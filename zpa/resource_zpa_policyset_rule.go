@@ -1,4 +1,4 @@
-package zscaler
+package zpa
 
 import (
 	"log"

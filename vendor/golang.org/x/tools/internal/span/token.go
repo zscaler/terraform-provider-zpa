@@ -19,16 +19,12 @@ type Range struct {
 	Converter Converter
 }
 
-type FileConverter struct {
-	file *token.File
-}
-
 // TokenConverter is a Converter backed by a token file set and file.
 // It uses the file set methods to work out the conversions, which
 // makes it fast and does not require the file contents.
 type TokenConverter struct {
-	FileConverter
 	fset *token.FileSet
+	file *token.File
 }
 
 // NewRange creates a new Range from a FileSet and two positions.
@@ -44,7 +40,7 @@ func NewRange(fset *token.FileSet, start, end token.Pos) Range {
 // NewTokenConverter returns an implementation of Converter backed by a
 // token.File.
 func NewTokenConverter(fset *token.FileSet, f *token.File) *TokenConverter {
-	return &TokenConverter{fset: fset, FileConverter: FileConverter{file: f}}
+	return &TokenConverter{fset: fset, file: f}
 }
 
 // NewContentConverter returns an implementation of Converter for the
@@ -53,7 +49,7 @@ func NewContentConverter(filename string, content []byte) *TokenConverter {
 	fset := token.NewFileSet()
 	f := fset.AddFile(filename, -1, len(content))
 	f.SetLinesForContent(content)
-	return NewTokenConverter(fset, f)
+	return &TokenConverter{fset: fset, file: f}
 }
 
 // IsPoint returns true if the range represents a single point.
@@ -72,23 +68,17 @@ func (r Range) Span() (Span, error) {
 	if f == nil {
 		return Span{}, fmt.Errorf("file not found in FileSet")
 	}
-	return FileSpan(f, r.Converter, r.Start, r.End)
-}
-
-// FileSpan returns a span within tok, using converter to translate between
-// offsets and positions.
-func FileSpan(tok *token.File, converter Converter, start, end token.Pos) (Span, error) {
 	var s Span
 	var err error
 	var startFilename string
-	startFilename, s.v.Start.Line, s.v.Start.Column, err = position(tok, start)
+	startFilename, s.v.Start.Line, s.v.Start.Column, err = position(f, r.Start)
 	if err != nil {
 		return Span{}, err
 	}
 	s.v.URI = URIFromPath(startFilename)
-	if end.IsValid() {
+	if r.End.IsValid() {
 		var endFilename string
-		endFilename, s.v.End.Line, s.v.End.Column, err = position(tok, end)
+		endFilename, s.v.End.Line, s.v.End.Column, err = position(f, r.End)
 		if err != nil {
 			return Span{}, err
 		}
@@ -101,13 +91,13 @@ func FileSpan(tok *token.File, converter Converter, start, end token.Pos) (Span,
 	s.v.Start.clean()
 	s.v.End.clean()
 	s.v.clean()
-	if converter != nil {
-		return s.WithOffset(converter)
+	if r.Converter != nil {
+		return s.WithOffset(r.Converter)
 	}
-	if startFilename != tok.Name() {
-		return Span{}, fmt.Errorf("must supply Converter for file %q containing lines from %q", tok.Name(), startFilename)
+	if startFilename != f.Name() {
+		return Span{}, fmt.Errorf("must supply Converter for file %q containing lines from %q", f.Name(), startFilename)
 	}
-	return s.WithOffset(&FileConverter{tok})
+	return s.WithOffset(NewTokenConverter(r.FileSet, f))
 }
 
 func position(f *token.File, pos token.Pos) (string, int, int, error) {
@@ -164,12 +154,12 @@ func (s Span) Range(converter *TokenConverter) (Range, error) {
 	}, nil
 }
 
-func (l *FileConverter) ToPosition(offset int) (int, int, error) {
+func (l *TokenConverter) ToPosition(offset int) (int, int, error) {
 	_, line, col, err := positionFromOffset(l.file, offset)
 	return line, col, err
 }
 
-func (l *FileConverter) ToOffset(line, col int) (int, error) {
+func (l *TokenConverter) ToOffset(line, col int) (int, error) {
 	if line < 0 {
 		return -1, fmt.Errorf("line is not valid")
 	}

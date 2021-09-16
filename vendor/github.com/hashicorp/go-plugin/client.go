@@ -22,8 +22,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/hashicorp/go-hclog"
-	"google.golang.org/grpc"
+	hclog "github.com/hashicorp/go-hclog"
 )
 
 // If this is 1, then we've called CleanupClients. This can be used
@@ -204,11 +203,6 @@ type ClientConfig struct {
 	//
 	// You cannot Reattach to a server with this option enabled.
 	AutoMTLS bool
-
-	// GRPCDialOptions allows plugin users to pass custom grpc.DialOption
-	// to create gRPC connections. This only affects plugins using the gRPC
-	// protocol.
-	GRPCDialOptions []grpc.DialOption
 }
 
 // ReattachConfig is used to configure a client to reattach to an

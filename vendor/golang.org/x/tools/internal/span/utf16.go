@@ -6,6 +6,7 @@ package span
 
 import (
 	"fmt"
+	"unicode/utf16"
 	"unicode/utf8"
 )
 
@@ -40,14 +41,9 @@ func ToUTF16Column(p Point, content []byte) (int, error) {
 	// Now, truncate down to the supplied column.
 	start = start[:colZero]
 
-	cnt := 0
-	for _, r := range string(start) {
-		cnt++
-		if r > 0xffff {
-			cnt++
-		}
-	}
-	return cnt + 1, nil // the +1 is for 1-based columns
+	// and count the number of utf16 characters
+	// in theory we could do this by hand more efficiently...
+	return len(utf16.Encode([]rune(string(start)))) + 1, nil
 }
 
 // FromUTF16Column advances the point by the utf16 character offset given the

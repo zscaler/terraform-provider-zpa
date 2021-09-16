@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"github.com/apparentlymart/go-textseg/v13/textseg"
+	"github.com/apparentlymart/go-textseg/v12/textseg"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -1661,7 +1661,7 @@ func (p *parser) parseQuotedStringLiteral() (string, hcl.Range, hcl.Diagnostics)
 
 	var diags hcl.Diagnostics
 	ret := &bytes.Buffer{}
-	var endRange hcl.Range
+	var cQuote Token
 
 Token:
 	for {
@@ -1669,7 +1669,7 @@ Token:
 		switch tok.Type {
 
 		case TokenCQuote:
-			endRange = tok.Range
+			cQuote = tok
 			break Token
 
 		case TokenQuotedLit:
@@ -1712,7 +1712,6 @@ Token:
 				Subject:  &tok.Range,
 				Context:  hcl.RangeBetween(oQuote.Range, tok.Range).Ptr(),
 			})
-			endRange = tok.Range
 			break Token
 
 		default:
@@ -1725,14 +1724,13 @@ Token:
 				Context:  hcl.RangeBetween(oQuote.Range, tok.Range).Ptr(),
 			})
 			p.recover(TokenCQuote)
-			endRange = tok.Range
 			break Token
 
 		}
 
 	}
 
-	return ret.String(), hcl.RangeBetween(oQuote.Range, endRange), diags
+	return ret.String(), hcl.RangeBetween(oQuote.Range, cQuote.Range), diags
 }
 
 // ParseStringLiteralToken processes the given token, which must be either a

@@ -1,4 +1,4 @@
-package zscaler
+package zpa
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
