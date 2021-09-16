@@ -30,12 +30,6 @@ func Provider() *schema.Provider {
 				DefaultFunc: envDefaultFunc("ZPA_CUSTOMER_ID"),
 				Description: "zpa customer id",
 			},
-			"baseurl": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: envDefaultFunc("ZPA_BASE_URL"),
-				Description: "zpa base url",
-			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			/*
@@ -81,7 +75,6 @@ func zscalerConfigure(d *schema.ResourceData) (interface{}, error) {
 		ClientID:     d.Get("client_id").(string),
 		ClientSecret: d.Get("client_secret").(string),
 		CustomerID:   d.Get("customerid").(string),
-		BaseURL:      d.Get("baseurl").(string),
 	}
 
 	return config.Client()
