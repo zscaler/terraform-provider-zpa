@@ -31,9 +31,9 @@ type ScimAttributeHeader struct {
 	Uniqueness      bool     `json:"uniqueness,omitempty"`
 }
 
-func (service *Service) Get(ScimAttrHeaderId string) (*ScimAttributeHeader, *http.Response, error) {
+func (service *Service) Get(ScimAttrHeaderID string) (*ScimAttributeHeader, *http.Response, error) {
 	v := new(ScimAttributeHeader)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+idpId+scimAttrEndpoint, ScimAttrHeaderId)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+idpId+scimAttrEndpoint, ScimAttrHeaderID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err

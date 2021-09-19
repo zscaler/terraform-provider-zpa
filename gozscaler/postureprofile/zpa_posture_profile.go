@@ -35,6 +35,23 @@ func (service *Service) Get(id string) (*PostureProfile, *http.Response, error) 
 	return v, resp, nil
 }
 
+func (service *Service) GetByPostureUDID(postureUDID string) (*PostureProfile, *http.Response, error) {
+	var v []PostureProfile
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + postureProfileEndpoint)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
+		pagesize: 500,
+	}, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, postureProfile := range v {
+		if postureProfile.PostureudID == postureUDID {
+			return &postureProfile, resp, nil
+		}
+	}
+	return nil, resp, fmt.Errorf("no posture profile with postureUDID '%s' was found", postureUDID)
+}
+
 func (service *Service) GetByName(name string) (*PostureProfile, *http.Response, error) {
 	var v []PostureProfile
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + postureProfileEndpoint)

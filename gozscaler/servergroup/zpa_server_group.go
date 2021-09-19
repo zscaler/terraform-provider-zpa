@@ -113,9 +113,9 @@ type ApplicationServer struct {
 	Name              string   `json:"name"`
 }
 
-func (service *Service) Get(groupId string) (*ServerGroup, *http.Response, error) {
+func (service *Service) Get(groupID string) (*ServerGroup, *http.Response, error) {
 	v := new(ServerGroup)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+serverGroupEndpoint, groupId)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+serverGroupEndpoint, groupID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err

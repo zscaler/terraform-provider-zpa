@@ -258,7 +258,7 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
-		_ = d.Set("segment_group_id", resp.SegmentGroupId)
+		_ = d.Set("segment_group_id", resp.SegmentGroupID)
 		_ = d.Set("segment_group_name", resp.SegmentGroupName)
 		_ = d.Set("bypass_type", resp.BypassType)
 		_ = d.Set("config_space", resp.ConfigSpace)
@@ -297,7 +297,7 @@ func flattenClientlessApps(clientlessApp *applicationsegment.ApplicationSegmentR
 	for i, clientlessApp := range clientlessApp.ClientlessApps {
 		clientlessApps[i] = map[string]interface{}{
 			"allow_options":        clientlessApp.AllowOptions,
-			"appid":                clientlessApp.AppId,
+			"appid":                clientlessApp.AppID,
 			"application_port":     clientlessApp.ApplicationPort,
 			"application_protocol": clientlessApp.ApplicationProtocol,
 			"certificate_id":       clientlessApp.CertificateID,

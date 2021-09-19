@@ -158,7 +158,7 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 
 	req := expandApplicationSegmentRequest(d)
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
-	if req.SegmentGroupId == "" {
+	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
 		return fmt.Errorf("please provde a valid segment group for the application segment")
 	}
@@ -189,7 +189,7 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	log.Printf("[INFO] Reading application segment and settings states: %+v\n", resp)
-	_ = d.Set("segment_group_id", resp.SegmentGroupId)
+	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
 	_ = d.Set("bypass_type", resp.BypassType)
 	_ = d.Set("config_space", resp.ConfigSpace)
@@ -225,7 +225,7 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 	log.Printf("[INFO] Updating role ID: %v\n", id)
 	req := expandApplicationSegmentRequest(d)
 
-	if d.HasChange("segment_group_id") && req.SegmentGroupId == "" {
+	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
 		return fmt.Errorf("please provde a valid segment group for the application segment")
 	}
@@ -288,7 +288,7 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 
 func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.ApplicationSegmentResource {
 	return applicationsegment.ApplicationSegmentResource{
-		SegmentGroupId:   d.Get("segment_group_id").(string),
+		SegmentGroupID:   d.Get("segment_group_id").(string),
 		SegmentGroupName: d.Get("segment_group_name").(string),
 		BypassType:       d.Get("bypass_type").(string),
 		Description:      d.Get("description").(string),

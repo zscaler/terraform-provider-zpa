@@ -62,9 +62,9 @@ type AppServerGroup struct {
 	Name             string `json:"name"`
 }
 
-func (service *Service) Get(segmentGroupId string) (*SegmentGroup, *http.Response, error) {
+func (service *Service) Get(segmentGroupID string) (*SegmentGroup, *http.Response, error) {
 	v := new(SegmentGroup)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+segmentGroupEndpoint, segmentGroupId)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+segmentGroupEndpoint, segmentGroupID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err

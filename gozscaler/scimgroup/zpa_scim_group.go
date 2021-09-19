@@ -22,9 +22,9 @@ type ScimGroup struct {
 	Name         string `json:"name,omitempty"`
 }
 
-func (service *Service) Get(scimGroupId string) (*ScimGroup, *http.Response, error) {
+func (service *Service) Get(scimGroupID string) (*ScimGroup, *http.Response, error) {
 	v := new(ScimGroup)
-	relativeURL := fmt.Sprintf("%s/%s", userConfig+service.Client.Config.CustomerID+scimGroupEndpoint, scimGroupId)
+	relativeURL := fmt.Sprintf("%s/%s", userConfig+service.Client.Config.CustomerID+scimGroupEndpoint, scimGroupID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err

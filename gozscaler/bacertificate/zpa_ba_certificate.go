@@ -29,9 +29,9 @@ type BaCertificate struct {
 	ValidToInEpochSec   string   `json:"validToInEpochSec,omitempty"`
 }
 
-func (service *Service) Get(baCertificateId string) (*BaCertificate, *http.Response, error) {
+func (service *Service) Get(baCertificateID string) (*BaCertificate, *http.Response, error) {
 	v := new(BaCertificate)
-	relativeURL := fmt.Sprintf("%v/%v", mgmtConfig+service.Client.Config.CustomerID+baCertificateEndpoint, baCertificateId)
+	relativeURL := fmt.Sprintf("%v/%v", mgmtConfig+service.Client.Config.CustomerID+baCertificateEndpoint, baCertificateID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err

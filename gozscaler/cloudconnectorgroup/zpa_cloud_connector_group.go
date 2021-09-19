@@ -38,9 +38,9 @@ type CloudConnectors struct {
 	Name         string                 `json:"name,omitempty"`
 }
 
-func (service *Service) Get(cloudConnectorGroupId string) (*CloudConnectorGroup, *http.Response, error) {
+func (service *Service) Get(cloudConnectorGroupID string) (*CloudConnectorGroup, *http.Response, error) {
 	v := new(CloudConnectorGroup)
-	relativeURL := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+cloudConnectorGroupEndpoint, cloudConnectorGroupId)
+	relativeURL := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+cloudConnectorGroupEndpoint, cloudConnectorGroupID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err

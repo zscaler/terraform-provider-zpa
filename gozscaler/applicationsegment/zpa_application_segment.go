@@ -27,7 +27,7 @@ type ApplicationSegmentResource struct {
 	IpAnchored           bool              `json:"ipAnchored"`
 	HealthReporting      string            `json:"healthReporting,omitempty"`
 	IcmpAccessType       string            `json:"icmpAccessType,omitempty"`
-	SegmentGroupId       string            `json:"segmentGroupId"`
+	SegmentGroupID       string            `json:"segmentGroupId"`
 	SegmentGroupName     string            `json:"segmentGroupName,omitempty"`
 	CreationTime         string            `json:"creationTime,omitempty"`
 	ModifiedBy           string            `json:"modifiedBy,omitempty"`
@@ -41,7 +41,7 @@ type ApplicationSegmentResource struct {
 }
 type ClientlessApps struct {
 	AllowOptions        bool   `json:"allowOptions"`
-	AppId               string `json:"appId,omitempty"`
+	AppID               string `json:"appId,omitempty"`
 	ApplicationPort     string `json:"applicationPort,omitempty"`
 	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
 	CertificateID       string `json:"certificateId,omitempty"`
@@ -74,9 +74,9 @@ type AppServerGroups struct {
 	Name             string `json:"name"`
 }
 
-func (service *Service) Get(applicationId string) (*ApplicationSegmentResource, *http.Response, error) {
+func (service *Service) Get(applicationID string) (*ApplicationSegmentResource, *http.Response, error) {
 	v := new(ApplicationSegmentResource)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appSegmentEndpoint, applicationId)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appSegmentEndpoint, applicationID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err

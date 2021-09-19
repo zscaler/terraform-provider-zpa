@@ -37,9 +37,9 @@ type Machines struct {
 	SigningCert      map[string]interface{} `json:"signingCert,omitempty"`
 }
 
-func (service *Service) Get(machineGroupId string) (*MachineGroup, *http.Response, error) {
+func (service *Service) Get(machineGroupID string) (*MachineGroup, *http.Response, error) {
 	v := new(MachineGroup)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+machineGroupEndpoint, machineGroupId)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+machineGroupEndpoint, machineGroupID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err

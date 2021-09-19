@@ -16,13 +16,13 @@ var testAccProviderVersionValidation *schema.Provider
 func init() {
 	testAccProvider = Provider()
 	testAccProviders = map[string]*schema.Provider{
-		"zscaler": testAccProvider,
+		"zpa": testAccProvider,
 	}
 
 	testAccProviderVersionValidation = Provider()
 	//testAccProviderVersionValidation.ConfigureFunc = zscalerConfigureWithoutVersionValidation
 	testAccProvidersVersionValidation = map[string]*schema.Provider{
-		"zscaler": testAccProviderVersionValidation,
+		"zpa": testAccProviderVersionValidation,
 	}
 }
 

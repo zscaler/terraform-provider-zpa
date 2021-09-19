@@ -333,7 +333,7 @@ func flattenConnectors(appConnector *appconnectorgroup.AppConnectorGroup) []inte
 			"expected_version":            appConnector.ExpectedVersion,
 			"fingerprint":                 appConnector.Fingerprint,
 			"id":                          appConnector.ID,
-			"ipacl":                       appConnector.IpAcl,
+			"ipacl":                       appConnector.IPACL,
 			"issued_cert_id":              appConnector.IssuedCertID,
 			"last_broker_connect_time":    appConnector.LastBrokerConnectTime,
 			"last_broker_disconnect_time": appConnector.LastBrokerDisconnectTime,

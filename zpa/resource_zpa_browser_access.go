@@ -247,7 +247,7 @@ func resourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	_ = d.Set("ip_anchored", resp.IpAnchored)
+	_ = d.Set("ip_anchored", resp.IPAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
@@ -329,7 +329,7 @@ func expandBrowserAccess(d *schema.ResourceData) browseraccess.BrowserAccess {
 		DoubleEncrypt:   d.Get("double_encrypt").(bool),
 		Enabled:         d.Get("enabled").(bool),
 		HealthReporting: d.Get("health_reporting").(string),
-		IpAnchored:      d.Get("ip_anchored").(bool),
+		IPAnchored:      d.Get("ip_anchored").(bool),
 		IsCnameEnabled:  d.Get("is_cname_enabled").(bool),
 		DomainNames:     expandStringInSlice(d, "domain_names"),
 		SegmentGroupID:  d.Get("segment_group_id").(string),

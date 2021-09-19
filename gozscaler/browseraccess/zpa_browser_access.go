@@ -24,7 +24,7 @@ type BrowserAccess struct {
 	DoubleEncrypt        bool              `json:"doubleEncrypt"`
 	HealthCheckType      string            `json:"healthCheckType,omitempty"`
 	IsCnameEnabled       bool              `json:"isCnameEnabled"`
-	IpAnchored           bool              `json:"ipAnchored"`
+	IPAnchored           bool              `json:"ipAnchored"`
 	HealthReporting      string            `json:"healthReporting,omitempty"`
 	CreationTime         string            `json:"creationTime,omitempty"`
 	ModifiedBy           string            `json:"modifiedBy,omitempty"`

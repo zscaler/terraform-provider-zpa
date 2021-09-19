@@ -3,7 +3,7 @@
 This example will show you how to use Terraform to implement the ZPA application server controller resource.
 This example codifies [this API](https://help.zscaler.com/zpa/api-reference#/app-server-controller/addAppServer).
 
-To run, configure your ZPA provider as described in (Specify README Page with instructions)
+To run, configure your ZPA provider as described [Here](https://github.com/SecurityGeekIO/terraform-provider-zpa/blob/master/website/docs/index.html.markdown)
 
 ## Run the example
 
