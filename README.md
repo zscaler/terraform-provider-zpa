@@ -1,6 +1,3 @@
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://img.shields.io/badge/license-MIT-blue.svg)
-[![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
 

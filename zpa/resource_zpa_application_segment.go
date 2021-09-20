@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/applicationsegment"
+	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/client"
+	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/segmentgroup"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/applicationsegment"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
 )
 
 func resourceApplicationSegment() *schema.Resource {
@@ -40,7 +40,7 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
-				Optional:    true,
+				Required:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeInt},
 			},
@@ -135,13 +135,13 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 			"server_groups": {
 				Type:        schema.TypeSet,
-				Optional:    true,
+				Required:    true,
 				Description: "List of the server group IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Required: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},

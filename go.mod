@@ -1,4 +1,4 @@
-module github.com/willguibr/terraform-provider-zpa
+module github.com/SecurityGeekIO/terraform-provider-zpa
 
 go 1.17
 

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/browseraccess"
+	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/client"
+	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/segmentgroup"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/browseraccess"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
 )
 
 func resourceBrowserAccess() *schema.Resource {
@@ -26,7 +26,7 @@ func resourceBrowserAccess() *schema.Resource {
 			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"segment_group_name": {
 				Type:     schema.TypeString,
@@ -39,7 +39,7 @@ func resourceBrowserAccess() *schema.Resource {
 			},
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
-				Optional:    true,
+				Required:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -119,7 +119,7 @@ func resourceBrowserAccess() *schema.Resource {
 						},
 						"application_protocol": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"HTTP",
 								"HTTPS",
@@ -129,7 +129,7 @@ func resourceBrowserAccess() *schema.Resource {
 						},
 						"certificate_id": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 						"certificate_name": {
 							Type:     schema.TypeString,
@@ -180,13 +180,13 @@ func resourceBrowserAccess() *schema.Resource {
 			},
 			"server_groups": {
 				Type:        schema.TypeSet,
-				Optional:    true,
+				Required:    true,
 				Description: "List of the server group IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Required: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},

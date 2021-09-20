@@ -10,13 +10,13 @@ terraform {
 provider "zpa" {}
 
 // CrowdStrike_ZTA_Score_Policy
-resource "zpa_policyset_rule" "crwd_zta_score_40" {
+resource "zpa_policy_access_rule" "crwd_zta_score_40" {
   name                          = "CrowdStrike_ZTA_Score_40"
   description                   = "CrowdStrike_ZTA_Score_40"
   action                        = "DENY"
   rule_order                     = 2
   operator = "AND"
-  policy_set_id = data.zpa_policy_set_global.all.id
+  policy_set_id = data.zpa_global_access_policy.all.id
   conditions {
     negated = false
     operator = "OR"
@@ -32,20 +32,20 @@ resource "zpa_policyset_rule" "crwd_zta_score_40" {
     operands {
       object_type = "SAML"
       lhs = data.zpa_saml_attribute.email_user_sso.id
-      rhs = "wguilherme@securitygeek.io"
+      rhs_list = ["wguilherme@securitygeek.io", "wguilherme2@securitygeek.io"]
       idp_id = data.zpa_idp_controller.sgio_user_okta.id
     }
   }
 }
 
-data "zpa_policy_set_global" "all" {}
+data "zpa_global_access_policy" "all" {}
 
 data "zpa_idp_controller" "sgio_user_okta" {
  name = "SGIO-User-Okta"
 }
 
 data "zpa_saml_attribute" "email_user_sso" {
-    name = "Email_User SSO"
+    name = "Email_SGIO-User-Okta"
 }
 
 data "zpa_posture_profile" "crwd_zta_score_40" {

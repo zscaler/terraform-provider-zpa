@@ -3,11 +3,11 @@ package zpa
 import (
 	"log"
 
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/appservercontroller"
+	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/appservercontroller"
 
+	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/client"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
 )
 
 func resourceApplicationServer() *schema.Resource {
@@ -50,7 +50,11 @@ func resourceApplicationServer() *schema.Resource {
 			},
 			"config_space": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"DEFAULT",
+					"SIEM",
+				}, false),
 			},
 			"id": {
 				Type:     schema.TypeString,
