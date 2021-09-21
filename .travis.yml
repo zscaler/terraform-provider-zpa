@@ -1,0 +1,33 @@
+dist: xenial
+sudo: required
+services:
+  - docker
+language: go
+go:
+  - "1.13.x"
+env:
+  global: GOFLAGS=-mod=vendor
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: tip
+  include:
+    - name: "Code UnitTest"
+      script: make test
+    - name: "Vet"
+      script: make vet
+    - name: "Website"
+      script:
+        - make website-test
+
+install:
+  # This script is used by the Travis build to install a cookie for
+  # go.googlesource.com so rate limits are higher when using `go get` to fetch
+  # packages that live there.
+  # See: https://github.com/golang/go/issues/12933
+  - bash scripts/gogetcookie.sh
+
+branches:
+  only:
+  - master
