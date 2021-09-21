@@ -33,6 +33,7 @@ func resourceSegmentGroup() *schema.Resource {
 			"config_space": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -142,6 +143,7 @@ func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 		Description:         d.Get("description").(string),
 		Enabled:             d.Get("enabled").(bool),
 		PolicyMigrated:      d.Get("policy_migrated").(bool),
+		ConfigSpace:         d.Get("config_space").(string),
 		TcpKeepAliveEnabled: d.Get("tcp_keep_alive_enabled").(string),
 		Applications:        expandSegmentGroupApplications(d.Get("applications").([]interface{})),
 	}
