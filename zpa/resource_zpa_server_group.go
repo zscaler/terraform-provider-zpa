@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/servergroup"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/servergroup"
 )
 
 func resourceServerGroup() *schema.Resource {

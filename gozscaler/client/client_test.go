@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler"
 )
 
 type dummyStruct struct {

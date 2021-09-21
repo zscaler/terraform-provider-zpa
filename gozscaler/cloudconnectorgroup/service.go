@@ -1,8 +1,8 @@
 package cloudconnectorgroup
 
 import (
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/client"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
 )
 
 type Service struct {
