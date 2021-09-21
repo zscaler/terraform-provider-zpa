@@ -19,19 +19,19 @@ Requirements
 Building The Provider (Terraform v0.12+)
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/SecurityGeekIO/terraform-provider-zpa`
+Clone repository to: `$GOPATH/src/github.com/willguibr/terraform-provider-zpa`
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/terraform-providers
 $ cd $GOPATH/src/github.com/terraform-providers
-$ git clone https://github.com/SecurityGeekIO/terraform-provider-zpa.git
+$ git clone https://github.com/willguibr/terraform-provider-zpa.git
 ```
 
 To clone on windows
 ```sh
 mkdir %GOPATH%\src\github.com\terraform-providers
 cd %GOPATH%\src\github.com\terraform-providers
-git clone https://github.com/SecurityGeekIO/terraform-provider-zpa.git
+git clone https://github.com/willguibr/terraform-provider-zpa.git
 ```
 
 Enter the provider directory and build the provider
@@ -68,7 +68,7 @@ xcopy "%GOPATH%\bin\terraform-provider-zpa.exe" "%APPDATA%\terraform.d\plugins\z
 ```
 Run the following commands if using powershell:
 ```sh
-cd "$env:GOPATH\src\github.com\SecurityGeekIO\terraform-provider-zpa"
+cd "$env:GOPATH\src\github.com\willguibr\terraform-provider-zpa"
 go fmt
 go install
 xcopy "$env:GOPATH\bin\terraform-provider-zpa.exe" "$env:APPDATA\terraform.d\plugins\zscaler.com\zpa\zpa\1.0.0\windows_amd64\" /Y
@@ -118,11 +118,11 @@ terraform {
 Examples
 --------
 
-Visit [here](https://github.com/SecurityGeekIO/terraform-provider-zpa/tree/master/website/docs/) for the complete documentation for all resources on github.
+Visit [here](https://github.com/willguibr/terraform-provider-zpa/tree/master/website/docs/) for the complete documentation for all resources on github.
 
 Issues
 =========
-Please feel free to open an issue using [Github Issues](https://github.com/SecurityGeekIO/terraform-provider-zpa/issues) if you run into any problems using this ZPA Terraform provider.
+Please feel free to open an issue using [Github Issues](https://github.com/willguibr/terraform-provider-zpa/issues) if you run into any problems using this ZPA Terraform provider.
 
 Developing the Provider
 ---------------------------

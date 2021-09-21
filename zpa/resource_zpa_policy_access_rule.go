@@ -5,10 +5,10 @@ import (
 	"log"
 	"sync"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/policysetrule"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
 )
 
 type listrules struct {

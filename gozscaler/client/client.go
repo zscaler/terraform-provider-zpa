@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler"
 	"github.com/google/go-querystring/query"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler"
 )
 
 type Client struct {

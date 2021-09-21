@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/cloudconnectorgroup"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/cloudconnectorgroup"
 )
 
 func dataSourceCloudConnectorGroup() *schema.Resource {

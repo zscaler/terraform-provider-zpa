@@ -5,8 +5,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/zpa"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
+	"github.com/willguibr/terraform-provider-zpa/zpa"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	flag.Parse()
 
 	if debugMode {
-		err := plugin.Debug(context.Background(), "github.com/SecurityGeekIO/terraform-provider-zpa",
+		err := plugin.Debug(context.Background(), "github.com/willguibr/terraform-provider-zpa",
 			&plugin.ServeOpts{
 				ProviderFunc: zpa.Provider,
 			})

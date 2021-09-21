@@ -5,9 +5,9 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/gozscaler/policysetrule"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
 )
 
 func ValidateConditions(conditions []policysetrule.Conditions, zClient *Client) bool {
