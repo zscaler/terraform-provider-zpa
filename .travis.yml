@@ -1,30 +1,27 @@
 dist: trusty
 sudo: required
 services:
-  - docker
+- docker
 language: go
 go:
-  - "1.16.x"
-
+- 1.16.x
 script:
 - go mod vendor
 - make testacc
 - make vet
 - make build
 - make website-test
-
 branches:
   only:
   - master
-
 matrix:
   fast_finish: true
   allow_failures:
-    - go: tip
-
+  - go: tip
 install:
-  # This script is used by the Travis build to install a cookie for
-  # go.googlesource.com so rate limits are higher when using `go get` to fetch
-  # packages that live there.
-  # See: https://github.com/golang/go/issues/12933
-  - bash scripts/gogetcookie.sh
+- bash scripts/gogetcookie.sh
+env:
+  global:
+  - secure: dy+v+78Y66ULBa1BgyseOKJQ4vUqGIKIT9ZnNa7BI2qOM872DhV/BJVZq0pcvLnfIf9MeiBfsxahEQhNrM9DhWer5btm1CeuTtsxD91an374zTegflVu9BbCNp0Et3OzBBGQ2rGZMae5vt11ELxAoBQwDDRe2xDHhjRTcRSLavUd3jZOHMJYNLHPljz4ufTKmXJzwm9v2D5cDezolecWWIeZCr1mVyGql/1K77es3M8d0CFsj27ktwDcotpTVd9kxmPq+Bntx+KBtu+oNinVDxDM90cQMRaBEegbg3Iavq5t4KzzW4w5iLZCOSjzsLOw5r0w2SO2zq5NSWinompIgigBU9kKFMPLw2jGkEG1JyLhvu4UfsAmUATeraEQ2VRJIgHi5/OSSgaJI2THWUdcyyUHGOKMJl58c7nmtBO+zcllEpdmP/NbHuAaLcwLfYHguyE59tBBNDP7I+D1VgPy74j/eSJa9pQO0Tc+K3GVuu2OqUUVDyntD7sy71EvNPpzqkz84xSU9wNuYPAALBQ/ntnN9tQA4traLIl27qbVqvT3vlFn50IWq6Va5ccYGiaYpAJjbbceZdXN5vXFPt6XSFKTKfNtIIFj05r20GMY8WFeFM+3X++Ky9kbD2b8akC435rU6l9oBKUBsvwruLrFSJkmZDtHpiq8mxug4c7wjUM=
+  - secure: NyzeP6HQlxvErDQpYG3eW16D1fc6Fmy3sxKBoGuLv3rf4Qr7e8G1hRN/V+Z9vddxQ26HOgr292XSIiKaXUqUmmiJuiHALIqxXPq/mcFhkjcw0OjMr4EV/Q1JPD7aprvByAg/n/gbGOUxlDqFuQTnw4HHPxe0BdZuWKanqoUwuCZrm7Orhs7eo0Ln0/6zC4jY/ik0i2k/TVG/r+0J/qnhKj5SauwlaPtE5Ub8ZCC/G25Ff2h6uhAgWz2X/O9dsdIARTgYkRApb65ctGNI42E7IjhPB1Vncr5peQd86z2ym1bGd02WA6ITb+jBOG63h88OSk7xsktryJVq1K2shd+/RZ2JSmvj8B0KTkt72k8OgshavU/Xuk24mLWElMEtv1iUHl980o36hxtrkD7xyqOWggeZhsOTn2peLgrQ/Zyam2oq85ZSs59GbbDMsSs6QZc4dP8/s9LK9tptC/d9Q45Enz2qF647tWJfYBjxEXSECDdJmSEYXbtnf9S4JaQbHolxUH/0bbfjFePPqIwOaaI2S4kA7tmiXV3T31+FJRoWPdOqxcUtprgKoih+cZLRzlUCuj/TIN+T4usOcmjrTylourN0SIGleaXED8NXuaZUpNJ1u9fiQOCXZPVwfZV1vXZYxyCB29groRawrnCc81SghvSmji+ES+zlZrNEYtnj1hc=
+  - secure: Xtu4XK2hAwfrcnybv2OHHV9WWM0t2YS7vlugRFEIynDXXokB/TTAag4AWLjj+bktDJfwq8JF4uQTIBZmlEwSkCyOBpKyNRn872D37Ec1Dxfee5cmhDsdXBDmI39c3qPedT086wLHR0f1SWMtCAURAlwr/DnD9nuHKtKkuA69VbIA7/oxOk8K3kK9EyKaaU8B9qRrDEEnXeSAGUtYREk9NC6Q+9h17YPiFL3VTaMwXMiF6hkzMCVYQkQFKozKJgn25naBjIOO90ucr1O7uUcLdX/rMq/2D4VrE8Ph5dRLmsgJvpfnOQTm9qETWBJpvNustw2k60Pmj/6c0W/rIB4TL9l7bqIs1xPe565Ut29JWQ6YC8a4Gglu7rf52QbQVF6lONYGCztAynwoUwsugDhBGp4yE+47QoIVxSD7R5VNEvMuviisMmInEOrRV+mc/E8y3Yl2vjw5/lOXZ9f852qgCZqe3TUm/k8uNnuVAy/cUx12xnXy70CP60hWiUHMaCTwFG8bS4QdcM31uGEGZW753VbCJylD+0w1sH87tgSUMeQD6JVYeDoH0Xs17Sg/KSppq/xmeJTo6HrelAnDtix5upKRgHwvqzSsygATfA82fOy89LJXC6v+aS4HydN8iiIgJCbtGySEvZPPEQ47F/szaUG43xVK33cGdGADe27rrHA=
