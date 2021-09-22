@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,6 +22,7 @@ func resourceSegmentGroup() *schema.Resource {
 			"applications": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -58,6 +60,7 @@ func resourceSegmentGroup() *schema.Resource {
 			"policy_migrated": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"tcp_keep_alive_enabled": {
 				Type:     schema.TypeString,
@@ -106,10 +109,22 @@ func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("policy_migrated", resp.PolicyMigrated)
 	_ = d.Set("tcp_keep_alive_enabled", resp.TcpKeepAliveEnabled)
-	_ = d.Set("applications", flattenSegmentGroupApplications(resp))
+	if err := d.Set("applications", flattenSegmentGroupApplicationsSimple(resp)); err != nil {
+		return fmt.Errorf("failed to read applications %s", err)
+	}
 	return nil
 }
 
+func flattenSegmentGroupApplicationsSimple(segmentGroup *segmentgroup.SegmentGroup) []interface{} {
+	segmentGroupApplications := make([]interface{}, len(segmentGroup.Applications))
+	for i, segmentGroupApplication := range segmentGroup.Applications {
+		segmentGroupApplications[i] = map[string]interface{}{
+			"id": segmentGroupApplication.ID,
+		}
+	}
+
+	return segmentGroupApplications
+}
 func resourceSegmentGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
