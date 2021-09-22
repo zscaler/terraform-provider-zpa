@@ -1,6 +1,5 @@
 TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep "zpa/")
-WEBSITE_REPO=zscaler.com/hashicorp/terraform-website
 PKG_NAME=zpa
 TF_PLUGIN_DIR=~/.terraform.d/plugins
 ZPA_PROVIDER_NAMESPACE=zscaler.com/zpa/zpa
@@ -28,7 +27,7 @@ test: fmtcheck
 		xargs -t -n4 go test $(TESTARGS) -timeout=600s -parallel=4
 
 testacc: fmtcheck
-	TF_ACC=true go test $(TEST) -v $(TESTARGS) -timeout 600m
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 600m
 
 vet:
 	@echo "go vet ."
@@ -66,23 +65,5 @@ test-compile:
 		exit 1; \
 	fi
 	go test -c $(TEST) $(TESTARGS)
-
-website:
-ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
-	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
-	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
-endif
-	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
-
-website-lint:
-	@echo "==> Checking website against linters..."
-	@misspell -error -source=text website/
-
-website-test:
-ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
-	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
-	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
-endif
-	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck tools vendor-status test-compile website-lint website website-test
