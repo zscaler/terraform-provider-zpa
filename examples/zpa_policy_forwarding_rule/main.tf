@@ -1,3 +1,31 @@
+// Create Policy Forwarding Rule
+resource "zpa_policy_forwarding_rule" "crm_application_rule" {
+  name                          = "CRM Application"
+  description                   = "CRM Application"
+  action                        = "BYPASS"
+  operator = "AND"
+  policy_set_id = data.zpa_global_policy_forwarding.policyset.id
+
+  conditions {
+    negated = false
+    operator = "OR"
+    operands {
+      object_type = "APP"
+      lhs = "id"
+      rhs = [zpa_application_segment.crm_application.id]
+    }
+  }
+  conditions {
+     negated = false
+     operator = "OR"
+    operands {
+      object_type = "SCIM_GROUP"
+      lhs = data.zpa_idp_controller.idp_name.id
+      rhs = [data.zpa_scim_groups.engineering.id]
+    }
+  }
+}
+
 // Create Application Segment
 resource "zpa_application_segment" "crm_application" {
     name = "CRM Application"
@@ -21,7 +49,7 @@ resource "zpa_server_group" "crm_servers" {
   enabled = true
   dynamic_discovery = false
   app_connector_groups {
-    id = [data.zpa_app_connector_group.dc_connector_group.id]
+    id = [ data.zpa_app_connector_group.dc_connector_group.id ]
   }
   servers {
     id = [ zpa_application_server.crm_app_server.id ]
@@ -47,4 +75,17 @@ resource "zpa_segment_group" "crm_app_group" {
 // Retrieve App Connector Group
 data "zpa_app_connector_group" "dc_connector_group" {
   name = "DC Connector Group"
+}
+
+data "zpa_global_policy_forwarding" "policyset" {
+}
+
+data "zpa_idp_controller" "idp_name" {
+ name = "IdP-Name"
+}
+
+// Okta IDP SCIM Groups
+data "zpa_scim_groups" "engineering" {
+  name = "Engineering"
+  idp_name = "IdP-Name"
 }

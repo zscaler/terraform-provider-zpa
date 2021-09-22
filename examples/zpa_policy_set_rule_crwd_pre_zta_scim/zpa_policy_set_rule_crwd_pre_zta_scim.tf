@@ -21,7 +21,7 @@ resource "zpa_policyset_rule" "crwd_zpa_pre_zta" {
     operands {
       object_type = "SCIM_GROUP"
       lhs = data.zpa_idp_controller.idp_name.id
-      rhs = data.zpa_scim_groups.engineering.id
+      rhs = [data.zpa_scim_groups.engineering.id]
     }
   }
 }

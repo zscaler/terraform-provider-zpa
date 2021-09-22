@@ -1,29 +1,25 @@
-terraform {
-    required_providers {
-        zpa = {
-            version = "1.0.0"
-            source = "zscaler.com/zpa/zpa"
-        }
-    }
+```hcl
+// Create Server Group - Dynamic Discovery "True"
+resource "zpa_server_group" "example" {
+  name = "Example"
+  description = "Example"
+  enabled = true
+  dynamic_discovery = true
+  app_connector_groups {
+    id = [data.zpa_app_connector_group.example.id]
+  }
 }
-
-provider "zpa" {}
 
 data "zpa_app_connector_group" "example" {
   name = "SGIO-Vancouver"
 }
+```
 
-resource "zpa_application_server" "example20" {
-  name                          = "example20.securitygeek.io"
-  description                   = "example20.securitygeek.io"
-  address                       = "2.2.2.2"
-  enabled                       = true
-}
-
-
-resource "zpa_server_group" "example20" {
-  name = "example20"
-  description = "example20"
+```hcl
+// Create Server Group - Dynamic Discovery "False"
+resource "zpa_server_group" "example" {
+  name = "Example"
+  description = "Example"
   enabled = false
   dynamic_discovery = false
   app_connector_groups {
@@ -34,7 +30,16 @@ resource "zpa_server_group" "example20" {
   }
 }
 
-
-output "all_zpa_server_group" {
-  value = zpa_server_group.example20
+data "zpa_app_connector_group" "example" {
+  name = "SGIO-Vancouver"
 }
+
+resource "zpa_application_server" "example" {
+  name                          = "Server1"
+  description                   = "Server1"
+  address                       = "192.168.1.1"
+  enabled                       = true
+}
+
+
+```
