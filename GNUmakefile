@@ -22,7 +22,7 @@ build13: fmtcheck
 	go build -o $(DESTINATION)/terraform-provider-zpa_v1.0.0
 
 test: fmtcheck
-	go test -i $(TEST) || exit 1
+	go test $(TEST) || exit 1
 	echo $(TEST) | \
 		xargs -t -n4 go test $(TESTARGS) -timeout=600s -parallel=4
 
