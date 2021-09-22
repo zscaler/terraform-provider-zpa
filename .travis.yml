@@ -6,9 +6,6 @@ language: go
 go:
   - "1.16.x"
 
-env:
-  global: GOFLAGS=-mod=vendor
-
 script:
 - make testacc
 - make vet
