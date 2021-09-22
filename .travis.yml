@@ -10,7 +10,7 @@ env:
   global: GOFLAGS=-mod=vendor
 
 script:
-- make test
+- make testacc
 - make vet
 - make build
 - make website-test
