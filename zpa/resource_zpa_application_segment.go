@@ -27,6 +27,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"segment_group_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"bypass_type": {
 				Type:        schema.TypeString,
@@ -42,13 +43,13 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeList,
 				Required:    true,
 				Description: "TCP port ranges used to access the app.",
-				Elem:        &schema.Schema{Type: schema.TypeInt},
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "UDP port ranges used to access the app.",
-				Elem:        &schema.Schema{Type: schema.TypeInt},
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"config_space": {
 				Type:     schema.TypeString,
@@ -57,6 +58,7 @@ func resourceApplicationSegment() *schema.Resource {
 					"DEFAULT",
 					"SIEM",
 				}, false),
+				Computed: true,
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -101,10 +103,33 @@ func resourceApplicationSegment() *schema.Resource {
 					"PING",
 					"NONE",
 				}, false),
+				Computed: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"creation_time": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"default_idle_timeout": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"modifiedby": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"modified_time": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"default_max_age": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"ip_anchored": {
 				Type:     schema.TypeBool,
@@ -121,6 +146,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"is_cname_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
 			},
 			"name": {
@@ -132,6 +158,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"passive_health_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"server_groups": {
 				Type:        schema.TypeSet,
@@ -213,9 +240,20 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
-	_ = d.Set("server_groups", flattenAppServerGroups(resp))
+	_ = d.Set("server_groups", flattenAppServerGroupsSimple(resp))
 
 	return nil
+}
+func flattenAppServerGroupsSimple(serverGroup *applicationsegment.ApplicationSegmentResource) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroup.ServerGroups))
+	for i, group := range serverGroup.ServerGroups {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }
 
 func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) error {
@@ -288,20 +326,25 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 
 func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.ApplicationSegmentResource {
 	return applicationsegment.ApplicationSegmentResource{
-		SegmentGroupID:   d.Get("segment_group_id").(string),
-		SegmentGroupName: d.Get("segment_group_name").(string),
-		BypassType:       d.Get("bypass_type").(string),
-		Description:      d.Get("description").(string),
-		DomainNames:      expandStringInSlice(d, "domain_names"),
-		DoubleEncrypt:    d.Get("double_encrypt").(bool),
-		Enabled:          d.Get("enabled").(bool),
-		HealthReporting:  d.Get("health_reporting").(string),
-		IpAnchored:       d.Get("ip_anchored").(bool),
-		IsCnameEnabled:   d.Get("is_cname_enabled").(bool),
-		Name:             d.Get("name").(string),
-		TCPPortRanges:    d.Get("tcp_port_ranges").([]interface{}),
-		UDPPortRanges:    d.Get("udp_port_ranges").([]interface{}),
-		ServerGroups:     expandAppServerGroups(d),
+		SegmentGroupID:       d.Get("segment_group_id").(string),
+		SegmentGroupName:     d.Get("segment_group_name").(string),
+		BypassType:           d.Get("bypass_type").(string),
+		ConfigSpace:          d.Get("config_space").(string),
+		CreationTime:         d.Get("creation_time").(string),
+		ModifiedBy:           d.Get("modifiedby").(string),
+		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
+		IcmpAccessType:       d.Get("icmp_access_type").(string),
+		Description:          d.Get("description").(string),
+		DomainNames:          expandStringInSlice(d, "domain_names"),
+		DoubleEncrypt:        d.Get("double_encrypt").(bool),
+		Enabled:              d.Get("enabled").(bool),
+		HealthReporting:      d.Get("health_reporting").(string),
+		IpAnchored:           d.Get("ip_anchored").(bool),
+		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
+		Name:                 d.Get("name").(string),
+		TCPPortRanges:        ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
+		UDPPortRanges:        ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
+		ServerGroups:         expandAppServerGroups(d),
 	}
 }
 

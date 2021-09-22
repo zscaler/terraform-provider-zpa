@@ -192,6 +192,7 @@ func dataSourceSegmentGroup() *schema.Resource {
 			},
 			"policy_migrated": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"tcp_keep_alive_enabled": {
