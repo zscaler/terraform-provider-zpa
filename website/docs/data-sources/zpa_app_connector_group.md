@@ -11,7 +11,8 @@ description: |-
 # zpa_app_connector_group
 
 The **zpa_app_connector_group** data source provides details about a specific app connector group created in the Zscaler Private Access cloud.
-This data source must be used in the following circumstances: 
+This data source must be used in the following circumstances:
+
 1. Create a server group
 2. Create an access policy routing to control path selection
 
@@ -28,7 +29,7 @@ data "zpa_app_connector_group" "foo" {
 
 The following arguments are supported:
 
-* ` name` - (Required) Name. The name of the App Connector Group to be exported.
+* `name` - (Required) Name. The name of the App Connector Group to be exported.
 
 ## Attribute Reference
 
