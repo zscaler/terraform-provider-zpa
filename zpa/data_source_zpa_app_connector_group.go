@@ -90,7 +90,7 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 							Computed: true,
 						},
 						"latitude": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"location": {
@@ -98,7 +98,7 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 							Computed: true,
 						},
 						"longitude": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"modifiedby": {
@@ -178,7 +178,7 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Optional: true,
 			},
 			"latitude": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"location": {
@@ -186,7 +186,7 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Computed: true,
 			},
 			"longitude": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"modifiedby": {

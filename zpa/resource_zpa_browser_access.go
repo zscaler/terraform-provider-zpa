@@ -52,6 +52,7 @@ func resourceBrowserAccess() *schema.Resource {
 			"config_space": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "DEFAULT",
 			},
 			"description": {
 				Type:        schema.TypeString,
