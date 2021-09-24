@@ -10,24 +10,28 @@ const (
 )
 
 type PolicyRule struct {
-	Action             string               `json:"action,omitempty"`
-	ActionID           string               `json:"actionId,omitempty"`
-	BypassDefaultRule  bool                 `json:"bypassDefaultRule"`
-	CustomMsg          string               `json:"customMsg,omitempty"`
-	Description        string               `json:"description,omitempty"`
-	ID                 string               `json:"id,omitempty"`
-	Name               string               `json:"name,omitempty"`
-	Operator           string               `json:"operator,omitempty"`
-	PolicySetID        string               `json:"policySetId"`
-	PolicyType         string               `json:"policyType,omitempty"`
-	Priority           string               `json:"priority,omitempty"`
-	ReauthDefaultRule  bool                 `json:"reauthDefaultRule"`
-	ReauthIdleTimeout  string               `json:"reauthIdleTimeout,omitempty"`
-	ReauthTimeout      string               `json:"reauthTimeout,omitempty"`
-	RuleOrder          string               `json:"ruleOrder"`
-	Conditions         []Conditions         `json:"conditions,omitempty"`
-	AppServerGroups    []AppServerGroups    `json:"appServerGroups,omitempty"`
-	AppConnectorGroups []AppConnectorGroups `json:"appConnectorGroups,omitempty"`
+	Action                   string               `json:"action,omitempty"`
+	ActionID                 string               `json:"actionId,omitempty"`
+	BypassDefaultRule        bool                 `json:"bypassDefaultRule"`
+	CustomMsg                string               `json:"customMsg,omitempty"`
+	Description              string               `json:"description,omitempty"`
+	ID                       string               `json:"id,omitempty"`
+	IsolationDefaultRule     bool                 `json:"isolationDefaultRule"`
+	Name                     string               `json:"name,omitempty"`
+	Operator                 string               `json:"operator,omitempty"`
+	PolicySetID              string               `json:"policySetId"`
+	PolicyType               string               `json:"policyType,omitempty"`
+	Priority                 string               `json:"priority,omitempty"`
+	ReauthDefaultRule        bool                 `json:"reauthDefaultRule"`
+	ReauthIdleTimeout        string               `json:"reauthIdleTimeout,omitempty"`
+	ReauthTimeout            string               `json:"reauthTimeout,omitempty"`
+	ZpnCbiProfileId          string               `json:"zpnCbiProfileId,omitempty"`
+	ZpnInspectionProfileId   string               `json:"zpnInspectionProfileId,omitempty"`
+	ZpnInspectionProfileName string               `json:"zpnInspectionProfileName,omitempty"`
+	RuleOrder                string               `json:"ruleOrder"`
+	Conditions               []Conditions         `json:"conditions,omitempty"`
+	AppServerGroups          []AppServerGroups    `json:"appServerGroups,omitempty"`
+	AppConnectorGroups       []AppConnectorGroups `json:"appConnectorGroups,omitempty"`
 }
 
 type Conditions struct {
@@ -68,6 +72,17 @@ func (service *Service) Create(rule *PolicyRule) (*PolicyRule, *http.Response, e
 	v := new(PolicyRule)
 	path := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/policySet/%s/rule", rule.PolicySetID)
 	resp, err := service.Client.NewRequestDo("POST", path, nil, &rule, v)
+	if err != nil {
+		return nil, nil, err
+	}
+	return v, resp, nil
+}
+
+// POST --> /zpn/api/v1/admin/customers/{customerId}​/policySet/{policySetId}/rule/{ruleId}
+func (service *Service) CreateIsolationRule(policySetID, ruleID string) (*PolicyRule, *http.Response, error) {
+	v := new(PolicyRule)
+	path := fmt.Sprintf("zpn/api/v1/admin/customers/%s/policySet/%s/rule/%s", service.Client.Config.CustomerID, policySetID, ruleID)
+	resp, err := service.Client.NewPrivateRequestDo("POST", path, nil, nil, v)
 	if err != nil {
 		return nil, nil, err
 	}

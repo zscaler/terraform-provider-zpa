@@ -106,11 +106,23 @@ func (service *Service) GetReauth() (*PolicySet, *http.Response, error) {
 	return v, resp, nil
 }
 
-// Get the authentication policy and all rules for a Client Forwarding Policy Rule
+// Get the global bypass policy and all rules for a Client Forwarding Policy Rule
 func (service *Service) GetBypass() (*PolicySet, *http.Response, error) {
 	v := new(PolicySet)
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/bypass")
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return v, resp, nil
+}
+
+// Get the global isolation policy and all rules for a Isolation Policy Rule
+func (service *Service) GetIsolationPolicy() (*PolicySet, *http.Response, error) {
+	v := new(PolicySet)
+	relativeURL := fmt.Sprintf("zpn/api/v1/admin/customers/%s/policySet/policyType/ISOLATION_POLICY", service.Client.Config.CustomerID)
+	resp, err := service.Client.NewPrivateRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
