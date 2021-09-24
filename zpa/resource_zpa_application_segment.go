@@ -58,7 +58,7 @@ func resourceApplicationSegment() *schema.Resource {
 					"DEFAULT",
 					"SIEM",
 				}, false),
-				Computed: true,
+				Default: "DEFAULT",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -88,6 +88,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"health_reporting": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Default:     "NONE",
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"NONE",
@@ -98,12 +99,12 @@ func resourceApplicationSegment() *schema.Resource {
 			"icmp_access_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "NONE",
 				ValidateFunc: validation.StringInSlice([]string{
 					"PING_TRACEROUTING",
 					"PING",
 					"NONE",
 				}, false),
-				Computed: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -117,6 +118,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"default_idle_timeout": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			"modifiedby": {
 				Type:     schema.TypeString,
@@ -126,10 +128,12 @@ func resourceApplicationSegment() *schema.Resource {
 			"modified_time": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"default_max_age": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "",
 			},
 			"ip_anchored": {
 				Type:     schema.TypeBool,

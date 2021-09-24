@@ -26,6 +26,7 @@ func resourceServerGroup() *schema.Resource {
 					"DEFAULT",
 					"SIEM",
 				}, false),
+				Default: "DEFAULT",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -153,14 +154,36 @@ func resourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("dynamic_discovery", resp.DynamicDiscovery)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("name", resp.Name)
-	_ = d.Set("app_connector_groups", flattenAppConnectorGroups(resp.AppConnectorGroups))
-	_ = d.Set("applications", flattenServerGroupApplications(resp.Applications))
+	_ = d.Set("app_connector_groups", flattenAppConnectorGroupsSimple(resp.AppConnectorGroups))
+	_ = d.Set("applications", flattenServerGroupApplicationsSimple(resp.Applications))
 	_ = d.Set("servers", flattenServers(resp.Servers))
 
 	return nil
 
 }
 
+func flattenAppConnectorGroupsSimple(appConnectorGroups []servergroup.AppConnectorGroups) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(appConnectorGroups))
+	for i, group := range appConnectorGroups {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(apps))
+	for i, app := range apps {
+		ids[i] = app.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
 func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	id := d.Id()
