@@ -52,9 +52,9 @@ type Connector struct {
 	LastBrokerConnectTime    string                 `json:"lastBrokerConnectTime,omitempty"`
 	LastBrokerDisconnectTime string                 `json:"lastBrokerDisconnectTime,omitempty"`
 	LastUpgradeTime          string                 `json:"lastUpgradeTime,omitempty"`
-	Latitude                 float64                `json:"latitude,omitempty"`
+	Latitude                 string                 `json:"latitude,omitempty"`
 	Location                 string                 `json:"location,omitempty"`
-	Longitude                float64                `json:"longitude,omitempty"`
+	Longitude                string                 `json:"longitude,omitempty"`
 	ModifiedBy               string                 `json:"modifiedBy,omitempty"`
 	ModifiedTime             string                 `json:"modifiedTime,omitempty"`
 	Name                     string                 `json:"name,omitempty"`

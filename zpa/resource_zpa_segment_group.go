@@ -35,7 +35,7 @@ func resourceSegmentGroup() *schema.Resource {
 			"config_space": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				Default:  "DEFAULT",
 			},
 			"description": {
 				Type:        schema.TypeString,

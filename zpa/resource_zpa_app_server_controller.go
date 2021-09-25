@@ -51,6 +51,7 @@ func resourceApplicationServer() *schema.Resource {
 			"config_space": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "DEFAULT",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"SIEM",

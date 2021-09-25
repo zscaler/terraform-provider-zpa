@@ -22,7 +22,7 @@ type ServerGroup struct {
 	CreationTime       string               `json:"creationTime,omitempty"`
 	ModifiedBy         string               `json:"modifiedBy,omitempty"`
 	ModifiedTime       string               `json:"modifiedTime,omitempty"`
-	AppConnectorGroups []AppConnectorGroups `json:"appConnectorGroups,omitempty"`
+	AppConnectorGroups []AppConnectorGroups `json:"appConnectorGroups"`
 	Servers            []ApplicationServer  `json:"servers"`
 	Applications       []Applications       `json:"applications"`
 }

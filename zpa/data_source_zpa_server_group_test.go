@@ -9,14 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccDataSourceApplicationSegment_ByIdAndName(t *testing.T) {
+func TestAccDataSourceServerGroup_ByIdAndName(t *testing.T) {
 	rName := acctest.RandString(15)
-	port := acctest.RandIntRange(1000, 9999)
 	rDesc := acctest.RandString(15)
-	sgrName := acctest.RandString(15)
-	sgrDesc := acctest.RandString(15)
-	resourceName := "data.zpa_application_segment.by_id"
-	resourceName2 := "data.zpa_application_segment.by_name"
+	resourceName := "data.zpa_server_group.by_id"
+	resourceName2 := "data.zpa_server_group.by_name"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -25,9 +22,9 @@ func TestAccDataSourceApplicationSegment_ByIdAndName(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceApplicationSegmentByID(port, rName, rDesc, sgrName, sgrDesc),
+				Config: testAccDataSourceServerGroupByID(rName, rDesc),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceApplicationSegment(resourceName),
+					testAccDataSourceServerGroup(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "description", rDesc),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
@@ -41,38 +38,33 @@ func TestAccDataSourceApplicationSegment_ByIdAndName(t *testing.T) {
 	})
 }
 
-func testAccDataSourceApplicationSegmentByID(port int, rName, rDesc, sgName, sgDesc string) string {
+func testAccDataSourceServerGroupByID(rName, rDesc string) string {
 	return fmt.Sprintf(`
-	resource "zpa_application_segment" "test_application" {
+	resource "zpa_server_group" "test_app_group" {
 		name = "%s"
 		description = "%s"
 		enabled = true
-		health_reporting = "ON_ACCESS"
-		bypass_type = "NEVER"
-		is_cname_enabled = true
-		tcp_port_ranges = ["%d", "%d"]
-		domain_names = ["test.example.com"]
-		segment_group_id = zpa_segment_group.test_app_group.id
-		server_groups {
+		dynamic_discovery = true
+		applications {
 			id = []
 		}
+		app_connector_groups {
+			id = [data.zpa_app_connector_group.example.id]
+		}
 	}
-
-	resource "zpa_segment_group" "test_app_group" {
-		name = "%s"
-		description = "%s"
-		enabled = true
+	data "zpa_app_connector_group" "example" {
+		name = "SGIO-Vancouver"
 	}
-	data "zpa_application_segment" "by_name" {
-		name = zpa_application_segment.test_application.name
+	data "zpa_server_group" "by_name" {
+		name = zpa_server_group.test_app_group.name
 	}
-	data "zpa_application_segment" "by_id" {
-		id = zpa_application_segment.test_application.id
+	data "zpa_server_group" "by_id" {
+		id = zpa_server_group.test_app_group.id
 	}
-	`, rName, rDesc, port, port, sgName, sgName)
+	`, rName, rDesc)
 }
 
-func testAccDataSourceApplicationSegment(name string) resource.TestCheckFunc {
+func testAccDataSourceServerGroup(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		_, ok := s.RootModule().Resources[name]
 		if !ok {
