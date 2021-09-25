@@ -18,144 +18,39 @@ func resourcePolicyIsolationRule() *schema.Resource {
 		Delete:   resourcePolicyIsolationRuleDelete,
 		Importer: &schema.ResourceImporter{},
 
-		Schema: map[string]*schema.Schema{
-			"action": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "  This is for providing the rule action.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"ISOLATE",
-					"BYPASS_ISOLATE",
-				}, false),
-			},
-			"action_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "This field defines the description of the server.",
-			},
-			"bypass_default_rule": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"isolation_default_rule": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "This is the description of the access policy rule.",
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "This is the name of the policy isolation rule.",
-			},
-			"operator": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"AND",
-					"OR",
-				}, false),
-			},
-			"policy_set_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"policy_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"priority": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"rule_order": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"zpn_cbi_profile_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"conditions": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "This is for proviidng the set of conditions for the policy.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"negated": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"operator": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"AND",
-								"OR",
-							}, false),
-						},
-						"operands": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "This signifies the various policy criteria.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"idp_id": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"lhs": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"rhs": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "This denotes the value for the given object type. Its value depends upon the key.",
-									},
-									"object_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "  This is for specifying the policy critiera.",
-										ValidateFunc: validation.StringInSlice([]string{
-											"APP",
-											"APP_GROUP",
-											"CLIENT_TYPE",
-											"CLOUD_CONNECTOR_GROUP",
-											"IDP",
-											"POSTURE",
-											"SAML",
-											"SCIM",
-											"SCIM_GROUP",
-											"TRUSTED_NETWORK",
-										}, false),
-									},
-								},
-							},
-						},
-					},
+		Schema: MergeSchema(
+			CommonPolicySchema(), map[string]*schema.Schema{
+				"action": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "  This is for providing the rule action.",
+					ValidateFunc: validation.StringInSlice([]string{
+						"ISOLATE",
+						"BYPASS_ISOLATE",
+					}, false),
 				},
+				"isolation_default_rule": {
+					Type:     schema.TypeBool,
+					Computed: true,
+				},
+				"zpn_cbi_profile_id": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"conditions": GetPolicyConditionsSchema([]string{
+					"APP",
+					"APP_GROUP",
+					"CLIENT_TYPE",
+					"CLOUD_CONNECTOR_GROUP",
+					"IDP",
+					"POSTURE",
+					"SAML",
+					"SCIM",
+					"SCIM_GROUP",
+					"TRUSTED_NETWORK",
+				}),
 			},
-		},
+		),
 	}
 }
 
