@@ -23,18 +23,12 @@ const (
 	ZPA_CUSTOMER_ID          = "ZPA_CUSTOMER_ID"
 )
 
-// BackoffConfig contains all the configuration for the backoff and retry mechanism
 type BackoffConfig struct {
 	Enabled             bool // Set to true to enable backoff and retry mechanism
 	RetryWaitMinSeconds int  // Minimum time to wait
 	RetryWaitMaxSeconds int  // Maximum time to wait
 	MaxNumOfRetries     int  // Maximum number of retries
 }
-
-// Need to implement exponential back off to comply with the API rate limit. https://help.zscaler.com/zpa/about-rate-limiting
-// 20 times in a 10 second interval for a GET call.
-// 10 times in a 10 second interval for any POST/PUT/DELETE call.
-// See example: https://github.com/okta/terraform-provider-okta/blob/master/okta/config.go
 type AuthToken struct {
 	TokenType   string `json:"token_type"`
 	AccessToken string `json:"access_token"`
@@ -63,7 +57,6 @@ By default it will try to read the access and te secret from the environment var
 // Need to implement exponential back off to comply with the API rate limit. https://help.zscaler.com/zpa/about-rate-limiting
 // 20 times in a 10 second interval for a GET call.
 // 10 times in a 10 second interval for any POST/PUT/DELETE call.
-// See example: https://github.com/okta/terraform-provider-okta/blob/master/okta/config.go
 // TODO Add healthCheck method to NewConfig
 func NewConfig(clientID, clientSecret, customerID, rawUrl string) (*Config, error) {
 	backoffConf := &BackoffConfig{
