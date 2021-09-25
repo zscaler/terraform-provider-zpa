@@ -60,14 +60,14 @@ func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) er
 	req := expandCreatePolicyIsolationRule(d)
 	log.Printf("[INFO] Creating zpa policy Isolation rule with request\n%+v\n", req)
 	if ValidateConditions(req.Conditions, zClient) {
-		policysetrule, _, err := zClient.policysetrule.Create(&req)
+		policy, _, err := zClient.policysetrule.Create(&req)
 		if err != nil {
 			return err
 		}
-		d.SetId(policysetrule.ID)
+		d.SetId(policy.ID)
 		order, ok := d.GetOk("rule_order")
 		if ok {
-			reorder(order, policysetrule.PolicySetID, policysetrule.ID, zClient)
+			reorder(order, policy.PolicySetID, policy.ID, zClient)
 		}
 		return resourcePolicyIsolationRuleRead(d, m)
 	} else {
@@ -101,6 +101,7 @@ func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) erro
 	_ = d.Set("action_id", resp.ActionID)
 	_ = d.Set("isolation_default_rule", resp.IsolationDefaultRule)
 	_ = d.Set("description", resp.Description)
+	_ = d.Set("custom_msg", resp.CustomMsg)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("bypass_default_rule", resp.BypassDefaultRule)
 	_ = d.Set("operator", resp.Operator)
@@ -164,9 +165,9 @@ func expandCreatePolicyIsolationRule(d *schema.ResourceData) policysetrule.Polic
 	}
 	log.Printf("[INFO] action_id:%v\n", d.Get("action_id"))
 	return policysetrule.PolicyRule{
-		Action:   d.Get("action").(string),
-		ActionID: d.Get("action_id").(string),
-		// CustomMsg:       d.Get("custom_msg").(string),
+		Action:          d.Get("action").(string),
+		ActionID:        d.Get("action_id").(string),
+		CustomMsg:       d.Get("custom_msg").(string),
 		Description:     d.Get("description").(string),
 		ID:              d.Get("id").(string),
 		Name:            d.Get("name").(string),
