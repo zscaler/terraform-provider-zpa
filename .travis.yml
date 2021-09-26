@@ -1,27 +1,23 @@
 dist: trusty
 sudo: required
 services:
-  - docker
+- docker
 language: go
 go:
-  - 1.16.x
-
+- 1.16.x
+script:
+- go mod vendor
+- make testacc
+- make vet
+- make build
+- make website-test
+branches:
+  only:
+  - master
 matrix:
   fast_finish: true
   allow_failures:
   - go: tip
-  include:
-    - name: "Code UnitTest"
-      script: make testacc
-    - name: "Update vendor repo"
-      script: go mod vendor
-    - name: "Vet"
-      script: make vet
-    - name: "Make Build"
-      script: make build
-    - name: "Website"
-      script: make website-test
-
 install:
   # This script is used by the Travis build to install a cookie for
   # go.googlesource.com so rate limits are higher when using `go get` to fetch
@@ -29,6 +25,3 @@ install:
   # See: https://github.com/golang/go/issues/12933
 - bash scripts/gogetcookie.sh
 
-branches:
-  only:
-  - master
