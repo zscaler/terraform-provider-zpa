@@ -102,7 +102,7 @@ func (service *Service) GetByName(appName string) (*ApplicationSegmentResource, 
 			return &app, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no applicattion named '%s' was found", appName)
+	return nil, resp, fmt.Errorf("no application segment named '%s' was found", appName)
 }
 
 func (service *Service) Create(appSegment ApplicationSegmentResource) (*ApplicationSegmentResource, *http.Response, error) {
