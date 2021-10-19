@@ -15,6 +15,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetglobal"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/postureprofile"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/samlattribute"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/scimattributeheader"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/scimgroup"
@@ -39,6 +40,7 @@ type Client struct {
 	postureprofile      postureprofile.Service
 	policysetglobal     policysetglobal.Service
 	policysetrule       policysetrule.Service
+	provisioningkey     provisioningkey.Service
 	samlattribute       samlattribute.Service
 	scimgroup           scimgroup.Service
 	scimattributeheader scimattributeheader.Service
@@ -72,6 +74,7 @@ func (c *Config) Client() (*Client, error) {
 		postureprofile:      *postureprofile.New(config),
 		policysetglobal:     *policysetglobal.New(config),
 		policysetrule:       *policysetrule.New(config),
+		provisioningkey:     *provisioningkey.New(config),
 		samlattribute:       *samlattribute.New(config),
 		scimgroup:           *scimgroup.New(config),
 		scimattributeheader: *scimattributeheader.New(config),
