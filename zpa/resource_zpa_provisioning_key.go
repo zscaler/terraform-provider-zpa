@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"log"
 
@@ -29,18 +30,23 @@ func resourceProvisioningKey() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default: true,
+				Description: "Whether the provisioning key is enabled or not.",
 			},
 			"max_usage": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
+				Description: "The maximum number of instances where this provisioning key can be used for enrolling an App Connector or Service Edge.",
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
+				Description: "Name of the provisioning key.",
 			},
 			"enrollment_cert_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Description: "ID of the enrollment certificate that can be used for this provisioning key.",
 			},
 			"enrollment_cert_name": {
 				Type:     schema.TypeString,
@@ -53,10 +59,12 @@ func resourceProvisioningKey() *schema.Resource {
 			"usage_count": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Description: "The provisioning key utilization count.",
 			},
 			"zcomponent_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Description: "ID of the existing App Connector or Service Edge Group.",
 			},
 			"zcomponent_name": {
 				Type:     schema.TypeString,
@@ -156,3 +164,4 @@ func expandProvisioningKey(d *schema.ResourceData) provisioningkey.ProvisioningK
 	}
 	return provisioningKey
 }
+*/
