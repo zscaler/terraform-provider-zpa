@@ -126,7 +126,7 @@ func (service *Service) Create(appConnectorGroup AppConnectorGroup) (*AppConnect
 	return v, resp, nil
 }
 
-func (service *Service) Update(appConnectorGroupID string, appConnectorGroup AppConnectorGroup) (*http.Response, error) {
+func (service *Service) Update(appConnectorGroupID string, appConnectorGroup *AppConnectorGroup) (*http.Response, error) {
 	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appConnectorGroupEndpoint, appConnectorGroupID)
 	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, appConnectorGroup, nil)
 	if err != nil {

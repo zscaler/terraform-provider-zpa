@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/appservercontroller"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
 )
 
@@ -18,6 +18,10 @@ func resourceAppConnectorGroup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -50,10 +54,6 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Optional: true,
 			},
 			"longitude": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -91,7 +91,7 @@ func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) erro
 	req := expandAppConnectorGroup(d)
 	log.Printf("[INFO] Creating zpa app connector group with request\n%+v\n", req)
 
-	resp, _, err := zClient.appservercontroller.Create(req)
+	resp, _, err := zClient.appconnectorgroup.Create(req)
 	if err != nil {
 		return err
 	}
@@ -104,10 +104,10 @@ func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) erro
 func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	resp, _, err := zClient.appconnectorgroup.Create(req)
+	resp, _, err := zClient.appconnectorgroup.Get(d.Id())
 	if err != nil {
 		if err.(*client.ErrorResponse).IsObjectNotFound() {
-			log.Printf("[WARN] Removing application server %s from state because it no longer exists in ZPA", d.Id())
+			log.Printf("[WARN] Removing app connector group %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
@@ -116,12 +116,21 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	log.Printf("[INFO] Getting application server:\n%+v\n", resp)
-	_ = d.Set("address", resp.Address)
-	_ = d.Set("app_server_group_ids", resp.AppServerGroupIds)
-	_ = d.Set("config_space", resp.ConfigSpace)
-	_ = d.Set("description", resp.Description)
-	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("name", resp.Name)
+	_ = d.Set("city_country", resp.CityCountry)
+	_ = d.Set("country_code", resp.CountryCode)
+	_ = d.Set("description", resp.Description)
+	_ = d.Set("dns_query_type", resp.DNSQueryType)
+	_ = d.Set("enabled", resp.Enabled)
+	_ = d.Set("latitude", resp.Latitude)
+	_ = d.Set("longitude", resp.Longitude)
+	_ = d.Set("location", resp.Location)
+	_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
+	_ = d.Set("upgrade_day", resp.UpgradeDay)
+	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
+	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
+	_ = d.Set("version_profile_id", resp.VersionProfileID)
+	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	return nil
 
 }
@@ -129,72 +138,48 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	log.Println("An updated occurred")
+	id := d.Id()
+	log.Printf("[INFO] Updating app connector group ID: %v\n", id)
+	req := expandAppConnectorGroup(d)
 
-	if d.HasChange("app_server_group_ids") || d.HasChange("name") || d.HasChange("address") {
-		log.Println("The AppServerGroupID, name or address has been changed")
-
-		if _, err := zClient.appservercontroller.Update(d.Id(), appservercontroller.ApplicationServer{
-			AppServerGroupIds: SetToStringSlice(d.Get("app_server_group_ids").(*schema.Set)),
-			Name:              d.Get("name").(string),
-			Address:           d.Get("address").(string),
-			Enabled:           d.Get("enabled").(bool),
-		}); err != nil {
-			return err
-		}
+	if _, err := zClient.appconnectorgroup.Update(id, &req); err != nil {
+		return err
 	}
 
-	return nil
+	return resourceAppConnectorGroupRead(d, m)
 }
 
 func resourceAppConnectorGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	log.Printf("[INFO] Deleting application server ID: %v\n", d.Id())
+	log.Printf("[INFO] Deleting app connector groupID: %v\n", d.Id())
 
-	err := removeServerFromGroup(zClient, d.Id())
-	if err != nil {
+	if _, err := zClient.appconnectorgroup.Delete(d.Id()); err != nil {
 		return err
 	}
-
-	if _, err = zClient.appservercontroller.Delete(d.Id()); err != nil {
-		return err
-	}
-
+	d.SetId("")
+	log.Printf("[INFO] app connector group deleted")
 	return nil
 }
 
-func removeServerFromGroup(zClient *Client, serverID string) error {
-	// Remove the reference to this server from server groups.
-
-	resp, _, err := zClient.appservercontroller.Get(serverID)
-	if err != nil {
-		return err
+func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnectorGroup {
+	appConnectorGroup := appconnectorgroup.AppConnectorGroup{
+		ID:                     d.Get("id").(string),
+		Name:                   d.Get("name").(string),
+		CityCountry:            d.Get("city_country").(string),
+		CountryCode:            d.Get("country_code").(string),
+		Description:            d.Get("description").(string),
+		DNSQueryType:           d.Get("dns_query_type").(string),
+		Enabled:                d.Get("enabled").(bool),
+		Latitude:               d.Get("latitude").(string),
+		Longitude:              d.Get("longitude").(string),
+		Location:               d.Get("location").(string),
+		LSSAppConnectorGroup:   d.Get("lss_app_connector_group").(bool),
+		UpgradeDay:             d.Get("upgrade_day").(string),
+		UpgradeTimeInSecs:      d.Get("upgrade_time_in_secs").(string),
+		OverrideVersionProfile: d.Get("override_version_profile").(bool),
+		VersionProfileID:       d.Get("version_profile_id").(string),
+		VersionProfileName:     d.Get("version_profile_name").(string),
 	}
-
-	if len(resp.AppServerGroupIds) != 0 {
-		log.Printf("[INFO] Removing server group ID/s from application server: %s", serverID)
-		resp.AppServerGroupIds = make([]string, 0)
-
-		log.Printf("[INFO] Updating server group ID: %s", serverID)
-		_, err = zClient.appservercontroller.Update(serverID, *resp)
-		if err != nil {
-			log.Printf("[ERROR] Failed to update application server ID: %s", serverID)
-			return err
-		}
-	}
-
-	return nil
-}
-
-func expandCreateAppServerRequest(d *schema.ResourceData) appservercontroller.ApplicationServer {
-	applicationServer := appservercontroller.ApplicationServer{
-		Address:           d.Get("address").(string),
-		ConfigSpace:       d.Get("config_space").(string),
-		AppServerGroupIds: SetToStringSlice(d.Get("app_server_group_ids").(*schema.Set)),
-		Description:       d.Get("description").(string),
-		Enabled:           d.Get("enabled").(bool),
-		Name:              d.Get("name").(string),
-	}
-	return applicationServer
+	return appConnectorGroup
 }
