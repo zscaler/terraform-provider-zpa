@@ -36,6 +36,7 @@ func Provider() *schema.Provider {
 			   terraform resource name: resource schema
 			   resource formation: provider-resourcename-subresource
 			*/
+			"zpa_app_connector_group":    resourceAppConnectorGroup(),
 			"zpa_application_server":     resourceApplicationServer(),
 			"zpa_application_segment":    resourceApplicationSegment(),
 			"zpa_server_group":           resourceServerGroup(),
@@ -44,7 +45,8 @@ func Provider() *schema.Provider {
 			"zpa_policy_access_rule":     resourcePolicyAccessRule(),
 			"zpa_policy_timeout_rule":    resourcePolicyTimeoutRule(),
 			"zpa_policy_forwarding_rule": resourcePolicyForwardingRule(),
-			"zpa_app_connector_group":    resourceAppConnectorGroup(),
+			//"zpa_provisioning_key":       resourceProvisioningKey(),
+			"zpa_service_edge_group": resourceServiceEdgeGroup(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform date source name: data source schema
@@ -66,6 +68,8 @@ func Provider() *schema.Provider {
 			"zpa_global_access_policy":     dataSourceGlobalAccessPolicy(),
 			"zpa_global_policy_timeout":    dataSourceGlobalPolicyTimeout(),
 			"zpa_global_policy_forwarding": dataSourceGlobalPolicyForwarding(),
+			//"zpa_provisioning_key":         dataSourceProvisioningKey(),
+			"zpa_service_edge_group": dataSourceServiceEdgeGroup(),
 		},
 		ConfigureFunc: zscalerConfigure,
 	}

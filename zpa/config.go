@@ -16,11 +16,13 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetglobal"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/postureprofile"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/samlattribute"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/scimattributeheader"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/scimgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/servergroup"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
 )
 
@@ -30,6 +32,7 @@ func init() {
 }
 
 type Client struct {
+<<<<<<< HEAD
 	appconnectorgroup      appconnectorgroup.Service
 	applicationsegment     applicationsegment.Service
 	appservercontroller    appservercontroller.Service
@@ -48,6 +51,27 @@ type Client struct {
 	servergroup            servergroup.Service
 	trustednetwork         trustednetwork.Service
 	browseraccess          browseraccess.Service
+=======
+	appconnectorgroup   appconnectorgroup.Service
+	applicationsegment  applicationsegment.Service
+	appservercontroller appservercontroller.Service
+	bacertificate       bacertificate.Service
+	cloudconnectorgroup cloudconnectorgroup.Service
+	idpcontroller       idpcontroller.Service
+	machinegroup        machinegroup.Service
+	postureprofile      postureprofile.Service
+	policysetglobal     policysetglobal.Service
+	policysetrule       policysetrule.Service
+	provisioningkey     provisioningkey.Service
+	samlattribute       samlattribute.Service
+	scimgroup           scimgroup.Service
+	scimattributeheader scimattributeheader.Service
+	segmentgroup        segmentgroup.Service
+	servergroup         servergroup.Service
+	serviceedgegroup    serviceedgegroup.Service
+	trustednetwork      trustednetwork.Service
+	browseraccess       browseraccess.Service
+>>>>>>> zpa_service_edge_group
 }
 
 type Config struct {
@@ -64,6 +88,7 @@ func (c *Config) Client() (*Client, error) {
 	}
 
 	client := &Client{
+<<<<<<< HEAD
 		appconnectorgroup:      *appconnectorgroup.New(config),
 		applicationsegment:     *applicationsegment.New(config),
 		appservercontroller:    *appservercontroller.New(config),
@@ -82,6 +107,27 @@ func (c *Config) Client() (*Client, error) {
 		servergroup:            *servergroup.New(config),
 		trustednetwork:         *trustednetwork.New(config),
 		browseraccess:          *browseraccess.New(config),
+=======
+		appconnectorgroup:   *appconnectorgroup.New(config),
+		applicationsegment:  *applicationsegment.New(config),
+		appservercontroller: *appservercontroller.New(config),
+		bacertificate:       *bacertificate.New(config),
+		cloudconnectorgroup: *cloudconnectorgroup.New(config),
+		idpcontroller:       *idpcontroller.New(config),
+		machinegroup:        *machinegroup.New(config),
+		postureprofile:      *postureprofile.New(config),
+		policysetglobal:     *policysetglobal.New(config),
+		policysetrule:       *policysetrule.New(config),
+		provisioningkey:     *provisioningkey.New(config),
+		samlattribute:       *samlattribute.New(config),
+		scimgroup:           *scimgroup.New(config),
+		scimattributeheader: *scimattributeheader.New(config),
+		segmentgroup:        *segmentgroup.New(config),
+		servergroup:         *servergroup.New(config),
+		serviceedgegroup:    *serviceedgegroup.New(config),
+		trustednetwork:      *trustednetwork.New(config),
+		browseraccess:       *browseraccess.New(config),
+>>>>>>> zpa_service_edge_group
 	}
 
 	log.Println("[INFO] initialized ZPA client")
