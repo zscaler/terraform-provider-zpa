@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"fmt"
 	"log"
@@ -136,3 +137,4 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 
 	return nil
 }
+*/

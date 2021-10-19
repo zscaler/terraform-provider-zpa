@@ -21,6 +21,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/scimgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/servergroup"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
 )
 
@@ -46,6 +47,7 @@ type Client struct {
 	scimattributeheader scimattributeheader.Service
 	segmentgroup        segmentgroup.Service
 	servergroup         servergroup.Service
+	serviceedgegroup    serviceedgegroup.Service
 	trustednetwork      trustednetwork.Service
 	browseraccess       browseraccess.Service
 }
@@ -54,7 +56,6 @@ type Config struct {
 	ClientID     string
 	ClientSecret string
 	CustomerID   string
-	BaseURL      string
 }
 
 func (c *Config) Client() (*Client, error) {
@@ -80,6 +81,7 @@ func (c *Config) Client() (*Client, error) {
 		scimattributeheader: *scimattributeheader.New(config),
 		segmentgroup:        *segmentgroup.New(config),
 		servergroup:         *servergroup.New(config),
+		serviceedgegroup:    *serviceedgegroup.New(config),
 		trustednetwork:      *trustednetwork.New(config),
 		browseraccess:       *browseraccess.New(config),
 	}
