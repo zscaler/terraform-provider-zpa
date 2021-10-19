@@ -12,28 +12,28 @@ const (
 )
 
 type ServiceEdgeGroup struct {
-	CityCountry                   string            `json:"cityCountry"`
-	CountryCode                   string            `json:"countryCode"`
-	CreationTime                  string            `json:"creationTime"`
-	Description                   string            `json:"description"`
+	CityCountry                   string            `json:"cityCountry,omitempty"`
+	CountryCode                   string            `json:"countryCode,omitempty"`
+	CreationTime                  string            `json:"creationTime,omitempty"`
+	Description                   string            `json:"description,omitempty"`
 	Enabled                       bool              `json:"enabled"`
-	GeoLocationID                 string            `json:"geoLocationId"`
+	GeoLocationID                 string            `json:"geoLocationId,omitempty"`
 	ID                            string            `json:"id"`
-	IsPublic                      string            `json:"isPublic"`
-	Latitude                      string            `json:"latitude"`
-	Location                      string            `json:"location"`
-	Longitude                     string            `json:"longitude"`
-	ModifiedBy                    string            `json:"modifiedBy"`
-	ModifiedTime                  string            `json:"modifiedTime"`
-	Name                          string            `json:"name"`
+	IsPublic                      string            `json:"isPublic,omitempty"`
+	Latitude                      string            `json:"latitude,omitempty"`
+	Location                      string            `json:"location,omitempty"`
+	Longitude                     string            `json:"longitude,omitempty"`
+	ModifiedBy                    string            `json:"modifiedBy,omitempty"`
+	ModifiedTime                  string            `json:"modifiedTime,omitempty"`
+	Name                          string            `json:"name,omitempty"`
 	OverrideVersionProfile        bool              `json:"overrideVersionProfile"`
 	ServiceEdges                  []ServiceEdges    `json:"serviceEdges"`
 	TrustedNetworks               []TrustedNetworks `json:"trustedNetworks"`
-	UpgradeDay                    string            `json:"upgradeDay"`
-	UpgradeTimeInSecs             string            `json:"upgradeTimeInSecs"`
-	VersionProfileID              string            `json:"versionProfileId"`
-	VersionProfileName            string            `json:"versionProfileName"`
-	VersionProfileVisibilityScope string            `json:"versionProfileVisibilityScope"`
+	UpgradeDay                    string            `json:"upgradeDay,omitempty"`
+	UpgradeTimeInSecs             string            `json:"upgradeTimeInSecs,omitempty"`
+	VersionProfileID              string            `json:"versionProfileId,omitempty"`
+	VersionProfileName            string            `json:"versionProfileName,omitempty"`
+	VersionProfileVisibilityScope string            `json:"versionProfileVisibilityScope,omitempty"`
 }
 
 type ServiceEdges struct {

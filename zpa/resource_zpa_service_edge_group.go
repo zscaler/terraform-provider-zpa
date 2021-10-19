@@ -49,7 +49,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			"is_public": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     false,
+				Default:     "FALSE",
 				Description: "Enable or disable public access for the Service Edge Group.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
@@ -92,7 +92,17 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			},
 			"version_profile_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
+				Description: "ID of the version profile. To learn more",
+			},
+			"version_profile_name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the version profile. To learn more",
+			},
+			"version_profile_visibility_scope": {
+				Type:        schema.TypeString,
+				Computed:    true,
 				Description: "ID of the version profile. To learn more",
 			},
 		},
@@ -130,11 +140,13 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	log.Printf("[INFO] Getting service edge group:\n%+v\n", resp)
+	d.SetId(resp.ID)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("city_country", resp.CityCountry)
 	_ = d.Set("country_code", resp.CountryCode)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
+	_ = d.Set("is_public", resp.IsPublic)
 	_ = d.Set("latitude", resp.Latitude)
 	_ = d.Set("longitude", resp.Longitude)
 	_ = d.Set("location", resp.Location)
@@ -143,6 +155,7 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
+	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
 	return nil
 
 }
@@ -176,19 +189,22 @@ func resourceServiceEdgeGroupDelete(d *schema.ResourceData, m interface{}) error
 
 func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdgeGroup {
 	serviceEdgeGroup := serviceedgegroup.ServiceEdgeGroup{
-		ID:                     d.Get("id").(string),
-		Name:                   d.Get("name").(string),
-		CityCountry:            d.Get("city_country").(string),
-		CountryCode:            d.Get("country_code").(string),
-		Description:            d.Get("description").(string),
-		Enabled:                d.Get("enabled").(bool),
-		IsPublic:               d.Get("is_public").(string),
-		Latitude:               d.Get("latitude").(string),
-		Location:               d.Get("location").(string),
-		Longitude:              d.Get("longitude").(string),
-		OverrideVersionProfile: d.Get("override_version_profile").(bool),
-		UpgradeDay:             d.Get("upgrade_day").(string),
-		UpgradeTimeInSecs:      d.Get("upgrade_time_in_secs").(string),
+		ID:                            d.Get("id").(string),
+		Name:                          d.Get("name").(string),
+		CityCountry:                   d.Get("city_country").(string),
+		CountryCode:                   d.Get("country_code").(string),
+		Description:                   d.Get("description").(string),
+		Enabled:                       d.Get("enabled").(bool),
+		IsPublic:                      d.Get("is_public").(string),
+		Latitude:                      d.Get("latitude").(string),
+		Location:                      d.Get("location").(string),
+		Longitude:                     d.Get("longitude").(string),
+		UpgradeDay:                    d.Get("upgrade_day").(string),
+		UpgradeTimeInSecs:             d.Get("upgrade_time_in_secs").(string),
+		VersionProfileID:              d.Get("version_profile_id").(string),
+		VersionProfileName:            d.Get("version_profile_name").(string),
+		VersionProfileVisibilityScope: d.Get("version_profile_visibility_scope").(string),
+		OverrideVersionProfile:        d.Get("override_version_profile").(bool),
 	}
 	return serviceEdgeGroup
 }

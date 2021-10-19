@@ -12,15 +12,14 @@ provider "zpa" {}
 resource "zpa_service_edge_group" "example" {
   name                          = "Example"
   description                   = "Example"
-  enabled                       = true
-  city_country                  = "Langley, CA"
-  country_code                  = "CA"
+  upgrade_day                   = "SUNDAY"
+  upgrade_time_in_secs          = "66600"
   latitude                      = "49.1041779"
   longitude                     = "-122.6603519"
   location                      = "Langley City, BC, Canada"
-  upgrade_day                   = "SUNDAY"
-  upgrade_time_in_secs          = "66600"
-  override_version_profile      = true
-  version_profile_id            = 0
-  dns_query_type                = "IPV4"
+  version_profile_id = "0"
+}
+
+output "zpa_service_edge_group" {
+  value = zpa_service_edge_group.example
 }

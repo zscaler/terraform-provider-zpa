@@ -56,6 +56,7 @@ type Config struct {
 	ClientID     string
 	ClientSecret string
 	CustomerID   string
+	BaseURL      string
 }
 
 func (c *Config) Client() (*Client, error) {
