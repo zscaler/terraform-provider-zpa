@@ -54,6 +54,7 @@ func Provider() *schema.Provider {
 			"zpa_scim_groups":              dataSourceScimGroup(),
 			"zpa_scim_attribute_header":    dataSourceScimAttributeHeader(),
 			"zpa_ba_certificate":           dataSourceBaCertificate(),
+			"zpa_customer_version_profile": dataSourceCustomerVersionProfile(),
 			"zpa_machine_group":            dataSourceMachineGroup(),
 			"zpa_application_segment":      dataSourceApplicationSegment(),
 			"zpa_application_server":       dataSourceApplicationServer(),
