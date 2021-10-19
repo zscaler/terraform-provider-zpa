@@ -18,8 +18,20 @@ resource "zpa_service_edge_group" "example" {
   longitude                     = "-122.6603519"
   location                      = "Langley City, BC, Canada"
   version_profile_id = "0"
+  trusted_networks {
+    id = [ data.zpa_trusted_network.example.id ]
+  }
+}
+
+
+data "zpa_service_edge_group" "example" {
+  name = "Example"
 }
 
 output "zpa_service_edge_group" {
-  value = zpa_service_edge_group.example
+  value = data.zpa_service_edge_group.example
+}
+
+data "zpa_trusted_network" "example" {
+ name = "Corp-Trusted-Networks"
 }

@@ -68,6 +68,7 @@ func Provider() *schema.Provider {
 			"zpa_global_policy_timeout":    dataSourceGlobalPolicyTimeout(),
 			"zpa_global_policy_forwarding": dataSourceGlobalPolicyForwarding(),
 			//"zpa_provisioning_key":         dataSourceProvisioningKey(),
+			"zpa_service_edge_group": dataSourceServiceEdgeGroup(),
 		},
 		ConfigureFunc: zscalerConfigure,
 	}

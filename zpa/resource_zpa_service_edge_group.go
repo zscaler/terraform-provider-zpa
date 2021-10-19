@@ -78,6 +78,36 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Default:     true,
 				Description: "Whether the default version profile of the App Connector Group is applied or overridden.",
 			},
+			"service_edges": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
+			"trusted_networks": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
 			"upgrade_day": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -156,6 +186,8 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
+	_ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
+	_ = d.Set("service_edges", flattenServiceEdges(resp))
 	return nil
 
 }
@@ -205,6 +237,52 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		VersionProfileName:            d.Get("version_profile_name").(string),
 		VersionProfileVisibilityScope: d.Get("version_profile_visibility_scope").(string),
 		OverrideVersionProfile:        d.Get("override_version_profile").(bool),
+		ServiceEdges:                  expandServiceEdges(d),
+		TrustedNetworks:               expandTrustedNetworks(d),
 	}
 	return serviceEdgeGroup
+}
+
+func expandServiceEdges(d *schema.ResourceData) []serviceedgegroup.ServiceEdges {
+	serviceEdgesGroupInterface, ok := d.GetOk("service_edges")
+	if ok {
+		serviceEdge := serviceEdgesGroupInterface.(*schema.Set)
+		log.Printf("[INFO] service edges data: %+v\n", serviceEdge)
+		var serviceEdgesGroups []serviceedgegroup.ServiceEdges
+		for _, serviceEdgesGroup := range serviceEdge.List() {
+			serviceEdgesGroup, ok := serviceEdgesGroup.(map[string]interface{})
+			if ok {
+				for _, id := range serviceEdgesGroup["id"].([]interface{}) {
+					serviceEdgesGroups = append(serviceEdgesGroups, serviceedgegroup.ServiceEdges{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return serviceEdgesGroups
+	}
+
+	return []serviceedgegroup.ServiceEdges{}
+}
+
+func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNetworks {
+	trustedNetworksInterface, ok := d.GetOk("trusted_networks")
+	if ok {
+		network := trustedNetworksInterface.(*schema.Set)
+		log.Printf("[INFO] trusted network data: %+v\n", network)
+		var trustedNetworks []serviceedgegroup.TrustedNetworks
+		for _, trustedNetwork := range network.List() {
+			trustedNetwork, ok := trustedNetwork.(map[string]interface{})
+			if ok {
+				for _, id := range trustedNetwork["id"].([]interface{}) {
+					trustedNetworks = append(trustedNetworks, serviceedgegroup.TrustedNetworks{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return trustedNetworks
+	}
+
+	return []serviceedgegroup.TrustedNetworks{}
 }
