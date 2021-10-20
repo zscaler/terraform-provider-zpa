@@ -39,22 +39,14 @@ data "zpa_server_group" "example" {
     name = "Example"
 } 
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
-* ` name` - (Required) Name. The name of the application server to be exported.
-* ` address` - (Required) Address. The address of the application server to be exported.
 
-
-### Optional
-
-- **app_server_group_ids** (Set of String) This field defines the list of server groups IDs.
-- **description** (String) This field defines the description of the server.
-- **enabled** (Boolean) This field defines the status of the server.
-
-### Read-Only
-
-- **config_space** (String)
-- **id** (String) The ID of this resource.
-
-
+* `name` - (Required) This field defines the name of the server.
+* `description` (Optional) This field defines the description of the server.
+* `address` - (Required) This field defines the domain or IP address of the server.
+* `app_server_group_ids` - (Optional) This field defines the list of server group ID(s).
+* `enabled` - (Required) This field defines the status of the server.
+* `config_space` - (Optional)
