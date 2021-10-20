@@ -7,11 +7,12 @@ import (
 )
 
 const (
-	mgmtConfig                 = "/mgmtconfig/v1/admin/customers/"
+	mgmtConfig                 = "/mgmtconfig/v2/admin/customers/"
 	idpControllerGroupEndpoint = "/idp"
 )
 
 type IdpController struct {
+	AdminSpSigningCertID        string         `json:"adminSpSigningCertId,omitempty"`
 	AutoProvision               string         `json:"autoProvision,omitempty"`
 	CreationTime                string         `json:"creationTime,omitempty"`
 	Description                 string         `json:"description,omitempty"`
@@ -35,6 +36,7 @@ type IdpController struct {
 	SignSamlRequest             string         `json:"signSamlRequest,,omitempty"`
 	SsoType                     []string       `json:"ssoType,omitempty"`
 	UseCustomSpMetadata         bool           `json:"useCustomSPMetadata,omitempty"`
+	UserSpSigningCertId         string         `json:"userSpSigningCertId,omitempty"`
 	AdminMetadata               AdminMetadata  `json:"adminMetadata,omitempty"`
 	UserMetadata                UserMetadata   `json:"userMetadata,omitempty"`
 	Certificates                []Certificates `json:"certificates"`
@@ -42,6 +44,7 @@ type IdpController struct {
 
 type AdminMetadata struct {
 	CertificateURL string `json:"certificateUrl"`
+	SpBaseURL      string `json:"spBaseUrl"`
 	SpEntityID     string `json:"spEntityId"`
 	SpMetadataURL  string `json:"spMetadataUrl"`
 	SpPostURL      string `json:"spPostUrl"`
@@ -50,11 +53,12 @@ type Certificates struct {
 	Cname          string `json:"cName,omitempty"`
 	Certificate    string `json:"certificate,omitempty"`
 	SerialNo       string `json:"serialNo,omitempty"`
-	ValidFrominSec string `json:"validFromInSec,omitempty"`
-	ValidToinSec   string `json:"validToInSec,omitempty"`
+	ValidFromInSec string `json:"validFromInSec,omitempty"`
+	ValidToInSec   string `json:"validToInSec,omitempty"`
 }
 type UserMetadata struct {
 	CertificateURL string `json:"certificateUrl,omitempty"`
+	SpBaseURL      string `json:"spBaseUrl"`
 	SpEntityID     string `json:"spEntityId,omitempty"`
 	SpMetadataURL  string `json:"spMetadataUrl,omitempty"`
 	SpPostURL      string `json:"spPostUrl,omitempty"`
@@ -71,19 +75,22 @@ func (service *Service) Get(IdpID string) (*IdpController, *http.Response, error
 	return v, resp, nil
 }
 
-func (service *Service) GetByName(name string) (*IdpController, *http.Response, error) {
-	var v []IdpController
-	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + idpControllerGroupEndpoint)
+func (service *Service) GetByName(idpName string) (*IdpController, *http.Response, error) {
+	var v struct {
+		List []IdpController `json:"list"`
+	}
+
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + idpControllerGroupEndpoint
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
 	}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, idpController := range v {
-		if strings.EqualFold(idpController.Name, name) {
+	for _, idpController := range v.List {
+		if strings.EqualFold(idpController.Name, idpName) {
 			return &idpController, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no Idp-Controller named '%s' was found", name)
+	return nil, resp, fmt.Errorf("no Idp-Controller named '%s' was found", idpName)
 }
