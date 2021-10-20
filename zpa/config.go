@@ -11,6 +11,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/browseraccess"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/cloudconnectorgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/customerversionprofile"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/enrollmentcert"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/idpcontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/machinegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetglobal"
@@ -38,6 +39,7 @@ type Client struct {
 	bacertificate          bacertificate.Service
 	cloudconnectorgroup    cloudconnectorgroup.Service
 	customerversionprofile customerversionprofile.Service
+	enrollmentcert         enrollmentcert.Service
 	idpcontroller          idpcontroller.Service
 	machinegroup           machinegroup.Service
 	postureprofile         postureprofile.Service
@@ -74,6 +76,7 @@ func (c *Config) Client() (*Client, error) {
 		bacertificate:          *bacertificate.New(config),
 		cloudconnectorgroup:    *cloudconnectorgroup.New(config),
 		customerversionprofile: *customerversionprofile.New(config),
+		enrollmentcert:         *enrollmentcert.New(config),
 		idpcontroller:          *idpcontroller.New(config),
 		machinegroup:           *machinegroup.New(config),
 		postureprofile:         *postureprofile.New(config),

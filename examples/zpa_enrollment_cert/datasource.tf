@@ -9,10 +9,10 @@ terraform {
 
 provider "zpa" {}
 
-data "zpa_posture_profile" "crwd_zta_score_40" {
- name = "CrowdStrike_ZPA_ZTA_40"
+data "zpa_enrollment_cert" "sales_ba" {
+    name = "sales.securitygeek.io"
 }
 
-output "all_posture_profile" {
-  value = data.zpa_posture_profile.crwd_zta_score_40
+output "zpa_enrollment_cert" {
+  value = data.zpa_enrollment_cert.sales_ba
 }
