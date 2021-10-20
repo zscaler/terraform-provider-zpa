@@ -46,11 +46,11 @@ resource "zpa_server_group" "example" {
 
 The following arguments are supported:
 
-* `name` (Required) This field defines the name of the server group.
-* `description` (Optional) This field is the description of the server group.
-* `dynamic_discovery` (Optional) This field controls dynamic discovery of the servers.
-* `app_connector_groups` (Required) This field is an array of app-connector-id only.
-* `config_space` (Optional)
-* `enabled` (Optional) This field defines if the server group is enabled or disabled.
-* `ip_anchored` (Optional)
-* `servers` (Optional) This field becomes required when `dynamic_discovery` is disabled.
+* `name` - (Required) This field defines the name of the server group.
+* `description` - (Optional) This field is the description of the server group.
+* `dynamic_discovery` - (Optional) This field controls dynamic discovery of the servers.
+* `app_connector_groups` - (Required) This field is an array of app-connector-id only.
+* `config_space` - (Optional)
+* `enabled` - (Optional) This field defines if the server group is enabled or disabled.
+* `ip_anchored` - (Optional)
+* `servers` - (Optional) This field becomes required when `dynamic_discovery` is disabled.
