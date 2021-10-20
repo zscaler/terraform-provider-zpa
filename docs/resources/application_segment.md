@@ -80,7 +80,7 @@ The following arguments are supported:
 * `description` (Optional) Description of the application.
 * `bypass_type` - (Optional) Indicates whether users can bypass ZPA to access applications.
 * `config_space` - (Optional)
-* `domain_names` - (Optional) List of domains and IPs.
+* `domain_names` - (Required) List of domains and IPs.
 * `double_encrypt` - (Optional) Whether Double Encryption is enabled or disabled for the app.
 * `enabled` - (Optional) Whether this application is enabled or not.
 * `health_reporting` - (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: `NONE`, `ON_ACCESS`, `CONTINUOUS`.
@@ -89,7 +89,7 @@ The following arguments are supported:
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
 * `log_features` - (Optional)
 * `passive_health_enabled` - (Optional)
-* `segment_group_id` - (Optional)
+* `segment_group_id` - (Required) ID(s) of the segment group(s).
 * `segment_group_name` - (Optional)
 * `server_groups` - (Required) ID(s) of the server group(s).
 * `tcp_port_ranges` - (Required) TCP port ranges used to access the app.
