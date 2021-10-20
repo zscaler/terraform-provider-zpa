@@ -85,8 +85,8 @@ The following arguments are supported:
 * `enabled` - (Optional) Whether this application is enabled or not.
 * `health_reporting` - (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: `NONE`, `ON_ACCESS`, `CONTINUOUS`.
 * `icmp_access_type` - (Optional)
-* `ip_anchored` - (Optional)
-* `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
+* `ip_anchored` - (Optional) Whether Source IP Anchoring for use with ZIA, is enabled or disabled for the app. Default: `false`. Supported: `true`, `false`.
+* `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors. Default: `true`. Boolean: `true`, `false`.
 * `log_features` - (Optional)
 * `passive_health_enabled` - (Optional)
 * `segment_group_id` - (Required) ID(s) of the segment group(s).
