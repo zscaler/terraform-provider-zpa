@@ -11,13 +11,12 @@ const (
 )
 
 type LSSResource struct {
-	Config          *Config            `json:"config"`
-	ID              string             `json:"id"`
-	ConnectorGroups *[]ConnectorGroups `json:"connectorGroups"`
-	PolicyRule      *PolicyRule        `json:"policyRule"`
-	// PolicyRuleResource PolicyRuleResource `json:"policyRuleResource"`
+	LSSConfig       *LSSConfig        `json:"config"`
+	ID              string            `json:"id"`
+	ConnectorGroups []ConnectorGroups `json:"connectorGroups"`
+	PolicyRule      *PolicyRule       `json:"policyRule"`
 }
-type Config struct {
+type LSSConfig struct {
 	AuditMessage  string   `json:"auditMessage"`
 	CreationTime  string   `json:"creationTime"`
 	Description   string   `json:"description"`
@@ -28,8 +27,8 @@ type Config struct {
 	ModifiedBy    string   `json:"modifiedBy"`
 	ModifiedTime  string   `json:"modifiedTime"`
 	Name          string   `json:"name"`
-	LssHost       string   `json:"lssHost"`
-	LssPort       string   `json:"lssPort"`
+	LSSHost       string   `json:"lssHost"`
+	LSSPort       string   `json:"lssPort"`
 	SourceLogType string   `json:"sourceLogType"`
 	UseTLS        bool     `json:"useTls"`
 }

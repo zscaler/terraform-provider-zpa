@@ -9,6 +9,18 @@ func SetToStringSlice(d *schema.Set) []string {
 	return ListToStringSlice(list)
 }
 
+func SetToStringList(d *schema.ResourceData, key string) []string {
+	setObj, ok := d.GetOk(key)
+	if !ok {
+		return []string{}
+	}
+	set, ok := setObj.(*schema.Set)
+	if !ok {
+		return []string{}
+	}
+	return SetToStringSlice(set)
+}
+
 func ListToStringSlice(v []interface{}) []string {
 	if len(v) == 0 {
 		return []string{}

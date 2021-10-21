@@ -1,14 +1,12 @@
 package zpa
 
-/*
 import (
 	"log"
-
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 )
 
 func resourceLSSConfigController() *schema.Resource {
@@ -24,9 +22,22 @@ func resourceLSSConfigController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"connector_groups": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeList,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Optional: true,
+						},
+					},
+				},
+			},
 			"config": {
 				Type:     schema.TypeList,
-				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"audit_message": {
@@ -65,26 +76,14 @@ func resourceLSSConfigController() *schema.Resource {
 						},
 						"lss_port": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
 						"source_log_type": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
 						"use_tls": {
 							Type:     schema.TypeBool,
-							Required: true,
-						},
-					},
-				},
-			},
-			"connector_groups": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
 							Optional: true,
 						},
 					},
@@ -97,10 +96,10 @@ func resourceLSSConfigController() *schema.Resource {
 func resourceLSSConfigControllerCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	req := expandLSSConfigController(d)
+	req := expandLSSResource(d)
 	log.Printf("[INFO] Creating zpa lss config controller with request\n%+v\n", req)
 
-	resp, _, err := zClient.lssconfigcontroller.Create(req)
+	resp, _, err := zClient.lssconfigcontroller.Create(&req)
 	if err != nil {
 		return err
 	}
@@ -126,7 +125,8 @@ func resourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) erro
 
 	log.Printf("[INFO] Getting lss config controller:\n%+v\n", resp)
 	d.SetId(resp.ID)
-	_ = d.Set("config", flattenAppServerGroupsSimple(resp))
+	_ = d.Set("config", flattenLSSConfig(resp.LSSConfig))
+	_ = d.Set("connector_groups", flattenConnectorGroups(resp.ConnectorGroups))
 	return nil
 
 }
@@ -136,7 +136,7 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) er
 
 	id := d.Id()
 	log.Printf("[INFO] Updating lss config controller ID: %v\n", id)
-	req := expandLSSConfigController(d)
+	req := expandLSSResource(d)
 
 	if _, err := zClient.lssconfigcontroller.Update(id, &req); err != nil {
 		return err
@@ -157,4 +157,50 @@ func resourceLSSConfigControllerDelete(d *schema.ResourceData, m interface{}) er
 	log.Printf("[INFO] lss config controller deleted")
 	return nil
 }
-*/
+
+func expandLSSResource(d *schema.ResourceData) lssconfigcontroller.LSSResource {
+	req := lssconfigcontroller.LSSResource{
+
+		ID:              d.Get("id").(string),
+		LSSConfig:       expandLSSConfigController(d),
+		ConnectorGroups: expandConnectorGroups(d),
+	}
+	return req
+}
+
+func expandLSSConfigController(d *schema.ResourceData) *lssconfigcontroller.LSSConfig {
+	return &lssconfigcontroller.LSSConfig{
+		AuditMessage:  d.Get("audit_message").(string),
+		Description:   d.Get("description").(string),
+		Enabled:       d.Get("enabled").(bool),
+		Filter:        SetToStringList(d, "filter"),
+		Format:        d.Get("format").(string),
+		Name:          d.Get("name").(string),
+		LSSHost:       d.Get("lss_host").(string),
+		LSSPort:       d.Get("lss_port").(string),
+		SourceLogType: d.Get("source_log_type").(string),
+		UseTLS:        d.Get("use_tls").(bool),
+	}
+}
+
+func expandConnectorGroups(d *schema.ResourceData) []lssconfigcontroller.ConnectorGroups {
+	appConnectorGroupsInterface, ok := d.GetOk("connector_groups")
+	if ok {
+		appConnector := appConnectorGroupsInterface.(*schema.Set)
+		log.Printf("[INFO] connector groups data: %+v\n", appConnector)
+		var appConnectorGroups []lssconfigcontroller.ConnectorGroups
+		for _, appConnectorGroup := range appConnector.List() {
+			appConnectorGroup, ok := appConnectorGroup.(map[string]interface{})
+			if ok {
+				for _, id := range appConnectorGroup["id"].([]interface{}) {
+					appConnectorGroups = append(appConnectorGroups, lssconfigcontroller.ConnectorGroups{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return appConnectorGroups
+	}
+
+	return []lssconfigcontroller.ConnectorGroups{}
+}

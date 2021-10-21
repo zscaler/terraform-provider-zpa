@@ -287,11 +287,11 @@ func dataSourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) er
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
-		if err := d.Set("config", flattenLSSConfig(resp.Config)); err != nil {
+		if err := d.Set("config", flattenLSSConfig(resp.LSSConfig)); err != nil {
 			return err
 		}
 
-		_ = d.Set("connector_groups", flattenConnectorGroups(*resp.ConnectorGroups))
+		_ = d.Set("connector_groups", flattenConnectorGroups(resp.ConnectorGroups))
 
 		if err := d.Set("policy_rule", flattenLSSPolicyRule(resp.PolicyRule)); err != nil {
 			return err
@@ -303,7 +303,7 @@ func dataSourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) er
 	return nil
 }
 
-func flattenLSSConfig(lssConfig *lssconfigcontroller.Config) interface{} {
+func flattenLSSConfig(lssConfig *lssconfigcontroller.LSSConfig) interface{} {
 	return []map[string]interface{}{
 		{
 			"audit_message":   lssConfig.AuditMessage,
@@ -312,8 +312,8 @@ func flattenLSSConfig(lssConfig *lssconfigcontroller.Config) interface{} {
 			"filter":          lssConfig.Filter,
 			"id":              lssConfig.ID,
 			"name":            lssConfig.Name,
-			"lss_host":        lssConfig.LssHost,
-			"lss_port":        lssConfig.LssPort,
+			"lss_host":        lssConfig.LSSHost,
+			"lss_port":        lssConfig.LSSPort,
 			"source_log_type": lssConfig.SourceLogType,
 			"use_tls":         lssConfig.UseTLS,
 		},

@@ -355,7 +355,7 @@ func expandOperandsList(ops interface{}) ([]policysetrule.Operands, error) {
 	return []policysetrule.Operands{}, nil
 }
 
-func FlattenPolicyConditions(conditions []policysetrule.Conditions) []interface{} {
+func flattenPolicyConditions(conditions []policysetrule.Conditions) []interface{} {
 	ruleConditions := make([]interface{}, len(conditions))
 	for i, ruleConditionItems := range conditions {
 		ruleConditions[i] = map[string]interface{}{
@@ -397,6 +397,11 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		},
 		"custom_msg": {
 			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "This is for providing a customer message for the user.",
+		},
+		"default_rule": {
+			Type:        schema.TypeBool,
 			Optional:    true,
 			Description: "This is for providing a customer message for the user.",
 		},
@@ -447,6 +452,10 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Optional: true,
 		},
 		"rule_order": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"lss_default_rule": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
