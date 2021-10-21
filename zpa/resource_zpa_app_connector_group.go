@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
 )
@@ -44,6 +45,11 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Optional:    true,
 				Default:     "IPV4_IPV6",
 				Description: "Whether to enable IPv4 or IPv6, or both, for DNS resolution of all applications in the App Connector Group",
+				ValidateFunc: validation.StringInSlice([]string{
+					"IPV4_IPV6",
+					"IPV4",
+					"IPV6",
+				}, false),
 			},
 			"enabled": {
 				Type:        schema.TypeBool,
