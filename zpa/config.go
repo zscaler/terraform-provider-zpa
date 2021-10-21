@@ -13,6 +13,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/customerversionprofile"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/enrollmentcert"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/idpcontroller"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/machinegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetglobal"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
@@ -41,6 +42,7 @@ type Client struct {
 	customerversionprofile customerversionprofile.Service
 	enrollmentcert         enrollmentcert.Service
 	idpcontroller          idpcontroller.Service
+	lssconfigcontroller    lssconfigcontroller.Service
 	machinegroup           machinegroup.Service
 	postureprofile         postureprofile.Service
 	policysetglobal        policysetglobal.Service
@@ -78,6 +80,7 @@ func (c *Config) Client() (*Client, error) {
 		customerversionprofile: *customerversionprofile.New(config),
 		enrollmentcert:         *enrollmentcert.New(config),
 		idpcontroller:          *idpcontroller.New(config),
+		lssconfigcontroller:    *lssconfigcontroller.New(config),
 		machinegroup:           *machinegroup.New(config),
 		postureprofile:         *postureprofile.New(config),
 		policysetglobal:        *policysetglobal.New(config),
