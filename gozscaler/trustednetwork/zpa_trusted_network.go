@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	mgmtConfig             = "/mgmtconfig/v1/admin/customers/"
+	mgmtConfig             = "/mgmtconfig/v2/admin/customers/"
 	trustedNetworkEndpoint = "/network"
 )
 
@@ -51,19 +51,22 @@ func (service *Service) GetByNetID(netID string) (*TrustedNetwork, *http.Respons
 	return nil, resp, fmt.Errorf("no trusted network with NetworkID '%s' was found", netID)
 }
 
-func (service *Service) GetByName(name string) (*TrustedNetwork, *http.Response, error) {
-	var v []TrustedNetwork
-	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint)
+func (service *Service) GetByName(trustedNetworkName string) (*TrustedNetwork, *http.Response, error) {
+	var v struct {
+		List []TrustedNetwork `json:"list"`
+	}
+
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
 	}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, trustedNetwork := range v {
-		if strings.EqualFold(trustedNetwork.Name, name) {
+	for _, trustedNetwork := range v.List {
+		if strings.EqualFold(trustedNetwork.Name, trustedNetworkName) {
 			return &trustedNetwork, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no trusted network named '%s' was found", name)
+	return nil, resp, fmt.Errorf("no trusted network named '%s' was found", trustedNetworkName)
 }
