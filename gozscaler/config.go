@@ -14,15 +14,15 @@ import (
 )
 
 const (
-	//defaultBaseURL           = "https://config.private.zscaler.com"
-	//defaultPrivateAPIBaseURL = "https://api.private.zscaler.com"
-	defaultBaseURL           = "https://config.zpabeta.net"
-	defaultPrivateAPIBaseURL = "https://api.private.zpabeta.net"
-	defaultTimeout           = 240 * time.Second
-	loggerPrefix             = "zpa-logger: "
-	ZPA_CLIENT_ID            = "ZPA_CLIENT_ID"
-	ZPA_CLIENT_SECRET        = "ZPA_CLIENT_SECRET"
-	ZPA_CUSTOMER_ID          = "ZPA_CUSTOMER_ID"
+	defaultBaseURL           = "https://config.private.zscaler.com"
+	defaultPrivateAPIBaseURL = "https://api.private.zscaler.com"
+	//defaultBaseURL           = "https://config.zpabeta.net"
+	//defaultPrivateAPIBaseURL = "https://api.private.zpabeta.net"
+	defaultTimeout    = 240 * time.Second
+	loggerPrefix      = "zpa-logger: "
+	ZPA_CLIENT_ID     = "ZPA_CLIENT_ID"
+	ZPA_CLIENT_SECRET = "ZPA_CLIENT_SECRET"
+	ZPA_CUSTOMER_ID   = "ZPA_CUSTOMER_ID"
 )
 
 type BackoffConfig struct {

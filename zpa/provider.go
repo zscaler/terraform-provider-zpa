@@ -47,6 +47,7 @@ func Provider() *schema.Provider {
 			"zpa_policy_forwarding_rule": resourcePolicyForwardingRule(),
 			//"zpa_provisioning_key":       resourceProvisioningKey(),
 			"zpa_service_edge_group": resourceServiceEdgeGroup(),
+			//"zpa_lss_config_controller": resourceLSSConfigController(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform date source name: data source schema
@@ -71,6 +72,7 @@ func Provider() *schema.Provider {
 			"zpa_server_group":             dataSourceServerGroup(),
 			"zpa_enrollment_cert":          dataSourceEnrollmentCert(),
 			"zpa_trusted_network":          dataSourceTrustedNetwork(),
+			"zpa_lss_config_controller":    dataSourceLSSConfigController(),
 		},
 		ConfigureFunc: zscalerConfigure,
 	}
