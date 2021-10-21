@@ -13,6 +13,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/customerversionprofile"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/enrollmentcert"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/idpcontroller"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/machinegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetglobal"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
