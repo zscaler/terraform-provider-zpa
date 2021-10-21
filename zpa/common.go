@@ -456,7 +456,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Optional: true,
 		},
 		"lss_default_rule": {
-			Type:     schema.TypeString,
+			Type:     schema.TypeBool,
 			Optional: true,
 		},
 	}
