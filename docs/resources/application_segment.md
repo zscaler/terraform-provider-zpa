@@ -76,12 +76,21 @@ resource "zpa_application_server" "example" {
 
 The following arguments are supported:
 
+<<<<<<< HEAD
+* `name` - (Required) Name. The name of the App Connector Group to be exported.
+* `description` (Optional) Description of the application.
+* `bypass_type` - (Optional) Indicates whether users can bypass ZPA to access applications.
+* `config_space` - (Optional)
+* `domain_names` - (Required) List of domains and IPs.
+* `double_encrypt` - (Optional) Whether Double Encryption is enabled or disabled for the app.
+=======
 * `name` - (Required) Name of the application.
 * `description` (Optional) Description of the application.
 * `bypass_type` - (Optional) Indicates whether users can bypass ZPA to access applications. Default: `NEVER`. Supported values: `ALWAYS`, `NEVER`, `ON_NET`. The value `NEVER` indicates the use of the client forwarding policy.
 * `config_space` - (Optional)
 * `domain_names` - (Required) List of domains and IPs.
 * `double_encrypt` - (Optional) Whether Double Encryption is enabled or disabled for the app. Default: `false`. Boolean: `true`, `false`.
+>>>>>>> 1f538a70306b82374fd45d78cc385a053ee0e878
 * `enabled` - (Optional) Whether this application is enabled or not.
 * `health_reporting` - (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: `NONE`, `ON_ACCESS`, `CONTINUOUS`.
 * `icmp_access_type` - (Optional)

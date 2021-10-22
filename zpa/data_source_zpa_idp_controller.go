@@ -13,11 +13,15 @@ func dataSourceIdpController() *schema.Resource {
 		Read: dataSourceIdpControllerRead,
 		Schema: map[string]*schema.Schema{
 			"admin_metadata": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"certificate_url": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"sp_base_url": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -35,6 +39,38 @@ func dataSourceIdpController() *schema.Resource {
 						},
 					},
 				},
+			},
+			"certificates": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cname": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"certificate": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"serial_no": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"valid_from_in_sec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"valid_to_in_sec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"admin_sp_signing_cert_id": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"auto_provision": {
 				Type:     schema.TypeString,
@@ -68,7 +104,7 @@ func dataSourceIdpController() *schema.Resource {
 			},
 			"id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -110,10 +146,6 @@ func dataSourceIdpController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"scim_shared_secret": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"scim_shared_secret_exists": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -140,6 +172,10 @@ func dataSourceIdpController() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"sp_base_url": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"sp_entity_id": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -155,6 +191,10 @@ func dataSourceIdpController() *schema.Resource {
 					},
 				},
 			},
+			"user_sp_signing_cert_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -164,7 +204,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 	var resp *idpcontroller.IdpController
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
-		log.Printf("[INFO] Getting data for machine group %s\n", id)
+		log.Printf("[INFO] Getting data for idp controller %s\n", id)
 		res, _, err := zClient.idpcontroller.Get(id)
 		if err != nil {
 			return err
@@ -174,7 +214,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 	}
 	name, ok := d.Get("name").(string)
 	if ok && id == "" && name != "" {
-		log.Printf("[INFO] Getting data for machine group name %s\n", name)
+		log.Printf("[INFO] Getting data for idp controller name %s\n", name)
 		res, _, err := zClient.idpcontroller.GetByName(name)
 		if err != nil {
 			return err
@@ -183,6 +223,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
+		_ = d.Set("admin_sp_signing_cert_id", resp.AdminSpSigningCertID)
 		_ = d.Set("auto_provision", resp.AutoProvision)
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
@@ -205,17 +246,39 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("sign_saml_request", resp.SignSamlRequest)
 		_ = d.Set("sso_type", resp.SsoType)
 		_ = d.Set("use_custom_sp_metadata", resp.UseCustomSpMetadata)
+		_ = d.Set("user_sp_signing_cert_id", resp.UserSpSigningCertId)
 		_ = d.Set("user_metadata.certificate_url", resp.UserMetadata.CertificateURL)
+		_ = d.Set("user_metadata.sp_base_url", resp.UserMetadata.SpBaseURL)
 		_ = d.Set("user_metadata.sp_entity_id", resp.UserMetadata.SpEntityID)
 		_ = d.Set("user_metadata.sp_metadata_url", resp.UserMetadata.SpMetadataURL)
 		_ = d.Set("user_metadata.sp_post_url", resp.UserMetadata.SpPostURL)
 		_ = d.Set("admin_metadata.certificate_url", resp.AdminMetadata.CertificateURL)
+		_ = d.Set("admin_metadata.sp_base_url", resp.AdminMetadata.SpBaseURL)
 		_ = d.Set("admin_metadata.sp_entity_id", resp.AdminMetadata.SpEntityID)
 		_ = d.Set("admin_metadata.sp_metadata_url", resp.AdminMetadata.SpMetadataURL)
 		_ = d.Set("admin_metadata.sp_post_url", resp.AdminMetadata.SpPostURL)
+
+		if err := d.Set("certificates", flattenCertificates(resp.Certificates)); err != nil {
+			return err
+		}
 
 	} else {
 		return fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id)
 	}
 	return nil
+}
+
+func flattenCertificates(certificate []idpcontroller.Certificates) []interface{} {
+	certificates := make([]interface{}, len(certificate))
+	for i, val := range certificate {
+		certificates[i] = map[string]interface{}{
+			"name":              val.Cname,
+			"certificate":       val.Certificate,
+			"serial_no":         val.SerialNo,
+			"valid_from_in_sec": val.ValidFromInSec,
+			"valid_to_in_sec":   val.ValidToInSec,
+		}
+	}
+
+	return certificates
 }

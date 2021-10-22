@@ -1,5 +1,5 @@
 data "zpa_idp_controller" "example" {
- name = "IDP-Name"
+ name = "IdP-User-Name"
 }
 
 output "idp_controller" {

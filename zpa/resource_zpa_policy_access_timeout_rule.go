@@ -104,7 +104,7 @@ func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("reauth_idle_timeout", resp.ReauthIdleTimeout)
 	_ = d.Set("reauth_timeout", resp.ReauthTimeout)
 	_ = d.Set("rule_order", resp.RuleOrder)
-	_ = d.Set("conditions", FlattenPolicyConditions(resp.Conditions))
+	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
 	return nil
 }
