@@ -23,8 +23,14 @@ func resourceLSSConfigController() *schema.Resource {
 				Computed: true,
 			},
 			"connector_groups": {
+<<<<<<< HEAD
 				Type:     schema.TypeSet,
 				Optional: true,
+=======
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "App Connector Group(s) to be added to the LSS configuration",
+>>>>>>> 1f538a70306b82374fd45d78cc385a053ee0e878
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -45,6 +51,7 @@ func resourceLSSConfigController() *schema.Resource {
 							Optional: true,
 						},
 						"description": {
+<<<<<<< HEAD
 							Type:     schema.TypeString,
 							Optional: true,
 						},
@@ -60,6 +67,28 @@ func resourceLSSConfigController() *schema.Resource {
 						"format": {
 							Type:     schema.TypeString,
 							Optional: true,
+=======
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Description of the LSS configuration",
+						},
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
+							Description: "Whether this LSS configuration is enabled or not. Supported values: true, false",
+						},
+						"filter": {
+							Type:        schema.TypeSet,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Required:    true,
+							Description: "Filter for the LSS configuration. Format given by the following API to get status codes: /mgmtconfig/v2/admin/lssConfig/statusCodes",
+						},
+						"format": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Format of the log type. Format given by the following API to get formats: /mgmtconfig/v2/admin/lssConfig/logType/formats",
+>>>>>>> 1f538a70306b82374fd45d78cc385a053ee0e878
 						},
 						"id": {
 							Type:     schema.TypeString,
@@ -69,6 +98,7 @@ func resourceLSSConfigController() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringIsNotEmpty,
+<<<<<<< HEAD
 						},
 						"lss_host": {
 							Type:     schema.TypeString,
@@ -81,10 +111,41 @@ func resourceLSSConfigController() *schema.Resource {
 						"source_log_type": {
 							Type:     schema.TypeString,
 							Optional: true,
+=======
+							Description:  "Name of the LSS configuration",
+						},
+						"lss_host": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Host of the LSS configuration",
+						},
+						"lss_port": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Port of the LSS configuration",
+						},
+						"source_log_type": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Log type of the LSS configuration",
+							ValidateFunc: validation.StringInSlice([]string{
+								"zpn_trans_log",
+								"zpn_auth_log",
+								"zpn_ast_auth_log",
+								"zpn_http_trans_log",
+								"zpn_audit_log",
+								"zpn_sys_auth_log",
+								"zpn_http_insp",
+							}, false),
+>>>>>>> 1f538a70306b82374fd45d78cc385a053ee0e878
 						},
 						"use_tls": {
 							Type:     schema.TypeBool,
 							Optional: true,
+<<<<<<< HEAD
+=======
+							Default:  false,
+>>>>>>> 1f538a70306b82374fd45d78cc385a053ee0e878
 						},
 					},
 				},
