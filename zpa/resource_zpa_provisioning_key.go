@@ -51,7 +51,7 @@ func resourceProvisioningKey() *schema.Resource {
 			},
 			"enrollment_cert_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "ID of the enrollment certificate that can be used for this provisioning key.",
 			},
 			"enrollment_cert_name": {
@@ -71,7 +71,7 @@ func resourceProvisioningKey() *schema.Resource {
 			},
 			"zcomponent_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "ID of the existing App Connector or Service Edge Group.",
 			},
 			"zcomponent_name": {
