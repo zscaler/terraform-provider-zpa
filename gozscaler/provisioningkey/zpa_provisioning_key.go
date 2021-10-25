@@ -3,6 +3,7 @@ package provisioningkey
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -15,7 +16,7 @@ type ProvisioningKey struct {
 	CreationTime          string   `json:"creationTime,omitempty"`
 	Enabled               bool     `json:"enabled,omitempty"`
 	ExpirationInEpochSec  string   `json:"expirationInEpochSec,omitempty"`
-	ID                    string   `json:"id"`
+	ID                    string   `json:"id,omitempty"`
 	IPACL                 []string `json:"ipAcl,omitempty"`
 	MaxUsage              string   `json:"maxUsage,omitempty"`
 	ModifiedBy            string   `json:"modifiedBy,omitempty"`
@@ -41,11 +42,31 @@ func (service *Service) Get(associationType, provisioningKeyID string) (*Provisi
 	return v, resp, nil
 }
 
+// GET --> mgmtconfig/v1/admin/customers/{customerId}/associationType/{associationType}/provisioningKey
+func (service *Service) GetByName(associationType, name string) (*ProvisioningKey, *http.Response, error) {
+	var v struct {
+		List []ProvisioningKey `json:"list"`
+	}
+	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/associationType/%s/provisioningKey", associationType)
+	resp, err := service.Client.NewRequestDo("GET", url, struct{ pagesize int }{
+		pagesize: 500,
+	}, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, provisioningKey := range v.List {
+		if strings.EqualFold(provisioningKey.Name, name) {
+			return &provisioningKey, resp, nil
+		}
+	}
+	return nil, resp, fmt.Errorf("no ProvisioningKey named '%s' was found", name)
+}
+
 // POST --> /mgmtconfig/v1/admin/customers/{customerId}/associationType/{associationType}/provisioningKey
-func (service *Service) Create(associationType *ProvisioningKey) (*ProvisioningKey, *http.Response, error) {
+func (service *Service) Create(associationType string, provisioningKey *ProvisioningKey) (*ProvisioningKey, *http.Response, error) {
 	v := new(ProvisioningKey)
 	path := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/associationType/%s/provisioningKey", associationType)
-	resp, err := service.Client.NewRequestDo("POST", path, nil, &associationType, v)
+	resp, err := service.Client.NewRequestDo("POST", path, nil, provisioningKey, v)
 	if err != nil {
 		return nil, nil, err
 	}

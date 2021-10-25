@@ -1,12 +1,13 @@
 package zpa
 
-/*
 import (
+	"fmt"
 	"log"
 
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
 )
 
@@ -19,6 +20,11 @@ func resourceProvisioningKey() *schema.Resource {
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"app_connector_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -28,59 +34,91 @@ func resourceProvisioningKey() *schema.Resource {
 				Optional: true,
 			},
 			"enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
 				Description: "Whether the provisioning key is enabled or not.",
 			},
 			"max_usage": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
 				Description: "The maximum number of instances where this provisioning key can be used for enrolling an App Connector or Service Edge.",
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
 				Description: "Name of the provisioning key.",
 			},
 			"enrollment_cert_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
 				Description: "ID of the enrollment certificate that can be used for this provisioning key.",
 			},
 			"enrollment_cert_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"ui_config": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"usage_count": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
 				Description: "The provisioning key utilization count.",
 			},
 			"zcomponent_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
 				Description: "ID of the existing App Connector or Service Edge Group.",
 			},
 			"zcomponent_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
+			},
+			"provisioning_key": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"association_type": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"CONNECTOR_GRP", "SERVICE_EDGE_GRP",
+				}, false),
+			},
+			"ip_acl": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
 }
 
+func getAssociationType(d *schema.ResourceData) (string, bool) {
+	val, ok := d.GetOk("association_type")
+	if !ok {
+		return "", ok
+	}
+	value, ok := val.(string)
+	return value, ok
+}
+
 func resourceProvisioningKeyCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	associationType, ok := getAssociationType(d)
+	if !ok {
+		return fmt.Errorf("associationType is required")
+	}
 	req := expandProvisioningKey(d)
 	log.Printf("[INFO] Creating zpa provisining key with request\n%+v\n", req)
 
-	resp, _, err := zClient.provisioningkey.Create(&req)
+	resp, _, err := zClient.provisioningkey.Create(associationType, &req)
 	if err != nil {
 		return err
 	}
@@ -92,15 +130,17 @@ func resourceProvisioningKeyCreate(d *schema.ResourceData, m interface{}) error 
 
 func resourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
-	resp, _, err := zClient.provisioningkey.Get(d.Id())
+	associationType, ok := getAssociationType(d)
+	if !ok {
+		return fmt.Errorf("associationType is required")
+	}
+	resp, _, err := zClient.provisioningkey.Get(associationType, d.Id())
 	if err != nil {
-		if err.(*client.ErrorResponse).IsObjectNotFound() {
+		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing provisining key %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-
 		return err
 	}
 
@@ -117,18 +157,23 @@ func resourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("usage_count", resp.UsageCount)
 	_ = d.Set("zcomponent_id", resp.ZcomponentID)
 	_ = d.Set("zcomponent_name", resp.ZcomponentName)
+	_ = d.Set("ip_acl", resp.IPACL)
+	_ = d.Set("provisioning_key", resp.ProvisioningKey)
 	return nil
 
 }
 
 func resourceProvisioningKeyUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	associationType, ok := getAssociationType(d)
+	if !ok {
+		return fmt.Errorf("associationType is required")
+	}
 	id := d.Id()
 	log.Printf("[INFO] Updating provisining key ID: %v\n", id)
 	req := expandProvisioningKey(d)
 
-	if _, err := zClient.provisioningkey.Update(id, &req); err != nil {
+	if _, err := zClient.provisioningkey.Update(associationType, id, &req); err != nil {
 		return err
 	}
 
@@ -137,10 +182,13 @@ func resourceProvisioningKeyUpdate(d *schema.ResourceData, m interface{}) error 
 
 func resourceProvisioningKeyDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	associationType, ok := getAssociationType(d)
+	if !ok {
+		return fmt.Errorf("associationType is required")
+	}
 	log.Printf("[INFO] Deleting provisining key  ID: %v\n", d.Id())
 
-	if _, err := zClient.provisioningkey.Delete(d.Id()); err != nil {
+	if _, err := zClient.provisioningkey.Delete(associationType, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
@@ -161,7 +209,8 @@ func expandProvisioningKey(d *schema.ResourceData) provisioningkey.ProvisioningK
 		UsageCount:            d.Get("usage_count").(string),
 		ZcomponentID:          d.Get("zcomponent_id").(string),
 		ZcomponentName:        d.Get("zcomponent_name").(string),
+		IPACL:                 SetToStringList(d, "ip_acl"),
+		ProvisioningKey:       d.Get("provisioning_key").(string),
 	}
 	return provisioningKey
 }
-*/

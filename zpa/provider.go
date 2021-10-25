@@ -45,9 +45,9 @@ func Provider() *schema.Provider {
 			"zpa_policy_access_rule":     resourcePolicyAccessRule(),
 			"zpa_policy_timeout_rule":    resourcePolicyTimeoutRule(),
 			"zpa_policy_forwarding_rule": resourcePolicyForwardingRule(),
-			//"zpa_provisioning_key":       resourceProvisioningKey(),
-			"zpa_service_edge_group":    resourceServiceEdgeGroup(),
-			"zpa_lss_config_controller": resourceLSSConfigController(),
+			"zpa_provisioning_key":       resourceProvisioningKey(),
+			"zpa_service_edge_group":     resourceServiceEdgeGroup(),
+			"zpa_lss_config_controller":  resourceLSSConfigController(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform date source name: data source schema
@@ -60,7 +60,7 @@ func Provider() *schema.Provider {
 			"zpa_cloud_connector_group":    dataSourceCloudConnectorGroup(),
 			"zpa_idp_controller":           dataSourceIdpController(),
 			"zpa_machine_group":            dataSourceMachineGroup(),
-			//"zpa_provisioning_key":         dataSourceProvisioningKey(),
+			"zpa_provisioning_key":         dataSourceProvisioningKey(),
 			"zpa_global_access_policy":     dataSourceGlobalAccessPolicy(),
 			"zpa_global_policy_timeout":    dataSourceGlobalPolicyTimeout(),
 			"zpa_global_policy_forwarding": dataSourceGlobalPolicyForwarding(),

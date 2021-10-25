@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"log"
@@ -8,6 +7,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceProvisioningKey() *schema.Resource {
@@ -37,8 +37,9 @@ func dataSourceProvisioningKey() *schema.Resource {
 				Computed: true,
 			},
 			"ip_acl": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeSet,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"max_usage": {
 				Type:     schema.TypeString,
@@ -84,18 +85,29 @@ func dataSourceProvisioningKey() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"association_type": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"CONNECTOR_GRP", "SERVICE_EDGE_GRP",
+				}, false),
+			},
 		},
 	}
 }
 
 func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	associationType, ok := getAssociationType(d)
+	if !ok {
+		return fmt.Errorf("associationType is required")
+	}
 	var resp *provisioningkey.ProvisioningKey
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data provisining key %s\n", id)
-		res, _, err := zClient.provisioningkey.Get(id)
+		res, _, err := zClient.provisioningkey.Get(associationType, id)
 		if err != nil {
 			return err
 		}
@@ -104,7 +116,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for provisining key name %s\n", name)
-		res, _, err := zClient.provisioningkey.GetByName(name)
+		res, _, err := zClient.provisioningkey.GetByName(associationType, name)
 		if err != nil {
 			return err
 		}
@@ -118,7 +130,6 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("expiration_in_epoch_sec", resp.ExpirationInEpochSec)
 		_ = d.Set("ip_acl", resp.IPACL)
-		_ = d.Set("ip_acl", resp.IPACL)
 		_ = d.Set("max_usage", resp.MaxUsage)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
@@ -130,11 +141,8 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 		_ = d.Set("usage_count", resp.UsageCount)
 		_ = d.Set("zcomponent_id", resp.ZcomponentID)
 		_ = d.Set("zcomponent_name", resp.ZcomponentName)
-
 	} else {
 		return fmt.Errorf("couldn't find any provisining key with name '%s' or id '%s'", name, id)
 	}
-
 	return nil
 }
-*/
