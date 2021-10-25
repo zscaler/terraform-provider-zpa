@@ -60,7 +60,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"latitude": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Latitude of the App Connector Group",
+				Description: "Latitude of the App Connector Group. Integer or decimal. With values in the range of -90 to 90",
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -70,7 +70,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"longitude": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Longitude of the App Connector Group",
+				Description: "Longitude of the App Connector Group. Integer or decimal. With values in the range of -180 to 180",
 			},
 			"lss_app_connector_group": {
 				Type:     schema.TypeBool,
