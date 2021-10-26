@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	mgmtConfig             = "/mgmtconfig/v2/admin/customers/"
+	mgmtConfig             = "/mgmtconfig/v1/admin/customers/"
 	postureProfileEndpoint = "/posture"
 )
 
@@ -53,22 +53,19 @@ func (service *Service) GetByPostureUDID(postureUDID string) (*PostureProfile, *
 	return nil, resp, fmt.Errorf("no posture profile with postureUDID '%s' was found", postureUDID)
 }
 
-func (service *Service) GetByName(postureName string) (*PostureProfile, *http.Response, error) {
-	var v struct {
-		List []PostureProfile `json:"list"`
-	}
-
-	relativeURL := mgmtConfig + service.Client.Config.CustomerID + postureProfileEndpoint
+func (service *Service) GetByName(name string) (*PostureProfile, *http.Response, error) {
+	var v []PostureProfile
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + postureProfileEndpoint)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
 	}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, posture := range v.List {
-		if strings.EqualFold(posture.Name, postureName) {
-			return &posture, resp, nil
+	for _, postureProfile := range v {
+		if strings.EqualFold(postureProfile.Name, name) {
+			return &postureProfile, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no posture profile named '%s' was found", postureName)
+	return nil, resp, fmt.Errorf("no posture profile named '%s' was found", name)
 }
