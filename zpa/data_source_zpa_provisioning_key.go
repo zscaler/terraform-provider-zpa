@@ -29,8 +29,9 @@ func dataSourceProvisioningKey() *schema.Resource {
 				Computed: true,
 			},
 			"enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Whether the provisioning key is enabled or not. Supported values: true, false",
 			},
 			"expiration_in_epoch_sec": {
 				Type:     schema.TypeString,
@@ -62,12 +63,14 @@ func dataSourceProvisioningKey() *schema.Resource {
 				Computed: true,
 			},
 			"enrollment_cert_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the enrollment certificate that can be used for this provisioning key.",
 			},
 			"enrollment_cert_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Read only property. Applicable only for GET calls, ignored in PUT/POST calls.",
 			},
 			"ui_config": {
 				Type:     schema.TypeString,
@@ -78,12 +81,14 @@ func dataSourceProvisioningKey() *schema.Resource {
 				Computed: true,
 			},
 			"zcomponent_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the existing App Connector or Service Edge Group.",
 			},
 			"zcomponent_name": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Read only property. Applicable only for GET calls, ignored in PUT/POST calls.",
 			},
 			"association_type": {
 				Type:        schema.TypeString,

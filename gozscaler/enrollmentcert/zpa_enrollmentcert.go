@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	mgmtConfig             = "/mgmtconfig/v1/admin/customers/"
+	mgmtConfig             = "/mgmtconfig/v2/admin/customers/"
 	enrollmentCertEndpoint = "/enrollmentCert"
 )
 

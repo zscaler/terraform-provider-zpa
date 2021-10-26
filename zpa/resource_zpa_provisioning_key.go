@@ -30,14 +30,15 @@ func resourceProvisioningKey() *schema.Resource {
 				Optional: true,
 			},
 			"app_connector_group_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Read only property. Applicable only for GET calls, ignored in PUT/POST calls.",
 			},
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
-				Description: "Whether the provisioning key is enabled or not.",
+				Description: "Whether the provisioning key is enabled or not. Supported values: true, false",
 			},
 			"max_usage": {
 				Type:        schema.TypeString,
@@ -55,9 +56,9 @@ func resourceProvisioningKey() *schema.Resource {
 				Description: "ID of the enrollment certificate that can be used for this provisioning key.",
 			},
 			"enrollment_cert_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Read only property. Applicable only for GET calls, ignored in PUT/POST calls.",
 			},
 			"ui_config": {
 				Type:     schema.TypeString,
@@ -75,13 +76,15 @@ func resourceProvisioningKey() *schema.Resource {
 				Description: "ID of the existing App Connector or Service Edge Group.",
 			},
 			"zcomponent_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Read only property. Applicable only for GET calls, ignored in PUT/POST calls.",
 			},
 			"provisioning_key": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "read only field. Ignored in PUT/POST calls.",
 			},
 			"association_type": {
 				Type:        schema.TypeString,
