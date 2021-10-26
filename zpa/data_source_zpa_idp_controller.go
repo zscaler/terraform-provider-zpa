@@ -40,34 +40,36 @@ func dataSourceIdpController() *schema.Resource {
 					},
 				},
 			},
-			"certificates": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"cname": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"certificate": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"serial_no": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"valid_from_in_sec": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"valid_to_in_sec": {
-							Type:     schema.TypeString,
-							Computed: true,
+			/*
+				"certificates": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"cname": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"certificate": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"serial_no": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"valid_from_in_sec": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"valid_to_in_sec": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
 						},
 					},
 				},
-			},
+			*/
 			"admin_sp_signing_cert_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -201,6 +203,7 @@ func dataSourceIdpController() *schema.Resource {
 
 func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+
 	var resp *idpcontroller.IdpController
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
@@ -213,7 +216,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 
 	}
 	name, ok := d.Get("name").(string)
-	if ok && id == "" && name != "" {
+	if ok && name != "" {
 		log.Printf("[INFO] Getting data for idp controller name %s\n", name)
 		res, _, err := zClient.idpcontroller.GetByName(name)
 		if err != nil {
@@ -258,9 +261,9 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("admin_metadata.sp_metadata_url", resp.AdminMetadata.SpMetadataURL)
 		_ = d.Set("admin_metadata.sp_post_url", resp.AdminMetadata.SpPostURL)
 
-		if err := d.Set("certificates", flattenCertificates(resp.Certificates)); err != nil {
-			return err
-		}
+		// if err := d.Set("certificates", flattenCertificates(resp.Certificates)); err != nil {
+		// 	return err
+		// }
 
 	} else {
 		return fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id)
@@ -268,6 +271,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+/*
 func flattenCertificates(certificate []idpcontroller.Certificates) []interface{} {
 	certificates := make([]interface{}, len(certificate))
 	for i, val := range certificate {
@@ -282,3 +286,4 @@ func flattenCertificates(certificate []idpcontroller.Certificates) []interface{}
 
 	return certificates
 }
+*/
