@@ -2,6 +2,7 @@ package zpa
 
 import (
 	"fmt"
+	"html"
 	"log"
 
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
@@ -306,7 +307,7 @@ func dataSourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) er
 func flattenLSSConfig(lssConfig *lssconfigcontroller.LSSConfig) interface{} {
 	return []map[string]interface{}{
 		{
-			"audit_message":   lssConfig.AuditMessage,
+			"audit_message":   html.UnescapeString(lssConfig.AuditMessage),
 			"description":     lssConfig.Description,
 			"enabled":         lssConfig.Enabled,
 			"filter":          lssConfig.Filter,
@@ -316,6 +317,7 @@ func flattenLSSConfig(lssConfig *lssconfigcontroller.LSSConfig) interface{} {
 			"lss_port":        lssConfig.LSSPort,
 			"source_log_type": lssConfig.SourceLogType,
 			"use_tls":         lssConfig.UseTLS,
+			"format":          html.UnescapeString(lssConfig.Format),
 		},
 	}
 }
