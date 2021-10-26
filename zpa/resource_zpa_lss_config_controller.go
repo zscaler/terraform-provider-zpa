@@ -9,6 +9,81 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 )
 
+func getPolicyRuleResourceSchema() map[string]*schema.Schema {
+	return MergeSchema(
+		CommonPolicySchema(), map[string]*schema.Schema{
+			"action": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "  This is for providing the rule action.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"ALLOW",
+					"DENY",
+				}, false),
+			},
+			"conditions": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "This is for proviidng the set of conditions for the policy.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"negated": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"operator": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"AND",
+								"OR",
+							}, false),
+						},
+						"operands": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "This signifies the various policy criteria.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"values": {
+										Type:        schema.TypeSet,
+										Optional:    true,
+										Description: "This denotes a list of values for the given object type. The value depend upon the key. If rhs is defined this list will be ignored",
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+									"object_type": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "  This is for specifying the policy critiera.",
+										ValidateFunc: validation.StringInSlice([]string{
+											"USER",
+											"USER_GROUP",
+											"LOCATION",
+											"APP",
+											"APP_GROUP",
+											"SAML",
+											"POSTURE",
+											"CLIENT_TYPE",
+											"IDP",
+											"TRUSTED_NETWORK",
+											"EDGE_CONNECTOR_GROUP",
+											"MACHINE_GRP",
+											"SCIM",
+											"SCIM_GROUP",
+										}, false),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	)
+}
+
 func resourceLSSConfigController() *schema.Resource {
 	return &schema.Resource{
 		Create:   resourceLSSConfigControllerCreate,
@@ -21,6 +96,14 @@ func resourceLSSConfigController() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"policy_rule_resource": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: getPolicyRuleResourceSchema(),
+				},
 			},
 			"connector_groups": {
 				Type:        schema.TypeSet,
@@ -39,11 +122,13 @@ func resourceLSSConfigController() *schema.Resource {
 			"config": {
 				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"audit_message": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"description": {
 							Type:        schema.TypeString,
@@ -145,8 +230,11 @@ func resourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) erro
 
 	log.Printf("[INFO] Getting lss config controller:\n%+v\n", resp)
 	d.SetId(resp.ID)
+	if resp.PolicyRule != nil {
+		_ = d.Set("policy_rule_id", resp.PolicyRule.ID)
+	}
 	_ = d.Set("config", flattenLSSConfig(resp.LSSConfig))
-	_ = d.Set("connector_groups", flattenConnectorGroups(resp.ConnectorGroups))
+	_ = d.Set("connector_groups", flattenConnectorGroupsSimple(resp.ConnectorGroups))
 	return nil
 
 }
@@ -179,28 +267,122 @@ func resourceLSSConfigControllerDelete(d *schema.ResourceData, m interface{}) er
 }
 
 func expandLSSResource(d *schema.ResourceData) lssconfigcontroller.LSSResource {
+	policy, err := expandPolicyRuleResource(d)
+	if err != nil {
+		log.Printf("[ERROR] failed reading policy rule resource: %v\n", err)
+	}
 	req := lssconfigcontroller.LSSResource{
-
-		ID:              d.Get("id").(string),
-		LSSConfig:       expandLSSConfigController(d),
-		ConnectorGroups: expandConnectorGroups(d),
+		ID:                 d.Get("id").(string),
+		PolicyRuleResource: policy,
+		LSSConfig:          expandLSSConfigController(d),
+		ConnectorGroups:    expandConnectorGroups(d),
 	}
 	return req
 }
+func expandPolicyRuleResource(d *schema.ResourceData) (*lssconfigcontroller.PolicyRuleResource, error) {
+	policyObj, ok := d.GetOk("policy_rule_resource")
+	if !ok {
+		return nil, nil
+	}
+	policyList := policyObj.([]interface{})
+	if len(policyList) == 0 {
+		return nil, nil
+	}
+	polictSet := policyList[0].(map[string]interface{})
+	conditions, err := ExpandPolicyRuleResourceConditions(polictSet)
+	if err != nil {
+		return nil, err
+	}
+
+	return &lssconfigcontroller.PolicyRuleResource{
+		Action:            polictSet["action"].(string),
+		ActionID:          polictSet["action_id"].(string),
+		CustomMsg:         polictSet["custom_msg"].(string),
+		DefaultRule:       polictSet["default_rule"].(bool),
+		Description:       polictSet["description"].(string),
+		ID:                polictSet["id"].(string),
+		Name:              polictSet["name"].(string),
+		Operator:          polictSet["operator"].(string),
+		PolicyType:        polictSet["policy_type"].(string),
+		Priority:          polictSet["priority"].(string),
+		ReauthDefaultRule: polictSet["reauth_default_rule"].(bool),
+		ReauthIdleTimeout: polictSet["reauth_idle_timeout"].(string),
+		ReauthTimeout:     polictSet["reauth_timeout"].(string),
+		RuleOrder:         polictSet["rule_order"].(string),
+		LssDefaultRule:    polictSet["lss_default_rule"].(bool),
+		Conditions:        conditions,
+	}, nil
+}
+
+func ExpandPolicyRuleResourceConditions(d map[string]interface{}) ([]lssconfigcontroller.PolicyRuleResourceConditions, error) {
+	conditionInterface, ok := d["conditions"]
+	if ok {
+		conditions := conditionInterface.([]interface{})
+		log.Printf("[INFO] conditions data: %+v\n", conditions)
+		var conditionSets []lssconfigcontroller.PolicyRuleResourceConditions
+		for _, condition := range conditions {
+			conditionSet, _ := condition.(map[string]interface{})
+			if conditionSet != nil {
+				operands, err := expandPolicyRuleResourceOperandsList(conditionSet["operands"])
+				if err != nil {
+					return nil, err
+				}
+				conditionSets = append(conditionSets, lssconfigcontroller.PolicyRuleResourceConditions{
+					Negated:  conditionSet["negated"].(bool),
+					Operator: conditionSet["operator"].(string),
+					Operands: &operands,
+				})
+			}
+		}
+		return conditionSets, nil
+	}
+
+	return []lssconfigcontroller.PolicyRuleResourceConditions{}, nil
+}
+
+func expandPolicyRuleResourceOperandsList(ops interface{}) ([]lssconfigcontroller.PolicyRuleResourceOperands, error) {
+	if ops != nil {
+		operands := ops.([]interface{})
+		log.Printf("[INFO] operands data: %+v\n", operands)
+		var operandsSets []lssconfigcontroller.PolicyRuleResourceOperands
+		for _, operand := range operands {
+			operandSet, _ := operand.(map[string]interface{})
+			valuesSet := operandSet["values"].(*schema.Set)
+			op := lssconfigcontroller.PolicyRuleResourceOperands{
+				Values:     SetToStringSlice(valuesSet),
+				ObjectType: operandSet["object_type"].(string),
+			}
+			operandsSets = append(operandsSets, op)
+		}
+		return operandsSets, nil
+	}
+	return []lssconfigcontroller.PolicyRuleResourceOperands{}, nil
+}
 
 func expandLSSConfigController(d *schema.ResourceData) *lssconfigcontroller.LSSConfig {
-	return &lssconfigcontroller.LSSConfig{
-		AuditMessage:  d.Get("audit_message").(string),
-		Description:   d.Get("description").(string),
-		Enabled:       d.Get("enabled").(bool),
-		Filter:        SetToStringList(d, "filter"),
-		Format:        d.Get("format").(string),
-		Name:          d.Get("name").(string),
-		LSSHost:       d.Get("lss_host").(string),
-		LSSPort:       d.Get("lss_port").(string),
-		SourceLogType: d.Get("source_log_type").(string),
-		UseTLS:        d.Get("use_tls").(bool),
+	configInterface, ok := d.GetOk("config")
+	if ok {
+		configList := configInterface.([]interface{})
+		if len(configList) == 0 {
+			return nil
+		}
+		config, _ := configList[0].(map[string]interface{})
+		filterSet, _ := config["filter"].(*schema.Set)
+		return &lssconfigcontroller.LSSConfig{
+			ID:            d.Get("id").(string),
+			AuditMessage:  config["audit_message"].(string),
+			Description:   config["description"].(string),
+			Enabled:       config["enabled"].(bool),
+			Filter:        SetToStringSlice(filterSet),
+			Format:        config["format"].(string),
+			Name:          config["name"].(string),
+			LSSHost:       config["lss_host"].(string),
+			LSSPort:       config["lss_port"].(string),
+			SourceLogType: config["source_log_type"].(string),
+			UseTLS:        config["use_tls"].(bool),
+		}
 	}
+	return nil
 }
 
 func expandConnectorGroups(d *schema.ResourceData) []lssconfigcontroller.ConnectorGroups {
@@ -223,4 +405,16 @@ func expandConnectorGroups(d *schema.ResourceData) []lssconfigcontroller.Connect
 	}
 
 	return []lssconfigcontroller.ConnectorGroups{}
+}
+
+func flattenConnectorGroupsSimple(lssConnectorGroup []lssconfigcontroller.ConnectorGroups) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(lssConnectorGroup))
+	for i, item := range lssConnectorGroup {
+		ids[i] = item.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }

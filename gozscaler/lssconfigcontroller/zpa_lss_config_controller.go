@@ -11,58 +11,86 @@ const (
 )
 
 type LSSResource struct {
-	LSSConfig       *LSSConfig        `json:"config"`
-	ID              string            `json:"id"`
-	ConnectorGroups []ConnectorGroups `json:"connectorGroups"`
-	PolicyRule      *PolicyRule       `json:"policyRule"`
+	LSSConfig          *LSSConfig          `json:"config"`
+	ID                 string              `json:"id"`
+	ConnectorGroups    []ConnectorGroups   `json:"connectorGroups,omitempty"`
+	PolicyRule         *PolicyRule         `json:"policyRule,omitempty"`
+	PolicyRuleResource *PolicyRuleResource `json:"policyRuleResource,omitempty"`
 }
 type LSSConfig struct {
-	AuditMessage  string   `json:"auditMessage"`
-	CreationTime  string   `json:"creationTime"`
-	Description   string   `json:"description"`
-	Enabled       bool     `json:"enabled"`
-	Filter        []string `json:"filter"`
-	Format        string   `json:"format"`
-	ID            string   `json:"id"`
-	ModifiedBy    string   `json:"modifiedBy"`
-	ModifiedTime  string   `json:"modifiedTime"`
-	Name          string   `json:"name"`
-	LSSHost       string   `json:"lssHost"`
-	LSSPort       string   `json:"lssPort"`
-	SourceLogType string   `json:"sourceLogType"`
-	UseTLS        bool     `json:"useTls"`
+	AuditMessage  string   `json:"auditMessage,omitempty"`
+	CreationTime  string   `json:"creationTime,omitempty"`
+	Description   string   `json:"description,omitempty"`
+	Enabled       bool     `json:"enabled,omitempty"`
+	Filter        []string `json:"filter,omitempty"`
+	Format        string   `json:"format,omitempty"`
+	ID            string   `json:"id,omitempty"`
+	ModifiedBy    string   `json:"modifiedBy,omitempty"`
+	ModifiedTime  string   `json:"modifiedTime,omitempty"`
+	Name          string   `json:"name,omitempty"`
+	LSSHost       string   `json:"lssHost,omitempty"`
+	LSSPort       string   `json:"lssPort,omitempty"`
+	SourceLogType string   `json:"sourceLogType,omitempty"`
+	UseTLS        bool     `json:"useTls,omitempty"`
 }
 type ConnectorGroups struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID   string `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
+type PolicyRuleResource struct {
+	Action                   string                         `json:"action,omitempty"`
+	ActionID                 string                         `json:"actionId,omitempty"`
+	BypassDefaultRule        bool                           `json:"bypassDefaultRule,omitempty"`
+	CreationTime             string                         `json:"creationTime,omitempty"`
+	CustomMsg                string                         `json:"customMsg,omitempty"`
+	DefaultRule              bool                           `json:"defaultRule,omitempty"`
+	Description              string                         `json:"description,omitempty"`
+	ID                       string                         `json:"id,omitempty"`
+	IsolationDefaultRule     bool                           `json:"isolationDefaultRule,omitempty"`
+	ModifiedBy               string                         `json:"modifiedBy,omitempty"`
+	ModifiedTime             string                         `json:"modifiedTime,omitempty"`
+	Name                     string                         `json:"name,omitempty"`
+	Operator                 string                         `json:"operator,omitempty"`
+	PolicySetID              string                         `json:"policySetId,omitempty"`
+	PolicyType               string                         `json:"policyType,omitempty"`
+	Priority                 string                         `json:"priority,omitempty"`
+	ReauthDefaultRule        bool                           `json:"reauthDefaultRule,omitempty"`
+	ReauthIdleTimeout        string                         `json:"reauthIdleTimeout,omitempty"`
+	ReauthTimeout            string                         `json:"reauthTimeout,omitempty"`
+	RuleOrder                string                         `json:"ruleOrder,omitempty"`
+	LssDefaultRule           bool                           `json:"lssDefaultRule,omitempty"`
+	ZpnCbiProfileID          string                         `json:"zpnCbiProfileId,omitempty"`
+	ZpnInspectionProfileID   string                         `json:"zpnInspectionProfileId,omitempty"`
+	ZpnInspectionProfileName string                         `json:"zpnInspectionProfileName,omitempty"`
+	Conditions               []PolicyRuleResourceConditions `json:"conditions,omitempty"`
+}
 type PolicyRule struct {
-	Action                   string       `json:"action"`
-	ActionID                 string       `json:"actionId"`
-	BypassDefaultRule        bool         `json:"bypassDefaultRule"`
-	CreationTime             string       `json:"creationTime"`
-	CustomMsg                string       `json:"customMsg"`
-	DefaultRule              bool         `json:"defaultRule"`
-	Description              string       `json:"description"`
-	ID                       string       `json:"id"`
-	IsolationDefaultRule     bool         `json:"isolationDefaultRule"`
-	ModifiedBy               string       `json:"modifiedBy"`
-	ModifiedTime             string       `json:"modifiedTime"`
-	Name                     string       `json:"name"`
-	Operator                 string       `json:"operator"`
-	PolicySetID              string       `json:"policySetId"`
-	PolicyType               string       `json:"policyType"`
-	Priority                 string       `json:"priority"`
-	ReauthDefaultRule        bool         `json:"reauthDefaultRule"`
-	ReauthIdleTimeout        string       `json:"reauthIdleTimeout"`
-	ReauthTimeout            string       `json:"reauthTimeout"`
-	RuleOrder                string       `json:"ruleOrder"`
-	LssDefaultRule           bool         `json:"lssDefaultRule"`
-	ZpnCbiProfileID          string       `json:"zpnCbiProfileId"`
-	ZpnInspectionProfileID   string       `json:"zpnInspectionProfileId"`
-	ZpnInspectionProfileName string       `json:"zpnInspectionProfileName"`
-	Conditions               []Conditions `json:"conditions"`
+	Action                   string       `json:"action,omitempty"`
+	ActionID                 string       `json:"actionId,omitempty"`
+	BypassDefaultRule        bool         `json:"bypassDefaultRule,omitempty"`
+	CreationTime             string       `json:"creationTime,omitempty"`
+	CustomMsg                string       `json:"customMsg,omitempty"`
+	DefaultRule              bool         `json:"defaultRule,omitempty"`
+	Description              string       `json:"description,omitempty"`
+	ID                       string       `json:"id,omitempty"`
+	IsolationDefaultRule     bool         `json:"isolationDefaultRule,omitempty"`
+	ModifiedBy               string       `json:"modifiedBy,omitempty"`
+	ModifiedTime             string       `json:"modifiedTime,omitempty"`
+	Name                     string       `json:"name,omitempty"`
+	Operator                 string       `json:"operator,omitempty"`
+	PolicySetID              string       `json:"policySetId,omitempty"`
+	PolicyType               string       `json:"policyType,omitempty"`
+	Priority                 string       `json:"priority,omitempty"`
+	ReauthDefaultRule        bool         `json:"reauthDefaultRule,omitempty"`
+	ReauthIdleTimeout        string       `json:"reauthIdleTimeout,omitempty"`
+	ReauthTimeout            string       `json:"reauthTimeout,omitempty"`
+	RuleOrder                string       `json:"ruleOrder,omitempty"`
+	LssDefaultRule           bool         `json:"lssDefaultRule,omitempty"`
+	ZpnCbiProfileID          string       `json:"zpnCbiProfileId,omitempty"`
+	ZpnInspectionProfileID   string       `json:"zpnInspectionProfileId,omitempty"`
+	ZpnInspectionProfileName string       `json:"zpnInspectionProfileName,omitempty"`
+	Conditions               []Conditions `json:"conditions,omitempty"`
 }
 type Conditions struct {
 	CreationTime string      `json:"creationTime,omitempty"`
@@ -74,6 +102,19 @@ type Conditions struct {
 	Operator     string      `json:"operator,omitempty"`
 }
 
+type PolicyRuleResourceConditions struct {
+	CreationTime string                        `json:"creationTime,omitempty"`
+	ID           string                        `json:"id,omitempty"`
+	ModifiedBy   string                        `json:"modifiedBy,omitempty"`
+	ModifiedTime string                        `json:"modifiedTime,omitempty"`
+	Negated      bool                          `json:"negated"`
+	Operands     *[]PolicyRuleResourceOperands `json:"operands,omitempty"`
+	Operator     string                        `json:"operator,omitempty"`
+}
+type PolicyRuleResourceOperands struct {
+	ObjectType string   `json:"objectType,omitempty"`
+	Values     []string `json:"values,omitempty"`
+}
 type Operands struct {
 	CreationTime string `json:"creationTime,omitempty"`
 	ID           string `json:"id,omitempty"`
