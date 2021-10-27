@@ -1,9 +1,11 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceLSSLotTypeFormats() *schema.Resource {
@@ -12,61 +14,58 @@ func dataSourceLSSLotTypeFormats() *schema.Resource {
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
-			"zpn_auth_log": {
-				Type:     schema.TypeMap,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+			"log_type": {
+				Type:     schema.TypeString,
+				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"zpn_trans_log",
+					"zpn_auth_log",
+					"zpn_ast_auth_log",
+					"zpn_http_trans_log",
+					"zpn_audit_log",
+				}, false),
 			},
-			"zpn_ast_auth_log": {
-				Type:     schema.TypeMap,
+			"tsv": {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 			},
-			"zpn_audit_log": {
-				Type:     schema.TypeMap,
+			"csv": {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 			},
-			"zpn_trans_log": {
-				Type:     schema.TypeMap,
+			"json": {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-			"zpn_http_trans_log": {
-				Type:     schema.TypeMap,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 			},
 		},
 	}
 }
 
+func getLogType(d *schema.ResourceData) (string, bool) {
+	val, ok := d.GetOk("log_type")
+	if !ok {
+		return "", ok
+	}
+	value, ok := val.(string)
+	return value, ok
+}
 func dataSourceLSSLotTypeFormatsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	log.Printf("[INFO] Getting data for LSS Log Types Format set\n")
-
-	resp, _, err := zClient.lssconfigcontroller.GetFormats()
+	logType, ok := getLogType(d)
+	if !ok {
+		return fmt.Errorf("[ERROR] log type is required")
+	}
+	resp, _, err := zClient.lssconfigcontroller.GetFormats(logType)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Getting LSS Log Types Format:\n%+v\n", resp)
-	// d.SetId(resp.ID)
-	_ = d.Set("zpn_auth_log", resp.ZPNAuthLog)
-	_ = d.Set("zpn_ast_auth_log", resp.ZPNAstAuthLog)
-	_ = d.Set("zpn_audit_log", resp.ZPNAuditLog)
-	_ = d.Set("zpn_trans_log", resp.ZPNTransLog)
-	_ = d.Set("zpn_http_trans_log", resp.ZPNHTTPTransLog)
+	d.SetId("lss_log_types_" + logType)
+	_ = d.Set("tsv", resp.Tsv)
+	_ = d.Set("csv", resp.Csv)
+	_ = d.Set("json", resp.Json)
 
 	return nil
 }

@@ -58,7 +58,7 @@ func dataSourceLSSClientTypesRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	log.Printf("[INFO] Getting Policy Set Global Rules:\n%+v\n", resp)
-	// d.SetId(resp.ID)
+	d.SetId("lss_client_types")
 	_ = d.Set("zpn_client_type_exporter", resp.ZPNClientTypeExporter)
 	_ = d.Set("zpn_client_type_machine_tunnel", resp.ZPNClientTypeMachineTunnel)
 	_ = d.Set("zpn_client_type_ip_anchoring", resp.ZPNClientTypeIPAnchoring)

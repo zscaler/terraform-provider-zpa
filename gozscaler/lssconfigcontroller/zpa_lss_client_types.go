@@ -1,12 +1,11 @@
 package lssconfigcontroller
 
 import (
-	"fmt"
 	"net/http"
 )
 
 const (
-	lssClientTypesEndpoint = "/lssConfig/clientTypes"
+	lssClientTypesEndpoint = "lssConfig/clientTypes"
 )
 
 type LSSClientTypes struct {
@@ -21,7 +20,7 @@ type LSSClientTypes struct {
 
 func (service *Service) GetClientTypes() (*LSSClientTypes, *http.Response, error) {
 	v := new(LSSClientTypes)
-	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + lssClientTypesEndpoint)
+	relativeURL := mgmtConfigTypesAndFormats + lssClientTypesEndpoint
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err
