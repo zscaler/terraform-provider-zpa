@@ -1,3 +1,4 @@
+/*
 // Create Log Receiver Configuration
 resource "zpa_lss_config_controller" "example" {
   config {
@@ -11,7 +12,7 @@ resource "zpa_lss_config_controller" "example" {
     source_log_type = "zpn_trans_log"
     use_tls         = true
   }
-  policy_rule {
+  policy_rule_resource {
     name   = "policy_rule_resource-example"
     action = "ALLOW"
     conditions {
@@ -37,3 +38,4 @@ data "zpa_app_connector_group" "example" {
 data "zpa_application_segment" "example" {
   name = "Example"
 }
+*/

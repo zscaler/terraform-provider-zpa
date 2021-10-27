@@ -1,3 +1,14 @@
+terraform {
+    required_providers {
+        zpa = {
+            version = "1.0.0"
+            source = "zscaler.com/zpa/zpa"
+        }
+    }
+}
+
+provider "zpa" {}
+
 // Create Log Receiver Configuration
 resource "zpa_lss_config_controller" "example" {
   config {
@@ -10,16 +21,19 @@ resource "zpa_lss_config_controller" "example" {
     lss_port        = "11001"
     source_log_type = "zpn_trans_log"
     use_tls         = true
+    filter = ["BRK_MT_SETUP_FAIL_BIND_TO_AST_LOCAL_OWNER",
+      "BRK_MT_TERMINATED_IDLE_TIMEOUT",
+    ]
   }
-  policy_rule {
-    name   = "policy_rule_resource-example"
+  policy_rule_resource {
+    name   = "policy_rule_resource-example2"
     action = "ALLOW"
     conditions {
       negated  = false
       operator = "OR"
       operands {
         object_type = "APP_GROUP"
-        values      = [data.zpa_segment_group.example.id]
+        //values      = [zpa_segment_group.example2.id]
       }
     }
   }
@@ -28,12 +42,21 @@ resource "zpa_lss_config_controller" "example" {
   }
 }
 
+  resource "zpa_segment_group" "example" {
+   name = "Example"
+   description = "Example"
+   enabled = true
+   policy_migrated = true
+ }
+
 // Retrieve the App Connector Group ID
 data "zpa_app_connector_group" "example" {
-  name = "Example"
+  name = "SGIO-Vancouver"
 }
 
+/*
 // Retrieve the Segment Group ID
 data "zpa_segment_group" "example" {
   name = "Example"
 }
+*/

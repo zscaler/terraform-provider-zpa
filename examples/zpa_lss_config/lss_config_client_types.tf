@@ -1,3 +1,4 @@
+/*
 // Create Log Receiver Configuration
 resource "zpa_lss_config_controller" "example" {
   config {
@@ -42,3 +43,4 @@ resource "zpa_lss_config_controller" "example" {
 data "zpa_app_connector_group" "example" {
   name = "Example"
 }
+*/
