@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	mgmtConfig        = "/mgmtconfig/v2/admin/customers/"
-	lssConfigEndpoint = "/lssConfig"
+	mgmtConfig                = "/mgmtconfig/v2/admin/customers/"
+	mgmtConfigTypesAndFormats = "/mgmtconfig/v2/admin/"
+	lssConfigEndpoint         = "/lssConfig"
 )
 
 type LSSResource struct {

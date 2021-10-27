@@ -5,22 +5,20 @@ import (
 	"net/http"
 )
 
-const (
-	lssFormatsEndpoint = "/lssConfig/statusCodes"
-)
-
 type LSSFormats struct {
-	ZPNAuthLog      map[string]interface{} `json:"zpn_auth_log"`
-	ZPNAstAuthLog   map[string]interface{} `json:"zpn_ast_auth_log"`
-	ZPNAuditLog     map[string]interface{} `json:"zpn_audit_log"`
-	ZPNTransLog     map[string]interface{} `json:"zpn_trans_log"`
-	ZPNHTTPTransLog map[string]interface{} `json:"zpn_http_trans_log"`
+	Csv  string `json:"csv"`
+	Tsv  string `json:"tsv"`
+	Json string `json:"json"`
 }
 
-func (service *Service) GetFormats() (*LSSFormats, *http.Response, error) {
+func (service *Service) GetFormats(logType string) (*LSSFormats, *http.Response, error) {
 	v := new(LSSFormats)
-	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + lssFormatsEndpoint)
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	relativeURL := fmt.Sprintf("%slssConfig/logType/formats", mgmtConfigTypesAndFormats)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct {
+		LogType string `url:"logType"`
+	}{
+		LogType: logType,
+	}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
