@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetglobal"
 )
 
@@ -42,6 +43,10 @@ func dataSourceGlobalAccessPolicy() *schema.Resource {
 			"policy_type": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"ACCESS_POLICY", "GLOBAL_POLICY", "TIMEOUT_POLICY", "REAUTH_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "BYPASS_POLICY",
+				}, false),
 			},
 			"rules": {
 				Type:     schema.TypeList,
@@ -226,8 +231,14 @@ func dataSourceGlobalAccessPolicy() *schema.Resource {
 func dataSourceGlobalAccessPolicyRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	log.Printf("[INFO] Getting data for global policy set\n")
-
-	resp, _, err := zClient.policysetglobal.Get()
+	var resp *policysetglobal.PolicySet
+	var err error
+	policyType, policyTypeIsSet := d.GetOk("policy_type")
+	if policyTypeIsSet {
+		resp, _, err = zClient.policysetglobal.GetByPolicyType(policyType.(string))
+	} else {
+		resp, _, err = zClient.policysetglobal.Get()
+	}
 	if err != nil {
 		return err
 	}

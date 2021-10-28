@@ -83,6 +83,19 @@ type Count struct {
 	Count string `json:"count"`
 }
 
+func (service *Service) GetByPolicyType(policyType string) (*PolicySet, *http.Response, error) {
+	v := new(PolicySet)
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/policyType/" + policyType)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return v, resp, nil
+}
+
+// Get the global policy. This API will be deprecated in a future release.
+// GET /mgmtconfig/v1/admin/customers/{customerId}/policySet/global
 func (service *Service) Get() (*PolicySet, *http.Response, error) {
 	v := new(PolicySet)
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/global")
@@ -94,7 +107,8 @@ func (service *Service) Get() (*PolicySet, *http.Response, error) {
 	return v, resp, nil
 }
 
-// Get the authentication policy and all rules for a Timeout policy rule
+// Get the authentication policy and all rules for a Timeout policy rule. This API will be deprecated in a future release.
+// /mgmtconfig/v1/admin/customers/{customerId}/policySet/reauth
 func (service *Service) GetReauth() (*PolicySet, *http.Response, error) {
 	v := new(PolicySet)
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/reauth")
@@ -106,7 +120,8 @@ func (service *Service) GetReauth() (*PolicySet, *http.Response, error) {
 	return v, resp, nil
 }
 
-// Get the authentication policy and all rules for a Client Forwarding Policy Rule
+// Get the bypass policy and all rules for a Client Forwarding policy rule. This API will be deprecated in a future release.
+// GET mgmtconfig/v1/admin/customers/{customerId}/policySet/bypass
 func (service *Service) GetBypass() (*PolicySet, *http.Response, error) {
 	v := new(PolicySet)
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/bypass")
