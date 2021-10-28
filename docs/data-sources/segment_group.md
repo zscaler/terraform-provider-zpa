@@ -8,7 +8,7 @@ description: |-
 ---
 # zpa_segment_group
 
-The **zpa_segment_group** data source provides details about a specific Segment Group created in the Zscaler Private Access.
+The **zpa_segment_group` data source provides details about a specific Segment Group created in the Zscaler Private Access.
 This data source is required when creating:
 
 1. Access policy rule
@@ -19,6 +19,10 @@ This data source is required when creating:
 # ZPA Server Group Data Source
 data "zpa_segment_group" "example" {
  name = "segment_group_name"
+}
+
+output "zpa_segment_group" {
+  value = data.zpa_segment_group.example
 }
 ```
 
@@ -34,59 +38,45 @@ In addition to all arguments above, the following attributes are exported:
 
 ### Read-Only
 
-- **applications** (List of Object) (see [below for nested schema](#nestedatt--applications))
-- **config_space** (String)
-- **creation_time** (Number)
-- **description** (String)
-- **enabled** (Boolean)
-- **modified_time** (Number)
-- **modifiedby** (Number)
-- **name** (String)
-- **policy_migrated** (Boolean)
-- **tcp_keep_alive_enabled** (Number)
+* `config_space` (String)
+* `creation_time` (Number)
+* `description` (String)
+* `enabled` (Boolean)
+* `name` (String)
+* `policy_migrated` (Boolean)
+* `tcp_keep_alive_enabled` (Number)
 
-<a id="nestedatt--applications"></a>
-### `applications`
+`applications` (List of Object)
 
-Read-Only:
+* `bypass_type` (String)
+* `config_space` (String)
+* `creation_time` (Number)
+* `default_idle_timeout` (Number)
+* `default_max_age` (Number)
+* `description` (String)
+* `domain_name` (String)
+* `domain_names` (List of String)
+* `double_encrypt` (Boolean)
+* `enabled` (Boolean)
+* `health_check_type` (String)
+* `id` (Number)
+* `ip_anchored` (Boolean)
+* `log_features` (List of String)
+* `name` (String)
+* `passive_health_enabled` (Boolean)
+* `tcp_port_ranges` (List of String)
+* `tcp_ports_in` (List of String)
+* `tcp_ports_out` (List of String)
+* `udp_port_ranges` (List of String)
 
-- **bypass_type** (String)
-- **config_space** (String)
-- **creation_time** (Number)
-- **default_idle_timeout** (Number)
-- **default_max_age** (Number)
-- **description** (String)
-- **domain_name** (String)
-- **domain_names** (List of String)
-- **double_encrypt** (Boolean)
-- **enabled** (Boolean)
-- **health_check_type** (String)
-- **id** (Number)
-- **ip_anchored** (Boolean)
-- **log_features** (List of String)
-- **modified_time** (Number)
-- **modifiedby** (Number)
-- **name** (String)
-- **passive_health_enabled** (Boolean)
-- **server_groups** (List of Object) (see [below for nested schema](#nestedobjatt--applications--server_groups))
-- **tcp_port_ranges** (List of String)
-- **tcp_ports_in** (List of String)
-- **tcp_ports_out** (List of String)
-- **udp_port_ranges** (List of String)
+`server_groups` (List of Object)
 
-<a id="nestedobjatt--applications--server_groups"></a>
-### `applications.server_groups`
-
-Read-Only:
-
-- **config_space** (String)
-- **creation_time** (Number)
-- **description** (String)
-- **dynamic_discovery** (Boolean)
-- **enabled** (Boolean)
-- **id** (Number)
-- **modified_time** (Number)
-- **modifiedby** (Number)
-- **name** (String)
-
-
+* `config_space` (String)
+* `creation_time` (Number)
+* `description` (String)
+* `dynamic_discovery` (Boolean)
+* `enabled` (Boolean)
+* `id` (Number)
+* `modified_time` (Number)
+* `modifiedby` (Number)
+* `name` (String)
