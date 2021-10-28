@@ -144,7 +144,7 @@ func resourceLSSConfigController() *schema.Resource {
 						"filter": {
 							Type:        schema.TypeSet,
 							Elem:        &schema.Schema{Type: schema.TypeString},
-							Required:    true,
+							Optional:    true,
 							Description: "Filter for the LSS configuration. Format given by the following API to get status codes: /mgmtconfig/v2/admin/lssConfig/statusCodes",
 						},
 						"format": {
