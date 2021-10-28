@@ -1,12 +1,10 @@
-/*
 // Create Log Receiver Configuration
 resource "zpa_lss_config_controller" "example" {
   config {
     name            = "Example"
     description     = "Example"
     enabled         = true
-    audit_message   = "{\"logType\":\"User Activity\",\"tcpPort\":\"11001\",\"appConnectorGroups\":[{\"name\":\"SGIO-Vancouver\",\"id\":\"216196257331281931\"}],\"domainOrIpAddress\":\"192.168.1.1\",\"logStreamContent\":\"{\\\"LogTimestamp\\\": %j{LogTimestamp:time},\\\"Customer\\\": %j{Customer},\\\"SessionID\\\": %j{SessionID},\\\"ConnectionID\\\": %j{ConnectionID},\\\"InternalReason\\\": %j{InternalReason},\\\"ConnectionStatus\\\": %j{ConnectionStatus},\\\"IPProtocol\\\": %d{IPProtocol},\\\"DoubleEncryption\\\": %d{DoubleEncryption},\\\"Username\\\": %j{Username},\\\"ServicePort\\\": %d{ServicePort},\\\"ClientPublicIP\\\": %j{ClientPublicIP},\\\"ClientPrivateIP\\\": %j{ClientPrivateIP},\\\"ClientLatitude\\\": %f{ClientLatitude},\\\"ClientLongitude\\\": %f{ClientLongitude},\\\"ClientCountryCode\\\": %j{ClientCountryCode},\\\"ClientZEN\\\": %j{ClientZEN},\\\"Policy\\\": %j{Policy},\\\"Connector\\\": %j{Connector},\\\"ConnectorZEN\\\": %j{ConnectorZEN},\\\"ConnectorIP\\\": %j{ConnectorIP},\\\"ConnectorPort\\\": %d{ConnectorPort},\\\"Host\\\": %j{Host},\\\"Application\\\": %j{Application},\\\"AppGroup\\\": %j{AppGroup},\\\"Server\\\": %j{Server},\\\"ServerIP\\\": %j{ServerIP},\\\"ServerPort\\\": %d{ServerPort},\\\"PolicyProcessingTime\\\": %d{PolicyProcessingTime},\\\"ServerSetupTime\\\": %d{ServerSetupTime},\\\"TimestampConnectionStart\\\": %j{TimestampConnectionStart:iso8601},\\\"TimestampConnectionEnd\\\": %j{TimestampConnectionEnd:iso8601},\\\"TimestampCATx\\\": %j{TimestampCATx:iso8601},\\\"TimestampCARx\\\": %j{TimestampCARx:iso8601},\\\"TimestampAppLearnStart\\\": %j{TimestampAppLearnStart:iso8601},\\\"TimestampZENFirstRxClient\\\": %j{TimestampZENFirstRxClient:iso8601},\\\"TimestampZENFirstTxClient\\\": %j{TimestampZENFirstTxClient:iso8601},\\\"TimestampZENLastRxClient\\\": %j{TimestampZENLastRxClient:iso8601},\\\"TimestampZENLastTxClient\\\": %j{TimestampZENLastTxClient:iso8601},\\\"TimestampConnectorZENSetupComplete\\\": %j{TimestampConnectorZENSetupComplete:iso8601},\\\"TimestampZENFirstRxConnector\\\": %j{TimestampZENFirstRxConnector:iso8601},\\\"TimestampZENFirstTxConnector\\\": %j{TimestampZENFirstTxConnector:iso8601},\\\"TimestampZENLastRxConnector\\\": %j{TimestampZENLastRxConnector:iso8601},\\\"TimestampZENLastTxConnector\\\": %j{TimestampZENLastTxConnector:iso8601},\\\"ZENTotalBytesRxClient\\\": %d{ZENTotalBytesRxClient},\\\"ZENBytesRxClient\\\": %d{ZENBytesRxClient},\\\"ZENTotalBytesTxClient\\\": %d{ZENTotalBytesTxClient},\\\"ZENBytesTxClient\\\": %d{ZENBytesTxClient},\\\"ZENTotalBytesRxConnector\\\": %d{ZENTotalBytesRxConnector},\\\"ZENBytesRxConnector\\\": %d{ZENBytesRxConnector},\\\"ZENTotalBytesTxConnector\\\": %d{ZENTotalBytesTxConnector},\\\"ZENBytesTxConnector\\\": %d{ZENBytesTxConnector},\\\"Idp\\\": %j{Idp}}\\\\n\",\"name\":\"LSS App Connector Status\",\"description\":\"LSS App Connector Status\",\"sessionStatuses\":[],\"enabled\":true,\"useTls\":true,\"policy\":{\"policyType\":\"Log Receiver Policy\",\"name\":\"SIEM selection rule for LSS App Connector Status\",\"action\":\"LOG\",\"ruleOrder\":\"1\"}}"
-    format          = "{\"LogTimestamp\": %j{LogTimestamp:time},\"Customer\": %j{Customer},\"SessionID\": %j{SessionID},\"ConnectionID\": %j{ConnectionID},\"InternalReason\": %j{InternalReason},\"ConnectionStatus\": %j{ConnectionStatus},\"IPProtocol\": %d{IPProtocol},\"DoubleEncryption\": %d{DoubleEncryption},\"Username\": %j{Username},\"ServicePort\": %d{ServicePort},\"ClientPublicIP\": %j{ClientPublicIP},\"ClientPrivateIP\": %j{ClientPrivateIP},\"ClientLatitude\": %f{ClientLatitude},\"ClientLongitude\": %f{ClientLongitude},\"ClientCountryCode\": %j{ClientCountryCode},\"ClientZEN\": %j{ClientZEN},\"Policy\": %j{Policy},\"Connector\": %j{Connector},\"ConnectorZEN\": %j{ConnectorZEN},\"ConnectorIP\": %j{ConnectorIP},\"ConnectorPort\": %d{ConnectorPort},\"Host\": %j{Host},\"Application\": %j{Application},\"AppGroup\": %j{AppGroup},\"Server\": %j{Server},\"ServerIP\": %j{ServerIP},\"ServerPort\": %d{ServerPort},\"PolicyProcessingTime\": %d{PolicyProcessingTime},\"ServerSetupTime\": %d{ServerSetupTime},\"TimestampConnectionStart\": %j{TimestampConnectionStart:iso8601},\"TimestampConnectionEnd\": %j{TimestampConnectionEnd:iso8601},\"TimestampCATx\": %j{TimestampCATx:iso8601},\"TimestampCARx\": %j{TimestampCARx:iso8601},\"TimestampAppLearnStart\": %j{TimestampAppLearnStart:iso8601},\"TimestampZENFirstRxClient\": %j{TimestampZENFirstRxClient:iso8601},\"TimestampZENFirstTxClient\": %j{TimestampZENFirstTxClient:iso8601},\"TimestampZENLastRxClient\": %j{TimestampZENLastRxClient:iso8601},\"TimestampZENLastTxClient\": %j{TimestampZENLastTxClient:iso8601},\"TimestampConnectorZENSetupComplete\": %j{TimestampConnectorZENSetupComplete:iso8601},\"TimestampZENFirstRxConnector\": %j{TimestampZENFirstRxConnector:iso8601},\"TimestampZENFirstTxConnector\": %j{TimestampZENFirstTxConnector:iso8601},\"TimestampZENLastRxConnector\": %j{TimestampZENLastRxConnector:iso8601},\"TimestampZENLastTxConnector\": %j{TimestampZENLastTxConnector:iso8601},\"ZENTotalBytesRxClient\": %d{ZENTotalBytesRxClient},\"ZENBytesRxClient\": %d{ZENBytesRxClient},\"ZENTotalBytesTxClient\": %d{ZENTotalBytesTxClient},\"ZENBytesTxClient\": %d{ZENBytesTxClient},\"ZENTotalBytesRxConnector\": %d{ZENTotalBytesRxConnector},\"ZENBytesRxConnector\": %d{ZENBytesRxConnector},\"ZENTotalBytesTxConnector\": %d{ZENTotalBytesTxConnector},\"ZENBytesTxConnector\": %d{ZENBytesTxConnector},\"Idp\": %j{Idp}}\\n"
+    format          = data.zpa_lss_config_log_type_formats.zpn_trans_log.json
     lss_host        = "192.168.1.1"
     lss_port        = "11001"
     source_log_type = "zpn_trans_log"
@@ -20,22 +18,46 @@ resource "zpa_lss_config_controller" "example" {
       operator = "OR"
       operands {
         object_type = "APP"
-        values      = [data.zpa_application_segment.example.id]
+        values      = [ zpa_application_segment.as_lss_config.id ]
       }
     }
   }
   connector_groups {
-    id = [data.zpa_app_connector_group.example.id]
+    id = [ data.zpa_app_connector_group.app_connector_lss.id ]
   }
 }
 
-// Retrieve the App Connector Group ID
-data "zpa_app_connector_group" "example" {
-  name = "Example"
+// Create Application Segment
+resource "zpa_application_segment" "as_lss_config" {
+    name = "App Segment LSS"
+    description = "App Segment LSS"
+    enabled = true
+    health_reporting = "ON_ACCESS"
+    bypass_type = "NEVER"
+    tcp_port_ranges = ["11001", "11001"]
+    domain_names = ["*.acme.com"]
+    segment_group_id = data.zpa_segment_group.sg_lss_config.id
+    server_groups {
+        id = [ data.zpa_server_group.srvg_lss_config.id ]
+    }
 }
 
-// Retrieve the Application Segment ID
-data "zpa_application_segment" "example" {
-  name = "Example"
+// Retrieve LSS Config Format
+data "zpa_lss_config_log_type_formats" "zpn_trans_log" {
+    log_type="zpn_trans_log"
 }
-*/
+
+// Retrieve the App Connector Group ID
+data "zpa_app_connector_group" "app_connector_lss" {
+  name = "App Connector LSS"
+}
+
+// Retrieve Segment Group ID
+data "zpa_segment_group" "sg_lss_config" {
+   name = "Segment Group LSS"
+ }
+
+// Retrieve Server Group ID
+data "zpa_server_group" "srvg_lss_config" {
+  name = "Server Group LSS"
+}
