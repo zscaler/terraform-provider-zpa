@@ -84,7 +84,6 @@ The following arguments are supported:
 * `description` - (Optional) Description of the application.
 * `enabled` - (Optional) Whether this app is enabled or not. Default: `false`. Boolean values: `true`, `false`.
 * `bypass_type` - (Optional) Indicates whether users can bypass ZPA to access applications.
-* `clientless_apps` - (Block List) (see [below for nested schema](#nestedblock--clientless_apps))
 * `config_space` - (Optional) Default: `DEFAULT`. Supported values: `DEFAULT`, `SIEM`
 * `domain_names` - (Required) List of domains and IPs.
 * `double_encrypt` - (Optional) Whether Double Encryption is enabled or disabled for the app.
@@ -94,9 +93,10 @@ The following arguments are supported:
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors. Default: `true`. Boolean values: `true`, `false`.
 * `segment_group_id` - (Required) ID(s) of the segment group(s).
 * `segment_group_name` - (Optional)
-* `server_groups` (Block List) ID of the server group. (see [below for nested schema](#nestedblock--server_groups))
 * `tcp_port_ranges` - (Required) TCP port ranges used to access the app.
 * `udp_port_ranges` - (Required) UDP port ranges used to access the app.
+* `clientless_apps` - (Block List) (see [below for nested schema](#nestedblock--clientless_apps))
+* `server_groups` (Block List) ID of the server group. (see [below for nested schema](#nestedblock--server_groups))
 
 <a id="nestedblock--clientless_apps"></a>
 
