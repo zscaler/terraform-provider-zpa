@@ -83,6 +83,17 @@ type Count struct {
 	Count string `json:"count"`
 }
 
+func (service *Service) GetByPolicyType(policyType string) (*PolicySet, *http.Response, error) {
+	v := new(PolicySet)
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/policyType/" + policyType)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return v, resp, nil
+}
+
 func (service *Service) Get() (*PolicySet, *http.Response, error) {
 	v := new(PolicySet)
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/global")
