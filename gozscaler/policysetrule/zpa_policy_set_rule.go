@@ -88,7 +88,7 @@ func (service *Service) Update(policySetID, ruleId string, policySetRule *Policy
 
 // PUT --> /mgmtconfig/v1/admin/customers/{customerId}/policySet/{policySetId}/rule/{ruleId}/reorder/{newOrder}
 func (service *Service) Reorder(policySetID, ruleId string, order int) (*http.Response, error) {
-	path := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"policySet/%s/rule/%s/reorder/%d", policySetID, ruleId, order)
+	path := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/policySet/%s/rule/%s/reorder/%d", policySetID, ruleId, order)
 	resp, err := service.Client.NewRequestDo("PUT", path, nil, nil, nil)
 	if err != nil {
 		return nil, err

@@ -35,7 +35,9 @@ func (service *Service) Get(networkID string) (*TrustedNetwork, *http.Response, 
 }
 
 func (service *Service) GetByNetID(netID string) (*TrustedNetwork, *http.Response, error) {
-	var v []TrustedNetwork
+	var v struct {
+		List []TrustedNetwork `json:"list"`
+	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
@@ -43,7 +45,7 @@ func (service *Service) GetByNetID(netID string) (*TrustedNetwork, *http.Respons
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, trustedNetwork := range v {
+	for _, trustedNetwork := range v.List {
 		if trustedNetwork.NetworkID == netID {
 			return &trustedNetwork, resp, nil
 		}
