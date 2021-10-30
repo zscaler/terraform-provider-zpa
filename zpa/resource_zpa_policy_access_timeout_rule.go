@@ -72,7 +72,7 @@ func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, m interface{}) erro
 func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicyTimeout, _, err := zClient.policysetglobal.GetReauth()
+	globalPolicyTimeout, _, err := zClient.policytype.GetReauth()
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error 
 
 func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicyTimeout, _, err := zClient.policysetglobal.GetReauth()
+	globalPolicyTimeout, _, err := zClient.policytype.GetReauth()
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 
 func resourcePolicyTimeoutRuleDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicyTimeout, _, err := zClient.policysetglobal.GetReauth()
+	globalPolicyTimeout, _, err := zClient.policytype.GetReauth()
 	if err != nil {
 		return err
 	}

@@ -4,12 +4,13 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetglobal"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/policytype"
 )
 
-func dataSourceGlobalPolicyTimeout() *schema.Resource {
+func dataSourcePolicyType() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceGlobalPolicyTimeoutRead,
+		Read: dataSourcePolicyTypeRead,
 		Schema: map[string]*schema.Schema{
 			"creation_time": {
 				Type:     schema.TypeString,
@@ -42,6 +43,10 @@ func dataSourceGlobalPolicyTimeout() *schema.Resource {
 			"policy_type": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"ACCESS_POLICY", "GLOBAL_POLICY", "TIMEOUT_POLICY", "REAUTH_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "BYPASS_POLICY",
+				}, false),
 			},
 			"rules": {
 				Type:     schema.TypeList,
@@ -223,16 +228,22 @@ func dataSourceGlobalPolicyTimeout() *schema.Resource {
 	}
 }
 
-func dataSourceGlobalPolicyTimeoutRead(d *schema.ResourceData, m interface{}) error {
+func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	log.Printf("[INFO] Getting data for global timeout policy\n")
-
-	resp, _, err := zClient.policysetglobal.GetReauth()
+	log.Printf("[INFO] Getting data for policy type\n")
+	var resp *policytype.PolicySet
+	var err error
+	policyType, policyTypeIsSet := d.GetOk("policy_type")
+	if policyTypeIsSet {
+		resp, _, err = zClient.policytype.GetByPolicyType(policyType.(string))
+	} else {
+		resp, _, err = zClient.policytype.Get()
+	}
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[INFO] Getting Policy Set Global Rules:\n%+v\n", resp)
+	log.Printf("[INFO] Getting data for Policy Type:\n%+v\n", resp)
 	d.SetId(resp.ID)
 	_ = d.Set("creation_time", resp.CreationTime)
 	_ = d.Set("description", resp.Description)
@@ -242,16 +253,16 @@ func dataSourceGlobalPolicyTimeoutRead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("policy_type", resp.PolicyType)
 
-	if err := d.Set("rules", flattenPolicyTimeout(resp)); err != nil {
+	if err := d.Set("rules", flattenPolicySetRules(resp)); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func flattenPolicyTimeout(policyTimeoutRules *policysetglobal.PolicySet) []interface{} {
-	ruleItems := make([]interface{}, len(policyTimeoutRules.Rules))
-	for i, ruleItem := range policyTimeoutRules.Rules {
+func flattenPolicySetRules(policySetRules *policytype.PolicySet) []interface{} {
+	ruleItems := make([]interface{}, len(policySetRules.Rules))
+	for i, ruleItem := range policySetRules.Rules {
 		ruleItems[i] = map[string]interface{}{
 			"action":                      ruleItem.Action,
 			"action_id":                   ruleItem.ActionID,
@@ -273,14 +284,14 @@ func flattenPolicyTimeout(policyTimeoutRules *policysetglobal.PolicySet) []inter
 			"zpn_cbi_profile_id":          ruleItem.ZpnCbiProfileID,
 			"zpn_inspection_profile_id":   ruleItem.ZpnInspectionProfileID,
 			"zpn_inspection_profile_name": ruleItem.ZpnInspectionProfileName,
-			"conditions":                  flattenTimeoutRuleConditions(ruleItem),
+			"conditions":                  flattenRuleConditions(ruleItem),
 		}
 	}
 
 	return ruleItems
 }
 
-func flattenTimeoutRuleConditions(conditions policysetglobal.Rules) []interface{} {
+func flattenRuleConditions(conditions policytype.Rules) []interface{} {
 	ruleConditions := make([]interface{}, len(conditions.Conditions))
 	for i, ruleCondition := range conditions.Conditions {
 		ruleConditions[i] = map[string]interface{}{
@@ -290,14 +301,14 @@ func flattenTimeoutRuleConditions(conditions policysetglobal.Rules) []interface{
 			"modified_time": ruleCondition.ModifiedTime,
 			"negated":       ruleCondition.Negated,
 			"operator":      ruleCondition.Operator,
-			"operands":      flattenTimeoutConditionOperands(ruleCondition),
+			"operands":      flattenConditionOperands(ruleCondition),
 		}
 	}
 
 	return ruleConditions
 }
 
-func flattenTimeoutConditionOperands(operands policysetglobal.Conditions) []interface{} {
+func flattenConditionOperands(operands policytype.Conditions) []interface{} {
 	conditionOperands := make([]interface{}, len(*operands.Operands))
 	for i, conditionOperand := range *operands.Operands {
 		conditionOperands[i] = map[string]interface{}{

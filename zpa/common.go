@@ -201,7 +201,7 @@ func reorder(orderI interface{}, policySetID, id string, zClient *Client) {
 func reorderAll(policySetID string, zClient *Client) {
 	rules.Lock()
 	defer rules.Unlock()
-	count, _, _ := zClient.policysetglobal.RulesCount()
+	count, _, _ := zClient.policytype.RulesCount()
 	for k, v := range rules.orders {
 		if v <= count {
 			_, err := zClient.policysetrule.Reorder(policySetID, k, v)
@@ -429,7 +429,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		},
 		"policy_set_id": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Required: true,
 		},
 		"policy_type": {
 			Type:     schema.TypeString,

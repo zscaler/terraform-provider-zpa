@@ -1,4 +1,4 @@
-package policysetglobal
+package policytype
 
 import (
 	"fmt"

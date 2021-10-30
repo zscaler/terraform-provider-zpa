@@ -119,7 +119,7 @@ func resourcePolicySetCreate(d *schema.ResourceData, m interface{}) error {
 func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicySet, _, err := zClient.policysetglobal.Get()
+	globalPolicySet, _, err := zClient.policytype.Get()
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 
 func resourcePolicySetUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetglobal.Get()
+	globalPolicySet, _, err := zClient.policytype.Get()
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func resourcePolicySetUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourcePolicySetDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetglobal.Get()
+	globalPolicySet, _, err := zClient.policytype.Get()
 	if err != nil {
 		return err
 	}

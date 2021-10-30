@@ -76,7 +76,7 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicyForwarding, _, err := zClient.policysetglobal.GetBypass()
+	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 
 func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicyForwarding, _, err := zClient.policysetglobal.GetBypass()
+	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 
 func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicyForwarding, _, err := zClient.policysetglobal.GetBypass()
+	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
 	if err != nil {
 		return err
 	}
