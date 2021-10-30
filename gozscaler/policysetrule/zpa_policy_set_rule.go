@@ -96,18 +96,6 @@ func (service *Service) Reorder(policySetID, ruleId string, order int) (*http.Re
 	return resp, err
 }
 
-/*
-// PUT --> /mgmtconfig/v1/admin/customers/{customerId}/policySet/{policySetId}/rule/{ruleId}/reorder/{newOrder}
-func (service *Service) Reorder(policySetID, ruleId string, order int) (*http.Response, error) {
-	path := fmt.Sprintf("/zpn/api/v1/admin/customers/%s/policySet/%s/rule/%s/reorder/%d", service.Client.Config.CustomerID, policySetID, ruleId, order)
-	resp, err := service.Client.NewPrivateRequestDo("PUT", path, nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	return resp, err
-}
-
-*/
 // DELETE --> mgmtconfig​/v1​/admin​/customers​/{customerId}​/policySet​/{policySetId}​/rule​/{ruleId}
 func (service *Service) Delete(policySetID, ruleId string) (*http.Response, error) {
 	path := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/policySet/%s/rule/%s", policySetID, ruleId)
