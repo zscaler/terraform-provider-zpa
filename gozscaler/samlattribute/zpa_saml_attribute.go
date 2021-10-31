@@ -3,11 +3,10 @@ package samlattribute
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 const (
-	mgmtConfig            = "/mgmtconfig/v1/admin/customers/"
+	mgmtConfig            = "/mgmtconfig/v2/admin/customers/"
 	samlAttributeEndpoint = "/samlAttribute"
 )
 
@@ -34,8 +33,10 @@ func (service *Service) Get(samlAttributeID string) (*SamlAttribute, *http.Respo
 	return v, resp, nil
 }
 
-func (service *Service) GetByName(name string) (*SamlAttribute, *http.Response, error) {
-	var v []SamlAttribute
+func (service *Service) GetByName(samlAttrName string) (*SamlAttribute, *http.Response, error) {
+	var v struct {
+		List []SamlAttribute `json:"list"`
+	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + samlAttributeEndpoint)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
@@ -43,10 +44,10 @@ func (service *Service) GetByName(name string) (*SamlAttribute, *http.Response, 
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, samlAttribute := range v {
-		if strings.EqualFold(samlAttribute.Name, name) {
+	for _, samlAttribute := range v.List {
+		if samlAttribute.Name == samlAttrName {
 			return &samlAttribute, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no saml attribute named '%s' was found", name)
+	return nil, resp, fmt.Errorf("no saml attribute named '%s' was found", samlAttrName)
 }
