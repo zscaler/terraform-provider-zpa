@@ -1,4 +1,4 @@
-# Retrieve App Connector Group
+# App Connector Group Example
 
 This example will show you how to use Terraform to implement the ZPA App Connector Group resource
 This example codifies [this API](https://help.zscaler.com/zpa/api-reference#/connector-group-controller/getAppConnectorGroup).
