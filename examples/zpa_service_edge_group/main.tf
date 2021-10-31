@@ -1,14 +1,3 @@
-terraform {
-  required_providers {
-    zpa = {
-      version = "1.0.0"
-      source  = "zscaler.com/zpa/zpa"
-    }
-  }
-}
-
-provider "zpa" {}
-
 resource "zpa_service_edge_group" "service_edge_group_sjc" {
   name                 = "Service Edge Group San Jose"
   description          = "Service Edge Group in San Jose"
