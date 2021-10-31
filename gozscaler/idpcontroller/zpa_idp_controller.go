@@ -3,11 +3,10 @@ package idpcontroller
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 const (
-	mgmtConfig            = "/mgmtconfig/v1/admin/customers/"
+	mgmtConfig            = "/mgmtconfig/v2/admin/customers/"
 	idpControllerEndpoint = "/idp"
 )
 
@@ -36,10 +35,9 @@ type IdpController struct {
 	SignSamlRequest             string        `json:"signSamlRequest,,omitempty"`
 	SsoType                     []string      `json:"ssoType,omitempty"`
 	UseCustomSpMetadata         bool          `json:"useCustomSPMetadata"`
-	UserSpSigningCertId         string        `json:"userSpSigningCertId,omitempty"`
+	UserSpSigningCertID         string        `json:"userSpSigningCertId,omitempty"`
 	AdminMetadata               AdminMetadata `json:"adminMetadata,omitempty"`
 	UserMetadata                UserMetadata  `json:"userMetadata,omitempty"`
-	//Certificates                []Certificates `json:"certificates"`
 }
 
 type AdminMetadata struct {
@@ -48,13 +46,6 @@ type AdminMetadata struct {
 	SpEntityID     string `json:"spEntityId"`
 	SpMetadataURL  string `json:"spMetadataUrl"`
 	SpPostURL      string `json:"spPostUrl"`
-}
-type Certificates struct {
-	Cname          string `json:"cName,omitempty"`
-	Certificate    string `json:"certificate,omitempty"`
-	SerialNo       string `json:"serialNo,omitempty"`
-	ValidFromInSec string `json:"validFromInSec,omitempty"`
-	ValidToInSec   string `json:"validToInSec,omitempty"`
 }
 type UserMetadata struct {
 	CertificateURL string `json:"certificateUrl,omitempty"`
@@ -75,8 +66,10 @@ func (service *Service) Get(IdpID string) (*IdpController, *http.Response, error
 	return v, resp, nil
 }
 
-func (service *Service) GetByName(IdpName string) (*IdpController, *http.Response, error) {
-	var v []IdpController
+func (service *Service) GetByName(idpName string) (*IdpController, *http.Response, error) {
+	var v struct {
+		List []IdpController `json:"list"`
+	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + idpControllerEndpoint)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
@@ -84,10 +77,10 @@ func (service *Service) GetByName(IdpName string) (*IdpController, *http.Respons
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, idpController := range v {
-		if strings.EqualFold(idpController.Name, IdpName) {
+	for _, idpController := range v.List {
+		if idpController.Name == idpName {
 			return &idpController, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no Idp-Controller named '%s' was found", IdpName)
+	return nil, resp, fmt.Errorf("no Idp-Controller named '%s' was found", idpName)
 }

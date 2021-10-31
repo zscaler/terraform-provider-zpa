@@ -40,36 +40,6 @@ func dataSourceIdpController() *schema.Resource {
 					},
 				},
 			},
-			/*
-				"certificates": {
-					Type:     schema.TypeList,
-					Computed: true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"cname": {
-								Type:     schema.TypeString,
-								Computed: true,
-							},
-							"certificate": {
-								Type:     schema.TypeString,
-								Computed: true,
-							},
-							"serial_no": {
-								Type:     schema.TypeString,
-								Computed: true,
-							},
-							"valid_from_in_sec": {
-								Type:     schema.TypeString,
-								Computed: true,
-							},
-							"valid_to_in_sec": {
-								Type:     schema.TypeString,
-								Computed: true,
-							},
-						},
-					},
-				},
-			*/
 			"admin_sp_signing_cert_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -249,7 +219,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("sign_saml_request", resp.SignSamlRequest)
 		_ = d.Set("sso_type", resp.SsoType)
 		_ = d.Set("use_custom_sp_metadata", resp.UseCustomSpMetadata)
-		_ = d.Set("user_sp_signing_cert_id", resp.UserSpSigningCertId)
+		_ = d.Set("user_sp_signing_cert_id", resp.UserSpSigningCertID)
 		_ = d.Set("user_metadata.certificate_url", resp.UserMetadata.CertificateURL)
 		_ = d.Set("user_metadata.sp_base_url", resp.UserMetadata.SpBaseURL)
 		_ = d.Set("user_metadata.sp_entity_id", resp.UserMetadata.SpEntityID)
@@ -261,29 +231,8 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("admin_metadata.sp_metadata_url", resp.AdminMetadata.SpMetadataURL)
 		_ = d.Set("admin_metadata.sp_post_url", resp.AdminMetadata.SpPostURL)
 
-		// if err := d.Set("certificates", flattenCertificates(resp.Certificates)); err != nil {
-		// 	return err
-		// }
-
 	} else {
 		return fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id)
 	}
 	return nil
 }
-
-/*
-func flattenCertificates(certificate []idpcontroller.Certificates) []interface{} {
-	certificates := make([]interface{}, len(certificate))
-	for i, val := range certificate {
-		certificates[i] = map[string]interface{}{
-			"name":              val.Cname,
-			"certificate":       val.Certificate,
-			"serial_no":         val.SerialNo,
-			"valid_from_in_sec": val.ValidFromInSec,
-			"valid_to_in_sec":   val.ValidToInSec,
-		}
-	}
-
-	return certificates
-}
-*/
