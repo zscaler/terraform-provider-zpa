@@ -90,15 +90,17 @@ func dataSourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
 		}
 		resp = res
 	}
+
 	name, ok := d.Get("name").(string)
-	if id == "" && ok && name != "" {
+	if ok && name != "" {
 		log.Printf("[INFO] Getting data for browser certificate name %s\n", name)
-		res, _, err := zClient.bacertificate.GetByName(name)
+		res, _, err := zClient.bacertificate.GetIssuedByName(name)
 		if err != nil {
 			return err
 		}
 		resp = res
 	}
+
 	if resp != nil {
 		d.SetId(resp.ID)
 		_ = d.Set("cname", resp.CName)

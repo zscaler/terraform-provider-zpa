@@ -3,12 +3,13 @@ package bacertificate
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 const (
-	mgmtConfig            = "/mgmtconfig/v1/admin/customers/"
-	baCertificateEndpoint = "/clientlessCertificate"
+	mgmtConfigV1                = "/mgmtconfig/v1/admin/customers/"
+	baCertificateEndpoint       = "/clientlessCertificate"
+	mgmtConfigV2                = "/mgmtconfig/v2/admin/customers/"
+	baCertificateIssuedEndpoint = "/clientlessCertificate/issued"
 )
 
 type BaCertificate struct {
@@ -31,7 +32,7 @@ type BaCertificate struct {
 
 func (service *Service) Get(baCertificateID string) (*BaCertificate, *http.Response, error) {
 	v := new(BaCertificate)
-	relativeURL := fmt.Sprintf("%v/%v", mgmtConfig+service.Client.Config.CustomerID+baCertificateEndpoint, baCertificateID)
+	relativeURL := fmt.Sprintf("%v/%v", mgmtConfigV1+service.Client.Config.CustomerID+baCertificateEndpoint, baCertificateID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err
@@ -40,19 +41,21 @@ func (service *Service) Get(baCertificateID string) (*BaCertificate, *http.Respo
 	return v, resp, nil
 }
 
-func (service *Service) GetByName(name string) (*BaCertificate, *http.Response, error) {
-	var v []BaCertificate
-	relativeURL := fmt.Sprintf("%s/issued", mgmtConfig+service.Client.Config.CustomerID+baCertificateEndpoint)
+func (service *Service) GetIssuedByName(CertName string) (*BaCertificate, *http.Response, error) {
+	var v struct {
+		List []BaCertificate `json:"list"`
+	}
+	relativeURL := fmt.Sprintf(mgmtConfigV2 + service.Client.Config.CustomerID + baCertificateIssuedEndpoint)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
 	}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, baCertificate := range v {
-		if strings.EqualFold(baCertificate.Name, name) {
+	for _, baCertificate := range v.List {
+		if baCertificate.Name == CertName {
 			return &baCertificate, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no browser access certificate named '%s' was found", name)
+	return nil, resp, fmt.Errorf("no issued certificate named '%s' was found", CertName)
 }
