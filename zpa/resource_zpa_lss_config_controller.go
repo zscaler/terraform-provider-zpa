@@ -21,6 +21,10 @@ func getPolicyRuleResourceSchema() map[string]*schema.Schema {
 					"DENY",
 				}, false),
 			},
+			"policy_set_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"conditions": {
 				Type:        schema.TypeList,
 				Optional:    true,
