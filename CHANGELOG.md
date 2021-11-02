@@ -1,6 +1,6 @@
-## 2.0.0 (November 2, 2021)
+# 2.0.0 (November 2, 2021)
 
-### Notes
+## Notes
 
 - New management APIs are now available to manage App Connectors, App Connector Groups, Service Edges, Service Edge Groups, and Log Streaming Service (LSS) configurations.
 - New prerequisite APIs for enrollment certificates, provisioning keys, and to get version profiles, client types, status codes, and LSS formats are added.
