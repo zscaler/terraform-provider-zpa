@@ -222,19 +222,33 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("sso_type", resp.SsoType)
 		_ = d.Set("use_custom_sp_metadata", resp.UseCustomSpMetadata)
 		_ = d.Set("user_sp_signing_cert_id", resp.UserSpSigningCertID)
-		_ = d.Set("user_metadata.certificate_url", resp.UserMetadata.CertificateURL)
-		_ = d.Set("user_metadata.sp_base_url", resp.UserMetadata.SpBaseURL)
-		_ = d.Set("user_metadata.sp_entity_id", resp.UserMetadata.SpEntityID)
-		_ = d.Set("user_metadata.sp_metadata_url", resp.UserMetadata.SpMetadataURL)
-		_ = d.Set("user_metadata.sp_post_url", resp.UserMetadata.SpPostURL)
-		_ = d.Set("admin_metadata.certificate_url", resp.AdminMetadata.CertificateURL)
-		_ = d.Set("admin_metadata.sp_base_url", resp.AdminMetadata.SpBaseURL)
-		_ = d.Set("admin_metadata.sp_entity_id", resp.AdminMetadata.SpEntityID)
-		_ = d.Set("admin_metadata.sp_metadata_url", resp.AdminMetadata.SpMetadataURL)
-		_ = d.Set("admin_metadata.sp_post_url", resp.AdminMetadata.SpPostURL)
+		if resp.UserMetadata != nil {
+			_ = d.Set("user_metadata", flattenUserMeta(resp.UserMetadata))
+		}
+		if resp.AdminMetadata != nil {
+			_ = d.Set("admin_metadata", flattenAdminMeta(resp.AdminMetadata))
+		}
 
 	} else {
 		return fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id)
 	}
 	return nil
+}
+func flattenAdminMeta(metaData *idpcontroller.AdminMetadata) []map[string]interface{} {
+	result := make([]map[string]interface{}, 1)
+	result[0]["certificate_url"] = metaData.CertificateURL
+	result[0]["sp_base_url"] = metaData.SpBaseURL
+	result[0]["sp_entity_id"] = metaData.SpEntityID
+	result[0]["sp_metadata_url"] = metaData.SpMetadataURL
+	result[0]["sp_post_url"] = metaData.SpPostURL
+	return result
+}
+
+func flattenUserMeta(metaData *idpcontroller.UserMetadata) []map[string]interface{} {
+	result := make([]map[string]interface{}, 1)
+	result[0]["certificate_url"] = metaData.CertificateURL
+	result[0]["sp_base_url"] = metaData.SpBaseURL
+	result[0]["sp_metadata_url"] = metaData.SpMetadataURL
+	result[0]["sp_post_url"] = metaData.SpPostURL
+	return result
 }
