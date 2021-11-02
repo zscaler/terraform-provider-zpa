@@ -77,10 +77,12 @@ func dataSourceIdpController() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"idp_entity_id": {
 				Type:     schema.TypeString,

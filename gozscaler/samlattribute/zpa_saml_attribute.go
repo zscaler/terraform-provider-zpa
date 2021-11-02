@@ -3,10 +3,13 @@ package samlattribute
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
 	mgmtConfig            = "/mgmtconfig/v2/admin/customers/"
+	mgmtConfigV1          = "/mgmtconfig/v1/admin/customers/"
 	samlAttributeEndpoint = "/samlAttribute"
 )
 
@@ -24,7 +27,7 @@ type SamlAttribute struct {
 
 func (service *Service) Get(samlAttributeID string) (*SamlAttribute, *http.Response, error) {
 	v := new(SamlAttribute)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+samlAttributeEndpoint, samlAttributeID)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfigV1+service.Client.Config.CustomerID+samlAttributeEndpoint, samlAttributeID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err
@@ -38,8 +41,9 @@ func (service *Service) GetByName(samlAttrName string) (*SamlAttribute, *http.Re
 		List []SamlAttribute `json:"list"`
 	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + samlAttributeEndpoint)
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
-		pagesize: 500,
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{
+		PageSize: 500,
+		Search:   samlAttrName,
 	}, nil, &v)
 	if err != nil {
 		return nil, nil, err

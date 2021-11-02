@@ -3,10 +3,13 @@ package idpcontroller
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
 	mgmtConfig            = "/mgmtconfig/v2/admin/customers/"
+	mgmtConfigV1          = "/mgmtconfig/v1/admin/customers/"
 	idpControllerEndpoint = "/idp"
 )
 
@@ -57,7 +60,7 @@ type UserMetadata struct {
 
 func (service *Service) Get(IdpID string) (*IdpController, *http.Response, error) {
 	v := new(IdpController)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+idpControllerEndpoint, IdpID)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfigV1+service.Client.Config.CustomerID+idpControllerEndpoint, IdpID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err
@@ -71,8 +74,9 @@ func (service *Service) GetByName(idpName string) (*IdpController, *http.Respons
 		List []IdpController `json:"list"`
 	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + idpControllerEndpoint)
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
-		pagesize: 500,
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{
+		PageSize: 500,
+		Search:   idpName,
 	}, nil, &v)
 	if err != nil {
 		return nil, nil, err
