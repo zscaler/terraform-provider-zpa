@@ -43,9 +43,9 @@
 
 - API endpoints specific to a policy (global/reauth/bypass) are deprecated and replaced by a generic API that takes policyType as a parameter.
 
-1. Deprecated ``data_source_zpa_global_forwarding_policy`` and ``data_source_zpa_global_timeout_policy`` and replaced with ``data_source_zpa_policy_type``
+1. Deprecated ``data_source_zpa_global_forwarding_policy`` and ``data_source_zpa_global_timeout_policy`` and replaced with ``data_source_zpa_policy_type`` 💥
 
-2. Deprecated ``data_source_zpa_global_access_policy`` and renamed with ``data_source_zpa_policy_type``
+2. Deprecated ``data_source_zpa_global_access_policy`` and renamed with ``data_source_zpa_policy_type`` 💥
 
 ## 1.0.0 (September 23, 2021)
 
