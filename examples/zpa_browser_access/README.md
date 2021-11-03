@@ -1,4 +1,4 @@
-# Application Segment Example
+# Browser Access Example
 
 This example will show you how to use Terraform to implement a ZPA application segment resource.
 This example codifies [this API](https://help.zscaler.com/zpa/api-reference#/application-controller/addApplication).
