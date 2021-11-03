@@ -39,15 +39,20 @@ func resourceApplicationSegment() *schema.Resource {
 					"ON_NET",
 				}, false),
 			},
+			"tcp_port_range": resourceAppSegmentPortRange("tcp port range"),
+			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
+
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
-				Required:    true,
+				Optional:    true,
+				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -246,6 +251,14 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 	_ = d.Set("server_groups", flattenAppServerGroupsSimple(resp))
 
+	if err := d.Set("tcp_port_range", flattenAppSegmentPortRange(resp.TCPAppPortRange)); err != nil {
+		return err
+	}
+
+	if err := d.Set("tcp_port_range", flattenAppSegmentPortRange(resp.UDPAppPortRange)); err != nil {
+		return err
+	}
+
 	return nil
 }
 func flattenAppServerGroupsSimple(serverGroup *applicationsegment.ApplicationSegmentResource) []interface{} {
@@ -329,7 +342,7 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 }
 
 func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.ApplicationSegmentResource {
-	return applicationsegment.ApplicationSegmentResource{
+	details := applicationsegment.ApplicationSegmentResource{
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		SegmentGroupName:     d.Get("segment_group_name").(string),
 		BypassType:           d.Get("bypass_type").(string),
@@ -350,6 +363,21 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		UDPPortRanges:        ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
 		ServerGroups:         expandAppServerGroups(d),
 	}
+	TCPAppPortRange := expandAppSegmentPortRange(d, "tcp_port_range")
+	if TCPAppPortRange != nil {
+		details.TCPAppPortRange = TCPAppPortRange
+	}
+	UDPAppPortRange := expandAppSegmentPortRange(d, "udp_port_range")
+	if UDPAppPortRange != nil {
+		details.UDPAppPortRange = UDPAppPortRange
+	}
+	if d.HasChange("udp_port_ranges") {
+		details.UDPPortRanges = convertToListString(d.Get("udp_port_ranges"))
+	}
+	if d.HasChange("tcp_port_ranges") {
+		details.TCPPortRanges = convertToListString(d.Get("tcp_port_ranges"))
+	}
+	return details
 }
 
 func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServerGroups {

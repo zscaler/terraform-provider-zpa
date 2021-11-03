@@ -1,6 +1,8 @@
 package zpa
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -56,4 +58,21 @@ func MergeSchema(schemas ...map[string]*schema.Schema) map[string]*schema.Schema
 		}
 	}
 	return final
+}
+
+func convertToListString(obj interface{}) []string {
+	listI, ok := obj.([]interface{})
+	if ok && len(listI) > 0 {
+		list := make([]string, len(listI))
+		for i, e := range listI {
+			s, ok := e.(string)
+			if ok {
+				list[i] = e.(string)
+			} else {
+				log.Printf("[WARN] invalid type: %v\n", s)
+			}
+		}
+		return list
+	}
+	return []string{}
 }
