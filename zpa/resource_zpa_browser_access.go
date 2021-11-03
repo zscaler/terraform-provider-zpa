@@ -35,17 +35,28 @@ func resourceBrowserAccess() *schema.Resource {
 			"bypass_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Indicates whether users can bypass ZPA to access applications.",
+				Default:     "NEVER",
+				Description: "Indicates whether users can bypass ZPA to access applications. Default: NEVER. Supported values: ALWAYS, NEVER, ON_NET. The value NEVER indicates the use of the client forwarding policy.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"ALWAYS",
+					"NEVER",
+					"ON_NET",
+				}, false),
 			},
+			"tcp_port_range": resourceNetworkPortsSchema("tcp port range"),
+			"udp_port_range": resourceNetworkPortsSchema("udp port range"),
+
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
-				Required:    true,
+				Optional:    true,
+				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -235,6 +246,7 @@ func resourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	log.Printf("[INFO] Getting browser access:\n%+v\n", resp)
+	d.SetId(resp.ID)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
 	_ = d.Set("bypass_type", resp.BypassType)
@@ -243,7 +255,6 @@ func resourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
-	_ = d.Set("id", resp.ID)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
@@ -256,8 +267,17 @@ func resourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	if err := d.Set("clientless_apps", flattenBaClientlessApps(resp)); err != nil {
 		return fmt.Errorf("failed to read clientless apps %s", err)
 	}
+
 	if err := d.Set("server_groups", flattenClientlessAppServerGroups(resp.AppServerGroups)); err != nil {
 		return fmt.Errorf("failed to read app server groups %s", err)
+	}
+
+	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
+		return err
+	}
+
+	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+		return err
 	}
 
 	return nil
@@ -347,6 +367,14 @@ func expandBrowserAccess(d *schema.ResourceData) browseraccess.BrowserAccess {
 	if d.HasChange("clientless_apps") {
 		details.ClientlessApps = expandClientlessApps(d)
 	}
+	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
+	if TCPAppPortRange != nil {
+		details.TCPAppPortRange = TCPAppPortRange
+	}
+	UDPAppPortRange := expandNetwokPorts(d, "udp_port_range")
+	if UDPAppPortRange != nil {
+		details.UDPAppPortRange = UDPAppPortRange
+	}
 	if d.HasChange("udp_port_ranges") {
 		details.UDPPortRanges = convertToListString(d.Get("udp_port_ranges"))
 	}
@@ -355,22 +383,7 @@ func expandBrowserAccess(d *schema.ResourceData) browseraccess.BrowserAccess {
 	}
 	return details
 }
-func convertToListString(obj interface{}) []string {
-	listI, ok := obj.([]interface{})
-	if ok && len(listI) > 0 {
-		list := make([]string, len(listI))
-		for i, e := range listI {
-			s, ok := e.(string)
-			if ok {
-				list[i] = e.(string)
-			} else {
-				log.Printf("[WARN] invalid type: %v\n", s)
-			}
-		}
-		return list
-	}
-	return []string{}
-}
+
 func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps {
 	clientlessInterface, ok := d.GetOk("clientless_apps")
 	if ok {

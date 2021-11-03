@@ -31,6 +31,8 @@ type BrowserAccess struct {
 	ModifiedTime         string            `json:"modifiedTime,omitempty"`
 	TCPPortRanges        []string          `json:"tcpPortRanges,omitempty"`
 	UDPPortRanges        []string          `json:"udpPortRanges,omitempty"`
+	TCPAppPortRange      []NetworkPorts    `json:"tcpPortRange,omitempty"`
+	UDPAppPortRange      []NetworkPorts    `json:"udpPortRange,omitempty"`
 	ClientlessApps       []ClientlessApps  `json:"clientlessApps,omitempty"`
 	AppServerGroups      []AppServerGroups `json:"serverGroups,omitempty"`
 }
@@ -57,6 +59,10 @@ type ClientlessApps struct {
 	TrustUntrustedCert  bool   `json:"trustUntrustedCert"`
 }
 
+type NetworkPorts struct {
+	From string `json:"from,omitempty"`
+	To   string `json:"to,omitempty"`
+}
 type AppServerGroups struct {
 	ID string `json:"id"`
 }
