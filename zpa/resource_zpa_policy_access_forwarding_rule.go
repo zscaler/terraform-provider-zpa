@@ -76,7 +76,7 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicyForwarding, _, err := zClient.policysetglobal.GetBypass()
+	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
 	if err != nil {
 		return err
 	}
@@ -108,14 +108,14 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("reauth_idle_timeout", resp.ReauthIdleTimeout)
 	_ = d.Set("reauth_timeout", resp.ReauthTimeout)
 	_ = d.Set("rule_order", resp.RuleOrder)
-	_ = d.Set("conditions", FlattenPolicyConditions(resp.Conditions))
+	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
 	return nil
 }
 
 func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicyForwarding, _, err := zClient.policysetglobal.GetBypass()
+	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 
 func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicyForwarding, _, err := zClient.policysetglobal.GetBypass()
+	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
 	if err != nil {
 		return err
 	}

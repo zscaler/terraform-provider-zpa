@@ -18,6 +18,7 @@ func dataSourceSamlAttribute() *schema.Resource {
 			},
 			"id": {
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 			"idp_id": {
@@ -38,6 +39,7 @@ func dataSourceSamlAttribute() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
+				Computed: true,
 				Optional: true,
 			},
 			"saml_name": {

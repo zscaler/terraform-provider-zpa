@@ -1,12 +1,26 @@
 package zpa
 
 import (
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func SetToStringSlice(d *schema.Set) []string {
 	list := d.List()
 	return ListToStringSlice(list)
+}
+
+func SetToStringList(d *schema.ResourceData, key string) []string {
+	setObj, ok := d.GetOk(key)
+	if !ok {
+		return []string{}
+	}
+	set, ok := setObj.(*schema.Set)
+	if !ok {
+		return []string{}
+	}
+	return SetToStringSlice(set)
 }
 
 func ListToStringSlice(v []interface{}) []string {
@@ -44,4 +58,21 @@ func MergeSchema(schemas ...map[string]*schema.Schema) map[string]*schema.Schema
 		}
 	}
 	return final
+}
+
+func convertToListString(obj interface{}) []string {
+	listI, ok := obj.([]interface{})
+	if ok && len(listI) > 0 {
+		list := make([]string, len(listI))
+		for i, e := range listI {
+			s, ok := e.(string)
+			if ok {
+				list[i] = e.(string)
+			} else {
+				log.Printf("[WARN] invalid type: %v\n", s)
+			}
+		}
+		return list
+	}
+	return []string{}
 }

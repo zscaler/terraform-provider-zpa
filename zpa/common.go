@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/applicationsegment"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/browseraccess"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
 )
 
@@ -201,7 +203,7 @@ func reorder(orderI interface{}, policySetID, id string, zClient *Client) {
 func reorderAll(policySetID string, zClient *Client) {
 	rules.Lock()
 	defer rules.Unlock()
-	count, _, _ := zClient.policysetglobal.RulesCount()
+	count, _, _ := zClient.policytype.RulesCount()
 	for k, v := range rules.orders {
 		if v <= count {
 			_, err := zClient.policysetrule.Reorder(policySetID, k, v)
@@ -355,7 +357,7 @@ func expandOperandsList(ops interface{}) ([]policysetrule.Operands, error) {
 	return []policysetrule.Operands{}, nil
 }
 
-func FlattenPolicyConditions(conditions []policysetrule.Conditions) []interface{} {
+func flattenPolicyConditions(conditions []policysetrule.Conditions) []interface{} {
 	ruleConditions := make([]interface{}, len(conditions))
 	for i, ruleConditionItems := range conditions {
 		ruleConditions[i] = map[string]interface{}{
@@ -400,6 +402,11 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Optional:    true,
 			Description: "This is for providing a customer message for the user.",
 		},
+		"default_rule": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "This is for providing a customer message for the user.",
+		},
 		"description": {
 			Type:        schema.TypeString,
 			Optional:    true,
@@ -424,7 +431,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		},
 		"policy_set_id": {
 			Type:     schema.TypeString,
-			Optional: true,
+			Required: true,
 		},
 		"policy_type": {
 			Type:     schema.TypeString,
@@ -450,5 +457,111 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
+		"lss_default_rule": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
 	}
+}
+
+func resourceNetworkPortsSchema(desc string) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Optional:    true,
+		Description: desc,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"from": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"to": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			},
+		},
+	}
+}
+
+func flattenNetworkPorts(ports []browseraccess.NetworkPorts) []interface{} {
+	portsObj := make([]interface{}, len(ports))
+	for i, val := range ports {
+		portsObj[i] = map[string]interface{}{
+			"from": val.From,
+			"to":   val.To,
+		}
+	}
+	return portsObj
+}
+
+func expandNetwokPorts(d *schema.ResourceData, key string) []browseraccess.NetworkPorts {
+	var ports []browseraccess.NetworkPorts
+	if portsInterface, ok := d.GetOk(key); ok {
+		portSet, ok := portsInterface.(*schema.Set)
+		if !ok {
+			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
+			return ports
+		}
+		ports = make([]browseraccess.NetworkPorts, len(portSet.List()))
+		for i, val := range portSet.List() {
+			portItem := val.(map[string]interface{})
+			ports[i] = browseraccess.NetworkPorts{
+				From: portItem["from"].(string),
+				To:   portItem["to"].(string),
+			}
+		}
+	}
+	return ports
+}
+
+func resourceAppSegmentPortRange(desc string) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Optional:    true,
+		Description: desc,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"from": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"to": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			},
+		},
+	}
+}
+
+func flattenAppSegmentPortRange(ports []applicationsegment.AppSegmentPortRange) []interface{} {
+	portsObj := make([]interface{}, len(ports))
+	for i, val := range ports {
+		portsObj[i] = map[string]interface{}{
+			"from": val.From,
+			"to":   val.To,
+		}
+	}
+	return portsObj
+}
+
+func expandAppSegmentPortRange(d *schema.ResourceData, key string) []applicationsegment.AppSegmentPortRange {
+	var ports []applicationsegment.AppSegmentPortRange
+	if portsInterface, ok := d.GetOk(key); ok {
+		portSet, ok := portsInterface.(*schema.Set)
+		if !ok {
+			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
+			return ports
+		}
+		ports = make([]applicationsegment.AppSegmentPortRange, len(portSet.List()))
+		for i, val := range portSet.List() {
+			portItem := val.(map[string]interface{})
+			ports[i] = applicationsegment.AppSegmentPortRange{
+				From: portItem["from"].(string),
+				To:   portItem["to"].(string),
+			}
+		}
+	}
+	return ports
 }

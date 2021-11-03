@@ -28,25 +28,11 @@ data "zpa_saml_attribute" "email_user_sso" {
 
 The following arguments are supported:
 
-* ` name` - (Required) Name. The name of the saml attribute to be exported.
+* `name` - (Required) The name of the saml attribute to be exported.
 
-### Read-Only
+## Attribute Reference
 
-- **list** (List of Object) (see [below for nested schema](#nestedatt--list))
-
-<a id="nestedatt--list"></a>
-### `list`
-
-Read-Only:
-
-- **creationtime** (Number)
-- **id** (Number)
-- **idp_id** (Number)
-- **idp_name** (String)
-- **modified_time** (Number)
-- **modifiedby** (Number)
-- **name** (String)
-- **saml_name** (String)
-- **user_attribute** (Boolean)
-
-
+* `idp_name` - (Optional)
+* `idp_id` - (Optional)
+* `saml_name` - (Optional)
+* `user_attribute` - (Optional)

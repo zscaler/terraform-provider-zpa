@@ -7,19 +7,20 @@ import (
 )
 
 const (
-	mgmtConfig             = "/mgmtconfig/v1/admin/customers/"
+	mgmtConfig             = "/mgmtconfig/v2/admin/customers/"
 	trustedNetworkEndpoint = "/network"
 )
 
 type TrustedNetwork struct {
-	CreationTime string `json:"creationTime,omitempty"`
-	Domain       string `json:"domain,omitempty"`
-	ID           string `json:"id,omitempty"`
-	ModifiedBy   string `json:"modifiedBy,omitempty"`
-	ModifiedTime string `json:"modifiedTime,omitempty"`
-	Name         string `json:"name,omitempty"`
-	NetworkID    string `json:"networkId,omitempty"`
-	ZscalerCloud string `json:"zscalerCloud,omitempty"`
+	CreationTime     string `json:"creationTime,omitempty"`
+	Domain           string `json:"domain,omitempty"`
+	ID               string `json:"id,omitempty"`
+	MasterCustomerID string `json:"masterCustomerId,omitempty"`
+	ModifiedBy       string `json:"modifiedBy,omitempty"`
+	ModifiedTime     string `json:"modifiedTime,omitempty"`
+	Name             string `json:"name,omitempty"`
+	NetworkID        string `json:"networkId,omitempty"`
+	ZscalerCloud     string `json:"zscalerCloud,omitempty"`
 }
 
 func (service *Service) Get(networkID string) (*TrustedNetwork, *http.Response, error) {
@@ -34,7 +35,9 @@ func (service *Service) Get(networkID string) (*TrustedNetwork, *http.Response, 
 }
 
 func (service *Service) GetByNetID(netID string) (*TrustedNetwork, *http.Response, error) {
-	var v []TrustedNetwork
+	var v struct {
+		List []TrustedNetwork `json:"list"`
+	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
@@ -42,27 +45,30 @@ func (service *Service) GetByNetID(netID string) (*TrustedNetwork, *http.Respons
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, trustedNetwork := range v {
+	for _, trustedNetwork := range v.List {
 		if trustedNetwork.NetworkID == netID {
 			return &trustedNetwork, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no saml trusted network with NetworkID '%s' was found", netID)
+	return nil, resp, fmt.Errorf("no trusted network with NetworkID '%s' was found", netID)
 }
 
-func (service *Service) GetByName(name string) (*TrustedNetwork, *http.Response, error) {
-	var v []TrustedNetwork
-	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint)
+func (service *Service) GetByName(trustedNetworkName string) (*TrustedNetwork, *http.Response, error) {
+	var v struct {
+		List []TrustedNetwork `json:"list"`
+	}
+
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
 		pagesize: 500,
 	}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, trustedNetwork := range v {
-		if strings.EqualFold(trustedNetwork.Name, name) {
+	for _, trustedNetwork := range v.List {
+		if strings.EqualFold(trustedNetwork.Name, trustedNetworkName) {
 			return &trustedNetwork, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no saml trusted network named '%s' was found", name)
+	return nil, resp, fmt.Errorf("no trusted network named '%s' was found", trustedNetworkName)
 }

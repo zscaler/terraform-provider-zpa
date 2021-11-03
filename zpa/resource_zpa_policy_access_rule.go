@@ -119,7 +119,7 @@ func resourcePolicySetCreate(d *schema.ResourceData, m interface{}) error {
 func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicySet, _, err := zClient.policysetglobal.Get()
+	globalPolicySet, _, err := zClient.policytype.Get()
 	if err != nil {
 		return err
 	}
@@ -140,6 +140,7 @@ func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("action", resp.Action)
 	_ = d.Set("action_id", resp.ActionID)
 	_ = d.Set("custom_msg", resp.CustomMsg)
+	_ = d.Set("default_rule", resp.DefaultRule)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("bypass_default_rule", resp.BypassDefaultRule)
@@ -151,7 +152,8 @@ func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("reauth_idle_timeout", resp.ReauthIdleTimeout)
 	_ = d.Set("reauth_timeout", resp.ReauthTimeout)
 	_ = d.Set("rule_order", resp.RuleOrder)
-	_ = d.Set("conditions", FlattenPolicyConditions(resp.Conditions))
+	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
+	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 	_ = d.Set("app_server_groups", flattenPolicyRuleServerGroups(resp.AppServerGroups))
 	_ = d.Set("app_connector_groups", flattenPolicyRuleAppConnectorGroups(resp.AppConnectorGroups))
 
@@ -160,7 +162,7 @@ func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 
 func resourcePolicySetUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetglobal.Get()
+	globalPolicySet, _, err := zClient.policytype.Get()
 	if err != nil {
 		return err
 	}
@@ -189,7 +191,7 @@ func resourcePolicySetUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourcePolicySetDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetglobal.Get()
+	globalPolicySet, _, err := zClient.policytype.Get()
 	if err != nil {
 		return err
 	}
@@ -218,7 +220,9 @@ func expandCreatePolicyRule(d *schema.ResourceData) (*policysetrule.PolicyRule, 
 	return &policysetrule.PolicyRule{
 		Action:             d.Get("action").(string),
 		ActionID:           d.Get("action_id").(string),
+		BypassDefaultRule:  d.Get("bypass_default_rule").(bool),
 		CustomMsg:          d.Get("custom_msg").(string),
+		DefaultRule:        d.Get("default_rule").(bool),
 		Description:        d.Get("description").(string),
 		ID:                 d.Get("id").(string),
 		Name:               d.Get("name").(string),
@@ -230,6 +234,7 @@ func expandCreatePolicyRule(d *schema.ResourceData) (*policysetrule.PolicyRule, 
 		ReauthIdleTimeout:  d.Get("reauth_idle_timeout").(string),
 		ReauthTimeout:      d.Get("reauth_timeout").(string),
 		RuleOrder:          d.Get("rule_order").(string),
+		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
 		AppServerGroups:    expandPolicySetRuleAppServerGroups(d),
 		AppConnectorGroups: expandPolicySetRuleAppConnectorGroups(d),

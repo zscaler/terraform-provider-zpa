@@ -1,4 +1,4 @@
-package policysetglobal
+package policytype
 
 import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler"

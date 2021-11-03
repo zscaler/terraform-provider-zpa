@@ -14,6 +14,7 @@ type PolicyRule struct {
 	ActionID           string               `json:"actionId,omitempty"`
 	BypassDefaultRule  bool                 `json:"bypassDefaultRule"`
 	CustomMsg          string               `json:"customMsg,omitempty"`
+	DefaultRule        bool                 `json:"defaultRule,omitempty"`
 	Description        string               `json:"description,omitempty"`
 	ID                 string               `json:"id,omitempty"`
 	Name               string               `json:"name,omitempty"`
@@ -25,6 +26,7 @@ type PolicyRule struct {
 	ReauthIdleTimeout  string               `json:"reauthIdleTimeout,omitempty"`
 	ReauthTimeout      string               `json:"reauthTimeout,omitempty"`
 	RuleOrder          string               `json:"ruleOrder"`
+	LSSDefaultRule     bool                 `json:"lssDefaultRule"`
 	Conditions         []Conditions         `json:"conditions,omitempty"`
 	AppServerGroups    []AppServerGroups    `json:"appServerGroups,omitempty"`
 	AppConnectorGroups []AppConnectorGroups `json:"appConnectorGroups,omitempty"`
@@ -84,10 +86,10 @@ func (service *Service) Update(policySetID, ruleId string, policySetRule *Policy
 	return resp, err
 }
 
-// PUT --> /zpn/api/v1/admin/customers/{customerId}​/policySet/{policySetId}/rule/{ruleId}/reorder/{order}
+// PUT --> /mgmtconfig/v1/admin/customers/{customerId}/policySet/{policySetId}/rule/{ruleId}/reorder/{newOrder}
 func (service *Service) Reorder(policySetID, ruleId string, order int) (*http.Response, error) {
-	path := fmt.Sprintf("/zpn/api/v1/admin/customers/%s/policySet/%s/rule/%s/reorder/%d", service.Client.Config.CustomerID, policySetID, ruleId, order)
-	resp, err := service.Client.NewPrivateRequestDo("PUT", path, nil, nil, nil)
+	path := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/policySet/%s/rule/%s/reorder/%d", policySetID, ruleId, order)
+	resp, err := service.Client.NewRequestDo("PUT", path, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}

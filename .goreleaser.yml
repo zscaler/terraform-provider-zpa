@@ -51,4 +51,8 @@ release:
   # If you want to manually examine the release before its live, uncomment this line:
   # draft: true
 changelog:
+<<<<<<< HEAD
   skip: true
+=======
+  skip: true
+>>>>>>> zpa_dev_branch

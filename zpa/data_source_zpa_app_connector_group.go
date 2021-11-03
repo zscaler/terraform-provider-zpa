@@ -81,7 +81,15 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"last_broker_connect_time_duration": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"last_broker_disconnect_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"last_broker_disconnect_time_duration": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -113,6 +121,14 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"provisioning_key_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"provisioning_key_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"platform": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -129,13 +145,17 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"upgrade_attempt": {
+						"sarge_version": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"signing_cert": {
+						"enrollment_cert": {
 							Type:     schema.TypeMap,
 							Elem:     schema.TypeString,
+							Computed: true,
+						},
+						"upgrade_attempt": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"upgrade_status": {
@@ -201,6 +221,10 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"override_version_profile": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"server_groups": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -245,7 +269,7 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 					},
 				},
 			},
-			"siem_appconnector_group": {
+			"lss_app_connector_group": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -258,6 +282,14 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Computed: true,
 			},
 			"version_profile_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"version_profile_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"version_profile_visibility_scope": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -295,16 +327,19 @@ func resourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("dns_query_type", resp.DNSQueryType)
 		_ = d.Set("enabled", resp.Enabled)
+		_ = d.Set("geo_location_id", resp.GeoLocationID)
 		_ = d.Set("latitude", resp.Latitude)
 		_ = d.Set("location", resp.Location)
 		_ = d.Set("longitude", resp.Longitude)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
-		_ = d.Set("siem_appconnector_group", resp.SiemAppConnectorGroup)
+		_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
+		_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
 		_ = d.Set("upgrade_day", resp.UpgradeDay)
 		_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
+		_ = d.Set("version_profile_name", resp.VersionProfileName)
 		_ = d.Set("connectors", flattenConnectors(resp))
 
 		if err := d.Set("server_groups", flattenServerGroups(resp)); err != nil {
@@ -321,36 +356,42 @@ func flattenConnectors(appConnector *appconnectorgroup.AppConnectorGroup) []inte
 	appConnectors := make([]interface{}, len(appConnector.Connectors))
 	for i, appConnector := range appConnector.Connectors {
 		appConnectors[i] = map[string]interface{}{
-			"application_start_time":      appConnector.ApplicationStartTime,
-			"appconnector_group_id":       appConnector.AppConnectorGroupID,
-			"control_channel_status":      appConnector.ControlChannelStatus,
-			"creation_time":               appConnector.CreationTime,
-			"ctrl_broker_name":            appConnector.CtrlBrokerName,
-			"current_version":             appConnector.CurrentVersion,
-			"description":                 appConnector.Description,
-			"enabled":                     appConnector.Enabled,
-			"expected_upgrade_time":       appConnector.ExpectedUpgradeTime,
-			"expected_version":            appConnector.ExpectedVersion,
-			"fingerprint":                 appConnector.Fingerprint,
-			"id":                          appConnector.ID,
-			"ipacl":                       appConnector.IPACL,
-			"issued_cert_id":              appConnector.IssuedCertID,
-			"last_broker_connect_time":    appConnector.LastBrokerConnectTime,
-			"last_broker_disconnect_time": appConnector.LastBrokerDisconnectTime,
-			"last_upgrade_time":           appConnector.LastUpgradeTime,
-			"latitude":                    appConnector.Latitude,
-			"location":                    appConnector.Location,
-			"longitude":                   appConnector.Longitude,
-			"modifiedby":                  appConnector.ModifiedBy,
-			"modified_time":               appConnector.ModifiedTime,
-			"name":                        appConnector.Name,
-			"platform":                    appConnector.Platform,
-			"previous_version":            appConnector.PreviousVersion,
-			"private_ip":                  appConnector.PrivateIP,
-			"public_ip":                   appConnector.PublicIP,
-			"signing_cert":                appConnector.SigningCert,
-			"upgrade_attempt":             appConnector.UpgradeAttempt,
-			"upgrade_status":              appConnector.UpgradeStatus,
+			"application_start_time":               appConnector.ApplicationStartTime,
+			"appconnector_group_id":                appConnector.AppConnectorGroupID,
+			"appconnector_group_name":              appConnector.AppConnectorGroupName,
+			"control_channel_status":               appConnector.ControlChannelStatus,
+			"creation_time":                        appConnector.CreationTime,
+			"ctrl_broker_name":                     appConnector.CtrlBrokerName,
+			"current_version":                      appConnector.CurrentVersion,
+			"description":                          appConnector.Description,
+			"enabled":                              appConnector.Enabled,
+			"expected_upgrade_time":                appConnector.ExpectedUpgradeTime,
+			"expected_version":                     appConnector.ExpectedVersion,
+			"fingerprint":                          appConnector.Fingerprint,
+			"id":                                   appConnector.ID,
+			"ipacl":                                appConnector.IPACL,
+			"issued_cert_id":                       appConnector.IssuedCertID,
+			"last_broker_connect_time":             appConnector.LastBrokerConnectTime,
+			"last_broker_connect_time_duration":    appConnector.LastBrokerConnectTimeDuration,
+			"last_broker_disconnect_time":          appConnector.LastBrokerDisconnectTime,
+			"last_broker_disconnect_time_duration": appConnector.LastBrokerDisconnectTimeDuration,
+			"last_upgrade_time":                    appConnector.LastUpgradeTime,
+			"latitude":                             appConnector.Latitude,
+			"location":                             appConnector.Location,
+			"longitude":                            appConnector.Longitude,
+			"modifiedby":                           appConnector.ModifiedBy,
+			"modified_time":                        appConnector.ModifiedTime,
+			"name":                                 appConnector.Name,
+			"provisioning_key_id":                  appConnector.ProvisioningKeyID,
+			"provisioning_key_name":                appConnector.ProvisioningKeyName,
+			"platform":                             appConnector.Platform,
+			"previous_version":                     appConnector.PreviousVersion,
+			"private_ip":                           appConnector.PrivateIP,
+			"public_ip":                            appConnector.PublicIP,
+			"sarge_version":                        appConnector.SargeVersion,
+			"enrollment_cert":                      appConnector.EnrollmentCert,
+			"upgrade_attempt":                      appConnector.UpgradeAttempt,
+			"upgrade_status":                       appConnector.UpgradeStatus,
 		}
 	}
 
