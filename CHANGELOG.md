@@ -1,4 +1,4 @@
-# 2.0.0 (November 2, 2021)
+# 2.0.0 (November 3, 2021)
 
 ## Notes
 
@@ -6,6 +6,7 @@
 - New prerequisite APIs for enrollment certificates, provisioning keys, and to get version profiles, client types, status codes, and LSS formats are added.
 - A new API to reorder policy rules is added.
 - The endpoints to get all browser access (BA) certificates, IdPs, posture profiles, trusted networks, and SAML attributes are now deprecated, and new APIs with pagination are provided.
+- API endpoints specific to a policy (global/reauth/bypass) are deprecated and replaced by a generic API that takes policyType as a parameter.
 - The port range configuration for the application segment has been enhanced for more readability. The tcpPortRanges and udpPortRanges fields are deprecated and replaced with tcpPortRange and udpPortRange.
 
 ### Features
@@ -29,7 +30,10 @@
 
 ### Enhancements
 
-1. Updated ``resource_zpa_policy_access_rule`` to support the new API to reorder policy rules.
+1. A new API to reorder policy rules is added. This update affects the following resources:
+    - ``resource_zpa_policy_access_rule`` :rocket:
+    - ``resource_zpa_policy_access_timeout_rule`` :rocket:
+    - ``resource_zpa_policy_access_forwarding_rule`` :rocket:
 2. Updated the following data sources to V2 API to support pagination:
     - ``data_source_zpa_idp_controller`` :rocket:
     - ``data_source_zpa_saml_attribute``:rocket:
@@ -38,6 +42,10 @@
     - ``data_source_zpa_posture_profile`` :rocket:
     - ``data_source_zpa_ba_certificate`` :rocket:
     - ``data_source_zpa_machine_group`` :rocket:
+3. Added additional validations to ``bypass_type`` parameter in ``resource_zpa_browser_access``. :rocket:
+4. The port range configuration for the application segment has been enhanced for more readability. This update affects the following resources:
+    - ``resource_zpa_application_segment`` :rocket:
+    - ``resource_zpa_browser_access`` :rocket:
 
 ### Deprecations
 
@@ -46,6 +54,8 @@
 1. Deprecated ``data_source_zpa_global_forwarding_policy`` and ``data_source_zpa_global_timeout_policy`` and replaced with ``data_source_zpa_policy_type`` 💥
 
 2. Deprecated ``data_source_zpa_global_access_policy`` and renamed with ``data_source_zpa_policy_type`` 💥
+
+3. Deprecated ``tcp_port_ranges`` and ``udp_port_ranges`` fields are deprecated and replaced with ``tcp_port_range`` and ``udp_port_range``. The values will be kept in Terraform schema until next provider update for backwards compatibility. 💥
 
 ## 1.0.0 (September 23, 2021)
 
