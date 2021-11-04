@@ -49,3 +49,5 @@ examples/quick-refactor.sh
 examples/terraform-set-logging.sh
 examples/all_together
 goreleaser.sh
+dist/
+dist/*
