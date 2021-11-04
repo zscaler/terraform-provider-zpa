@@ -10,20 +10,20 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"client_id": {
+			"zpa_client_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: envDefaultFunc("ZPA_CLIENT_ID"),
 				Description: "zpa client id",
 			},
-			"client_secret": {
+			"zpa_client_secret": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
 				DefaultFunc: envDefaultFunc("ZPA_CLIENT_SECRET"),
 				Description: "zpa client secret",
 			},
-			"customerid": {
+			"zpa_customer_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
@@ -51,19 +51,17 @@ func Provider() *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform date source name: data source schema
-			"zpa_application_server":       dataSourceApplicationServer(),
-			"zpa_application_segment":      dataSourceApplicationSegment(),
-			"zpa_segment_group":            dataSourceSegmentGroup(),
-			"zpa_app_connector_group":      dataSourceAppConnectorGroup(),
-			"zpa_ba_certificate":           dataSourceBaCertificate(),
-			"zpa_customer_version_profile": dataSourceCustomerVersionProfile(),
-			"zpa_cloud_connector_group":    dataSourceCloudConnectorGroup(),
-			"zpa_idp_controller":           dataSourceIdpController(),
-			"zpa_machine_group":            dataSourceMachineGroup(),
-			"zpa_provisioning_key":         dataSourceProvisioningKey(),
-			"zpa_policy_type":              dataSourcePolicyType(),
-			// "zpa_global_policy_timeout":		dataSourceGlobalPolicyTimeout(),
-			// "zpa_global_policy_forwarding": dataSourceGlobalPolicyForwarding(),
+			"zpa_application_server":          dataSourceApplicationServer(),
+			"zpa_application_segment":         dataSourceApplicationSegment(),
+			"zpa_segment_group":               dataSourceSegmentGroup(),
+			"zpa_app_connector_group":         dataSourceAppConnectorGroup(),
+			"zpa_ba_certificate":              dataSourceBaCertificate(),
+			"zpa_customer_version_profile":    dataSourceCustomerVersionProfile(),
+			"zpa_cloud_connector_group":       dataSourceCloudConnectorGroup(),
+			"zpa_idp_controller":              dataSourceIdpController(),
+			"zpa_machine_group":               dataSourceMachineGroup(),
+			"zpa_provisioning_key":            dataSourceProvisioningKey(),
+			"zpa_policy_type":                 dataSourcePolicyType(),
 			"zpa_posture_profile":             dataSourcePostureProfile(),
 			"zpa_service_edge_group":          dataSourceServiceEdgeGroup(),
 			"zpa_saml_attribute":              dataSourceSamlAttribute(),
@@ -84,9 +82,9 @@ func Provider() *schema.Provider {
 func zscalerConfigure(d *schema.ResourceData) (interface{}, error) {
 	log.Printf("[INFO] Initializing ZPA client")
 	config := Config{
-		ClientID:     d.Get("client_id").(string),
-		ClientSecret: d.Get("client_secret").(string),
-		CustomerID:   d.Get("customerid").(string),
+		ClientID:     d.Get("zpa_client_id").(string),
+		ClientSecret: d.Get("zpa_client_secret").(string),
+		CustomerID:   d.Get("zpa_customer_id").(string),
 	}
 
 	return config.Client()
