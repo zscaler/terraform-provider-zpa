@@ -10,20 +10,20 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"client_id": {
+			"zpa_client_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: envDefaultFunc("ZPA_CLIENT_ID"),
 				Description: "zpa client id",
 			},
-			"client_secret": {
+			"zpa_client_secret": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
 				DefaultFunc: envDefaultFunc("ZPA_CLIENT_SECRET"),
 				Description: "zpa client secret",
 			},
-			"customerid": {
+			"zpa_customer_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
@@ -84,9 +84,9 @@ func Provider() *schema.Provider {
 func zscalerConfigure(d *schema.ResourceData) (interface{}, error) {
 	log.Printf("[INFO] Initializing ZPA client")
 	config := Config{
-		ClientID:     d.Get("client_id").(string),
-		ClientSecret: d.Get("client_secret").(string),
-		CustomerID:   d.Get("customerid").(string),
+		ClientID:     d.Get("zpa_client_id").(string),
+		ClientSecret: d.Get("zpa_client_secret").(string),
+		CustomerID:   d.Get("zpa_customer_id").(string),
 	}
 
 	return config.Client()
