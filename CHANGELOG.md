@@ -1,3 +1,10 @@
+# 2.0.1 (November 4, 2021)
+
+## Bug Fixes
+
+- Fixed issue where provider authentication parameters for hard coded credentials was not working:
+- Changed the following variable names: ``client_id``, ``client_secret`` and ``customerid`` to ``zpa_client_id``, ``zpa_client_secret`` and ``zpa_customer_id``.
+
 # 2.0.0 (November 3, 2021)
 
 ## Notes
