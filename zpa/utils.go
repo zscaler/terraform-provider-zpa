@@ -8,13 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func ParseFloat(val string) (float64, error) {
-	if val == "" {
-		return 0, nil
-	}
-	return strconv.ParseFloat(val, 64)
-}
-
 func ValidateStringFloatBetween(min, max float64) schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (warnings []string, errors []error) {
 		str, ok := i.(string)
