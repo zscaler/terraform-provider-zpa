@@ -58,9 +58,10 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				}, false),
 			},
 			"latitude": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Latitude for the Service Edge Group.",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Latitude for the Service Edge Group.",
+				ValidateFunc: ValidateStringFloatBetween(-90, 90),
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -68,9 +69,10 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Description: "Location for the Service Edge Group.",
 			},
 			"longitude": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Longitude for the Service Edge Group.",
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Longitude for the Service Edge Group.",
+				ValidateFunc: ValidateStringFloatBetween(-180.0, 180.0),
 			},
 			"override_version_profile": {
 				Type:        schema.TypeBool,
