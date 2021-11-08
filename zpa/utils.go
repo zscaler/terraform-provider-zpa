@@ -1,10 +1,35 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func ValidateStringFloatBetween(min, max float64) schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (warnings []string, errors []error) {
+		str, ok := i.(string)
+		if !ok {
+			errors = append(errors, fmt.Errorf("expected type of %s to be string with value of float64", k))
+			return
+		}
+
+		v, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			errors = append(errors, fmt.Errorf("expected type of %s to be float64: %v", k, err))
+			return
+		}
+
+		if v < min || v > max {
+			errors = append(errors, fmt.Errorf("expected %s to be in the range (%f - %f), got %f", k, min, max, v))
+			return
+		}
+
+		return
+	}
+}
 
 func SetToStringSlice(d *schema.Set) []string {
 	list := d.List()
