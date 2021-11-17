@@ -64,7 +64,11 @@ func resourceSegmentGroup() *schema.Resource {
 			},
 			"tcp_keep_alive_enabled": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
+				Default:  0,
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1",
+				}, false),
 			},
 		},
 	}
