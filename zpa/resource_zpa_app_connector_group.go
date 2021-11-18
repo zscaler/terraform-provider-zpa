@@ -97,13 +97,21 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Description: "Whether the default version profile of the App Connector Group is applied or overridden. Supported values: true, false",
 			},
 			"version_profile_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "ID of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "ID of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
+				Default:     0,
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1", "2",
+				}, false),
 			},
 			"version_profile_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "Default",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Default", "Previous Default", "New Release",
+				}, false),
 			},
 		},
 	}
