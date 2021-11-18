@@ -2,7 +2,7 @@
 
 ## Enhancement
 
-- Added custom validation function ``ValidateStringFloatBetween`` to ``resource_zpa_app_connector_group``. [ZPA-17](https://github.com/willguibr/terraform-provider-zpa/pull/17).
+- Added custom validation function ``ValidateStringFloatBetween`` to ``resource_zpa_app_connector_group`` to validate ``longitude`` and ``latitude`` parameters. [ZPA-17](https://github.com/willguibr/terraform-provider-zpa/pull/17).
 - Added custom validation function ``ValidateStringFloatBetween`` to ``resource_zpa_service_edge_group`` to validate ``longitude`` and ``latitude`` parameters. [ZPA-18](https://github.com/willguibr/terraform-provider-zpa/pull/18).
 
 # 2.0.1 (November 4, 2021)
