@@ -69,7 +69,7 @@ xcopy "%GOPATH%\bin\terraform-provider-zpa.exe" "%APPDATA%\terraform.d\plugins\z
 ```
 Run the following commands if using powershell:
 ```sh
-cd "$env:GOPATH\src\github.com\willguibr\terraform-provider-zpa"
+cd "$env:GOPATH\src\github.com\terraform-providers\terraform-provider-zpa"
 go fmt
 go install
 xcopy "$env:GOPATH\bin\terraform-provider-zpa.exe" "$env:APPDATA\terraform.d\plugins\zscaler.com\zpa\zpa\1.0.0\windows_amd64\" /Y
