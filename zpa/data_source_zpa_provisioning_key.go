@@ -56,7 +56,7 @@ func dataSourceProvisioningKey() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"provisioning_key": {
 				Type:     schema.TypeString,
