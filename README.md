@@ -1,4 +1,4 @@
-[![Build Status](https://app.travis-ci.com/willguibr/terraform-provider-zpa.svg?token=Djmu8v8CsRiipfYMXaRA&branch=master)](https://app.travis-ci.com/willguibr/terraform-provider-zpa)
+[![Build Status](https://app.travis-ci.com/willguibr/terraform-provider-zpa.svg?token=Djmu8v8CsRiipfYMXaRA&branch=master)](https://app.travis-ci.com//terraform-provider-zpa)
 
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
@@ -20,12 +20,12 @@ Requirements
 Building The Provider (Terraform v0.12+)
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/willguibr/terraform-provider-zpa`
+Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-zpa`
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/terraform-providers
 $ cd $GOPATH/src/github.com/terraform-providers
-$ git clone https://github.com/willguibr/terraform-provider-zpa.git
+$ git clone https://github.com/terraform-providers/terraform-provider-zpa.git
 ```
 
 To clone on windows
@@ -119,11 +119,11 @@ terraform {
 Examples
 --------
 
-Visit [here](https://github.com/willguibr/terraform-provider-zpa/tree/master/website/docs/) for the complete documentation for all resources on github.
+Visit [here](https://github.com//terraform-provider-zpa/tree/master/website/docs/) for the complete documentation for all resources on github.
 
 Issues
 =========
-Please feel free to open an issue using [Github Issues](https://github.com/willguibr/terraform-provider-zpa/issues) if you run into any problems using this ZPA Terraform provider.
+Please feel free to open an issue using [Github Issues](https://github.com//terraform-provider-zpa/issues) if you run into any problems using this ZPA Terraform provider.
 
 Developing the Provider
 ---------------------------
