@@ -5,7 +5,7 @@ resource "zpa_policyset_rule" "corp_trusted_network" {
   action                        = "ALLOW"
   rule_order                    = 1
   operator = "AND"
-  policy_set_id = data.zpa_policy_set_global.all.id
+  policy_set_id = data.zpa_policy_type.access_policy.id
   conditions {
     negated = false
     operator = "OR"
@@ -17,8 +17,12 @@ resource "zpa_policyset_rule" "corp_trusted_network" {
   }
 }
 
-data "zpa_policy_set_global" "all" {}
+// Retrieve Policy Types
+data "zpa_policy_type" "access_policy" {
+    policy_type = "ACCESS_POLICY"
+}
 
+// Retrieve Trusted Network NetworkID Information
 data "zpa_trusted_network" "corp_trusted_network" {
  name = "Corp-Trusted-Networks"
 }

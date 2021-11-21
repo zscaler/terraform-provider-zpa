@@ -1,15 +1,3 @@
-
-terraform {
-  required_providers {
-    zpa = {
-      version = "1.0.0"
-      source  = "zscaler.com/zpa/zpa"
-    }
-  }
-}
-
-provider "zpa" {}
-
 // Get information for "GLOBAL_POLICY" ID
 data "zpa_policy_type" "access_policy" {
     policy_type = "ACCESS_POLICY"
