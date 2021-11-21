@@ -1,4 +1,3 @@
-```hcl
 // Create Server Group - Dynamic Discovery "True"
 resource "zpa_server_group" "example" {
   name = "Example"
@@ -11,11 +10,9 @@ resource "zpa_server_group" "example" {
 }
 
 data "zpa_app_connector_group" "example" {
-  name = "SGIO-Vancouver"
+  name = "Example"
 }
-```
 
-```hcl
 // Create Server Group - Dynamic Discovery "False"
 resource "zpa_server_group" "example" {
   name = "Example"
@@ -26,12 +23,12 @@ resource "zpa_server_group" "example" {
     id = [data.zpa_app_connector_group.example.id]
   }
   servers {
-    id = [zpa_application_server.example20.id]
+    id = [zpa_application_server.example.id]
   }
 }
 
 data "zpa_app_connector_group" "example" {
-  name = "SGIO-Vancouver"
+  name = "Example"
 }
 
 resource "zpa_application_server" "example" {
@@ -40,6 +37,3 @@ resource "zpa_application_server" "example" {
   address                       = "192.168.1.1"
   enabled                       = true
 }
-
-
-```
