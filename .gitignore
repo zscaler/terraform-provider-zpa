@@ -51,3 +51,5 @@ examples/all_together
 goreleaser.sh
 dist/
 dist/*
+local_test/
+local_test/*
