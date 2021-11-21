@@ -56,7 +56,7 @@ func dataSourceProvisioningKey() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"provisioning_key": {
 				Type:     schema.TypeString,
@@ -111,7 +111,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 	var resp *provisioningkey.ProvisioningKey
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
-		log.Printf("[INFO] Getting data provisining key %s\n", id)
+		log.Printf("[INFO] Getting data provisioning key %s\n", id)
 		res, _, err := zClient.provisioningkey.Get(associationType, id)
 		if err != nil {
 			return err
@@ -120,7 +120,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
-		log.Printf("[INFO] Getting data for provisining key name %s\n", name)
+		log.Printf("[INFO] Getting data for provisioning key name %s\n", name)
 		res, _, err := zClient.provisioningkey.GetByName(associationType, name)
 		if err != nil {
 			return err
@@ -147,7 +147,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 		_ = d.Set("zcomponent_id", resp.ZcomponentID)
 		_ = d.Set("zcomponent_name", resp.ZcomponentName)
 	} else {
-		return fmt.Errorf("couldn't find any provisining key with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any provisioning key with name '%s' or id '%s'", name, id)
 	}
 	return nil
 }
