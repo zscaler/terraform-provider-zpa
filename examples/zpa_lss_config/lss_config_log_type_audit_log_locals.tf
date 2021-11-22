@@ -17,7 +17,7 @@ resource "zpa_lss_config_controller" "example" {
 
 // Retrieve the App Connector Group ID
 data "zpa_app_connector_group" "example" {
-  name = "SGIO-Vancouver"
+  name = "Example"
 }
 
 // Encode JSON value to string
