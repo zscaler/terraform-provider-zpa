@@ -1,14 +1,3 @@
-terraform {
-    required_providers {
-        zpa = {
-            version = "1.0.0"
-            source = "zscaler.com/zpa/zpa"
-        }
-    }
-}
-
-provider "zpa" {}
-
 // CrowdStrike_ZTA_Score_Policy
 resource "zpa_policy_access_rule" "crwd_zta_score_40" {
   name                          = "CrowdStrike_ZTA_Score_40"
@@ -16,7 +5,7 @@ resource "zpa_policy_access_rule" "crwd_zta_score_40" {
   action                        = "DENY"
   rule_order                     = 2
   operator = "AND"
-  policy_set_id = data.zpa_global_access_policy.all.id
+  policy_set_id = data.zpa_policy_type.access_policy.id
   conditions {
     negated = false
     operator = "OR"
@@ -32,22 +21,28 @@ resource "zpa_policy_access_rule" "crwd_zta_score_40" {
     operands {
       object_type = "SAML"
       lhs = data.zpa_saml_attribute.email_user_sso.id
-      rhs_list = ["wguilherme@securitygeek.io", "wguilherme2@securitygeek.io"]
-      idp_id = data.zpa_idp_controller.sgio_user_okta.id
+      rhs_list = ["user1@acme.com", "user2@acme.com"]
+      idp_id = data.zpa_idp_controller.user_idp_name.id
     }
   }
 }
 
-data "zpa_global_access_policy" "all" {}
+// Retrieve Policy Type ID
+data "zpa_policy_type" "access_policy" {
+    policy_type = "ACCESS_POLICY"
+}
 
+// Retrieve IDP ID information
 data "zpa_idp_controller" "sgio_user_okta" {
- name = "SGIO-User-Okta"
+ name = "User_IDP_Name"
 }
 
+// Retrieve SAML Attribute information
 data "zpa_saml_attribute" "email_user_sso" {
-    name = "Email_SGIO-User-Okta"
+    name = "Email_User_IDP_Name"
 }
 
+// Retrieve Posture Profile UUID information
 data "zpa_posture_profile" "crwd_zta_score_40" {
  name = "CrowdStrike_ZPA_ZTA_40"
 }
