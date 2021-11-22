@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -56,21 +58,23 @@ func (service *Service) GetByPostureUDID(postureUDID string) (*PostureProfile, *
 }
 
 func (service *Service) GetByName(postureName string) (*PostureProfile, *http.Response, error) {
-	var v struct {
-		List []PostureProfile `json:"list"`
-	}
-
-	relativeURL := mgmtConfig + service.Client.Config.CustomerID + postureProfileEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
-		pagesize: 500,
-	}, nil, &v)
+	list, resp, err := service.GetAll()
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, postureProfile := range v.List {
+	for _, postureProfile := range list {
 		if strings.EqualFold(postureProfile.Name, postureName) {
 			return &postureProfile, resp, nil
 		}
 	}
 	return nil, resp, fmt.Errorf("no posture profile named '%s' was found", postureName)
+}
+
+func (service *Service) GetAll() ([]PostureProfile, *http.Response, error) {
+	var v struct {
+		List []PostureProfile `json:"list"`
+	}
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + postureProfileEndpoint
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: 500}, nil, &v)
+	return v.List, resp, err
 }

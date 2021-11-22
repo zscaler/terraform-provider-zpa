@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -44,22 +46,26 @@ func (service *Service) Get(associationType, provisioningKeyID string) (*Provisi
 
 // GET --> mgmtconfig/v1/admin/customers/{customerId}/associationType/{associationType}/provisioningKey
 func (service *Service) GetByName(associationType, name string) (*ProvisioningKey, *http.Response, error) {
-	var v struct {
-		List []ProvisioningKey `json:"list"`
-	}
-	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/associationType/%s/provisioningKey", associationType)
-	resp, err := service.Client.NewRequestDo("GET", url, struct{ pagesize int }{
-		pagesize: 500,
-	}, nil, &v)
+	list, resp, err := service.GetAll(associationType)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, provisioningKey := range v.List {
+	for _, provisioningKey := range list {
 		if strings.EqualFold(provisioningKey.Name, name) {
 			return &provisioningKey, resp, nil
 		}
 	}
 	return nil, resp, fmt.Errorf("no ProvisioningKey named '%s' was found", name)
+}
+
+// GET --> mgmtconfig/v1/admin/customers/{customerId}/associationType/{associationType}/provisioningKey
+func (service *Service) GetAll(associationType string) ([]ProvisioningKey, *http.Response, error) {
+	var v struct {
+		List []ProvisioningKey `json:"list"`
+	}
+	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/associationType/%s/provisioningKey", associationType)
+	resp, err := service.Client.NewRequestDo("GET", url, common.Pagination{PageSize: 500}, nil, &v)
+	return v.List, resp, err
 }
 
 // POST --> /mgmtconfig/v1/admin/customers/{customerId}/associationType/{associationType}/provisioningKey

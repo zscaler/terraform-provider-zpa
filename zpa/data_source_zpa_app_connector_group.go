@@ -8,292 +8,309 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorgroup"
 )
 
+func appConnectorGroupSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"connectors": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"application_start_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"appconnector_group_id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"appconnector_group_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"control_channel_status": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"creation_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"ctrl_broker_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"current_version": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"description": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"enabled": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"expected_upgrade_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"expected_version": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"fingerprint": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"ipacl": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"issued_cert_id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"last_broker_connect_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"last_broker_connect_time_duration": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"last_broker_disconnect_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"last_broker_disconnect_time_duration": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"last_upgrade_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"latitude": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"location": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"longitude": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"modifiedby": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"modified_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"provisioning_key_id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"provisioning_key_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"platform": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"previous_version": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"private_ip": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"public_ip": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"sarge_version": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"enrollment_cert": {
+						Type:     schema.TypeMap,
+						Elem:     schema.TypeString,
+						Computed: true,
+					},
+					"upgrade_attempt": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"upgrade_status": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+				},
+			},
+		},
+		"city_country": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"country_code": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"creation_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"description": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"dns_query_type": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"geo_location_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"enabled": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"geolocation_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"latitude": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"location": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"longitude": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"modifiedby": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"modified_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"override_version_profile": {
+			Type:     schema.TypeBool,
+			Optional: true,
+		},
+		"server_groups": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"config_space": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"creation_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"description": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"enabled": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"dynamic_discovery": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"modifiedby": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"modified_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+				},
+			},
+		},
+		"lss_app_connector_group": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"upgrade_day": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"upgrade_time_in_secs": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"version_profile_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"version_profile_name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"version_profile_visibility_scope": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+	}
+}
+
 func dataSourceAppConnectorGroup() *schema.Resource {
 	return &schema.Resource{
 		Read: resourceConnectorGroupRead,
-		Schema: map[string]*schema.Schema{
-			"connectors": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"application_start_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"appconnector_group_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"appconnector_group_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"control_channel_status": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"creation_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"ctrl_broker_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"current_version": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"enabled": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"expected_upgrade_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"expected_version": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"fingerprint": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"ipacl": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"issued_cert_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"last_broker_connect_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"last_broker_connect_time_duration": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"last_broker_disconnect_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"last_broker_disconnect_time_duration": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"last_upgrade_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"latitude": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"location": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"longitude": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modifiedby": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modified_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"provisioning_key_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"provisioning_key_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"platform": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"previous_version": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"private_ip": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"public_ip": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"sarge_version": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"enrollment_cert": {
-							Type:     schema.TypeMap,
-							Elem:     schema.TypeString,
-							Computed: true,
-						},
-						"upgrade_attempt": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"upgrade_status": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+		Schema: MergeSchema(appConnectorGroupSchema(),
+			map[string]*schema.Schema{
+				"list": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: appConnectorGroupSchema(),
 					},
 				},
-			},
-			"city_country": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"country_code": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"creation_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"dns_query_type": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"geolocation_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"latitude": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"location": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"longitude": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"modifiedby": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"modified_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"override_version_profile": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"server_groups": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"config_space": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"creation_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"enabled": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"dynamic_discovery": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"modifiedby": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modified_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
-			"lss_app_connector_group": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"upgrade_day": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"upgrade_time_in_secs": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"version_profile_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"version_profile_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"version_profile_visibility_scope": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-		},
+			}),
 	}
 }
 
@@ -321,6 +338,7 @@ func resourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
+		_ = d.Set("id", resp.ID)
 		_ = d.Set("city_country", resp.CityCountry)
 		_ = d.Set("country_code", resp.CountryCode)
 		_ = d.Set("creation_time", resp.CreationTime)
@@ -341,15 +359,54 @@ func resourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
 		_ = d.Set("connectors", flattenConnectors(resp))
-
+		_ = d.Set("list", flattenAppConnectorGroupList([]appconnectorgroup.AppConnectorGroup{*resp}))
 		if err := d.Set("server_groups", flattenServerGroups(resp)); err != nil {
 			return fmt.Errorf("failed to read server groups %s", err)
 		}
-	} else {
+	} else if id != "" || name != "" {
 		return fmt.Errorf("couldn't find any app connector group with name '%s' or id '%s'", name, id)
+	} else {
+		// get all
+		list, _, err := zClient.appconnectorgroup.GetAll()
+		if err != nil {
+			return err
+		}
+		d.SetId("app-connector-group-list")
+		_ = d.Set("list", flattenAppConnectorGroupList(list))
 	}
 
 	return nil
+}
+
+func flattenAppConnectorGroupList(list []appconnectorgroup.AppConnectorGroup) []interface{} {
+	appConnectorGroup := make([]interface{}, len(list))
+	for i, item := range list {
+		appConnectorGroup[i] = map[string]interface{}{
+			"id":                       item.ID,
+			"city_country":             item.CityCountry,
+			"country_code":             item.CountryCode,
+			"creation_time":            item.CreationTime,
+			"description":              item.Description,
+			"dns_query_type":           item.DNSQueryType,
+			"enabled":                  item.Enabled,
+			"geo_location_id":          item.GeoLocationID,
+			"latitude":                 item.Latitude,
+			"location":                 item.Location,
+			"longitude":                item.Longitude,
+			"modifiedby":               item.ModifiedBy,
+			"modified_time":            item.ModifiedTime,
+			"name":                     item.Name,
+			"override_version_profile": item.OverrideVersionProfile,
+			"lss_app_connector_group":  item.LSSAppConnectorGroup,
+			"upgrade_day":              item.UpgradeDay,
+			"upgrade_time_in_secs":     item.UpgradeTimeInSecs,
+			"version_profile_id":       item.VersionProfileID,
+			"version_profile_name":     item.VersionProfileName,
+			"connectors":               flattenConnectors(&item),
+			"server_groups":            flattenServerGroups(&item),
+		}
+	}
+	return appConnectorGroup
 }
 
 func flattenConnectors(appConnector *appconnectorgroup.AppConnectorGroup) []interface{} {

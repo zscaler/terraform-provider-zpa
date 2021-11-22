@@ -8,230 +8,243 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/applicationsegment"
 )
 
+func appSegmentSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"segment_group_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"segment_group_name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"bypass_type": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"clientless_apps": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"allow_options": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"appid": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"application_port": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"application_protocol": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"certificate_id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"certificate_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"cname": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"creation_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"description": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"domain": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"enabled": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"hidden": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"local_domain": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"modifiedby": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"modified_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"path": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"trust_untrusted_cert": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+				},
+			},
+		},
+		"config_space": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"creation_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"default_idle_timeout": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"default_max_age": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"description": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"domain_names": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"double_encrypt": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"enabled": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"health_checktype": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"health_reporting": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"ip_anchored": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"is_cname_enabled": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"modifiedby": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"modified_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"passive_health_enabled": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"server_groups": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"config_space": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"creation_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"description": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"enabled": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"dynamic_discovery": {
+						Type:     schema.TypeBool,
+						Computed: true,
+					},
+					"modifiedby": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"modified_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+				},
+			},
+		},
+		"tcp_port_ranges": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"udp_port_ranges": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+	}
+}
+
 func dataSourceApplicationSegment() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceApplicationSegmentRead,
-		Schema: map[string]*schema.Schema{
-			"segment_group_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"segment_group_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"bypass_type": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"clientless_apps": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"allow_options": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"appid": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"application_port": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"application_protocol": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"certificate_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"certificate_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"cname": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"creation_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"domain": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"enabled": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"hidden": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"local_domain": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modifiedby": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modified_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"path": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"trust_untrusted_cert": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
+		Schema: MergeSchema(appSegmentSchema(),
+			map[string]*schema.Schema{
+				"list": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: appSegmentSchema(),
 					},
 				},
-			},
-			"config_space": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"creation_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"default_idle_timeout": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"default_max_age": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"domain_names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"double_encrypt": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"health_checktype": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"health_reporting": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"ip_anchored": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"is_cname_enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"modifiedby": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"modified_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"passive_health_enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"server_groups": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"config_space": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"creation_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"enabled": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"dynamic_discovery": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"modifiedby": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modified_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
-			"tcp_port_ranges": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"udp_port_ranges": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-		},
+			}),
 	}
 }
 
@@ -277,19 +290,58 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
-
+		_ = d.Set("list", flattenAppSegmentList([]applicationsegment.ApplicationSegmentResource{*resp}))
 		if err := d.Set("clientless_apps", flattenClientlessApps(resp)); err != nil {
 			return fmt.Errorf("failed to read clientless apps %s", err)
 		}
 		if err := d.Set("server_groups", flattenAppServerGroups(resp)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
 		}
-	} else {
+	} else if id != "" || name != "" {
 		return fmt.Errorf("couldn't find any application segment with name '%s' or id '%s'", name, id)
+	} else {
+		// get the list
+		list, _, err := zClient.applicationsegment.GetAll()
+		log.Printf("[INFO] got %d apps\n", len(list))
+		if err != nil {
+			return err
+		}
+		d.SetId("app-segment-list")
+		_ = d.Set("list", flattenAppSegmentList(list))
 	}
 
 	return nil
+}
 
+func flattenAppSegmentList(list []applicationsegment.ApplicationSegmentResource) []interface{} {
+	appSegments := make([]interface{}, len(list))
+	for i, item := range list {
+		appSegments[i] = map[string]interface{}{
+			"id":                     item.ID,
+			"segment_group_id":       item.SegmentGroupID,
+			"segment_group_name":     item.SegmentGroupName,
+			"bypass_type":            item.BypassType,
+			"config_space":           item.ConfigSpace,
+			"creation_time":          item.CreationTime,
+			"description":            item.Description,
+			"domain_names":           item.DomainNames,
+			"double_encrypt":         item.DoubleEncrypt,
+			"enabled":                item.Enabled,
+			"health_checktype":       item.HealthCheckType,
+			"health_reporting":       item.HealthReporting,
+			"ip_anchored":            item.IpAnchored,
+			"is_cname_enabled":       item.IsCnameEnabled,
+			"modifiedby":             item.ModifiedBy,
+			"modified_time":          item.ModifiedTime,
+			"name":                   item.Name,
+			"passive_health_enabled": item.PassiveHealthEnabled,
+			"tcp_port_ranges":        item.TCPPortRanges,
+			"udp_port_ranges":        item.UDPPortRanges,
+			"clientless_apps":        flattenClientlessApps(&item),
+			"server_groups":          flattenAppServerGroups(&item),
+		}
+	}
+	return appSegments
 }
 
 func flattenClientlessApps(clientlessApp *applicationsegment.ApplicationSegmentResource) []interface{} {
@@ -303,7 +355,7 @@ func flattenClientlessApps(clientlessApp *applicationsegment.ApplicationSegmentR
 			"certificate_id":       clientlessApp.CertificateID,
 			"certificate_name":     clientlessApp.CertificateName,
 			"cname":                clientlessApp.Cname,
-			"creationtime":         clientlessApp.CreationTime,
+			"creation_time":        clientlessApp.CreationTime,
 			"description":          clientlessApp.Description,
 			"domain":               clientlessApp.Domain,
 			"enabled":              clientlessApp.Enabled,

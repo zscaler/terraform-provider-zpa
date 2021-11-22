@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -102,9 +104,7 @@ func (service *Service) GetByName(appConnectorGroupName string) (*AppConnectorGr
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + appConnectorGroupEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
-		pagesize: 500,
-	}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: 500}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -144,4 +144,14 @@ func (service *Service) Delete(appConnectorGroupID string) (*http.Response, erro
 	}
 
 	return resp, nil
+}
+
+func (service *Service) GetAll() ([]AppConnectorGroup, *http.Response, error) {
+	var v struct {
+		List []AppConnectorGroup `json:"list"`
+	}
+
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + appConnectorGroupEndpoint
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: 500}, nil, &v)
+	return v.List, resp, err
 }
