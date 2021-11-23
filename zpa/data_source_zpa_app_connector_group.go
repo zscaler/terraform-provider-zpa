@@ -225,7 +225,7 @@ func appConnectorGroupSchema() map[string]*schema.Schema {
 		},
 		"override_version_profile": {
 			Type:     schema.TypeBool,
-			Optional: true,
+			Computed: true,
 		},
 		"server_groups": {
 			Type:     schema.TypeList,
