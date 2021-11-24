@@ -107,20 +107,26 @@ func dataSourceProvisioningKey() *schema.Resource {
 		Read:     dataSourceProvisioningKeyRead,
 		Importer: &schema.ResourceImporter{},
 
-		Schema: MergeSchema(
-			provisiningKeySchema(),
-			map[string]*schema.Schema{
-				"list": {
-					Type:     schema.TypeList,
-					Computed: true,
-					Elem: &schema.Resource{
-						Schema: provisiningKeySchema(),
-					},
-				},
-			}),
+		Schema: provisiningKeySchema(),
 	}
 }
 
+func dataSourceProvisioningKeyAll() *schema.Resource {
+	return &schema.Resource{
+		Read:     dataSourceProvisioningKeyAllRead,
+		Importer: &schema.ResourceImporter{},
+
+		Schema: map[string]*schema.Schema{
+			"list": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: provisiningKeySchema(),
+				},
+			},
+		},
+	}
+}
 func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	associationType, ok := getAssociationType(d)
@@ -166,21 +172,26 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 		_ = d.Set("usage_count", resp.UsageCount)
 		_ = d.Set("zcomponent_id", resp.ZcomponentID)
 		_ = d.Set("zcomponent_name", resp.ZcomponentName)
-		_ = d.Set("list", flattenProvisionningKeyList([]provisioningkey.ProvisioningKey{*resp}))
-	} else if id != "" || name != "" {
-		return fmt.Errorf("couldn't find any provisining key with name '%s' or id '%s'", name, id)
 	} else {
-		// get the list
-		list, _, err := zClient.provisioningkey.GetAll(associationType)
-		if err != nil {
-			return err
-		}
-		d.SetId("provisionning-key-list")
-		_ = d.Set("list", flattenProvisionningKeyList(list))
+		return fmt.Errorf("couldn't find any provisining key with name '%s' or id '%s'", name, id)
 	}
 	return nil
 }
 
+func dataSourceProvisioningKeyAllRead(d *schema.ResourceData, m interface{}) error {
+	zClient := m.(*Client)
+	associationType, ok := getAssociationType(d)
+	if !ok {
+		return fmt.Errorf("associationType is required")
+	}
+	list, _, err := zClient.provisioningkey.GetAll(associationType)
+	if err != nil {
+		return err
+	}
+	d.SetId("provisionning-key-list")
+	_ = d.Set("list", flattenProvisionningKeyList(list))
+	return nil
+}
 func flattenProvisionningKeyList(list []provisioningkey.ProvisioningKey) []interface{} {
 	keys := make([]interface{}, len(list))
 	for i, item := range list {

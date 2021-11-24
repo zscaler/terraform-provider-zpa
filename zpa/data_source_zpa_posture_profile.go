@@ -57,17 +57,23 @@ func postureProfileSchema() map[string]*schema.Schema {
 
 func dataSourcePostureProfile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcePostureProfileRead,
-		Schema: MergeSchema(postureProfileSchema(),
-			map[string]*schema.Schema{
-				"list": {
-					Type:     schema.TypeList,
-					Computed: true,
-					Elem: &schema.Resource{
-						Schema: postureProfileSchema(),
-					},
+		Read:   dataSourcePostureProfileRead,
+		Schema: postureProfileSchema(),
+	}
+}
+
+func dataSourcePostureProfileAll() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourcePostureProfileAllRead,
+		Schema: map[string]*schema.Schema{
+			"list": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: postureProfileSchema(),
 				},
-			}),
+			},
+		},
 	}
 }
 
@@ -104,22 +110,22 @@ func dataSourcePostureProfileRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("posture_udid", resp.PostureudID)
 		_ = d.Set("zscaler_cloud", resp.ZscalerCloud)
 		_ = d.Set("zscaler_customer_id", resp.ZscalerCustomerID)
-		_ = d.Set("list", flattenPostureProfileList([]postureprofile.PostureProfile{*resp}))
-	} else if id != "" || name != "" {
-		return fmt.Errorf("couldn't find any posture profile with name '%s' or id '%s'", name, id)
 	} else {
-		// get the list
-		list, _, err := zClient.postureprofile.GetAll()
-		if err != nil {
-			return err
-		}
-		d.SetId("posture-profile-list")
-		_ = d.Set("list", flattenPostureProfileList(list))
+		return fmt.Errorf("couldn't find any posture profile with name '%s' or id '%s'", name, id)
 	}
-
 	return nil
 }
 
+func dataSourcePostureProfileAllRead(d *schema.ResourceData, m interface{}) error {
+	zClient := m.(*Client)
+	list, _, err := zClient.postureprofile.GetAll()
+	if err != nil {
+		return err
+	}
+	d.SetId("posture-profile-list")
+	_ = d.Set("list", flattenPostureProfileList(list))
+	return nil
+}
 func flattenPostureProfileList(list []postureprofile.PostureProfile) []interface{} {
 	keys := make([]interface{}, len(list))
 	for i, item := range list {

@@ -300,17 +300,8 @@ func appConnectorGroupSchema() map[string]*schema.Schema {
 
 func dataSourceAppConnectorGroup() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceConnectorGroupRead,
-		Schema: MergeSchema(appConnectorGroupSchema(),
-			map[string]*schema.Schema{
-				"list": {
-					Type:     schema.TypeList,
-					Computed: true,
-					Elem: &schema.Resource{
-						Schema: appConnectorGroupSchema(),
-					},
-				},
-			}),
+		Read:   dataSourceConnectorGroupRead,
+		Schema: appConnectorGroupSchema(),
 	}
 }
 
@@ -359,21 +350,39 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
 		_ = d.Set("connectors", flattenConnectors(resp))
-		_ = d.Set("list", flattenAppConnectorGroupList([]appconnectorgroup.AppConnectorGroup{*resp}))
 		if err := d.Set("server_groups", flattenServerGroups(resp)); err != nil {
 			return fmt.Errorf("failed to read server groups %s", err)
 		}
-	} else if id != "" || name != "" {
-		return fmt.Errorf("couldn't find any app connector group with name '%s' or id '%s'", name, id)
 	} else {
-		// get all
-		list, _, err := zClient.appconnectorgroup.GetAll()
-		if err != nil {
-			return err
-		}
-		d.SetId("app-connector-group-list")
-		_ = d.Set("list", flattenAppConnectorGroupList(list))
+		return fmt.Errorf("couldn't find any app connector group with name '%s' or id '%s'", name, id)
 	}
+
+	return nil
+}
+
+func dataSourceAppConnectorGroupAll() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceConnectorGroupAllRead,
+		Schema: map[string]*schema.Schema{
+			"list": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: appConnectorGroupSchema(),
+				},
+			},
+		},
+	}
+}
+func dataSourceConnectorGroupAllRead(d *schema.ResourceData, m interface{}) error {
+	zClient := m.(*Client)
+
+	list, _, err := zClient.appconnectorgroup.GetAll()
+	if err != nil {
+		return err
+	}
+	d.SetId("app-connector-group-list")
+	_ = d.Set("list", flattenAppConnectorGroupList(list))
 
 	return nil
 }

@@ -234,17 +234,23 @@ func appSegmentSchema() map[string]*schema.Schema {
 
 func dataSourceApplicationSegment() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceApplicationSegmentRead,
-		Schema: MergeSchema(appSegmentSchema(),
-			map[string]*schema.Schema{
-				"list": {
-					Type:     schema.TypeList,
-					Computed: true,
-					Elem: &schema.Resource{
-						Schema: appSegmentSchema(),
-					},
+		Read:   dataSourceApplicationSegmentRead,
+		Schema: appSegmentSchema(),
+	}
+}
+
+func dataSourceApplicationSegmentAll() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceApplicationSegmentAllRead,
+		Schema: map[string]*schema.Schema{
+			"list": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: appSegmentSchema(),
 				},
-			}),
+			},
+		},
 	}
 }
 
@@ -290,25 +296,27 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
-		_ = d.Set("list", flattenAppSegmentList([]applicationsegment.ApplicationSegmentResource{*resp}))
 		if err := d.Set("clientless_apps", flattenClientlessApps(resp)); err != nil {
 			return fmt.Errorf("failed to read clientless apps %s", err)
 		}
 		if err := d.Set("server_groups", flattenAppServerGroups(resp)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
 		}
-	} else if id != "" || name != "" {
-		return fmt.Errorf("couldn't find any application segment with name '%s' or id '%s'", name, id)
 	} else {
-		// get the list
-		list, _, err := zClient.applicationsegment.GetAll()
-		log.Printf("[INFO] got %d apps\n", len(list))
-		if err != nil {
-			return err
-		}
-		d.SetId("app-segment-list")
-		_ = d.Set("list", flattenAppSegmentList(list))
+		return fmt.Errorf("couldn't find any application segment with name '%s' or id '%s'", name, id)
 	}
+	return nil
+}
+
+func dataSourceApplicationSegmentAllRead(d *schema.ResourceData, m interface{}) error {
+	zClient := m.(*Client)
+	list, _, err := zClient.applicationsegment.GetAll()
+	log.Printf("[INFO] got %d apps\n", len(list))
+	if err != nil {
+		return err
+	}
+	d.SetId("app-segment-list")
+	_ = d.Set("list", flattenAppSegmentList(list))
 
 	return nil
 }
