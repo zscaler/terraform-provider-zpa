@@ -35,7 +35,7 @@ func (client *Client) NewRequestDo(method, url string, options, body, v interfac
 	return client.newRequestDoCustom(method, url, false, options, body, v)
 }
 
-func (client *Client) newRequestDoCustom(method, urlStr string, usePrivateAPI bool, options, body, v interface{}) (*http.Response, error) {
+func (client *Client) newRequestDoCustom(method, url string, usePrivateAPI bool, options, body, v interface{}) (*http.Response, error) {
 	client.Config.Lock()
 	defer client.Config.Unlock()
 	if client.Config.AuthToken == nil || client.Config.AuthToken.AccessToken == "" {
@@ -80,7 +80,7 @@ func (client *Client) newRequestDoCustom(method, urlStr string, usePrivateAPI bo
 		// we need keep auth token for future http request
 		client.Config.AuthToken = &a
 	}
-	req, err := client.newRequest(method, urlStr, usePrivateAPI, options, body)
+	req, err := client.newRequest(method, url, usePrivateAPI, options, body)
 	if err != nil {
 		return nil, err
 	}
