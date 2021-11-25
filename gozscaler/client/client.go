@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/google/go-querystring/query"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler"
@@ -45,11 +44,12 @@ func (client *Client) newRequestDoCustom(method, urlStr string, usePrivateAPI bo
 			return nil, errors.New("no client credentials were provided")
 		}
 		log.Printf("[TRACE] Getting access token for %s=%s\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID)
+		formData := []byte(fmt.Sprintf("client_id=%s&client_secret=%s",
+			client.Config.ClientID,
+			client.Config.ClientSecret,
+		))
 
-		data := url.Values{}
-		data.Set("client_id", client.Config.ClientID)
-		data.Set("client_secret", client.Config.ClientSecret)
-		req, err := http.NewRequest("POST", client.Config.BaseURL.String()+"/signin", strings.NewReader(data.Encode()))
+		req, err := http.NewRequest("POST", client.Config.BaseURL.String()+"/signin", bytes.NewBuffer(formData))
 		if err != nil {
 			log.Printf("[ERROR] Failed to signin the user %s=%s, err: %v\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
 			return nil, err
