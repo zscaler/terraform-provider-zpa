@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -52,6 +54,16 @@ func (service *Service) GetByName(appServerName string) (*ApplicationServer, *ht
 		}
 	}
 	return nil, resp, fmt.Errorf("no application named '%s' was found", appServerName)
+}
+
+func (service *Service) GetAll() ([]ApplicationServer, *http.Response, error) {
+	var v struct {
+		List []ApplicationServer `json:"list"`
+	}
+
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + appServerControllerEndpoint
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: 500}, nil, &v)
+	return v.List, resp, err
 }
 
 func (service *Service) Create(server ApplicationServer) (*ApplicationServer, *http.Response, error) {

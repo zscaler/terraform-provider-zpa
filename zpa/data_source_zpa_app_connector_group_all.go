@@ -19,6 +19,7 @@ func dataSourceAppConnectorGroupAll() *schema.Resource {
 		},
 	}
 }
+
 func dataSourceConnectorGroupAllRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 

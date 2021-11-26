@@ -52,6 +52,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform date source name: data source schema
 			"zpa_application_server":          dataSourceApplicationServer(),
+			"zpa_application_server_all":      dataSourceApplicationServerAll(),
 			"zpa_application_segment":         dataSourceApplicationSegment(),
 			"zpa_application_segment_all":     dataSourceApplicationSegmentAll(),
 			"zpa_segment_group":               dataSourceSegmentGroup(),
@@ -62,6 +63,7 @@ func Provider() *schema.Provider {
 			"zpa_cloud_connector_group":       dataSourceCloudConnectorGroup(),
 			"zpa_idp_controller":              dataSourceIdpController(),
 			"zpa_machine_group":               dataSourceMachineGroup(),
+			"zpa_machine_group_all":           dataSourceMachineGroupAll(),
 			"zpa_provisioning_key":            dataSourceProvisioningKey(),
 			"zpa_provisioning_key_all":        dataSourceProvisioningKeyAll(),
 			"zpa_policy_type":                 dataSourcePolicyType(),
@@ -74,6 +76,7 @@ func Provider() *schema.Provider {
 			"zpa_server_group":                dataSourceServerGroup(),
 			"zpa_enrollment_cert":             dataSourceEnrollmentCert(),
 			"zpa_trusted_network":             dataSourceTrustedNetwork(),
+			"zpa_trusted_network_all":         dataSourceTrustedNetworkAll(),
 			"zpa_lss_config_controller":       dataSourceLSSConfigController(),
 			"zpa_lss_config_client_types":     dataSourceLSSClientTypes(),
 			"zpa_lss_config_status_codes":     dataSourceLSSStatusCodes(),

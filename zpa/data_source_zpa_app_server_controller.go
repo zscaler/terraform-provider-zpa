@@ -8,52 +8,56 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appservercontroller"
 )
 
+func applicationServerSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"address": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"app_server_group_ids": {
+			Type:     schema.TypeSet,
+			Computed: true,
+			Elem:     &schema.Schema{Type: schema.TypeString},
+		},
+		"config_space": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"creation_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"description": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"enabled": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"modifiedby": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"modified_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+	}
+}
+
 func dataSourceApplicationServer() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceApplicationServerRead,
-		Schema: map[string]*schema.Schema{
-			"address": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"app_server_group_ids": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"config_space": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"creation_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"modifiedby": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"modified_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-		},
+		Read:   dataSourceApplicationServerRead,
+		Schema: applicationServerSchema(),
 	}
 }
 

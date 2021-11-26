@@ -26,10 +26,12 @@ func dataSourcePostureProfileAllRead(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return err
 	}
+
 	d.SetId("posture-profile-list")
 	_ = d.Set("list", flattenPostureProfileList(list))
 	return nil
 }
+
 func flattenPostureProfileList(list []postureprofile.PostureProfile) []interface{} {
 	keys := make([]interface{}, len(list))
 	for i, item := range list {

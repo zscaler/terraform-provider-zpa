@@ -8,43 +8,51 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
 )
 
+func trustedNetworkSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"creation_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"domain": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"modifiedby": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"master_customer_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"modified_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"network_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"zscaler_cloud": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+	}
+}
+
 func dataSourceTrustedNetwork() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceTrustedNetworkRead,
-		Schema: map[string]*schema.Schema{
-			"creation_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"domain": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"modifiedby": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"modified_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"network_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"zscaler_cloud": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-		},
+		Read:   dataSourceTrustedNetworkRead,
+		Schema: trustedNetworkSchema(),
 	}
 }
 
@@ -80,6 +88,7 @@ func dataSourceTrustedNetworkRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("network_id", resp.NetworkID)
 		_ = d.Set("zscaler_cloud", resp.ZscalerCloud)
+		_ = d.Set("master_customer_id", resp.MasterCustomerID)
 
 	} else {
 		return fmt.Errorf("couldn't find any trusted network with name '%s' or id '%s'", name, id)

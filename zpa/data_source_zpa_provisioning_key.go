@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func provisiningKeySchema() map[string]*schema.Schema {
+func provisioningKeySchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"app_connector_group_id": {
 			Type:     schema.TypeString,
@@ -107,7 +107,7 @@ func dataSourceProvisioningKey() *schema.Resource {
 		Read:     dataSourceProvisioningKeyRead,
 		Importer: &schema.ResourceImporter{},
 
-		Schema: provisiningKeySchema(),
+		Schema: provisioningKeySchema(),
 	}
 }
 

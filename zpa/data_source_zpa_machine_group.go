@@ -8,98 +8,102 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/machinegroup"
 )
 
-func dataSourceMachineGroup() *schema.Resource {
-	return &schema.Resource{
-		Read: dataSourceMachineGroupRead,
-		Schema: map[string]*schema.Schema{
-			"creation_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"machines": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"creation_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"fingerprint": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"issued_cert_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"machine_group_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"machine_group_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"machine_token_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modifiedby": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modified_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"signing_cert": {
-							Type:     schema.TypeMap,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+func machineGroupSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"creation_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"description": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"enabled": {
+			Type:     schema.TypeBool,
+			Computed: true,
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"machines": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"creation_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"description": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"fingerprint": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"issued_cert_id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"machine_group_id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"machine_group_name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"machine_token_id": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"modifiedby": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"modified_time": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"name": {
+						Type:     schema.TypeString,
+						Computed: true,
+					},
+					"signing_cert": {
+						Type:     schema.TypeMap,
+						Computed: true,
+						Elem: &schema.Schema{
+							Type: schema.TypeString,
 						},
 					},
 				},
 			},
-			"modifiedby": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"modified_time": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 		},
+		"modifiedby": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"modified_time": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+	}
+}
+
+func dataSourceMachineGroup() *schema.Resource {
+	return &schema.Resource{
+		Read:   dataSourceMachineGroupRead,
+		Schema: machineGroupSchema(),
 	}
 }
 

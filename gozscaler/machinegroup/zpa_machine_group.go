@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -66,4 +68,13 @@ func (service *Service) GetByName(machineGroupName string) (*MachineGroup, *http
 		}
 	}
 	return nil, resp, fmt.Errorf("no application named '%s' was found", machineGroupName)
+}
+
+func (service *Service) GetAll() ([]MachineGroup, *http.Response, error) {
+	var v struct {
+		List []MachineGroup `json:"list"`
+	}
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + machineGroupEndpoint
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: 500}, nil, &v)
+	return v.List, resp, err
 }

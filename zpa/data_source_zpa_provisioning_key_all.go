@@ -18,7 +18,7 @@ func dataSourceProvisioningKeyAll() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
-					Schema: provisiningKeySchema(),
+					Schema: provisioningKeySchema(),
 				},
 			},
 		},
