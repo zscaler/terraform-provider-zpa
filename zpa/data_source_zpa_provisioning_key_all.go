@@ -6,6 +6,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceProvisioningKeyAll() *schema.Resource {
@@ -14,6 +15,14 @@ func dataSourceProvisioningKeyAll() *schema.Resource {
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
+			"association_type": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"CONNECTOR_GRP", "SERVICE_EDGE_GRP",
+				}, false),
+			},
 			"list": {
 				Type:     schema.TypeList,
 				Computed: true,
