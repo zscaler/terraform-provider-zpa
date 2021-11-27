@@ -111,7 +111,3 @@ Application Segment can be imported by using `<APPLICATION SEGMENT ID>` as the i
 ```shell
 terraform import zpa_application_segment.example 216196257331290863
 ```
-
-```shell
-terraform import zpa_app_connector_group.example <app_connector_group_id>
-```
