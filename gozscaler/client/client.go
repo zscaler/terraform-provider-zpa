@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/google/go-querystring/query"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler"
@@ -35,7 +36,7 @@ func (client *Client) NewRequestDo(method, url string, options, body, v interfac
 	return client.newRequestDoCustom(method, url, false, options, body, v)
 }
 
-func (client *Client) newRequestDoCustom(method, url string, usePrivateAPI bool, options, body, v interface{}) (*http.Response, error) {
+func (client *Client) newRequestDoCustom(method, urlStr string, usePrivateAPI bool, options, body, v interface{}) (*http.Response, error) {
 	client.Config.Lock()
 	defer client.Config.Unlock()
 	if client.Config.AuthToken == nil || client.Config.AuthToken.AccessToken == "" {
@@ -44,12 +45,10 @@ func (client *Client) newRequestDoCustom(method, url string, usePrivateAPI bool,
 			return nil, errors.New("no client credentials were provided")
 		}
 		log.Printf("[TRACE] Getting access token for %s=%s\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID)
-		formData := []byte(fmt.Sprintf("client_id=%s&client_secret=%s",
-			client.Config.ClientID,
-			client.Config.ClientSecret,
-		))
-
-		req, err := http.NewRequest("POST", client.Config.BaseURL.String()+"/signin", bytes.NewBuffer(formData))
+		data := url.Values{}
+		data.Set("client_id", client.Config.ClientID)
+		data.Set("client_secret", client.Config.ClientSecret)
+		req, err := http.NewRequest("POST", client.Config.BaseURL.String()+"/signin", strings.NewReader(data.Encode()))
 		if err != nil {
 			log.Printf("[ERROR] Failed to signin the user %s=%s, err: %v\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
 			return nil, err
@@ -80,7 +79,7 @@ func (client *Client) newRequestDoCustom(method, url string, usePrivateAPI bool,
 		// we need keep auth token for future http request
 		client.Config.AuthToken = &a
 	}
-	req, err := client.newRequest(method, url, usePrivateAPI, options, body)
+	req, err := client.newRequest(method, urlStr, usePrivateAPI, options, body)
 	if err != nil {
 		return nil, err
 	}
