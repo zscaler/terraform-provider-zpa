@@ -104,10 +104,10 @@ data "zpa_scim_groups" "engineering" {
 
 ## Import
 
-Policy access timeout can be imported; use `<POLICY Access RULE ID>` as the import ID.
+Policy access timeout can be imported by using `<POLICY TIMEOUT RULE ID>` as the import ID.
 
 For example:
 
 ```shell
-terraform import zpa_policy_timeout_rule.example 216196257331290863
+terraform import zpa_policy_timeout_rule.example <policy_timeout_rule_id>
 ```

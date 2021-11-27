@@ -155,10 +155,10 @@ data "zpa_app_connector_group" "aws_connector" {
 
 ## Import
 
-Application Segment can be imported; use `<POLICY Access RULE ID>` as the import ID.
+Policy Access Rule for Browser Access can be imported by using`<POLICY ACCESS RULE ID>` as the import ID.
 
 For example:
 
 ```shell
-terraform import zpa_policy_access_rule.example 216196257331290863
+terraform import zpa_policy_access_rule.example <policy_access_rule_id>
 ```

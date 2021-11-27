@@ -106,10 +106,12 @@ The following arguments are supported:
 
 ## Import
 
-Application Segment can be imported; use `<APPLICATION SEGMENT ID>` as the import ID.
-
-For example:
+Application Segment can be imported by using `<APPLICATION SEGMENT ID>` as the import ID.
 
 ```shell
 terraform import zpa_application_segment.example 216196257331290863
+```
+
+```shell
+terraform import zpa_app_connector_group.example <app_connector_group_id>
 ```

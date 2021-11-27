@@ -40,10 +40,10 @@ resource "zpa_segment_group" "example" {
 
 ## Import
 
-Application Segment Group can be imported; use `<SEGMENT GROUP ID>` as the import ID.
+Segment Group can be imported by using `<SEGMENT GROUP ID>` as the import ID.
 
 For example:
 
 ```shell
-terraform import zpa_policy_forwarding_rule.example 216196257331290863
+terraform import zpa_segment_group.example <segment_group_id>
 ```

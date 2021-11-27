@@ -52,3 +52,15 @@ The following arguments are supported:
 * `dns_query_type` - (Optional)
 * `geo_location_id` - (Optional)
 * `geo_location_id` - (Optional)
+
+## Attributes Reference
+
+* `id` - The ID of the Group Role Assignment.
+
+## Import
+
+App Connector Group can be imported by using `<APP CONNECTOR GROUP ID>` as the import ID.
+
+```shell
+terraform import zpa_app_connector_group.example <app_connector_group_id>
+```

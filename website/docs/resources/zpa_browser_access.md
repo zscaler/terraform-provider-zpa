@@ -121,10 +121,10 @@ data "zpa_ba_certificate" "sales_ba" {
 
 ## Import
 
-Application Segment can be imported; use `<BROWSER ACCESS ID>` as the import ID.
+Browser Access Application Segment can be imported by using `<BROWSER ACCESS ID>` as the import ID.
 
 For example:
 
 ```shell
-terraform import zpa_browser_access.example 216196257331290863
+terraform import zpa_browser_access.example <browser_access_id>.
 ```

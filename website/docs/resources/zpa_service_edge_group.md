@@ -64,3 +64,13 @@ The following arguments are supported:
 * `upgrade_day` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified day. Default value: `SUNDAY` List of valid days (i.e., Sunday, Monday)
 * `upgrade_time_in_secs` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600` Integer in seconds (i..e, 66600). The integer must be greater than or equal to 0 and less than `86400`, in `15` minute intervals
 * `version_profile_id` - (Optional) ID of the version profile. To learn more, see Version Profile Use Cases. This value becomes required if the value for `override_version_profile` is set to `true`.
+
+## Import
+
+Service Edge Group can be imported; use `<SERVER EDGE GROUP ID>` as the import ID.
+
+For example:
+
+```shell
+terraform import zpa_service_edge_group.example <service_edge_group_id>
+```

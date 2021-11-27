@@ -145,10 +145,10 @@ data "zpa_app_connector_group" "aws_connector" {
 
 ## Import
 
-Application Segment can be imported; use `<POLICY FORWARDING RULE ID>` as the import ID.
+Policy Access Forwarding Rule can be imported by using `<POLICY FORWARDING RULE ID>` as the import ID.
 
 For example:
 
 ```shell
-terraform import zpa_policy_forwarding_rule.example 216196257331290863
+terraform import zpa_policy_forwarding_rule.example <policy_forwarding_rule_id>
 ```

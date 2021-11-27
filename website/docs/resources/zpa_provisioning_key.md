@@ -86,3 +86,13 @@ The following arguments are supported:
 * `enrollment_cert_id` - (Required) ID of the enrollment certificate that can be used for this provisioning key. `ID` of the existing enrollment certificate that has the private key
 * `zcomponentId` - (Required) ID of the existing App Connector or Service Edge Group.
 * `association_type` (Required) Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are `CONNECTOR_GRP` and `SERVICE_EDGE_GRP`
+
+## Import
+
+Provisioning key can be imported by using `<PROVISIONING KEY ID>` as the import ID.
+
+For example:
+
+```shell
+terraform import zpa_provisioning_key.example <provisioning_key_id>
+```

@@ -53,10 +53,10 @@ The following arguments are supported:
 
 ## Import
 
-Application Server can be imported; use `<APPLICATION SERVER ID>` as the import ID.
+Application Server can be imported by using `<APPLICATION SERVER ID>` as the import ID.
 
 For example:
 
 ```shell
-terraform import zpa_application_server.example 216196257331290863
+terraform import zpa_application_server.example <application_server_id>
 ```

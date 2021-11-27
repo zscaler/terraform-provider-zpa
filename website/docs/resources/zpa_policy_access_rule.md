@@ -102,10 +102,10 @@ data "zpa_scim_groups" "engineering" {
 
 ## Import
 
-Application Segment can be imported; use `<POLICY Access RULE ID>` as the import ID.
+Policy access rule can be imported by using `<POLICY ACCESS RULE ID>` as the import ID.
 
 For example:
 
 ```shell
-terraform import zpa_policy_forwarding_rule.example 216196257331290863
+terraform import zpa_policy_access_rule.example <policy_access_rule_id>
 ```

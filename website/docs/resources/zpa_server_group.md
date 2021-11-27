@@ -80,5 +80,5 @@ Server Groups can be imported; use `<SERVER GROUP ID>` as the import ID.
 For example:
 
 ```shell
-terraform import zpa_server_group.example 216196257331290863
+terraform import zpa_server_group.example <server_group_id>
 ```
