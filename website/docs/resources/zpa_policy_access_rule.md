@@ -17,7 +17,7 @@ resource "zpa_policy_access_rule" "gf_engineering" {
   description                   = "GF-Engineering"
   action                        = "ALLOW"
   operator                      = "AND"
-  policy_set_id                 = data.zpa_global_access_policy.policyset.id
+  policy_set_id                 = data.zpa_policy_type.access_policy.id
 
   conditions {
     negated = false

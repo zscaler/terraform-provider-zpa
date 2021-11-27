@@ -19,7 +19,7 @@ resource "zpa_policy_timeout_rule" "example_timeout_access_rule" {
   reauth_idle_timeout           = "600"
   reauth_timeout                = "172800"
   operator                      = "AND"
-  policy_set_id                 = data.zpa_global_policy_timeout.policyset.id
+  policy_set_id                 = data.zpa_policy_type.timeout_policy.id
 
   conditions {
     negated = false

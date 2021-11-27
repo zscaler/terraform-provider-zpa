@@ -14,11 +14,11 @@ The **zpa_policy_forwarding_rule** resource creates a policy forwarding access r
 ```hcl
 // Create Client Forwarding Access Rule
 resource "zpa_policy_forwarding_rule" "corporate_services_bypass_rule" {
-  name                          = "Corporate Services Bypass Rule"
-  description                   = "Corporate Services Bypass Rule"
-  action                        = "BYPASS"
-  operator = "AND"
-  policy_set_id = data.zpa_global_policy_forwarding.policyset.id
+  name            = "Corporate Services Bypass Rule"
+  description     = "Corporate Services Bypass Rule"
+  action          = "BYPASS"
+  operator        = "AND"
+  policy_set_id   = data.zpa_policy_type.client_forwarding_policy.id
 
   conditions {
     negated = false
