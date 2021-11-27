@@ -30,7 +30,6 @@ Static credentials can be provided by specifying the `zpa_client_id`, `zpa_clien
 
 **Usage:**
 
-
 ```hcl
 provider "zpa" {
   zpa_client_id         = "xxxxxxxxxxxxxxxx"
@@ -47,13 +46,21 @@ You can provide credentials via the `ZPA_CLIENT_ID`, `ZPA_CLIENT_SECRET`, `ZPA_C
 provider "zpa" {}
 ```
 
-**Usage:**
+**macOS and Linux Usage:**
 
 ```sh
-$ export ZPA_CLIENT_ID = "xxxxxxxxxxxxxxxx"
-$ export ZPA_CLIENT_SECRET = "xxxxxxxxxxxxxxxx"
-$ export ZPA_CUSTOMER_ID = "xxxxxxxxxxxxxxxx"
+$ export ZPA_CLIENT_ID      = "xxxxxxxxxxxxxxxx"
+$ export ZPA_CLIENT_SECRET  = "xxxxxxxxxxxxxxxx"
+$ export ZPA_CUSTOMER_ID    = "xxxxxxxxxxxxxxxx"
 $ terraform plan
+```
+
+**Windows Powershell:**
+
+```powershell
+$env:ZPA_CLIENT_ID      = 'xxxxxxxxxxxxxxxx'
+$env:ZPA_CLIENT_SECRET  = 'xxxxxxxxxxxxxxxx'
+$env:ZPA_CUSTOMER_ID    = 'xxxxxxxxxxxxxxxx'
 ```
 
 ## Argument Reference
