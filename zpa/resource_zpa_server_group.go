@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -12,11 +13,31 @@ import (
 
 func resourceServerGroup() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourceServerGroupCreate,
-		Read:     resourceServerGroupRead,
-		Update:   resourceServerGroupUpdate,
-		Delete:   resourceServerGroupDelete,
-		Importer: &schema.ResourceImporter{},
+		Create: resourceServerGroupCreate,
+		Read:   resourceServerGroupRead,
+		Update: resourceServerGroupUpdate,
+		Delete: resourceServerGroupDelete,
+		Importer: &schema.ResourceImporter{
+			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				zClient := m.(*Client)
+
+				id := d.Id()
+				_, parseIDErr := strconv.ParseInt(id, 10, 64)
+				if parseIDErr == nil {
+					// assume if the passed value is an int
+					d.Set("id", id)
+				} else {
+					resp, _, err := zClient.servergroup.GetByName(id)
+					if err == nil {
+						d.SetId(resp.ID)
+						d.Set("id", resp.ID)
+					} else {
+						return []*schema.ResourceData{d}, err
+					}
+				}
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 
 		Schema: map[string]*schema.Schema{
 			"config_space": {
