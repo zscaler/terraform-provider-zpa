@@ -59,7 +59,7 @@ The following arguments are supported:
 
 ## Import
 
-App Connector Group can be imported by using `<APP CONNECTOR GROUP ID>` as the import ID.
+App Connector Group can be imported by using `<APP CONNECTOR GROUP ID>` or `<APP CONNECTOR GROUP NAME>`as the import ID.
 
 ```shell
 terraform import zpa_app_connector_group.example <app_connector_group_id>
