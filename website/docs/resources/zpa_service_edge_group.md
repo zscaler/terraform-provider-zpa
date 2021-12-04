@@ -67,10 +67,14 @@ The following arguments are supported:
 
 ## Import
 
-Service Edge Group can be imported; use `<SERVER EDGE GROUP ID>` as the import ID.
+Service Edge Group can be imported; use `<SERVER EDGE GROUP ID>` or `<SERVER EDGE GROUP NAME>` as the import ID.
 
 For example:
 
 ```shell
 terraform import zpa_service_edge_group.example <service_edge_group_id>
+```
+or
+```shell
+terraform import zpa_service_edge_group.example <service_edge_group_name>
 ```
