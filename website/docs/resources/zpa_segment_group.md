@@ -40,10 +40,14 @@ resource "zpa_segment_group" "example" {
 
 ## Import
 
-Segment Group can be imported by using `<SEGMENT GROUP ID>` as the import ID.
+Segment Group can be imported by using `<SEGMENT GROUP ID>` or `<SEGMENT GROUP NAME>` as the import ID.
 
 For example:
 
 ```shell
 terraform import zpa_segment_group.example <segment_group_id>
+```
+or
+```shell
+terraform import zpa_segment_group.example <segment_group_name>
 ```
