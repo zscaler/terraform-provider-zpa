@@ -75,10 +75,14 @@ resource "zpa_application_server" "example" {
 
 ## Import
 
-Server Groups can be imported; use `<SERVER GROUP ID>` as the import ID.
+Server Groups can be imported; use `<SERVER GROUP ID>` or `<SERVER GROUP NAME>` as the import ID.
 
 For example:
 
 ```shell
 terraform import zpa_server_group.example <server_group_id>
+```
+or
+```shell
+terraform import zpa_server_group.example <server_group_name>
 ```
