@@ -2,6 +2,7 @@ package zpa
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appservercontroller"
 
@@ -12,11 +13,32 @@ import (
 
 func resourceApplicationServer() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourceApplicationServerCreate,
-		Read:     resourceApplicationServerRead,
-		Update:   resourceApplicationServerUpdate,
-		Delete:   resourceApplicationServerDelete,
-		Importer: &schema.ResourceImporter{},
+		Create: resourceApplicationServerCreate,
+		Read:   resourceApplicationServerRead,
+		Update: resourceApplicationServerUpdate,
+		Delete: resourceApplicationServerDelete,
+		Importer: &schema.ResourceImporter{
+			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				zClient := m.(*Client)
+
+				id := d.Id()
+				_, parseIDErr := strconv.ParseInt(id, 10, 64)
+				if parseIDErr == nil {
+					// assume if the passed value is an int
+					d.Set("id", id)
+				} else {
+					resp, _, err := zClient.appservercontroller.GetByName(id)
+					if err == nil {
+						d.SetId(resp.ID)
+						d.Set("id", resp.ID)
+					} else {
+						return []*schema.ResourceData{d}, err
+					}
+
+				}
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {

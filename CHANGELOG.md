@@ -1,3 +1,18 @@
+## 2.0.4 (December 3, 2021)
+
+## Enhancement
+
+- The provider now supports the ability to import resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
+This capability is currently available to the following resources:
+**resource_zpa_app_connector_group** - Issue [[#29](https://github.com/willguibr/terraform-provider-zpa/issues/29)]
+**resource_zpa_app_server_controller** - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+**resource_zpa_application_segment** - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+**resource_zpa_segment_group** - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+**resource_zpa_server_group** - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+**resource_zpa_service_edge_group** - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+
+Note: To import resources not currently supported, the resource numeric ID is required.
+
 # 2.0.3 (November 21, 2021)
 
 ## Dependabot Updates
