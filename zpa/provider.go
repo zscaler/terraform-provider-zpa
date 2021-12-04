@@ -53,6 +53,7 @@ func Provider() *schema.Provider {
 			// terraform date source name: data source schema
 			"zpa_application_server":          dataSourceApplicationServer(),
 			"zpa_application_segment":         dataSourceApplicationSegment(),
+			"zpa_browser_access":              dataSourceBrowserAccess(),
 			"zpa_segment_group":               dataSourceSegmentGroup(),
 			"zpa_app_connector_group":         dataSourceAppConnectorGroup(),
 			"zpa_ba_certificate":              dataSourceBaCertificate(),

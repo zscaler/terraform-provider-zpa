@@ -279,7 +279,7 @@ func dataSourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) er
 	var resp *lssconfigcontroller.LSSResource
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
-		log.Printf("[INFO] Getting data for service edge group %s\n", id)
+		log.Printf("[INFO] Getting data for lss config controller %s\n", id)
 		res, _, err := zClient.lssconfigcontroller.Get(id)
 		if err != nil {
 			return err
@@ -298,7 +298,7 @@ func dataSourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) er
 			return err
 		}
 	} else {
-		return fmt.Errorf("couldn't find any service edge group with name '%s' or id", id)
+		return fmt.Errorf("couldn't find any lss config controller with name '%s' or id", id)
 	}
 
 	return nil
