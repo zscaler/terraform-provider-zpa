@@ -109,5 +109,9 @@ The following arguments are supported:
 Application Segment can be imported by using `<APPLICATION SEGMENT ID>` as the import ID.
 
 ```shell
-terraform import zpa_application_segment.example 216196257331290863
+terraform import zpa_application_segment.example <application_segment_id>
+```
+or
+```shell
+terraform import zpa_application_segment.example <application_segment_name>
 ```
