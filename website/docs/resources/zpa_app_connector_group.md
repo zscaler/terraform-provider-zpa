@@ -64,3 +64,7 @@ App Connector Group can be imported by using `<APP CONNECTOR GROUP ID>` as the i
 ```shell
 terraform import zpa_app_connector_group.example <app_connector_group_id>
 ```
+or
+```shell
+terraform import zpa_app_connector_group.example <app_connector_group_name>
+```
