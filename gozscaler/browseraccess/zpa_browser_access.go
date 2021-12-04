@@ -3,6 +3,7 @@ package browseraccess
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -75,6 +76,26 @@ func (service *Service) Get(id string) (*BrowserAccess, *http.Response, error) {
 		return nil, nil, err
 	}
 	return v, resp, nil
+}
+
+func (service *Service) GetByName(BaName string) (*BrowserAccess, *http.Response, error) {
+	var v struct {
+		List []BrowserAccess `json:"list"`
+	}
+
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + browserAccessEndpoint
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
+		pagesize: 500,
+	}, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, app := range v.List {
+		if strings.EqualFold(app.Name, BaName) {
+			return &app, resp, nil
+		}
+	}
+	return nil, resp, fmt.Errorf("no browser access application named '%s' was found", BaName)
 }
 
 func (service *Service) Create(browserAccess BrowserAccess) (*BrowserAccess, *http.Response, error) {

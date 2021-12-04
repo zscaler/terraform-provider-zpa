@@ -468,6 +468,7 @@ func resourceNetworkPortsSchema(desc string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
 		Optional:    true,
+		Computed:    true,
 		Description: desc,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
