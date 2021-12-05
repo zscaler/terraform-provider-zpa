@@ -120,12 +120,10 @@ func resourceProvisioningKey() *schema.Resource {
 				Description: "read only field. Ignored in PUT/POST calls.",
 			},
 			"association_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"CONNECTOR_GRP", "SERVICE_EDGE_GRP",
-				}, false),
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
+				ValidateFunc: validation.StringInSlice(provisioningkey.ProvisioningKeyAssociationTypes, false),
 			},
 			"ip_acl": {
 				Type:     schema.TypeSet,
