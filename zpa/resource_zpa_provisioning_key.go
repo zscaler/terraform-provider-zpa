@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
 
@@ -13,12 +14,43 @@ import (
 
 func resourceProvisioningKey() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourceProvisioningKeyCreate,
-		Read:     resourceProvisioningKeyRead,
-		Update:   resourceProvisioningKeyUpdate,
-		Delete:   resourceProvisioningKeyDelete,
-		Importer: &schema.ResourceImporter{},
+		Create: resourceProvisioningKeyCreate,
+		Read:   resourceProvisioningKeyRead,
+		Update: resourceProvisioningKeyUpdate,
+		Delete: resourceProvisioningKeyDelete,
+		Importer: &schema.ResourceImporter{
+			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				zClient := m.(*Client)
+				id := d.Id()
+				_, parseIDErr := strconv.ParseInt(id, 10, 64)
+				_, associationTypeSet := d.GetOk("association_type")
+				if parseIDErr == nil {
+					// assume if the passed value is an int
+					d.Set("id", id)
+					if !associationTypeSet {
+						_, assoc_type, _, err := zClient.provisioningkey.GetByIDAllAssociations(id)
+						if err != nil {
+							return []*schema.ResourceData{d}, err
+						} else {
+							d.Set("association_type", assoc_type)
+						}
+					}
+				} else {
+					resp, assoc_type, _, err := zClient.provisioningkey.GetByNameAllAssociations(id)
+					if err == nil {
+						d.SetId(resp.ID)
+						d.Set("id", resp.ID)
+						if !associationTypeSet {
+							d.Set("association_type", assoc_type)
+						}
+					} else {
+						return []*schema.ResourceData{d}, err
+					}
 
+				}
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -88,12 +120,10 @@ func resourceProvisioningKey() *schema.Resource {
 				Description: "read only field. Ignored in PUT/POST calls.",
 			},
 			"association_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"CONNECTOR_GRP", "SERVICE_EDGE_GRP",
-				}, false),
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
+				ValidateFunc: validation.StringInSlice(provisioningkey.ProvisioningKeyAssociationTypes, false),
 			},
 			"ip_acl": {
 				Type:     schema.TypeSet,

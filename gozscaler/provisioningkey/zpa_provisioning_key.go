@@ -10,6 +10,12 @@ const (
 	mgmtConfig = "/mgmtconfig/v1/admin/customers/"
 )
 
+// TODO: because there isn't an endpoint to get all provisionning keys, we need to have all association type here
+var ProvisioningKeyAssociationTypes []string = []string{
+	"CONNECTOR_GRP",
+	"SERVICE_EDGE_GRP",
+}
+
 type ProvisioningKey struct {
 	AppConnectorGroupID   string   `json:"appConnectorGroupId,omitempty"`
 	AppConnectorGroupName string   `json:"appConnectorGroupName,omitempty"`
@@ -91,4 +97,26 @@ func (service *Service) Delete(associationType, provisioningKeyID string) (*http
 		return nil, err
 	}
 	return resp, err
+}
+
+func (service *Service) GetByNameAllAssociations(name string) (p *ProvisioningKey, assoc_type string, resp *http.Response, err error) {
+	for _, assassociation_type := range ProvisioningKeyAssociationTypes {
+		p, resp, err = service.GetByName(assassociation_type, name)
+		if err == nil {
+			assoc_type = assassociation_type
+			break
+		}
+	}
+	return p, assoc_type, resp, err
+}
+
+func (service *Service) GetByIDAllAssociations(id string) (p *ProvisioningKey, assoc_type string, resp *http.Response, err error) {
+	for _, assassociation_type := range ProvisioningKeyAssociationTypes {
+		p, resp, err = service.Get(assassociation_type, id)
+		if err == nil {
+			assoc_type = assassociation_type
+			break
+		}
+	}
+	return p, assoc_type, resp, err
 }
