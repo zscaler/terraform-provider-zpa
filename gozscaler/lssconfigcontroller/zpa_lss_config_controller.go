@@ -3,6 +3,7 @@ package lssconfigcontroller
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -136,6 +137,26 @@ func (service *Service) Get(lssID string) (*LSSResource, *http.Response, error) 
 		return nil, nil, err
 	}
 	return v, resp, nil
+}
+
+func (service *Service) GetByName(lssName string) (*LSSResource, *http.Response, error) {
+	var v struct {
+		List []LSSResource `json:"list"`
+	}
+
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + lssConfigEndpoint
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
+		pagesize: 500,
+	}, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, lss := range v.List {
+		if strings.EqualFold(lss.LSSConfig.Name, lssName) {
+			return &lss, resp, nil
+		}
+	}
+	return nil, resp, fmt.Errorf("no lss controller named '%s' was found", lssName)
 }
 
 func (service *Service) Create(lssConfig *LSSResource) (*LSSResource, *http.Response, error) {
