@@ -26,4 +26,3 @@ resource "zpa_app_connector_group" "nyc_connector_group" {
 data "zpa_enrollment_cert" "connector" {
     name = "Connector"
 }
-*/

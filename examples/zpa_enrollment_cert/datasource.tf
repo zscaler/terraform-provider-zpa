@@ -1,5 +1,5 @@
 data "zpa_enrollment_cert" "sales_ba" {
-    name = "sales.securitygeek.io"
+    name = "sales.acme.com"
 }
 
 output "zpa_enrollment_cert" {

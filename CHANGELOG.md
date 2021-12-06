@@ -14,6 +14,7 @@ This capability is currently available to the following resources:
 **resource_zpa_segment_group** - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
 **resource_zpa_server_group** - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
 **resource_zpa_service_edge_group** - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+**resource_zpa_provisioning_key** - [PR#45](https://github.com/willguibr/terraform-provider-zpa/pull/45) :rocket:
 
 Note: To import resources not currently supported, the resource numeric ID is required.
 

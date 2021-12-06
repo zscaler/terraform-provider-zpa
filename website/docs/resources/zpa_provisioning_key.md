@@ -89,10 +89,16 @@ The following arguments are supported:
 
 ## Import
 
-Provisioning key can be imported by using `<PROVISIONING KEY ID>` as the import ID.
+Provisioning key can be imported by using `<PROVISIONING KEY ID>` or `<PROVISIONING KEY NAME>` as the import ID.
 
 For example:
 
 ```shell
 terraform import zpa_provisioning_key.example <provisioning_key_id>
+```
+
+or
+
+```shell
+terraform import zpa_provisioning_key.example <provisioning_key_name>
 ```
