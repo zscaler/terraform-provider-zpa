@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -39,9 +41,7 @@ func (service *Service) GetByNetID(netID string) (*TrustedNetwork, *http.Respons
 		List []TrustedNetwork `json:"list"`
 	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint)
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
-		pagesize: 500,
-	}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -59,9 +59,7 @@ func (service *Service) GetByName(trustedNetworkName string) (*TrustedNetwork, *
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
-		pagesize: 500,
-	}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

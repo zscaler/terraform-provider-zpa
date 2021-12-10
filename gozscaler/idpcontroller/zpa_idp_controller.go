@@ -75,7 +75,7 @@ func (service *Service) GetByName(idpName string) (*IdpController, *http.Respons
 	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + idpControllerEndpoint)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{
-		PageSize: 500,
+		PageSize: common.DefaultPageSize,
 		Search:   idpName,
 	}, nil, &v)
 	if err != nil {
