@@ -12,11 +12,13 @@ import (
 
 func resourcePolicyTimeoutRule() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourcePolicyTimeoutRuleCreate,
-		Read:     resourcePolicyTimeoutRuleRead,
-		Update:   resourcePolicyTimeoutRuleUpdate,
-		Delete:   resourcePolicyTimeoutRuleDelete,
-		Importer: &schema.ResourceImporter{},
+		Create: resourcePolicyTimeoutRuleCreate,
+		Read:   resourcePolicyTimeoutRuleRead,
+		Update: resourcePolicyTimeoutRuleUpdate,
+		Delete: resourcePolicyTimeoutRuleDelete,
+		Importer: &schema.ResourceImporter{
+			State: importPolicyStateFunc([]string{"TIMEOUT_POLICY", "REAUTH_POLICY"}),
+		},
 
 		Schema: MergeSchema(
 			CommonPolicySchema(), map[string]*schema.Schema{

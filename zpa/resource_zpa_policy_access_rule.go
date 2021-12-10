@@ -22,11 +22,13 @@ var rules = listrules{
 
 func resourcePolicyAccessRule() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourcePolicySetCreate,
-		Read:     resourcePolicySetRead,
-		Update:   resourcePolicySetUpdate,
-		Delete:   resourcePolicySetDelete,
-		Importer: &schema.ResourceImporter{},
+		Create: resourcePolicySetCreate,
+		Read:   resourcePolicySetRead,
+		Update: resourcePolicySetUpdate,
+		Delete: resourcePolicySetDelete,
+		Importer: &schema.ResourceImporter{
+			State: importPolicyStateFunc([]string{"ACCESS_POLICY", "GLOBAL_POLICY"}),
+		},
 
 		Schema: MergeSchema(
 			CommonPolicySchema(), map[string]*schema.Schema{
