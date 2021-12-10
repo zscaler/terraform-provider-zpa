@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -112,7 +114,7 @@ func (service *Service) GetByNameAndType(policyType, ruleName string) (*PolicyRu
 		List []PolicyRule `json:"list"`
 	}
 	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/policySet/rules/policyType/%s", policyType)
-	resp, err := service.Client.NewRequestDo("GET", url, nil, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", url, common.Pagination{PageSize: 500}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
