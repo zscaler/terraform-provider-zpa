@@ -80,7 +80,7 @@ func (service *Service) GetByName(segmentName string) (*SegmentGroup, *http.Resp
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + segmentGroupEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: segmentName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

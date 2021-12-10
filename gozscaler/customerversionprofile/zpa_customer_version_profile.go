@@ -67,7 +67,7 @@ func (service *Service) GetByName(versionProfileName string) (*CustomerVersionPr
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + customerVersionProfileEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: versionProfileName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

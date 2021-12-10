@@ -104,7 +104,7 @@ func (service *Service) GetByName(appConnectorGroupName string) (*AppConnectorGr
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + appConnectorGroupEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: appConnectorGroupName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

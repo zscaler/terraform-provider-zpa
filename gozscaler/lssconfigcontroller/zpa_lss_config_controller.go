@@ -147,7 +147,7 @@ func (service *Service) GetByName(lssName string) (*LSSResource, *http.Response,
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + lssConfigEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: lssName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

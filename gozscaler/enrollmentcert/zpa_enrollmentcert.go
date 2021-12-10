@@ -55,7 +55,7 @@ func (service *Service) GetByName(certName string) (*EnrollmentCert, *http.Respo
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + enrollmentCertEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: certName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

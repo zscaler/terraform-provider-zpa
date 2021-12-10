@@ -61,7 +61,7 @@ func (service *Service) GetByName(postureName string) (*PostureProfile, *http.Re
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + postureProfileEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: postureName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -57,7 +57,7 @@ func (service *Service) GetByName(cloudConnectorGroupName string) (*CloudConnect
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + cloudConnectorGroupEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: cloudConnectorGroupName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

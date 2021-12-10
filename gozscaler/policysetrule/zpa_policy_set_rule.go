@@ -114,7 +114,7 @@ func (service *Service) GetByNameAndType(policyType, ruleName string) (*PolicyRu
 		List []PolicyRule `json:"list"`
 	}
 	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/policySet/rules/policyType/%s", policyType)
-	resp, err := service.Client.NewRequestDo("GET", url, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", url, common.Pagination{PageSize: common.DefaultPageSize, Search: ruleName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

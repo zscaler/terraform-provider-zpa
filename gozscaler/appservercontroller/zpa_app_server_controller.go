@@ -42,7 +42,7 @@ func (service *Service) GetByName(appServerName string) (*ApplicationServer, *ht
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + appServerControllerEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: appServerName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

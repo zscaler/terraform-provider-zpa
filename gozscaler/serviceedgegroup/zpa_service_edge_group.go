@@ -106,7 +106,7 @@ func (service *Service) GetByName(serviceEdgeGroupName string) (*ServiceEdgeGrou
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + serviceEdgeGroupEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: serviceEdgeGroupName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

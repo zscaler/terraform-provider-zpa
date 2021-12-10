@@ -56,7 +56,7 @@ func (service *Service) GetByName(machineGroupName string) (*MachineGroup, *http
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + machineGroupEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: machineGroupName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

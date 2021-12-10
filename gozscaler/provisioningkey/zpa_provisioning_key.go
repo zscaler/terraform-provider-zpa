@@ -56,7 +56,7 @@ func (service *Service) GetByName(associationType, name string) (*ProvisioningKe
 		List []ProvisioningKey `json:"list"`
 	}
 	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/associationType/%s/provisioningKey", associationType)
-	resp, err := service.Client.NewRequestDo("GET", url, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", url, common.Pagination{PageSize: common.DefaultPageSize, Search: name}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

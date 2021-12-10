@@ -86,7 +86,7 @@ func (service *Service) GetByName(BaName string) (*BrowserAccess, *http.Response
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + browserAccessEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: BaName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

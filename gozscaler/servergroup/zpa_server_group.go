@@ -131,7 +131,7 @@ func (service *Service) GetByName(serverGroupName string) (*ServerGroup, *http.R
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + serverGroupEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: serverGroupName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
