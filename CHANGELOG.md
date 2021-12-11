@@ -1,3 +1,17 @@
+## 2.0.5 (December 13, 2021)
+
+## Enhancement
+
+- The provider now supports the ability to import policy access resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
+The  following policy access resources are supported:
+    - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/29)] :rocket:
+    - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+    - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+
+## Bug Fixes
+
+- Fixed pagination issues with all resources where only the default pagesize was being returned. [PR#52](https://github.com/willguibr/terraform-provider-zpa/pull/52) :wrench:
+
 ## 2.0.4 (December 6, 2021)
 
 ## New Data Source
