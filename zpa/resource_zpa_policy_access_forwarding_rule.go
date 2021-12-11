@@ -12,11 +12,13 @@ import (
 
 func resourcePolicyForwardingRule() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourcePolicyForwardingRuleCreate,
-		Read:     resourcePolicyForwardingRuleRead,
-		Update:   resourcePolicyForwardingRuleUpdate,
-		Delete:   resourcePolicyForwardingRuleDelete,
-		Importer: &schema.ResourceImporter{},
+		Create: resourcePolicyForwardingRuleCreate,
+		Read:   resourcePolicyForwardingRuleRead,
+		Update: resourcePolicyForwardingRuleUpdate,
+		Delete: resourcePolicyForwardingRuleDelete,
+		Importer: &schema.ResourceImporter{
+			State: importPolicyStateFunc([]string{"CLIENT_FORWARDING_POLICY", "BYPASS_POLICY"}),
+		},
 
 		Schema: MergeSchema(
 			CommonPolicySchema(),

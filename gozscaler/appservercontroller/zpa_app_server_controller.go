@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -40,9 +42,7 @@ func (service *Service) GetByName(appServerName string) (*ApplicationServer, *ht
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + appServerControllerEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct{ pagesize int }{
-		pagesize: 500,
-	}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: appServerName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -3,6 +3,9 @@ package policysetrule
 import (
 	"fmt"
 	"net/http"
+	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -104,4 +107,33 @@ func (service *Service) Delete(policySetID, ruleId string) (*http.Response, erro
 		return nil, err
 	}
 	return resp, err
+}
+
+func (service *Service) GetByNameAndType(policyType, ruleName string) (*PolicyRule, *http.Response, error) {
+	var v struct {
+		List []PolicyRule `json:"list"`
+	}
+	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/policySet/rules/policyType/%s", policyType)
+	resp, err := service.Client.NewRequestDo("GET", url, common.Pagination{PageSize: common.DefaultPageSize, Search: ruleName}, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+	for _, p := range v.List {
+		if strings.EqualFold(ruleName, p.Name) {
+			return &p, resp, nil
+		}
+	}
+	return nil, resp, fmt.Errorf("no policy rule named :%s found", ruleName)
+}
+
+func (service *Service) GetByNameAndTypes(policyTypes []string, ruleName string) (p *PolicyRule, resp *http.Response, err error) {
+	for _, policyType := range policyTypes {
+		p, resp, err = service.GetByNameAndType(policyType, ruleName)
+		if err != nil {
+			continue
+		} else {
+			return
+		}
+	}
+	return
 }

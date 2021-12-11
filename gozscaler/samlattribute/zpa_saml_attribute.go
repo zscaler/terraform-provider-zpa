@@ -42,7 +42,7 @@ func (service *Service) GetByName(samlAttrName string) (*SamlAttribute, *http.Re
 	}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + samlAttributeEndpoint)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{
-		PageSize: 500,
+		PageSize: common.DefaultPageSize,
 		Search:   samlAttrName,
 	}, nil, &v)
 	if err != nil {

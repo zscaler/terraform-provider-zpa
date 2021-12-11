@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -54,9 +56,7 @@ func (service *Service) GetByName(associationType, name string) (*ProvisioningKe
 		List []ProvisioningKey `json:"list"`
 	}
 	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/associationType/%s/provisioningKey", associationType)
-	resp, err := service.Client.NewRequestDo("GET", url, struct{ pagesize int }{
-		pagesize: 500,
-	}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", url, common.Pagination{PageSize: common.DefaultPageSize, Search: name}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
