@@ -18,144 +18,39 @@ func resourcePolicyIsolationRule() *schema.Resource {
 		Delete:   resourcePolicyIsolationRuleDelete,
 		Importer: &schema.ResourceImporter{},
 
-		Schema: map[string]*schema.Schema{
-			"action": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "  This is for providing the rule action.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"ISOLATE",
-					"BYPASS_ISOLATE",
-				}, false),
-			},
-			"action_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "This field defines the description of the server.",
-			},
-			"bypass_default_rule": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-			"isolation_default_rule": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "This is the description of the access policy rule.",
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "This is the name of the policy isolation rule.",
-			},
-			"operator": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"AND",
-					"OR",
-				}, false),
-			},
-			"policy_set_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"policy_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"priority": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"rule_order": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"zpn_cbi_profile_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"conditions": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "This is for proviidng the set of conditions for the policy.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"negated": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"operator": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"AND",
-								"OR",
-							}, false),
-						},
-						"operands": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "This signifies the various policy criteria.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"idp_id": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"lhs": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-									"rhs": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "This denotes the value for the given object type. Its value depends upon the key.",
-									},
-									"object_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "  This is for specifying the policy critiera.",
-										ValidateFunc: validation.StringInSlice([]string{
-											"APP",
-											"APP_GROUP",
-											"CLIENT_TYPE",
-											"CLOUD_CONNECTOR_GROUP",
-											"IDP",
-											"POSTURE",
-											"SAML",
-											"SCIM",
-											"SCIM_GROUP",
-											"TRUSTED_NETWORK",
-										}, false),
-									},
-								},
-							},
-						},
-					},
+		Schema: MergeSchema(
+			CommonPolicySchema(), map[string]*schema.Schema{
+				"action": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "  This is for providing the rule action.",
+					ValidateFunc: validation.StringInSlice([]string{
+						"ISOLATE",
+						"BYPASS_ISOLATE",
+					}, false),
 				},
+				"isolation_default_rule": {
+					Type:     schema.TypeBool,
+					Computed: true,
+				},
+				"zpn_cbi_profile_id": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"conditions": GetPolicyConditionsSchema([]string{
+					"APP",
+					"APP_GROUP",
+					"CLIENT_TYPE",
+					"CLOUD_CONNECTOR_GROUP",
+					"IDP",
+					"POSTURE",
+					"SAML",
+					"SCIM",
+					"SCIM_GROUP",
+					"TRUSTED_NETWORK",
+				}),
 			},
-		},
+		),
 	}
 }
 
@@ -165,14 +60,14 @@ func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) er
 	req := expandCreatePolicyIsolationRule(d)
 	log.Printf("[INFO] Creating zpa policy Isolation rule with request\n%+v\n", req)
 	if ValidateConditions(req.Conditions, zClient) {
-		policysetrule, _, err := zClient.policysetrule.Create(&req)
+		policy, _, err := zClient.policysetrule.Create(&req)
 		if err != nil {
 			return err
 		}
-		d.SetId(policysetrule.ID)
+		d.SetId(policy.ID)
 		order, ok := d.GetOk("rule_order")
 		if ok {
-			reorder(order, policysetrule.PolicySetID, policysetrule.ID, zClient)
+			reorder(order, policy.PolicySetID, policy.ID, zClient)
 		}
 		return resourcePolicyIsolationRuleRead(d, m)
 	} else {
@@ -206,6 +101,7 @@ func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) erro
 	_ = d.Set("action_id", resp.ActionID)
 	_ = d.Set("isolation_default_rule", resp.IsolationDefaultRule)
 	_ = d.Set("description", resp.Description)
+	_ = d.Set("custom_msg", resp.CustomMsg)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("bypass_default_rule", resp.BypassDefaultRule)
 	_ = d.Set("operator", resp.Operator)
@@ -269,9 +165,9 @@ func expandCreatePolicyIsolationRule(d *schema.ResourceData) policysetrule.Polic
 	}
 	log.Printf("[INFO] action_id:%v\n", d.Get("action_id"))
 	return policysetrule.PolicyRule{
-		Action:   d.Get("action").(string),
-		ActionID: d.Get("action_id").(string),
-		// CustomMsg:       d.Get("custom_msg").(string),
+		Action:          d.Get("action").(string),
+		ActionID:        d.Get("action_id").(string),
+		CustomMsg:       d.Get("custom_msg").(string),
 		Description:     d.Get("description").(string),
 		ID:              d.Get("id").(string),
 		Name:            d.Get("name").(string),
