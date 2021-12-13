@@ -7,5 +7,5 @@ const (
 type Pagination struct {
 	PageSize int    `json:"pagesize" url:"pagesize"`
 	Page     int    `json:"page,omitempty" url:"page"`
-	Search   string `json:"search,omitempty" url:"search"`
+	Search   string //`json:"search,omitempty" url:"search"`
 }
