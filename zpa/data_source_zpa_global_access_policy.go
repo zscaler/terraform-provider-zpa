@@ -41,6 +41,7 @@ func dataSourceGlobalAccessPolicy() *schema.Resource {
 			},
 			"policy_type": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"rules": {
