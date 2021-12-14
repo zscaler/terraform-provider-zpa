@@ -52,6 +52,7 @@ func resourceBrowserAccess() *schema.Resource {
 			"segment_group_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"bypass_type": {
 				Type:        schema.TypeString,
@@ -70,6 +71,7 @@ func resourceBrowserAccess() *schema.Resource {
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -77,6 +79,7 @@ func resourceBrowserAccess() *schema.Resource {
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -105,6 +108,7 @@ func resourceBrowserAccess() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"passive_health_enabled": {
 				Type:     schema.TypeBool,
@@ -113,10 +117,12 @@ func resourceBrowserAccess() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"health_reporting": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
 			},
 			"ip_anchored": {
@@ -297,7 +303,7 @@ func resourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
 

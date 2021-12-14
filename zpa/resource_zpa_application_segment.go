@@ -53,6 +53,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"bypass_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Indicates whether users can bypass ZPA to access applications.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"ALWAYS",
@@ -66,6 +67,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -73,6 +75,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -276,7 +279,7 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
-	if err := d.Set("tcp_port_range", flattenAppSegmentPortRange(resp.UDPAppPortRange)); err != nil {
+	if err := d.Set("udp_port_range", flattenAppSegmentPortRange(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
 

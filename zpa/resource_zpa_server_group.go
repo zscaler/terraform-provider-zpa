@@ -80,6 +80,7 @@ func resourceServerGroup() *schema.Resource {
 			"servers": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: "This field is a list of servers that are applicable only when dynamic discovery is disabled. Server name is required only in cases where the new servers need to be created in this API. For existing servers, pass only the serverId.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -96,6 +97,7 @@ func resourceServerGroup() *schema.Resource {
 			"applications": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: "This field is a json array of app-connector-id only.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -112,6 +114,7 @@ func resourceServerGroup() *schema.Resource {
 			"app_connector_groups": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: "List of app-connector IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

@@ -424,6 +424,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"operator": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 			ValidateFunc: validation.StringInSlice([]string{
 				"AND",
 				"OR",
@@ -436,10 +437,12 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"policy_type": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"priority": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"reauth_default_rule": {
 			Type:     schema.TypeBool,
@@ -456,6 +459,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"rule_order": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"lss_default_rule": {
 			Type:     schema.TypeBool,
@@ -520,6 +524,7 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
 		Optional:    true,
+		Computed:    true,
 		Description: desc,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
