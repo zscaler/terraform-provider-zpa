@@ -52,9 +52,9 @@ func validateOperand(operand policysetrule.Operands, zClient *Client) bool {
 			return err
 		}))
 	case "CLIENT_TYPE":
-		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter'", Getter(func(id string) error {
-			if id != "zpn_client_type_zapp" && id != "zpn_client_type_exporter" {
-				return fmt.Errorf("RHS values must be 'zpn_client_type_zapp' or 'zpn_client_type_exporter' wehn object type is CLIENT_TYPE")
+		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring'", Getter(func(id string) error {
+			if id != "zpn_client_type_zapp" && id != "zpn_client_type_exporter" && id != "zpn_client_type_ip_anchoring" {
+				return fmt.Errorf("RHS values must be 'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' when object type is CLIENT_TYPE")
 			}
 			return nil
 		}))
