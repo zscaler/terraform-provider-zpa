@@ -218,6 +218,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
+		Computed:    true,
 		Description: "This is for proviidng the set of conditions for the policy.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -228,6 +229,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 				"negated": {
 					Type:     schema.TypeBool,
 					Optional: true,
+					Computed: true,
 				},
 				"operator": {
 					Type:     schema.TypeString,
@@ -240,6 +242,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 				"operands": {
 					Type:        schema.TypeList,
 					Optional:    true,
+					Computed:    true,
 					Description: "This signifies the various policy criteria.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -250,10 +253,12 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 							"idp_id": {
 								Type:     schema.TypeString,
 								Optional: true,
+								Computed: true,
 							},
 							"name": {
 								Type:     schema.TypeString,
 								Optional: true,
+								Computed: true,
 							},
 							"lhs": {
 								Type:        schema.TypeString,

@@ -95,7 +95,7 @@ func resourceApplicationSegment() *schema.Resource {
 				Description: "Description of the application.",
 			},
 			"domain_names": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of domains and IPs.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
@@ -376,7 +376,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
 		IcmpAccessType:       d.Get("icmp_access_type").(string),
 		Description:          d.Get("description").(string),
-		DomainNames:          expandStringInSlice(d, "domain_names"),
+		DomainNames:          SetToStringList(d, "domain_names"),
 		DoubleEncrypt:        d.Get("double_encrypt").(bool),
 		Enabled:              d.Get("enabled").(bool),
 		HealthReporting:      d.Get("health_reporting").(string),

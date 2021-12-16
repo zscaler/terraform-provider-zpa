@@ -113,6 +113,7 @@ func resourceBrowserAccess() *schema.Resource {
 			"passive_health_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
@@ -155,6 +156,7 @@ func resourceBrowserAccess() *schema.Resource {
 						"application_port": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"application_protocol": {
 							Type:     schema.TypeString,
@@ -173,10 +175,12 @@ func resourceBrowserAccess() *schema.Resource {
 						"certificate_name": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"cname": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"description": {
 							Type:     schema.TypeString,
@@ -189,10 +193,12 @@ func resourceBrowserAccess() *schema.Resource {
 						"enabled": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 						"hidden": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 						"id": {
 							Type:     schema.TypeString,
@@ -213,6 +219,7 @@ func resourceBrowserAccess() *schema.Resource {
 						"trust_untrusted_cert": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
