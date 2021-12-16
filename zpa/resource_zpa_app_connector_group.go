@@ -51,7 +51,6 @@ func resourceAppConnectorGroup() *schema.Resource {
 			},
 			"city_country": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"country_code": {
@@ -125,19 +124,14 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "ID of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
-				Default:     0,
+				Default:     "0",
 				ValidateFunc: validation.StringInSlice([]string{
 					"0", "1", "2",
 				}, false),
 			},
 			"version_profile_name": {
 				Type:     schema.TypeString,
-				Optional: true,
-				//Default:  "Default",
 				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Default", "Previous Default", "New Release",
-				}, false),
 			},
 		},
 	}
