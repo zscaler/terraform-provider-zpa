@@ -23,6 +23,7 @@ func dataSourceLSSLotTypeFormats() *schema.Resource {
 					"zpn_ast_auth_log",
 					"zpn_http_trans_log",
 					"zpn_audit_log",
+					"zpn_ast_comprehensive_stats",
 				}, false),
 			},
 			"tsv": {

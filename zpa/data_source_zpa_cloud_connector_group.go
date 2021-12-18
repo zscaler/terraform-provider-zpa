@@ -13,7 +13,7 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 		Read: dataSourceCloudConnectorGroupRead,
 		Schema: map[string]*schema.Schema{
 			"creation_time": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"description": {
@@ -26,7 +26,7 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"creation_time": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"description": {
@@ -42,7 +42,7 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 							Computed: true,
 						},
 						"id": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"ipacl": {
@@ -50,15 +50,15 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 							Computed: true,
 						},
 						"issued_cert_id": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"modifiedby": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"modified_time": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"name": {
@@ -78,7 +78,7 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 				Computed: true,
 			},
 			"geolocation_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"id": {
@@ -86,11 +86,11 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 				Optional: true,
 			},
 			"modifiedby": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"modified_time": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"name": {
@@ -102,7 +102,7 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 				Computed: true,
 			},
 			"zia_org_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},

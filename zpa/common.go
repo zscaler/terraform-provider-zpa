@@ -46,7 +46,7 @@ func validateOperand(operand policysetrule.Operands, zClient *Client) bool {
 			_, _, err := zClient.idpcontroller.Get(id)
 			return err
 		}))
-	case "CLOUD_CONNECTOR_GROUP":
+	case "EDGE_CONNECTOR_GROUP":
 		return customValidate(operand, []string{"id"}, "cloud connector group ID", Getter(func(id string) error {
 			_, _, err := zClient.cloudconnectorgroup.Get(id)
 			return err

@@ -1,4 +1,4 @@
-## 2.0.5 (December 13, 2021)
+## 2.0.5 (December 17, 2021)
 
 ## Enhancement
 
@@ -11,6 +11,7 @@ The  following policy access resources are supported:
 ## Bug Fixes
 
 - Fixed pagination issues with all resources where only the default pagesize was being returned. [PR#52](https://github.com/willguibr/terraform-provider-zpa/pull/52) :wrench:
+- Fixed issue where Terraform showed that resources had been modified even though nothing had been changed in the upstream resources.[PR#54](https://github.com/willguibr/terraform-provider-zpa/pull/54) :wrench:
 
 ## 2.0.4 (December 6, 2021)
 
