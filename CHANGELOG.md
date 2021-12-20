@@ -1,16 +1,27 @@
-## 2.0.5 (December 13, 2021)
+## 2.0.5 (December 20, 2021)
 
 ## Enhancement
 
 - The provider now supports the ability to import policy access resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
 The  following policy access resources are supported:
-    - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/29)] :rocket:
-    - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
-    - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+    - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/51)] :rocket:
+    - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
+    - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
+
+- The provider now supports policy access creation to be associated with Cloud Connector Group resource
+    - resource_zpa_policy_access_rule - [PR#54](https://github.com/willguibr/terraform-provider-zpa/pull/54) :rocket:
+
+- Added new `client_type` to support access, forward, and timeout policy creation. The following new types have been added:
+    - zpn_client_type_ip_anchoring, zpn_client_type_browser_isolation, zpn_client_type_machine_tunnel and zpn_client_type_edge_connector. [PR#57](https://github.com/willguibr/terraform-provider-zpa/issues/57)] :rocket:
+
+- Updated the following examples for more accuracy:
+    - resource_zpa_policy_access_rule
+    - resource_zpa_app_connector_group
 
 ## Bug Fixes
 
 - Fixed pagination issues with all resources where only the default pagesize was being returned. [PR#52](https://github.com/willguibr/terraform-provider-zpa/pull/52) :wrench:
+- Fixed issue where Terraform showed that resources had been modified even though nothing had been changed in the upstream resources.[PR#54](https://github.com/willguibr/terraform-provider-zpa/pull/54) :wrench:
 
 ## 2.0.4 (December 6, 2021)
 

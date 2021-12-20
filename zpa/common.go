@@ -46,15 +46,15 @@ func validateOperand(operand policysetrule.Operands, zClient *Client) bool {
 			_, _, err := zClient.idpcontroller.Get(id)
 			return err
 		}))
-	case "CLOUD_CONNECTOR_GROUP":
+	case "EDGE_CONNECTOR_GROUP":
 		return customValidate(operand, []string{"id"}, "cloud connector group ID", Getter(func(id string) error {
 			_, _, err := zClient.cloudconnectorgroup.Get(id)
 			return err
 		}))
 	case "CLIENT_TYPE":
-		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter'", Getter(func(id string) error {
-			if id != "zpn_client_type_zapp" && id != "zpn_client_type_exporter" {
-				return fmt.Errorf("RHS values must be 'zpn_client_type_zapp' or 'zpn_client_type_exporter' wehn object type is CLIENT_TYPE")
+		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector'", Getter(func(id string) error {
+			if id != "zpn_client_type_zapp" && id != "zpn_client_type_exporter" && id != "zpn_client_type_ip_anchoring" && id != "zpn_client_type_browser_isolation" && id != "zpn_client_type_machine_tunnel" && id != "zpn_client_type_edge_connector" {
+				return fmt.Errorf("RHS values must be 'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' when object type is CLIENT_TYPE")
 			}
 			return nil
 		}))
@@ -218,6 +218,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
+		Computed:    true,
 		Description: "This is for proviidng the set of conditions for the policy.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -228,6 +229,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 				"negated": {
 					Type:     schema.TypeBool,
 					Optional: true,
+					Computed: true,
 				},
 				"operator": {
 					Type:     schema.TypeString,
@@ -240,6 +242,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 				"operands": {
 					Type:        schema.TypeList,
 					Optional:    true,
+					Computed:    true,
 					Description: "This signifies the various policy criteria.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -250,10 +253,12 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 							"idp_id": {
 								Type:     schema.TypeString,
 								Optional: true,
+								Computed: true,
 							},
 							"name": {
 								Type:     schema.TypeString,
 								Optional: true,
+								Computed: true,
 							},
 							"lhs": {
 								Type:        schema.TypeString,
@@ -380,6 +385,7 @@ func flattenPolicyRuleOperands(conditionOperand []policysetrule.Operands) []inte
 			"lhs":         operandItems.LHS,
 			"object_type": operandItems.ObjectType,
 			"rhs":         operandItems.RHS,
+			"name":        operandItems.Name,
 		}
 	}
 
@@ -424,6 +430,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"operator": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 			ValidateFunc: validation.StringInSlice([]string{
 				"AND",
 				"OR",
@@ -436,10 +443,12 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"policy_type": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"priority": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"reauth_default_rule": {
 			Type:     schema.TypeBool,
@@ -456,6 +465,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"rule_order": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"lss_default_rule": {
 			Type:     schema.TypeBool,
@@ -520,6 +530,7 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
 		Optional:    true,
+		Computed:    true,
 		Description: desc,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{

@@ -42,7 +42,7 @@ type CloudConnectors struct {
 
 func (service *Service) Get(cloudConnectorGroupID string) (*CloudConnectorGroup, *http.Response, error) {
 	v := new(CloudConnectorGroup)
-	relativeURL := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+cloudConnectorGroupEndpoint, cloudConnectorGroupID)
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + cloudConnectorGroupEndpoint + "/" + cloudConnectorGroupID
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err
