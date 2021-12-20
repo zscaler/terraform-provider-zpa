@@ -46,7 +46,8 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 							Computed: true,
 						},
 						"ipacl": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeList,
+							Elem:     schema.TypeString,
 							Computed: true,
 						},
 						"issued_cert_id": {

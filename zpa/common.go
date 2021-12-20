@@ -385,6 +385,7 @@ func flattenPolicyRuleOperands(conditionOperand []policysetrule.Operands) []inte
 			"lhs":         operandItems.LHS,
 			"object_type": operandItems.ObjectType,
 			"rhs":         operandItems.RHS,
+			"name":        operandItems.Name,
 		}
 	}
 

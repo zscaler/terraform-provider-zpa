@@ -1,4 +1,4 @@
-## 2.0.5 (December 17, 2021)
+## 2.0.5 (December 20, 2021)
 
 ## Enhancement
 
@@ -8,8 +8,15 @@ The  following policy access resources are supported:
     - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
     - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
 
+- The provider now supports policy access creation to be associated with Cloud Connector Group resource
+    - resource_zpa_policy_access_rule - [PR#54](https://github.com/willguibr/terraform-provider-zpa/pull/54) :rocket:
+
 - Added new `client_type` to support access, forward, and timeout policy creation. The following new types have been added:
     - zpn_client_type_ip_anchoring, zpn_client_type_browser_isolation, zpn_client_type_machine_tunnel and zpn_client_type_edge_connector. [PR#57](https://github.com/willguibr/terraform-provider-zpa/issues/57)] :rocket:
+
+- Updated the following examples for more accuracy:
+    - resource_zpa_policy_access_rule
+    - resource_zpa_app_connector_group
 
 ## Bug Fixes
 
