@@ -1,12 +1,19 @@
-## 2.0.5 (December 17, 2021)
+## 2.0.5 (December 20, 2021)
 
 ## Enhancement
 
 - The provider now supports the ability to import policy access resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
 The  following policy access resources are supported:
-    - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/29)] :rocket:
-    - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
-    - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+    - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/51)] :rocket:
+    - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
+    - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
+
+- The provider now supports policy access creation to be associated with Cloud Connector Group resource
+    - resource_zpa_policy_access_rule - [PR#54](https://github.com/willguibr/terraform-provider-zpa/pull/54) :rocket:
+
+- Updated the following examples for more accuracy:
+    - resource_zpa_policy_access_rule
+    - resource_zpa_app_connector_group
 
 ## Bug Fixes
 
