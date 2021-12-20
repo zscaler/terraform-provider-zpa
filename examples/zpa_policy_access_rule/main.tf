@@ -1,4 +1,4 @@
-resource "zpa_policyset_rule" "all_other_services" {
+resource "zpa_policy_access_rule" "all_other_services" {
   name                          = "All Other Services"
   description                   = "All Other Services"
   action                        = "ALLOW"
@@ -34,7 +34,7 @@ resource "zpa_policyset_rule" "all_other_services" {
   }
 }
 
-output "all_zpa_policyset_rule" {
+output "all_zpa_policy_access_rule" {
   value = zpa_policyset_rule.all_other_services
 }
 
