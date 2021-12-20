@@ -4,9 +4,12 @@
 
 - The provider now supports the ability to import policy access resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
 The  following policy access resources are supported:
-    - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/29)] :rocket:
-    - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
-    - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+    - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/51)] :rocket:
+    - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
+    - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
+
+- Added new `client_type` to support access, forward, and timeout policy creation. The following new types have been added:
+    - zpn_client_type_ip_anchoring, zpn_client_type_browser_isolation, zpn_client_type_machine_tunnel and zpn_client_type_edge_connector. [PR#57](https://github.com/willguibr/terraform-provider-zpa/issues/57)] :rocket:
 
 ## Bug Fixes
 
