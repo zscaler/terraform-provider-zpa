@@ -44,6 +44,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 				"app_server_groups": {
 					Type:        schema.TypeSet,
 					Optional:    true,
+					Computed:    true,
 					Description: "List of the server group IDs.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -60,6 +61,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 				"app_connector_groups": {
 					Type:        schema.TypeSet,
 					Optional:    true,
+					Computed:    true,
 					Description: "List of app-connector IDs.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{

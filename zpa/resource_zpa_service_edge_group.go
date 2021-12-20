@@ -51,10 +51,12 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			"city_country": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"country_code": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"description": {
 				Type:        schema.TypeString,
