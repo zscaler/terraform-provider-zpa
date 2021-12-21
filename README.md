@@ -65,14 +65,14 @@ Run the following commands for cmd:
 cd %GOPATH%\src\github.com\terraform-providers\terraform-provider-zpa
 go fmt
 go install
-xcopy "%GOPATH%\bin\terraform-provider-zpa.exe" "%APPDATA%\terraform.d\plugins\zscaler.com\zpa\zpa\1.0.0\windows_amd64\" /Y
+xcopy "%GOPATH%\bin\terraform-provider-zpa.exe" "%APPDATA%\terraform.d\plugins\zscaler.com\zpa\zpa\2.0.5\windows_amd64\" /Y
 ```
 Run the following commands if using powershell:
 ```sh
 cd "$env:GOPATH\src\github.com\terraform-providers\terraform-provider-zpa"
 go fmt
 go install
-xcopy "$env:GOPATH\bin\terraform-provider-zpa.exe" "$env:APPDATA\terraform.d\plugins\zscaler.com\zpa\zpa\1.0.0\windows_amd64\" /Y
+xcopy "$env:GOPATH\bin\terraform-provider-zpa.exe" "$env:APPDATA\terraform.d\plugins\zscaler.com\zpa\zpa\2.0.5\windows_amd64\" /Y
 ```
 
 **Note**: For contributions created from forks, the repository should still be cloned under the `$GOPATH/src/github.com/terraform-providers/terraform-provider-zpa` directory to allow the provided `make` commands to properly run, build, and test this project.
@@ -110,7 +110,7 @@ terraform {
   required_providers {
     zpa = {
       source  = "zscaler.com/zpa/zpa"
-      version = "1.0.0"
+      version = "2.0.5"
     }
   }
 }
