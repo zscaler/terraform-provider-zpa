@@ -48,6 +48,7 @@ func Provider() *schema.Provider {
 			"zpa_provisioning_key":       resourceProvisioningKey(),
 			"zpa_service_edge_group":     resourceServiceEdgeGroup(),
 			"zpa_lss_config_controller":  resourceLSSConfigController(),
+			"zpa_idp_controller":         resourceIdpController(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform date source name: data source schema

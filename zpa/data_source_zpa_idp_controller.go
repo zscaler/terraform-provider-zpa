@@ -40,6 +40,34 @@ func dataSourceIdpController() *schema.Resource {
 					},
 				},
 			},
+			"certificates": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cname": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"certificate": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"serial_no": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"valid_from_in_sec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"valid_to_in_sec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"admin_sp_signing_cert_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -203,7 +231,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("disable_saml_based_policy", resp.DisableSamlBasedPolicy)
-		_ = d.Set("domain_list", resp.Domainlist)
+		_ = d.Set("domain_list", resp.DomainList)
 		_ = d.Set("enable_scim_based_policy", resp.EnableScimBasedPolicy)
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("idp_entity_id", resp.IdpEntityID)
@@ -222,6 +250,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("sso_type", resp.SsoType)
 		_ = d.Set("use_custom_sp_metadata", resp.UseCustomSpMetadata)
 		_ = d.Set("user_sp_signing_cert_id", resp.UserSpSigningCertID)
+		// _ = d.Set("certificates", flattenCertificates(resp))
 		if resp.UserMetadata != nil {
 			_ = d.Set("user_metadata", flattenUserMeta(resp.UserMetadata))
 		}
@@ -229,6 +258,9 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 			_ = d.Set("admin_metadata", flattenAdminMeta(resp.AdminMetadata))
 		}
 
+		if err := d.Set("certificates", flattenCertificates(resp)); err != nil {
+			return fmt.Errorf("failed to read certificates %s", err)
+		}
 	} else {
 		return fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id)
 	}
@@ -251,4 +283,19 @@ func flattenUserMeta(metaData *idpcontroller.UserMetadata) []map[string]interfac
 	result[0]["sp_metadata_url"] = metaData.SpMetadataURL
 	result[0]["sp_post_url"] = metaData.SpPostURL
 	return result
+}
+
+func flattenCertificates(certificates *idpcontroller.IdpController) []interface{} {
+	certificate := make([]interface{}, len(certificates.Certificates))
+	for i, certificates := range certificates.Certificates {
+		certificate[i] = map[string]interface{}{
+			"cname":             certificates.CName,
+			"certificate":       certificates.Certificate,
+			"serial_no":         certificates.SerialNo,
+			"valid_from_in_sec": certificates.ValidFromInSec,
+			"valid_to_in_sec":   certificates.ValidToInSec,
+		}
+	}
+
+	return certificate
 }
