@@ -26,6 +26,10 @@ func resourcePolicyTimeoutRule() *schema.Resource {
 					Description: "  This is for providing the rule action.",
 					ValidateFunc: validation.StringInSlice([]string{
 						"RE_AUTH",
+						"LOG",
+						"NEVER",
+						"BYPASS_RE_AUTH",
+						"NO_DOWNLOAD",
 					}, false),
 				},
 

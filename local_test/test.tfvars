@@ -1,0 +1,1 @@
+segment_group = ["test_segmentgroup", "testapplication_segmentgroup"]

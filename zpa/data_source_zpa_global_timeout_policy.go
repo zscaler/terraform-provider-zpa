@@ -41,7 +41,7 @@ func dataSourceGlobalPolicyTimeout() *schema.Resource {
 			},
 			"policy_type": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"rules": {
 				Type:     schema.TypeList,

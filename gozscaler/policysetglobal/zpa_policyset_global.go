@@ -118,6 +118,18 @@ func (service *Service) GetBypass() (*PolicySet, *http.Response, error) {
 	return v, resp, nil
 }
 
+func (service *Service) GetIsolationPolicy() (*PolicySet, *http.Response, error) {
+	v := new(PolicySet)
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/policyType/ISOLATION_POLICY")
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return v, resp, nil
+}
+
+/*
 // Get the global isolation policy and all rules for a Isolation Policy Rule
 func (service *Service) GetIsolationPolicy() (*PolicySet, *http.Response, error) {
 	v := new(PolicySet)
@@ -129,6 +141,7 @@ func (service *Service) GetIsolationPolicy() (*PolicySet, *http.Response, error)
 
 	return v, resp, nil
 }
+*/
 
 func (service *Service) RulesCount() (int, *http.Response, error) {
 	v := new(Count)
