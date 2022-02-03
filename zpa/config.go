@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/willguibr/terraform-provider-zpa/gozscaler"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorcontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/applicationsegment"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appservercontroller"
@@ -35,6 +36,7 @@ func init() {
 
 type Client struct {
 	appconnectorgroup      appconnectorgroup.Service
+	appconnectorcontroller appconnectorcontroller.Service
 	applicationsegment     applicationsegment.Service
 	appservercontroller    appservercontroller.Service
 	bacertificate          bacertificate.Service
@@ -73,6 +75,7 @@ func (c *Config) Client() (*Client, error) {
 
 	client := &Client{
 		appconnectorgroup:      *appconnectorgroup.New(config),
+		appconnectorcontroller: *appconnectorcontroller.New(config),
 		applicationsegment:     *applicationsegment.New(config),
 		appservercontroller:    *appservercontroller.New(config),
 		bacertificate:          *bacertificate.New(config),
