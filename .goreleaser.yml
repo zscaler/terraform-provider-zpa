@@ -53,11 +53,7 @@ release:
   github:
     owner: willguibr
     name: terraform-provider-zpa
+    # Visit your project's GitHub Releases page to publish this release.
   draft: true
 changelog:
   skip: true
-# release:
-#   # If you want to manually examine the release before its live, uncomment this line:
-#   # draft: true
-# changelog:
-#   skip: true
