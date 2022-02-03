@@ -8,9 +8,9 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorcontroller"
 )
 
-func dataSourceAppConnector() *schema.Resource {
+func dataSourceAppConnectorController() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceConnectorRead,
+		Read: dataSourceAppConnectorControllerRead,
 		Schema: map[string]*schema.Schema{
 			"application_start_time": {
 				Type:     schema.TypeString,
@@ -161,7 +161,7 @@ func dataSourceAppConnector() *schema.Resource {
 	}
 }
 
-func dataSourceConnectorRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceAppConnectorControllerRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	var resp *appconnectorcontroller.AppConnector

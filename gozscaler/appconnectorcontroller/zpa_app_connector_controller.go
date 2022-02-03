@@ -9,9 +9,8 @@ import (
 )
 
 const (
-	mgmtConfig                     = "/mgmtconfig/v1/admin/customers/"
-	appConnectorEndpoint           = "/connector"
-	appConnectorBulkDeleteEndpoint = "/bulkDelete"
+	mgmtConfig           = "/mgmtconfig/v1/admin/customers/"
+	appConnectorEndpoint = "/connector"
 )
 
 type AppConnector struct {
@@ -81,37 +80,4 @@ func (service *Service) GetByName(appConnectorName string) (*AppConnector, *http
 		}
 	}
 	return nil, resp, fmt.Errorf("no app connector named '%s' was found", appConnectorName)
-}
-
-// This function calls the App Connector BulkDelete Endpoint
-func (service *Service) Create(appConnector AppConnector) (*AppConnector, *http.Response, error) {
-	v := new(AppConnector)
-	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+appConnectorBulkDeleteEndpoint, nil, appConnector, &v)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return v, resp, nil
-}
-
-// This function calls the App Connector Update Endpoint
-func (service *Service) Update(appConnectorID string, appConnector *AppConnector) (*http.Response, error) {
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appConnectorEndpoint, appConnectorID)
-	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, appConnector, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, err
-}
-
-// This function calls the App Connector Delete Endpoint
-func (service *Service) Delete(appConnectorID string) (*http.Response, error) {
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appConnectorEndpoint, appConnectorID)
-	resp, err := service.Client.NewRequestDo("DELETE", relativeURL, nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, nil
 }
