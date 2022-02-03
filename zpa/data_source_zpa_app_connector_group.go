@@ -10,7 +10,7 @@ import (
 
 func dataSourceAppConnectorGroup() *schema.Resource {
 	return &schema.Resource{
-		Read: resourceConnectorGroupRead,
+		Read: dataSourceConnectorGroupRead,
 		Schema: map[string]*schema.Schema{
 			"connectors": {
 				Type:     schema.TypeList,
@@ -297,7 +297,7 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 	}
 }
 
-func resourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	var resp *appconnectorgroup.AppConnectorGroup
