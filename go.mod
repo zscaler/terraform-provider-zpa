@@ -3,7 +3,7 @@ module github.com/willguibr/terraform-provider-zpa
 go 1.17
 
 require (
-	github.com/bflad/tfproviderlint v0.27.1
+	github.com/bflad/tfproviderlint v0.28.0
 	github.com/client9/misspell v0.3.4
 	github.com/google/go-querystring v1.1.0
 	github.com/hashicorp/go-retryablehttp v0.7.0
