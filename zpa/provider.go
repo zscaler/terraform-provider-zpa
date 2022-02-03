@@ -66,6 +66,7 @@ func Provider() *schema.Provider {
 			"zpa_policy_type":                 dataSourcePolicyType(),
 			"zpa_posture_profile":             dataSourcePostureProfile(),
 			"zpa_service_edge_group":          dataSourceServiceEdgeGroup(),
+			"zpa_service_edge_controller":     dataSourceServiceEdgeController(),
 			"zpa_saml_attribute":              dataSourceSamlAttribute(),
 			"zpa_scim_groups":                 dataSourceScimGroup(),
 			"zpa_scim_attribute_header":       dataSourceScimAttributeHeader(),

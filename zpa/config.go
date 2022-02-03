@@ -25,6 +25,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/scimgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/servergroup"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgecontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
 )
@@ -56,6 +57,7 @@ type Client struct {
 	segmentgroup           segmentgroup.Service
 	servergroup            servergroup.Service
 	serviceedgegroup       serviceedgegroup.Service
+	serviceedgecontroller  serviceedgecontroller.Service
 	trustednetwork         trustednetwork.Service
 	browseraccess          browseraccess.Service
 }
@@ -95,6 +97,7 @@ func (c *Config) Client() (*Client, error) {
 		segmentgroup:           *segmentgroup.New(config),
 		servergroup:            *servergroup.New(config),
 		serviceedgegroup:       *serviceedgegroup.New(config),
+		serviceedgecontroller:  *serviceedgecontroller.New(config),
 		trustednetwork:         *trustednetwork.New(config),
 		browseraccess:          *browseraccess.New(config),
 	}

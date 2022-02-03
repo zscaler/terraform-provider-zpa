@@ -1,3 +1,10 @@
+## 2.0.6 (February 3, 2022)
+
+## New Data Sources
+
+- Added new data source for ``zpa_app_connector_controller`` resource. [PR#62](https://github.com/willguibr/terraform-provider-zpa/pull/62)
+- Added new data source for ``zpa_service_edge_controller`` resource. [PR#63](https://github.com/willguibr/terraform-provider-zpa/pull/63)
+
 ## 2.0.5 (December 20, 2021)
 
 ## Enhancement
