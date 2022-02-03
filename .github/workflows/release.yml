@@ -14,36 +14,64 @@ on:
   push:
     tags:
       - 'v*'
+    paths-ignore:
+      - 'website/**'
+
+  pull_request:
+    paths-ignore:
+      - 'website/**'
+
 jobs:
-  goreleaser:
+  build:
+    name: build
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v2.4.0
-      -
-        name: Unshallow
-        run: git fetch --prune --unshallow
-      -
-        name: Set up Go
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.14
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+    - name: Build
+      run: go build -v .
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
-          go-version: 1.17
-      -
-        name: Import GPG key
-        id: import_gpg
-        uses: hashicorp/ghaction-import-gpg@v2.1.0
-        env:
-          # These secrets will need to be configured for the repository:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
-      -
-        name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.8.1
+          go-version: ^1.14
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Get dependencies
+        run: |
+          go get -v -t -d ./...
+      - name: Build
+        run: go build -v .
+
+      - name: Test
+        run: go test -v ./...
+
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
         with:
-          version: latest
-          args: release --rm-dist
-        env:
-          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          # GitHub sets this automatically
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version: v1.29
+          only-new-issues: true
