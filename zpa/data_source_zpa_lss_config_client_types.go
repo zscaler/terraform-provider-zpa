@@ -12,14 +12,6 @@ func dataSourceLSSClientTypes() *schema.Resource {
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
-			// "id": {
-			// 	Type:     schema.TypeString,
-			// 	Computed: true,
-			// },
-			// "lss_id": {
-			// 	Type:     schema.TypeString,
-			// 	Optional: true,
-			// },
 			"zpn_client_type_exporter": {
 				Type:     schema.TypeString,
 				Computed: true,

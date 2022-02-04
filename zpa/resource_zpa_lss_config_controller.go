@@ -111,6 +111,10 @@ func resourceLSSConfigController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"policy_rule_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"policy_rule_resource": {
 				Type:     schema.TypeList,
 				Optional: true,

@@ -23,6 +23,7 @@ func dataSourceLSSConfigController() *schema.Resource {
 			"config": {
 				Type:     schema.TypeList,
 				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"audit_message": {
@@ -53,6 +54,7 @@ func dataSourceLSSConfigController() *schema.Resource {
 						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
+							Optional: true,
 						},
 						"lss_host": {
 							Type:     schema.TypeString,

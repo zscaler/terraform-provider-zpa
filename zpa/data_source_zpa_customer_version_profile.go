@@ -36,22 +36,23 @@ func dataSourceCustomerVersionProfile() *schema.Resource {
 					},
 				},
 			},
-			"custom_scope_request_customer_ids": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"add_customer_ids": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"delete_customer_ids": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
+			// Acceptance tests returning panic: custom_scope_request_customer_ids.add_customer_ids: can only set full list
+			// "custom_scope_request_customer_ids": {
+			// 	Type:     schema.TypeList,
+			// 	Computed: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"add_customer_ids": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 			"delete_customer_ids": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 		},
+			// 	},
+			// },
 			"customer_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -168,8 +169,9 @@ func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, m interface{})
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("upgrade_priority", resp.UpgradePriority)
 		_ = d.Set("visibility_scope", resp.VisibilityScope)
-		_ = d.Set("custom_scope_customer_ids.add_customer_ids", resp.CustomScopeRequestCustomerIDs.AddCustomerIDs)
-		_ = d.Set("custom_scope_customer_ids.add_customer_ids", resp.CustomScopeRequestCustomerIDs.DeletecustomerIDs)
+		// Acceptance tests returning panic: custom_scope_request_customer_ids.add_customer_ids: can only set full list
+		// _ = d.Set("custom_scope_request_customer_ids.add_customer_ids", resp.CustomScopeRequestCustomerIDs.AddCustomerIDs)
+		// _ = d.Set("custom_scope_request_customer_ids.delete_customer_ids", resp.CustomScopeRequestCustomerIDs.DeletecustomerIDs)
 
 		if err := d.Set("custom_scope_customer_ids", flattenCustomerIDName(resp.CustomScopeCustomerIDs)); err != nil {
 			return fmt.Errorf("failed to read custom scope customer ids %s", err)
