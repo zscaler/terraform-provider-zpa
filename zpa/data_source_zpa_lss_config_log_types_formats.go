@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceLSSLotTypeFormats() *schema.Resource {
+func dataSourceLSSLogTypeFormats() *schema.Resource {
 	return &schema.Resource{
-		Read:     dataSourceLSSLotTypeFormatsRead,
+		Read:     dataSourceLSSLogTypeFormatsRead,
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
@@ -24,6 +24,8 @@ func dataSourceLSSLotTypeFormats() *schema.Resource {
 					"zpn_http_trans_log",
 					"zpn_audit_log",
 					"zpn_ast_comprehensive_stats",
+					"zpn_sys_auth_log",
+					"zpn_waf_http_exchanges_log",
 				}, false),
 			},
 			"tsv": {
@@ -50,7 +52,7 @@ func getLogType(d *schema.ResourceData) (string, bool) {
 	value, ok := val.(string)
 	return value, ok
 }
-func dataSourceLSSLotTypeFormatsRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceLSSLogTypeFormatsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	log.Printf("[INFO] Getting data for LSS Log Types Format set\n")
 	logType, ok := getLogType(d)

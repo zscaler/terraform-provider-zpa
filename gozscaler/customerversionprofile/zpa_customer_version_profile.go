@@ -34,8 +34,8 @@ type CustomScopeCustomerIDs struct {
 	Name                 string `json:"name"`
 }
 type CustomScopeRequestCustomerIDs struct {
-	AddCustomerIDs    []string `json:"addCustomerIds"`
-	DeletecustomerIDs []string `json:"deleteCustomerIds"`
+	AddCustomerIDs    string `json:"addCustomerIds"`
+	DeletecustomerIDs string `json:"deleteCustomerIds"`
 }
 type Versions struct {
 	CreationTime             string `json:"creationTime"`

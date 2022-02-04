@@ -33,7 +33,6 @@ type IdpController struct {
 	RedirectBinding             bool           `json:"redirectBinding"`
 	ScimEnabled                 bool           `json:"scimEnabled"`
 	ScimServiceProviderEndpoint string         `json:"scimServiceProviderEndpoint,omitempty"`
-	ScimSharedSecret            string         `json:"scimSharedSecret,omitempty"`
 	ScimSharedSecretExists      bool           `json:"scimSharedSecretExists,omitempty"`
 	SignSamlRequest             string         `json:"signSamlRequest,,omitempty"`
 	SsoType                     []string       `json:"ssoType,omitempty"`

@@ -14,6 +14,7 @@ type LSSStatusCodes struct {
 	ZPNAuthLog    map[string]interface{} `json:"zpn_auth_log"`
 	ZPNAstAuthLog map[string]interface{} `json:"zpn_ast_auth_log"`
 	ZPNTransLog   map[string]interface{} `json:"zpn_trans_log"`
+	ZPNSysAuthLog map[string]interface{} `json:"zpn_sys_auth_log"`
 }
 
 func (service *Service) GetStatusCodes() (*LSSStatusCodes, *http.Response, error) {

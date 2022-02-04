@@ -93,7 +93,7 @@ func dataSourceBrowserAccess() *schema.Resource {
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "Name of the application.",
 			},
 			"clientless_apps": {

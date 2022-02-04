@@ -53,7 +53,7 @@ func testAccDataSourceServerGroupByID(rName, rDesc string) string {
 		}
 	}
 	data "zpa_app_connector_group" "example" {
-		name = "SGIO-Vancouver"
+		name = "Canada App Connector Group"
 	}
 	data "zpa_server_group" "by_name" {
 		name = zpa_server_group.test_app_group.name
