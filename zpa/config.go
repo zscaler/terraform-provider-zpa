@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/willguibr/terraform-provider-zpa/gozscaler"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorcontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/applicationsegment"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appservercontroller"
@@ -24,6 +25,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/scimgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/servergroup"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgecontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
 )
@@ -35,6 +37,7 @@ func init() {
 
 type Client struct {
 	appconnectorgroup      appconnectorgroup.Service
+	appconnectorcontroller appconnectorcontroller.Service
 	applicationsegment     applicationsegment.Service
 	appservercontroller    appservercontroller.Service
 	bacertificate          bacertificate.Service
@@ -54,6 +57,7 @@ type Client struct {
 	segmentgroup           segmentgroup.Service
 	servergroup            servergroup.Service
 	serviceedgegroup       serviceedgegroup.Service
+	serviceedgecontroller  serviceedgecontroller.Service
 	trustednetwork         trustednetwork.Service
 	browseraccess          browseraccess.Service
 }
@@ -73,6 +77,7 @@ func (c *Config) Client() (*Client, error) {
 
 	client := &Client{
 		appconnectorgroup:      *appconnectorgroup.New(config),
+		appconnectorcontroller: *appconnectorcontroller.New(config),
 		applicationsegment:     *applicationsegment.New(config),
 		appservercontroller:    *appservercontroller.New(config),
 		bacertificate:          *bacertificate.New(config),
@@ -92,6 +97,7 @@ func (c *Config) Client() (*Client, error) {
 		segmentgroup:           *segmentgroup.New(config),
 		servergroup:            *servergroup.New(config),
 		serviceedgegroup:       *serviceedgegroup.New(config),
+		serviceedgecontroller:  *serviceedgecontroller.New(config),
 		trustednetwork:         *trustednetwork.New(config),
 		browseraccess:          *browseraccess.New(config),
 	}

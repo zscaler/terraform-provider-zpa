@@ -51,11 +51,12 @@ func resourceAppConnectorGroup() *schema.Resource {
 			},
 			"city_country": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"country_code": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -99,6 +100,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"lss_app_connector_group": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"upgrade_day": {
 				Type:        schema.TypeString,
@@ -122,18 +124,14 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "ID of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
-				Default:     0,
+				Default:     "0",
 				ValidateFunc: validation.StringInSlice([]string{
 					"0", "1", "2",
 				}, false),
 			},
 			"version_profile_name": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Default",
-				ValidateFunc: validation.StringInSlice([]string{
-					"Default", "Previous Default", "New Release",
-				}, false),
+				Computed: true,
 			},
 		},
 	}
@@ -179,7 +177,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("latitude", resp.Latitude)
 	_ = d.Set("longitude", resp.Longitude)
 	_ = d.Set("location", resp.Location)
-	_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
+	//_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
 	_ = d.Set("upgrade_day", resp.UpgradeDay)
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)

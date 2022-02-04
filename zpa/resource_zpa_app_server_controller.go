@@ -61,11 +61,13 @@ func resourceApplicationServer() *schema.Resource {
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Computed:    true,
 				Description: "This field defines the status of the server.",
 			},
 			// App Server Group ID can only be attached if Dynamic Server Discovery in Server Group is False
 			"app_server_group_ids": {
 				Type:        schema.TypeSet,
+				Computed:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "This field defines the list of server groups IDs.",
 				Optional:    true,
