@@ -16,7 +16,7 @@ builds:
   ldflags:
     - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
   goos:
-    - freebsd
+    # - freebsd
     - windows
     - linux
     - darwin
@@ -28,6 +28,9 @@ builds:
   ignore:
     - goos: darwin
       goarch: '386'
+    - goos: freebsd
+    - goarch: 'amd64'
+  
   binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
 - format: zip
@@ -47,13 +50,8 @@ signs:
       - "${signature}"
       - "--detach-sign"
       - "${artifact}"
-
 release:
-  # Visit your project's GitHub Releases page to publish this release.
-  github:
-    owner: willguibr
-    name: terraform-provider-zpa
-    # Visit your project's GitHub Releases page to publish this release.
-  draft: true
+  # If you want to manually examine the release before its live, uncomment this line:
+  # draft: true
 changelog:
   skip: true
