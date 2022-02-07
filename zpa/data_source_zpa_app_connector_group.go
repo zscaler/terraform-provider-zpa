@@ -189,7 +189,7 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"geolocation_id": {
+			"geo_location_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

@@ -34,6 +34,13 @@ func dataSourceLSSStatusCodes() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"zpn_sys_auth_log": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -65,6 +72,7 @@ func dataSourceLSSStatusCodesRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("zpn_auth_log", toMapString(resp.ZPNAstAuthLog))
 	_ = d.Set("zpn_ast_auth_log", toMapString(resp.ZPNAstAuthLog))
 	_ = d.Set("zpn_trans_log", toMapString(resp.ZPNTransLog))
+	_ = d.Set("zpn_sys_auth_log", toMapString(resp.ZPNSysAuthLog))
 
 	return nil
 }

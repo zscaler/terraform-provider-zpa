@@ -216,7 +216,6 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("redirect_binding", resp.RedirectBinding)
 		_ = d.Set("scim_enabled", resp.ScimEnabled)
 		_ = d.Set("scim_service_provider_endpoint", resp.ScimServiceProviderEndpoint)
-		_ = d.Set("scim_shared_secret", resp.ScimSharedSecret)
 		_ = d.Set("scim_shared_secret_exists", resp.ScimSharedSecretExists)
 		_ = d.Set("sign_saml_request", resp.SignSamlRequest)
 		_ = d.Set("sso_type", resp.SsoType)

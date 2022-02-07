@@ -1,17 +1,18 @@
 package zpa
 
 import (
+	"errors"
 	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var testAccProviders map[string]*schema.Provider
-var testAccProvider *schema.Provider
+const testNamePrefix = "tf-acc-test-"
 
-var testAccProvidersVersionValidation map[string]*schema.Provider
-var testAccProviderVersionValidation *schema.Provider
+var testAccProvider *schema.Provider
+var testAccProviders map[string]*schema.Provider
+var testAccProviderFactories map[string]func() (*schema.Provider, error)
 
 func init() {
 	testAccProvider = Provider()
@@ -19,10 +20,10 @@ func init() {
 		"zpa": testAccProvider,
 	}
 
-	testAccProviderVersionValidation = Provider()
-	testAccProviderVersionValidation.ConfigureFunc = zscalerConfigure
-	testAccProvidersVersionValidation = map[string]*schema.Provider{
-		"zpa": testAccProviderVersionValidation,
+	testAccProviderFactories = map[string]func() (*schema.Provider, error){
+		"zpa": func() (*schema.Provider, error) {
+			return testAccProvider, nil
+		},
 	}
 }
 
@@ -33,10 +34,14 @@ func TestProvider(t *testing.T) {
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ = Provider()
+	_ = Provider()
 }
 
 func testAccPreCheck(t *testing.T) {
+	err := accPreCheck()
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
 	if v := os.Getenv("ZPA_CLIENT_ID"); v == "" {
 		t.Fatal("ZPA_CLIENT_ID must be set for acceptance tests.")
 	}
@@ -46,4 +51,17 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ZPA_CUSTOMER_ID"); v == "" {
 		t.Fatal("ZPA_CUSTOMER_ID must be set for acceptance tests.")
 	}
+}
+
+func accPreCheck() error {
+	if v := os.Getenv("ZPA_CLIENT_ID"); v == "" {
+		return errors.New("ZPA_CLIENT_ID must be set for acceptance tests")
+	}
+	client_id := os.Getenv("ZPA_CLIENT_ID")
+	client_secret := os.Getenv("ZPA_CLIENT_SECRET")
+	customer_id := os.Getenv("ZPA_CUSTOMER_ID")
+	if client_id == "" && (client_id == "" || client_secret == "" || customer_id == "") {
+		return errors.New("either ZPA_CLIENT_ID or OKTA_API_CLIENT_ID, OKTA_API_SCOPES and OKTA_API_PRIVATE_KEY must be set for acceptance tests")
+	}
+	return nil
 }
