@@ -21,6 +21,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Go Mod Vendor
+        run: go mod vendor
+
+      - name: Go Mod Tidy
+        run: go mod tidy
+        
       - name: make testacc
         run: make testacc
         env:
