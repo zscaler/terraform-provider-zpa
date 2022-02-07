@@ -1,5 +1,4 @@
-![Build Status](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)
-<br/><br/>
+[![Release](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml)
 
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
