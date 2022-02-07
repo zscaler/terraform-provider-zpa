@@ -1,3 +1,5 @@
+# Changelog
+
 ## 2.0.6 (February 3, 2022)
 
 ## New Data Sources
@@ -5,25 +7,53 @@
 - Added new data source for ``zpa_app_connector_controller`` resource. [PR#62](https://github.com/willguibr/terraform-provider-zpa/pull/62)
 - Added new data source for ``zpa_service_edge_controller`` resource. [PR#63](https://github.com/willguibr/terraform-provider-zpa/pull/63)
 
+## New Acceptance Tests
+
+These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#64](https://github.com/willguibr/terraform-provider-zpa/pull/64)
+
+- ``data_source_zpa_app_connector_controller_test``
+- ``data_source_zpa_app_connector_group_test``
+- ``data_source_zpa_app_server_controller_test``
+- ``data_source_zpa_application_segment_test``
+- ``data_source_zpa_ba_certificate_test``
+- ``data_source_zpa_browser_access_test``
+- ``data_source_zpa_cloud_connector_group_test``
+- ``data_source_zpa_customer_version_profile_test``
+- ``data_source_zpa_enrollement_cert_test``
+- ``data_source_zpa_idp_controller_test``
+- ``data_source_zpa_lss_config_client_types_test``
+- ``data_source_zpa_lss_config_log_types_formats_test``
+- ``data_source_zpa_lss_config_status_codes_test``
+- ``data_source_zpa_machine_group_test``
+- ``data_source_zpa_posture_profile_test``
+- ``data_source_zpa_segment_group_test``
+- ``data_source_zpa_server_group_test``
+- ``data_source_zpa_trusted_network_test``
+- ``resource_zpa_app_connector_group_test``
+- ``resource_zpa_app_server_controller_test``
+- ``resource_zpa_application_segment_test``
+- ``resource_zpa_segment_group_test``
+- ``resource_zpa_server_group_test``
+- ``resource_zpa_service_edge_group_test``
+
 ## 2.0.5 (December 20, 2021)
 
-## Enhancement
+ENHANCEMENTS:
 
 - The provider now supports the ability to import policy access resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
-The  following policy access resources are supported:
-    - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/51)] :rocket:
-    - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
-    - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
+- The  following policy access resources are supported:
+  - resource_zpa_policy_access_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/issues/51)] :rocket:
+  - resource_zpa_policy_access_timeout_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
+  - resource_zpa_policy_access_forwarding_rule - [PR#51](https://github.com/willguibr/terraform-provider-zpa/pull/51) :rocket:
 
 - The provider now supports policy access creation to be associated with Cloud Connector Group resource
-    - resource_zpa_policy_access_rule - [PR#54](https://github.com/willguibr/terraform-provider-zpa/pull/54) :rocket:
-
-- Added new `client_type` to support access, forward, and timeout policy creation. The following new types have been added:
-    - zpn_client_type_ip_anchoring, zpn_client_type_browser_isolation, zpn_client_type_machine_tunnel and zpn_client_type_edge_connector. [PR#57](https://github.com/willguibr/terraform-provider-zpa/issues/57)] :rocket:
+  - resource_zpa_policy_access_rule - [PR#54](https://github.com/willguibr/terraform-provider-zpa/pull/54) :rocket:
+  - Added new `client_type` to support access, forward, and timeout policy creation. The following new types have been added:
+  - zpn_client_type_ip_anchoring, zpn_client_type_browser_isolation, zpn_client_type_machine_tunnel and zpn_client_type_edge_connector. [PR#57](https://github.com/willguibr/terraform-provider-zpa/issues/57)] :rocket:
 
 - Updated the following examples for more accuracy:
-    - resource_zpa_policy_access_rule
-    - resource_zpa_app_connector_group
+  - resource_zpa_policy_access_rule
+  - resource_zpa_app_connector_group
 
 ## Bug Fixes
 
@@ -40,32 +70,32 @@ The  following policy access resources are supported:
 
 - The provider now supports the ability to import resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
 This capability is currently available to the following resources:
-    - resource_zpa_app_connector_group - Issue [[#29](https://github.com/willguibr/terraform-provider-zpa/issues/29)]
-    - resource_zpa_app_server_controller - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
-    - resource_zpa_application_segment - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
-    - resource_zpa_segment_group - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
-    - resource_zpa_server_group - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
-    - resource_zpa_service_edge_group - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
-    - resource_zpa_provisioning_key - [PR#45](https://github.com/willguibr/terraform-provider-zpa/pull/45) :rocket:
-    - resource_zpa_browser_access - [PR#48](https://github.com/willguibr/terraform-provider-zpa/pull/48) :rocket:
-    - zpa_lss_config_controller - [PR#48](https://github.com/willguibr/terraform-provider-zpa/pull/48) :rocket:
+  - resource_zpa_app_connector_group - Issue [[#29](https://github.com/willguibr/terraform-provider-zpa/issues/29)]
+  - resource_zpa_app_server_controller - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+  - resource_zpa_application_segment - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+  - resource_zpa_segment_group - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+  - resource_zpa_server_group - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+  - resource_zpa_service_edge_group - [PR#42](https://github.com/willguibr/terraform-provider-zpa/pull/42) :rocket:
+  - resource_zpa_provisioning_key - [PR#45](https://github.com/willguibr/terraform-provider-zpa/pull/45) :rocket:
+  - resource_zpa_browser_access - [PR#48](https://github.com/willguibr/terraform-provider-zpa/pull/48) :rocket:
+  - zpa_lss_config_controller - [PR#48](https://github.com/willguibr/terraform-provider-zpa/pull/48) :rocket:
 
 Note: To import resources not currently supported, the resource numeric ID is required.
 
-## Bug Fixes
+BUG FIXES
 
 - Fixed [INFO] and [Error] message in ``data_source_zpa_lss_config_controller`` [PR#43](https://github.com/willguibr/terraform-provider-zpa/pull/43) 🔧
 
 # 2.0.3 (November 21, 2021)
 
-## Dependabot Updates
+DEPENDABOT UPDATES:
 
 - Dependabot updates [PR#33](https://github.com/willguibr/terraform-provider-zpa/pull/33/) Bump github.com/hashicorp/terraform-plugin-docs from 0.5.0 to 0.5.1 #33
 - Dependabot updates [PR#34](https://github.com/willguibr/terraform-provider-zpa/pull/34) Bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.8.0 to 2.9.0
 
 ## 2.0.2 (November 7, 2021)
 
-## Enhancement
+ENHANCEMENTS:
 
 - Added custom validation function ``ValidateStringFloatBetween`` to ``resource_zpa_app_connector_group`` to validate ``longitude`` and ``latitude`` parameters. [ZPA-17](https://github.com/willguibr/terraform-provider-zpa/pull/17).
 - Added custom validation function ``ValidateStringFloatBetween`` to ``resource_zpa_service_edge_group`` to validate ``longitude`` and ``latitude`` parameters. [ZPA-18](https://github.com/willguibr/terraform-provider-zpa/pull/18).
