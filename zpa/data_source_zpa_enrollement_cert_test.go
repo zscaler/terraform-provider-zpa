@@ -16,7 +16,15 @@ func TestAccDataSourceEnrollmentCert_Basic(t *testing.T) {
 				Config: fmt.Sprintf(testAccCheckDataSourceEnrollmentCertConfig_basic),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(
-						"data.zpa_ba_certificate.foobar", "name"),
+						"data.zpa_enrollment_cert.root", "name"),
+					resource.TestCheckResourceAttrSet(
+						"data.zpa_enrollment_cert.client", "name"),
+					resource.TestCheckResourceAttrSet(
+						"data.zpa_enrollment_cert.connector", "name"),
+					resource.TestCheckResourceAttrSet(
+						"data.zpa_enrollment_cert.service_edge", "name"),
+					resource.TestCheckResourceAttrSet(
+						"data.zpa_enrollment_cert.isolation_client", "name"),
 				),
 			},
 		},
@@ -24,6 +32,19 @@ func TestAccDataSourceEnrollmentCert_Basic(t *testing.T) {
 }
 
 const testAccCheckDataSourceEnrollmentCertConfig_basic = `
-data "zpa_ba_certificate" "foobar" {
-    name = "jenkins.securitygeek.io"
-}`
+data "zpa_enrollment_cert" "root" {
+    name = "Root"
+}
+data "zpa_enrollment_cert" "client" {
+    name = "Client"
+}
+data "zpa_enrollment_cert" "connector" {
+    name = "Connector"
+}
+data "zpa_enrollment_cert" "service_edge" {
+    name = "Service Edge"
+}
+data "zpa_enrollment_cert" "isolation_client" {
+    name = "Isolation Client"
+}
+`

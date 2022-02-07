@@ -14,7 +14,8 @@ func TestAccResourceProvisioningKey(t *testing.T) {
 
 	rNameConnectorGrp := acctest.RandString(10)
 	rNameServiceEdgeGrp := acctest.RandString(20)
-	resourceName := "zpa_service_edge_group.test"
+	resourceName := "zpa_provisioning_key.test_connector_grp"
+	resourceName2 := "zpa_provisioning_key.test_service_edge_grp"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -25,7 +26,7 @@ func TestAccResourceProvisioningKey(t *testing.T) {
 			{
 				Config: testAccResourceProvisioningKeyConnectorGroupConfigBasic(rNameConnectorGrp),
 				Check: resource.ComposeTestCheckFunc(
-					tesAccCheckProvisioningKeyExists(resourceName),
+					testAccCheckProvisioningKeyExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", rNameConnectorGrp),
 					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "max_usage", "2"),
@@ -35,11 +36,11 @@ func TestAccResourceProvisioningKey(t *testing.T) {
 			{
 				Config: testAccResourceProvisioningKeyServiceEdgeConfigBasic(rNameServiceEdgeGrp),
 				Check: resource.ComposeTestCheckFunc(
-					tesAccCheckProvisioningKeyExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", rNameServiceEdgeGrp),
-					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "max_usage", "2"),
-					resource.TestCheckResourceAttr(resourceName, "association_type", "SERVICE_EDGE_GRP"),
+					testAccCheckProvisioningKeyExists(resourceName2),
+					resource.TestCheckResourceAttr(resourceName2, "name", rNameServiceEdgeGrp),
+					resource.TestCheckResourceAttr(resourceName2, "enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName2, "max_usage", "2"),
+					resource.TestCheckResourceAttr(resourceName2, "association_type", "SERVICE_EDGE_GRP"),
 				),
 			},
 			{
@@ -77,6 +78,7 @@ func testAccResourceProvisioningKeyConnectorGroupConfigBasic(rNameConnectorGrp s
 		enrollment_cert_id       = data.zpa_enrollment_cert.connector.id
 		max_usage                = "2"
 		zcomponent_id            = zpa_app_connector_group.app_connector_test.id
+		depends_on = 			 = [zpa_app_connector_group.app_connector_test]
 	}
 	`, rNameConnectorGrp)
 }
@@ -104,21 +106,22 @@ func testAccResourceProvisioningKeyServiceEdgeConfigBasic(rNameServiceEdgeGrp st
 		enrollment_cert_id       = data.zpa_enrollment_cert.service_edge.id
 		max_usage                = "2"
 		zcomponent_id            = zpa_service_edge_group.service_edge_group_test.id
+		depends_on = 			 = [zpa_app_connector_group.service_edge_group_test]
 	}
 	`, rNameServiceEdgeGrp)
 }
 
-func tesAccCheckProvisioningKeyExists(n string) resource.TestCheckFunc {
+func testAccCheckProvisioningKeyExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Service Edge Group Not found: %s", n)
+			return fmt.Errorf("Provisioning Key Not found: %s", n)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Service Edge Group ID is set")
+			return fmt.Errorf("no Provisioning Key ID is set")
 		}
 		client := testAccProvider.Meta().(*Client)
-		resp, _, err := client.serviceedgegroup.GetByName(rs.Primary.Attributes["name"])
+		resp, _, err := client.provisioningkey.GetBy(rs.Primary.Attributes["name"])
 		if err != nil {
 			return err
 		}
