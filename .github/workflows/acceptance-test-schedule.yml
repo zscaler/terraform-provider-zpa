@@ -10,7 +10,20 @@ concurrency: acceptance_tests
 
 jobs:
   acceptance:
+    # Runs the acceptance test suite using the `Acceptance Tests` environment.
+    # The enviroment should be configured to require reviewers approve the
+    # step. This allows the tests to be added as a check to PRs.
+    #
+    # This job has the `continue-on-error` set to true which prevents blocking
+    # PRs if the tests fail.
+    needs: unit
     runs-on: ubuntu-latest
+    environment:
+      name: Acceptance Tests
+
+    concurrency: acceptance_tests
+
+    continue-on-error: true
 
     steps:
       - name: Install Go
