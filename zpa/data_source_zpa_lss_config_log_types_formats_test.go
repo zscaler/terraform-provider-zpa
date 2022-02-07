@@ -29,8 +29,6 @@ func TestAccDataSourceLSSLogTypeFormats_Basic(t *testing.T) {
 						"data.zpa_lss_config_log_type_formats.zpn_ast_comprehensive_stats", "log_type"),
 					resource.TestCheckResourceAttrSet(
 						"data.zpa_lss_config_log_type_formats.zpn_sys_auth_log", "log_type"),
-					// resource.TestCheckResourceAttrSet(
-					// 	"data.zpa_lss_config_log_type_formats.zpn_waf_http_exchanges_log", "log_type"),
 				),
 			},
 		},

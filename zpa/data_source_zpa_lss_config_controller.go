@@ -288,6 +288,15 @@ func dataSourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) er
 		}
 		resp = res
 	}
+	name, ok := d.Get("name").(string)
+	if ok && name != "" {
+		log.Printf("[INFO] Getting data for lss config controller %s\n", name)
+		res, _, err := zClient.lssconfigcontroller.GetByName(name)
+		if err != nil {
+			return err
+		}
+		resp = res
+	}
 	if resp != nil {
 		d.SetId(resp.ID)
 		if err := d.Set("config", flattenLSSConfig(resp.LSSConfig)); err != nil {

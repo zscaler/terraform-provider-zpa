@@ -16,11 +16,13 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: "Name of the Service Edge Group.",
 			},
 			"city_country": {
@@ -72,6 +74,14 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Type:        schema.TypeBool,
 				Computed:    true,
 				Description: "Whether the default version profile of the App Connector Group is applied or overridden.",
+			},
+			"modifiedby": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"modified_time": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"service_edges": {
 				Type:     schema.TypeList,
@@ -235,7 +245,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				},
 			},
 			"trusted_networks": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

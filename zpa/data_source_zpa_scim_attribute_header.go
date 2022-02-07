@@ -13,15 +13,16 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 		Read: dataSourceScimAttributeHeaderRead,
 		Schema: map[string]*schema.Schema{
 			"canonical_values": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeList,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"case_sensitive": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"creation_time": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"data_type": {
@@ -33,11 +34,11 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 				Computed: true,
 			},
 			"id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"idp_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"idp_name": {
@@ -45,11 +46,11 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 				Optional: true,
 			},
 			"modifiedby": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"modified_time": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"multivalued": {

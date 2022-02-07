@@ -32,22 +32,11 @@ data "zpa_customer_version_profile" "default" {
     name = "Default"
 }
 
-output "zpa_customer_version_profile_default" {
-    value = data.zpa_customer_version_profile.default
-}
-
 data "zpa_customer_version_profile" "previous_default" {
     name = "Default"
-}
-
-output "zpa_customer_version_profile_previous_default" {
-    value = data.zpa_customer_version_profile.previous_default
 }
 
 data "zpa_customer_version_profile" "new_release" {
     name = "Default"
 }
-
-output "zpa_customer_version_profile_new_release" {
-    value = data.zpa_customer_version_profile.new_release
-}`
+`
