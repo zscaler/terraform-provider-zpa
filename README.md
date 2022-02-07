@@ -1,4 +1,4 @@
-[![Build Status](https://app.travis-ci.com/willguibr/terraform-provider-zpa.svg?token=Djmu8v8CsRiipfYMXaRA&branch=master)](https://app.travis-ci.com//terraform-provider-zpa)
+[![Release](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml)
 
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
