@@ -2,95 +2,129 @@ package zpa
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/appservercontroller"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
-func TestAccResourceApplicationServer(t *testing.T) {
+func TestAccResourceApplicationServerBasic(t *testing.T) {
+	var servers appservercontroller.ApplicationServer
+	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationServer)
 
-	rName := acctest.RandString(10)
-	rDesc := acctest.RandString(20)
-	resourceName := "zpa_application_server.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckApplicationServerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceApplicationServerConfigBasic(rName, rDesc),
+				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
 				Check: resource.ComposeTestCheckFunc(
-					tesAccCheckApplicationServerExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", rDesc),
-					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "address", "test.example.com"),
-					resource.TestCheckResourceAttr(resourceName, "config_space", "DEFAULT"),
+					testAccCheckApplicationServerExists(resourceTypeAndName, &servers),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", variable.AppServerResourceName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppServerDescription),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "address", variable.AppServerAddress),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
 				),
 			},
+
+			// Update test
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckApplicationServerExists(resourceTypeAndName, &servers),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppServerDescription),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "address", variable.AppServerAddress),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
+				),
 			},
 		},
 	})
 }
 
-func testAccResourceApplicationServerConfigBasic(rName, rDesc string) string {
-	return fmt.Sprintf(`
-	resource "zpa_application_server" "test" {
-		name 		 = "%s"
-		description  = "%s"
-		address      = "test.example.com"
-		enabled      = true
-		config_space = "DEFAULT"
-	}
-	`, rName, rDesc)
-}
-
-func tesAccCheckApplicationServerExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Application Server Not found: %s", n)
-		}
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Application Server ID is set")
-		}
-		client := testAccProvider.Meta().(*Client)
-		resp, _, err := client.appservercontroller.GetByName(rs.Primary.Attributes["name"])
-		if err != nil {
-			return err
-		}
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("name Not found in created attributes")
-		}
-		if resp.Description != rs.Primary.Attributes["description"] {
-			return fmt.Errorf("description Not found in created attributes")
-		}
-		return nil
-	}
-}
-
 func testAccCheckApplicationServerDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "zpa_application_server" {
+		if rs.Type != resourcetype.ZPAApplicationServer {
 			continue
 		}
 
-		_, _, err := client.appservercontroller.GetByName(rs.Primary.Attributes["name"])
+		rule, _, err := apiClient.appservercontroller.Get(rs.Primary.ID)
+
 		if err == nil {
-			return fmt.Errorf("Application Server still exists")
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
+
+		if rule != nil {
+			return fmt.Errorf("application server with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
+	}
+
+	return nil
+}
+
+func testAccCheckApplicationServerExists(resource string, server *appservercontroller.ApplicationServer) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resource]
+		if !ok {
+			return fmt.Errorf("didn't find resource: %s", resource)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no record ID is set")
+		}
+
+		apiClient := testAccProvider.Meta().(*Client)
+		receivedServer, _, err := apiClient.appservercontroller.Get(rs.Primary.ID)
+
+		if err != nil {
+			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
+		}
+		*server = *receivedServer
 
 		return nil
 	}
-	return nil
+}
+
+func testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, description, address string, enabled bool) string {
+	return fmt.Sprintf(`
+// application server resource
+%s
+
+data "%s" "%s" {
+  id = "${%s.id}"
+}
+`,
+		// resource variables
+		ApplicationServerResourceHCL(generatedName, description, address, enabled),
+
+		// data source variables
+		resourcetype.ZPAApplicationServer,
+		generatedName,
+		resourceTypeAndName,
+	)
+}
+
+func ApplicationServerResourceHCL(generatedName, description, address string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "%s" "%s" {
+	name                          = "%s"
+	description                   = "%s"
+	address                       = "%s"
+	enabled                       = "%s"
+}
+`,
+		// resource variables
+		resourcetype.ZPAApplicationServer,
+		generatedName,
+		variable.AppServerResourceName,
+		description,
+		address,
+		strconv.FormatBool(enabled),
+	)
 }

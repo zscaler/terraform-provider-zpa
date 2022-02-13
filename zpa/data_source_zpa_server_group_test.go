@@ -45,16 +45,27 @@ func testAccDataSourceServerGroupByID(rName, rDesc string) string {
 		description = "%s"
 		enabled = true
 		dynamic_discovery = true
-		applications {
-			id = []
-		}
 		app_connector_groups {
-			id = [data.zpa_app_connector_group.example.id]
+			id = [zpa_app_connector_group.testAcc.id]
 		}
+		depends_on = [zpa_app_connector_group.testAcc]
 	}
-	data "zpa_app_connector_group" "example" {
-		name = "Canada App Connector Group"
-	}
+
+	resource "zpa_app_connector_group" "testAcc" {
+		name                          = "testAcc"
+		description                   = "testAcc"
+		enabled                       = true
+		country_code                  = "US"
+		latitude                      = "37.3382082"
+		longitude                     = "-121.8863286"
+		location                      = "San Jose, CA, USA"
+		upgrade_day                   = "SUNDAY"
+		upgrade_time_in_secs          = "66600"
+		override_version_profile      = true
+		version_profile_id            = 0
+		dns_query_type                = "IPV4"
+	  }
+	  
 	data "zpa_server_group" "by_name" {
 		name = zpa_server_group.test_app_group.name
 	}
