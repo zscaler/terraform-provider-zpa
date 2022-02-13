@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -27,3 +28,4 @@ const testAccCheckDataSourceAppConnectorControllerConfig_basic = `
 data "zpa_app_connector_controller" "foobar" {
     name = "Canada Provisioning Key-1642925951210"
 }`
+*/

@@ -2,89 +2,125 @@ package zpa
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
-func TestAccResourceZPASegmentGroup_basic(t *testing.T) {
+func TestAccResourceSegmentGroupBasic(t *testing.T) {
+	var segmentGroup segmentgroup.SegmentGroup
+	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 
-	rName := acctest.RandString(10)
-	rDesc := acctest.RandString(20)
-	resourceName := "zpa_segment_group.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSegmentGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceZPASegmentGroupConfigBasic(rName, rDesc),
+				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
 				Check: resource.ComposeTestCheckFunc(
-					tesAccCheckSegmentGroupExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", rDesc),
+					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", variable.SegmentGroupResourceName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescription),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
 				),
 			},
+
+			// Update test
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescription),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
+				),
 			},
 		},
 	})
 }
 
-func testAccResourceZPASegmentGroupConfigBasic(rName, rDesc string) string {
-	return fmt.Sprintf(`
-	resource "zpa_segment_group" "test" {
-		name= "%s"
-		description= "%s"
-	}
-	`, rName, rDesc)
-}
-
-func tesAccCheckSegmentGroupExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Segment Group Not found: %s", n)
-		}
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Segment Group ID is set")
-		}
-		client := testAccProvider.Meta().(*Client)
-		resp, _, err := client.segmentgroup.GetByName(rs.Primary.Attributes["name"])
-		if err != nil {
-			return err
-		}
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("name Not found in created attributes")
-		}
-		if resp.Description != rs.Primary.Attributes["description"] {
-			return fmt.Errorf("description Not found in created attributes")
-		}
-		return nil
-	}
-}
-
 func testAccCheckSegmentGroupDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "zpa_segment_group" {
+		if rs.Type != resourcetype.ZPASegmentGroup {
 			continue
 		}
 
-		_, _, err := client.segmentgroup.GetByName(rs.Primary.Attributes["name"])
+		group, _, err := apiClient.segmentgroup.Get(rs.Primary.ID)
+
 		if err == nil {
-			return fmt.Errorf("Segment group still exists")
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
+
+		if group != nil {
+			return fmt.Errorf("segment group with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
+	}
+
+	return nil
+}
+
+func testAccCheckSegmentGroupExists(resource string, group *segmentgroup.SegmentGroup) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resource]
+		if !ok {
+			return fmt.Errorf("didn't find resource: %s", resource)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no record ID is set")
+		}
+
+		apiClient := testAccProvider.Meta().(*Client)
+		receivedGroup, _, err := apiClient.segmentgroup.Get(rs.Primary.ID)
+
+		if err != nil {
+			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
+		}
+		*group = *receivedGroup
 
 		return nil
 	}
-	return nil
+}
+
+func testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
+	return fmt.Sprintf(`
+// segment group resource
+%s
+
+data "%s" "%s" {
+  id = "${%s.id}"
+}
+`,
+		// resource variables
+		SegmentGroupResourceHCL(generatedName, description, enabled),
+
+		// data source variables
+		resourcetype.ZPASegmentGroup,
+		generatedName,
+		resourceTypeAndName,
+	)
+}
+
+func SegmentGroupResourceHCL(generatedName, description string, enabled bool) string {
+	return fmt.Sprintf(`
+resource "%s" "%s" {
+	name = "%s"
+	description = "%s"
+	enabled = "%s"
+}
+`,
+		// resource variables
+		resourcetype.ZPASegmentGroup,
+		generatedName,
+		variable.SegmentGroupResourceName,
+		description,
+		strconv.FormatBool(enabled),
+	)
 }
