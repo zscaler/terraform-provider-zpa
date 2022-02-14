@@ -49,7 +49,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"id": {
-								Type:     schema.TypeList,
+								Type:     schema.TypeSet,
 								Optional: true,
 								Elem: &schema.Schema{
 									Type: schema.TypeString,
@@ -254,7 +254,7 @@ func expandPolicySetRuleAppServerGroups(d *schema.ResourceData) []policysetrule.
 		for _, appServerGroup := range appServer.List() {
 			appServerGroup, _ := appServerGroup.(map[string]interface{})
 			if appServerGroup != nil {
-				for _, id := range appServerGroup["id"].([]interface{}) {
+				for _, id := range appServerGroup["id"].(*schema.Set).List() {
 					appServerGroups = append(appServerGroups, policysetrule.AppServerGroups{
 						ID: id.(string),
 					})
@@ -276,7 +276,7 @@ func expandPolicySetRuleAppConnectorGroups(d *schema.ResourceData) []policysetru
 		for _, appConnectorGroup := range appConnector.List() {
 			appConnectorGroup, _ := appConnectorGroup.(map[string]interface{})
 			if appConnectorGroup != nil {
-				for _, id := range appConnectorGroup["id"].([]interface{}) {
+				for _, id := range appConnectorGroup["id"].(*schema.Set).List() {
 					appConnectorGroups = append(appConnectorGroups, policysetrule.AppConnectorGroups{
 						ID: id.(string),
 					})
