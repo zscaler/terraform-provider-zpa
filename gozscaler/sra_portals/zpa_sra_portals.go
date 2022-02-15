@@ -1,4 +1,4 @@
-package browseraccess
+package sra_portals
 
 import (
 	"fmt"
@@ -10,10 +10,10 @@ import (
 
 const (
 	mgmtConfig            = "/mgmtconfig/v1/admin/customers/"
-	browserAccessEndpoint = "/application"
+	sraAppSegmentEndpoint = "/application"
 )
 
-type BrowserAccess struct {
+type ApplicationSegmentSRA struct {
 	ID                   string                `json:"id,omitempty"`
 	SegmentGroupID       string                `json:"segmentGroupId,omitempty"`
 	SegmentGroupName     string                `json:"segmentGroupName,omitempty"`
@@ -36,79 +36,73 @@ type BrowserAccess struct {
 	UDPPortRanges        []string              `json:"udpPortRanges,omitempty"`
 	TCPAppPortRange      []common.NetworkPorts `json:"tcpPortRange,omitempty"`
 	UDPAppPortRange      []common.NetworkPorts `json:"udpPortRange,omitempty"`
-	ClientlessApps       []ClientlessApps      `json:"clientlessApps,omitempty"`
+	SRAApps              []SRAApps             `json:"sraApps,omitempty"`
 	AppServerGroups      []AppServerGroups     `json:"serverGroups,omitempty"`
 }
 
-type ClientlessApps struct {
-	AllowOptions        bool   `json:"allowOptions"`
-	AppID               string `json:"appId,omitempty"`
+type SRAApps struct {
+	ID                  string `json:"id,omitempty"`
+	Name                string `json:"name,omitempty"`
+	Enabled             bool   `json:"enabled"`
 	ApplicationPort     string `json:"applicationPort,omitempty"`
 	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
-	CertificateID       string `json:"certificateId,omitempty"`
-	CertificateName     string `json:"certificateName,omitempty"`
-	Cname               string `json:"cname,omitempty"`
-	CreationTime        string `json:"creationTime,omitempty"`
-	Description         string `json:"description,omitempty"`
 	Domain              string `json:"domain,omitempty"`
-	Enabled             bool   `json:"enabled"`
-	Hidden              bool   `json:"hidden"`
-	ID                  string `json:"id,omitempty"`
-	LocalDomain         string `json:"localDomain,omitempty"`
-	ModifiedBy          string `json:"modifiedBy,omitempty"`
-	ModifiedTime        string `json:"modifiedTime,omitempty"`
-	Name                string `json:"name,omitempty"`
-	Path                string `json:"path,omitempty"`
-	TrustUntrustedCert  bool   `json:"trustUntrustedCert"`
+	AppID               string `json:"appId,omitempty"`
+	Hidden              bool   `json:"hidden,omitempty"`
+	Portal              bool   `json:"portal,omitempty"`
+	ConnectionSecurity  string `json:"connectionSecurity,omitempty"`
 }
 
 type NetworkPorts struct {
 	From string `json:"from,omitempty"`
 	To   string `json:"to,omitempty"`
 }
+
 type AppServerGroups struct {
 	ID string `json:"id"`
 }
 
-func (service *Service) Get(id string) (*BrowserAccess, *http.Response, error) {
-	v := new(BrowserAccess)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+browserAccessEndpoint, id)
+func (service *Service) Get(sraApplicationId string) (*ApplicationSegmentSRA, *http.Response, error) {
+	v := new(ApplicationSegmentSRA)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+sraAppSegmentEndpoint, sraApplicationId)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	return v, resp, nil
 }
 
-func (service *Service) GetByName(BaName string) (*BrowserAccess, *http.Response, error) {
+func (service *Service) GetByName(sraName string) (*ApplicationSegmentSRA, *http.Response, error) {
 	var v struct {
-		List []BrowserAccess `json:"list"`
+		List []ApplicationSegmentSRA `json:"list"`
 	}
 
-	relativeURL := mgmtConfig + service.Client.Config.CustomerID + browserAccessEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: BaName}, nil, &v)
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + sraAppSegmentEndpoint
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: sraName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, app := range v.List {
-		if strings.EqualFold(app.Name, BaName) {
-			return &app, resp, nil
+	for _, sra := range v.List {
+		if strings.EqualFold(sra.Name, sraName) {
+			return &sra, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no browser access application named '%s' was found", BaName)
+	return nil, resp, fmt.Errorf("no sra application segment named '%s' was found", sraName)
 }
 
-func (service *Service) Create(browserAccess BrowserAccess) (*BrowserAccess, *http.Response, error) {
-	v := new(BrowserAccess)
-	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+browserAccessEndpoint, nil, browserAccess, &v)
+func (service *Service) Create(appSegment ApplicationSegmentSRA) (*ApplicationSegmentSRA, *http.Response, error) {
+	v := new(ApplicationSegmentSRA)
+	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+sraAppSegmentEndpoint, nil, appSegment, &v)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	return v, resp, nil
 }
 
-func (service *Service) Update(id string, browserAccess *BrowserAccess) (*http.Response, error) {
-	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+browserAccessEndpoint, id)
+func (service *Service) Update(id string, browserAccess *ApplicationSegmentSRA) (*http.Response, error) {
+	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+sraAppSegmentEndpoint, id)
 	resp, err := service.Client.NewRequestDo("PUT", path, nil, browserAccess, nil)
 	if err != nil {
 		return nil, err
@@ -116,11 +110,12 @@ func (service *Service) Update(id string, browserAccess *BrowserAccess) (*http.R
 	return resp, err
 }
 
-func (service *Service) Delete(id string) (*http.Response, error) {
-	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+browserAccessEndpoint, id)
-	resp, err := service.Client.NewRequestDo("DELETE", path, nil, nil, nil)
+func (service *Service) Delete(sraApplicationId string) (*http.Response, error) {
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+sraAppSegmentEndpoint, sraApplicationId)
+	resp, err := service.Client.NewRequestDo("DELETE", relativeURL, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	return resp, err
+
+	return resp, nil
 }

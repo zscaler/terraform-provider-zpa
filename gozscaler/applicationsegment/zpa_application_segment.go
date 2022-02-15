@@ -40,6 +40,7 @@ type ApplicationSegmentResource struct {
 	UDPAppPortRange      []AppSegmentPortRange `json:"udpPortRange,omitempty"`
 	ClientlessApps       []ClientlessApps      `json:"clientlessApps,omitempty"`
 	ServerGroups         []AppServerGroups     `json:"serverGroups,omitempty"`
+	SRAApps              []SRAApps             `json:"sraApps,omitempty"`
 	DefaultIdleTimeout   string                `json:"defaultIdleTimeout,omitempty"`
 	DefaultMaxAge        string                `json:"defaultMaxAge,omitempty"`
 }
@@ -82,6 +83,19 @@ type AppServerGroups struct {
 	ModifiedBy       string `json:"modifiedBy,omitempty"`
 	ModifiedTime     string `json:"modifiedTime,omitempty"`
 	Name             string `json:"name"`
+}
+
+type SRAApps struct {
+	ID                  string `json:"id,omitempty"`
+	Name                string `json:"name,omitempty"`
+	Enabled             bool   `json:"enabled"`
+	ApplicationPort     string `json:"applicationPort,omitempty"`
+	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
+	Domain              string `json:"domain,omitempty"`
+	AppID               string `json:"appId,omitempty"`
+	Hidden              bool   `json:"hidden,omitempty"`
+	Portal              bool   `json:"portal,omitempty"`
+	ConnectionSecurity  string `json:"connectionSecurity,omitempty"`
 }
 
 func (service *Service) Get(applicationID string) (*ApplicationSegmentResource, *http.Response, error) {

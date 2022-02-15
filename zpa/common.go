@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/applicationsegment"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/browseraccess"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
 )
 
@@ -495,7 +495,7 @@ func resourceNetworkPortsSchema(desc string) *schema.Schema {
 	}
 }
 
-func flattenNetworkPorts(ports []browseraccess.NetworkPorts) []interface{} {
+func flattenNetworkPorts(ports []common.NetworkPorts) []interface{} {
 	portsObj := make([]interface{}, len(ports))
 	for i, val := range ports {
 		portsObj[i] = map[string]interface{}{
@@ -506,18 +506,18 @@ func flattenNetworkPorts(ports []browseraccess.NetworkPorts) []interface{} {
 	return portsObj
 }
 
-func expandNetwokPorts(d *schema.ResourceData, key string) []browseraccess.NetworkPorts {
-	var ports []browseraccess.NetworkPorts
+func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
+	var ports []common.NetworkPorts
 	if portsInterface, ok := d.GetOk(key); ok {
 		portSet, ok := portsInterface.(*schema.Set)
 		if !ok {
 			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
 			return ports
 		}
-		ports = make([]browseraccess.NetworkPorts, len(portSet.List()))
+		ports = make([]common.NetworkPorts, len(portSet.List()))
 		for i, val := range portSet.List() {
 			portItem := val.(map[string]interface{})
-			ports[i] = browseraccess.NetworkPorts{
+			ports[i] = common.NetworkPorts{
 				From: portItem["from"].(string),
 				To:   portItem["to"].(string),
 			}

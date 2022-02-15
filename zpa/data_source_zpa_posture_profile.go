@@ -15,9 +15,11 @@ func dataSourcePostureProfile() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"master_customer_id": {
@@ -30,6 +32,7 @@ func dataSourcePostureProfile() *schema.Resource {
 			},
 			"posture_udid": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"zscaler_cloud": {
@@ -69,6 +72,17 @@ func dataSourcePostureProfileRead(d *schema.ResourceData, m interface{}) error {
 		}
 		resp = res
 	}
+
+	udid, ok := d.Get("posture_udid").(string)
+	if ok && udid != "" {
+		log.Printf("[INFO] Getting data for posture profile %s\n", udid)
+		res, _, err := zClient.postureprofile.GetByPostureUDID(udid)
+		if err != nil {
+			return err
+		}
+		resp = res
+	}
+
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for posture profile name %s\n", name)

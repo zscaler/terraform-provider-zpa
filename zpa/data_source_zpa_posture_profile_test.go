@@ -25,5 +25,5 @@ func TestAccDataSourcePostureProfile_Basic(t *testing.T) {
 
 const testAccCheckDataSourcePostureProfileConfig_basic = `
 data "zpa_posture_profile" "foobar" {
-    name = "CrowdStrike_ZPA_ZTA_40"
+    name = "CrowdStrike_ZPA_ZTA_40 (zscalerthree.net)"
 }`

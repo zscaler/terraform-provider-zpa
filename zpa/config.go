@@ -27,6 +27,7 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/servergroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgecontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgegroup"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/sra_portals"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
 )
 
@@ -60,6 +61,7 @@ type Client struct {
 	serviceedgecontroller  serviceedgecontroller.Service
 	trustednetwork         trustednetwork.Service
 	browseraccess          browseraccess.Service
+	sra_portals            sra_portals.Service
 }
 
 type Config struct {
@@ -100,6 +102,7 @@ func (c *Config) Client() (*Client, error) {
 		serviceedgecontroller:  *serviceedgecontroller.New(config),
 		trustednetwork:         *trustednetwork.New(config),
 		browseraccess:          *browseraccess.New(config),
+		sra_portals:            *sra_portals.New(config),
 	}
 
 	log.Println("[INFO] initialized ZPA client")

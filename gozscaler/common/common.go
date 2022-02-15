@@ -9,3 +9,8 @@ type Pagination struct {
 	Page     int    `json:"page,omitempty" url:"page"`
 	Search   string //`json:"search,omitempty" url:"search"`
 }
+
+type NetworkPorts struct {
+	From string `json:"from,omitempty"`
+	To   string `json:"to,omitempty"`
+}
