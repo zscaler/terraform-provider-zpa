@@ -25,5 +25,5 @@ func TestAccDataSourceTrustedNetwork_Basic(t *testing.T) {
 
 const testAccCheckDataSourceTrustedNetworkConfig_basic = `
 data "zpa_trusted_network" "foobar" {
-    name = "Corp-Trusted-Networks"
+    name = "Corp-Trusted-Networks (zscalerthree.net)"
 }`

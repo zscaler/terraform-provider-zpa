@@ -34,14 +34,12 @@ func dataSourceBrowserAccess() *schema.Resource {
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},

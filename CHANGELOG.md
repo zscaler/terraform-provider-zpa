@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.7 (February 17, 2022)
+
+## BUG Fixes
+
+- ZPA-50: Fixed and removed deprecated arguments from ``zpa_application_segments`` data source and resource :wrench:
+- ZPA-50: Fixed ``zpa_posture_profile`` and ``zpa_trusted_networks`` acceptance tests to include ZIA cloud name :wrench:
+
+## Enhancements
+
+- ZPA-51: Updated common ``NetworkPorts`` flatten and expand functions for better optimization and global use across multiple application segment resources. This update affects the following resources: ``data_source_zpa_application_segment``, ``data_source_zpa_browser_access`` and ``resource_zpa_application_segment``, ``resource_source_zpa_browser_access`` :rocket:
+
 ## 2.0.6 (February 3, 2022)
 
 ## New Data Sources

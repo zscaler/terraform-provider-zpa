@@ -41,13 +41,17 @@ func resourceApplicationSegment() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"segment_group_name": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"bypass_type": {
@@ -68,7 +72,6 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -76,7 +79,6 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				Deprecated:  "The tcp_port_ranges and udp_port_ranges fields are deprecated and replaced with tcp_port_range and udp_port_range.",
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -112,7 +114,12 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 			"health_check_type": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
+				Default:  "DEFAULT",
+				ValidateFunc: validation.StringInSlice([]string{
+					"DEFAULT",
+					"NONE",
+				}, false),
 			},
 			"health_reporting": {
 				Type:        schema.TypeString,
@@ -135,46 +142,14 @@ func resourceApplicationSegment() *schema.Resource {
 					"NONE",
 				}, false),
 			},
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"creation_time": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"default_idle_timeout": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "",
-			},
-			"modifiedby": {
-				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-			},
-			"modified_time": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"default_max_age": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
 			},
 			"ip_anchored": {
 				Type:     schema.TypeBool,
 				Optional: true,
-			},
-			"log_features": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"skip_discovery",
-					"full_wildcard",
-				}, false),
 			},
 			"is_cname_enabled": {
 				Type:        schema.TypeBool,
@@ -249,13 +224,11 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	log.Printf("[INFO] Reading application segment and settings states: %+v\n", resp)
+	_ = d.Set("id", resp.ID)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
 	_ = d.Set("bypass_type", resp.BypassType)
 	_ = d.Set("config_space", resp.ConfigSpace)
-	_ = d.Set("creation_time", resp.CreationTime)
-	_ = d.Set("default_idle_timeout", resp.DefaultIdleTimeout)
-	_ = d.Set("default_max_age", resp.DefaultMaxAge)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("domain_names", resp.DomainNames)
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
@@ -263,11 +236,8 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
-	_ = d.Set("id", resp.ID)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	_ = d.Set("modifiedby", resp.ModifiedBy)
-	_ = d.Set("modified_time", resp.ModifiedTime)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
@@ -275,11 +245,11 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 	_ = d.Set("server_groups", flattenAppServerGroupsSimple(resp))
 
-	if err := d.Set("tcp_port_range", flattenAppSegmentPortRange(resp.TCPAppPortRange)); err != nil {
+	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
 	}
 
-	if err := d.Set("udp_port_range", flattenAppSegmentPortRange(resp.UDPAppPortRange)); err != nil {
+	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
 
@@ -371,8 +341,6 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		SegmentGroupName:     d.Get("segment_group_name").(string),
 		BypassType:           d.Get("bypass_type").(string),
 		ConfigSpace:          d.Get("config_space").(string),
-		CreationTime:         d.Get("creation_time").(string),
-		ModifiedBy:           d.Get("modifiedby").(string),
 		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
 		IcmpAccessType:       d.Get("icmp_access_type").(string),
 		Description:          d.Get("description").(string),
@@ -387,11 +355,11 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		UDPPortRanges:        ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
 		ServerGroups:         expandAppServerGroups(d),
 	}
-	TCPAppPortRange := expandAppSegmentPortRange(d, "tcp_port_range")
+	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
 	if TCPAppPortRange != nil {
 		details.TCPAppPortRange = TCPAppPortRange
 	}
-	UDPAppPortRange := expandAppSegmentPortRange(d, "udp_port_range")
+	UDPAppPortRange := expandNetwokPorts(d, "udp_port_range")
 	if UDPAppPortRange != nil {
 		details.UDPAppPortRange = UDPAppPortRange
 	}

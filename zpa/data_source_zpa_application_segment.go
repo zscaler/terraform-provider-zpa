@@ -24,90 +24,6 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"clientless_apps": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"allow_options": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"appid": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"application_port": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"application_protocol": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"certificate_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"certificate_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"cname": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"creation_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"domain": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"enabled": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"hidden": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"local_domain": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modifiedby": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modified_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"path": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"trust_untrusted_cert": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-					},
-				},
-			},
 			"config_space": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -231,6 +147,8 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"tcp_port_range": resourceNetworkPortsSchema("tcp port range"),
+			"udp_port_range": resourceNetworkPortsSchema("udp port range"),
 		},
 	}
 }
@@ -278,9 +196,6 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
-		if err := d.Set("clientless_apps", flattenClientlessApps(resp)); err != nil {
-			return fmt.Errorf("failed to read clientless apps %s", err)
-		}
 		if err := d.Set("server_groups", flattenAppServerGroups(resp)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
 		}
@@ -290,35 +205,6 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 
 	return nil
 
-}
-
-func flattenClientlessApps(clientlessApp *applicationsegment.ApplicationSegmentResource) []interface{} {
-	clientlessApps := make([]interface{}, len(clientlessApp.ClientlessApps))
-	for i, clientlessApp := range clientlessApp.ClientlessApps {
-		clientlessApps[i] = map[string]interface{}{
-			"allow_options":        clientlessApp.AllowOptions,
-			"appid":                clientlessApp.AppID,
-			"application_port":     clientlessApp.ApplicationPort,
-			"application_protocol": clientlessApp.ApplicationProtocol,
-			"certificate_id":       clientlessApp.CertificateID,
-			"certificate_name":     clientlessApp.CertificateName,
-			"cname":                clientlessApp.Cname,
-			"creationtime":         clientlessApp.CreationTime,
-			"description":          clientlessApp.Description,
-			"domain":               clientlessApp.Domain,
-			"enabled":              clientlessApp.Enabled,
-			"hidden":               clientlessApp.Hidden,
-			"id":                   clientlessApp.ID,
-			"local_domain":         clientlessApp.LocalDomain,
-			"modifiedby":           clientlessApp.ModifiedBy,
-			"modified_time":        clientlessApp.ModifiedTime,
-			"name":                 clientlessApp.Name,
-			"path":                 clientlessApp.Path,
-			"trust_untrusted_cert": clientlessApp.TrustUntrustedCert,
-		}
-	}
-
-	return clientlessApps
 }
 
 func flattenAppServerGroups(serverGroup *applicationsegment.ApplicationSegmentResource) []interface{} {
