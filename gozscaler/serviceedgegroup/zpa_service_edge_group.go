@@ -25,8 +25,8 @@ type ServiceEdgeGroup struct {
 	Latitude                      string            `json:"latitude,omitempty"`
 	Location                      string            `json:"location,omitempty"`
 	Longitude                     string            `json:"longitude,omitempty"`
-	ModifiedBy                    string            `json:"modifiedBy"`
-	ModifiedTime                  string            `json:"modifiedTime"`
+	ModifiedBy                    string            `json:"modifiedBy,omitempty"`
+	ModifiedTime                  string            `json:"modifiedTime,omitempty"`
 	Name                          string            `json:"name,omitempty"`
 	OverrideVersionProfile        bool              `json:"overrideVersionProfile"`
 	ServiceEdges                  []ServiceEdges    `json:"serviceEdges,omitempty"`
@@ -61,8 +61,8 @@ type ServiceEdges struct {
 	ListenIPs                        []string               `json:"listenIps,omitempty"`
 	Location                         string                 `json:"location,omitempty"`
 	Longitude                        string                 `json:"longitude,omitempty"`
-	ModifiedBy                       string                 `json:"modifiedBy"`
-	ModifiedTime                     string                 `json:"modifiedTime"`
+	ModifiedBy                       string                 `json:"modifiedBy,omitempty"`
+	ModifiedTime                     string                 `json:"modifiedTime,omitempty"`
 	Name                             string                 `json:"name,omitempty"`
 	ProvisioningKeyID                string                 `json:"provisioningKeyId,omitempty"`
 	ProvisioningKeyName              string                 `json:"provisioningKeyName,omitempty"`
@@ -79,14 +79,14 @@ type ServiceEdges struct {
 	UpgradeStatus                    string                 `json:"upgradeStatus,omitempty"`
 }
 type TrustedNetworks struct {
-	CreationTime     string `json:"creationTime"`
+	CreationTime     string `json:"creationTime,omitempty"`
 	Domain           string `json:"domain,omitempty"`
 	ID               string `json:"id"`
 	MasterCustomerID string `json:"masterCustomerId"`
-	ModifiedBy       string `json:"modifiedBy"`
-	ModifiedTime     string `json:"modifiedTime"`
+	ModifiedBy       string `json:"modifiedBy,omitempty"`
+	ModifiedTime     string `json:"modifiedTime,omitempty"`
 	Name             string `json:"name,omitempty"`
-	NetworkID        string `json:"networkId"`
+	NetworkID        string `json:"networkId,omitempty"`
 	ZscalerCloud     string `json:"zscalerCloud,omitempty"`
 }
 

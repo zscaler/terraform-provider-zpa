@@ -1,3 +1,4 @@
+[![Tests](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/test.yml/badge.svg)](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/test.yml)
 [![Release](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml)
 
 Terraform Provider for ☁️Zscaler Private Access☁️

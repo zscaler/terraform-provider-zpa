@@ -10,22 +10,21 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
-func TestAccDataSourceApplicationServer_Basic(t *testing.T) {
-	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationServer)
+func TestAccDataSourceServiceEdgeGroup_Basic(t *testing.T) {
+	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServiceEdgeGroup)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckApplicationServerDestroy,
+		CheckDestroy: testAccCheckServiceEdgeGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
+				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "description", resourceTypeAndName, "description"),
-					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "address", resourceTypeAndName, "address"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 				),
 			},
 		},
