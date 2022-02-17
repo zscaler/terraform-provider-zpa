@@ -245,11 +245,11 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 	_ = d.Set("server_groups", flattenAppServerGroupsSimple(resp))
 
-	if err := d.Set("tcp_port_range", flattenAppSegmentPortRange(resp.TCPAppPortRange)); err != nil {
+	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
 	}
 
-	if err := d.Set("udp_port_range", flattenAppSegmentPortRange(resp.UDPAppPortRange)); err != nil {
+	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
 
@@ -355,11 +355,11 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		UDPPortRanges:        ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
 		ServerGroups:         expandAppServerGroups(d),
 	}
-	TCPAppPortRange := expandAppSegmentPortRange(d, "tcp_port_range")
+	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
 	if TCPAppPortRange != nil {
 		details.TCPAppPortRange = TCPAppPortRange
 	}
-	UDPAppPortRange := expandAppSegmentPortRange(d, "udp_port_range")
+	UDPAppPortRange := expandNetwokPorts(d, "udp_port_range")
 	if UDPAppPortRange != nil {
 		details.UDPAppPortRange = UDPAppPortRange
 	}

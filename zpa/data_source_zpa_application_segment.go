@@ -147,6 +147,8 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"tcp_port_range": resourceNetworkPortsSchema("tcp port range"),
+			"udp_port_range": resourceNetworkPortsSchema("udp port range"),
 		},
 	}
 }
