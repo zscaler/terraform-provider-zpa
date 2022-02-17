@@ -16,7 +16,11 @@ func TestAccDataSourcePostureProfile_Basic(t *testing.T) {
 				Config: fmt.Sprintf(testAccCheckDataSourcePostureProfileConfig_basic),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(
-						"data.zpa_posture_profile.foobar", "name"),
+						"data.zpa_posture_profile.pre_zta", "name"),
+					resource.TestCheckResourceAttrSet(
+						"data.zpa_posture_profile.zta_40", "name"),
+					resource.TestCheckResourceAttrSet(
+						"data.zpa_posture_profile.zta_80", "name"),
 				),
 			},
 		},
@@ -24,6 +28,12 @@ func TestAccDataSourcePostureProfile_Basic(t *testing.T) {
 }
 
 const testAccCheckDataSourcePostureProfileConfig_basic = `
-data "zpa_posture_profile" "foobar" {
-    name = "CrowdStrike_ZPA_ZTA_40"
+data "zpa_posture_profile" "pre_zta" {
+    name = "CrowdStrike_ZPA_Pre-ZTA (zscalerthree.net)"
+}
+data "zpa_posture_profile" "zta_40" {
+    name = "CrowdStrike_ZPA_ZTA_40 (zscalerthree.net)"
+}
+data "zpa_posture_profile" "zta_80" {
+    name = "CrowdStrike_ZPA_ZTA_80 (zscalerthree.net)"
 }`
