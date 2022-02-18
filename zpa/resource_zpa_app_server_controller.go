@@ -55,7 +55,7 @@ func resourceApplicationServer() *schema.Resource {
 			"address": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				ValidateFunc: validation.IsIPAddress,
 				Description:  "This field defines the domain or IP address of the server.",
 			},
 			"enabled": {
