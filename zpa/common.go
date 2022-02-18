@@ -482,14 +482,12 @@ func resourceNetworkPortsSchema(desc string) *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"from": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ValidateFunc: validation.IntBetween(1, 65535),
+					Type:     schema.TypeString,
+					Optional: true,
 				},
 				"to": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ValidateFunc: validation.IntBetween(1, 65535),
+					Type:     schema.TypeString,
+					Optional: true,
 				},
 			},
 		},
@@ -536,14 +534,12 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"from": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ValidateFunc: validation.IntBetween(1, 65535),
+					Type:     schema.TypeString,
+					Optional: true,
 				},
 				"to": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ValidateFunc: validation.IntBetween(1, 65535),
+					Type:     schema.TypeString,
+					Optional: true,
 				},
 			},
 		},
