@@ -1,10 +1,11 @@
-name: Acceptance Test Schedule
+name: Acceptance Tests
 
 # Runs acceptance tests on a cron schedule
 
 on:
-  schedule:
-    - cron: 0 14 * * MON-FRI # Every weekday at 14:00 UTC (10a Eastern)
+  push:
+    branches:
+      - master
 
 concurrency: acceptance_tests
 
