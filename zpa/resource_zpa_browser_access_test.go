@@ -60,14 +60,14 @@ resource "zpa_browser_access" "testAcc_browser_access" {
 	health_reporting = "ON_ACCESS"
 	bypass_type      = "NEVER"
 	is_cname_enabled = true
-	tcp_port_ranges  = ["80", "80", "8080", "8080"]
+	tcp_port_ranges  = ["9000", "9000", "9001", "9001"]
 	domain_names     = ["jenkins.securitygeek.io"]
 	segment_group_id = zpa_segment_group.testAcc_segment_group.id
-	
+
 	clientless_apps {
 		name                 = "jenkins.securitygeek.io"
 		application_protocol = "HTTP"
-		application_port     = "8080"
+		application_port     = "9001"
 		certificate_id       = data.zpa_ba_certificate.jenkins.id
 		trust_untrusted_cert = true
 		enabled              = true

@@ -267,7 +267,7 @@ func expandAppConnectorGroups(d *schema.ResourceData) []servergroup.AppConnector
 		for _, appConnectorGroup := range appConnector.List() {
 			appConnectorGroup, ok := appConnectorGroup.(map[string]interface{})
 			if ok {
-				for _, id := range appConnectorGroup["id"].([]interface{}) {
+				for _, id := range appConnectorGroup["id"].(*schema.Set).List() {
 					appConnectorGroups = append(appConnectorGroups, servergroup.AppConnectorGroups{
 						ID: id.(string),
 					})
