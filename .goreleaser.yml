@@ -53,13 +53,4 @@ release:
   # draft: true
 changelog:
   skip: false
-    - `github`: uses the compare GitHub API, appending the author login to the changelog.
-  # Changelog generation implementation to use.
-  #
-  # Valid options are:
-  # - `git`: uses `git log`;
-
-  # - `gitlab`: uses the compare GitLab API, appending the author name and email to the changelog.
-  # - `github-native`: uses the GitHub release notes generation API, disables the groups feature.
-  #
-  # Defaults to `git`.
+  use: github
