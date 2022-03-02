@@ -1,4 +1,4 @@
-name: Tests
+name: Acceptance Tests
 
 # Runs unit and acceptance tests for pull requests and pushes to main.
 
@@ -67,7 +67,7 @@ jobs:
 
       - name: Go Mod Tidy
         run: go mod tidy
-        
+
       - name: make testacc
         run: make testacc
         env:
