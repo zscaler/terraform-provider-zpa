@@ -26,7 +26,7 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceEdgeGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", variable.ServiceEdgeResourceName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 				),
@@ -37,6 +37,7 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceEdgeGroupExists(resourceTypeAndName, &groups),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 				),

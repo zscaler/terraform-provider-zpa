@@ -26,7 +26,7 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", variable.SegmentGroupResourceName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
 				),
@@ -37,6 +37,7 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
 				),

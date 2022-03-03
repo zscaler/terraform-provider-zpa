@@ -26,7 +26,7 @@ func TestAccResourceApplicationServerBasic(t *testing.T) {
 				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationServerExists(resourceTypeAndName, &servers),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", variable.AppServerResourceName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppServerDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "address", variable.AppServerAddress),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
@@ -38,6 +38,7 @@ func TestAccResourceApplicationServerBasic(t *testing.T) {
 				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationServerExists(resourceTypeAndName, &servers),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppServerDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "address", variable.AppServerAddress),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
