@@ -87,7 +87,7 @@ jobs:
       timeout-minutes: 10
       env:
         TF_ACC: "1"
-        # TESTARGS: -parallel 20
+        TESTARGS: -parallel 20
         ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
         ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
         ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
