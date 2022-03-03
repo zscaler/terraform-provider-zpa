@@ -123,7 +123,7 @@ resource "%s" "%s" {
 		// resource variables
 		resourcetype.ZPAApplicationServer,
 		generatedName,
-		variable.AppServerResourceName,
+		generatedName,
 		description,
 		address,
 		strconv.FormatBool(enabled),

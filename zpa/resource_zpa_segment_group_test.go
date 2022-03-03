@@ -120,7 +120,8 @@ resource "%s" "%s" {
 		// resource variables
 		resourcetype.ZPASegmentGroup,
 		generatedName,
-		variable.SegmentGroupResourceName,
+		generatedName,
+		// variable.SegmentGroupResourceName,
 		description,
 		strconv.FormatBool(enabled),
 	)

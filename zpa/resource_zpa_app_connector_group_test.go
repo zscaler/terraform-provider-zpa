@@ -37,6 +37,7 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
 				),
@@ -128,7 +129,8 @@ resource "%s" "%s" {
 		// resource variables
 		resourcetype.ZPAAppConnectorGroup,
 		generatedName,
-		variable.AppConnectorResourceName,
+		generatedName,
+		// variable.AppConnectorResourceName,
 		description,
 		strconv.FormatBool(enabled),
 	)

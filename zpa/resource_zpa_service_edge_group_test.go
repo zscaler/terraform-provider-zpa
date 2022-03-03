@@ -126,7 +126,8 @@ resource "%s" "%s" {
 		// resource variables
 		resourcetype.ZPAServiceEdgeGroup,
 		generatedName,
-		variable.ServiceEdgeResourceName,
+		generatedName,
+		// variable.ServiceEdgeResourceName,
 		description,
 		strconv.FormatBool(enabled),
 	)
