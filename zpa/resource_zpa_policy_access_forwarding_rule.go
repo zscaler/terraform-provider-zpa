@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func resourcePolicyForwardingRule() *schema.Resource {
@@ -59,14 +59,14 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 	}
 	log.Printf("[INFO] Creating zpa policy forwarding rule with request\n%+v\n", req)
 	if ValidateConditions(req.Conditions, zClient) {
-		policysetrule, _, err := zClient.policysetrule.Create(req)
+		policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
 		if err != nil {
 			return err
 		}
-		d.SetId(policysetrule.ID)
+		d.SetId(policysetcontroller.ID)
 		order, ok := d.GetOk("rule_order")
 		if ok {
-			reorder(order, policysetrule.PolicySetID, policysetrule.ID, zClient)
+			reorder(order, policysetcontroller.PolicySetID, policysetcontroller.ID, zClient)
 		}
 		return resourcePolicyForwardingRuleRead(d, m)
 	} else {
@@ -83,7 +83,7 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 		return err
 	}
 	log.Printf("[INFO] Getting Policy Set Forwarding Rule: globalPolicySet:%s id: %s\n", globalPolicyForwarding.ID, d.Id())
-	resp, _, err := zClient.policysetrule.Get(globalPolicyForwarding.ID, d.Id())
+	resp, _, err := zClient.policysetcontroller.Get(globalPolicyForwarding.ID, d.Id())
 	if err != nil {
 		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy forwarding rule %s from state because it no longer exists in ZPA", d.Id())
@@ -128,7 +128,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 	if ValidateConditions(req.Conditions, zClient) {
-		if _, err := zClient.policysetrule.Update(globalPolicyForwarding.ID, ruleID, req); err != nil {
+		if _, err := zClient.policysetcontroller.Update(globalPolicyForwarding.ID, ruleID, req); err != nil {
 			return err
 		}
 		if d.HasChange("rule_order") {
@@ -153,7 +153,7 @@ func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) e
 
 	log.Printf("[INFO] Deleting policy forwarding rule with id %v\n", d.Id())
 
-	if _, err := zClient.policysetrule.Delete(globalPolicyForwarding.ID, d.Id()); err != nil {
+	if _, err := zClient.policysetcontroller.Delete(globalPolicyForwarding.ID, d.Id()); err != nil {
 		return err
 	}
 
@@ -161,7 +161,7 @@ func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) e
 
 }
 
-func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetrule.PolicyRule, error) {
+func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {
 	policySetID, ok := d.Get("policy_set_id").(string)
 	if !ok {
 		return nil, fmt.Errorf("policy_set_id is not set")
@@ -171,7 +171,7 @@ func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetrule.Po
 	if err != nil {
 		return nil, err
 	}
-	return &policysetrule.PolicyRule{
+	return &policysetcontroller.PolicyRule{
 		Action:            d.Get("action").(string),
 		ActionID:          d.Get("action_id").(string),
 		CustomMsg:         d.Get("custom_msg").(string),

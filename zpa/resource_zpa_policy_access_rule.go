@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 type listrules struct {
@@ -96,6 +96,15 @@ func resourcePolicyAccessRule() *schema.Resource {
 	}
 }
 
+func getPolicyType(d *schema.ResourceData) (string, bool) {
+	val, ok := d.GetOk("policy_type")
+	if !ok {
+		return "", ok
+	}
+	value, ok := val.(string)
+	return value, ok
+}
+
 func resourcePolicySetCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
@@ -105,14 +114,14 @@ func resourcePolicySetCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
 	if ValidateConditions(req.Conditions, zClient) {
-		policysetrule, _, err := zClient.policysetrule.Create(req)
+		policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
 		if err != nil {
 			return err
 		}
-		d.SetId(policysetrule.ID)
+		d.SetId(policysetcontroller.ID)
 		order, ok := d.GetOk("rule_order")
 		if ok {
-			reorder(order, policysetrule.PolicySetID, policysetrule.ID, zClient)
+			reorder(order, policysetcontroller.PolicySetID, policysetcontroller.ID, zClient)
 		}
 		return resourcePolicySetRead(d, m)
 	} else {
@@ -123,12 +132,17 @@ func resourcePolicySetCreate(d *schema.ResourceData, m interface{}) error {
 func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicySet, _, err := zClient.policytype.Get()
+	policyType, ok := getPolicyType(d)
+	if !ok {
+		return fmt.Errorf("a policy type name is required")
+	}
+
+	globalPolicyAccess, _, err := zClient.policysetcontroller.GetByPolicyType(policyType)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
-	resp, _, err := zClient.policysetrule.Get(globalPolicySet.ID, d.Id())
+	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicyAccess.ID, d.Id())
+	resp, _, err := zClient.policysetcontroller.GetByPolicyType(globalPolicyAccess.ID)
 	if err != nil {
 		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
@@ -177,7 +191,7 @@ func resourcePolicySetUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	if ValidateConditions(req.Conditions, zClient) {
-		if _, err := zClient.policysetrule.Update(globalPolicySet.ID, ruleID, req); err != nil {
+		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
 		if d.HasChange("rule_order") {
@@ -202,7 +216,7 @@ func resourcePolicySetDelete(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
 
-	if _, err := zClient.policysetrule.Delete(globalPolicySet.ID, d.Id()); err != nil {
+	if _, err := zClient.policysetcontroller.Delete(globalPolicySet.ID, d.Id()); err != nil {
 		return err
 	}
 
@@ -210,7 +224,7 @@ func resourcePolicySetDelete(d *schema.ResourceData, m interface{}) error {
 
 }
 
-func expandCreatePolicyRule(d *schema.ResourceData) (*policysetrule.PolicyRule, error) {
+func expandCreatePolicyRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {
 	policySetID, ok := d.Get("policy_set_id").(string)
 	if !ok {
 		log.Printf("[ERROR] policy_set_id is not set\n")
@@ -221,7 +235,7 @@ func expandCreatePolicyRule(d *schema.ResourceData) (*policysetrule.PolicyRule, 
 	if err != nil {
 		return nil, err
 	}
-	return &policysetrule.PolicyRule{
+	return &policysetcontroller.PolicyRule{
 		Action:             d.Get("action").(string),
 		ActionID:           d.Get("action_id").(string),
 		BypassDefaultRule:  d.Get("bypass_default_rule").(bool),
@@ -240,22 +254,22 @@ func expandCreatePolicyRule(d *schema.ResourceData) (*policysetrule.PolicyRule, 
 		RuleOrder:          d.Get("rule_order").(string),
 		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
-		AppServerGroups:    expandPolicySetRuleAppServerGroups(d),
-		AppConnectorGroups: expandPolicySetRuleAppConnectorGroups(d),
+		AppServerGroups:    expandpolicysetcontrollerAppServerGroups(d),
+		AppConnectorGroups: expandpolicysetcontrollerAppConnectorGroups(d),
 	}, nil
 }
 
-func expandPolicySetRuleAppServerGroups(d *schema.ResourceData) []policysetrule.AppServerGroups {
+func expandpolicysetcontrollerAppServerGroups(d *schema.ResourceData) []policysetcontroller.AppServerGroups {
 	appServerGroupsInterface, ok := d.GetOk("app_server_groups")
 	if ok {
 		appServer := appServerGroupsInterface.(*schema.Set)
 		log.Printf("[INFO] app server groups data: %+v\n", appServer)
-		var appServerGroups []policysetrule.AppServerGroups
+		var appServerGroups []policysetcontroller.AppServerGroups
 		for _, appServerGroup := range appServer.List() {
 			appServerGroup, _ := appServerGroup.(map[string]interface{})
 			if appServerGroup != nil {
 				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					appServerGroups = append(appServerGroups, policysetrule.AppServerGroups{
+					appServerGroups = append(appServerGroups, policysetcontroller.AppServerGroups{
 						ID: id.(string),
 					})
 				}
@@ -264,20 +278,20 @@ func expandPolicySetRuleAppServerGroups(d *schema.ResourceData) []policysetrule.
 		return appServerGroups
 	}
 
-	return []policysetrule.AppServerGroups{}
+	return []policysetcontroller.AppServerGroups{}
 }
 
-func expandPolicySetRuleAppConnectorGroups(d *schema.ResourceData) []policysetrule.AppConnectorGroups {
+func expandpolicysetcontrollerAppConnectorGroups(d *schema.ResourceData) []policysetcontroller.AppConnectorGroups {
 	appConnectorGroupsInterface, ok := d.GetOk("app_connector_groups")
 	if ok {
 		appConnector := appConnectorGroupsInterface.(*schema.Set)
 		log.Printf("[INFO] app connector groups data: %+v\n", appConnector)
-		var appConnectorGroups []policysetrule.AppConnectorGroups
+		var appConnectorGroups []policysetcontroller.AppConnectorGroups
 		for _, appConnectorGroup := range appConnector.List() {
 			appConnectorGroup, _ := appConnectorGroup.(map[string]interface{})
 			if appConnectorGroup != nil {
 				for _, id := range appConnectorGroup["id"].(*schema.Set).List() {
-					appConnectorGroups = append(appConnectorGroups, policysetrule.AppConnectorGroups{
+					appConnectorGroups = append(appConnectorGroups, policysetcontroller.AppConnectorGroups{
 						ID: id.(string),
 					})
 				}
@@ -287,10 +301,10 @@ func expandPolicySetRuleAppConnectorGroups(d *schema.ResourceData) []policysetru
 		return appConnectorGroups
 	}
 
-	return []policysetrule.AppConnectorGroups{}
+	return []policysetcontroller.AppConnectorGroups{}
 }
 
-func flattenPolicyRuleServerGroups(appServerGroup []policysetrule.AppServerGroups) []interface{} {
+func flattenPolicyRuleServerGroups(appServerGroup []policysetcontroller.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
 	ids := make([]string, len(appServerGroup))
@@ -302,7 +316,7 @@ func flattenPolicyRuleServerGroups(appServerGroup []policysetrule.AppServerGroup
 	return result
 }
 
-func flattenPolicyRuleAppConnectorGroups(appConnectorGroups []policysetrule.AppConnectorGroups) []interface{} {
+func flattenPolicyRuleAppConnectorGroups(appConnectorGroups []policysetcontroller.AppConnectorGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
 	ids := make([]string, len(appConnectorGroups))

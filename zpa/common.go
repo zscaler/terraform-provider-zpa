@@ -8,10 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
-func ValidateConditions(conditions []policysetrule.Conditions, zClient *Client) bool {
+func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client) bool {
 	for _, condition := range conditions {
 		if !validateOperands(condition.Operands, zClient) {
 			return false
@@ -19,7 +19,7 @@ func ValidateConditions(conditions []policysetrule.Conditions, zClient *Client) 
 	}
 	return true
 }
-func validateOperands(operands []policysetrule.Operands, zClient *Client) bool {
+func validateOperands(operands []policysetcontroller.Operands, zClient *Client) bool {
 	for _, operand := range operands {
 		if !validateOperand(operand, zClient) {
 			return false
@@ -27,7 +27,7 @@ func validateOperands(operands []policysetrule.Operands, zClient *Client) bool {
 	}
 	return true
 }
-func validateOperand(operand policysetrule.Operands, zClient *Client) bool {
+func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool {
 	switch operand.ObjectType {
 	case "APP":
 		return customValidate(operand, []string{"id"}, "application segment ID", Getter(func(id string) error {
@@ -153,7 +153,7 @@ type Getter func(id string) error
 func (g Getter) Get(id string) error {
 	return g(id)
 }
-func customValidate(operand policysetrule.Operands, expectedLHS []string, expectedRHS string, clientRHS Getter) bool {
+func customValidate(operand policysetcontroller.Operands, expectedLHS []string, expectedRHS string, clientRHS Getter) bool {
 	if operand.LHS == "" || !contains(expectedLHS, operand.LHS) {
 		lhsWarn(operand.ObjectType, expectedLHS, operand.LHS, nil)
 		return false
@@ -205,7 +205,7 @@ func reorderAll(policySetID string, zClient *Client) {
 	count, _, _ := zClient.policytype.RulesCount()
 	for k, v := range rules.orders {
 		if v <= count {
-			_, err := zClient.policysetrule.Reorder(policySetID, k, v)
+			_, err := zClient.policysetcontroller.Reorder(policySetID, k, v)
 			if err != nil {
 				log.Printf("[ERROR] couldn't reorder the policy set, the order may not have taken place: %v\n", err)
 			}
@@ -291,12 +291,12 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 	}
 }
 
-func ExpandPolicyConditions(d *schema.ResourceData) ([]policysetrule.Conditions, error) {
+func ExpandPolicyConditions(d *schema.ResourceData) ([]policysetcontroller.Conditions, error) {
 	conditionInterface, ok := d.GetOk("conditions")
 	if ok {
 		conditions := conditionInterface.([]interface{})
 		log.Printf("[INFO] conditions data: %+v\n", conditions)
-		var conditionSets []policysetrule.Conditions
+		var conditionSets []policysetcontroller.Conditions
 		for _, condition := range conditions {
 			conditionSet, _ := condition.(map[string]interface{})
 			if conditionSet != nil {
@@ -304,7 +304,7 @@ func ExpandPolicyConditions(d *schema.ResourceData) ([]policysetrule.Conditions,
 				if err != nil {
 					return nil, err
 				}
-				conditionSets = append(conditionSets, policysetrule.Conditions{
+				conditionSets = append(conditionSets, policysetcontroller.Conditions{
 					ID:       conditionSet["id"].(string),
 					Negated:  conditionSet["negated"].(bool),
 					Operator: conditionSet["operator"].(string),
@@ -315,20 +315,20 @@ func ExpandPolicyConditions(d *schema.ResourceData) ([]policysetrule.Conditions,
 		return conditionSets, nil
 	}
 
-	return []policysetrule.Conditions{}, nil
+	return []policysetcontroller.Conditions{}, nil
 }
 
-func expandOperandsList(ops interface{}) ([]policysetrule.Operands, error) {
+func expandOperandsList(ops interface{}) ([]policysetcontroller.Operands, error) {
 	if ops != nil {
 		operands := ops.([]interface{})
 		log.Printf("[INFO] operands data: %+v\n", operands)
-		var operandsSets []policysetrule.Operands
+		var operandsSets []policysetcontroller.Operands
 		for _, operand := range operands {
 			operandSet, _ := operand.(map[string]interface{})
 			id, _ := operandSet["id"].(string)
 			IdpID, _ := operandSet["idp_id"].(string)
 			rhs, ok := operandSet["rhs"].(string)
-			op := policysetrule.Operands{
+			op := policysetcontroller.Operands{
 				ID:         id,
 				IdpID:      IdpID,
 				LHS:        operandSet["lhs"].(string),
@@ -358,10 +358,10 @@ func expandOperandsList(ops interface{}) ([]policysetrule.Operands, error) {
 
 		return operandsSets, nil
 	}
-	return []policysetrule.Operands{}, nil
+	return []policysetcontroller.Operands{}, nil
 }
 
-func flattenPolicyConditions(conditions []policysetrule.Conditions) []interface{} {
+func flattenPolicyConditions(conditions []policysetcontroller.Conditions) []interface{} {
 	ruleConditions := make([]interface{}, len(conditions))
 	for i, ruleConditionItems := range conditions {
 		ruleConditions[i] = map[string]interface{}{
@@ -375,7 +375,7 @@ func flattenPolicyConditions(conditions []policysetrule.Conditions) []interface{
 	return ruleConditions
 }
 
-func flattenPolicyRuleOperands(conditionOperand []policysetrule.Operands) []interface{} {
+func flattenPolicyRuleOperands(conditionOperand []policysetcontroller.Operands) []interface{} {
 	conditionOperands := make([]interface{}, len(conditionOperand))
 	for i, operandItems := range conditionOperand {
 		conditionOperands[i] = map[string]interface{}{
@@ -586,7 +586,7 @@ func importPolicyStateFunc(types []string) schema.StateFunc {
 			// assume if the passed value is an int
 			d.Set("id", id)
 		} else {
-			resp, _, err := zClient.policysetrule.GetByNameAndTypes(types, id)
+			resp, _, err := zClient.policysetcontroller.GetByNameAndTypes(types, id)
 			if err == nil {
 				d.SetId(resp.ID)
 				d.Set("id", resp.ID)
