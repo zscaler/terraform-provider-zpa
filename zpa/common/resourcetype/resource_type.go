@@ -7,4 +7,5 @@ const (
 	ZPAApplicationServer = "zpa_application_server"
 	ZPAServerGroup       = "zpa_server_group"
 	ZPASegmentGroup      = "zpa_segment_group"
+	ZPAPolicyAccessRule  = "zpa_policy_access_rule"
 )

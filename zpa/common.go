@@ -437,7 +437,8 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		},
 		"policy_set_id": {
 			Type:     schema.TypeString,
-			Required: true,
+			Optional: true,
+			Computed: true,
 		},
 		"policy_type": {
 			Type:     schema.TypeString,

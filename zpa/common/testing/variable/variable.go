@@ -32,7 +32,13 @@ const (
 
 // Segment Group
 const (
-	SegmentGroupResourceName = "testAcc_segment_group"
-	SegmentGroupDescription  = "testAcc_segment_group"
-	SegmentGroupEnabled      = true
+	SegmentGroupDescription = "testAcc_segment_group"
+	SegmentGroupEnabled     = true
+)
+
+// Policy Access Rule
+const (
+	AccessRuleDescription = "testAcc_access_rule"
+	AccessRuleAction      = "ALLOW"
+	AccessRuleOrder       = 1
 )
