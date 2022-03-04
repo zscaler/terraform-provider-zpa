@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -103,3 +104,4 @@ func testAccCheckPolicyTimeoutRuleDestroy(s *terraform.State) error {
 	}
 	return nil
 }
+*/

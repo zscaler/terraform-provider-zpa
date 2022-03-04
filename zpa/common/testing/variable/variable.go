@@ -7,6 +7,14 @@ const (
 	AppConnectorEnabled      = true
 )
 
+// Provisioning Key
+const (
+	ConnectorGroupType     = "CONNECTOR_GRP"
+	ServiceEdgeGroupType   = "SERVICE_EDGE_GRP"
+	ProvisioningKeyUsage   = "2"
+	ProvisioningKeyEnabled = true
+)
+
 // Service Edge Group
 const (
 	ServiceEdgeResourceName = "testAcc_service_edge_group"
