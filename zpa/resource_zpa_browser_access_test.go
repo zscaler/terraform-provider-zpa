@@ -51,7 +51,7 @@ func TestAccResourceBrowserAccess(t *testing.T) {
 
 func testAccResourceZPABrowserAccessConfigBasic(port int, rName, rDesc, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc string) string {
 	return fmt.Sprintf(`
-data "zpa_ba_certificate" "jenkins" {
+data "zpa_ba_certificate" "testAcc" {
 	name = "jenkins.securitygeek.io"
 }
 resource "zpa_browser_access" "testAcc_browser_access" {
@@ -65,17 +65,17 @@ resource "zpa_browser_access" "testAcc_browser_access" {
         from = "%d"
         to = "%d"
     }
-	domain_names     = ["jenkins.securitygeek.io"]
+	domain_names     = ["testAcc.securitygeek.io"]
 	segment_group_id = zpa_segment_group.testAcc_segment_group.id
 
 	clientless_apps {
-		name                 = "jenkins.securitygeek.io"
+		name                 = "testAcc.securitygeek.io"
 		application_protocol = "HTTP"
 		application_port     = "%d"
-		certificate_id       = data.zpa_ba_certificate.jenkins.id
+		certificate_id       = data.zpa_ba_certificate.testAcc.id
 		trust_untrusted_cert = true
 		enabled              = true
-		domain               = "jenkins.securitygeek.io"
+		domain               = "testAcc.securitygeek.io"
 	}
 	server_groups {
 		id = [
