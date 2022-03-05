@@ -113,20 +113,6 @@ data "%s" "%s" {
 
 func ServerGroupResourceHCL(generatedName, description string, enabled, dynamic_discovery bool) string {
 	return fmt.Sprintf(`
-resource "zpa_app_connector_group" "testAcc" {
-	name                          = "testAcc"
-	description                   = "testAcc"
-	enabled                       = true
-	country_code                  = "US"
-	latitude                      = "37.3382082"
-	longitude                     = "-121.8863286"
-	location                      = "San Jose, CA, USA"
-	upgrade_day                   = "SUNDAY"
-	upgrade_time_in_secs          = "66600"
-	override_version_profile      = true
-	version_profile_id            = 0
-	dns_query_type                = "IPV4"
-}
 
 resource "%s" "%s" {
 	name = "%s"
@@ -139,6 +125,20 @@ resource "%s" "%s" {
 	depends_on = [zpa_app_connector_group.testAcc]
 }
 
+resource "zpa_app_connector_group" "testAcc" {
+	name                          = "%s"
+	description                   = "testAcc"
+	enabled                       = true
+	country_code                  = "US"
+	latitude                      = "37.3382082"
+	longitude                     = "-121.8863286"
+	location                      = "San Jose, CA, USA"
+	upgrade_day                   = "SUNDAY"
+	upgrade_time_in_secs          = "66600"
+	override_version_profile      = true
+	version_profile_id            = 0
+	dns_query_type                = "IPV4"
+}
 `,
 		// resource variables
 		resourcetype.ZPAServerGroup,
@@ -147,5 +147,6 @@ resource "%s" "%s" {
 		description,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(dynamic_discovery),
+		generatedName,
 	)
 }
