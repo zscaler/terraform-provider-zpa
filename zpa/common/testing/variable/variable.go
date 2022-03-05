@@ -14,6 +14,21 @@ const (
 	ServiceEdgeEnabled      = true
 )
 
+// Provisioning Key
+const (
+	ConnectorGroupType     = "CONNECTOR_GRP"
+	ServiceEdgeGroupType   = "SERVICE_EDGE_GRP"
+	ProvisioningKeyUsage   = "2"
+	ProvisioningKeyEnabled = true
+)
+
+// Customer Version Profile
+const (
+	VersionProfileDefault         = "Default"
+	VersionProfilePreviousDefault = "Previous Default"
+	VersionProfileNewRelease      = "New Release"
+)
+
 // Application Server
 const (
 	AppServerResourceName = "testAcc_application_server"
@@ -32,7 +47,13 @@ const (
 
 // Segment Group
 const (
-	SegmentGroupResourceName = "testAcc_segment_group"
-	SegmentGroupDescription  = "testAcc_segment_group"
-	SegmentGroupEnabled      = true
+	SegmentGroupDescription = "testAcc_segment_group"
+	SegmentGroupEnabled     = true
+)
+
+// Policy Access Rule
+const (
+	AccessRuleDescription = "testAcc_access_rule"
+	AccessRuleAction      = "ALLOW"
+	AccessRuleOrder       = 1
 )
