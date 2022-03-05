@@ -7,6 +7,13 @@ const (
 	AppConnectorEnabled      = true
 )
 
+// Service Edge Group
+const (
+	ServiceEdgeResourceName = "testAcc_service_edge_group"
+	ServiceEdgeDescription  = "testAcc_service_edge_group"
+	ServiceEdgeEnabled      = true
+)
+
 // Provisioning Key
 const (
 	ConnectorGroupType     = "CONNECTOR_GRP"
@@ -15,11 +22,11 @@ const (
 	ProvisioningKeyEnabled = true
 )
 
-// Service Edge Group
+// Customer Version Profile
 const (
-	ServiceEdgeResourceName = "testAcc_service_edge_group"
-	ServiceEdgeDescription  = "testAcc_service_edge_group"
-	ServiceEdgeEnabled      = true
+	VersionProfileDefault         = "Default"
+	VersionProfilePreviousDefault = "Previous Default"
+	VersionProfileNewRelease      = "New Release"
 )
 
 // Application Server
