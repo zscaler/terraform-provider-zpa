@@ -227,3 +227,16 @@ func (service *Service) RulesCount() (int, *http.Response, error) {
 	count, err := strconv.Atoi(v.Count)
 	return count, resp, err
 }
+
+/*
+func (service *Service) RulesCount() (int, *http.Response, error) {
+	v := new(Count)
+	relativeURL := fmt.Sprintf("/zpn/api/v1/admin/customers/%s/policySet/rules/policyType/GLOBAL_POLICY/count", service.Client.Config.CustomerID)
+	resp, err := service.Client.NewPrivateRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return 0, nil, err
+	}
+	count, err := strconv.Atoi(v.Count)
+	return count, resp, err
+}
+*/
