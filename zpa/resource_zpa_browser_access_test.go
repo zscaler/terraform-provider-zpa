@@ -17,6 +17,7 @@ func TestAccResourceBrowserAccess(t *testing.T) {
 	sgDesc := acctest.RandString(20)
 	srvName := acctest.RandString(10)
 	srvDesc := acctest.RandString(20)
+	port := acctest.RandIntRange(1000, 9999)
 	appConnectorName := acctest.RandString(10)
 	appConnectorDesc := acctest.RandString(10)
 	resourceName := "zpa_browser_access.testAcc_browser_access"
@@ -28,7 +29,7 @@ func TestAccResourceBrowserAccess(t *testing.T) {
 		CheckDestroy: testAccCheckZPABrowserAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceZPABrowserAccessConfigBasic(rName, rDesc, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc),
+				Config: testAccResourceZPABrowserAccessConfigBasic(port, rName, rDesc, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckZPABrowserAccessExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
@@ -48,7 +49,7 @@ func TestAccResourceBrowserAccess(t *testing.T) {
 	})
 }
 
-func testAccResourceZPABrowserAccessConfigBasic(rName, rDesc, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc string) string {
+func testAccResourceZPABrowserAccessConfigBasic(port int, rName, rDesc, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc string) string {
 	return fmt.Sprintf(`
 data "zpa_ba_certificate" "jenkins" {
 	name = "jenkins.securitygeek.io"
@@ -60,14 +61,14 @@ resource "zpa_browser_access" "testAcc_browser_access" {
 	health_reporting = "ON_ACCESS"
 	bypass_type      = "NEVER"
 	is_cname_enabled = true
-	tcp_port_ranges  = ["9000", "9000", "9001", "9001"]
+	tcp_port_ranges  = ["%d", "%d"]
 	domain_names     = ["jenkins.securitygeek.io"]
 	segment_group_id = zpa_segment_group.testAcc_segment_group.id
 
 	clientless_apps {
 		name                 = "jenkins.securitygeek.io"
 		application_protocol = "HTTP"
-		application_port     = "9001"
+		application_port     = "%d"
 		certificate_id       = data.zpa_ba_certificate.jenkins.id
 		trust_untrusted_cert = true
 		enabled              = true
@@ -112,7 +113,7 @@ resource "zpa_app_connector_group" "testAcc_app_connector_group" {
 	dns_query_type                = "IPV4"
 }
 
-	`, rName, rDesc, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc)
+	`, rName, rDesc, port, port, port, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc)
 }
 
 func testAccCheckZPABrowserAccessExists(n string) resource.TestCheckFunc {
