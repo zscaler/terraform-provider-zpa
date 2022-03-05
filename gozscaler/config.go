@@ -14,13 +14,12 @@ import (
 )
 
 const (
-	defaultBaseURL           = "https://config.private.zscaler.com"
-	defaultPrivateAPIBaseURL = "https://api.private.zscaler.com"
-	defaultTimeout           = 240 * time.Second
-	loggerPrefix             = "zpa-logger: "
-	ZPA_CLIENT_ID            = "ZPA_CLIENT_ID"
-	ZPA_CLIENT_SECRET        = "ZPA_CLIENT_SECRET"
-	ZPA_CUSTOMER_ID          = "ZPA_CUSTOMER_ID"
+	defaultBaseURL    = "https://config.private.zscaler.com"
+	defaultTimeout    = 240 * time.Second
+	loggerPrefix      = "zpa-logger: "
+	ZPA_CLIENT_ID     = "ZPA_CLIENT_ID"
+	ZPA_CLIENT_SECRET = "ZPA_CLIENT_SECRET"
+	ZPA_CUSTOMER_ID   = "ZPA_CUSTOMER_ID"
 )
 
 type BackoffConfig struct {
@@ -37,9 +36,8 @@ type AuthToken struct {
 
 // Config contains all the configuration data for the API client
 type Config struct {
-	BaseURL           *url.URL
-	PrivateAPIBaseURL *url.URL
-	httpClient        *http.Client
+	BaseURL    *url.URL
+	httpClient *http.Client
 	// The logger writer interface to write logging messages to. Defaults to standard out.
 	Logger *log.Logger
 	// Credentials for basic authentication.
@@ -83,19 +81,14 @@ func NewConfig(clientID, clientSecret, customerID, rawUrl string) (*Config, erro
 	if err != nil {
 		log.Printf("[ERROR] error occured while configuring the client: %v", err)
 	}
-	privateAPIBaseURL, err := url.Parse(defaultPrivateAPIBaseURL)
-	if err != nil {
-		log.Printf("[ERROR] error occured while configuring the client: %v", err)
-	}
 	return &Config{
-		BaseURL:           baseURL,
-		PrivateAPIBaseURL: privateAPIBaseURL,
-		Logger:            logger,
-		httpClient:        nil,
-		ClientID:          clientID,
-		ClientSecret:      clientSecret,
-		CustomerID:        customerID,
-		BackoffConf:       backoffConf,
+		BaseURL:      baseURL,
+		Logger:       logger,
+		httpClient:   nil,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		CustomerID:   customerID,
+		BackoffConf:  backoffConf,
 	}, err
 }
 

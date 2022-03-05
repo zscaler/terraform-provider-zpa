@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetrule"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func resourcePolicyForwardingRule() *schema.Resource {
@@ -37,13 +37,14 @@ func resourcePolicyForwardingRule() *schema.Resource {
 					"APP",
 					"APP_GROUP",
 					"CLIENT_TYPE",
-					"CLOUD_CONNECTOR_GROUP",
-					"IDP",
+					"EDGE_CONNECTOR_GROUP",
 					"POSTURE",
+					"MACHINE_GRP",
+					"TRUSTED_NETWORK",
+					"IDP",
 					"SAML",
 					"SCIM",
 					"SCIM_GROUP",
-					"TRUSTED_NETWORK",
 				}),
 			},
 		),
@@ -59,14 +60,14 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 	}
 	log.Printf("[INFO] Creating zpa policy forwarding rule with request\n%+v\n", req)
 	if ValidateConditions(req.Conditions, zClient) {
-		policysetrule, _, err := zClient.policysetrule.Create(req)
+		policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
 		if err != nil {
 			return err
 		}
-		d.SetId(policysetrule.ID)
+		d.SetId(policysetcontroller.ID)
 		order, ok := d.GetOk("rule_order")
 		if ok {
-			reorder(order, policysetrule.PolicySetID, policysetrule.ID, zClient)
+			reorder(order, policysetcontroller.PolicySetID, policysetcontroller.ID, zClient)
 		}
 		return resourcePolicyForwardingRuleRead(d, m)
 	} else {
@@ -78,15 +79,15 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetBypass()
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Getting Policy Set Forwarding Rule: globalPolicySet:%s id: %s\n", globalPolicyForwarding.ID, d.Id())
-	resp, _, err := zClient.policysetrule.Get(globalPolicyForwarding.ID, d.Id())
+	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
+	resp, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, d.Id())
 	if err != nil {
 		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
-			log.Printf("[WARN] Removing policy forwarding rule %s from state because it no longer exists in ZPA", d.Id())
+			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
@@ -96,19 +97,17 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 
 	log.Printf("[INFO] Got Policy Set Forwarding Rule:\n%+v\n", resp)
 	d.SetId(resp.ID)
+	_ = d.Set("name", resp.Name)
+	_ = d.Set("description", resp.Description)
 	_ = d.Set("action", resp.Action)
 	_ = d.Set("action_id", resp.ActionID)
 	_ = d.Set("custom_msg", resp.CustomMsg)
-	_ = d.Set("description", resp.Description)
-	_ = d.Set("name", resp.Name)
 	_ = d.Set("bypass_default_rule", resp.BypassDefaultRule)
+	_ = d.Set("default_rule", resp.DefaultRule)
 	_ = d.Set("operator", resp.Operator)
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
-	_ = d.Set("reauth_default_rule", resp.ReauthDefaultRule)
-	_ = d.Set("reauth_idle_timeout", resp.ReauthIdleTimeout)
-	_ = d.Set("reauth_timeout", resp.ReauthTimeout)
 	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
@@ -117,7 +116,7 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 
 func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetBypass()
 	if err != nil {
 		return err
 	}
@@ -128,13 +127,13 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 	if ValidateConditions(req.Conditions, zClient) {
-		if _, err := zClient.policysetrule.Update(globalPolicyForwarding.ID, ruleID, req); err != nil {
+		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
 		if d.HasChange("rule_order") {
 			order, ok := d.GetOk("rule_order")
 			if ok {
-				reorder(order, globalPolicyForwarding.ID, ruleID, zClient)
+				reorder(order, globalPolicySet.ID, ruleID, zClient)
 			}
 		}
 		return resourcePolicyForwardingRuleRead(d, m)
@@ -146,14 +145,14 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 
 func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicyForwarding, _, err := zClient.policytype.GetBypass()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetBypass()
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Deleting policy forwarding rule with id %v\n", d.Id())
 
-	if _, err := zClient.policysetrule.Delete(globalPolicyForwarding.ID, d.Id()); err != nil {
+	if _, err := zClient.policysetcontroller.Delete(globalPolicySet.ID, d.Id()); err != nil {
 		return err
 	}
 
@@ -161,7 +160,7 @@ func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) e
 
 }
 
-func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetrule.PolicyRule, error) {
+func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {
 	policySetID, ok := d.Get("policy_set_id").(string)
 	if !ok {
 		return nil, fmt.Errorf("policy_set_id is not set")
@@ -171,20 +170,19 @@ func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetrule.Po
 	if err != nil {
 		return nil, err
 	}
-	return &policysetrule.PolicyRule{
+	return &policysetcontroller.PolicyRule{
+		ID:                d.Get("id").(string),
+		Name:              d.Get("name").(string),
+		Description:       d.Get("description").(string),
 		Action:            d.Get("action").(string),
 		ActionID:          d.Get("action_id").(string),
 		CustomMsg:         d.Get("custom_msg").(string),
-		Description:       d.Get("description").(string),
-		ID:                d.Get("id").(string),
-		Name:              d.Get("name").(string),
+		BypassDefaultRule: d.Get("bypass_default_rule").(bool),
+		DefaultRule:       d.Get("default_rule").(bool),
 		Operator:          d.Get("operator").(string),
 		PolicySetID:       policySetID,
 		PolicyType:        d.Get("policy_type").(string),
 		Priority:          d.Get("priority").(string),
-		ReauthDefaultRule: d.Get("reauth_default_rule").(bool),
-		ReauthIdleTimeout: d.Get("reauth_idle_timeout").(string),
-		ReauthTimeout:     d.Get("reauth_timeout").(string),
 		RuleOrder:         d.Get("rule_order").(string),
 		Conditions:        conditions,
 	}, nil
