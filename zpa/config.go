@@ -17,7 +17,6 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/machinegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policytype"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/postureprofile"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/samlattribute"
@@ -48,7 +47,6 @@ type Client struct {
 	lssconfigcontroller    lssconfigcontroller.Service
 	machinegroup           machinegroup.Service
 	postureprofile         postureprofile.Service
-	policytype             policytype.Service
 	policysetcontroller    policysetcontroller.Service
 	provisioningkey        provisioningkey.Service
 	samlattribute          samlattribute.Service
@@ -88,7 +86,6 @@ func (c *Config) Client() (*Client, error) {
 		lssconfigcontroller:    *lssconfigcontroller.New(config),
 		machinegroup:           *machinegroup.New(config),
 		postureprofile:         *postureprofile.New(config),
-		policytype:             *policytype.New(config),
 		policysetcontroller:    *policysetcontroller.New(config),
 		provisioningkey:        *provisioningkey.New(config),
 		samlattribute:          *samlattribute.New(config),

@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policytype"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func dataSourcePolicyType() *schema.Resource {
@@ -231,13 +231,13 @@ func dataSourcePolicyType() *schema.Resource {
 func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	log.Printf("[INFO] Getting data for policy type\n")
-	var resp *policytype.PolicySet
+	var resp *policysetcontroller.PolicySet
 	var err error
 	policyType, policyTypeIsSet := d.GetOk("policy_type")
 	if policyTypeIsSet {
-		resp, _, err = zClient.policytype.GetByPolicyType(policyType.(string))
+		resp, _, err = zClient.policysetcontroller.GetByPolicyType(policyType.(string))
 	} else {
-		resp, _, err = zClient.policytype.Get()
+		resp, _, err = zClient.policysetcontroller.GetPolicySet()
 	}
 	if err != nil {
 		return err
@@ -260,7 +260,7 @@ func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func flattenPolicySetRules(policySetRules *policytype.PolicySet) []interface{} {
+func flattenPolicySetRules(policySetRules *policysetcontroller.PolicySet) []interface{} {
 	ruleItems := make([]interface{}, len(policySetRules.Rules))
 	for i, ruleItem := range policySetRules.Rules {
 		ruleItems[i] = map[string]interface{}{
@@ -291,7 +291,7 @@ func flattenPolicySetRules(policySetRules *policytype.PolicySet) []interface{} {
 	return ruleItems
 }
 
-func flattenRuleConditions(conditions policytype.Rules) []interface{} {
+func flattenRuleConditions(conditions policysetcontroller.PolicyRule) []interface{} {
 	ruleConditions := make([]interface{}, len(conditions.Conditions))
 	for i, ruleCondition := range conditions.Conditions {
 		ruleConditions[i] = map[string]interface{}{
@@ -308,9 +308,9 @@ func flattenRuleConditions(conditions policytype.Rules) []interface{} {
 	return ruleConditions
 }
 
-func flattenConditionOperands(operands policytype.Conditions) []interface{} {
-	conditionOperands := make([]interface{}, len(*operands.Operands))
-	for i, conditionOperand := range *operands.Operands {
+func flattenConditionOperands(operands policysetcontroller.Conditions) []interface{} {
+	conditionOperands := make([]interface{}, len(operands.Operands))
+	for i, conditionOperand := range operands.Operands {
 		conditionOperands[i] = map[string]interface{}{
 			"creation_time": conditionOperand.CreationTime,
 			"id":            conditionOperand.ID,

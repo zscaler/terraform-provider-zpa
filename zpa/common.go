@@ -202,7 +202,7 @@ func reorder(orderI interface{}, policySetID, id string, zClient *Client) {
 func reorderAll(policySetID string, zClient *Client) {
 	rules.Lock()
 	defer rules.Unlock()
-	count, _, _ := zClient.policytype.RulesCount()
+	count, _, _ := zClient.policysetcontroller.RulesCount()
 	for k, v := range rules.orders {
 		if v <= count {
 			_, err := zClient.policysetcontroller.Reorder(policySetID, k, v)

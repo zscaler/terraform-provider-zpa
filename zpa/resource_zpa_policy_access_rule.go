@@ -22,10 +22,10 @@ var rules = listrules{
 
 func resourcePolicyAccessRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePolicySetCreate,
-		Read:   resourcePolicySetRead,
-		Update: resourcePolicySetUpdate,
-		Delete: resourcePolicySetDelete,
+		Create: resourcePolicyAccessCreate,
+		Read:   resourcePolicyAccessRead,
+		Update: resourcePolicyAccessUpdate,
+		Delete: resourcePolicyAccessDelete,
 		Importer: &schema.ResourceImporter{
 			State: importPolicyStateFunc([]string{"ACCESS_POLICY", "GLOBAL_POLICY"}),
 		},
@@ -96,16 +96,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 	}
 }
 
-func getPolicyType(d *schema.ResourceData) (string, bool) {
-	val, ok := d.GetOk("policy_type")
-	if !ok {
-		return "", ok
-	}
-	value, ok := val.(string)
-	return value, ok
-}
-
-func resourcePolicySetCreate(d *schema.ResourceData, m interface{}) error {
+func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	req, err := expandCreatePolicyRule(d)
@@ -123,26 +114,21 @@ func resourcePolicySetCreate(d *schema.ResourceData, m interface{}) error {
 		if ok {
 			reorder(order, policysetcontroller.PolicySetID, policysetcontroller.ID, zClient)
 		}
-		return resourcePolicySetRead(d, m)
+		return resourcePolicyAccessRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
 }
 
-func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
+func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	policyType, ok := getPolicyType(d)
-	if !ok {
-		return fmt.Errorf("a policy type name is required")
-	}
-
-	globalPolicyAccess, _, err := zClient.policysetcontroller.GetByPolicyType(policyType)
+	globalPolicySet, _, err := zClient.policysetcontroller.GetPolicySet()
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicyAccess.ID, d.Id())
-	resp, _, err := zClient.policysetcontroller.GetByPolicyType(globalPolicyAccess.ID)
+	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
+	resp, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, d.Id())
 	if err != nil {
 		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
@@ -155,20 +141,16 @@ func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Got Policy Set Rule:\n%+v\n", resp)
 	d.SetId(resp.ID)
+	_ = d.Set("description", resp.Description)
+	_ = d.Set("name", resp.Name)
 	_ = d.Set("action", resp.Action)
 	_ = d.Set("action_id", resp.ActionID)
 	_ = d.Set("custom_msg", resp.CustomMsg)
 	_ = d.Set("default_rule", resp.DefaultRule)
-	_ = d.Set("description", resp.Description)
-	_ = d.Set("name", resp.Name)
-	_ = d.Set("bypass_default_rule", resp.BypassDefaultRule)
 	_ = d.Set("operator", resp.Operator)
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
-	_ = d.Set("reauth_default_rule", resp.ReauthDefaultRule)
-	_ = d.Set("reauth_idle_timeout", resp.ReauthIdleTimeout)
-	_ = d.Set("reauth_timeout", resp.ReauthTimeout)
 	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
@@ -178,9 +160,9 @@ func resourcePolicySetRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourcePolicySetUpdate(d *schema.ResourceData, m interface{}) error {
+func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policytype.Get()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetPolicySet()
 	if err != nil {
 		return err
 	}
@@ -200,16 +182,16 @@ func resourcePolicySetUpdate(d *schema.ResourceData, m interface{}) error {
 				reorder(order, globalPolicySet.ID, ruleID, zClient)
 			}
 		}
-		return resourcePolicySetRead(d, m)
+		return resourcePolicyAccessRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
 
 }
 
-func resourcePolicySetDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePolicyAccessDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policytype.Get()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetPolicySet()
 	if err != nil {
 		return err
 	}
@@ -236,21 +218,18 @@ func expandCreatePolicyRule(d *schema.ResourceData) (*policysetcontroller.Policy
 		return nil, err
 	}
 	return &policysetcontroller.PolicyRule{
+		ID:                 d.Get("id").(string),
+		Name:               d.Get("name").(string),
+		Description:        d.Get("description").(string),
 		Action:             d.Get("action").(string),
 		ActionID:           d.Get("action_id").(string),
 		BypassDefaultRule:  d.Get("bypass_default_rule").(bool),
 		CustomMsg:          d.Get("custom_msg").(string),
 		DefaultRule:        d.Get("default_rule").(bool),
-		Description:        d.Get("description").(string),
-		ID:                 d.Get("id").(string),
-		Name:               d.Get("name").(string),
 		Operator:           d.Get("operator").(string),
 		PolicySetID:        policySetID,
 		PolicyType:         d.Get("policy_type").(string),
 		Priority:           d.Get("priority").(string),
-		ReauthDefaultRule:  d.Get("reauth_default_rule").(bool),
-		ReauthIdleTimeout:  d.Get("reauth_idle_timeout").(string),
-		ReauthTimeout:      d.Get("reauth_timeout").(string),
 		RuleOrder:          d.Get("rule_order").(string),
 		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
