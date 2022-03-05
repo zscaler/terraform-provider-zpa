@@ -16,6 +16,10 @@ func dataSourceProvisioningKey() *schema.Resource {
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"app_connector_group_id": {
 				Type:     schema.TypeString,
 				Computed: true,

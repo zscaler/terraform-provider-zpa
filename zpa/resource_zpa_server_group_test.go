@@ -2,113 +2,151 @@ package zpa
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/servergroup"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
-func TestAccResourceServerGroup(t *testing.T) {
+func TestAccResourceServerGroupBasic(t *testing.T) {
+	var serverGroup servergroup.ServerGroup
+	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 
-	rName := acctest.RandString(10)
-	rDesc := acctest.RandString(20)
-	connGroupName := acctest.RandString(10)
-	connGroupDesc := acctest.RandString(20)
-	resourceName := "zpa_server_group.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceServerGroupConfigBasic(rName, rDesc, connGroupName, connGroupDesc),
+				Config: testAccCheckServerGroupConfigure(resourceTypeAndName, generatedName, variable.ServerGroupDescription, variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery),
 				Check: resource.ComposeTestCheckFunc(
-					tesAccCheckServerGroupExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", rDesc),
-					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "dynamic_discovery", "true"),
+					testAccCheckServerGroupExists(resourceTypeAndName, &serverGroup),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServerGroupDescription),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServerGroupEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServerGroupDynamicDiscovery)),
 				),
 			},
+
+			// Update test
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccCheckServerGroupConfigure(resourceTypeAndName, generatedName, variable.ServerGroupDescription, variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServerGroupExists(resourceTypeAndName, &serverGroup),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServerGroupDescription),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServerGroupEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "dynamic_discovery", strconv.FormatBool(variable.ServerGroupDynamicDiscovery)),
+				),
 			},
 		},
 	})
 }
 
-func testAccResourceServerGroupConfigBasic(rName, rDesc, connGroupName, connGroupDesc string) string {
-	return fmt.Sprintf(`
-	resource "zpa_server_group" "test" {
-		name              = "%s"
-		description       = "%s"
-		enabled           = true
-		dynamic_discovery = true
-		app_connector_groups {
-		  id = [zpa_app_connector_group.test_app_connector_group.id]
-		}
-		depends_on = [zpa_app_connector_group.test_app_connector_group]
-	}
-	resource "zpa_app_connector_group" "test_app_connector_group" {
-		name                          = "%s"
-		description                   = "%s"
-		enabled                       = true
-		country_code                  = "US"
-		latitude                      = "37.3382082"
-		longitude                     = "-121.8863286"
-		location                      = "San Jose, CA, USA"
-		upgrade_day                   = "SUNDAY"
-		upgrade_time_in_secs          = "66600"
-		override_version_profile      = true
-		version_profile_id            = 0
-		dns_query_type                = "IPV4"
-	}
-	`, rName, rDesc, connGroupName, connGroupDesc)
-}
-
-func tesAccCheckServerGroupExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Server Group Not found: %s", n)
-		}
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Server Group Group ID is set")
-		}
-		client := testAccProvider.Meta().(*Client)
-		resp, _, err := client.servergroup.GetByName(rs.Primary.Attributes["name"])
-		if err != nil {
-			return err
-		}
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("name Not found in created attributes")
-		}
-		if resp.Description != rs.Primary.Attributes["description"] {
-			return fmt.Errorf("description Not found in created attributes")
-		}
-		return nil
-	}
-}
-
 func testAccCheckServerGroupDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "zpa_server_group" {
+		if rs.Type != resourcetype.ZPAServerGroup {
 			continue
 		}
 
-		_, _, err := client.servergroup.GetByName(rs.Primary.Attributes["name"])
+		rule, _, err := apiClient.servergroup.Get(rs.Primary.ID)
+
 		if err == nil {
-			return fmt.Errorf("Server Group still exists")
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
+
+		if rule != nil {
+			return fmt.Errorf("server group with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
+	}
+
+	return nil
+}
+
+func testAccCheckServerGroupExists(resource string, rule *servergroup.ServerGroup) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resource]
+		if !ok {
+			return fmt.Errorf("didn't find resource: %s", resource)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no record ID is set")
+		}
+
+		apiClient := testAccProvider.Meta().(*Client)
+		receivedGroup, _, err := apiClient.servergroup.Get(rs.Primary.ID)
+
+		if err != nil {
+			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
+		}
+		*rule = *receivedGroup
 
 		return nil
 	}
-	return nil
+}
+
+func testAccCheckServerGroupConfigure(resourceTypeAndName, generatedName, description string, enabled, dynamic_discovery bool) string {
+	return fmt.Sprintf(`
+// server group resource
+%s
+
+data "%s" "%s" {
+  id = "${%s.id}"
+}
+`,
+		// resource variables
+		ServerGroupResourceHCL(generatedName, description, enabled, dynamic_discovery),
+
+		// data source variables
+		resourcetype.ZPAServerGroup,
+		generatedName,
+		resourceTypeAndName,
+	)
+}
+
+func ServerGroupResourceHCL(generatedName, description string, enabled, dynamic_discovery bool) string {
+	return fmt.Sprintf(`
+
+resource "%s" "%s" {
+	name = "%s"
+	description = "%s"
+	enabled = "%s"
+	dynamic_discovery = "%s"
+	app_connector_groups {
+		id = [zpa_app_connector_group.testAcc.id]
+	}
+	depends_on = [zpa_app_connector_group.testAcc]
+}
+
+resource "zpa_app_connector_group" "testAcc" {
+	name                          = "%s"
+	description                   = "testAcc"
+	enabled                       = true
+	country_code                  = "US"
+	latitude                      = "37.3382082"
+	longitude                     = "-121.8863286"
+	location                      = "San Jose, CA, USA"
+	upgrade_day                   = "SUNDAY"
+	upgrade_time_in_secs          = "66600"
+	override_version_profile      = true
+	version_profile_id            = 0
+	dns_query_type                = "IPV4"
+}
+`,
+		// resource variables
+		resourcetype.ZPAServerGroup,
+		generatedName,
+		generatedName,
+		description,
+		strconv.FormatBool(enabled),
+		strconv.FormatBool(dynamic_discovery),
+		generatedName,
+	)
 }

@@ -65,7 +65,7 @@ func (service *Service) GetByName(associationType, name string) (*ProvisioningKe
 			return &provisioningKey, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no ProvisioningKey named '%s' was found", name)
+	return nil, resp, fmt.Errorf("no Provisioning Key named '%s' was found", name)
 }
 
 // POST --> /mgmtconfig/v1/admin/customers/{customerId}/associationType/{associationType}/provisioningKey

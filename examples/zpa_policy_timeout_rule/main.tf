@@ -1,5 +1,5 @@
 // Create Policy Timeout Rule
-resource "zpa_policy_timeout" "crm_application_rule" {
+resource "zpa_policy_timeout_rule" "crm_application_rule" {
   name                          = "CRM Application"
   description                   = "CRM Application"
   action                        = "RE_AUTH"

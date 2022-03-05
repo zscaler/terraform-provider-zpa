@@ -33,10 +33,10 @@ data "zpa_customer_version_profile" "default" {
 }
 
 data "zpa_customer_version_profile" "previous_default" {
-    name = "Default"
+    name = "Previous Default"
 }
 
 data "zpa_customer_version_profile" "new_release" {
-    name = "Default"
+    name = "New Release"
 }
 `
