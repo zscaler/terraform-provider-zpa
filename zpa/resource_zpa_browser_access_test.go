@@ -65,17 +65,17 @@ resource "zpa_browser_access" "testAcc_browser_access" {
         from = "%d"
         to = "%d"
     }
-	domain_names     = ["testAcc.securitygeek.io"]
+	domain_names     = ["testacc.securitygeek.io"]
 	segment_group_id = zpa_segment_group.testAcc_segment_group.id
 
 	clientless_apps {
-		name                 = "testAcc.securitygeek.io"
+		name                 = "testacc.securitygeek.io"
 		application_protocol = "HTTP"
 		application_port     = "%d"
 		certificate_id       = data.zpa_ba_certificate.testAcc.id
 		trust_untrusted_cert = true
 		enabled              = true
-		domain               = "testAcc.securitygeek.io"
+		domain               = "testacc.securitygeek.io"
 	}
 	server_groups {
 		id = [
