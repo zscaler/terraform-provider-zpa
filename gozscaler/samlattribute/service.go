@@ -1,8 +1,8 @@
 package samlattribute
 
 import (
-	"github.com/willguibr/terraform-provider-zpa/gozscaler"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
 )
 
 type Service struct {
