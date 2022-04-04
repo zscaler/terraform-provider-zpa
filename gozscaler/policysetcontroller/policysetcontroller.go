@@ -98,45 +98,7 @@ func (service *Service) GetByPolicyType(policyType string) (*PolicySet, *http.Re
 	return v, resp, nil
 }
 
-// Get the global policy. This API will be deprecated in a future release.
-// GET /mgmtconfig/v1/admin/customers/{customerId}/policySet/global
-func (service *Service) GetPolicySet() (*PolicySet, *http.Response, error) {
-	v := new(PolicySet)
-	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/global")
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return v, resp, nil
-}
-
-// Get the authentication policy and all rules for a Timeout policy rule. This API will be deprecated in a future release.
-// /mgmtconfig/v1/admin/customers/{customerId}/policySet/reauth
-func (service *Service) GetReauth() (*PolicySet, *http.Response, error) {
-	v := new(PolicySet)
-	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/reauth")
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return v, resp, nil
-}
-
-// Get the bypass policy and all rules for a Client Forwarding policy rule. This API will be deprecated in a future release.
-// GET mgmtconfig/v1/admin/customers/{customerId}/policySet/bypass
-func (service *Service) GetBypass() (*PolicySet, *http.Response, error) {
-	v := new(PolicySet)
-	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/bypass")
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return v, resp, nil
-}
-
+// GET --> mgmtconfig​/v1​/admin​/customers​/{customerId}​/policySet​/{policySetId}​/rule/{ruleId}
 func (service *Service) GetPolicyRule(policySetID, ruleId string) (*PolicyRule, *http.Response, error) {
 	v := new(PolicyRule)
 	url := fmt.Sprintf(mgmtConfig+service.Client.Config.CustomerID+"/policySet/%s/rule/%s", policySetID, ruleId)
@@ -226,6 +188,45 @@ func (service *Service) RulesCount() (int, *http.Response, error) {
 	}
 	count, err := strconv.Atoi(v.Count)
 	return count, resp, err
+}
+
+// Get the global policy. This API will be deprecated in a future release.
+// GET /mgmtconfig/v1/admin/customers/{customerId}/policySet/global
+func (service *Service) GetPolicySet() (*PolicySet, *http.Response, error) {
+	v := new(PolicySet)
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/global")
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return v, resp, nil
+}
+
+// Get the authentication policy and all rules for a Timeout policy rule. This API will be deprecated in a future release.
+// /mgmtconfig/v1/admin/customers/{customerId}/policySet/reauth
+func (service *Service) GetReauth() (*PolicySet, *http.Response, error) {
+	v := new(PolicySet)
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/reauth")
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return v, resp, nil
+}
+
+// Get the bypass policy and all rules for a Client Forwarding policy rule. This API will be deprecated in a future release.
+// GET mgmtconfig/v1/admin/customers/{customerId}/policySet/bypass
+func (service *Service) GetBypass() (*PolicySet, *http.Response, error) {
+	v := new(PolicySet)
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + "/policySet/bypass")
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return v, resp, nil
 }
 
 /*
