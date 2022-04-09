@@ -4,26 +4,27 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 )
 
-func TestAccDataSourceLSSConfigController_Basic(t *testing.T) {
-	rName := acctest.RandString(15)
-	rDesc := acctest.RandString(15)
-	resourceName := "data.zpa_lss_config_controller.by_id"
+func TestAccResourceLSSConfigControllerBasic(t *testing.T) {
+	var lssConfig lssconfigcontroller.LSSConfig
+	rName := acctest.RandString(5)
+	rDesc := acctest.RandString(20)
+	resourceName := "zpa_lss_config_controller.test-lss-config"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckLSSConfigControllerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceLSSConfigControllerBasic(rName, rDesc),
+				Config: testAccResourceLSSConfigControllerBasic(rName, rDesc),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceLSSConfigController(resourceName),
+					testAccCheckLSSConfigControllerExists("zpa_lss_config_controller.test-lss-config", &lssConfig),
 					resource.TestCheckResourceAttr(resourceName, "config.0.name", "test-lss-config-"+rName),
 					resource.TestCheckResourceAttr(resourceName, "config.0.description", "test-lss-config-"+rDesc),
 					resource.TestCheckResourceAttr(resourceName, "config.0.enabled", "true"),
@@ -31,13 +32,17 @@ func TestAccDataSourceLSSConfigController_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "config.0.source_log_type", "zpn_trans_log"),
 					resource.TestCheckResourceAttr(resourceName, "config.0.use_tls", "true"),
 				),
-				PreventPostDestroyRefresh: true,
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: false,
 			},
 		},
 	})
 }
 
-func testAccDataSourceLSSConfigControllerBasic(rName, rDesc string) string {
+func testAccResourceLSSConfigControllerBasic(rName, rDesc string) string {
 	return fmt.Sprintf(`
 
 data "zpa_lss_config_log_type_formats" "zpn_trans_log" {
@@ -60,7 +65,7 @@ resource "zpa_app_connector_group" "test_app_connector_lss" {
 	dns_query_type                = "IPV4"
 }
 
-resource "zpa_lss_config_controller" "test_lss_config_controller" {
+resource "zpa_lss_config_controller" "test-lss-config" {
 	config {
 		name            = "test-lss-config-%s"
 		description     = "test-lss-config-%s"
@@ -113,20 +118,44 @@ resource "zpa_lss_config_controller" "test_lss_config_controller" {
 	depends_on = [ zpa_app_connector_group.test_app_connector_lss ]
 }
 
-data "zpa_lss_config_controller" "by_id" {
-	id = zpa_lss_config_controller.test_lss_config_controller.id
-	depends_on = [ zpa_lss_config_controller.test_lss_config_controller ]
-}
-
 	`, rName, rDesc)
 }
 
-func testAccDataSourceLSSConfigController(name string) resource.TestCheckFunc {
+func testAccCheckLSSConfigControllerExists(resource string, lssConfig *lssconfigcontroller.LSSConfig) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		_, ok := s.RootModule().Resources[name]
+		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("root module has no data source called %s", name)
+			return fmt.Errorf("LSS Config Not found: %s", resource)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no LSS Config ID is set")
+		}
+		client := testAccProvider.Meta().(*Client)
+		resp, _, err := client.lssconfigcontroller.Get(rs.Primary.Attributes["id"])
+		if err != nil {
+			return err
+		}
+		if resp.LSSConfig.ID != rs.Primary.Attributes["id"] {
+			return fmt.Errorf("LSS Config Not found in created attributes")
 		}
 		return nil
 	}
+}
+
+func testAccCheckLSSConfigControllerDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*Client)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "zpa_lss_config_controller" {
+			continue
+		}
+
+		_, _, err := client.lssconfigcontroller.Get(rs.Primary.Attributes["id"])
+		if err == nil {
+			return fmt.Errorf("LSS Config still exists")
+		}
+
+		return nil
+	}
+	return nil
 }

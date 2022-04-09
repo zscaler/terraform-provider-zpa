@@ -33,8 +33,7 @@ func TestAccResourceProvisioningKey(t *testing.T) {
 				),
 			},
 			{
-				ResourceName: resourceName1,
-
+				ResourceName:      resourceName1,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -49,8 +48,7 @@ func TestAccResourceProvisioningKey(t *testing.T) {
 				),
 			},
 			{
-				ResourceName: resourceName2,
-
+				ResourceName:      resourceName2,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
