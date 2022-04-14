@@ -1,15 +1,20 @@
-# This GitHub action will publish assets for release when a tag is created
-# that matches the pattern "v*" (ie. v0.1.0).
+# This GitHub action can publish assets for release when a tag is created.
+# Currently its setup to run on any tag that matches the pattern "v*" (ie. v0.1.0).
 #
-# Based on the configuration provided at:
-# https://github.com/hashicorp/terraform-provider-scaffolding
+# This uses an action (hashicorp/ghaction-import-gpg) that assumes you set your
+# private key in the `GPG_PRIVATE_KEY` secret and passphrase in the `PASSPHRASE`
+# secret. If you would rather own your own GPG handling, please fork this action
+# or use an alternative one for key handling.
+#
+# You will need to pass the `--batch` flag to `gpg` in your signing step
+# in `goreleaser` to indicate this is being used in a non-interactive mode.
+#
 name: Release
-
 on:
   push:
+    branches: [ master ]
     tags:
       - 'v*'
-
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -29,6 +34,7 @@ jobs:
         id: import_gpg
         uses: hashicorp/ghaction-import-gpg@v2.1.0
         env:
+          # These secrets will need to be configured for the repository:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
 
@@ -39,4 +45,5 @@ jobs:
           args: release --rm-dist
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+          # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

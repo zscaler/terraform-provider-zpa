@@ -1,28 +1,33 @@
 package zpa
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceScimAttributeHeader_Basic(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDataSourceScimAttributeHeaderConfig_basic),
+				Config: testAccCheckDataSourceScimAttributeHeaderConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_scim_attribute_header.email_value", "name"),
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_scim_attribute_header.email_value", "idp_name"),
+					testAccDataSourceScimAttributeHeaderCheck("data.zpa_scim_attribute_header.email_value"),
+					testAccDataSourceScimAttributeHeaderCheck("data.zpa_scim_attribute_header.email_value"),
 				),
 			},
 		},
 	})
+}
+
+func testAccDataSourceScimAttributeHeaderCheck(name string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(name, "id"),
+		resource.TestCheckResourceAttrSet(name, "name"),
+		resource.TestCheckResourceAttrSet(name, "idp_name"),
+	)
 }
 
 const testAccCheckDataSourceScimAttributeHeaderConfig_basic = `

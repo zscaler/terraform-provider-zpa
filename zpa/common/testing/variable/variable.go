@@ -2,9 +2,10 @@ package variable
 
 // App Connector Group
 const (
-	AppConnectorResourceName = "testAcc_app_connector_group"
-	AppConnectorDescription  = "testAcc_app_connector_group"
-	AppConnectorEnabled      = true
+	AppConnectorResourceName    = "testAcc_app_connector_group"
+	AppConnectorDescription     = "testAcc_app_connector_group"
+	AppConnectorEnabled         = true
+	AppConnectorOverrideProfile = true
 )
 
 // Service Edge Group

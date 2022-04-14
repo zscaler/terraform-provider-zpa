@@ -1,29 +1,34 @@
 package zpa
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceTrustedNetwork_Basic(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDataSourceTrustedNetworkConfig_basic),
+				Config: testAccCheckDataSourceTrustedNetworkConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_trusted_network.foobar", "name"),
+					testAccDataSourceTrustedNetworkCheck("data.zpa_trusted_network.foobar"),
 				),
 			},
 		},
 	})
 }
 
-const testAccCheckDataSourceTrustedNetworkConfig_basic = `
+func testAccDataSourceTrustedNetworkCheck(name string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(name, "id"),
+		resource.TestCheckResourceAttrSet(name, "name"),
+	)
+}
+
+var testAccCheckDataSourceTrustedNetworkConfig_basic = `
 data "zpa_trusted_network" "foobar" {
     name = "Corp-Trusted-Networks (zscalerthree.net)"
 }`

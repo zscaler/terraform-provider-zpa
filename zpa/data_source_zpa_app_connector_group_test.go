@@ -19,12 +19,13 @@ func TestAccDataSourceAppConnectorGroup_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckAppConnectorGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
+				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled, variable.AppConnectorOverrideProfile),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "description", resourceTypeAndName, "description"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "override_version_profile", strconv.FormatBool(variable.AppConnectorOverrideProfile)),
 				),
 			},
 		},

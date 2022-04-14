@@ -1,29 +1,34 @@
 package zpa
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceBaCertificate_Basic(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDataSourceBaCertificateConfig_basic),
+				Config: testAccCheckDataSourceBaCertificateConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_ba_certificate.foobar", "name"),
+					testAccDataSourceBaCertificateCheck("data.zpa_ba_certificate.certificate"),
 				),
 			},
 		},
 	})
 }
 
-const testAccCheckDataSourceBaCertificateConfig_basic = `
-data "zpa_ba_certificate" "foobar" {
+func testAccDataSourceBaCertificateCheck(name string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(name, "id"),
+		resource.TestCheckResourceAttrSet(name, "name"),
+	)
+}
+
+var testAccCheckDataSourceBaCertificateConfig_basic = `
+data "zpa_ba_certificate" "certificate" {
     name = "jenkins.securitygeek.io"
 }`

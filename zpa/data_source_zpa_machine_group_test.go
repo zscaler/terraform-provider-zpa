@@ -1,29 +1,34 @@
 package zpa
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceMachineGroup_Basic(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDataSourceMachineGroupConfig_basic),
+				Config: testAccCheckDataSourceMachineGroup_basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_machine_group.foobar", "name"),
+					testAccDataSourceMachineGroupCheck("data.zpa_machine_group.mgr"),
 				),
 			},
 		},
 	})
 }
 
-const testAccCheckDataSourceMachineGroupConfig_basic = `
-data "zpa_machine_group" "foobar" {
+func testAccDataSourceMachineGroupCheck(name string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(name, "id"),
+		resource.TestCheckResourceAttrSet(name, "name"),
+	)
+}
+
+const testAccCheckDataSourceMachineGroup_basic = `
+data "zpa_machine_group" "mgr" {
     name = "SGIO-MGR01"
 }`

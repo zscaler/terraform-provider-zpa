@@ -3,7 +3,6 @@
 before:
   hooks:
     # this is just an example and not a requirement for provider building/publishing
-    - go mod vendor
     - go mod tidy
 builds:
 - env:
@@ -49,9 +48,11 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 release:
-  # If you want to manually examine the release before its live, uncomment this line:
-  # draft: true
+# Explicit set the repo to release from. Default is origin.
+  github:
+    owner: zscaler
+    name: terraform-provider-zpa
+  # Visit your project's GitHub Releases page to publish this release.
+  draft: true
 changelog:
-  skip: false
-  use: github
-  sort: asc
+  skip: true

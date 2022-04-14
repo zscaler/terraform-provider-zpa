@@ -23,23 +23,25 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 		CheckDestroy: testAccCheckAppConnectorGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
+				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled, variable.AppConnectorOverrideProfile),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorOverrideProfile)),
 				),
 			},
 
 			// Update test
 			{
-				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
+				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled, variable.AppConnectorOverrideProfile),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorOverrideProfile)),
 				),
 			},
 		},
@@ -90,26 +92,7 @@ func testAccCheckAppConnectorGroupExists(resource string, rule *appconnectorgrou
 	}
 }
 
-func testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
-	return fmt.Sprintf(`
-// app connector group resource
-%s
-
-data "%s" "%s" {
-  id = "${%s.id}"
-}
-`,
-		// resource variables
-		AppConnectorGroupResourceHCL(generatedName, description, enabled),
-
-		// data source variables
-		resourcetype.ZPAAppConnectorGroup,
-		generatedName,
-		resourceTypeAndName,
-	)
-}
-
-func AppConnectorGroupResourceHCL(generatedName, description string, enabled bool) string {
+func testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, description string, enabled, profile bool) string {
 	return fmt.Sprintf(`
 resource "%s" "%s" {
 	name                          = "%s"
@@ -121,17 +104,27 @@ resource "%s" "%s" {
 	location                      = "San Jose, CA, USA"
 	upgrade_day                   = "SUNDAY"
 	upgrade_time_in_secs          = "66600"
-	override_version_profile      = true
-	version_profile_id            = 0
+	override_version_profile      = "%s"
+	version_profile_id            = 2
 	dns_query_type                = "IPV4"
 }
+
+data "%s" "%s" {
+	id = "${%s.id}"
+}
+
 `,
 		// resource variables
 		resourcetype.ZPAAppConnectorGroup,
 		generatedName,
 		generatedName,
-		// variable.AppConnectorResourceName,
 		description,
 		strconv.FormatBool(enabled),
+		strconv.FormatBool(profile),
+
+		// data source variables
+		resourcetype.ZPAAppConnectorGroup,
+		generatedName,
+		resourceTypeAndName,
 	)
 }
