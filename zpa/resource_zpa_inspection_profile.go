@@ -6,16 +6,16 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectionprofile"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/inspection_profile"
 )
 
-func resourceInspectionProfile() *schema.Resource {
+func resourceinspection_profile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceInspectionProfileCreate,
-		Read:   resourceInspectionProfileRead,
-		Update: resourceInspectionProfileUpdate,
-		Delete: resourceInspectionProfileDelete,
+		Create: resourceinspection_profileCreate,
+		Read:   resourceinspection_profileRead,
+		Update: resourceinspection_profileUpdate,
+		Delete: resourceinspection_profileDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
@@ -26,7 +26,7 @@ func resourceInspectionProfile() *schema.Resource {
 					// assume if the passed value is an int
 					d.Set("profile_id", id)
 				} else {
-					resp, _, err := zClient.inspectionprofile.GetByName(id)
+					resp, _, err := zClient.inspection_profile.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
 						d.Set("profile_id", resp.ID)
@@ -141,26 +141,26 @@ func resourceInspectionProfile() *schema.Resource {
 	}
 }
 
-func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) error {
+func resourceinspection_profileCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	req := expandInspectionProfile(d)
+	req := expandinspection_profile(d)
 	log.Printf("[INFO] Creating segment group with request\n%+v\n", req)
 
-	resp, _, err := zClient.inspectionprofile.Create(req)
+	resp, _, err := zClient.inspection_profile.Create(req)
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Created segment group request. ID: %v\n", resp)
 
 	d.SetId(resp.ID)
-	return resourceInspectionProfileRead(d, m)
+	return resourceinspection_profileRead(d, m)
 }
 
-func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error {
+func resourceinspection_profileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	resp, _, err := zClient.inspectionprofile.Get(d.Id())
+	resp, _, err := zClient.inspection_profile.Get(d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing inspection profile %s from state because it no longer exists in ZPA", d.Id())
@@ -197,26 +197,26 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 
 }
 
-func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceinspection_profileUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection profile ID: %v\n", id)
-	req := expandInspectionProfile(d)
+	req := expandinspection_profile(d)
 
-	if _, err := zClient.inspectionprofile.Update(id, &req); err != nil {
+	if _, err := zClient.inspection_profile.Update(id, &req); err != nil {
 		return err
 	}
 
-	return resourceInspectionProfileRead(d, m)
+	return resourceinspection_profileRead(d, m)
 }
 
-func resourceInspectionProfileDelete(d *schema.ResourceData, m interface{}) error {
+func resourceinspection_profileDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	log.Printf("[INFO] Deleting inspection profile ID: %v\n", d.Id())
 
-	if _, err := zClient.inspectionprofile.Delete(d.Id()); err != nil {
+	if _, err := zClient.inspection_profile.Delete(d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
@@ -224,8 +224,8 @@ func resourceInspectionProfileDelete(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func expandInspectionProfile(d *schema.ResourceData) inspectionprofile.InspectionProfile {
-	inspectionProfile := inspectionprofile.InspectionProfile{
+func expandinspection_profile(d *schema.ResourceData) inspection_profile.inspection_profile {
+	inspection_profile := inspection_profile.inspection_profile{
 		Name:                      d.Get("name").(string),
 		Description:               d.Get("description").(string),
 		GlobalControlActions:      SetToStringList(d, "global_control_actions"),
@@ -236,11 +236,11 @@ func expandInspectionProfile(d *schema.ResourceData) inspectionprofile.Inspectio
 		CustomControls:            expandCustomControls(d),
 		PredefinedControls:        expandPredefinedControls(d),
 	}
-	return inspectionProfile
+	return inspection_profile
 }
 
-func expandControlsInfo(d *schema.ResourceData) []inspectionprofile.ControlInfoResource {
-	var controlItems []inspectionprofile.ControlInfoResource
+func expandControlsInfo(d *schema.ResourceData) []inspection_profile.ControlInfoResource {
+	var controlItems []inspection_profile.ControlInfoResource
 	controlInterface, ok := d.GetOk("controls_info")
 	if !ok {
 		return controlItems
@@ -254,7 +254,7 @@ func expandControlsInfo(d *schema.ResourceData) []inspectionprofile.ControlInfoR
 		if !ok {
 			return controlItems
 		}
-		controlItems = append(controlItems, inspectionprofile.ControlInfoResource{
+		controlItems = append(controlItems, inspection_profile.ControlInfoResource{
 			ControlType: controlItem["control_type"].(string),
 			Count:       controlItem["count"].(string),
 		})
@@ -262,17 +262,17 @@ func expandControlsInfo(d *schema.ResourceData) []inspectionprofile.ControlInfoR
 	return controlItems
 }
 
-func expandCustomControls(d *schema.ResourceData) []inspectionprofile.CustomControls {
+func expandCustomControls(d *schema.ResourceData) []inspection_profile.CustomControls {
 	customControlsInterface, ok := d.GetOk("custom_controls")
 	if ok {
 		control := customControlsInterface.(*schema.Set)
 		log.Printf("[INFO] custom control data: %+v\n", control)
-		var customControls []inspectionprofile.CustomControls
+		var customControls []inspection_profile.CustomControls
 		for _, customControl := range control.List() {
 			customControl, ok := customControl.(map[string]interface{})
 			if ok {
 				for _, id := range customControl["id"].(*schema.Set).List() {
-					customControls = append(customControls, inspectionprofile.CustomControls{
+					customControls = append(customControls, inspection_profile.CustomControls{
 						ID: id.(string),
 					})
 				}
@@ -281,20 +281,20 @@ func expandCustomControls(d *schema.ResourceData) []inspectionprofile.CustomCont
 		return customControls
 	}
 
-	return []inspectionprofile.CustomControls{}
+	return []inspection_profile.CustomControls{}
 }
 
-func expandPredefinedControls(d *schema.ResourceData) []inspectionprofile.PredefinedControls {
+func expandPredefinedControls(d *schema.ResourceData) []inspection_profile.PredefinedControls {
 	predControlsInterface, ok := d.GetOk("predefined_controls")
 	if ok {
 		predControl := predControlsInterface.(*schema.Set)
 		log.Printf("[INFO] predefined control data: %+v\n", predControl)
-		var predControls []inspectionprofile.PredefinedControls
+		var predControls []inspection_profile.PredefinedControls
 		for _, predControl := range predControl.List() {
 			predControl, ok := predControl.(map[string]interface{})
 			if ok {
 				for _, id := range predControl["id"].(*schema.Set).List() {
-					predControls = append(predControls, inspectionprofile.PredefinedControls{
+					predControls = append(predControls, inspection_profile.PredefinedControls{
 						ID: id.(string),
 					})
 				}
@@ -303,5 +303,5 @@ func expandPredefinedControls(d *schema.ResourceData) []inspectionprofile.Predef
 		return predControls
 	}
 
-	return []inspectionprofile.PredefinedControls{}
+	return []inspection_profile.PredefinedControls{}
 }

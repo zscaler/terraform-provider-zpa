@@ -4,7 +4,7 @@
 
 ## Enhancements
 
-- Refactored and added new acceptance tests. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#xx](https://github.com/zscaler/terraform-provider-zpa/pull/xx)
+- Refactored and added new acceptance tests. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#xx](https://github.com/willguibr/terraform-provider-zpa/pull/xx)
 
 - ``data_source_zpa_app_connector_controller_test``
 - ``data_source_zpa_app_connector_group_test``

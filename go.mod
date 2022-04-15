@@ -1,4 +1,4 @@
-module github.com/zscaler/terraform-provider-zpa
+module github.com/willguibr/terraform-provider-zpa
 
 go 1.17
 

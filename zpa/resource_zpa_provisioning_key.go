@@ -5,11 +5,11 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/provisioningkey"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
 )
 
 func resourceProvisioningKey() *schema.Resource {

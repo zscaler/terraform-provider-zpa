@@ -3,7 +3,7 @@
 This example will show you how to retrieve a SCIM Attribute Header ID to attach to a ZPA Access Policy Rule.
 This example codifies [this API](https://help.zscaler.com/zpa/api-reference#/scim-attribute-header-controller/getAllSCIMAttributes).
 
-To run, configure your ZPA provider as described [Here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.html.markdown)
+To run, configure your ZPA provider as described [Here](https://github.com/willguibr/terraform-provider-zpa/blob/master/docs/index.html.markdown)
 
 ## Run the example
 

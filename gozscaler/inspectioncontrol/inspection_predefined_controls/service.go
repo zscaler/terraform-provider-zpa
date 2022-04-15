@@ -1,4 +1,4 @@
-package servergroup
+package inspection_predefined_controls
 
 import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler"

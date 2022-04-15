@@ -3,7 +3,7 @@
 This example will show you how to create a Segment Group in the ZPA portal.
 This example codifies [this API](https://help.zscaler.com/zpa/api-reference#/segment-group-controller).
 
-To run, configure your ZPA provider as described [Here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.html.markdown)
+To run, configure your ZPA provider as described [Here](https://github.com/willguibr/terraform-provider-zpa/blob/master/docs/index.html.markdown)
 
 ## Run the example
 

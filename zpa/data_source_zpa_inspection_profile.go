@@ -5,12 +5,12 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectionprofile"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/inspection_profile"
 )
 
-func dataSourceInspectionProfile() *schema.Resource {
+func dataSourceinspection_profile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceInspectionProfileRead,
+		Read: dataSourceinspection_profileRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -278,14 +278,14 @@ func dataSourceInspectionProfile() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceinspection_profileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	var resp *inspectionprofile.InspectionProfile
+	var resp *inspection_profile.inspection_profile
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for inspection profile  %s\n", id)
-		res, _, err := zClient.inspectionprofile.Get(id)
+		res, _, err := zClient.inspection_profile.Get(id)
 		if err != nil {
 			return err
 		}
@@ -294,7 +294,7 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for inspection profile name %s\n", name)
-		res, _, err := zClient.inspectionprofile.GetByName(name)
+		res, _, err := zClient.inspection_profile.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -331,7 +331,7 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func flattenControlInfoResource(controlInfo []inspectionprofile.ControlInfoResource) []interface{} {
+func flattenControlInfoResource(controlInfo []inspection_profile.ControlInfoResource) []interface{} {
 	controlInfoResource := make([]interface{}, len(controlInfo))
 	for i, val := range controlInfo {
 		controlInfoResource[i] = map[string]interface{}{
@@ -343,7 +343,7 @@ func flattenControlInfoResource(controlInfo []inspectionprofile.ControlInfoResou
 	return controlInfoResource
 }
 
-func flattenCustomControls(customControl []inspectionprofile.CustomControls) []interface{} {
+func flattenCustomControls(customControl []inspection_profile.CustomControls) []interface{} {
 	customControls := make([]interface{}, len(customControl))
 	for i, custom := range customControl {
 		customControls[i] = map[string]interface{}{
@@ -362,7 +362,7 @@ func flattenCustomControls(customControl []inspectionprofile.CustomControls) []i
 			"paranoia_level":                      custom.ParanoiaLevel,
 			"type":                                custom.Type,
 			"version":                             custom.Version,
-			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(custom),
+			"associated_inspection_profile_names": flattenAssociatedinspection_profileNames(custom),
 			"rules":                               flattenRules(custom),
 		}
 	}
@@ -370,9 +370,9 @@ func flattenCustomControls(customControl []inspectionprofile.CustomControls) []i
 	return customControls
 }
 
-func flattenAssociatedInspectionProfileNames(associated inspectionprofile.CustomControls) []interface{} {
-	rule := make([]interface{}, len(associated.AssociatedInspectionProfileNames))
-	for i, val := range associated.AssociatedInspectionProfileNames {
+func flattenAssociatedinspection_profileNames(associated inspection_profile.CustomControls) []interface{} {
+	rule := make([]interface{}, len(associated.Associatedinspection_profileNames))
+	for i, val := range associated.Associatedinspection_profileNames {
 		rule[i] = map[string]interface{}{
 			"id":   val.ID,
 			"name": val.Name,
@@ -382,7 +382,7 @@ func flattenAssociatedInspectionProfileNames(associated inspectionprofile.Custom
 	return rule
 }
 
-func flattenRules(rule inspectionprofile.CustomControls) []interface{} {
+func flattenRules(rule inspection_profile.CustomControls) []interface{} {
 	rules := make([]interface{}, len(rule.Rules))
 	for i, rule := range rule.Rules {
 		rules[i] = map[string]interface{}{
@@ -395,7 +395,7 @@ func flattenRules(rule inspectionprofile.CustomControls) []interface{} {
 	return rules
 }
 
-func flattenConditions(condition inspectionprofile.Rules) []interface{} {
+func flattenConditions(condition inspection_profile.Rules) []interface{} {
 	conditions := make([]interface{}, len(condition.Conditions))
 	for i, val := range condition.Conditions {
 		conditions[i] = map[string]interface{}{
@@ -408,7 +408,7 @@ func flattenConditions(condition inspectionprofile.Rules) []interface{} {
 	return conditions
 }
 
-func flattenPredefinedControls(predControl []inspectionprofile.PredefinedControls) []interface{} {
+func flattenPredefinedControls(predControl []inspection_profile.PredefinedControls) []interface{} {
 	predControls := make([]interface{}, len(predControl))
 	for i, predControl := range predControl {
 		predControls[i] = map[string]interface{}{

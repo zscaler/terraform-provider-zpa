@@ -1,11 +1,11 @@
-package inspectionprofile
+package inspection_profile
 
 import (
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/common"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
