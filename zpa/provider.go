@@ -48,6 +48,7 @@ func Provider() *schema.Provider {
 			"zpa_provisioning_key":       resourceProvisioningKey(),
 			"zpa_service_edge_group":     resourceServiceEdgeGroup(),
 			"zpa_lss_config_controller":  resourceLSSConfigController(),
+			"zpa_inspection_profile":     resourceInspectionProfile(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform date source name: data source schema
@@ -77,6 +78,7 @@ func Provider() *schema.Provider {
 			"zpa_lss_config_client_types":     dataSourceLSSClientTypes(),
 			"zpa_lss_config_status_codes":     dataSourceLSSStatusCodes(),
 			"zpa_lss_config_log_type_formats": dataSourceLSSLogTypeFormats(),
+			"zpa_inspection_profile":          dataSourceInspectionProfile(),
 		},
 		ConfigureFunc: zscalerConfigure,
 	}

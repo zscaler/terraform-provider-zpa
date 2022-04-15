@@ -14,6 +14,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/customerversionprofile"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/enrollmentcert"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/idpcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectionprofile"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/machinegroup"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
@@ -58,6 +59,7 @@ type Client struct {
 	serviceedgecontroller  serviceedgecontroller.Service
 	trustednetwork         trustednetwork.Service
 	browseraccess          browseraccess.Service
+	inspectionprofile      inspectionprofile.Service
 }
 
 type Config struct {
@@ -97,6 +99,7 @@ func (c *Config) Client() (*Client, error) {
 		serviceedgecontroller:  *serviceedgecontroller.New(config),
 		trustednetwork:         *trustednetwork.New(config),
 		browseraccess:          *browseraccess.New(config),
+		inspectionprofile:      *inspectionprofile.New(config),
 	}
 
 	log.Println("[INFO] initialized ZPA client")
