@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	mgmtConfig                = "/mgmtconfig/v1/admin/customers/"
-	inspectionProfileEndpoint = "/inspectionControls/custom"
+	mgmtConfig             = "/mgmtconfig/v1/admin/customers/"
+	customControlsEndpoint = "/inspectionControls/custom"
 )
 
 type InspectionCustomControl struct {
@@ -45,35 +45,14 @@ type Conditions struct {
 	OP  string `json:"op,omitempty"`
 	RHS string `json:"rhs,omitempty"`
 }
-
-type PredefinedControls struct {
-	ID                               string                   `json:"id,omitempty"`
-	Name                             string                   `json:"name,omitempty"`
-	Action                           string                   `json:"action,omitempty"`
-	ActionValue                      string                   `json:"actionValue,omitempty"`
-	AssociatedInspectionProfileNames []AssociatedProfileNames `json:"associatedInspectionProfileNames,omitempty"`
-	Attachment                       string                   `json:"attachment,omitempty"`
-	ControlGroup                     string                   `json:"controlGroup,omitempty"`
-	ControlNumber                    string                   `json:"controlNumber,omitempty"`
-	CreationTime                     string                   `json:"creationTime,omitempty"`
-	DefaultAction                    string                   `json:"defaultAction,omitempty"`
-	DefaultActionValue               string                   `json:"defaultActionValue,omitempty"`
-	Description                      string                   `json:"description,omitempty"`
-	ModifiedBy                       string                   `json:"modifiedBy,omitempty"`
-	ModifiedTime                     string                   `json:"modifiedTime,omitempty"`
-	ParanoiaLevel                    string                   `json:"paranoiaLevel,omitempty"`
-	Severity                         string                   `json:"severity,omitempty"`
-	Version                          string                   `json:"version,omitempty"`
-}
-
 type AssociatedProfileNames struct {
 	ID   string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
 }
 
-func (service *Service) Get(profileID string) (*InspectionProfile, *http.Response, error) {
-	v := new(InspectionProfile)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID)
+func (service *Service) Get(customID string) (*InspectionCustomControl, *http.Response, error) {
+	v := new(InspectionCustomControl)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+customControlsEndpoint, customID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
 	if err != nil {
 		return nil, nil, err
@@ -82,27 +61,27 @@ func (service *Service) Get(profileID string) (*InspectionProfile, *http.Respons
 	return v, resp, nil
 }
 
-func (service *Service) GetByName(profileName string) (*InspectionProfile, *http.Response, error) {
+func (service *Service) GetByName(controlName string) (*InspectionCustomControl, *http.Response, error) {
 	var v struct {
-		List []InspectionProfile `json:"list"`
+		List []InspectionCustomControl `json:"list"`
 	}
 
-	relativeURL := mgmtConfig + service.Client.Config.CustomerID + inspectionProfileEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: profileName}, nil, &v)
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + customControlsEndpoint
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: controlName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
-	for _, inspection := range v.List {
-		if strings.EqualFold(inspection.Name, profileName) {
-			return &inspection, resp, nil
+	for _, control := range v.List {
+		if strings.EqualFold(control.Name, controlName) {
+			return &control, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no inspection profile named '%s' was found", profileName)
+	return nil, resp, fmt.Errorf("no inspection profile named '%s' was found", controlName)
 }
 
-func (service *Service) Create(inspectionProfile InspectionProfile) (*InspectionProfile, *http.Response, error) {
-	v := new(InspectionProfile)
-	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, nil, inspectionProfile, &v)
+func (service *Service) Create(customControls InspectionCustomControl) (*InspectionCustomControl, *http.Response, error) {
+	v := new(InspectionCustomControl)
+	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+customControlsEndpoint, nil, customControls, &v)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -110,9 +89,9 @@ func (service *Service) Create(inspectionProfile InspectionProfile) (*Inspection
 	return v, resp, nil
 }
 
-func (service *Service) Update(profileID string, inspectionProfile *InspectionProfile) (*http.Response, error) {
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID)
-	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, inspectionProfile, nil)
+func (service *Service) Update(customID string, customControls *InspectionCustomControl) (*http.Response, error) {
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+customControlsEndpoint, customID)
+	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, customControls, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -120,38 +99,8 @@ func (service *Service) Update(profileID string, inspectionProfile *InspectionPr
 	return resp, err
 }
 
-func (service *Service) PutAssociate(profileID string, inspectionProfile *InspectionProfile) (*http.Response, error) {
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"associateAllPredefinedControls")
-	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, inspectionProfile, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, err
-}
-
-func (service *Service) PutDeassociate(profileID string, inspectionProfile *InspectionProfile) (*http.Response, error) {
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"associateAllPredefinedControls")
-	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, inspectionProfile, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, err
-}
-
-func (service *Service) Patch(profileID string, inspectionProfile *InspectionProfile) (*http.Response, error) {
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"patch")
-	resp, err := service.Client.NewRequestDo("PATCH", relativeURL, nil, inspectionProfile, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, err
-}
-
-func (service *Service) Delete(profileID string) (*http.Response, error) {
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID)
+func (service *Service) Delete(customID string) (*http.Response, error) {
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+customControlsEndpoint, customID)
 	resp, err := service.Client.NewRequestDo("DELETE", relativeURL, nil, nil, nil)
 	if err != nil {
 		return nil, err

@@ -547,37 +547,6 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	}
 }
 
-// func flattenAppSegmentPortRange(ports []applicationsegment.AppSegmentPortRange) []interface{} {
-// 	portsObj := make([]interface{}, len(ports))
-// 	for i, val := range ports {
-// 		portsObj[i] = map[string]interface{}{
-// 			"from": val.From,
-// 			"to":   val.To,
-// 		}
-// 	}
-// 	return portsObj
-// }
-
-// func expandAppSegmentPortRange(d *schema.ResourceData, key string) []applicationsegment.AppSegmentPortRange {
-// 	var ports []applicationsegment.AppSegmentPortRange
-// 	if portsInterface, ok := d.GetOk(key); ok {
-// 		portSet, ok := portsInterface.(*schema.Set)
-// 		if !ok {
-// 			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
-// 			return ports
-// 		}
-// 		ports = make([]applicationsegment.AppSegmentPortRange, len(portSet.List()))
-// 		for i, val := range portSet.List() {
-// 			portItem := val.(map[string]interface{})
-// 			ports[i] = applicationsegment.AppSegmentPortRange{
-// 				From: portItem["from"].(string),
-// 				To:   portItem["to"].(string),
-// 			}
-// 		}
-// 	}
-// 	return ports
-// }
-
 func importPolicyStateFunc(types []string) schema.StateFunc {
 	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		zClient := m.(*Client)

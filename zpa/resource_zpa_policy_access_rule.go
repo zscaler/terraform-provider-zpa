@@ -233,12 +233,12 @@ func expandCreatePolicyRule(d *schema.ResourceData) (*policysetcontroller.Policy
 		RuleOrder:          d.Get("rule_order").(string),
 		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
-		AppServerGroups:    expandpolicysetcontrollerAppServerGroups(d),
-		AppConnectorGroups: expandpolicysetcontrollerAppConnectorGroups(d),
+		AppServerGroups:    expandPolicySetControllerAppServerGroups(d),
+		AppConnectorGroups: expandPolicysetControllerAppConnectorGroups(d),
 	}, nil
 }
 
-func expandpolicysetcontrollerAppServerGroups(d *schema.ResourceData) []policysetcontroller.AppServerGroups {
+func expandPolicySetControllerAppServerGroups(d *schema.ResourceData) []policysetcontroller.AppServerGroups {
 	appServerGroupsInterface, ok := d.GetOk("app_server_groups")
 	if ok {
 		appServer := appServerGroupsInterface.(*schema.Set)
@@ -260,7 +260,7 @@ func expandpolicysetcontrollerAppServerGroups(d *schema.ResourceData) []policyse
 	return []policysetcontroller.AppServerGroups{}
 }
 
-func expandpolicysetcontrollerAppConnectorGroups(d *schema.ResourceData) []policysetcontroller.AppConnectorGroups {
+func expandPolicysetControllerAppConnectorGroups(d *schema.ResourceData) []policysetcontroller.AppConnectorGroups {
 	appConnectorGroupsInterface, ok := d.GetOk("app_connector_groups")
 	if ok {
 		appConnector := appConnectorGroupsInterface.(*schema.Set)

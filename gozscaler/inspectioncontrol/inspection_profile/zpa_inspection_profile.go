@@ -14,27 +14,28 @@ const (
 )
 
 type InspectionProfile struct {
-	ID                                string                 `json:"id,omitempty"`
-	CommonGlobalOverrideActionsConfig map[string]interface{} `json:"commonGlobalOverrideActionsConfig,omitempty"`
-	CreationTime                      string                 `json:"creationTime,omitempty"`
-	Description                       string                 `json:"description,omitempty"`
-	GlobalControlActions              []string               `json:"globalControlActions,omitempty"`
-	IncarnationNumber                 string                 `json:"incarnationNumber,omitempty"`
-	ModifiedBy                        string                 `json:"modifiedBy,omitempty"`
-	ModifiedTime                      string                 `json:"modifiedTime,omitempty"`
-	Name                              string                 `json:"name,omitempty"`
-	ParanoiaLevel                     string                 `json:"paranoiaLevel,omitempty"`
-	PredefinedControlsVersion         string                 `json:"predefinedControlsVersion,omitempty"`
-	ControlInfoResource               []ControlInfoResource  `json:"controlsInfo,omitempty"`
-	CustomControls                    []CustomControls       `json:"customControls,omitempty"`
-	PredefinedControls                []PredefinedControls   `json:"predefinedControls,omitempty"`
+	ID                                string                    `json:"id,omitempty"`
+	CommonGlobalOverrideActionsConfig map[string]interface{}    `json:"commonGlobalOverrideActionsConfig,omitempty"`
+	CreationTime                      string                    `json:"creationTime,omitempty"`
+	Description                       string                    `json:"description,omitempty"`
+	GlobalControlActions              []string                  `json:"globalControlActions,omitempty"`
+	IncarnationNumber                 string                    `json:"incarnationNumber,omitempty"`
+	ModifiedBy                        string                    `json:"modifiedBy,omitempty"`
+	ModifiedTime                      string                    `json:"modifiedTime,omitempty"`
+	Name                              string                    `json:"name,omitempty"`
+	ParanoiaLevel                     string                    `json:"paranoiaLevel,omitempty"`
+	PredefinedControlsVersion         string                    `json:"predefinedControlsVersion,omitempty"`
+	ControlInfoResource               []ControlInfoResource     `json:"controlsInfo,omitempty"`
+	CustomControls                    []InspectionCustomControl `json:"customControls,omitempty"`
+	PredefinedControls                []PredefinedControls      `json:"predefinedControls,omitempty"`
 }
 
 type ControlInfoResource struct {
 	ControlType string `json:"controlType,omitempty"`
 	Count       string `json:"count,omitempty"`
 }
-type CustomControls struct {
+
+type InspectionCustomControl struct {
 	Action                           string                   `json:"action,omitempty"`
 	ActionValue                      string                   `json:"actionValue,omitempty"`
 	AssociatedInspectionProfileNames []AssociatedProfileNames `json:"associatedInspectionProfileNames,omitempty"`

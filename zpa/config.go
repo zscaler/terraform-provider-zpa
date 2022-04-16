@@ -14,6 +14,9 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/customerversionprofile"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/enrollmentcert"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/idpcontroller"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_custom_controls"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_predefined_controls"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_profile"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/machinegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
@@ -27,9 +30,6 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgecontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_custom_controls"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_predefined_controls"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_profile"
 )
 
 func init() {
