@@ -2,8 +2,8 @@ package inspection_predefined_controls
 
 import (
 	"fmt"
+	"log"
 	"net/http"
-	"strings"
 
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 )
@@ -53,9 +53,21 @@ func (service *Service) Get(controlID string) (*PredefinedControls, *http.Respon
 	return v, resp, nil
 }
 
+func (service *Service) GetAll() (*PredefinedControls, *http.Response, error) {
+	v := new(PredefinedControls)
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + predControlsEndpoint)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+	log.Printf("[INFO] got predefined controls:%#v", v)
+	return v, resp, nil
+}
+
+/*
 // Get All Predefined Inspection Controls - Need to create multiple search criteria
 //https://help.zscaler.com/zpa/api-reference#/inspection-control-controller/getAllInspectionControls
-func (service *Service) GetAll(controlName string) (*PredefinedControls, *http.Response, error) {
+func (service *Service) GetAll() (*PredefinedControls, *http.Response, error) {
 	var v struct {
 		List []PredefinedControls `json:"list"`
 	}
@@ -66,9 +78,10 @@ func (service *Service) GetAll(controlName string) (*PredefinedControls, *http.R
 		return nil, nil, err
 	}
 	for _, inspection := range v.List {
-		if strings.EqualFold(inspection.Name, controlName) {
+		if strings.EqualFold(inspection.Name) {
 			return &inspection, resp, nil
 		}
 	}
 	return nil, resp, fmt.Errorf("no predefined control named '%s' was found", controlName)
 }
+*/

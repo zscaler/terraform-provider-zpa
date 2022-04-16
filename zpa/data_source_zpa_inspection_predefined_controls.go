@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"log"
@@ -95,7 +94,7 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for predefined controls name %s\n", name)
-		res, _, err := zClient.inspection_predefined_controls.GetByName(name)
+		res, _, err := zClient.inspection_predefined_controls.GetAll()
 		if err != nil {
 			return err
 		}
@@ -124,4 +123,3 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 
 	return nil
 }
-*/
