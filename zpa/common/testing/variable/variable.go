@@ -52,6 +52,15 @@ const (
 	SegmentGroupEnabled     = true
 )
 
+// Application Segment
+const (
+	AppSegmentResourceName = "testAcc_app_segment"
+	AppSegmentDescription  = "testAcc_app_segment"
+	AppSegmentEnabled      = true
+	AppSegmentCnameEnabled = true
+	AppSegmentGroupID      = ""
+)
+
 // Policy Access Rule
 const (
 	AccessRuleDescription = "testAcc_access_rule"

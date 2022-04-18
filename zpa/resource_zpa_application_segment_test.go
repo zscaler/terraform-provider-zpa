@@ -2,78 +2,95 @@ package zpa
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/applicationsegment"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
-func TestAccResourceZPAApplicationSegment(t *testing.T) {
+func TestAccResourceApplicationSegmentBasic(t *testing.T) {
+	var appSegment applicationsegment.ApplicationSegmentResource
+	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegment)
+	rPort := acctest.RandIntRange(1000, 9999)
 
-	rName := acctest.RandString(10)
-	rDesc := acctest.RandString(20)
-	sgName := acctest.RandString(10)
-	sgDesc := acctest.RandString(20)
-	port := acctest.RandIntRange(1000, 9999)
-	resourceName := "zpa_application_segment.test"
+	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
+	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
+
+	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
+	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
+
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckApplicationSegmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceZPAApplicationSegmentConfigBasic(port, rName, rDesc, sgName, sgDesc),
+				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
-					tesAccCheckApplicationSegmentExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", rDesc),
-					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "health_reporting", "ON_ACCESS"),
-					resource.TestCheckResourceAttr(resourceName, "bypass_type", "NEVER"),
-					resource.TestCheckResourceAttr(resourceName, "is_cname_enabled", "true"),
+					testAccCheckApplicationSegmentExists(appSegmentTypeAndName, &appSegment),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", "tf-acc-test-"+appSegmentGeneratedName),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
+					// resource.TestCheckResourceAttr(appSegmentTypeAndName, "segment_group_id.#", ""),
+					// resource.TestCheckResourceAttr(appSegmentTypeAndName, "server_groups.#", "1"),
 				),
 			},
+
+			// Update test
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckApplicationSegmentExists(appSegmentTypeAndName, &appSegment),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", "tf-acc-test-"+appSegmentGeneratedName),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
+					// resource.TestCheckResourceAttr(appSegmentTypeAndName, "segment_group_id.#", "1"),
+					// resource.TestCheckResourceAttr(appSegmentTypeAndName, "server_groups.#", "1"),
+				),
 			},
 		},
 	})
 }
 
-func testAccResourceZPAApplicationSegmentConfigBasic(port int, rName, rDesc, sgName, sgDesc string) string {
-	return fmt.Sprintf(`
-	resource "zpa_application_segment" "test" {
-		name = "%s"
-		description = "%s"
-		enabled = true
-		health_reporting = "ON_ACCESS"
-		bypass_type = "NEVER"
-		is_cname_enabled = true
-		tcp_port_ranges = ["%d", "%d"]
-		domain_names = ["test.example.com"]
-		segment_group_id = zpa_segment_group.test_app_group.id
-		server_groups {
-			id = []
+func testAccCheckApplicationSegmentDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*Client)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != resourcetype.ZPAApplicationSegment {
+			continue
 		}
+
+		_, _, err := client.applicationsegment.GetByName(rs.Primary.Attributes["name"])
+		if err == nil {
+			return fmt.Errorf("Application Segment still exists")
+		}
+
+		return nil
 	}
-	resource "zpa_segment_group" "test_app_group" {
-		name = "%s"
-		description = "%s"
-		enabled = true
-	}
-	`, rName, rDesc, port, port, sgName, sgDesc)
+	return nil
 }
 
-func tesAccCheckApplicationSegmentExists(n string) resource.TestCheckFunc {
+func testAccCheckApplicationSegmentExists(resource string, segment *applicationsegment.ApplicationSegmentResource) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
+		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("Application Segment Not found: %s", n)
+			return fmt.Errorf("Application Segment Not found: %s", resource)
 		}
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no Application Segment ID is set")
@@ -93,20 +110,66 @@ func tesAccCheckApplicationSegmentExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckApplicationSegmentDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+func testAccCheckApplicationSegmentConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
+	return fmt.Sprintf(`
 
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "zpa_application_segment" {
-			continue
-		}
+// segment group resource
+%s
 
-		_, _, err := client.applicationsegment.GetByName(rs.Primary.Attributes["name"])
-		if err == nil {
-			return fmt.Errorf("Application Segment still exists")
-		}
+// application segment resource
+%s
 
-		return nil
+data "%s" "%s" {
+	id = "${%s.id}"
+}
+`,
+		// resource variables
+		segmentGroupHCL,
+		// serverGroupHCL,
+		getApplicationSegmentResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, rPort, enabled, cnameEnabled),
+
+		// data source variables
+		resourcetype.ZPAApplicationSegment,
+		generatedName,
+		resourceTypeAndName,
+	)
+}
+
+func getApplicationSegmentResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
+	return fmt.Sprintf(`
+
+resource "%s" "%s" {
+	name = "tf-acc-test-%s"
+	description = "tf-acc-test-%s"
+	enabled = "%s"
+	is_cname_enabled = "%s"
+	health_reporting = "ON_ACCESS"
+	bypass_type = "NEVER"
+	tcp_port_ranges = ["%d", "%d"]
+	udp_port_ranges = ["%d", "%d"]
+	domain_names = ["test.example.com"]
+	segment_group_id = "${%s.id}"
+	server_groups {
+		id = []
 	}
-	return nil
+	depends_on = [ %s ]
+}
+`,
+
+		// resource variables
+		resourcetype.ZPAApplicationSegment,
+		generatedName,
+		generatedName,
+		generatedName,
+		strconv.FormatBool(enabled),
+		strconv.FormatBool(cnameEnabled),
+		rPort,
+		rPort,
+		rPort,
+		rPort,
+		segmentGroupTypeAndName,
+		// serverGroupTypeAndName,
+		segmentGroupTypeAndName,
+		// serverGroupTypeAndName,
+	)
 }
