@@ -91,8 +91,7 @@ func resourceInspectionCustomControls() *schema.Resource {
 			},
 			"default_action": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"PASS",
 					"BLOCK",
@@ -122,6 +121,7 @@ func resourceInspectionCustomControls() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"conditions": {
 							Type:     schema.TypeList,
+							Optional: true,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -157,9 +157,12 @@ func resourceInspectionCustomControls() *schema.Resource {
 							},
 						},
 						"names": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						"type": {
 							Type:     schema.TypeString,
@@ -181,8 +184,7 @@ func resourceInspectionCustomControls() *schema.Resource {
 			},
 			"severity": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"CRITICAL",
 					"ERROR",
@@ -302,7 +304,7 @@ func expandInspectionCustomControls(d *schema.ResourceData) inspection_custom_co
 		Type:                             d.Get("type").(string),
 		Version:                          d.Get("version").(string),
 		AssociatedInspectionProfileNames: expandAssociatedInspectionProfileNames(d),
-		// Rules:                            expandInspectionCustomControlsRules(d),
+		Rules:                            expandInspectionCustomControlsRules(d),
 	}
 	return custom_control
 }
@@ -329,20 +331,54 @@ func expandAssociatedInspectionProfileNames(d *schema.ResourceData) []inspection
 	return []inspection_custom_controls.AssociatedProfileNames{}
 }
 
-/*
 // Expand Rules and Conditions Menu
 //https://help.zscaler.com/zpa/api-reference#/inspection-control-controller/createCustomControl
-func expandInspectionCustomControlsRules(d *schema.ResourceData) inspection_custom_controls.Rules {
+func expandInspectionCustomControlsRules(d *schema.ResourceData) []inspection_custom_controls.Rules {
+	rulesObj, ok := d.GetOk("rules")
+	if !ok {
+		return nil
+	}
+	rulesInterfaces := rulesObj.([]interface{})
+	var rules []inspection_custom_controls.Rules
+	for _, ruleObj := range rulesInterfaces {
+		ruleMap, ok := ruleObj.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		var names []string
+		ruleNamesSet, ok := ruleMap["names"].(*schema.Set)
+		if ok {
+			for _, name := range ruleNamesSet.List() {
+				names = append(names, name.(string))
+			}
 
+		}
+		rules = append(rules, inspection_custom_controls.Rules{
+			Names:      names,
+			Type:       ruleMap["type"].(string),
+			Conditions: expandCustomControlRuleConditions(ruleMap["conditions"]),
+		})
+	}
+	return rules
 }
 
-func expandCustomControlRuleConditions(d *schema.ResourceData) inspection_custom_controls.Conditions {
-	conditions := inspection_custom_controls.Conditions{
-		LHS: d.Get("lhs").(string),
-		RHS: d.Get("rhs").(string),
-		OP:  d.Get("op").(string),
+func expandCustomControlRuleConditions(conditionsObj interface{}) []inspection_custom_controls.Conditions {
+	conditionsInterface, ok := conditionsObj.([]interface{})
+	if !ok {
+		return nil
+	}
+	var conditions []inspection_custom_controls.Conditions
+	for _, conditionObj := range conditionsInterface {
+		condition, ok := conditionObj.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		conditions = append(conditions, inspection_custom_controls.Conditions{
+			LHS: condition["lhs"].(string),
+			RHS: condition["rhs"].(string),
+			OP:  condition["op"].(string),
+		})
 	}
 
 	return conditions
 }
-*/
