@@ -1,14 +1,55 @@
 package zpa
 
+/*
 import (
-	"fmt"
+	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
+func TestAccResourceProvisioningKeyBasic(t *testing.T) {
+	var groups provisioningkey.ProvisioningKey
+	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckProvisioningKeyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckProvisioningKeyConfigure(resourceTypeAndName, generatedName, variable.ProvisioningKeyDesc, variable.ProvisioningKeyEnabled),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckProvisioningKeyExists(resourceTypeAndName, &groups),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ConnectorGroupType),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", "max_usage"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enrollment_cert_id", "enrollment_cert_id"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "zcomponent_id", "zcomponent_id"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
+				),
+			},
+
+			// Update test
+			{
+				Config: testAccCheckProvisioningKeyConfigure(resourceTypeAndName, generatedName, variable.ProvisioningKeyDesc, variable.ProvisioningKeyEnabled),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckProvisioningKeyExists(resourceTypeAndName, &groups),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
+				),
+			},
+		},
+	})
+}
+*/
+/*
 func TestAccResourceProvisioningKey(t *testing.T) {
 
 	rName1 := acctest.RandString(10)
@@ -151,3 +192,4 @@ func testAccCheckProvisioningKeyDestroy(s *terraform.State) error {
 	}
 	return nil
 }
+*/

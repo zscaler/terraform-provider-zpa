@@ -19,6 +19,7 @@ const (
 const (
 	ConnectorGroupType     = "CONNECTOR_GRP"
 	ServiceEdgeGroupType   = "SERVICE_EDGE_GRP"
+	ProvisioningKeyDesc    = "testAcc_provisioning_key"
 	ProvisioningKeyUsage   = "2"
 	ProvisioningKeyEnabled = true
 )
