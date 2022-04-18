@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"strconv"
 	"testing"
@@ -14,13 +13,16 @@ import (
 func TestAccDataSourceProvisioningKey_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
 
+	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
+	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAppConnectorGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAppConnectorGroupProvisioningKeyConfigure(resourceTypeAndName, generatedName, variable.ProvisioningKeyDesc, variable.ProvisioningKeyEnabled),
+				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
@@ -35,4 +37,3 @@ func TestAccDataSourceProvisioningKey_Basic(t *testing.T) {
 		},
 	})
 }
-*/
