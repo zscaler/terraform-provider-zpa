@@ -1,6 +1,7 @@
 package inspection_custom_controls
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -36,7 +37,7 @@ type InspectionCustomControl struct {
 
 type Rules struct {
 	Conditions []Conditions `json:"conditions,omitempty"`
-	Names      string       `json:"names,omitempty"`
+	Names      []string     `json:"names,omitempty"`
 	Type       string       `json:"type,omitempty"`
 }
 
@@ -50,6 +51,12 @@ type AssociatedProfileNames struct {
 	Name string `json:"name,omitempty"`
 }
 
+func unmarshalRulesJson(rulesJsonStr string) ([]Rules, error) {
+	var rules []Rules
+	err := json.Unmarshal([]byte(rulesJsonStr), &rules)
+	return rules, err
+}
+
 func (service *Service) Get(customID string) (*InspectionCustomControl, *http.Response, error) {
 	v := new(InspectionCustomControl)
 	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+customControlsEndpoint, customID)
@@ -57,8 +64,9 @@ func (service *Service) Get(customID string) (*InspectionCustomControl, *http.Re
 	if err != nil {
 		return nil, nil, err
 	}
-
-	return v, resp, nil
+	rules, err := unmarshalRulesJson(v.ControlRuleJson)
+	v.Rules = rules
+	return v, resp, err
 }
 
 func (service *Service) GetByName(controlName string) (*InspectionCustomControl, *http.Response, error) {
@@ -73,7 +81,9 @@ func (service *Service) GetByName(controlName string) (*InspectionCustomControl,
 	}
 	for _, control := range v.List {
 		if strings.EqualFold(control.Name, controlName) {
-			return &control, resp, nil
+			rules, err := unmarshalRulesJson(control.ControlRuleJson)
+			control.Rules = rules
+			return &control, resp, err
 		}
 	}
 	return nil, resp, fmt.Errorf("no inspection profile named '%s' was found", controlName)
