@@ -22,11 +22,10 @@ func TestAccDataSourceProvisioningKey_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckAppConnectorGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName),
+				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
-					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "description", resourceTypeAndName, "description"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "association_type", resourceTypeAndName, "association_type"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "max_usage", resourceTypeAndName, "max_usage"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "enrollment_cert_id", resourceTypeAndName, "enrollment_cert_id"),
