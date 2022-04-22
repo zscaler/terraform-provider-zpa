@@ -81,8 +81,8 @@ func resourceInspectionProfile() *schema.Resource {
 			},
 			"custom_controls": {
 				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
+				Required: true,
+				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -101,7 +101,7 @@ func resourceInspectionProfile() *schema.Resource {
 				Computed: true,
 			},
 			"global_control_actions": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -113,13 +113,12 @@ func resourceInspectionProfile() *schema.Resource {
 			},
 			"paranoia_level": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 			},
 			"predefined_controls": {
 				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
+				Required: true,
+				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -134,8 +133,7 @@ func resourceInspectionProfile() *schema.Resource {
 			},
 			"predefined_controls_version": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 			},
 		},
 	}
@@ -226,15 +224,16 @@ func resourceInspectionProfileDelete(d *schema.ResourceData, m interface{}) erro
 
 func expandInspectionProfile(d *schema.ResourceData) inspection_profile.InspectionProfile {
 	inspection_profile := inspection_profile.InspectionProfile{
-		Name:                      d.Get("name").(string),
-		Description:               d.Get("description").(string),
-		GlobalControlActions:      SetToStringList(d, "global_control_actions"),
-		IncarnationNumber:         d.Get("incarnation_number").(string),
-		ParanoiaLevel:             d.Get("paranoia_level").(string),
-		PredefinedControlsVersion: d.Get("predefined_controls_version").(string),
-		ControlInfoResource:       expandControlsInfo(d),
-		CustomControls:            expandCustomControls(d),
-		PredefinedControls:        expandPredefinedControls(d),
+		Name:                              d.Get("name").(string),
+		Description:                       d.Get("description").(string),
+		GlobalControlActions:              SetToStringList(d, "global_control_actions"),
+		IncarnationNumber:                 d.Get("incarnation_number").(string),
+		ParanoiaLevel:                     d.Get("paranoia_level").(string),
+		PredefinedControlsVersion:         d.Get("predefined_controls_version").(string),
+		CommonGlobalOverrideActionsConfig: d.Get("common_global_override_actions_config").(map[string]interface{}),
+		ControlInfoResource:               expandControlsInfo(d),
+		CustomControls:                    expandCustomControls(d),
+		PredefinedControls:                expandPredefinedControls(d),
 	}
 	return inspection_profile
 }

@@ -25,9 +25,9 @@ type InspectionProfile struct {
 	Name                              string                    `json:"name,omitempty"`
 	ParanoiaLevel                     string                    `json:"paranoiaLevel,omitempty"`
 	PredefinedControlsVersion         string                    `json:"predefinedControlsVersion,omitempty"`
-	ControlInfoResource               []ControlInfoResource     `json:"controlsInfo,omitempty"`
-	CustomControls                    []InspectionCustomControl `json:"customControls,omitempty"`
-	PredefinedControls                []PredefinedControls      `json:"predefinedControls,omitempty"`
+	ControlInfoResource               []ControlInfoResource     `json:"controlsInfo"`
+	CustomControls                    []InspectionCustomControl `json:"customControls"`
+	PredefinedControls                []PredefinedControls      `json:"predefinedControls"`
 }
 
 type ControlInfoResource struct {
