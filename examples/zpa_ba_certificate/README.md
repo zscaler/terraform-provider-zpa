@@ -3,7 +3,7 @@
 This example will show you how to retrieve a Browser Access Certificate ID to attach to a browser access application segment
 This example codifies [this API](https://help.zscaler.com/zpa/api-reference#/ba-certificate-controller/getAllIssuedCerts).
 
-To run, configure your ZPA provider as described [Here](https://github.com/willguibr/terraform-provider-zpa/blob/master/docs/index.html.markdown)
+To run, configure your ZPA provider as described [Here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.html.markdown)
 
 ## Run the example
 

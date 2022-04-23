@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func resourcePolicyTimeoutRule() *schema.Resource {
@@ -76,7 +76,7 @@ func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, m interface{}) erro
 func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicySet, _, err := zClient.policysetcontroller.GetReauth()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("TIMEOUT_POLICY")
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error 
 
 func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetcontroller.GetReauth()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("TIMEOUT_POLICY")
 	if err != nil {
 		return err
 	}
@@ -144,7 +144,7 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 
 func resourcePolicyTimeoutRuleDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetcontroller.GetReauth()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("TIMEOUT_POLICY")
 	if err != nil {
 		return err
 	}

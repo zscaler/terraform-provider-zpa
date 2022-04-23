@@ -53,3 +53,4 @@ dist/
 dist/*
 local_test/
 local_test/*
+acceptance_test.yml

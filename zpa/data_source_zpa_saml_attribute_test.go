@@ -1,37 +1,38 @@
 package zpa
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceSamlAttribute_Basic(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories,
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDataSourceSamlAttributeConfig_basic),
+				Config: testAccCheckDataSourceSamlAttributeConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_saml_attribute.email_user_sso", "name"),
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_saml_attribute.department", "name"),
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_saml_attribute.first_name", "name"),
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_saml_attribute.last_name", "name"),
-					resource.TestCheckResourceAttrSet(
-						"data.zpa_saml_attribute.group", "name"),
+					testAccDataSourceSamlAttributeCheck("data.zpa_saml_attribute.email_user_sso"),
+					testAccDataSourceSamlAttributeCheck("data.zpa_saml_attribute.department"),
+					testAccDataSourceSamlAttributeCheck("data.zpa_saml_attribute.first_name"),
+					testAccDataSourceSamlAttributeCheck("data.zpa_saml_attribute.last_name"),
+					testAccDataSourceSamlAttributeCheck("data.zpa_saml_attribute.group"),
 				),
 			},
 		},
 	})
 }
 
-const testAccCheckDataSourceSamlAttributeConfig_basic = `
+func testAccDataSourceSamlAttributeCheck(name string) resource.TestCheckFunc {
+	return resource.ComposeTestCheckFunc(
+		resource.TestCheckResourceAttrSet(name, "id"),
+		resource.TestCheckResourceAttrSet(name, "name"),
+	)
+}
+
+var testAccCheckDataSourceSamlAttributeConfig_basic = `
 data "zpa_saml_attribute" "email_user_sso" {
     name = "Email_SGIO-User-Okta"
 }

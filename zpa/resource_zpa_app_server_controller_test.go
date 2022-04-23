@@ -7,10 +7,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/appservercontroller"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/appservercontroller"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
 func TestAccResourceApplicationServerBasic(t *testing.T) {
@@ -94,30 +94,15 @@ func testAccCheckApplicationServerExists(resource string, server *appservercontr
 
 func testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, description, address string, enabled bool) string {
 	return fmt.Sprintf(`
-// application server resource
-%s
+resource "%s" "%s" {
+	name            = "%s"
+	description     = "%s"
+	address         = "%s"
+	enabled         = "%s"
+}
 
 data "%s" "%s" {
-  id = "${%s.id}"
-}
-`,
-		// resource variables
-		ApplicationServerResourceHCL(generatedName, description, address, enabled),
-
-		// data source variables
-		resourcetype.ZPAApplicationServer,
-		generatedName,
-		resourceTypeAndName,
-	)
-}
-
-func ApplicationServerResourceHCL(generatedName, description, address string, enabled bool) string {
-	return fmt.Sprintf(`
-resource "%s" "%s" {
-	name                          = "%s"
-	description                   = "%s"
-	address                       = "%s"
-	enabled                       = "%s"
+	id = "${%s.id}"
 }
 `,
 		// resource variables
@@ -127,5 +112,10 @@ resource "%s" "%s" {
 		description,
 		address,
 		strconv.FormatBool(enabled),
+
+		// data source variables
+		resourcetype.ZPAApplicationServer,
+		generatedName,
+		resourceTypeAndName,
 	)
 }

@@ -7,8 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 type listrules struct {
@@ -123,7 +123,7 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicySet, _, err := zClient.policysetcontroller.GetPolicySet()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 
 func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetcontroller.GetPolicySet()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourcePolicyAccessDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetcontroller.GetPolicySet()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return err
 	}

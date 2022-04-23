@@ -1,5 +1,45 @@
 # Changelog
 
+## 2.1.0 (March 05, 2022)
+
+## Enhancements
+
+- Refactored and added new acceptance tests. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#xx](https://github.com/zscaler/terraform-provider-zpa/pull/xx)
+
+- ``data_source_zpa_app_connector_controller_test``
+- ``data_source_zpa_app_connector_group_test``
+- ``data_source_zpa_app_server_controller_test``
+- ``data_source_zpa_application_segment_test``
+- ``data_source_zpa_ba_certificate_test``
+- ``data_source_zpa_browser_access_test``
+- ``data_source_zpa_cloud_connector_group_test``
+- ``data_source_zpa_customer_version_profile_test``
+- ``data_source_zpa_enrollement_cert_test``
+- ``data_source_zpa_idp_controller_test``
+- ``data_source_zpa_lss_config_client_types_test``
+- ``data_source_zpa_lss_config_log_types_formats_test``
+- ``data_source_zpa_lss_config_status_codes_test``
+- ``data_source_zpa_machine_group_test``
+- ``data_source_zpa_posture_profile_test``
+- ``data_source_zpa_segment_group_test``
+- ``data_source_zpa_server_group_test``
+- ``data_source_zpa_trusted_network_test``
+- ``resource_zpa_app_connector_group_test``
+- ``resource_zpa_app_server_controller_test``
+- ``resource_zpa_application_segment_test``
+- ``resource_zpa_segment_group_test``
+- ``resource_zpa_server_group_test``
+- ``resource_zpa_service_edge_group_test``
+- ``resource_zpa_policy_access_rule_test``
+- ``resource_zpa_policy_access_timeout_rule_test``
+- ``resource_zpa_policy_access_forwarding_rule_test``
+
+## BUG Fixes
+
+- Fix: Acceptance Tests for ``zpa_browser_access_test``
+- Fix: Consolidate Policy Type resources
+- Fix: Refactor ZPA API Client
+
 ## 2.0.7 (February 17, 2022)
 
 ## BUG Fixes

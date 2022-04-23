@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func resourcePolicyForwardingRule() *schema.Resource {
@@ -79,7 +79,7 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	globalPolicySet, _, err := zClient.policysetcontroller.GetBypass()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("CLIENT_FORWARDING_POLICY")
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 
 func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetcontroller.GetBypass()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("CLIENT_FORWARDING_POLICY")
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 
 func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetcontroller.GetBypass()
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("CLIENT_FORWARDING_POLICY")
 	if err != nil {
 		return err
 	}

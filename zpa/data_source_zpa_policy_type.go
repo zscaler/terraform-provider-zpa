@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func dataSourcePolicyType() *schema.Resource {
@@ -45,7 +45,11 @@ func dataSourcePolicyType() *schema.Resource {
 				Computed: true,
 				Optional: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"ACCESS_POLICY", "GLOBAL_POLICY", "TIMEOUT_POLICY", "REAUTH_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "BYPASS_POLICY",
+					"ACCESS_POLICY", "GLOBAL_POLICY",
+					"TIMEOUT_POLICY", "REAUTH_POLICY",
+					"CLIENT_FORWARDING_POLICY", "BYPASS_POLICY",
+					"ISOLATION_POLICY", "INSPECTION_POLICY",
+					"SIEM_POLICY",
 				}, false),
 			},
 			"rules": {
