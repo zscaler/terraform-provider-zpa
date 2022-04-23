@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/trustednetwork"
 )
 
 func dataSourceTrustedNetwork() *schema.Resource {
