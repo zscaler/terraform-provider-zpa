@@ -81,8 +81,8 @@ func resourceInspectionProfile() *schema.Resource {
 			},
 			"custom_controls": {
 				Type:     schema.TypeSet,
-				Required: true,
-				MinItems: 1,
+				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -188,11 +188,23 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	if err := d.Set("predefined_controls", flattenPredefinedControls(resp.PredefinedControls)); err != nil {
+	if err := d.Set("predefined_controls", flattenResourcePredefinedControls(resp.PredefinedControls)); err != nil {
 		return err
 	}
 	return nil
 
+}
+
+func flattenResourcePredefinedControls(controls []inspection_profile.PredefinedControls) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(controls))
+	for i, group := range controls {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }
 
 func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) error {
