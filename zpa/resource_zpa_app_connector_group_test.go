@@ -7,10 +7,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorgroup"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorgroup"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
 func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
@@ -23,25 +23,23 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 		CheckDestroy: testAccCheckAppConnectorGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled, variable.AppConnectorOverrideProfile),
+				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorOverrideProfile)),
 				),
 			},
 
 			// Update test
 			{
-				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled, variable.AppConnectorOverrideProfile),
+				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorOverrideProfile)),
 				),
 			},
 		},
@@ -92,7 +90,26 @@ func testAccCheckAppConnectorGroupExists(resource string, rule *appconnectorgrou
 	}
 }
 
-func testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, description string, enabled, profile bool) string {
+func testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
+	return fmt.Sprintf(`
+// app connector group resource
+%s
+
+data "%s" "%s" {
+  id = "${%s.id}"
+}
+`,
+		// resource variables
+		appConnectorGroupResourceHCL(generatedName, description, enabled),
+
+		// data source variables
+		resourcetype.ZPAAppConnectorGroup,
+		generatedName,
+		resourceTypeAndName,
+	)
+}
+
+func appConnectorGroupResourceHCL(generatedName, description string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "%s" "%s" {
 	name                          = "%s"
@@ -104,27 +121,17 @@ resource "%s" "%s" {
 	location                      = "San Jose, CA, USA"
 	upgrade_day                   = "SUNDAY"
 	upgrade_time_in_secs          = "66600"
-	override_version_profile      = "%s"
-	version_profile_id            = 2
+	override_version_profile      = true
+	version_profile_id            = 0
 	dns_query_type                = "IPV4"
 }
-
-data "%s" "%s" {
-	id = "${%s.id}"
-}
-
 `,
 		// resource variables
 		resourcetype.ZPAAppConnectorGroup,
 		generatedName,
 		generatedName,
+		// variable.AppConnectorResourceName,
 		description,
 		strconv.FormatBool(enabled),
-		strconv.FormatBool(profile),
-
-		// data source variables
-		resourcetype.ZPAAppConnectorGroup,
-		generatedName,
-		resourceTypeAndName,
 	)
 }

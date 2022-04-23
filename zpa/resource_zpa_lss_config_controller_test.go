@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 )
 
 func TestAccResourceLSSConfigControllerBasic(t *testing.T) {

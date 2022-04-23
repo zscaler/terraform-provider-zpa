@@ -8,6 +8,7 @@ const (
 	ZPAApplicationServer      = "zpa_application_server"
 	ZPAServerGroup            = "zpa_server_group"
 	ZPASegmentGroup           = "zpa_segment_group"
+	ZPAApplicationSegment     = "zpa_application_segment"
 	ZPAPolicyAccessRule       = "zpa_policy_access_rule"
 	ZPAPolicyTimeOutRule      = "zpa_policy_timeout_rule"
 	ZPAPolicyForwardingRule   = "zpa_policy_forwarding_rule"
