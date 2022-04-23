@@ -71,8 +71,9 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 				Computed: true,
 			},
 			"version": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				RequiredWith: []string{"name"},
+				Optional:     true,
 			},
 		},
 	}
@@ -93,8 +94,12 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
+		version, versionSet := d.Get("version").(string)
+		if !versionSet || version == "" {
+			return fmt.Errorf("when the name is set, version must be set as well")
+		}
 		log.Printf("[INFO] Getting data for predefined controls name %s\n", name)
-		res, _, err := zClient.inspection_predefined_controls.GetAll()
+		res, _, err := zClient.inspection_predefined_controls.GetByName(name, version)
 		if err != nil {
 			return err
 		}
