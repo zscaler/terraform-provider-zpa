@@ -66,42 +66,7 @@ func dataSourceInspectionCustomControls() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"rules": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"conditions": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"lhs": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"op": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"rhs": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"names": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
+			"rules": dataInspectionRulesSchema(),
 			"severity": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -158,7 +123,7 @@ func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{
 		_ = d.Set("version", resp.Version)
 		_ = d.Set("type", resp.Type)
 
-		if err := d.Set("rules", flattenInspectionCustomRules(resp.Rules)); err != nil {
+		if err := d.Set("rules", flattenInspectionRules(resp.Rules)); err != nil {
 			return err
 		}
 
@@ -167,29 +132,4 @@ func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{
 	}
 
 	return nil
-}
-func flattenInspectionCustomRules(rule []inspection_custom_controls.Rules) []interface{} {
-	rules := make([]interface{}, len(rule))
-	for i, rule := range rule {
-		rules[i] = map[string]interface{}{
-			"conditions": flattenInspectionRuleConditions(rule),
-			"names":      rule.Names,
-			"type":       rule.Type,
-		}
-	}
-
-	return rules
-}
-
-func flattenInspectionRuleConditions(condition inspection_custom_controls.Rules) []interface{} {
-	conditions := make([]interface{}, len(condition.Conditions))
-	for i, val := range condition.Conditions {
-		conditions[i] = map[string]interface{}{
-			"lhs": val.LHS,
-			"rhs": val.RHS,
-			"op":  val.OP,
-		}
-	}
-
-	return conditions
 }

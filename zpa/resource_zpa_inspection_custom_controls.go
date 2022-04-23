@@ -254,7 +254,7 @@ func resourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{})
 	_ = d.Set("version", resp.Version)
 	_ = d.Set("type", resp.Type)
 
-	if err := d.Set("rules", flattenInspectionCustomRules(resp.Rules)); err != nil {
+	if err := d.Set("rules", flattenInspectionRules(resp.Rules)); err != nil {
 		return err
 	}
 	return nil
