@@ -117,7 +117,8 @@ func resourceInspectionProfile() *schema.Resource {
 			},
 			"predefined_controls": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
+				Computed: true,
 				MinItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -178,10 +179,13 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("modified_time", resp.ModifiedTime)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
-	_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
-
-	if err := d.Set("controls_info", flattenControlInfoResource(resp.ControlInfoResource)); err != nil {
-		return err
+	if resp.PredefinedControlsVersion != "" {
+		_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
+	}
+	if len(resp.ControlInfoResource) > 0 {
+		if err := d.Set("controls_info", flattenControlInfoResource(resp.ControlInfoResource)); err != nil {
+			return err
+		}
 	}
 
 	if err := d.Set("custom_controls", flattenCustomControls(resp.CustomControls)); err != nil {
