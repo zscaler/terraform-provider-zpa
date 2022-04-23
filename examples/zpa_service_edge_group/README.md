@@ -3,7 +3,7 @@
 This example will show you how to use Terraform to implement the ZPA Service Edge Group resource.
 This example codifies [this API](https://help.zscaler.com/zpa/api-reference#/service-edge-group-controller).
 
-To run, configure your ZPA provider as described [Here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.html.markdown)
+To run, configure your ZPA provider as described [Here](https://github.com/willguibr/terraform-provider-zpa/blob/master/docs/index.html.markdown)
 
 ## Run the example
 

@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/bacertificate"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/bacertificate"
 )
 
 func dataSourceBaCertificate() *schema.Resource {

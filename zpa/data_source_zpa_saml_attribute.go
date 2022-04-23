@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/samlattribute"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/samlattribute"
 )
 
 func dataSourceSamlAttribute() *schema.Resource {

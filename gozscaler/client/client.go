@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/google/go-querystring/query"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler"
 )
 
 type Client struct {

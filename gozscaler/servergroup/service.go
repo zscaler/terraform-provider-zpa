@@ -1,8 +1,8 @@
 package servergroup
 
 import (
-	"github.com/zscaler/terraform-provider-zpa/gozscaler"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
 )
 
 type Service struct {
