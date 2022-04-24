@@ -30,21 +30,25 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"associated_inspection_profile_names": {
-				Type:     schema.TypeList,
+			// "associated_inspection_profile_names": {
+			// 	Type:     schema.TypeList,
+			// 	Computed: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"id": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 			"name": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
+			// 		},
+			// 	},
+			// },
+			"attachment": {
+				Type:     schema.TypeString,
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
 			},
 			"control_group": {
 				Type:     schema.TypeString,
