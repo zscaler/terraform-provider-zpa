@@ -30,6 +30,22 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"associated_inspection_profile_names": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"control_group": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -110,6 +126,7 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 		_ = d.Set("action", resp.Action)
 		_ = d.Set("action_value", resp.ActionValue)
 		_ = d.Set("attachment", resp.Attachment)
+		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("control_group", resp.ControlGroup)
 		_ = d.Set("control_number", resp.ControlNumber)
 		_ = d.Set("default_action", resp.DefaultAction)

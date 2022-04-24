@@ -40,13 +40,6 @@ type ControlGroupItem struct {
 	DefaultGroup                 bool                 `json:"defaultGroup,omitempty"`
 }
 
-/*
-type AssociatedProfileNames struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-}
-*/
-
 // Get Predefined Controls by ID
 // https://help.zscaler.com/zpa/api-reference#/inspection-control-controller/getPredefinedControlById
 func (service *Service) Get(controlID string) (*PredefinedControls, *http.Response, error) {
@@ -80,25 +73,3 @@ func (service *Service) GetByName(name, version string) (*PredefinedControls, *h
 	log.Printf("[ERROR] no predefined control named '%s' found", name)
 	return nil, resp, fmt.Errorf("no predefined control named '%s' found", name)
 }
-
-/*
-// Get All Predefined Inspection Controls - Need to create multiple search criteria
-//https://help.zscaler.com/zpa/api-reference#/inspection-control-controller/getAllInspectionControls
-func (service *Service) GetAll() (*PredefinedControls, *http.Response, error) {
-	var v struct {
-		List []PredefinedControls `json:"list"`
-	}
-
-	relativeURL := mgmtConfig + service.Client.Config.CustomerID + predControlsEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: controlName}, nil, &v)
-	if err != nil {
-		return nil, nil, err
-	}
-	for _, inspection := range v.List {
-		if strings.EqualFold(inspection.Name) {
-			return &inspection, resp, nil
-		}
-	}
-	return nil, resp, fmt.Errorf("no predefined control named '%s' was found", controlName)
-}
-*/
