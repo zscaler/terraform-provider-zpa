@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_predefined_controls"
 )
 
@@ -30,22 +31,22 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			// "associated_inspection_profile_names": {
-			// 	Type:     schema.TypeList,
-			// 	Computed: true,
-			// 	Elem: &schema.Resource{
-			// 		Schema: map[string]*schema.Schema{
-			// 			"id": {
-			// 				Type:     schema.TypeString,
-			// 				Computed: true,
-			// 			},
-			// 			"name": {
-			// 				Type:     schema.TypeString,
-			// 				Computed: true,
-			// 			},
-			// 		},
-			// 	},
-			// },
+			"associated_inspection_profile_names": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"attachment": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -142,10 +143,21 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 		_ = d.Set("paranoia_level", resp.ParanoiaLevel)
 		_ = d.Set("severity", resp.Severity)
 		_ = d.Set("version", resp.Version)
-
+		_ = d.Set("associated_inspection_profile_names", flattenInspectionProfileNames(resp.AssociatedInspectionProfileNames))
 	} else {
 		return fmt.Errorf("couldn't find any predefined inspection controls with name '%s' or id '%s'", name, id)
 	}
 
 	return nil
+}
+
+func flattenInspectionProfileNames(names []common.AssociatedProfileNames) []interface{} {
+	flattenedList := make([]interface{}, len(names))
+	for i, val := range names {
+		flattenedList[i] = map[string]interface{}{
+			"id":   val.ID,
+			"name": val.Name,
+		}
+	}
+	return flattenedList
 }
