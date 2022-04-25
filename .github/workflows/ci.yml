@@ -42,9 +42,11 @@ jobs:
     - name: Download Go Dependencies
       run: |
         go mod vendor && go mod tidy
+
     - name: Build
       run: |
         go build -v .
+
   # run acceptance tests
   test:
     needs: build
