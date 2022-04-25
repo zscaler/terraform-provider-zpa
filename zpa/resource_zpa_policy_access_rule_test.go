@@ -7,17 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/willguibr/terraform-provider-zia/zia/common/resourcetype"
-	"github.com/willguibr/terraform-provider-zia/zia/common/testing/method"
-	"github.com/willguibr/terraform-provider-zia/zia/common/testing/variable"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
 	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
 )
 
 func TestAccPolicyAccessRuleBasic(t *testing.T) {
-	var rules policysetcontroller.PolicySet
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyAccessRule)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
+	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -25,25 +22,23 @@ func TestAccPolicyAccessRuleBasic(t *testing.T) {
 		CheckDestroy: testAccCheckPolicyAccessRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, variable.AccessRuleDescription, variable.AccessRuleAction),
+				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, rName, rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPolicyAccessRuleExists(resourceTypeAndName, &rules),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", fmt.Sprintf(rName)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.FWRuleResourceDescription),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "action", variable.FWRuleResourceAction),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "state", variable.FWRuleResourceState),
+					testAccCheckPolicyAccessRuleExists(resourceTypeAndName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 				),
 			},
 
 			// Update test
 			{
-				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, variable.AccessRuleDescription, variable.AccessRuleAction),
+				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPolicyAccessRuleExists(resourceTypeAndName, &rules),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", fmt.Sprintf(rName)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.FWRuleResourceDescription),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "action", variable.FWRuleResourceAction),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "state", variable.FWRuleResourceState),
+					testAccCheckPolicyAccessRuleExists(resourceTypeAndName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 				),
 			},
 		},
@@ -52,27 +47,30 @@ func TestAccPolicyAccessRuleBasic(t *testing.T) {
 
 func testAccCheckPolicyAccessRuleDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-
+	accessPolicy, _, err := apiClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	if err != nil {
+		return fmt.Errorf("failed fetching resource ACCESS_POLICY. Recevied error: %s", err)
+	}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPAPolicyAccessRule {
 			continue
 		}
 
-		rule, _, err := apiClient.policysetcontroller.GetPolicyRule(rs.Primary.ID)
+		rule, _, err := apiClient.policysetcontroller.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
-			return fmt.Errorf("id %d already exists", rs.Primary.ID)
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
 
 		if rule != nil {
-			return fmt.Errorf("policy access rule with id %d exists and wasn't destroyed", rs.Primary.ID)
+			return fmt.Errorf("policy access rule with id %s exists and wasn't destroyed", rs.Primary.ID)
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckPolicyAccessRuleExists(resource string, rule *policysetcontroller.PolicySet) resource.TestCheckFunc {
+func testAccCheckPolicyAccessRuleExists(resource string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
@@ -83,39 +81,36 @@ func testAccCheckPolicyAccessRuleExists(resource string, rule *policysetcontroll
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedRule, err := apiClient.policysetcontroller.GetPolicyRule(rs.Primary.ID)
-
+		resp, _, err := apiClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+		if err != nil {
+			return fmt.Errorf("failed fetching resource ACCESS_POLICY. Recevied error: %s", err)
+		}
+		_, _, err = apiClient.policysetcontroller.GetPolicyRule(resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
-		*rule = *receivedRule
-
 		return nil
 	}
 }
 
-func testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, description, action, state string) string {
+func testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, rName, generatedName, desc string) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
 	name          		= "%s"
 	description   		= "%s"
 	action        		= "ALLOW"
-	rule_order    		= 4
 	operator      		= "AND"
 	policy_set_id 		= data.zpa_policy_type.access_policy.id
+}
+data "zpa_policy_type" "access_policy" {
+    policy_type = "ACCESS_POLICY"
+}
 `,
 		// resource variables
 		resourcetype.ZPAPolicyAccessRule,
+		rName,
 		generatedName,
-		generatedName,
-		description,
-		action,
-		state,
-
-		// data source variables
-		// resourcetype.FirewallFilteringRules,
-		// generatedName,
-		// resourceTypeAndName,
+		desc,
 	)
 }
