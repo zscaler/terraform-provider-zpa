@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"testing"
@@ -8,15 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-<<<<<<< HEAD
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
-=======
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
 	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
 	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
 	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
->>>>>>> zpa-app-segment-acctest
 )
 
 func TestAccPolicyAccessRuleBasic(t *testing.T) {
@@ -24,29 +17,41 @@ func TestAccPolicyAccessRuleBasic(t *testing.T) {
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	randDesc := acctest.RandString(20)
 
+	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
+	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
+
+	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
+	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPolicyAccessRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, rName, rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPolicyAccessRuleExists(resourceTypeAndName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", rName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
-				),
-			},
-
-			// Update test
-			{
-				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc),
+				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc, appConnectorGroupHCL, appConnectorGroupTypeAndName, segmentGroupHCL, segmentGroupTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyAccessRuleExists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
+				),
+			},
+
+			// Update test
+			{
+				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc, appConnectorGroupHCL, appConnectorGroupTypeAndName, segmentGroupHCL, segmentGroupTypeAndName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckPolicyAccessRuleExists(resourceTypeAndName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 			},
 		},
@@ -101,7 +106,76 @@ func testAccCheckPolicyAccessRuleExists(resource string) resource.TestCheckFunc 
 	}
 }
 
-func testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, rName, generatedName, desc string) string {
+func testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, rName, generatedName, desc, appConnectorGroupHCL, appConnectorGroupTypeAndName, segmentGroupHCL, segmentGroupTypeAndName string) string {
+	return fmt.Sprintf(`
+
+// app connector group resource
+%s
+
+// segment group resource
+%s
+
+// policy access rule resource
+%s
+
+data "%s" "%s" {
+  id = "${%s.id}"
+}
+`,
+		// resource variables
+		appConnectorGroupHCL,
+		segmentGroupHCL,
+		getPolicyAccessRuleHCL(rName, generatedName, desc, appConnectorGroupTypeAndName, segmentGroupTypeAndName),
+
+		// data source variables
+		resourcetype.ZPAPolicyType,
+		generatedName,
+		resourceTypeAndName,
+	)
+}
+
+func getPolicyAccessRuleHCL(rName, generatedName, desc, appConnectorGroupTypeAndName, segmentGroupTypeAndName string) string {
+	return fmt.Sprintf(`
+
+data "zpa_policy_type" "access_policy" {
+	policy_type = "ACCESS_POLICY"
+}
+
+resource "%s" "%s" {
+	name          		= "%s"
+	description   		= "%s"
+	action        		= "ALLOW"
+	operator      		= "AND"
+	policy_set_id 		= data.zpa_policy_type.access_policy.id
+	app_connector_groups {
+		id = ["${%s.id}"]
+	}
+	conditions {
+		negated  = false
+		operator = "OR"
+		operands {
+		  object_type = "APP_GROUP"
+		  lhs         = "id"
+		  rhs         = "${%s.id}"
+		}
+	  }
+	depends_on = [ %s, %s ]
+}
+`,
+		// resource variables
+		resourcetype.ZPAPolicyAccessRule,
+		rName,
+		generatedName,
+		desc,
+		appConnectorGroupTypeAndName,
+		segmentGroupTypeAndName,
+		appConnectorGroupTypeAndName,
+		segmentGroupTypeAndName,
+	)
+}
+
+/*
+func testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, rName, generatedName, desc, appConnectorGroupHCL, appConnectorGroupTypeAndName string) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
