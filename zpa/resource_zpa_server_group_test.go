@@ -15,33 +15,37 @@ import (
 
 func TestAccResourceServerGroupBasic(t *testing.T) {
 	var serverGroup servergroup.ServerGroup
-	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
+	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 
+	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
+	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckServerGroupConfigure(resourceTypeAndName, generatedName, variable.ServerGroupDescription, variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery),
+				Config: testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, serverGroupGeneratedName, serverGroupGeneratedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerGroupExists(resourceTypeAndName, &serverGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServerGroupDescription),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServerGroupEnabled)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServerGroupDynamicDiscovery)),
+					testAccCheckServerGroupExists(serverGroupTypeAndName, &serverGroup),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "name", "tf-acc-test-"+serverGroupGeneratedName),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "description", "tf-acc-test-"+serverGroupGeneratedName),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "enabled", strconv.FormatBool(variable.ServerGroupEnabled)),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "dynamic_discovery", strconv.FormatBool(variable.ServerGroupDynamicDiscovery)),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "app_connector_groups.#", "1"),
 				),
 			},
 
 			// Update test
 			{
-				Config: testAccCheckServerGroupConfigure(resourceTypeAndName, generatedName, variable.ServerGroupDescription, variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery),
+				Config: testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, serverGroupGeneratedName, serverGroupGeneratedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckServerGroupExists(resourceTypeAndName, &serverGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServerGroupDescription),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServerGroupEnabled)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "dynamic_discovery", strconv.FormatBool(variable.ServerGroupDynamicDiscovery)),
+					testAccCheckServerGroupExists(serverGroupTypeAndName, &serverGroup),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "name", "tf-acc-test-"+serverGroupGeneratedName),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "description", "tf-acc-test-"+serverGroupGeneratedName),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "enabled", strconv.FormatBool(variable.ServerGroupEnabled)),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "dynamic_discovery", strconv.FormatBool(variable.ServerGroupDynamicDiscovery)),
+					resource.TestCheckResourceAttr(serverGroupTypeAndName, "app_connector_groups.#", "1"),
 				),
 			},
 		},
@@ -92,8 +96,12 @@ func testAccCheckServerGroupExists(resource string, rule *servergroup.ServerGrou
 	}
 }
 
-func testAccCheckServerGroupConfigure(resourceTypeAndName, generatedName, description string, enabled, dynamic_discovery bool) string {
+func testAccCheckServerGroupConfigure(resourceTypeAndName, generatedName, name, description, appConnectorGroupHCL, appConnectorGroupTypeAndName string, enabled, dynDiscovery bool) string {
 	return fmt.Sprintf(`
+
+// app connector group resource
+%s
+
 // server group resource
 %s
 
@@ -102,7 +110,8 @@ data "%s" "%s" {
 }
 `,
 		// resource variables
-		ServerGroupResourceHCL(generatedName, description, enabled, dynamic_discovery),
+		appConnectorGroupHCL,
+		getServerGroupResourceHCL(generatedName, name, description, appConnectorGroupTypeAndName, enabled, dynDiscovery),
 
 		// data source variables
 		resourcetype.ZPAServerGroup,
@@ -111,42 +120,28 @@ data "%s" "%s" {
 	)
 }
 
-func ServerGroupResourceHCL(generatedName, description string, enabled, dynamic_discovery bool) string {
+func getServerGroupResourceHCL(generatedName, name, description, appConnectorGroupTypeAndName string, enabled, dynDiscovery bool) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
-	name = "%s"
-	description = "%s"
+	name = "tf-acc-test-%s"
+	description = "tf-acc-test-%s"
 	enabled = "%s"
 	dynamic_discovery = "%s"
 	app_connector_groups {
-		id = [zpa_app_connector_group.testAcc.id]
+		id = ["${%s.id}"]
 	}
-	depends_on = [zpa_app_connector_group.testAcc]
-}
-
-resource "zpa_app_connector_group" "testAcc" {
-	name                          = "%s"
-	description                   = "testAcc"
-	enabled                       = true
-	country_code                  = "US"
-	latitude                      = "37.3382082"
-	longitude                     = "-121.8863286"
-	location                      = "San Jose, CA, USA"
-	upgrade_day                   = "SUNDAY"
-	upgrade_time_in_secs          = "66600"
-	override_version_profile      = true
-	version_profile_id            = 0
-	dns_query_type                = "IPV4"
+	depends_on = [ %s ]
 }
 `,
 		// resource variables
 		resourcetype.ZPAServerGroup,
 		generatedName,
-		generatedName,
+		name,
 		description,
 		strconv.FormatBool(enabled),
-		strconv.FormatBool(dynamic_discovery),
-		generatedName,
+		strconv.FormatBool(dynDiscovery),
+		appConnectorGroupTypeAndName,
+		appConnectorGroupTypeAndName,
 	)
 }

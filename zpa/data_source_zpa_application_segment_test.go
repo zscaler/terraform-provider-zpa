@@ -1,83 +1,47 @@
 package zpa
 
 import (
-	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
-func TestAccDataSourceApplicationSegment_ByIdAndName(t *testing.T) {
-	rName := acctest.RandString(15)
-	port := acctest.RandIntRange(1000, 9999)
-	rDesc := acctest.RandString(15)
-	sgrName := acctest.RandString(15)
-	sgrDesc := acctest.RandString(15)
-	resourceName := "data.zpa_application_segment.by_id"
-	resourceName2 := "data.zpa_application_segment.by_name"
+func TestAccDataSourceApplicationSegment_Basic(t *testing.T) {
+	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegment)
+	rPort := acctest.RandIntRange(1000, 9999)
+
+	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
+	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, serverGroupGeneratedName, serverGroupGeneratedName, serverGroupGeneratedName, "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
+
+	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
+	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckApplicationSegmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceApplicationSegmentByID(port, rName, rDesc, sgrName, sgrDesc),
+				Config: testAccCheckApplicationSegmentConfigure(resourceTypeAndName, generatedName, generatedName, generatedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceApplicationSegment(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", rDesc),
-					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName2, "name", rName),
-					resource.TestCheckResourceAttr(resourceName2, "description", rDesc),
-					resource.TestCheckResourceAttr(resourceName2, "enabled", "true"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "description", resourceTypeAndName, "description"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "bypass_type", resourceTypeAndName, "bypass_type"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "health_reporting", resourceTypeAndName, "health_reporting"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "segment_group_id", resourceTypeAndName, "segment_group_id"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
+					resource.TestCheckResourceAttr(dataSourceTypeAndName, "tcp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(dataSourceTypeAndName, "udp_port_ranges.#", "2"),
+					// resource.TestCheckResourceAttr(dataSourceTypeAndName, "server_groups.#", "1"),
 				),
-				PreventPostDestroyRefresh: true,
 			},
 		},
 	})
-}
-
-func testAccDataSourceApplicationSegmentByID(port int, rName, rDesc, sgName, sgDesc string) string {
-	return fmt.Sprintf(`
-	resource "zpa_application_segment" "test_application" {
-		name = "%s"
-		description = "%s"
-		enabled = true
-		health_reporting = "ON_ACCESS"
-		bypass_type = "NEVER"
-		is_cname_enabled = true
-		tcp_port_ranges = ["%d", "%d"]
-		domain_names = ["test.example.com"]
-		segment_group_id = zpa_segment_group.test_app_group.id
-		server_groups {
-			id = []
-		}
-	}
-
-	resource "zpa_segment_group" "test_app_group" {
-		name = "%s"
-		description = "%s"
-		enabled = true
-	}
-	data "zpa_application_segment" "by_name" {
-		name = zpa_application_segment.test_application.name
-	}
-	data "zpa_application_segment" "by_id" {
-		id = zpa_application_segment.test_application.id
-	}
-	`, rName, rDesc, port, port, sgName, sgName)
-}
-
-func testAccDataSourceApplicationSegment(name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		_, ok := s.RootModule().Resources[name]
-		if !ok {
-			return fmt.Errorf("root module has no data source called %s", name)
-		}
-		return nil
-	}
 }
