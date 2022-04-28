@@ -38,34 +38,10 @@ type ApplicationSegmentResource struct {
 	UDPPortRanges        []string              `json:"udpPortRanges,omitempty"`
 	TCPAppPortRange      []common.NetworkPorts `json:"tcpPortRange,omitempty"`
 	UDPAppPortRange      []common.NetworkPorts `json:"udpPortRange,omitempty"`
-	// ClientlessApps       []ClientlessApps      `json:"clientlessApps,omitempty"`
-	ServerGroups       []AppServerGroups `json:"serverGroups,omitempty"`
-	DefaultIdleTimeout string            `json:"defaultIdleTimeout,omitempty"`
-	DefaultMaxAge      string            `json:"defaultMaxAge,omitempty"`
+	ServerGroups         []AppServerGroups     `json:"serverGroups,omitempty"`
+	DefaultIdleTimeout   string                `json:"defaultIdleTimeout,omitempty"`
+	DefaultMaxAge        string                `json:"defaultMaxAge,omitempty"`
 }
-
-// type ClientlessApps struct {
-// 	AllowOptions        bool   `json:"allowOptions"`
-// 	AppID               string `json:"appId,omitempty"`
-// 	ApplicationPort     string `json:"applicationPort,omitempty"`
-// 	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
-// 	CertificateID       string `json:"certificateId,omitempty"`
-// 	CertificateName     string `json:"certificateName,omitempty"`
-// 	Cname               string `json:"cname,omitempty"`
-// 	CreationTime        string `json:"creationTime,omitempty"`
-// 	Description         string `json:"description,omitempty"`
-// 	Domain              string `json:"domain,omitempty"`
-// 	Enabled             bool   `json:"enabled"`
-// 	Hidden              bool   `json:"hidden"`
-// 	ID                  string `json:"id,omitempty"`
-// 	LocalDomain         string `json:"localDomain,omitempty"`
-// 	ModifiedBy          string `json:"modifiedBy,omitempty"`
-// 	ModifiedTime        string `json:"modifiedTime,omitempty"`
-// 	Name                string `json:"name"`
-// 	Path                string `json:"path,omitempty"`
-// 	Portal              bool   `json:"portal"`
-// 	TrustUntrustedCert  bool   `json:"trustUntrustedCert"`
-// }
 
 type AppServerGroups struct {
 	ConfigSpace      string `json:"configSpace,omitempty"`
