@@ -9,7 +9,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	exec "golang.org/x/sys/execabs"
 	"io"
 	"os"
 	"regexp"
@@ -133,11 +132,6 @@ type Invocation struct {
 	Verb       string
 	Args       []string
 	BuildFlags []string
-<<<<<<< HEAD
-	ModFlag    string
-	ModFile    string
-	Overlay    string
-=======
 
 	// If ModFlag is set, the go command is invoked with -mod=ModFlag.
 	ModFlag string
@@ -148,7 +142,6 @@ type Invocation struct {
 	// If Overlay is set, the go command is invoked with -overlay=Overlay.
 	Overlay string
 
->>>>>>> master
 	// If CleanEnv is set, the invocation will run only with the environment
 	// in Env, not starting with os.Environ.
 	CleanEnv   bool

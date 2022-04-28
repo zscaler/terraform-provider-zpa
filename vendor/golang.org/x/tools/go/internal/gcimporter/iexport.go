@@ -30,39 +30,17 @@ import (
 // 0: initial implementation
 const bundleVersion = 0
 
-<<<<<<< HEAD
-// Current bundled export format version. Increase with each format change.
-// 0: initial implementation
-const bundleVersion = 0
-
-=======
->>>>>>> master
 // IExportData writes indexed export data for pkg to out.
 //
 // If no file set is provided, position info will be missing.
 // The package path of the top-level package will not be recorded,
 // so that calls to IImportData can override with a provided package path.
 func IExportData(out io.Writer, fset *token.FileSet, pkg *types.Package) error {
-<<<<<<< HEAD
-	return iexportCommon(out, fset, false, []*types.Package{pkg})
-=======
 	return iexportCommon(out, fset, false, iexportVersion, []*types.Package{pkg})
->>>>>>> master
 }
 
 // IExportBundle writes an indexed export bundle for pkgs to out.
 func IExportBundle(out io.Writer, fset *token.FileSet, pkgs []*types.Package) error {
-<<<<<<< HEAD
-	return iexportCommon(out, fset, true, pkgs)
-}
-
-func iexportCommon(out io.Writer, fset *token.FileSet, bundle bool, pkgs []*types.Package) (err error) {
-	defer func() {
-		if e := recover(); e != nil {
-			if ierr, ok := e.(internalError); ok {
-				err = ierr
-				return
-=======
 	return iexportCommon(out, fset, true, iexportVersion, pkgs)
 }
 
@@ -76,7 +54,6 @@ func iexportCommon(out io.Writer, fset *token.FileSet, bundle bool, version int,
 				}
 				// Not an internal error; panic again.
 				panic(e)
->>>>>>> master
 			}
 		}()
 	}
@@ -147,11 +124,7 @@ func iexportCommon(out io.Writer, fset *token.FileSet, bundle bool, version int,
 	if bundle {
 		hdr.uint64(bundleVersion)
 	}
-<<<<<<< HEAD
-	hdr.uint64(iexportVersion)
-=======
 	hdr.uint64(uint64(p.version))
->>>>>>> master
 	hdr.uint64(uint64(p.strings.Len()))
 	hdr.uint64(dataLen)
 

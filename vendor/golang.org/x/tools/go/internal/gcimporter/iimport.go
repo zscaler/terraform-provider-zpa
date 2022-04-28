@@ -217,26 +217,6 @@ func iimportCommon(fset *token.FileSet, imports map[string]*types.Package, data 
 		list := append(([]*types.Package)(nil), pkgList[1:]...)
 		sort.Sort(byPath(list))
 		pkgs[0].SetImports(list)
-<<<<<<< HEAD
-	}
-
-	for _, pkg := range pkgs {
-		if pkg.Complete() {
-			continue
-		}
-
-		names := make([]string, 0, len(p.pkgIndex[pkg]))
-		for name := range p.pkgIndex[pkg] {
-			names = append(names, name)
-		}
-		sort.Strings(names)
-		for _, name := range names {
-			p.doDecl(pkg, name)
-		}
-
-		// package was imported completely and without errors
-		pkg.MarkComplete()
-=======
 	}
 
 	for _, pkg := range pkgs {
@@ -264,7 +244,6 @@ func iimportCommon(fset *token.FileSet, imports map[string]*types.Package, data 
 	// after all types are complete.
 	for _, d := range p.later {
 		typeparams.SetTypeParamConstraint(d.t, d.constraint)
->>>>>>> master
 	}
 
 	for _, typ := range p.interfaceList {
@@ -272,12 +251,6 @@ func iimportCommon(fset *token.FileSet, imports map[string]*types.Package, data 
 	}
 
 	return pkgs, nil
-<<<<<<< HEAD
-}
-
-type iimporter struct {
-	ipath   string
-=======
 }
 
 type setConstraintArgs struct {
@@ -286,7 +259,6 @@ type setConstraintArgs struct {
 }
 
 type iimporter struct {
->>>>>>> master
 	version int
 	ipath   string
 
