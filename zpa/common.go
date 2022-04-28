@@ -528,9 +528,11 @@ func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts
 
 func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeSet,
-		Optional:    true,
-		Computed:    true,
+		Type:     schema.TypeSet,
+		Optional: true,
+		Computed: true,
+		// Activate the "Attributes as Blocks" processing mode to permit dynamic declaration of no ports
+		ConfigMode:  schema.SchemaConfigModeAttr,
 		Description: desc,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
