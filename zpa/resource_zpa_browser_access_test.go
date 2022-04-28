@@ -2,131 +2,98 @@ package zpa
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/willguibr/terraform-provider-zpa/gozscaler/browseraccess"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
-func TestAccResourceBrowserAccess(t *testing.T) {
+func TestAccResourceBrowserAccessBasic(t *testing.T) {
+	var browserAccess browseraccess.BrowserAccess
+	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPABrowserAccess)
+	rPort := acctest.RandIntRange(1000, 9999)
 
-	rName := acctest.RandString(10)
-	rDesc := acctest.RandString(20)
-	port := acctest.RandIntRange(1000, 65635)
-	sgName := acctest.RandString(10)
-	sgDesc := acctest.RandString(20)
-	srvName := acctest.RandString(10)
-	srvDesc := acctest.RandString(20)
-	appConnectorName := acctest.RandString(10)
-	appConnectorDesc := acctest.RandString(10)
-	resourceName := "zpa_browser_access.testAcc_browser_access"
+	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
+	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
+
+	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
+	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
+
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckZPABrowserAccessDestroy,
+		CheckDestroy: testAccCheckBrowserAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceZPABrowserAccessConfigBasic(port, rName, rDesc, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc),
+				Config: testAccCheckBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckZPABrowserAccessExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", rDesc),
-					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "health_reporting", "ON_ACCESS"),
-					resource.TestCheckResourceAttr(resourceName, "bypass_type", "NEVER"),
-					resource.TestCheckResourceAttr(resourceName, "is_cname_enabled", "true"),
+					testAccCheckBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", "tf-acc-test-"+browserAccessGeneratedName),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessCnameEnabled)),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "bypass_type", "NEVER"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "health_reporting", "ON_ACCESS"),
+					resource.TestCheckResourceAttrSet(browserAccessTypeAndName, "segment_group_id"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "clientless_apps.#", "1"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "tcp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "udp_port_ranges.#", "2"),
 				),
 			},
+
+			// Update test
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccCheckBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", "tf-acc-test-"+browserAccessGeneratedName),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessCnameEnabled)),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "bypass_type", "NEVER"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "health_reporting", "ON_ACCESS"),
+					resource.TestCheckResourceAttrSet(browserAccessTypeAndName, "segment_group_id"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "clientless_apps.#", "1"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "tcp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "udp_port_ranges.#", "2"),
+				),
 			},
 		},
 	})
 }
 
-func testAccResourceZPABrowserAccessConfigBasic(port int, rName, rDesc, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc string) string {
-	return fmt.Sprintf(`
-data "zpa_ba_certificate" "testAcc" {
-	name = "jenkins.securitygeek.io"
-}
-resource "zpa_browser_access" "testAcc_browser_access" {
-	name             = "%s"
-	description      = "%s"
-	enabled          = true
-	health_reporting = "ON_ACCESS"
-	bypass_type      = "NEVER"
-	is_cname_enabled = true
-	tcp_port_range {
-        from = "%d"
-        to = "%d"
-    }
-	domain_names     = ["testacc.securitygeek.io"]
-	segment_group_id = zpa_segment_group.testAcc_segment_group.id
+func testAccCheckBrowserAccessDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*Client)
 
-	clientless_apps {
-		name                 = "testacc.securitygeek.io"
-		application_protocol = "HTTP"
-		application_port     = "%d"
-		certificate_id       = data.zpa_ba_certificate.testAcc.id
-		trust_untrusted_cert = true
-		enabled              = true
-		domain               = "testacc.securitygeek.io"
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != resourcetype.ZPABrowserAccess {
+			continue
+		}
+
+		_, _, err := client.browseraccess.GetByName(rs.Primary.Attributes["name"])
+		if err == nil {
+			return fmt.Errorf("Broser Access still exists")
+		}
+
+		return nil
 	}
-	server_groups {
-		id = [
-			zpa_server_group.testAcc_server_group.id
-		]
-	}
-	depends_on = [zpa_server_group.testAcc_server_group, zpa_segment_group.testAcc_segment_group]
-}
-resource "zpa_segment_group" "testAcc_segment_group" {
-	name = "%s"
-	description = "%s"
-	enabled = true
+	return nil
 }
 
-resource "zpa_server_group" "testAcc_server_group" {
-	name              = "%s"
-	description       = "%s"
-	enabled           = true
-	dynamic_discovery = true
-	app_connector_groups {
-		id = [zpa_app_connector_group.testAcc_app_connector_group.id]
-	}
-	depends_on = [zpa_app_connector_group.testAcc_app_connector_group]
-}
-
-resource "zpa_app_connector_group" "testAcc_app_connector_group" {
-	name                          = "%s"
-	description                   = "%s"
-	enabled                       = true
-	country_code                  = "US"
-	latitude                      = "37.3382082"
-	longitude                     = "-121.8863286"
-	location                      = "San Jose, CA, USA"
-	upgrade_day                   = "SUNDAY"
-	upgrade_time_in_secs          = "66600"
-	override_version_profile      = true
-	version_profile_id            = 0
-	dns_query_type                = "IPV4"
-}
-
-	`, rName, rDesc, port, port, port, sgName, sgDesc, srvName, srvDesc, appConnectorName, appConnectorDesc)
-}
-
-func testAccCheckZPABrowserAccessExists(n string) resource.TestCheckFunc {
+func testAccCheckBrowserAccessExists(resource string, segment *browseraccess.BrowserAccess) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
+		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("Browser Access App Segment Not found: %s", n)
+			return fmt.Errorf("Broser Access Not found: %s", resource)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Browser Access App Segment ID is set")
+			return fmt.Errorf("no Broser Access ID is set")
 		}
 		client := testAccProvider.Meta().(*Client)
 		resp, _, err := client.browseraccess.GetByName(rs.Primary.Attributes["name"])
@@ -143,20 +110,80 @@ func testAccCheckZPABrowserAccessExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCheckZPABrowserAccessDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+func testAccCheckBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
+	return fmt.Sprintf(`
 
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "zpa_browser_access" {
-			continue
-		}
+// segment group resource
+%s
 
-		_, _, err := client.applicationsegment.GetByName(rs.Primary.Attributes["name"])
-		if err == nil {
-			return fmt.Errorf("Browser Access App Segment still exists")
-		}
+// application segment resource
+%s
 
-		return nil
+data "%s" "%s" {
+	id = "${%s.id}"
+}
+`,
+		// resource variables
+		segmentGroupHCL,
+		// serverGroupHCL,
+		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, rPort, enabled, cnameEnabled),
+
+		// data source variables
+		resourcetype.ZPABrowserAccess,
+		generatedName,
+		resourceTypeAndName,
+	)
+}
+
+func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
+	return fmt.Sprintf(`
+
+data "zpa_ba_certificate" "testAcc" {
+	name = "jenkins.securitygeek.io"
+}
+
+resource "%s" "%s" {
+	name = "tf-acc-test-%s"
+	description = "tf-acc-test-%s"
+	enabled = "%s"
+	is_cname_enabled = "%s"
+	health_reporting = "ON_ACCESS"
+	bypass_type = "NEVER"
+	tcp_port_ranges = ["%d", "%d"]
+	udp_port_ranges = ["%d", "%d"]
+	domain_names = ["test.example.com"]
+	segment_group_id = "${%s.id}"
+	clientless_apps {
+		name                 = "testacc.securitygeek.io"
+		application_protocol = "HTTP"
+		application_port     = "%d"
+		certificate_id       = data.zpa_ba_certificate.testAcc.id
+		trust_untrusted_cert = true
+		enabled              = true
+		domain               = "testacc.securitygeek.io"
 	}
-	return nil
+	server_groups {
+		id = []
+	}
+	depends_on = [ %s ]
+}
+`,
+
+		// resource variables
+		resourcetype.ZPABrowserAccess,
+		generatedName,
+		generatedName,
+		generatedName,
+		strconv.FormatBool(enabled),
+		strconv.FormatBool(cnameEnabled),
+		rPort,
+		rPort,
+		rPort,
+		rPort,
+		segmentGroupTypeAndName,
+		rPort,
+		// serverGroupTypeAndName,
+		segmentGroupTypeAndName,
+		// serverGroupTypeAndName,
+	)
 }

@@ -54,13 +54,26 @@ const (
 
 // Application Segment
 const (
+<<<<<<< HEAD
 	AppSegmentResourceName = "testAcc_app_segment"
 	AppSegmentDescription  = "testAcc_app_segment"
+=======
+>>>>>>> master
 	AppSegmentEnabled      = true
 	AppSegmentCnameEnabled = true
 	AppSegmentGroupID      = ""
 )
 
+<<<<<<< HEAD
+=======
+// Browser Access Application Segment
+const (
+	BrowserAccessEnabled      = true
+	BrowserAccessCnameEnabled = true
+	BrowserAccessSegGroupID   = ""
+)
+
+>>>>>>> master
 // Policy Access Rule
 const (
 	AccessRuleDescription = "testAcc_access_rule"
