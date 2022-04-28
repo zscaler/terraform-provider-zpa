@@ -177,6 +177,10 @@ func resourceAppSegmentInspection() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 										Optional: true,
+										ValidateFunc: validation.StringInSlice([]string{
+											"HTTP",
+											"HTTPS",
+										}, false),
 									},
 									"ba_app_id": {
 										Type:     schema.TypeString,
