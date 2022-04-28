@@ -42,9 +42,17 @@ jobs:
     - name: Download Go Dependencies
       run: |
         go mod vendor && go mod tidy
+<<<<<<< HEAD:.github/workflows/ci.yml
     - name: Build
       run: |
         go build -v .
+=======
+
+    - name: Build
+      run: |
+        go build -v .
+
+>>>>>>> master:.github/workflows/acceptance-tests.yml
   # run acceptance tests
   test:
     needs: build
@@ -57,7 +65,7 @@ jobs:
         go-version: '1.18'
       id: go
 
-    - uses: hashicorp/setup-terraform@v1
+    - uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: '>=0.13.x'
         terraform_wrapper: false
