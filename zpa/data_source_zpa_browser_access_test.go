@@ -36,7 +36,7 @@ func TestAccDataSourceBrowserAccess_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "health_reporting", resourceTypeAndName, "health_reporting"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "segment_group_id", resourceTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessCnameEnabled)),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "clientless_apps.#", "1"),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "udp_port_ranges.#", "2"),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "tcp_port_ranges.#", "2"),
