@@ -47,6 +47,10 @@ func dataSourceAppSegmentInspection() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"creation_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -88,6 +92,14 @@ func dataSourceAppSegmentInspection() *schema.Resource {
 				Type:        schema.TypeBool,
 				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
+			},
+			"modifiedby": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"modified_time": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -280,6 +292,7 @@ func dataSourceAppSegmentInspectionRead(d *schema.ResourceData, m interface{}) e
 		_ = d.Set("segment_group_id", resp.SegmentGroupID)
 		_ = d.Set("segment_group_name", resp.SegmentGroupName)
 		_ = d.Set("bypass_type", resp.BypassType)
+		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("config_space", resp.ConfigSpace)
 		_ = d.Set("domain_names", resp.DomainNames)
 		_ = d.Set("name", resp.Name)
@@ -289,6 +302,8 @@ func dataSourceAppSegmentInspectionRead(d *schema.ResourceData, m interface{}) e
 		_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
+		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("ip_anchored", resp.IPAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
