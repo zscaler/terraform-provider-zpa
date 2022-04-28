@@ -42,11 +42,17 @@ jobs:
     - name: Download Go Dependencies
       run: |
         go mod vendor && go mod tidy
+<<<<<<< HEAD:.github/workflows/ci.yml
+    - name: Build
+      run: |
+        go build -v .
+=======
 
     - name: Build
       run: |
         go build -v .
 
+>>>>>>> master:.github/workflows/acceptance-tests.yml
   # run acceptance tests
   test:
     needs: build

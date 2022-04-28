@@ -241,7 +241,7 @@ func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
 	if policyTypeIsSet {
 		resp, _, err = zClient.policysetcontroller.GetByPolicyType(policyType.(string))
 	} else {
-		resp, _, err = zClient.policysetcontroller.GetPolicySet()
+		resp, _, err = zClient.policysetcontroller.GetByPolicyType("GLOBAL_POLICY")
 	}
 	if err != nil {
 		return err

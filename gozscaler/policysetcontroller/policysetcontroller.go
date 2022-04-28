@@ -189,6 +189,8 @@ func (service *Service) RulesCount() (int, *http.Response, error) {
 	count, err := strconv.Atoi(v.Count)
 	return count, resp, err
 }
+<<<<<<< HEAD
+=======
 
 // Get the global policy. This API will be deprecated in a future release.
 // GET /mgmtconfig/v1/admin/customers/{customerId}/policySet/global
@@ -241,3 +243,4 @@ func (service *Service) RulesCount() (int, *http.Response, error) {
 	return count, resp, err
 }
 */
+>>>>>>> master
