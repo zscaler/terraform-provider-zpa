@@ -94,6 +94,98 @@ func dataSourceAppSegmentInspection() *schema.Resource {
 				Optional:    true,
 				Description: "Name of the application.",
 			},
+			"common_apps_dto": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"apps_config": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"allow_options": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"app_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"app_types": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"application_port": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"application_protocol": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"ba_app_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"certificate_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"certificate_name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"cname": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"description": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"domain": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"enabled": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"hidden": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"inspect_app_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"local_domain": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"path": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"portal": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"trust_untrusted_cert": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"inspection_apps": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -202,6 +294,10 @@ func dataSourceAppSegmentInspectionRead(d *schema.ResourceData, m interface{}) e
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
+		if err := d.Set("common_apps_dto", flattenCommonAppsDto(resp.CommonAppsDto)); err != nil {
+			return fmt.Errorf("failed to read common apps %s", err)
+		}
+
 		if err := d.Set("inspection_apps", flattenInspectionApps(resp)); err != nil {
 			return fmt.Errorf("failed to read inspection application segment %s", err)
 		}
@@ -218,11 +314,45 @@ func dataSourceAppSegmentInspectionRead(d *schema.ResourceData, m interface{}) e
 			return err
 		}
 	} else {
-		return fmt.Errorf("couldn't find any browser access application with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any application segment inspection with name '%s' or id '%s'", name, id)
 	}
 
 	return nil
 
+}
+
+func flattenCommonAppsDto(commonApps appsegment_inspection.CommonAppsDto) []interface{} {
+	m := map[string]interface{}{
+		"apps_config": flattenAppsConfig(commonApps.AppConfig),
+	}
+
+	return []interface{}{m}
+}
+
+func flattenAppsConfig(list []appsegment_inspection.AppConfig) []interface{} {
+	flattenedList := make([]interface{}, len(list))
+	for i, val := range list {
+		flattenedList[i] = map[string]interface{}{
+			"allow_options":        val.AllowOptions,
+			"app_id":               val.AppID,
+			"app_types":            val.AppTypes,
+			"application_port":     val.ApplicationPort,
+			"application_protocol": val.ApplicationProtocol,
+			"ba_app_id":            val.BaAppID,
+			"certificate_id":       val.CertificateID,
+			"certificate_name":     val.CertificateName,
+			"cname":                val.Cname,
+			"description":          val.Description,
+			"domain":               val.Domain,
+			"enabled":              val.Enabled,
+			"hidden":               val.Hidden,
+			"inspect_app_id":       val.InspectAppId,
+			"local_domain":         val.LocalDomain,
+			"name":                 val.Name,
+			"trust_untrusted_cert": val.TrustUntrustedCert,
+		}
+	}
+	return flattenedList
 }
 
 func flattenInspectionApps(inspectionApp *appsegment_inspection.AppSegmentInspection) []interface{} {

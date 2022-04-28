@@ -36,10 +36,38 @@ type AppSegmentInspection struct {
 	UDPPortRanges        []string              `json:"udpPortRanges,omitempty"`
 	TCPAppPortRange      []common.NetworkPorts `json:"tcpPortRange,omitempty"`
 	UDPAppPortRange      []common.NetworkPorts `json:"udpPortRange,omitempty"`
+	CommonAppsDto        CommonAppsDto         `json:"commonAppsDto,omitempty"`
 	InspectionApps       []InspectionApps      `json:"inspectionApps,omitempty"`
 	AppServerGroups      []AppServerGroups     `json:"serverGroups,omitempty"`
 }
 
+type CommonAppsDto struct {
+	AppConfig []AppConfig `json:"appsConfig,omitempty"`
+}
+
+type AppConfig struct {
+	ID                  string `json:"id,omitempty"`
+	Name                string `json:"name,omitempty"`
+	AllowOptions        bool   `json:"allowOptions"`
+	AppID               string `json:"appId,omitempty"`
+	AppTypes            string `json:"appTypes,omitempty"`
+	ApplicationPort     string `json:"applicationPort,omitempty"`
+	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
+	BaAppID             string `json:"baAppId,omitempty"`
+	CertificateID       string `json:"certificateId,omitempty"`
+	CertificateName     string `json:"certificateName,omitempty"`
+	Cname               string `json:"cname,omitempty"`
+	Description         string `json:"description,omitempty"`
+	Domain              string `json:"domain,omitempty"`
+	Enabled             bool   `json:"enabled"`
+	Hidden              bool   `json:"hidden"`
+	InspectAppId        string `json:"inspectAppId,omitempty"`
+	LocalDomain         string `json:"localDomain,omitempty"`
+	Path                string `json:"path,omitempty"`
+	Portal              string `json:"portal,omitempty"`
+	// SRAAppID            string `json:"sraAppId,omitempty"`
+	TrustUntrustedCert bool `json:"trustUntrustedCert"`
+}
 type InspectionApps struct {
 	AppID               string `json:"appId,omitempty"`
 	ApplicationPort     string `json:"applicationPort,omitempty"`

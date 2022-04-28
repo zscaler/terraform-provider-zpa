@@ -138,6 +138,118 @@ func resourceAppSegmentInspection() *schema.Resource {
 				Required:    true,
 				Description: "Name of the application.",
 			},
+			"common_apps_dto": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"apps_config": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"allow_options": {
+										Type:     schema.TypeBool,
+										Computed: true,
+										Optional: true,
+									},
+									"app_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"app_types": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+										ValidateFunc: validation.StringInSlice([]string{
+											"INSPECT",
+										}, false),
+									},
+									"application_port": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"application_protocol": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"ba_app_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"certificate_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"certificate_name": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"cname": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"description": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"domain": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"enabled": {
+										Type:     schema.TypeBool,
+										Computed: true,
+										Optional: true,
+									},
+									"hidden": {
+										Type:     schema.TypeBool,
+										Computed: true,
+										Optional: true,
+									},
+									"inspect_app_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"local_domain": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"path": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"portal": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"trust_untrusted_cert": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"inspection_apps": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -270,6 +382,10 @@ func resourceAppSegmentInspectionRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
+	if err := d.Set("common_apps_dto", flattenCommonAppsDto(resp.CommonAppsDto)); err != nil {
+		return fmt.Errorf("failed to read common apps %s", err)
+	}
+
 	if err := d.Set("inspection_apps", flattenInspectionApps(resp)); err != nil {
 		return fmt.Errorf("failed to read inspection application segment %s", err)
 	}
@@ -373,6 +489,9 @@ func expandAppSegmentInspection(d *schema.ResourceData) appsegment_inspection.Ap
 	if d.HasChange("inspection_apps") {
 		details.InspectionApps = expandInspectionApps(d)
 	}
+	if d.HasChange("common_apps_dto") {
+		details.CommonAppsDto = expandCommonAppsDto(d)
+	}
 	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
 	if TCPAppPortRange != nil {
 		details.TCPAppPortRange = TCPAppPortRange
@@ -388,6 +507,49 @@ func expandAppSegmentInspection(d *schema.ResourceData) appsegment_inspection.Ap
 		details.TCPPortRanges = convertToListString(d.Get("tcp_port_ranges"))
 	}
 	return details
+}
+
+func expandCommonAppsDto(d *schema.ResourceData) appsegment_inspection.CommonAppsDto {
+	appSegmentInspection := appsegment_inspection.CommonAppsDto{
+		AppConfig: expandAppsConfig(d),
+	}
+	return appSegmentInspection
+}
+
+func expandAppsConfig(d *schema.ResourceData) []appsegment_inspection.AppConfig {
+	appConfigInterface, ok := d.GetOk("apps_config")
+	if ok {
+		appConfig := appConfigInterface.([]interface{})
+		log.Printf("[INFO] application segment inspection config data: %+v\n", appConfig)
+		var appConfigs []appsegment_inspection.AppConfig
+		for _, inspectionAppConfig := range appConfig {
+			inspectionAppConfig, ok := inspectionAppConfig.(map[string]interface{})
+			if ok {
+				appConfigs = append(appConfigs, appsegment_inspection.AppConfig{
+					AllowOptions:        inspectionAppConfig["allow_options"].(bool),
+					AppID:               inspectionAppConfig["app_id"].(string),
+					AppTypes:            inspectionAppConfig["app_types"].(string),
+					ApplicationPort:     inspectionAppConfig["application_port"].(string),
+					ApplicationProtocol: inspectionAppConfig["application_protocol"].(string),
+					CertificateID:       inspectionAppConfig["certificate_id"].(string),
+					CertificateName:     inspectionAppConfig["certificate_name"].(string),
+					Cname:               inspectionAppConfig["cname"].(string),
+					Description:         inspectionAppConfig["description"].(string),
+					Domain:              inspectionAppConfig["domain"].(string),
+					Enabled:             inspectionAppConfig["enabled"].(bool),
+					Hidden:              inspectionAppConfig["hidden"].(bool),
+					InspectAppId:        inspectionAppConfig["inspect_app_id"].(string),
+					LocalDomain:         inspectionAppConfig["local_domain"].(string),
+					Path:                inspectionAppConfig["path"].(string),
+					TrustUntrustedCert:  inspectionAppConfig["trust_untrusted_cert"].(bool),
+					Name:                inspectionAppConfig["name"].(string),
+				})
+			}
+		}
+		return appConfigs
+	}
+
+	return []appsegment_inspection.AppConfig{}
 }
 
 func expandInspectionApps(d *schema.ResourceData) []appsegment_inspection.InspectionApps {
