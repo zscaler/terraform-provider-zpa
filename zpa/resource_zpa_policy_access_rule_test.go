@@ -173,27 +173,3 @@ resource "%s" "%s" {
 		segmentGroupTypeAndName,
 	)
 }
-
-/*
-func testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, rName, generatedName, desc, appConnectorGroupHCL, appConnectorGroupTypeAndName string) string {
-	return fmt.Sprintf(`
-
-resource "%s" "%s" {
-	name          		= "%s"
-	description   		= "%s"
-	action        		= "ALLOW"
-	operator      		= "AND"
-	policy_set_id 		= data.zpa_policy_type.access_policy.id
-}
-data "zpa_policy_type" "access_policy" {
-    policy_type = "ACCESS_POLICY"
-}
-`,
-		// resource variables
-		resourcetype.ZPAPolicyAccessRule,
-		rName,
-		generatedName,
-		desc,
-	)
-}
-*/
