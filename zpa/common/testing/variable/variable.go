@@ -67,6 +67,12 @@ const (
 	BrowserAccessCnameEnabled = true
 )
 
+// LSS Controller
+const (
+	LSSControllerEnabled    = true
+	LSSControllerTLSEnabled = true
+)
+
 // Policy Access Rule
 const (
 	AccessRuleDescription = "testAcc_access_rule"

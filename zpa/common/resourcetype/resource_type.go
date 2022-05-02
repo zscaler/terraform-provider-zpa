@@ -15,4 +15,5 @@ const (
 	ZPAPolicyTimeOutRule      = "zpa_policy_timeout_rule"
 	ZPAPolicyForwardingRule   = "zpa_policy_forwarding_rule"
 	ZPACustomerVersionProfile = "zpa_customer_version_profile"
+	ZPALSSController          = "zpa_lss_config_controller"
 )

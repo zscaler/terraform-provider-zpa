@@ -356,6 +356,8 @@ github.com/posener/complete
 github.com/posener/complete/cmd
 github.com/posener/complete/cmd/install
 github.com/posener/complete/match
+# github.com/ramya-rao-a/go-outline v0.0.0-20210608161538-9736a4bde949
+## explicit; go 1.16
 # github.com/russross/blackfriday v1.6.0
 ## explicit; go 1.13
 github.com/russross/blackfriday
