@@ -1,7 +1,6 @@
 package zpa
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -13,7 +12,7 @@ func TestAccDataSourceLSSStatusCodes_Basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDataSourceLSSStatusCodesConfig_basic),
+				Config: testAccCheckDataSourceLSSStatusCodesConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr(
 						"data.zpa_lss_config_status_codes.foobar", ""),

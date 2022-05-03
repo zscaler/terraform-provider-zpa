@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -40,3 +41,4 @@ data "zpa_posture_profile" "zta_40" {
 data "zpa_posture_profile" "zta_80" {
     name = "CrowdStrike_ZPA_ZTA_80 (zscalerthree.net)"
 }`
+*/

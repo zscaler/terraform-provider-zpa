@@ -14,7 +14,8 @@ func TestAccDataSourceTrustedNetwork_Basic(t *testing.T) {
 			{
 				Config: testAccCheckDataSourceTrustedNetworkConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceTrustedNetworkCheck("data.zpa_trusted_network.foobar"),
+					testAccDataSourceTrustedNetworkCheck("data.zpa_trusted_network.testAcc01"),
+					testAccDataSourceTrustedNetworkCheck("data.zpa_trusted_network.testAcc02"),
 				),
 			},
 		},
@@ -29,6 +30,11 @@ func testAccDataSourceTrustedNetworkCheck(name string) resource.TestCheckFunc {
 }
 
 var testAccCheckDataSourceTrustedNetworkConfig_basic = `
-data "zpa_trusted_network" "foobar" {
-    name = "Corp-Trusted-Networks (zscalerthree.net)"
-}`
+data "zpa_trusted_network" "testAcc01" {
+    name = "BD-TrustedNetwork01"
+}
+
+data "zpa_trusted_network" "testAcc02" {
+    name = "BD-TrustedNetwork02"
+}
+`

@@ -14,7 +14,8 @@ func TestAccDataSourceMachineGroup_Basic(t *testing.T) {
 			{
 				Config: testAccCheckDataSourceMachineGroup_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceMachineGroupCheck("data.zpa_machine_group.mgr"),
+					testAccDataSourceMachineGroupCheck("data.zpa_machine_group.bd_mgr01"),
+					testAccDataSourceMachineGroupCheck("data.zpa_machine_group.bd_mgr02"),
 				),
 			},
 		},
@@ -29,6 +30,10 @@ func testAccDataSourceMachineGroupCheck(name string) resource.TestCheckFunc {
 }
 
 const testAccCheckDataSourceMachineGroup_basic = `
-data "zpa_machine_group" "mgr" {
-    name = "SGIO-MGR01"
-}`
+data "zpa_machine_group" "bd_mgr01" {
+    name = "BD-MGR01"
+}
+data "zpa_machine_group" "bd_mgr02" {
+    name = "BD-MGR02"
+}
+`

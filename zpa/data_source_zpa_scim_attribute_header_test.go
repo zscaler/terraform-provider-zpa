@@ -15,7 +15,7 @@ func TestAccDataSourceScimAttributeHeader_Basic(t *testing.T) {
 				Config: testAccCheckDataSourceScimAttributeHeaderConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceScimAttributeHeaderCheck("data.zpa_scim_attribute_header.email_value"),
-					testAccDataSourceScimAttributeHeaderCheck("data.zpa_scim_attribute_header.email_value"),
+					testAccDataSourceScimAttributeHeaderCheck("data.zpa_scim_attribute_header.cost_center"),
 				),
 			},
 		},
@@ -30,9 +30,14 @@ func testAccDataSourceScimAttributeHeaderCheck(name string) resource.TestCheckFu
 	)
 }
 
-const testAccCheckDataSourceScimAttributeHeaderConfig_basic = `
+var testAccCheckDataSourceScimAttributeHeaderConfig_basic = `
 data "zpa_scim_attribute_header" "email_value" {
     name = "emails.value"
-    idp_name = "SGIO-User-Okta"
+    idp_name = "BD_Okta_Users"
+}
+
+data "zpa_scim_attribute_header" "cost_center" {
+    name = "costCenter"
+    idp_name = "BD_Okta_Users"
 }
 `
