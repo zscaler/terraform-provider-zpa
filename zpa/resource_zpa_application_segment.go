@@ -351,9 +351,12 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		IpAnchored:           d.Get("ip_anchored").(bool),
 		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
 		Name:                 d.Get("name").(string),
-		TCPPortRanges:        ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges:        ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
-		ServerGroups:         expandAppServerGroups(d),
+		TCPPortRanges:        expandList(d.Get("tcp_port_ranges").([]interface{})),
+		UDPPortRanges:        expandList(d.Get("udp_port_ranges").([]interface{})),
+
+		// TCPPortRanges:        ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
+		// UDPPortRanges:        ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
+		ServerGroups: expandAppServerGroups(d),
 	}
 	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
 	if TCPAppPortRange != nil {
