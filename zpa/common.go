@@ -539,11 +539,13 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 				"from": {
 					Type:         schema.TypeString,
 					Optional:     true,
+					ForceNew:     true,
 					ValidateFunc: validation.NoZeroValues,
 				},
 				"to": {
 					Type:         schema.TypeString,
 					Optional:     true,
+					ForceNew:     true,
 					ValidateFunc: validation.NoZeroValues,
 				},
 			},

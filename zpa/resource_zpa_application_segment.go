@@ -72,6 +72,7 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -79,6 +80,7 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -353,10 +355,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		Name:                 d.Get("name").(string),
 		TCPPortRanges:        expandList(d.Get("tcp_port_ranges").([]interface{})),
 		UDPPortRanges:        expandList(d.Get("udp_port_ranges").([]interface{})),
-
-		// TCPPortRanges:        ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
-		// UDPPortRanges:        ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
-		ServerGroups: expandAppServerGroups(d),
+		ServerGroups:         expandAppServerGroups(d),
 	}
 	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
 	if TCPAppPortRange != nil {
