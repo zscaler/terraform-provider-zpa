@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.2 (May 6, 2022)
+
+### Notes
+- Supported Terraform version: **v1.x**
+
+### BUG Fixes
+
+- Fix: tcp and udp ports were not being updated during changes, requiring the application segment resource to be fully destroyed and rebuilt. Implemented ``ForceNew`` in the the ``zpa_application_segment`` resource parameters: ``tcp_port_range``, ``udp_port_range``, ``tcp_port_ranges``, ``udp_port_ranges``. This behavior instructs Terraform to first destroy and then recreate the resource if any of the attributes change in the configuration, as opposed to trying to update the existing resource. The destruction of the resource does not impact attached resources such as server groups, segment groups or policies.
+
 ## 2.1.1 (April 27, 2022)
 
 ### Notes
