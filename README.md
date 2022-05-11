@@ -1,11 +1,8 @@
-[![CI](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/ci.yml/badge.svg)](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/ci.yml)
-[![Release](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/willguibr/terraform-provider-zpa/actions/workflows/release.yml)
+[![CI](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/ci.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/ci.yml)
+[![Release](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml)
 
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
-
-⚠️  **Attention:** This provider is not affiliated with, nor supported by Zscaler in any way.
-
 
 - Website: https://www.terraform.io
 - Documentation: https://help.zscaler.com/zpa
@@ -33,7 +30,7 @@ To clone on windows
 ```sh
 mkdir %GOPATH%\src\github.com\terraform-providers
 cd %GOPATH%\src\github.com\terraform-providers
-git clone https://github.com/willguibr/terraform-provider-zpa.git
+git clone https://github.com/zscaler/terraform-provider-zpa.git
 ```
 
 Enter the provider directory and build the provider
@@ -157,7 +154,7 @@ License
 =========
 MIT License
 
-Copyright (c) 2021 [William Guilherme](https://github.com/willguibr)
+Copyright (c) 2021 [William Guilherme](https://github.com/zscaler)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
