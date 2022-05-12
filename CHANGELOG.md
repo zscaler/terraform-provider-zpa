@@ -29,7 +29,11 @@
 ## 2.1.0 (March 05, 2022)
 ### Enhancements
 
+<<<<<<< HEAD
+- Refactored and added new acceptance tests. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#xx](https://github.com/zscaler/terraform-provider-zpa/pull/xx)
+=======
 1. Refactored and added new acceptance tests. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#xx](https://github.com/zscaler/terraform-provider-zpa/pull/xx)
+>>>>>>> master
 
 - ``data_source_zpa_app_connector_controller_test``
 - ``data_source_zpa_app_connector_group_test``
@@ -146,7 +150,11 @@ These tests are considered best practice and were added to routinely verify that
 
 - The provider now supports the ability to import resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
 This capability is currently available to the following resources:
+<<<<<<< HEAD
+  - resource_zpa_app_connector_group - Issue [[#29](https://github.com/zscaler/terraform-provider-zpa/issues/29)]
+=======
   - resource_zpa_app_connector_group - Issue ([#29](https://github.com/zscaler/terraform-provider-zpa/issues/29))
+>>>>>>> master
   - resource_zpa_app_server_controller - [PR#42](https://github.com/zscaler/terraform-provider-zpa/pull/42) :rocket:
   - resource_zpa_application_segment - [PR#42](https://github.com/zscaler/terraform-provider-zpa/pull/42) :rocket:
   - resource_zpa_segment_group - [PR#42](https://github.com/zscaler/terraform-provider-zpa/pull/42) :rocket:

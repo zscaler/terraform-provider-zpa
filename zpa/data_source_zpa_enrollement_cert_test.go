@@ -17,7 +17,7 @@ func TestAccDataSourceEnrollmentCert_Basic(t *testing.T) {
 					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.root"),
 					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.client"),
 					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.connector"),
-					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.isolation_client"),
+					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.service_edge"),
 				),
 			},
 		},
@@ -35,16 +35,16 @@ var testAccCheckDataSourceEnrollmentCertConfig_basic = `
 data "zpa_enrollment_cert" "root" {
     name = "Root"
 }
+
 data "zpa_enrollment_cert" "client" {
     name = "Client"
 }
+
 data "zpa_enrollment_cert" "connector" {
     name = "Connector"
 }
+
 data "zpa_enrollment_cert" "service_edge" {
     name = "Service Edge"
-}
-data "zpa_enrollment_cert" "isolation_client" {
-    name = "Isolation Client"
 }
 `
