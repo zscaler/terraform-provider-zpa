@@ -8,10 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/variable"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
 func TestAccPolicyAccessRuleBasic(t *testing.T) {

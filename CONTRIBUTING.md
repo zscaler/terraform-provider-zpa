@@ -29,7 +29,7 @@ In short, when you submit code changes, your submissions are understood to be un
 same [MIT License](http://choosealicense.com/licenses/mit/) that covers the project. Feel free to contact the
 maintainers if that's a concern.
 
-## Report bugs using Github's [issues](github.com/willguibr/terraform-provider-zpa/issues)
+## Report bugs using Github's [issues](github.com/zscaler/terraform-provider-zpa/issues)
 
 I use GitHub issues to track public bugs. Report a bug by [opening a new issue](); it's that easy!
 
