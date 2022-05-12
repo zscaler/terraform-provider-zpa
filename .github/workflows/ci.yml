@@ -14,6 +14,7 @@ on:
     paths-ignore:
       - 'README.md'
       - 'docs/**'
+
   # For systems with an upstream API that could drift unexpectedly (like most SaaS systems, etc.),
   # we recommend testing at a regular interval not necessarily tied to code changes. This will
   # ensure you are alerted to something breaking due to an API change, even if the code did not
@@ -42,10 +43,7 @@ jobs:
     - name: Download Go Dependencies
       run: |
         go mod vendor && go mod tidy
-<<<<<<< HEAD:.github/workflows/ci.yml
-=======
 
->>>>>>> master:.github/workflows/build.yml
     - name: Build
       run: |
         go build -v .
