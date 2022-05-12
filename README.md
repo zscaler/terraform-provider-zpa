@@ -1,15 +1,16 @@
-<<<<<<< HEAD
-[![Acceptance Tests](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/acceptance-tests.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/acceptance-tests.yml)
-=======
 [![CI](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/ci.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/ci.yml)
->>>>>>> master
 [![Release](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml)
+
+<a href="https://terraform.io">
+    <img src="https://raw.githubusercontent.com/hashicorp/terraform-website/master/public/img/logo-text.svg" alt="Terraform logo" title="Terraform" height="50" />
+</a>
+
+<a href="https://www.zscaler.com/">
+    <img src="https://www.zscaler.com/themes/custom/zscaler/logo.svg" alt="Zscaler logo" title="Zscaler" height="50" />
+</a>
 
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
-
-⚠️  **Attention:** This provider is not affiliated with, nor supported by Zscaler in any way.
-
 
 - Website: https://www.terraform.io
 - Documentation: https://help.zscaler.com/zpa
@@ -124,11 +125,12 @@ terraform {
 Examples
 --------
 
-Visit [here](https://github.com//terraform-provider-zpa/tree/master/website/docs/) for the complete documentation for all resources on github.
+Visit [here](https://github.com/zscaler/terraform-provider-zpa/tree/master/website/docs/) for the complete documentation for all resources on github.
 
 Issues
 =========
-Please feel free to open an issue using [Github Issues](https://github.com//terraform-provider-zpa/issues) if you run into any problems using this ZPA Terraform provider.
+
+Please feel free to open an issue using [Github Issues](https://github.com/zscaler/terraform-provider-zpa/issues) if you run into any problems using this ZPA Terraform provider.
 
 Developing the Provider
 ---------------------------
@@ -157,11 +159,13 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 ```sh
 $ make testacc
 ```
+
 License
 =========
+
 MIT License
 
-Copyright (c) 2021 [William Guilherme](https://github.com/zscaler)
+Copyright (c) 2021 [Zscaler BD Solutions Architect team](https://github.com/zscaler)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
