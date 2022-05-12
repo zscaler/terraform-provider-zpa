@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/segmentgroup"
 )
 
 func dataSourceSegmentGroup() *schema.Resource {
