@@ -5,8 +5,6 @@
     <img src="https://raw.githubusercontent.com/hashicorp/terraform-website/master/public/img/logo-text.svg" alt="Terraform logo" title="Terraform" height="50" />
 </a>
 
-<<<<<<< HEAD
-=======
 <a href="https://www.zscaler.com/">
     <img src="https://www.zscaler.com/themes/custom/zscaler/logo.svg" alt="Zscaler logo" title="Zscaler" height="50" />
 </a>
@@ -14,7 +12,6 @@
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
 
->>>>>>> master
 - Website: https://www.terraform.io
 - Documentation: https://help.zscaler.com/zpa
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
