@@ -14,12 +14,6 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/customerversionprofile"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/enrollmentcert"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/idpcontroller"
-<<<<<<< HEAD
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_custom_controls"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_predefined_controls"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_profile"
-=======
->>>>>>> master
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/machinegroup"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
