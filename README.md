@@ -167,7 +167,7 @@ MIT License
 
 =======
 
-Copyright (c) 2021 [Zscaler BD Solutions Architect team](https://github.com/zscaler)
+Copyright (c) 2022 [Zscaler BD Solutions Architect team](https://github.com/zscaler)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
