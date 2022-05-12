@@ -21,6 +21,7 @@ func TestAccDataSourceProvisioningKey_Basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAppConnectorGroupDestroy,
 		Steps: []resource.TestStep{
+
 			{
 				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
 				Check: resource.ComposeTestCheckFunc(
