@@ -2,19 +2,29 @@ package zpa
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
+<<<<<<< HEAD
+=======
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
+>>>>>>> master
 )
 
 func TestAccResourceLSSConfigControllerBasic(t *testing.T) {
 	var lssConfig lssconfigcontroller.LSSConfig
-	rName := acctest.RandString(5)
-	rDesc := acctest.RandString(20)
-	resourceName := "zpa_lss_config_controller.test-lss-config"
+	lssControllerTypeAndName, _, lssControllerGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPALSSController)
+	rPort := acctest.RandIntRange(1000, 9999)
+	rIP, _ := acctest.RandIpAddress("192.168.100.0/25")
+
+	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
+	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -22,59 +32,121 @@ func TestAccResourceLSSConfigControllerBasic(t *testing.T) {
 		CheckDestroy: testAccCheckLSSConfigControllerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceLSSConfigControllerBasic(rName, rDesc),
+				Config: testAccCheckLSSConfigControllerConfigure(lssControllerTypeAndName, lssControllerGeneratedName, lssControllerGeneratedName, lssControllerGeneratedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, rIP, rPort, variable.LSSControllerEnabled, variable.LSSControllerTLSEnabled),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLSSConfigControllerExists("zpa_lss_config_controller.test-lss-config", &lssConfig),
-					resource.TestCheckResourceAttr(resourceName, "config.0.name", "test-lss-config-"+rName),
-					resource.TestCheckResourceAttr(resourceName, "config.0.description", "test-lss-config-"+rDesc),
-					resource.TestCheckResourceAttr(resourceName, "config.0.enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "config.0.lss_host", "192.168.1.1"),
-					resource.TestCheckResourceAttr(resourceName, "config.0.source_log_type", "zpn_trans_log"),
-					resource.TestCheckResourceAttr(resourceName, "config.0.use_tls", "true"),
+					testAccCheckLSSConfigControllerExists(lssControllerTypeAndName, &lssConfig),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.name", "test-lss-config-"+lssControllerGeneratedName),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.description", "test-lss-config-"+lssControllerGeneratedName),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.enabled", strconv.FormatBool(variable.LSSControllerEnabled)),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.use_tls", strconv.FormatBool(variable.LSSControllerTLSEnabled)),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "policy_rule_resource.#", "1"),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "connector_groups.#", "1"),
 				),
 			},
+
+			// Update test
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: false,
+				Config: testAccCheckLSSConfigControllerConfigure(lssControllerTypeAndName, lssControllerGeneratedName, lssControllerGeneratedName, lssControllerGeneratedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, rIP, rPort, variable.LSSControllerEnabled, variable.LSSControllerTLSEnabled),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLSSConfigControllerExists(lssControllerTypeAndName, &lssConfig),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.name", "test-lss-config-"+lssControllerGeneratedName),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.description", "test-lss-config-"+lssControllerGeneratedName),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.enabled", strconv.FormatBool(variable.LSSControllerEnabled)),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.use_tls", strconv.FormatBool(variable.LSSControllerTLSEnabled)),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "policy_rule_resource.#", "1"),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "connector_groups.#", "1"),
+				),
 			},
 		},
 	})
 }
 
-func testAccResourceLSSConfigControllerBasic(rName, rDesc string) string {
+func testAccCheckLSSConfigControllerDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*Client)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != resourcetype.ZPALSSController {
+			continue
+		}
+
+		lss, _, err := client.lssconfigcontroller.Get(rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("id %s still exists", rs.Primary.ID)
+		}
+
+		if lss != nil {
+			return fmt.Errorf("lss config controller with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
+	}
+	return nil
+}
+
+func testAccCheckLSSConfigControllerExists(resource string, lss *lssconfigcontroller.LSSConfig) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resource]
+		if !ok {
+			return fmt.Errorf("lss config controller Not found: %s", resource)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no lss config controller ID is set")
+		}
+		apiClient := testAccProvider.Meta().(*Client)
+		resp, _, err := apiClient.lssconfigcontroller.Get(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
+		if resp.LSSConfig.Name != rs.Primary.Attributes["config.0.name"] {
+			return fmt.Errorf("name Not found in created attributes")
+		}
+		if resp.LSSConfig.Description != rs.Primary.Attributes["config.0.description"] {
+			return fmt.Errorf("description Not found in created attributes")
+		}
+		return nil
+	}
+}
+
+func testAccCheckLSSConfigControllerConfigure(resourceTypeAndName, generatedName, name, description, appConnectorGroupHCL, appConnectorGroupTypeAndName, lssHost string, rPort int, enabled, tlsEnabled bool) string {
 	return fmt.Sprintf(`
 
+// app connector group resource
+%s
+
+// lss controller resource
+%s
+
+data "%s" "%s" {
+	id = "${%s.id}"
+}
+`,
+		// resource variables
+		appConnectorGroupHCL,
+		getLSSControllerResourceHCL(generatedName, name, description, appConnectorGroupTypeAndName, lssHost, rPort, enabled, tlsEnabled),
+
+		// data source variables
+		resourcetype.ZPALSSController,
+		generatedName,
+		resourceTypeAndName,
+	)
+}
+
+func getLSSControllerResourceHCL(generatedName, name, description, appConnectorGroupTypeAndName, lssHost string, rPort int, enabled, tlsEnabled bool) string {
+	return fmt.Sprintf(`
+
+// Retrieve LSS Config Format
 data "zpa_lss_config_log_type_formats" "zpn_trans_log" {
 	log_type="zpn_trans_log"
 }
 
-resource "zpa_app_connector_group" "test_app_connector_lss" {
-	name                          = "test-app-connector-lss"
-	description                   = "test-app-connector-lss"
-	enabled                       = true
-	country_code                  = "US"
-	latitude                      = "37.3382082"
-	longitude                     = "-121.8863286"
-	location                      = "San Jose, CA, USA"
-	upgrade_day                   = "SUNDAY"
-	upgrade_time_in_secs          = "66600"
-	lss_app_connector_group		  = true
-	override_version_profile      = true
-	version_profile_id            = 2
-	dns_query_type                = "IPV4"
-}
-
-resource "zpa_lss_config_controller" "test-lss-config" {
+resource "%s" "%s" {
 	config {
 		name            = "test-lss-config-%s"
 		description     = "test-lss-config-%s"
-		enabled         = true
+		enabled         = "%s"
+		use_tls         = "%s"
+		lss_host        = "%s"
+		lss_port        = "%d"
 		format          = data.zpa_lss_config_log_type_formats.zpn_trans_log.json
-		lss_host        = "192.168.1.1"
-		lss_port        = "12001"
 		source_log_type = "zpn_trans_log"
-		use_tls         = true
 	}
 	policy_rule_resource {
 		name   = "policy_rule_resource-lss_auth_logs"
@@ -113,49 +185,22 @@ resource "zpa_lss_config_controller" "test-lss-config" {
 		}
 	  }
 	connector_groups {
-		id = [ zpa_app_connector_group.test_app_connector_lss.id ]
+		id = [ "${%s.id}" ]
 	}
-	depends_on = [ zpa_app_connector_group.test_app_connector_lss ]
+	depends_on = [ %s ]
 }
+`,
 
-	`, rName, rDesc)
-}
-
-func testAccCheckLSSConfigControllerExists(resource string, lssConfig *lssconfigcontroller.LSSConfig) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resource]
-		if !ok {
-			return fmt.Errorf("LSS Config Not found: %s", resource)
-		}
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no LSS Config ID is set")
-		}
-		client := testAccProvider.Meta().(*Client)
-		resp, _, err := client.lssconfigcontroller.Get(rs.Primary.Attributes["id"])
-		if err != nil {
-			return err
-		}
-		if resp.LSSConfig.ID != rs.Primary.Attributes["id"] {
-			return fmt.Errorf("LSS Config Not found in created attributes")
-		}
-		return nil
-	}
-}
-
-func testAccCheckLSSConfigControllerDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "zpa_lss_config_controller" {
-			continue
-		}
-
-		_, _, err := client.lssconfigcontroller.Get(rs.Primary.Attributes["id"])
-		if err == nil {
-			return fmt.Errorf("LSS Config still exists")
-		}
-
-		return nil
-	}
-	return nil
+		// resource variables
+		resourcetype.ZPALSSController,
+		generatedName,
+		generatedName,
+		generatedName,
+		strconv.FormatBool(enabled),
+		strconv.FormatBool(tlsEnabled),
+		lssHost,
+		rPort,
+		appConnectorGroupTypeAndName,
+		appConnectorGroupTypeAndName,
+	)
 }

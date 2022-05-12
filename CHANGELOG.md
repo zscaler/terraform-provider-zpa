@@ -1,10 +1,39 @@
 # Changelog
 
+## 2.1.2 (May 6, 2022)
+
+### Notes
+- Supported Terraform version: **v1.x**
+
+### BUG Fixes
+
+- Fix: tcp and udp ports were not being updated during changes, requiring the application segment resource to be fully destroyed and rebuilt. Implemented ``ForceNew`` in the the ``zpa_application_segment`` resource parameters: ``tcp_port_range``, ``udp_port_range``, ``tcp_port_ranges``, ``udp_port_ranges``. This behavior instructs Terraform to first destroy and then recreate the resource if any of the attributes change in the configuration, as opposed to trying to update the existing resource. The destruction of the resource does not impact attached resources such as server groups, segment groups or policies.
+
+## 2.1.1 (April 27, 2022)
+
+### Notes
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+1. Refactored and added new acceptance tests for better statement coverage. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#88], [PR#96], [PR#98], [PR#99]
+
+2. Support explicitly empty port ranges. Allow optional use of Attributes as Blocks syntax for ``zpa_application_segment`` {tcp,udp}_port_range blocks, allowing clean specification of "no port ranges" in dynamic contexts. [PR#97](https://github.com/zscaler/terraform-provider-zpa/pull/97) Thanks @isometry
+
+### Deprecations
+
+1. Deprecated all legacy policy set controller endpoints: ``/policySet/global``, ``/policySet/reauth``, ``/policySet/bypass`` [PR#88](https://github.com/zscaler/terraform-provider-zpa/pull/88)
+
+2. Deprecated all references to ZPA private API gateway. [PR#87](https://github.com/zscaler/terraform-provider-zpa/pull/87)
+
 ## 2.1.0 (March 05, 2022)
+### Enhancements
 
-## Enhancements
-
+<<<<<<< HEAD
 - Refactored and added new acceptance tests. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#xx](https://github.com/zscaler/terraform-provider-zpa/pull/xx)
+=======
+1. Refactored and added new acceptance tests. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#xx](https://github.com/zscaler/terraform-provider-zpa/pull/xx)
+>>>>>>> master
 
 - ``data_source_zpa_app_connector_controller_test``
 - ``data_source_zpa_app_connector_group_test``
@@ -34,7 +63,7 @@
 - ``resource_zpa_policy_access_timeout_rule_test``
 - ``resource_zpa_policy_access_forwarding_rule_test``
 
-## BUG Fixes
+### BUG Fixes
 
 - Fix: Acceptance Tests for ``zpa_browser_access_test``
 - Fix: Consolidate Policy Type resources
@@ -42,12 +71,12 @@
 
 ## 2.0.7 (February 17, 2022)
 
-## BUG Fixes
+### BUG Fixes
 
 - ZPA-50: Fixed and removed deprecated arguments from ``zpa_application_segments`` data source and resource :wrench:
 - ZPA-50: Fixed ``zpa_posture_profile`` and ``zpa_trusted_networks`` acceptance tests to include ZIA cloud name :wrench:
 
-## Enhancements
+### Enhancements
 
 - ZPA-51: Updated common ``NetworkPorts`` flatten and expand functions for better optimization and global use across multiple application segment resources. This update affects the following resources: ``data_source_zpa_application_segment``, ``data_source_zpa_browser_access`` and ``resource_zpa_application_segment``, ``resource_source_zpa_browser_access`` :rocket:
 
@@ -89,7 +118,7 @@ These tests are considered best practice and were added to routinely verify that
 
 ## 2.0.5 (December 20, 2021)
 
-ENHANCEMENTS:
+### Enhancements
 
 - The provider now supports the ability to import policy access resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
 - The  following policy access resources are supported:
@@ -106,7 +135,7 @@ ENHANCEMENTS:
   - resource_zpa_policy_access_rule
   - resource_zpa_app_connector_group
 
-## Bug Fixes
+### Bug Fixes
 
 - Fixed pagination issues with all resources where only the default pagesize was being returned. [PR#52](https://github.com/zscaler/terraform-provider-zpa/pull/52) :wrench:
 - Fixed issue where Terraform showed that resources had been modified even though nothing had been changed in the upstream resources.[PR#54](https://github.com/zscaler/terraform-provider-zpa/pull/54) :wrench:
@@ -117,11 +146,15 @@ ENHANCEMENTS:
 
 - Added new data source for ``zpa_browser_access`` resource.
 
-## Enhancement
+### Enhancements
 
 - The provider now supports the ability to import resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
 This capability is currently available to the following resources:
+<<<<<<< HEAD
   - resource_zpa_app_connector_group - Issue [[#29](https://github.com/zscaler/terraform-provider-zpa/issues/29)]
+=======
+  - resource_zpa_app_connector_group - Issue ([#29](https://github.com/zscaler/terraform-provider-zpa/issues/29))
+>>>>>>> master
   - resource_zpa_app_server_controller - [PR#42](https://github.com/zscaler/terraform-provider-zpa/pull/42) :rocket:
   - resource_zpa_application_segment - [PR#42](https://github.com/zscaler/terraform-provider-zpa/pull/42) :rocket:
   - resource_zpa_segment_group - [PR#42](https://github.com/zscaler/terraform-provider-zpa/pull/42) :rocket:
@@ -153,14 +186,14 @@ ENHANCEMENTS:
 
 ## 2.0.1 (November 4, 2021)
 
-## Bug Fixes
+### Bug Fixes
 
 - Fixed issue where provider authentication parameters for hard coded credentials was not working:
 - Changed the following variable names: ``client_id``, ``client_secret`` and ``customerid`` to ``zpa_client_id``, ``zpa_client_secret`` and ``zpa_customer_id``.
 
 # 2.0.0 (November 3, 2021)
 
-## Notes
+### Notes
 
 - New management APIs are now available to manage App Connectors, App Connector Groups, Service Edges, Service Edge Groups, and Log Streaming Service (LSS) configurations.
 - New prerequisite APIs for enrollment certificates, provisioning keys, and to get version profiles, client types, status codes, and LSS formats are added.

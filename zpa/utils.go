@@ -101,3 +101,23 @@ func convertToListString(obj interface{}) []string {
 	}
 	return []string{}
 }
+
+func expandList(portRangeLst []interface{}) []string {
+	portRanges := make([]string, len(portRangeLst))
+	for i, port := range portRangeLst {
+		portRanges[i] = port.(string)
+	}
+
+	return portRanges
+}
+
+/*
+func expandList(strings []interface{}) []string {
+	expandedStrings := make([]string, len(strings))
+	for i, v := range strings {
+		expandedStrings[i] = v.(string)
+	}
+
+	return expandedStrings
+}
+*/

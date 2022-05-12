@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 [![Acceptance Tests](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/acceptance-tests.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/acceptance-tests.yml)
+=======
+[![CI](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/ci.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/ci.yml)
+>>>>>>> master
 [![Release](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml)
 
 Terraform Provider for ☁️Zscaler Private Access☁️
