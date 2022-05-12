@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -32,3 +33,4 @@ var testAccCheckDataSourceAppConnectorControllerConfig_basic = `
 data "zpa_app_connector_controller" "app_connector" {
     name = "SGIO-APP-CONNECTOR-GRP-1649283086343"
 }`
+*/

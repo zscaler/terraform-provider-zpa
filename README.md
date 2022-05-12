@@ -5,6 +5,8 @@
     <img src="https://raw.githubusercontent.com/hashicorp/terraform-website/master/public/img/logo-text.svg" alt="Terraform logo" title="Terraform" height="50" />
 </a>
 
+<<<<<<< HEAD
+=======
 <a href="https://www.zscaler.com/">
     <img src="https://www.zscaler.com/themes/custom/zscaler/logo.svg" alt="Zscaler logo" title="Zscaler" height="50" />
 </a>
@@ -12,6 +14,7 @@
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
 
+>>>>>>> master
 - Website: https://www.terraform.io
 - Documentation: https://help.zscaler.com/zpa
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
@@ -165,7 +168,11 @@ License
 
 MIT License
 
+<<<<<<< HEAD
+Copyright (c) 2021 [William Guilherme](https://github.com/zscaler)
+=======
 Copyright (c) 2021 [Zscaler BD Solutions Architect team](https://github.com/zscaler)
+>>>>>>> master
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
