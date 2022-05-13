@@ -25,12 +25,12 @@ func resourceApplicationServer() *schema.Resource {
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
 				if parseIDErr == nil {
 					// assume if the passed value is an int
-					d.Set("id", id)
+					_ = d.Set("id", id)
 				} else {
 					resp, _, err := zClient.appservercontroller.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
-						d.Set("id", resp.ID)
+						_ = d.Set("id", resp.ID)
 					} else {
 						return []*schema.ResourceData{d}, err
 					}
