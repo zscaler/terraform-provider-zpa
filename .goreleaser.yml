@@ -52,7 +52,7 @@ release:
   github:
     owner: zscaler
     name: terraform-provider-zpa
-  draft: false
+  draft: true
   discussion_category_name: General
 changelog:
   skip: true
