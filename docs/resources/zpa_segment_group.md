@@ -3,7 +3,7 @@ subcategory: "Segment Group"
 layout: "zpa"
 page_title: "ZPA: segment_group"
 description: |-
-  Creates a ZPA Segment Group resource
+  Creates and manages ZPA Segment Group resource
 ---
 # zpa_segment_group (Resource)
 
@@ -13,30 +13,24 @@ The **zpa_segment_group** resource creates a segment group in the Zscaler Privat
 
 ```hcl
 # ZPA Segment Group resource
-resource "zpa_segment_group" "example" {
-  name = "Example"
-  description = "Example"
-  enabled = true
-  policy_migrated = true
-  tcp_keep_alive_enabled = true
+resource "zpa_segment_group" "test_segment_group" {
+  name                   = "test1-segment-group"
+  description            = "test1-segment-group"
+  enabled                = true
+  tcp_keep_alive_enabled = "1"
 }
 ```
 
 ### Required
 
-* `name` - (Required) Name of the app group.
+* `name` - (Required) Name of the segment group.
 
 ## Attributes Reference
 
-* `description` (String) Description of the app group.
-* `enabled` (Optional) Whether this app group is enabled or not.
-* `config_space` (String)
-* `policy_migrated` (Boolean)
-* `tcp_keep_alive_enabled` (Number)
-
-`applications`
-
-* `id` (Number) The ID of Application Segment resources.
+* `description` (Optional) Description of the segment group.
+* `enabled` (Optional) Whether this segment group is enabled or not.
+* `config_space` (Optional)
+* `tcp_keep_alive_enabled` (Optional)
 
 ## Import
 
@@ -47,7 +41,9 @@ For example:
 ```shell
 terraform import zpa_segment_group.example <segment_group_id>
 ```
+
 or
+
 ```shell
 terraform import zpa_segment_group.example <segment_group_name>
 ```

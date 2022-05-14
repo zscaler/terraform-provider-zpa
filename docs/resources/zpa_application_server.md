@@ -3,7 +3,7 @@ subcategory: "Application Server"
 layout: "zpa"
 page_title: "ZPA: application_server"
 description: |-
-  Creates a ZPA Application Server.
+  Creates and manages ZPA Application Servers.
 ---
 
 # zpa_application_server (Resource)
@@ -13,28 +13,38 @@ The **zpa_application_server** resource creates an application server in the Zsc
 ## Example Usage
 
 ```hcl
-# ZPA Application Server resource
-resource "zpa_application_server" "server1" {
-  name                          = "Example"
-  description                   = "Example"
+# ZPA Application Server resource (IP Address)
+resource "zpa_application_server" "test_app_server"{
+  name                          = "test1-app-server"
+  description                   = "test1-app-server"
   address                       = "192.168.1.1"
   enabled                       = true
 }
 ```
 
 ```hcl
+# ZPA Application Server resource (FQDN Address)
+resource "zpa_application_server" "test_app_server" {
+  name                          = "test1-app-server"
+  description                   = "test1-app-server"
+  address                       = "server1.acme.com"
+  enabled                       = true
+}
+```
+
+```hcl
 # ZPA Application Server resource
-resource "zpa_application_server" "server1" {
-  name                          = "Example"
-  description                   = "Example"
+resource "zpa_application_server" "test_app_server"{
+  name                          = "test1-app-server"
+  description                   = "test1-app-server"
   address                       = "192.168.1.1"
   enabled                       = true
-  app_server_group_ids          = [data.zpa_server_group.example.com]
+  app_server_group_ids          = [ data.zpa_server_group.example.com ]
 }
 
 data "zpa_server_group" "example" {
     name = "Example"
-} 
+}
 ```
 
 ## Argument Reference
@@ -60,7 +70,9 @@ For example:
 ```shell
 terraform import zpa_application_server.example <application_server_id>
 ```
+
 or
+
 ```shell
 terraform import zpa_application_server.example <application_server_name>
 ```

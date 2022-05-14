@@ -3,8 +3,8 @@ subcategory: "Service Edge Group"
 layout: "zpa"
 page_title: "ZPA: service_edge_group"
 description: |-
-  Creates a ZPA Service Edge Group details.
-  
+  Creates and manages ZPA Service Edge Group details.
+
 ---
 
 # zpa_service_edge_group
@@ -25,7 +25,7 @@ resource "zpa_service_edge_group" "service_edge_group_sjc" {
   location             = "San Jose, CA, USA"
   version_profile_id   = "0"
   trusted_networks {
-    id = [data.zpa_trusted_network.example.id]
+    id = [ data.zpa_trusted_network.example.id ]
   }
 }
 ```
@@ -74,7 +74,9 @@ For example:
 ```shell
 terraform import zpa_service_edge_group.example <service_edge_group_id>
 ```
+
 or
+
 ```shell
 terraform import zpa_service_edge_group.example <service_edge_group_name>
 ```

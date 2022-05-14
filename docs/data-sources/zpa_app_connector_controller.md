@@ -4,14 +4,13 @@ layout: "zpa"
 page_title: "ZPA: app_connector_controller"
 description: |-
   Gets a ZPA App Connector details.
-  
+
 ---
 # zpa_app_connector_controller
 
 The **zpa_app_connector_controller** data source provides details about a specific app connector created in the Zscaler Private Access cloud. This data source can then be referenced in the following resources:
 
 * App Connector Group
-* Provisioning Key
 
 ## Example Usage
 
