@@ -1,10 +1,10 @@
 ---
-subcategory: "Application Segment"
+subcategory: "App Connector Group"
 layout: "zpa"
-page_title: "ZPA: application_segment"
+page_title: "ZPA: app_connector_group"
 description: |-
-  Creates a ZPA Application Segment details.
-  
+  Creates and manages ZPA App Connector Groups.
+
 ---
 
 # zpa_app_connector_group
@@ -18,11 +18,11 @@ resource "zpa_app_connector_group" "example" {
   name                          = "Example"
   description                   = "Example"
   enabled                       = true
-  city_country                  = "Langley, CA"
-  country_code                  = "CA"
-  latitude                      = "49.1041779"
-  longitude                     = "-122.6603519"
-  location                      = "Langley City, BC, Canada"
+  city_country                  = "San Jose, CA"
+  country_code                  = "US"
+  latitude                      = "37.338"
+  longitude                     = "-121.8863"
+  location                      = "San Jose, CA, US"
   upgrade_day                   = "SUNDAY"
   upgrade_time_in_secs          = "66600"
   override_version_profile      = true
@@ -64,7 +64,9 @@ App Connector Group can be imported by using `<APP CONNECTOR GROUP ID>` or `<APP
 ```shell
 terraform import zpa_app_connector_group.example <app_connector_group_id>
 ```
+
 or
+
 ```shell
 terraform import zpa_app_connector_group.example <app_connector_group_name>
 ```

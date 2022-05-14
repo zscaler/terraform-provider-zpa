@@ -3,17 +3,37 @@ layout: "ZPA"
 page_title: "Provider: Zscaler Private Access"
 description: |-
    The Zscaler Private Access provider is used to interact with ZPA API, to onboard new application segments, segment groups, server groups, application servers and create zero trust access policies. To use this  provider, you must create ZPA API credentials.
-
 ---
-
-⚠️ **Attention:** This provider is not affiliated with, nor supported by Zscaler in any way.
 
 # Zscaler Private Access (ZPA) Provider
 
 The Zscaler Private Access (ZPA) provider is used to interact with [ZPA](https://www.zscaler.com/products/zscaler-private-access) platform, to onboard new application segments, segment groups, server groups, and create zero trust access policies. To use this  provider, you must create ZPA API credentials. For details on API credentials, please visit the official product [help portal](https://help.zscaler.com/zpa/about-api-keys)
 
-
 Use the navigation on the left to read about the available resources.
+
+## Example Usage
+
+```hcl
+# Configure ZPA provider source and version
+terraform {
+  required_providers {
+    zpa = {
+      source = "zscaler/zpa"
+      version = "2.1.3"
+    }
+  }
+}
+
+provider "zpa" {
+  zpa_client_id         = "xxxxxxxxxxxxxxxx"
+  zpa_client_secret     = "xxxxxxxxxxxxxxxx"
+  zpa_customer_id       = "xxxxxxxxxxxxxxxx"
+}
+
+resouce "zpa_application_segment" "app_segment" {
+  # ...
+}
+```
 
 ## Authentication
 
@@ -30,7 +50,7 @@ Static credentials can be provided by specifying the `zpa_client_id`, `zpa_clien
 
 **Usage:**
 
-```hcl
+``` hcl
 provider "zpa" {
   zpa_client_id         = "xxxxxxxxxxxxxxxx"
   zpa_client_secret     = "xxxxxxxxxxxxxxxx"
@@ -49,18 +69,19 @@ provider "zpa" {}
 **macOS and Linux Usage:**
 
 ```sh
-$ export ZPA_CLIENT_ID      = "xxxxxxxxxxxxxxxx"
-$ export ZPA_CLIENT_SECRET  = "xxxxxxxxxxxxxxxx"
-$ export ZPA_CUSTOMER_ID    = "xxxxxxxxxxxxxxxx"
-$ terraform plan
+export ZPA_CLIENT_ID      = "xxxxxxxxxxxxxxxx"
+export ZPA_CLIENT_SECRET  = "xxxxxxxxxxxxxxxx"
+export ZPA_CUSTOMER_ID    = "xxxxxxxxxxxxxxxx"
+terraform plan
 ```
 
 **Windows Powershell:**
 
 ```powershell
-$env:ZPA_CLIENT_ID      = 'xxxxxxxxxxxxxxxx'
-$env:ZPA_CLIENT_SECRET  = 'xxxxxxxxxxxxxxxx'
-$env:ZPA_CUSTOMER_ID    = 'xxxxxxxxxxxxxxxx'
+env:ZPA_CLIENT_ID      = 'xxxxxxxxxxxxxxxx'
+env:ZPA_CLIENT_SECRET  = 'xxxxxxxxxxxxxxxx'
+env:ZPA_CUSTOMER_ID    = 'xxxxxxxxxxxxxxxx'
+terraform plan
 ```
 
 ## Argument Reference
