@@ -14,7 +14,7 @@ Terraform Provider for ☁️Zscaler Private Access☁️
 
 - Website: https://www.terraform.io
 - Documentation: https://help.zscaler.com/zpa
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
+- Zscaler Community: [Zscaler Community](https://community.zscaler.com/)
 
 Requirements
 ------------
