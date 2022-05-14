@@ -1,6 +1,6 @@
 ---
-layout: "ZPA"
-page_title: "Provider: Zscaler Private Access"
+layout: "zscaler"
+page_title: "Provider: ZPA"
 description: |-
    The Zscaler Private Access provider is used to interact with ZPA API, to onboard new application segments, segment groups, server groups, application servers and create zero trust access policies. To use this  provider, you must create ZPA API credentials.
 ---
