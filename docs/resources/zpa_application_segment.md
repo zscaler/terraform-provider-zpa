@@ -8,9 +8,9 @@ description: |-
 ---
 # zpa_application_segment
 
-The **zpa_application_segment** resource creates an application segment in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule.
+The **zpa_application_segment** resource creates an application segment in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
 
-## Example Usage
+## Example 1 Usage
 
 ```hcl
 # ZPA Application Segment resource
@@ -29,18 +29,14 @@ resource "zpa_application_segment" "test_app_segment" {
     }
     depends_on = [ zpa_server_group.test_server_group, zpa_server_group.test_segment_group]
 }
-```
 
-```hcl
 # ZPA Segment Group resource
 resource "zpa_segment_group" "test_segment_group" {
   name            = "test1-segment-group"
   description     = "test1-segment-group"
   enabled         = true
 }
-```
 
-```hcl
 # ZPA Server Group resource
 resource "zpa_server_group" "test_server_group" {
   name              = "test1-server-group"
@@ -52,9 +48,75 @@ resource "zpa_server_group" "test_server_group" {
   }
   depends_on = [ zpa_app_connector_group.test_app_connector_group ]
 }
+
+# ZPA App Connector Group resource
+resource "zpa_app_connector_group" "test_app_connector_group" {
+  name                          = "test1-appconnector-group"
+  description                   = "test1-appconnector-group"
+  enabled                       = true
+  city_country                  = "San Jose, CA"
+  country_code                  = "US"
+  latitude                      = "37.338"
+  longitude                     = "-121.8863"
+  location                      = "San Jose, CA, US"
+  upgrade_day                   = "SUNDAY"
+  upgrade_time_in_secs          = "66600"
+  override_version_profile      = true
+  version_profile_id            = 0
+  dns_query_type                = "IPV4"
+}
 ```
 
+## Example 2 Usage
+
 ```hcl
+# ZPA Application Segment resource
+resource "zpa_application_segment" "test_app_segment" {
+    name              = "test1-app-segment"
+    description       = "test1-app-segment"
+    enabled           = true
+    health_reporting  = "ON_ACCESS"
+    bypass_type       = "NEVER"
+    is_cname_enabled  = true
+  tcp_port_range = [
+    {
+    from = "8080"
+    to = "8080"
+    }
+  ]
+  udp_port_range = [
+    {
+    from = "8080"
+    to = "8080"
+    }
+  ]
+    domain_names      = ["server.acme.com"]
+    segment_group_id  = zpa_segment_group.test_segment_group.id
+    server_groups {
+        id = [ zpa_server_group.test_server_group.id]
+    }
+    depends_on = [ zpa_server_group.test_server_group, zpa_server_group.test_segment_group]
+}
+
+# ZPA Segment Group resource
+resource "zpa_segment_group" "test_segment_group" {
+  name            = "test1-segment-group"
+  description     = "test1-segment-group"
+  enabled         = true
+}
+
+# ZPA Server Group resource
+resource "zpa_server_group" "test_server_group" {
+  name              = "test1-server-group"
+  description       = "test1-server-group"
+  enabled           = true
+  dynamic_discovery = false
+  app_connector_groups {
+    id = [ zpa_app_connector_group.example.id ]
+  }
+  depends_on = [ zpa_app_connector_group.test_app_connector_group ]
+}
+
 # ZPA App Connector Group resource
 resource "zpa_app_connector_group" "test_app_connector_group" {
   name                          = "test1-appconnector-group"
@@ -87,11 +149,13 @@ The following arguments are supported:
 -> **NOTE:**  TCP and UDP ports can also be defined using the following model:
 
 * `tcp_port_range` - (Required) TCP port ranges used to access the app.
-    `from:`
-    `to:`
+
+  * `from:`
+  * `to:`
+
 * `udp_port_range` - (Required) UDP port ranges used to access the app.
-    `from:`
-    `to:`
+  * `from:`
+  * `to:`
 
 ## Attributes Reference
 

@@ -14,6 +14,7 @@ The **zpa_app_connector_group** resource creates a app connector group in the Zs
 ## Example Usage
 
 ```hcl
+# Create a App Connector Group
 resource "zpa_app_connector_group" "example" {
   name                          = "Example"
   description                   = "Example"

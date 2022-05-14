@@ -2,30 +2,31 @@
 subcategory: "Policy Access Rule"
 page_title: "ZPA: policyset_rule"
 description: |-
-  Creates a ZPA Policy Access Rule.
+  Creates and manages ZPA Policy Access Rule.
 ---
 
 # zpa_policy_access_rule (Resource)
 
-The **zpa_policy_access_rule** resource creates a policy access rule in the Zscaler Private Access cloud.
+The **zpa_policy_access_rule** resource creates and manages policy access rule in the Zscaler Private Access cloud.
 
 ## Example Usage
 
 ```hcl
-resource "zpa_policy_access_rule" "gf_engineering" {
-  name                          = "GF-Engineering"
-  description                   = "GF-Engineering"
+#Create Policy Access Rule
+resource "zpa_policy_access_rule" "test_policy_access" {
+  name                          = "test1-policy-access"
+  description                   = "test1-policy-access"
   action                        = "ALLOW"
   operator                      = "AND"
   policy_set_id                 = data.zpa_policy_type.access_policy.id
 
   conditions {
-    negated = false
-    operator = "OR"
+    negated   = false
+    operator  = "OR"
     operands {
-      object_type = "CLIENT_TYPE"
+      object_type = "APP"
       lhs = "id"
-      rhs = "zpn_client_type_exporter"
+      rhs = [ zpa_application_segment.test_app_segment.id ]
     }
   }
   conditions {
@@ -37,22 +38,25 @@ resource "zpa_policy_access_rule" "gf_engineering" {
       rhs = [data.zpa_scim_groups.engineering.id]
     }
   }
+  depends_on = [
+  data.zpa_policy_type.access_policy,
+  data.zpa_idp_controller.idp_name,
+  data.zpa_scim_groups.engineering,
+  zpa_application_segment.test_app_segment
+  ]
 }
-```
 
-```hcl
+# Get Global Access Policy ID
 data "zpa_policy_type" "access_policy" {
     policy_type = "ACCESS_POLICY"
 }
-```
 
-```hcl
+# Get IdP ID
 data "zpa_idp_controller" "idp_name" {
  name = "IdP_Name"
 }
-```
 
-```hcl
+# Get SCIM Group attribute ID
 data "zpa_scim_groups" "engineering" {
   name = "Engineering"
   idp_name = "IdP_Name"
@@ -66,39 +70,36 @@ data "zpa_scim_groups" "engineering" {
 
 ## Attributes Reference
 
-* `action` (String) This is for providing the rule action.
-* `action_id` (String) This field defines the description of the server.
-* `bypass_default_rule` (Boolean)
-* `custom_msg` (String) This is for providing a customer message for the user.
-* `description` (String) This is the description of the access policy rule.
-* `operator` (String)
-* `policy_type` (String)
-* `priority` (String)
-* `reauth_default_rule` (Boolean)
-* `reauth_idle_timeout` (String)
-* `reauth_timeout` (String)
-* `rule_order` (String)
+* `action` (Optional) This is for providing the rule action.
+* `action_id` (Optional) This field defines the description of the server.
+* `custom_msg` (Optional) This is for providing a customer message for the user.
+* `description` (Optional) This is the description of the access policy rule.
+* `operator` (Optional)
+* `policy_type` (Optional)
+* `rule_order` (Optional)
 
-`conditions` - (Optional)
+* `conditions` - (Optional)
+  * `negated` - (Optional)
+  * `operator` (Optional)
+  * `operands`
+    * `name` (Optional)
+    * `lhs` (Optional)
+    * `rhs` (Optional) This denotes the value for the given object type. Its value depends upon the key.
+    * `idp_id` (Optional)
+    * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `APP`, `APP_GROUP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
+    * `CLIENT_TYPE` (Optional) - The below options are the only ones supported in an access policy rule.
+      * `zpn_client_type_exporter`
+      * `zpn_client_type_browser_isolation`
+      * `zpn_client_type_machine_tunnel`
+      * `zpn_client_type_ip_anchoring`
+      * `zpn_client_type_edge_connector`
+      * `zpn_client_type_zapp`
 
-* `negated` (Optional)
-* `idp_id` (Optional)
-* `operator` (String)
-* `name` (Optional)
-* `object_type` (Optional) This is for specifying the policy critiera. Supported values: `APP`, `APP_GROUP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. TRUSTED_NETWORK is only supported for CLIENT_TYPE
+* `app_connector_groups`
+  * `id` - (Optional) The ID of an app connector group resource
 
-`operands`
-
-* `lhs` (Optional)
-* `rhs` (Optional) This denotes the value for the given object type. Its value depends upon the key.
-
-`app_connector_groups`
-
-* `id` - (Optional) The ID of this resource.
-
-`app_server_groups`
-
-* `id` - (Optional) The ID of this resource.
+* `app_server_groups`
+  * `id` - (Optional) The ID of a server group resource
 
 ## Import
 

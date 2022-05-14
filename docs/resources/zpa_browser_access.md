@@ -3,16 +3,20 @@ subcategory: "Browser Access"
 layout: "zpa"
 page_title: "ZPA: browser_access"
 description: |-
-  Creates a ZPA Browser Access.
+  Creates and manages ZPA Browser Access.
 ---
-# zpa_browser_access
+# zpa_browser_access (Resource)
 
-The **zpa_browser_access** creates an browser access resource in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
+The **zpa_browser_access** creates a browser access resource in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
 
-## Example Usage
+## Example 1 Usage
 
 ```hcl
-Create Browser Access Application
+# Retrieve Browser Access Certificate
+data "zpa_ba_certificate" "test_cert" {
+  name = "sales.acme.com"
+}
+# Create Browser Access Application
 resource "zpa_browser_access" "browser_access_apps" {
     name = "Browser Access Apps"
     description = "Browser Access Apps"
@@ -27,7 +31,7 @@ resource "zpa_browser_access" "browser_access_apps" {
         name = "sales.acme.com"
         application_protocol = "HTTP"
         application_port = "80"
-        certificate_id = data.zpa_ba_certificate.sales_ba.id
+        certificate_id = data.zpa_ba_certificate.test_cert.id
         trust_untrusted_cert = true
         enabled = true
         domain = "sales.acme.com"

@@ -3,7 +3,7 @@ subcategory: "Provisioning Key"
 layout: "zpa"
 page_title: "ZPA: provisioning_key"
 description: |-
-  Creates a ZPA Provisioning Key for Service Edge and/or App Connector Groups.
+  Creates and manages ZPA Provisioning Key for Service Edge and/or App Connector Groups.
 
 ---
 
@@ -14,66 +14,69 @@ The **zpa_provisioning_key** resource provides creates a provisioning key in the
 1. App Connector Groups
 2. Service Edge Groups
 
-## Example Usage
+## App Connector Group Provisioning Key Example Usage
 
 ```hcl
-# Create Provisioning Key for Service Edge Group
-resource "zpa_provisioning_key" "usa_provisioning_key" {
-  name                  = "AWS Provisioning Key"
-  association_type      = "SERVICE_EDGE_GRP"
-  max_usage             = "10"
-  enrollment_cert_id    = data.zpa_enrollment_cert.service_edge.id
-  zcomponent_id         = zpa_service_edge_group.service_edge_group_nyc.id
+# Retrieve the Connector Enrollment Certificate
+data "zpa_enrollment_cert" "connector" {
+    name = "Connector"
 }
 
-// Create a Service Edge Group
-resource "zpa_service_edge_group" "service_edge_group_nyc" {
-  name                  = "Service Edge Group New York"
-  description           = "Service Edge Group in New York"
-  upgrade_day           = "SUNDAY"
-  upgrade_time_in_secs  = "66600"
-  latitude              = "40.7128"
-  longitude             = "-73.935242"
-  location              = "New York, NY, USA"
-  version_profile_id    = "0"
-}
-
-// Retrieve the Service Edge Enrollment Certificate
-data "zpa_enrollment_cert" "service_edge" {
-    name = "Service Edge"
-}
-```
-
-```hcl
-// Create Provisioning Key for App Connector Group
-resource "zpa_provisioning_key" "canada_provisioning_key" {
-  name                  = "Canada Provisioning Key"
+# Create Provisioning Key for App Connector Group
+resource "zpa_provisioning_key" "test_provisioning_key" {
+  name                  = test_provisioning_key
   association_type      = "CONNECTOR_GRP"
   max_usage             = "10"
   enrollment_cert_id    = data.zpa_enrollment_cert.connector.id
   zcomponent_id         = zpa_app_connector_group.canada_connector_group.id
+  depends_on            = [ data.zpa_enrollment_cert.connector, zpa_app_connector_group.us_connector_group]
 }
 
-// Create an App Connector Group
-resource "zpa_app_connector_group" "canada_connector_group" {
-  name                          = "Canada Connector Group"
-  description                   = "Canada Connector Group"
+# Create an App Connector Group
+resource "zpa_app_connector_group" "usa_connector_group" {
+  name                          = "USA Connector Group"
+  description                   = "USA Connector Group"
   enabled                       = true
-  city_country                  = "Toronto, CA"
+  city_country                  = "San Jose, CA"
   country_code                  = "CA"
   latitude                      = "43.6532"
   longitude                     = "79.3832"
-  location                      = "Toronto, ON, Canada"
+  location                      = "San Jose, CA, USA"
   upgrade_day                   = "SUNDAY"
   upgrade_time_in_secs          = "66600"
   override_version_profile      = true
   version_profile_id            = 0
   dns_query_type                = "IPV4"
 }
+```
 
-// Retrieve the Connector Enrollment Certificate
-data "zpa_enrollment_cert" "connector" {
-    name = "Connector"
+## Service Edge Provisioning KeyExample Usage
+
+```hcl
+# Create Provisioning Key for Service Edge Group
+resource "zpa_provisioning_key" "test_provisioning_key" {
+  name                  = "test-provisioning-key"
+  association_type      = "SERVICE_EDGE_GRP"
+  max_usage             = "10"
+  enrollment_cert_id    = data.zpa_enrollment_cert.service_edge.id
+  zcomponent_id         = zpa_service_edge_group.service_edge_group_nyc.id
+}
+
+# Retrieve the Service Edge Enrollment Certificate
+data "zpa_enrollment_cert" "service_edge" {
+    name = "Service Edge"
+}
+
+# Create a Service Edge Group
+resource "zpa_service_edge_group" "service_edge_group_nyc" {
+  name                  = "Service Edge Group New York"
+  description           = "Service Edge Group New York"
+  upgrade_day           = "SUNDAY"
+  upgrade_time_in_secs  = "66600"
+  latitude              = "40.7128"
+  longitude             = "-73.935242"
+  location              = "New York, NY, USA"
+  version_profile_id    = "0"
 }
 ```
 

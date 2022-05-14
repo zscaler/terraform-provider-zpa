@@ -2,19 +2,19 @@
 subcategory: "Policy Access Rule Browser Access"
 page_title: "ZPA: policyset_rule"
 description: |-
-  Creates a ZPA Policy Access Rule for Browser Access.
+  Creates and manages ZPA Policy Access Rule for Browser Access.
 ---
 
 # zpa_policyset_rule (Resource)
 
-The **zpa_policyset_rule** resource creates a policy access rule in the Zscaler Private Access cloud.
+The **zpa_policyset_rule** resource creates and manages policy access rule to support Browser Access  in the Zscaler Private Access cloud.
 
 ## Example Usage
 
 ```hcl
 resource "zpa_policy_access_rule" "browser_access_rule" {
-  name                          = "Browser Access Corporate Services"
-  description                   = "Browser Access Corporate Services"
+  name                          = "test1-ba-policy-access"
+  description                   = "test1-ba-policy-access"
   action                        = "ALLOW"
   operator                      = "AND"
   policy_set_id                 = data.zpa_policy_type.access_policy.id
@@ -25,7 +25,7 @@ resource "zpa_policy_access_rule" "browser_access_rule" {
     operands {
       object_type = "APP"
       lhs = "id"
-      rhs = [zpa_application_segment.as_corporate_services.id]
+      rhs = [zpa_application_segment.test_app_segment.id]
     }
   }
 
@@ -65,50 +65,22 @@ data "zpa_scim_groups" "engineering" {
   name = "Engineering"
   idp_name = "IdP_Name"
 }
-```
 
-```hcl
-// Create Application Segment
-resource "zpa_application_segment" "as_corporate_services" {
-    name = "Corporate Services"
-    description = "Corporate Services"
-    enabled = true
-    health_reporting = "ON_ACCESS"
-    bypass_type = "NEVER"
-    tcp_port_ranges = ["1", "52", "54", "65535"]
-    domain_names = ["*.acme.com"]
-    segment_group_id = zpa_segment_group.sg_corporate_services.id
+# ZPA Application Segment resource
+resource "zpa_application_segment" "test_app_segment" {
+    name              = "test1-app-segment"
+    description       = "test1-app-segment"
+    enabled           = true
+    health_reporting  = "ON_ACCESS"
+    bypass_type       = "NEVER"
+    is_cname_enabled  = true
+    tcp_port_ranges   = ["8080", "8080"]
+    domain_names      = ["server.acme.com"]
+    segment_group_id  = zpa_segment_group.test_segment_group.id
     server_groups {
-        id = [zpa_server_group.corporate_server_group.id]
+        id = [ zpa_server_group.test_server_group.id]
     }
-}
-```
-
-```hcl
-// Create Segment Group
- resource "zpa_segment_group" "sg_corporate_services" {
-   name = "Corporate Services"
-   description = "Corporate Services"
-   enabled = true
-   policy_migrated = true
- }
-```
-
-```hcl
-// Create Server Group
-resource "zpa_server_group" corporate_server_group" {
-  name =  "Corporate Services Group"
-  description = "Corporate Services Group"
-  enabled = true
-  dynamic_discovery = true
-  app_connector_groups {
-    id = [data.zpa_app_connector_group.aws_connector.id]
-  }
-}
-
-// Get App Connector Group ID
-data "zpa_app_connector_group" "aws_connector" {
-  name = "AWS-Connector"
+    depends_on = [ zpa_server_group.test_server_group, zpa_server_group.test_segment_group]
 }
 ```
 
@@ -132,26 +104,28 @@ data "zpa_app_connector_group" "aws_connector" {
 * `reauth_timeout` (String)
 * `rule_order` (String)
 
-`conditions` - (Optional)
+* `conditions` - (Optional)
+  * `negated` - (Optional)
+  * `operator` (Optional)
+  * `operands`
+    * `name` (Optional)
+    * `lhs` (Optional)
+    * `rhs` (Optional) This denotes the value for the given object type. Its value depends upon the key.
+    * `idp_id` (Optional)
+    * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `APP`, `APP_GROUP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
+    * `CLIENT_TYPE` (Optional) - The below options are the only ones supported in an access policy rule.
+      * `zpn_client_type_exporter`
+      * `zpn_client_type_browser_isolation`
+      * `zpn_client_type_machine_tunnel`
+      * `zpn_client_type_ip_anchoring`
+      * `zpn_client_type_edge_connector`
+      * `zpn_client_type_zapp`
 
-* `negated` (Optional)
-* `idp_id` (Optional)
-* `operator` (String)
-* `name` (Optional)
-* `object_type` (Optional) This is for specifying the policy critiera. Supported values: `APP`, `APP_GROUP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. TRUSTED_NETWORK is only supported for CLIENT_TYPE
+* `app_connector_groups`
+  * `id` - (Optional) The ID of an app connector group resource
 
-`operands`
-
-* `lhs` (Optional)
-* `rhs` (Optional) This denotes the value for the given object type. Its value depends upon the key.
-
-`app_connector_groups`
-
-* `id` - (Optional) The ID of this resource.
-
-`app_server_groups`
-
-* `id` - (Optional) The ID of this resource.
+* `app_server_groups`
+  * `id` - (Optional) The ID of a server group resource
 
 ## Import
 
