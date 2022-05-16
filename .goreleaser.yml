@@ -48,11 +48,11 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 release:
-# Explicit set the repo to release from. Default is origin.
-  # github:
-  #   owner: zscaler
-  #   name: terraform-provider-zpa
   # Visit your project's GitHub Releases page to publish this release.
-  # draft: true
+  github:
+    owner: zscaler
+    name: terraform-provider-zpa
+  draft: true
+  discussion_category_name: Annoucements
 changelog:
   skip: true
