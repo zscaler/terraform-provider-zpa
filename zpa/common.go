@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -553,8 +554,8 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	}
 }
 
-func importPolicyStateFunc(types []string) schema.StateFunc {
-	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
+	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		zClient := m.(*Client)
 		id := d.Id()
 		_, parseIDErr := strconv.ParseInt(id, 10, 64)
