@@ -27,7 +27,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 		Update: resourcePolicyAccessUpdate,
 		Delete: resourcePolicyAccessDelete,
 		Importer: &schema.ResourceImporter{
-			State: importPolicyStateFunc([]string{"ACCESS_POLICY", "GLOBAL_POLICY"}),
+			StateContext: importPolicyStateContextFunc([]string{"ACCESS_POLICY", "GLOBAL_POLICY"}),
 		},
 
 		Schema: MergeSchema(
