@@ -193,8 +193,8 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
-		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
+		_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+		_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 		if err := d.Set("server_groups", flattenAppServerGroups(resp)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
