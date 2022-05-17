@@ -6,8 +6,9 @@ const (
 
 type Pagination struct {
 	PageSize int    `json:"pagesize" url:"pagesize"`
-	Page     int    `json:"page,omitempty" url:"page"`
-	Search   string //`json:"search,omitempty" url:"search"`
+	Page     int    `json:"page,omitempty" url:"page,omitempty"`
+	Search   string `json:"-" url:"-"`
+	Search2  string `json:"search,omitempty" url:"search,omitempty"`
 }
 
 type NetworkPorts struct {
