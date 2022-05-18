@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Server Group resource
 ---
 
-# zpa_server_group (Resource)
+# Resource: zpa_server_group
 
 The **zpa_server_group** resource creates a server group in the Zscaler Private Access cloud. This resource can then be referenced in an application segment or application server resource.
 

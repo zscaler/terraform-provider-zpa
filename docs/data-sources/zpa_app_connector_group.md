@@ -6,7 +6,7 @@ description: |-
   Get information about ZPA App Connector Group in Zscaler Private Access cloud.
 ---
 
-# zpa_app_connector_group
+# Data Source: zpa_app_connector_group
 
 Use the **zpa_app_connector_group** data source to get information about a app connector group in the Zscaler Private Access cloud. This data source can then be referenced in an App Connector Group. This data source can then be referenced in the following resources:
 

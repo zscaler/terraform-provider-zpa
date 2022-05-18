@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Policy Access Rule.
 ---
 
-# zpa_policy_access_rule (Resource)
+# Resource: zpa_policy_access_rule
 
 The **zpa_policy_access_rule** resource creates and manages policy access rule in the Zscaler Private Access cloud.
 

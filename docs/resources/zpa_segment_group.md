@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Segment Group resource
 ---
 
-# zpa_segment_group (Resource)
+# Resource: zpa_segment_group
 
 The **zpa_segment_group** resource creates a segment group in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule or application segment resource.
 
@@ -22,11 +22,15 @@ resource "zpa_segment_group" "test_segment_group" {
 }
 ```
 
+## Attributes Reference
+
 ### Required
 
 * `name` - (Required) Name of the segment group.
 
-## Attributes Reference
+## Attribute Reference
+
+In addition to all arguments above, the following attributes are exported:
 
 * `description` (Optional) Description of the segment group.
 * `enabled` (Optional) Whether this segment group is enabled or not.
@@ -35,7 +39,7 @@ resource "zpa_segment_group" "test_segment_group" {
 
 ## Import
 
-Segment Group can be imported by using `<SEGMENT GROUP ID>` or `<SEGMENT GROUP NAME>` as the import ID.
+**segment_group** can be imported by using `<SEGMENT GROUP ID>` or `<SEGMENT GROUP NAME>` as the import ID.
 
 For example:
 

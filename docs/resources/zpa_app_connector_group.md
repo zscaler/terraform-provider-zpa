@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA App Connector Groups.
 ---
 
-# zpa_app_connector_group
+# Resource: zpa_app_connector_group
 
 The **zpa_app_connector_group** resource creates a and manages app connector groups in the Zscaler Private Access (ZPA) cloud. This resource can then be associated with the following resoueces: server groups, log receivers and access policies.
 

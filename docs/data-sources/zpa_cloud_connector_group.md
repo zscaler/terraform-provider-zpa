@@ -6,7 +6,7 @@ description: |-
   Get information about ZPA Cloud Connector Group in Zscaler Private Access cloud.
 ---
 
-# zpa_cloud_connector_group
+# Data Source: zpa_cloud_connector_group
 
 Use the **zpa_cloud_connector_group** data source to get information about a cloud connector group created from the Zscaler Private Access cloud. This data source can then be referenced within an Access Policy rule
 

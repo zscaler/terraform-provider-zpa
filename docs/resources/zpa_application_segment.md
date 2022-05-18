@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Application Segments.
 ---
 
-# zpa_application_segment
+# Resource: zpa_application_segment
 
 The **zpa_application_segment** resource creates an application segment in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
 
@@ -149,7 +149,6 @@ The following arguments are supported:
 -> **NOTE:**  TCP and UDP ports can also be defined using the following model:
 
 * `tcp_port_range` - (Required) TCP port ranges used to access the app.
-
   * `from:`
   * `to:`
 

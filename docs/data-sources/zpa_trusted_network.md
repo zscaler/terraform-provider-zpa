@@ -6,7 +6,7 @@ description: |-
   Get information about Trusted Network in Zscaler Private Access cloud.
 ---
 
-# zpa_trusted_network
+# Data Source: zpa_trusted_network
 
 The **zpa_trusted_network** data source to get information about a trusted network created in the Zscaler Private Access Mobile Portal. This data source can then be referenced within the following resources:
 

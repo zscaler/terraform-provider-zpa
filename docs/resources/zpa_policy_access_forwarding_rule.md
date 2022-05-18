@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Policy Access Forwarding Rule.
 ---
 
-# zpa_policy_forwarding_rule (Resource)
+# Resource: zpa_policy_forwarding_rule
 
 The **zpa_policy_forwarding_rule** resource creates a policy forwarding access rule in the Zscaler Private Access cloud.
 

@@ -6,7 +6,7 @@ description: |-
   Get information about Machine Groups in Zscaler Private Access cloud.
 ---
 
-# zpa_machine_group
+# Data Source: zpa_machine_group
 
 Use the **zpa_machine_group** data source to get information about a machine group created in the Zscaler Private Access cloud. This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 

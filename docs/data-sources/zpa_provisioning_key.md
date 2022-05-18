@@ -6,7 +6,7 @@ description: |-
   Get information about Provisioning Key in Zscaler Private Access cloud.
 ---
 
-# zpa_provisioning_key
+# Data Source: zpa_provisioning_key
 
 Use the **zpa_provisioning_key** data source to get information about a provisioning key in the Zscaler Private Access portal or via API. This data source can be referenced in the following ZPA resources:
 

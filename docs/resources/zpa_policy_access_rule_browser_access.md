@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Policy Access Rule for Browser Access.
 ---
 
-# zpa_policy_access_rule (Resource)
+# Resource: zpa_policy_access_rule
 
 The **zpa_policy_access_rule** resource creates and manages policy access rule to support Browser Access  in the Zscaler Private Access cloud.
 

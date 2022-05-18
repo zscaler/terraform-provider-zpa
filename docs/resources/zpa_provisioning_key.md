@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Provisioning Key for Service Edge and/or App Connector Groups.
 ---
 
-# zpa_provisioning_key (Resource)
+# Resource: zpa_provisioning_key
 
 The **zpa_provisioning_key** resource provides creates a provisioning key in the Zscaler Private Access portal. This resource can then be referenced in the following ZPA resources:
 
