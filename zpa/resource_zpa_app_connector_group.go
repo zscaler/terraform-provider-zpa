@@ -178,7 +178,6 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
-	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	return nil
 
 }
