@@ -129,10 +129,6 @@ func resourceAppConnectorGroup() *schema.Resource {
 					"0", "1", "2",
 				}, false),
 			},
-			"version_profile_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -177,7 +173,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("latitude", resp.Latitude)
 	_ = d.Set("longitude", resp.Longitude)
 	_ = d.Set("location", resp.Location)
-	//_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
+	_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
 	_ = d.Set("upgrade_day", resp.UpgradeDay)
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
@@ -231,7 +227,6 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		UpgradeTimeInSecs:      d.Get("upgrade_time_in_secs").(string),
 		OverrideVersionProfile: d.Get("override_version_profile").(bool),
 		VersionProfileID:       d.Get("version_profile_id").(string),
-		VersionProfileName:     d.Get("version_profile_name").(string),
 	}
 	return appConnectorGroup
 }

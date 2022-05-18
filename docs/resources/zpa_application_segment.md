@@ -149,7 +149,6 @@ The following arguments are supported:
 -> **NOTE:**  TCP and UDP ports can also be defined using the following model:
 
 * `tcp_port_range` - (Required) TCP port ranges used to access the app.
-
   * `from:`
   * `to:`
 
