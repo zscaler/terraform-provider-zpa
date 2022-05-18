@@ -3,10 +3,10 @@ subcategory: "Customer Version Profile"
 layout: "zscaler"
 page_title: "ZPA: customer_version_profile"
 description: |-
-  Get information about all configured enrollment certificate details.
+  Get information about all customer version profile details.
 ---
 
-# zpa_customer_version_profile
+# Data Source: zpa_customer_version_profile
 
 Use the **zpa_customer_version_profile** data source to get information about all customer version profiles from the Zscaler Private Access cloud. This data source can be associated with an App Connector Group within the parameter `version_profile_id` or `version_profile_name`
 

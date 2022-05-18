@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Segment Group resource
 ---
 
-# zpa_segment_group (Resource)
+# Resource: zpa_segment_group
 
 The **zpa_segment_group** resource creates a segment group in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule or application segment resource.
 

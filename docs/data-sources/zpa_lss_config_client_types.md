@@ -6,7 +6,7 @@ description: |-
   Get information about all LSS client type details.
 ---
 
-# zpa_lss_config_client_types
+# Data Source: zpa_lss_config_client_types
 
 Use the **zpa_lss_config_client_types** data source to get information about all LSS client types in the Zscaler Private Access cloud. This data source is required when the defining a policy rule resource for an object type as `CLIENT_TYPE` parameter in the LSS Config Controller resource is set. To learn more see the To learn more see the [Getting Details of All LSS Status Codes](https://help.zscaler.com/zpa/log-streaming-service-configuration-use-cases#GettingLSSClientTypes)
 

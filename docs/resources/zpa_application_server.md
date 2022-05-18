@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Application Servers.
 ---
 
-# zpa_application_server (Resource)
+# Resource: zpa_application_server (Resource)
 
 The **zpa_application_server** resource creates an application server in the Zscaler Private Access cloud. This resource can then be referenced in a server group.
 

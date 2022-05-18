@@ -6,7 +6,7 @@ description: |-
   Get information about SCIM Group from an Identity Provider (IdP) in the Zscaler Private Access cloud.
 ---
 
-# zpa_scim_groups
+# Data Source: zpa_scim_groups
 
 Use the **zpa_scim_groups** data source to get information about a SCIM Group from an Identity Provider (IdP). This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 

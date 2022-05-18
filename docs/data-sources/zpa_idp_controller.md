@@ -6,7 +6,7 @@ description: |-
   Get information about an Identity Provider in Zscaler Private Access cloud.
 ---
 
-# zpa_idp_controller
+# Data Source: zpa_idp_controller
 
 Use the **zpa_idp_controller** data source to get information about an Identity Provider created in the Zscaler Private Access cloud. This data source is required when creating:
 

@@ -6,7 +6,7 @@ description: |-
   Get information about ZPA Browser Access Certificate in Zscaler Private Access cloud.
 ---
 
-# zpa_ba_certificate
+# Data Source: zpa_ba_certificate
 
 Use the **zpa_ba_certificate** data source to get information about a browser access certificate created in the Zscaler Private Access cloud. This data source is required when creating a browser access application segment resource.
 

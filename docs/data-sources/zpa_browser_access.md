@@ -1,12 +1,12 @@
 ---
 subcategory: "Application Segment"
 layout: "zscaler"
-page_title: "ZPA: application_segment"
+page_title: "ZPA: browser_access"
 description: |-
   Get information about ZPA Browser Access Application Segment in Zscaler Private Access cloud.
 ---
 
-# zpa_application_segment
+# Data Source: zpa_browser_access
 
 Use the **zpa_application_segment** data source to get information about a browser access application segment created in the Zscaler Private Access cloud. This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 

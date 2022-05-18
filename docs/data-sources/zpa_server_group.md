@@ -6,7 +6,7 @@ description: |-
   Get information about Server Groups in Zscaler Private Access cloud.
 ---
 
-# zpa_server_group
+# Data Source: zpa_server_group
 
 Use the **zpa_server_group** data source to get information about a server group created in the Zscaler Private Access cloud. This data source can then be referenced in an application segment, application server and Access Policy rule.
 

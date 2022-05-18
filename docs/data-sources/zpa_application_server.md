@@ -6,7 +6,7 @@ description: |-
   Get information about ZPA Application Server in Zscaler Private Access cloud.
 ---
 
-# zpa_application_server (Data Source)
+# Data Source: zpa_application_server
 
 Use the **zpa_application_server** data source to get information about an application server created in the Zscaler Private Access cloud. This data source must be used in the following circumstances:
 

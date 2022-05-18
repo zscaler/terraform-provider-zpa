@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Service Edge Group details.
 ---
 
-# zpa_service_edge_group
+# Resource: zpa_service_edge_group
 
 The **zpa_service_edge_group** resource creates a service edge group in the Zscaler Private Access cloud. This resource can then be referenced in a service edge connector.
 

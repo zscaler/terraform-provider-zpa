@@ -6,7 +6,7 @@ description: |-
   Get information about all configured enrollment certificate details.
 ---
 
-# zpa_enrollment_cert
+# Data Source: zpa_enrollment_cert
 
 Use the **zpa_enrollment_cert** data source to get information about all configured enrollment certificate details created in the Zscaler Private Access cloud. This data source is required when creating provisioning key resources.
 

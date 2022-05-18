@@ -6,7 +6,7 @@ description: |-
   Get information about Service Edge Controller in Zscaler Private Access cloud.
 ---
 
-# zpa_service_edge_controller
+# Data Source: zpa_service_edge_controller
 
 Use the **zpa_service_edge_controller** data source to get information about a service edge controller in the Zscaler Private Access cloud. This data source can then be referenced in a Service Edge Group and Provisioning Key.
 

@@ -6,7 +6,7 @@ description: |-
   Get information about SAML attributes from an Identity Provider (IdP) in the Zscaler Private Access cloud.
 ---
 
-# zpa_saml_attribute
+# Data Source: zpa_saml_attribute
 
 Use the **zpa_saml_attribute** data source to get information about a SAML Attributes from an Identity Provider (IdP). This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 

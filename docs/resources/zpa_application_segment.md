@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Application Segments.
 ---
 
-# zpa_application_segment
+# Resource: zpa_application_segment
 
 The **zpa_application_segment** resource creates an application segment in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
 

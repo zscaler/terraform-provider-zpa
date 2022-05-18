@@ -6,7 +6,7 @@ description: |-
   Get information about Log Streaming (LSS) configuration Zscaler Private Access cloud.
 ---
 
-# zpa_lss_config_controller
+# Data Source: zpa_lss_config_controller
 
 Use the **zpa_lss_config_controller** data source to get information about a Log Streaming (LSS) configuration resource created in the Zscaler Private Access.
 

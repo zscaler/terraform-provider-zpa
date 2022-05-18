@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA LSS Configuration.
 ---
 
-# zpa_lss_config_controller
+# Resource: zpa_lss_config_controller
 
 The **zpa_lss_config_controller** resource creates and manages Log Streaming Service (LSS) in the Zscaler Private Access cloud.
 

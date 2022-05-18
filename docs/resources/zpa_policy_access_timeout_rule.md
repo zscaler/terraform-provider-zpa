@@ -6,7 +6,7 @@ description: |-
   Creates and manages ZPA Policy Timeout Access Rule.
 ---
 
-# zpa_policy_timeout_rule (Resource)
+# Resource: zpa_policy_timeout_rule
 
 The **zpa_policy_timeout_rule** resource creates a policy timeout rule in the Zscaler Private Access cloud.
 

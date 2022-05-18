@@ -6,7 +6,7 @@ description: |-
   Get information about all all LSS log type format details.
 ---
 
-# zpa_lss_config_log_type_formats
+# Data Source: zpa_lss_config_log_type_formats
 
 Use the **zpa_lss_config_log_type_formats** data source to get information about all LSS log type formats in the Zscaler Private Access cloud. This data source is required when creating an LSS Config Controller resource.
 
