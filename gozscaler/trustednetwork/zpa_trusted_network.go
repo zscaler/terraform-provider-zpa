@@ -57,7 +57,7 @@ func (service *Service) GetByName(trustedNetworkName string) (*TrustedNetwork, *
 	var v struct {
 		List []TrustedNetwork `json:"list"`
 	}
-	adaptedTrustedNetworkName := trustedNetworkName[:strings.LastIndex(trustedNetworkName, " ")]
+	adaptedTrustedNetworkName := common.RemoveCloudSuffix(trustedNetworkName)
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search2: adaptedTrustedNetworkName}, nil, &v)
 	if err != nil {

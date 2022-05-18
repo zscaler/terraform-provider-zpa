@@ -1,5 +1,10 @@
 package common
 
+import (
+	"regexp"
+	"strings"
+)
+
 const (
 	DefaultPageSize = 500
 )
@@ -32,4 +37,11 @@ type Conditions struct {
 type AssociatedProfileNames struct {
 	ID   string `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
+}
+
+// RemoveCloudSuffix removes appended cloud name (zscalerthree.net) i.e "CrowdStrike_ZPA_Pre-ZTA (zscalerthree.net)"
+func RemoveCloudSuffix(str string) string {
+	reg := regexp.MustCompile(`(.*)[\s]+\([a-zA-Z0-9\-_\.]*\)[\s]*$`)
+	res := reg.ReplaceAllString(str, "${1}")
+	return strings.Trim(res, " ")
 }

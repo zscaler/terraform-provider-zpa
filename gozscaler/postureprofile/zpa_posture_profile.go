@@ -59,8 +59,7 @@ func (service *Service) GetByName(postureName string) (*PostureProfile, *http.Re
 	var v struct {
 		List []PostureProfile `json:"list"`
 	}
-	// remove appended cloud name (zscalerthree.net) i.e "CrowdStrike_ZPA_Pre-ZTA (zscalerthree.net)"
-	adaptedPostureName := postureName[:strings.LastIndex(postureName, " ")]
+	adaptedPostureName := common.RemoveCloudSuffix(postureName)
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + postureProfileEndpoint
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search2: adaptedPostureName}, nil, &v)
 	if err != nil {
