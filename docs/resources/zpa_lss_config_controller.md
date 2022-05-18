@@ -1,5 +1,5 @@
 ---
-subcategory: "Log Streaming Service"
+subcategory: "Log Streaming (LSS)"
 layout: "zscaler"
 page_title: "ZPA: lss_config_controller"
 description: |-
