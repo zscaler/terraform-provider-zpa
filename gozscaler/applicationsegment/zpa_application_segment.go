@@ -34,8 +34,6 @@ type ApplicationSegmentResource struct {
 	CreationTime         string                `json:"creationTime,omitempty"`
 	ModifiedBy           string                `json:"modifiedBy,omitempty"`
 	ModifiedTime         string                `json:"modifiedTime,omitempty"`
-	TCPPortRanges        []string              `json:"tcpPortRanges,omitempty"`
-	UDPPortRanges        []string              `json:"udpPortRanges,omitempty"`
 	TCPAppPortRange      []common.NetworkPorts `json:"tcpPortRange,omitempty"`
 	UDPAppPortRange      []common.NetworkPorts `json:"udpPortRange,omitempty"`
 	ServerGroups         []AppServerGroups     `json:"serverGroups,omitempty"`

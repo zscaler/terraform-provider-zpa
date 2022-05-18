@@ -72,7 +72,6 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -80,7 +79,6 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -243,8 +241,8 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
-	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenAppServerGroupsSimple(resp))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
@@ -353,8 +351,6 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		IpAnchored:           d.Get("ip_anchored").(bool),
 		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
 		Name:                 d.Get("name").(string),
-		TCPPortRanges:        expandList(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges:        expandList(d.Get("udp_port_ranges").([]interface{})),
 		ServerGroups:         expandAppServerGroups(d),
 	}
 	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
@@ -366,10 +362,10 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		details.UDPAppPortRange = UDPAppPortRange
 	}
 	if d.HasChange("udp_port_ranges") {
-		details.UDPPortRanges = convertToListString(d.Get("udp_port_ranges"))
+		details.UDPAppPortRange = convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
 	}
 	if d.HasChange("tcp_port_ranges") {
-		details.TCPPortRanges = convertToListString(d.Get("tcp_port_ranges"))
+		details.TCPAppPortRange = convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
 	}
 	return details
 }
