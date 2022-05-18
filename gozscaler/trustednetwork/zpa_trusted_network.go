@@ -64,7 +64,7 @@ func (service *Service) GetByName(trustedNetworkName string) (*TrustedNetwork, *
 		return nil, nil, err
 	}
 	for _, trustedNetwork := range v.List {
-		if strings.EqualFold(trustedNetwork.Name, trustedNetworkName) {
+		if strings.EqualFold(common.RemoveCloudSuffix(trustedNetwork.Name), adaptedTrustedNetworkName) {
 			return &trustedNetwork, resp, nil
 		}
 	}

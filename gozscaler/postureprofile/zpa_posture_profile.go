@@ -66,7 +66,7 @@ func (service *Service) GetByName(postureName string) (*PostureProfile, *http.Re
 		return nil, nil, err
 	}
 	for _, postureProfile := range v.List {
-		if strings.EqualFold(postureProfile.Name, postureName) {
+		if strings.EqualFold(common.RemoveCloudSuffix(postureProfile.Name), adaptedPostureName) {
 			return &postureProfile, resp, nil
 		}
 	}
