@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	defaultBaseURL    = "https://config.private.zscaler.com"
+	// defaultBaseURL    = "https://config.private.zscaler.com"
+	defaultBaseURL    = "https://config.zpabeta.net"
 	defaultTimeout    = 240 * time.Second
 	loggerPrefix      = "zpa-logger: "
 	ZPA_CLIENT_ID     = "ZPA_CLIENT_ID"
