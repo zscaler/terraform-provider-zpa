@@ -12,7 +12,7 @@
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
 
-- Website: https://www.terraform.io
+- Website: [https://www.terraform.io](https://registry.terraform.io/providers/zscaler/zpa/latest)
 - Documentation: https://help.zscaler.com/zpa
 - Zscaler Community: [Zscaler Community](https://community.zscaler.com/)
 
