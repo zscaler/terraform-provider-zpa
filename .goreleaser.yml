@@ -59,6 +59,6 @@ release:
     owner: zscaler
     name: terraform-provider-zpa
   draft: true
-  discussion_category_name: Annoucements
+  # discussion_category_name: Annoucements
 changelog:
   skip: true
