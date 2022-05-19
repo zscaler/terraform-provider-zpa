@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func resourcePolicyTimeoutRule() *schema.Resource {
@@ -17,7 +17,7 @@ func resourcePolicyTimeoutRule() *schema.Resource {
 		Update: resourcePolicyTimeoutRuleUpdate,
 		Delete: resourcePolicyTimeoutRuleDelete,
 		Importer: &schema.ResourceImporter{
-			State: importPolicyStateFunc([]string{"TIMEOUT_POLICY", "REAUTH_POLICY"}),
+			StateContext: importPolicyStateContextFunc([]string{"TIMEOUT_POLICY", "REAUTH_POLICY"}),
 		},
 
 		Schema: MergeSchema(

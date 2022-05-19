@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/lssconfigcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
 )
 
 func getPolicyRuleResourceSchema() map[string]*schema.Schema {
@@ -92,12 +92,12 @@ func resourceLSSConfigController() *schema.Resource {
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
 				if parseIDErr == nil {
 					// assume if the passed value is an int
-					d.Set("id", id)
+					_ = d.Set("id", id)
 				} else {
 					resp, _, err := zClient.lssconfigcontroller.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
-						d.Set("id", resp.ID)
+						_ = d.Set("id", resp.ID)
 					} else {
 						return []*schema.ResourceData{d}, err
 					}

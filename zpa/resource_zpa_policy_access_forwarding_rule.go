@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func resourcePolicyForwardingRule() *schema.Resource {
@@ -17,7 +17,7 @@ func resourcePolicyForwardingRule() *schema.Resource {
 		Update: resourcePolicyForwardingRuleUpdate,
 		Delete: resourcePolicyForwardingRuleDelete,
 		Importer: &schema.ResourceImporter{
-			State: importPolicyStateFunc([]string{"CLIENT_FORWARDING_POLICY", "BYPASS_POLICY"}),
+			StateContext: importPolicyStateContextFunc([]string{"CLIENT_FORWARDING_POLICY", "BYPASS_POLICY"}),
 		},
 
 		Schema: MergeSchema(

@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -32,3 +33,4 @@ var testAccCheckDataSourceBaCertificateConfig_basic = `
 data "zpa_ba_certificate" "certificate" {
     name = "jenkins.securitygeek.io"
 }`
+*/

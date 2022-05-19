@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/willguibr/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
 )
 
 func TestAccPolicyForwardingRuleBasic(t *testing.T) {
@@ -125,16 +125,16 @@ data "zpa_policy_type" "forwarding_policy" {
 }
 
 data "zpa_posture_profile" "crwd_zta_score_80" {
-	name = "CrowdStrike_ZPA_ZTA_80 (zscalerthree.net)"
+	name = "CrowdStrike_ZPA_ZTA_80 (zscalertwo.net)"
 }
 
-data "zpa_idp_controller" "user_okta" {
-    name = "SGIO-User-Okta"
+data "zpa_idp_controller" "bd_user_okta" {
+    name = "BD_Okta_Users"
 }
 
 data "zpa_scim_groups" "contractors" {
 	name     = "Contractors"
-	idp_name = "SGIO-User-Okta"
+	idp_name = "BD_Okta_Users"
 }
 
 resource "%s" "%s" {
@@ -157,9 +157,9 @@ resource "%s" "%s" {
 		operator = "OR"
 		operands {
 		  object_type = "SCIM_GROUP"
-		  lhs         = data.zpa_idp_controller.user_okta.id
+		  lhs         = data.zpa_idp_controller.bd_user_okta.id
 		  rhs         = data.zpa_scim_groups.contractors.id
-		  idp_id      = data.zpa_idp_controller.user_okta.id
+		  idp_id      = data.zpa_idp_controller.bd_user_okta.id
 		}
 	  }
 }

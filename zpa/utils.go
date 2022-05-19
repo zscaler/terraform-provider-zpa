@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/common"
 )
 
 func ValidateStringFloatBetween(min, max float64) schema.SchemaValidateFunc {
@@ -84,7 +85,23 @@ func MergeSchema(schemas ...map[string]*schema.Schema) map[string]*schema.Schema
 	}
 	return final
 }
+func convertPortsToListString(portRangeLst []common.NetworkPorts) []string {
+	portRanges := make([]string, len(portRangeLst)*2)
+	for i := range portRangeLst {
+		portRanges[2*i] = portRangeLst[i].From
+		portRanges[2*i+1] = portRangeLst[i].To
+	}
+	return portRanges
+}
 
+func convertToPortRange(portRangeLst []interface{}) []common.NetworkPorts {
+	portRanges := make([]common.NetworkPorts, len(portRangeLst)/2)
+	for i := range portRanges {
+		portRanges[i].From = portRangeLst[2*i].(string)
+		portRanges[i].To = portRangeLst[2*i+1].(string)
+	}
+	return portRanges
+}
 func convertToListString(obj interface{}) []string {
 	listI, ok := obj.([]interface{})
 	if ok && len(listI) > 0 {
@@ -101,3 +118,23 @@ func convertToListString(obj interface{}) []string {
 	}
 	return []string{}
 }
+
+func expandList(portRangeLst []interface{}) []string {
+	portRanges := make([]string, len(portRangeLst))
+	for i, port := range portRangeLst {
+		portRanges[i] = port.(string)
+	}
+
+	return portRanges
+}
+
+/*
+func expandList(strings []interface{}) []string {
+	expandedStrings := make([]string, len(strings))
+	for i, v := range strings {
+		expandedStrings[i] = v.(string)
+	}
+
+	return expandedStrings
+}
+*/

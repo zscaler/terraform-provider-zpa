@@ -1,7 +1,6 @@
 package zpa
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -13,16 +12,16 @@ func TestAccDataSourceLSSClientTypes_Basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckDataSourceLSSClientTypesConfig_basic),
+				Config: (testAccCheckDataSourceLSSClientTypesConfig_basic),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr(
-						"data.zpa_lss_config_client_types.foobar", ""),
+						"data.zpa_lss_config_client_types.all_client_types", ""),
 				),
 			},
 		},
 	})
 }
 
-const testAccCheckDataSourceLSSClientTypesConfig_basic = `
-data "zpa_lss_config_client_types" "foobar" {
+var testAccCheckDataSourceLSSClientTypesConfig_basic = `
+data "zpa_lss_config_client_types" "all_client_types" {
 }`

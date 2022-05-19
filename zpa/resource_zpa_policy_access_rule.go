@@ -7,8 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 type listrules struct {
@@ -27,7 +27,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 		Update: resourcePolicyAccessUpdate,
 		Delete: resourcePolicyAccessDelete,
 		Importer: &schema.ResourceImporter{
-			State: importPolicyStateFunc([]string{"ACCESS_POLICY", "GLOBAL_POLICY"}),
+			StateContext: importPolicyStateContextFunc([]string{"ACCESS_POLICY", "GLOBAL_POLICY"}),
 		},
 
 		Schema: MergeSchema(

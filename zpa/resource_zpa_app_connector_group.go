@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorgroup"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorgroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
 )
 
 func resourceAppConnectorGroup() *schema.Resource {
@@ -24,12 +24,12 @@ func resourceAppConnectorGroup() *schema.Resource {
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
 				if parseIDErr == nil {
 					// assume if the passed value is an int
-					d.Set("id", id)
+					_ = d.Set("id", id)
 				} else {
 					resp, _, err := zClient.appconnectorgroup.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
-						d.Set("id", resp.ID)
+						_ = d.Set("id", resp.ID)
 					} else {
 						return []*schema.ResourceData{d}, err
 					}
@@ -129,10 +129,6 @@ func resourceAppConnectorGroup() *schema.Resource {
 					"0", "1", "2",
 				}, false),
 			},
-			"version_profile_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -177,12 +173,11 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("latitude", resp.Latitude)
 	_ = d.Set("longitude", resp.Longitude)
 	_ = d.Set("location", resp.Location)
-	//_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
+	_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
 	_ = d.Set("upgrade_day", resp.UpgradeDay)
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
-	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	return nil
 
 }
@@ -231,7 +226,6 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		UpgradeTimeInSecs:      d.Get("upgrade_time_in_secs").(string),
 		OverrideVersionProfile: d.Get("override_version_profile").(bool),
 		VersionProfileID:       d.Get("version_profile_id").(string),
-		VersionProfileName:     d.Get("version_profile_name").(string),
 	}
 	return appConnectorGroup
 }

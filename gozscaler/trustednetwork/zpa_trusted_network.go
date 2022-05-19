@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/common"
 )
 
 const (
@@ -57,14 +57,14 @@ func (service *Service) GetByName(trustedNetworkName string) (*TrustedNetwork, *
 	var v struct {
 		List []TrustedNetwork `json:"list"`
 	}
-
+	adaptedTrustedNetworkName := common.RemoveCloudSuffix(trustedNetworkName)
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + trustedNetworkEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: trustedNetworkName}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search2: adaptedTrustedNetworkName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
 	for _, trustedNetwork := range v.List {
-		if strings.EqualFold(trustedNetwork.Name, trustedNetworkName) {
+		if strings.EqualFold(common.RemoveCloudSuffix(trustedNetwork.Name), adaptedTrustedNetworkName) {
 			return &trustedNetwork, resp, nil
 		}
 	}

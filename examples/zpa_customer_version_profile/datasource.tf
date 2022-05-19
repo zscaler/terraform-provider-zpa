@@ -24,4 +24,3 @@ data "zpa_customer_version_profile" "new_release"{
 output "zpa_customer_version_profile_new_release" {
     value = data.zpa_customer_version_profile.new_release
 }
-

@@ -32,11 +32,11 @@ func testAccDataSourcePostureProfileCheck(name string) resource.TestCheckFunc {
 
 var testAccCheckDataSourcePostureProfileConfig_basic = `
 data "zpa_posture_profile" "pre_zta" {
-    name = "CrowdStrike_ZPA_Pre-ZTA (zscalerthree.net)"
+    name = "CrowdStrike_ZPA_Pre-ZTA (zscalertwo.net)"
 }
 data "zpa_posture_profile" "zta_40" {
-    name = "CrowdStrike_ZPA_ZTA_40 (zscalerthree.net)"
+    name = "CrowdStrike_ZPA_ZTA_40 (zscalertwo.net)"
 }
 data "zpa_posture_profile" "zta_80" {
-    name = "CrowdStrike_ZPA_ZTA_80 (zscalerthree.net)"
+    name = "CrowdStrike_ZPA_ZTA_80 (zscalertwo.net)"
 }`

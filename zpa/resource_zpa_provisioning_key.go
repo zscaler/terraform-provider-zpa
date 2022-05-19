@@ -5,11 +5,11 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/provisioningkey"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/provisioningkey"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
 )
 
 func resourceProvisioningKey() *schema.Resource {
@@ -26,22 +26,22 @@ func resourceProvisioningKey() *schema.Resource {
 				_, associationTypeSet := d.GetOk("association_type")
 				if parseIDErr == nil {
 					// assume if the passed value is an int
-					d.Set("id", id)
+					_ = d.Set("id", id)
 					if !associationTypeSet {
 						_, assoc_type, _, err := zClient.provisioningkey.GetByIDAllAssociations(id)
 						if err != nil {
 							return []*schema.ResourceData{d}, err
 						} else {
-							d.Set("association_type", assoc_type)
+							_ = d.Set("association_type", assoc_type)
 						}
 					}
 				} else {
 					resp, assoc_type, _, err := zClient.provisioningkey.GetByNameAllAssociations(id)
 					if err == nil {
 						d.SetId(resp.ID)
-						d.Set("id", resp.ID)
+						_ = d.Set("id", resp.ID)
 						if !associationTypeSet {
-							d.Set("association_type", assoc_type)
+							_ = d.Set("association_type", assoc_type)
 						}
 					} else {
 						return []*schema.ResourceData{d}, err

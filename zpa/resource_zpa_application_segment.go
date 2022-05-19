@@ -7,9 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/applicationsegment"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/client"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/segmentgroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/segmentgroup"
 )
 
 func resourceApplicationSegment() *schema.Resource {
@@ -26,12 +26,12 @@ func resourceApplicationSegment() *schema.Resource {
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
 				if parseIDErr == nil {
 					// assume if the passed value is an int
-					d.Set("id", id)
+					_ = d.Set("id", id)
 				} else {
 					resp, _, err := zClient.applicationsegment.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
-						d.Set("id", resp.ID)
+						_ = d.Set("id", resp.ID)
 					} else {
 						return []*schema.ResourceData{d}, err
 					}
@@ -241,8 +241,8 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
-	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenAppServerGroupsSimple(resp))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
@@ -351,8 +351,6 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		IpAnchored:           d.Get("ip_anchored").(bool),
 		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
 		Name:                 d.Get("name").(string),
-		TCPPortRanges:        ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges:        ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
 		ServerGroups:         expandAppServerGroups(d),
 	}
 	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
@@ -364,10 +362,10 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		details.UDPAppPortRange = UDPAppPortRange
 	}
 	if d.HasChange("udp_port_ranges") {
-		details.UDPPortRanges = convertToListString(d.Get("udp_port_ranges"))
+		details.UDPAppPortRange = convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
 	}
 	if d.HasChange("tcp_port_ranges") {
-		details.TCPPortRanges = convertToListString(d.Get("tcp_port_ranges"))
+		details.TCPAppPortRange = convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
 	}
 	return details
 }

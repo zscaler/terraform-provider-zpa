@@ -3,6 +3,7 @@ package zpa
 import (
 	"log"
 
+<<<<<<< HEAD
 	"github.com/willguibr/terraform-provider-zpa/gozscaler"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorcontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/appconnectorgroup"
@@ -28,6 +29,32 @@ import (
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgecontroller"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/serviceedgegroup"
 	"github.com/willguibr/terraform-provider-zpa/gozscaler/trustednetwork"
+=======
+	"github.com/zscaler/terraform-provider-zpa/gozscaler"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorgroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/appservercontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/bacertificate"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/browseraccess"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/cloudconnectorgroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/customerversionprofile"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/enrollmentcert"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/idpcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/machinegroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/postureprofile"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/provisioningkey"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/samlattribute"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimattributeheader"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimgroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/segmentgroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/servergroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/serviceedgecontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/serviceedgegroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/trustednetwork"
+>>>>>>> master
 )
 
 func init() {

@@ -1,14 +1,15 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/common"
-	"github.com/willguibr/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/common"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
 )
 
 func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client) bool {
@@ -537,31 +538,33 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"from": {
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validation.NoZeroValues,
 				},
 				"to": {
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validation.NoZeroValues,
 				},
 			},
 		},
 	}
 }
 
-func importPolicyStateFunc(types []string) schema.StateFunc {
-	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
+	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		zClient := m.(*Client)
 		id := d.Id()
 		_, parseIDErr := strconv.ParseInt(id, 10, 64)
 		if parseIDErr == nil {
 			// assume if the passed value is an int
-			d.Set("id", id)
+			_ = d.Set("id", id)
 		} else {
 			resp, _, err := zClient.policysetcontroller.GetByNameAndTypes(types, id)
 			if err == nil {
 				d.SetId(resp.ID)
-				d.Set("id", resp.ID)
+				_ = d.Set("id", resp.ID)
 			} else {
 				return []*schema.ResourceData{d}, err
 			}
