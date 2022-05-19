@@ -54,10 +54,7 @@ release:
   extra_files:
     - glob: 'terraform-registry-manifest.json'
       name_template: '{{ .ProjectName }}_{{ .Version }}_manifest.json'
-  # github:
-  #   owner: zscaler
-  #   name: terraform-provider-zpa
   # If you want to manually examine the release before its live, uncomment this line:
-  draft: true
+  # draft: true
 changelog:
   skip: true
