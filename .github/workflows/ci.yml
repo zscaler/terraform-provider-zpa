@@ -16,14 +16,6 @@ on:
       - 'README.md'
       - 'docs/**'
 
-  # For systems with an upstream API that could drift unexpectedly (like most SaaS systems, etc.),
-  # we recommend testing at a regular interval not necessarily tied to code changes. This will
-  # ensure you are alerted to something breaking due to an API change, even if the code did not
-  # change.
-
-  schedule:
-    - cron: '0 13 * * *'
-
 jobs:
   # ensure the code builds...
   build:
@@ -87,14 +79,14 @@ jobs:
       run: |
         go test -v -cover ./zpa -v -parallel 30 -timeout 60m
 
-  golangci:
-    name: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: v1.45
-          args: --timeout=60m
-          only-new-issues: true
+  # golangci:
+  #   name: lint
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: golangci-lint
+  #       uses: golangci/golangci-lint-action@v3
+  #       with:
+  #         version: v1.45
+  #         args: --timeout=60m
+  #         only-new-issues: true
