@@ -275,7 +275,7 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 	req := expandApplicationSegmentRequest(d)
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
 		return fmt.Errorf("please provde a valid segment group for the application segment")
 	}
 	if _, err := zClient.applicationsegment.Update(id, req); err != nil {
