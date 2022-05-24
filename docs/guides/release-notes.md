@@ -37,7 +37,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Annoucements:
 
-The Terraform Provider for Zscaler Private Access (ZPA) is now officially hosted under Zscaler's GitHub account and published in the Terraform Registry.
+The Terraform Provider for Zscaler Private Access (ZPA) is now officially hosted under Zscaler's GitHub account and published in the Terraform Registry. For more details, visit the Zscaler Community Article [Here](https://community.zscaler.com/t/zpa-and-zia-terraform-providers-now-verified/16675)
 Administrators who used previous versions of the provider, and followed instructions to install the binary as a custom provider, must update their provider block as such:
 
 ```hcl
@@ -54,7 +54,6 @@ provider "zpa" {}
 ```
 
 ### Enhancements:
-
 - Documentation: Updated documentation to comply with Terraform registry formatting. #125
 - ``zpa_posture_profile`` Updated search mechanism to support posture profile name search without the Zscaler cloud name. PR #123
 - ``zpa_trusted_network`` Updated search mechanism to support trusted network name search without the Zscaler cloud name. PR #123
@@ -71,7 +70,7 @@ provider "zpa" {}
 
 ### Annoucements:
 
-The Terraform Provider for Zscaler Private Access (ZPA) is now officially hosted under Zscaler's GitHub account and published in the Terraform Registry.
+The Terraform Provider for Zscaler Private Access (ZPA) is now officially hosted under Zscaler's GitHub account and published in the Terraform Registry. For more details, visit the Zscaler Community Article [Here](https://community.zscaler.com/t/zpa-and-zia-terraform-providers-now-verified/16675)
 Administrators who used previous versions of the provider, and followed instructions to install the binary as a custom provider, must update their provider block as such:
 
 ```hcl
