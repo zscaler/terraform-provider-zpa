@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/common"
 )
@@ -33,12 +34,11 @@ type PredefinedControls struct {
 	Version                          string                          `json:"version,omitempty"`
 }
 
-/*
-type AssociatedProfileNames struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+type ControlGroupItem struct {
+	ControlGroup                 string               `json:"controlGroup,omitempty"`
+	PredefinedInspectionControls []PredefinedControls `json:"predefinedInspectionControls,omitempty"`
+	DefaultGroup                 bool                 `json:"defaultGroup,omitempty"`
 }
-*/
 
 // Get Predefined Controls by ID
 // https://help.zscaler.com/zpa/api-reference#/inspection-control-controller/getPredefinedControlById
@@ -53,35 +53,23 @@ func (service *Service) Get(controlID string) (*PredefinedControls, *http.Respon
 	return v, resp, nil
 }
 
-func (service *Service) GetAll() (*PredefinedControls, *http.Response, error) {
-	v := new(PredefinedControls)
+func (service *Service) GetByName(name, version string) (*PredefinedControls, *http.Response, error) {
+	v := []ControlGroupItem{}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + predControlsEndpoint)
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, struct {
+		Version string `url:"version"`
+	}{Version: version}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
-	log.Printf("[INFO] got predefined controls:%#v", v)
-	return v, resp, nil
-}
-
-/*
-// Get All Predefined Inspection Controls - Need to create multiple search criteria
-//https://help.zscaler.com/zpa/api-reference#/inspection-control-controller/getAllInspectionControls
-func (service *Service) GetAll() (*PredefinedControls, *http.Response, error) {
-	var v struct {
-		List []PredefinedControls `json:"list"`
-	}
-
-	relativeURL := mgmtConfig + service.Client.Config.CustomerID + predControlsEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: controlName}, nil, &v)
-	if err != nil {
-		return nil, nil, err
-	}
-	for _, inspection := range v.List {
-		if strings.EqualFold(inspection.Name) {
-			return &inspection, resp, nil
+	for _, group := range v {
+		for _, control := range group.PredefinedInspectionControls {
+			if strings.EqualFold(control.Name, name) {
+				log.Printf("[INFO] got predefined controls:%#v", v)
+				return &control, resp, nil
+			}
 		}
 	}
-	return nil, resp, fmt.Errorf("no predefined control named '%s' was found", controlName)
+	log.Printf("[ERROR] no predefined control named '%s' found", name)
+	return nil, resp, fmt.Errorf("no predefined control named '%s' found", name)
 }
-*/

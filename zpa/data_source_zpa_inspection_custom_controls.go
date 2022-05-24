@@ -92,11 +92,8 @@ func dataSourceInspectionCustomControls() *schema.Resource {
 							},
 						},
 						"names": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeString,
 							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 						"type": {
 							Type:     schema.TypeString,

@@ -118,42 +118,7 @@ func dataSourceInspectionProfile() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"rules": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"conditions": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"lhs": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"op": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-												"rhs": {
-													Type:     schema.TypeString,
-													Computed: true,
-												},
-											},
-										},
-									},
-									"names": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
+						"rules": dataInspectionRulesSchema(),
 					},
 				},
 			},
@@ -363,7 +328,7 @@ func flattenCustomControls(customControl []inspection_profile.InspectionCustomCo
 			"type":                                custom.Type,
 			"version":                             custom.Version,
 			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(custom),
-			"rules":                               flattenRules(custom),
+			"rules":                               flattenInspectionRules(custom.Rules),
 		}
 	}
 
@@ -380,32 +345,6 @@ func flattenAssociatedInspectionProfileNames(associated inspection_profile.Inspe
 	}
 
 	return rule
-}
-
-func flattenRules(rule inspection_profile.InspectionCustomControl) []interface{} {
-	rules := make([]interface{}, len(rule.Rules))
-	for i, rule := range rule.Rules {
-		rules[i] = map[string]interface{}{
-			"conditions": flattenConditions(rule),
-			"names":      rule.Names,
-			"type":       rule.Type,
-		}
-	}
-
-	return rules
-}
-
-func flattenConditions(condition inspection_profile.Rules) []interface{} {
-	conditions := make([]interface{}, len(condition.Conditions))
-	for i, val := range condition.Conditions {
-		conditions[i] = map[string]interface{}{
-			"lhs": val.LHS,
-			"rhs": val.RHS,
-			"op":  val.OP,
-		}
-	}
-
-	return conditions
 }
 
 func flattenPredefinedControls(predControl []inspection_profile.PredefinedControls) []interface{} {

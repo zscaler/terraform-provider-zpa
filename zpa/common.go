@@ -573,3 +573,68 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 		return []*schema.ResourceData{d}, nil
 	}
 }
+
+func dataInspectionRulesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"conditions": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"lhs": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"op": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"rhs": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+						},
+					},
+				},
+				"names": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"type": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+			},
+		},
+	}
+}
+
+func flattenInspectionRules(rule []common.Rules) []interface{} {
+	rules := make([]interface{}, len(rule))
+	for i, rule := range rule {
+		rules[i] = map[string]interface{}{
+			"conditions": flattenInspectionRulesConditions(rule),
+			"names":      rule.Names,
+			"type":       rule.Type,
+		}
+	}
+
+	return rules
+}
+
+func flattenInspectionRulesConditions(condition common.Rules) []interface{} {
+	conditions := make([]interface{}, len(condition.Conditions))
+	for i, val := range condition.Conditions {
+		conditions[i] = map[string]interface{}{
+			"lhs": val.LHS,
+			"rhs": val.RHS,
+			"op":  val.OP,
+		}
+	}
+
+	return conditions
+}

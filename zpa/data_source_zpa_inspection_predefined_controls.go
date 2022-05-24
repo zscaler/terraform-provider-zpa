@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/common"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_predefined_controls"
 )
 
@@ -27,6 +28,26 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 				Computed: true,
 			},
 			"action_value": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"associated_inspection_profile_names": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"attachment": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -71,8 +92,9 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 				Computed: true,
 			},
 			"version": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:         schema.TypeString,
+				RequiredWith: []string{"name"},
+				Optional:     true,
 			},
 		},
 	}
@@ -93,8 +115,12 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
+		version, versionSet := d.Get("version").(string)
+		if !versionSet || version == "" {
+			return fmt.Errorf("when the name is set, version must be set as well")
+		}
 		log.Printf("[INFO] Getting data for predefined controls name %s\n", name)
-		res, _, err := zClient.inspection_predefined_controls.GetAll()
+		res, _, err := zClient.inspection_predefined_controls.GetByName(name, version)
 		if err != nil {
 			return err
 		}
@@ -105,6 +131,7 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 		_ = d.Set("action", resp.Action)
 		_ = d.Set("action_value", resp.ActionValue)
 		_ = d.Set("attachment", resp.Attachment)
+		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("control_group", resp.ControlGroup)
 		_ = d.Set("control_number", resp.ControlNumber)
 		_ = d.Set("default_action", resp.DefaultAction)
@@ -116,10 +143,21 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 		_ = d.Set("paranoia_level", resp.ParanoiaLevel)
 		_ = d.Set("severity", resp.Severity)
 		_ = d.Set("version", resp.Version)
-
+		_ = d.Set("associated_inspection_profile_names", flattenInspectionProfileNames(resp.AssociatedInspectionProfileNames))
 	} else {
 		return fmt.Errorf("couldn't find any predefined inspection controls with name '%s' or id '%s'", name, id)
 	}
 
 	return nil
+}
+
+func flattenInspectionProfileNames(names []common.AssociatedProfileNames) []interface{} {
+	flattenedList := make([]interface{}, len(names))
+	for i, val := range names {
+		flattenedList[i] = map[string]interface{}{
+			"id":   val.ID,
+			"name": val.Name,
+		}
+	}
+	return flattenedList
 }
