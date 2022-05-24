@@ -50,6 +50,7 @@ func resourceApplicationServer() *schema.Resource {
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "This field defines the description of the server.",
 			},
 			"address": {
@@ -134,12 +135,13 @@ func resourceApplicationServerUpdate(d *schema.ResourceData, m interface{}) erro
 
 	log.Println("An updated occurred")
 
-	if d.HasChange("app_server_group_ids") || d.HasChange("name") || d.HasChange("address") {
-		log.Println("The AppServerGroupID, name or address has been changed")
+	if d.HasChange("app_server_group_ids") || d.HasChange("name") || d.HasChange("description") || d.HasChange("address") || d.HasChange("enabled") {
+		log.Println("The AppServerGroupID, name, description or address has been changed")
 
 		if _, err := zClient.appservercontroller.Update(d.Id(), appservercontroller.ApplicationServer{
 			AppServerGroupIds: SetToStringSlice(d.Get("app_server_group_ids").(*schema.Set)),
 			Name:              d.Get("name").(string),
+			Description:       d.Get("description").(string),
 			Address:           d.Get("address").(string),
 			Enabled:           d.Get("enabled").(bool),
 		}); err != nil {
