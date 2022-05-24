@@ -523,16 +523,12 @@ func expandPRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.Ap
 	return []applicationsegmentpra.AppServerGroups{}
 }
 
-func flattenCommonAppsDto(commonApps *applicationsegmentpra.CommonAppsDto) []map[string]interface{} {
-	if commonApps == nil {
-		return nil
+func flattenCommonAppsDto(commonApps *applicationsegmentpra.CommonAppsDto) []interface{} {
+	commonApp := make([]interface{}, 1)
+	commonApp[0] = map[string]interface{}{
+		"apps_config": flattenAppsConfig(commonApps.AppsConfig),
 	}
-	return []map[string]interface{}{
-		{
-
-			"apps_config": flattenAppsConfig(commonApps.AppsConfig),
-		},
-	}
+	return commonApp
 }
 
 func flattenAppsConfig(appConfigs []applicationsegmentpra.AppsConfig) []interface{} {
