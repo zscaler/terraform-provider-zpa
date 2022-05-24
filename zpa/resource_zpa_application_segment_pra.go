@@ -7,17 +7,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/app_segment_sra_apps"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentpra"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/segmentgroup"
 )
 
-func resourceSRAPortalAppSegment() *schema.Resource {
+func resourceAppSegmentPRA() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSRAPortalAppSegmentCreate,
-		Read:   resourceSRAPortalAppSegmentRead,
-		Update: resourceSRAPortalAppSegmentUpdate,
-		Delete: resourceSRAPortalAppSegmentDelete,
+		Create: resourceAppSegmentPRACreate,
+		Read:   resourceAppSegmentPRARead,
+		Update: resourceAppSegmentPRAUpdate,
+		Delete: resourceAppSegmentPRADelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
@@ -28,7 +28,7 @@ func resourceSRAPortalAppSegment() *schema.Resource {
 					// assume if the passed value is an int
 					d.Set("id", id)
 				} else {
-					resp, _, err := zClient.app_segment_sra_apps.GetByName(id)
+					resp, _, err := zClient.applicationsegmentpra.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
 						d.Set("id", resp.ID)
@@ -245,7 +245,7 @@ func resourceSRAPortalAppSegment() *schema.Resource {
 	}
 }
 
-func resourceSRAPortalAppSegmentCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAppSegmentPRACreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	req := expandSRAApplicationSegment(d)
@@ -256,7 +256,7 @@ func resourceSRAPortalAppSegmentCreate(d *schema.ResourceData, m interface{}) er
 		return fmt.Errorf("please provde a valid segment group for the sra application segment")
 	}
 
-	resp, _, err := zClient.app_segment_sra_apps.Create(req)
+	resp, _, err := zClient.applicationsegmentpra.Create(req)
 	if err != nil {
 		return err
 	}
@@ -264,13 +264,13 @@ func resourceSRAPortalAppSegmentCreate(d *schema.ResourceData, m interface{}) er
 	log.Printf("[INFO] Created sra application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceSRAPortalAppSegmentRead(d, m)
+	return resourceAppSegmentPRARead(d, m)
 }
 
-func resourceSRAPortalAppSegmentRead(d *schema.ResourceData, m interface{}) error {
+func resourceAppSegmentPRARead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	resp, _, err := zClient.app_segment_sra_apps.Get(d.Id())
+	resp, _, err := zClient.applicationsegmentpra.Get(d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing sra application segment %s from state because it no longer exists in ZPA", d.Id())
@@ -319,7 +319,7 @@ func resourceSRAPortalAppSegmentRead(d *schema.ResourceData, m interface{}) erro
 
 }
 
-func resourceSRAPortalAppSegmentUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAppSegmentPRAUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	id := d.Id()
@@ -331,14 +331,14 @@ func resourceSRAPortalAppSegmentUpdate(d *schema.ResourceData, m interface{}) er
 		return fmt.Errorf("please provde a valid segment group for the sra application segment")
 	}
 
-	if _, err := zClient.app_segment_sra_apps.Update(id, &req); err != nil {
+	if _, err := zClient.applicationsegmentpra.Update(id, &req); err != nil {
 		return err
 	}
 
-	return resourceSRAPortalAppSegmentRead(d, m)
+	return resourceAppSegmentPRARead(d, m)
 }
 
-func resourceSRAPortalAppSegmentDelete(d *schema.ResourceData, m interface{}) error {
+func resourceAppSegmentPRADelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	id := d.Id()
 	segmentGroupID, ok := d.GetOk("segment_group_id")
@@ -352,7 +352,7 @@ func resourceSRAPortalAppSegmentDelete(d *schema.ResourceData, m interface{}) er
 		}
 	}
 	log.Printf("[INFO] Deleting sra application segment with id %v\n", id)
-	if _, err := zClient.app_segment_sra_apps.Delete(id); err != nil {
+	if _, err := zClient.applicationsegmentpra.Delete(id); err != nil {
 		return err
 	}
 
@@ -378,8 +378,8 @@ func detachSraPortalsFromGroup(client *Client, segmentID, segmentGroupID string)
 
 }
 
-func expandSRAApplicationSegment(d *schema.ResourceData) app_segment_sra_apps.AppSegmentSraApps {
-	details := app_segment_sra_apps.AppSegmentSraApps{
+func expandSRAApplicationSegment(d *schema.ResourceData) applicationsegmentpra.AppSegmentSraApps {
+	details := applicationsegmentpra.AppSegmentSraApps{
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		BypassType:           d.Get("bypass_type").(string),
 		ConfigSpace:          d.Get("config_space").(string),
@@ -426,16 +426,16 @@ func expandSRAApplicationSegment(d *schema.ResourceData) app_segment_sra_apps.Ap
 	return details
 }
 
-func expandSRAApps(d *schema.ResourceData) []app_segment_sra_apps.SraApps {
+func expandSRAApps(d *schema.ResourceData) []applicationsegmentpra.SraApps {
 	sraInterface, ok := d.GetOk("sra_apps")
 	if ok {
 		sra := sraInterface.([]interface{})
 		log.Printf("[INFO] sra apps data: %+v\n", sra)
-		var sraApps []app_segment_sra_apps.SraApps
+		var sraApps []applicationsegmentpra.SraApps
 		for _, sraApp := range sra {
 			sraApp, ok := sraApp.(map[string]interface{})
 			if ok {
-				sraApps = append(sraApps, app_segment_sra_apps.SraApps{
+				sraApps = append(sraApps, applicationsegmentpra.SraApps{
 					Name:                sraApp["name"].(string),
 					Description:         sraApp["description"].(string),
 					Enabled:             sraApp["enabled"].(bool),
@@ -452,20 +452,20 @@ func expandSRAApps(d *schema.ResourceData) []app_segment_sra_apps.SraApps {
 		return sraApps
 	}
 
-	return []app_segment_sra_apps.SraApps{}
+	return []applicationsegmentpra.SraApps{}
 }
 
-func expandSRAAppServerGroups(d *schema.ResourceData) []app_segment_sra_apps.AppServerGroups {
+func expandSRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.AppServerGroups {
 	serverGroupsInterface, ok := d.GetOk("server_groups")
 	if ok {
 		serverGroup := serverGroupsInterface.(*schema.Set)
 		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
-		var serverGroups []app_segment_sra_apps.AppServerGroups
+		var serverGroups []applicationsegmentpra.AppServerGroups
 		for _, appServerGroup := range serverGroup.List() {
 			appServerGroup, _ := appServerGroup.(map[string]interface{})
 			if appServerGroup != nil {
 				for _, id := range appServerGroup["id"].([]interface{}) {
-					serverGroups = append(serverGroups, app_segment_sra_apps.AppServerGroups{
+					serverGroups = append(serverGroups, applicationsegmentpra.AppServerGroups{
 						ID: id.(string),
 					})
 				}
@@ -474,5 +474,5 @@ func expandSRAAppServerGroups(d *schema.ResourceData) []app_segment_sra_apps.App
 		return serverGroups
 	}
 
-	return []app_segment_sra_apps.AppServerGroups{}
+	return []applicationsegmentpra.AppServerGroups{}
 }

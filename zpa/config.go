@@ -38,6 +38,7 @@ type Client struct {
 	appconnectorgroup      appconnectorgroup.Service
 	appconnectorcontroller appconnectorcontroller.Service
 	applicationsegment     applicationsegment.Service
+	applicationsegmentpra  applicationsegmentpra.Service
 	appservercontroller    appservercontroller.Service
 	bacertificate          bacertificate.Service
 	cloudconnectorgroup    cloudconnectorgroup.Service
@@ -77,6 +78,7 @@ func (c *Config) Client() (*Client, error) {
 		appconnectorgroup:      *appconnectorgroup.New(config),
 		appconnectorcontroller: *appconnectorcontroller.New(config),
 		applicationsegment:     *applicationsegment.New(config),
+		applicationsegmentpra:  *applicationsegmentpra.New(config),
 		appservercontroller:    *appservercontroller.New(config),
 		bacertificate:          *bacertificate.New(config),
 		cloudconnectorgroup:    *cloudconnectorgroup.New(config),
