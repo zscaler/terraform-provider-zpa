@@ -36,34 +36,49 @@ type BrowserAccess struct {
 	UDPPortRanges        []string              `json:"udpPortRanges,omitempty"`
 	TCPAppPortRange      []common.NetworkPorts `json:"tcpPortRange,omitempty"`
 	UDPAppPortRange      []common.NetworkPorts `json:"udpPortRange,omitempty"`
-	ClientlessApps       []ClientlessApps      `json:"clientlessApps,omitempty"`
+	SRAAppsDto           []SRAAppsDto          `json:"sraApps,omitempty"`
+	CommonAppsDto        CommonAppsDto         `json:"clientlessApps,omitempty"`
 	AppServerGroups      []AppServerGroups     `json:"serverGroups,omitempty"`
 }
 
 type CommonAppsDto struct {
+	AppConfig []AppConfig `json:"appsConfig,omitempty"`
+}
+
+type AppConfig struct {
+	ID                  string `json:"id,omitempty"`
+	Name                string `json:"name,omitempty"`
 	AllowOptions        bool   `json:"allowOptions"`
+	AppID               string `json:"appId,omitempty"`
+	AppTypes            string `json:"appTypes,omitempty"`
+	ApplicationPort     string `json:"applicationPort,omitempty"`
+	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
+	BaAppID             string `json:"baAppId,omitempty"`
+	CertificateID       string `json:"certificateId,omitempty"`
+	CertificateName     string `json:"certificateName,omitempty"`
+	Cname               string `json:"cname,omitempty"`
+	Description         string `json:"description,omitempty"`
+	Domain              string `json:"domain,omitempty"`
+	Enabled             bool   `json:"enabled"`
+	Hidden              bool   `json:"hidden"`
+	InspectAppId        string `json:"inspectAppId,omitempty"`
+	LocalDomain         string `json:"localDomain,omitempty"`
+	Path                string `json:"path,omitempty"`
+	Portal              string `json:"portal,omitempty"`
+	TrustUntrustedCert  bool   `json:"trustUntrustedCert"`
+}
+
+type SRAAppsDto struct {
 	AppID               string `json:"appId,omitempty"`
 	ApplicationPort     string `json:"applicationPort,omitempty"`
 	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
 	CertificateID       string `json:"certificateId,omitempty"`
 	CertificateName     string `json:"certificateName,omitempty"`
-	Cname               string `json:"cname,omitempty"`
-	CreationTime        string `json:"creationTime,omitempty"`
 	Description         string `json:"description,omitempty"`
 	Domain              string `json:"domain,omitempty"`
 	Enabled             bool   `json:"enabled"`
-	Hidden              bool   `json:"hidden"`
 	ID                  string `json:"id,omitempty"`
-	LocalDomain         string `json:"localDomain,omitempty"`
-	ModifiedBy          string `json:"modifiedBy,omitempty"`
-	ModifiedTime        string `json:"modifiedTime,omitempty"`
 	Name                string `json:"name,omitempty"`
-	Path                string `json:"path,omitempty"`
-	TrustUntrustedCert  bool   `json:"trustUntrustedCert"`
-}
-
-type AppServerGroups struct {
-	ID string `json:"id"`
 }
 
 func (service *Service) Get(id string) (*BrowserAccess, *http.Response, error) {
