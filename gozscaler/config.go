@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -15,11 +16,13 @@ import (
 
 const (
 	defaultBaseURL    = "https://config.private.zscaler.com"
+	betaBaseURL       = "https://config.zpabeta.net"
 	defaultTimeout    = 240 * time.Second
 	loggerPrefix      = "zpa-logger: "
 	ZPA_CLIENT_ID     = "ZPA_CLIENT_ID"
 	ZPA_CLIENT_SECRET = "ZPA_CLIENT_SECRET"
 	ZPA_CUSTOMER_ID   = "ZPA_CUSTOMER_ID"
+	ZPA_CLOUD         = "ZPA_CLOUD"
 )
 
 type BackoffConfig struct {
@@ -69,7 +72,12 @@ func NewConfig(clientID, clientSecret, customerID, rawUrl string) (*Config, erro
 		customerID = os.Getenv(ZPA_CUSTOMER_ID)
 	}
 	if rawUrl == "" {
-		rawUrl = defaultBaseURL
+		cloud := os.Getenv(ZPA_CLOUD)
+		if strings.EqualFold(cloud, "BETA") {
+			rawUrl = betaBaseURL
+		} else {
+			rawUrl = defaultBaseURL
+		}
 	}
 
 	var logger *log.Logger

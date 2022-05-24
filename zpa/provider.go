@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func Provider() *schema.Provider {
@@ -29,6 +30,14 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 				DefaultFunc: envDefaultFunc("ZPA_CUSTOMER_ID"),
 				Description: "zpa customer id",
+			},
+			"zpa_cloud": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				DefaultFunc:  envDefaultFunc("ZPA_CLOUD"),
+				Description:  "Cloud to use BETA or PRODUCTION",
+				ValidateFunc: validation.StringInSlice([]string{"BETA", "PRODUCTION"}, true),
+				Default:      "PRODUCTION",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
