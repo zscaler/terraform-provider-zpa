@@ -5,12 +5,12 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/app_segment_sra_apps"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentpra"
 )
 
-func dataSourceSRAPortalAppSegment() *schema.Resource {
+func dataSourceApplicationSegmentPRA() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSRAPortalAppSegmentRead,
+		Read: dataSourceApplicationSegmentPRARead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -79,102 +79,102 @@ func dataSourceSRAPortalAppSegment() *schema.Resource {
 				Optional:    true,
 				Description: "Name of the application.",
 			},
-			"common_apps_dto": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"apps_config": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"allow_options": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"app_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"app_types": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"application_port": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"application_protocol": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"ba_app_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"certificate_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"certificate_name": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"cname": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"connection_security": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"description": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"domain": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"enabled": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"hidden": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"local_domain": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"path": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"portal": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"sra_app_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"trust_untrusted_cert": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
+			// "common_apps_dto": {
+			// 	Type:     schema.TypeSet,
+			// 	Computed: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"apps_config": {
+			// 				Type:     schema.TypeList,
+			// 				Computed: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"allow_options": {
+			// 							Type:     schema.TypeBool,
+			// 							Computed: true,
+			// 						},
+			// 						"app_id": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"app_types": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"application_port": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"application_protocol": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"ba_app_id": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"certificate_id": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"certificate_name": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"cname": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"connection_security": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"description": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"domain": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"enabled": {
+			// 							Type:     schema.TypeBool,
+			// 							Computed: true,
+			// 						},
+			// 						"hidden": {
+			// 							Type:     schema.TypeBool,
+			// 							Computed: true,
+			// 						},
+			// 						"local_domain": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"name": {
+			// 							Type:     schema.TypeString,
+			// 							Required: true,
+			// 						},
+			// 						"path": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"portal": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"sra_app_id": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"trust_untrusted_cert": {
+			// 							Type:     schema.TypeBool,
+			// 							Computed: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
 			"sra_apps": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -270,13 +270,13 @@ func dataSourceSRAPortalAppSegment() *schema.Resource {
 	}
 }
 
-func dataSourceSRAPortalAppSegmentRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	var resp *app_segment_sra_apps.AppSegmentSraApps
+	var resp *applicationsegmentpra.AppSegmentPRA
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for sra application %s\n", id)
-		res, _, err := zClient.app_segment_sra_apps.Get(id)
+		res, _, err := zClient.applicationsegmentpra.Get(id)
 		if err != nil {
 			return err
 		}
@@ -285,7 +285,7 @@ func dataSourceSRAPortalAppSegmentRead(d *schema.ResourceData, m interface{}) er
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for sra application name %s\n", name)
-		res, _, err := zClient.app_segment_sra_apps.GetByName(name)
+		res, _, err := zClient.applicationsegmentpra.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -314,9 +314,9 @@ func dataSourceSRAPortalAppSegmentRead(d *schema.ResourceData, m interface{}) er
 			return fmt.Errorf("failed to read clientless apps %s", err)
 		}
 
-		if err := d.Set("common_apps_dto", flattenCommonAppDto(resp.CommonApplicationDto)); err != nil {
-			return fmt.Errorf("failed to read common apps %s", err)
-		}
+		// if err := d.Set("common_apps_dto", flattenCommonAppDto(resp.CommonApplicationDto)); err != nil {
+		// 	return fmt.Errorf("failed to read common apps %s", err)
+		// }
 
 		if err := d.Set("server_groups", flattenSRAAppServerGroups(resp.AppServerGroups)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
@@ -337,7 +337,7 @@ func dataSourceSRAPortalAppSegmentRead(d *schema.ResourceData, m interface{}) er
 
 }
 
-func flattenSRAAppServerGroups(appServerGroup []app_segment_sra_apps.AppServerGroups) []interface{} {
+func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
 	ids := make([]string, len(appServerGroup))
@@ -349,50 +349,50 @@ func flattenSRAAppServerGroups(appServerGroup []app_segment_sra_apps.AppServerGr
 	return result
 }
 
-func flattenCommonAppDto(commonAppDto *app_segment_sra_apps.CommonApplicationDto) []map[string]interface{} {
-	if commonAppDto == nil {
-		return nil
-	}
-	return []map[string]interface{}{
-		{
-			"apps_config": flattenAppsConfig(commonAppDto.AppsConfig),
-		},
-	}
-}
+// func flattenCommonAppDto(commonAppDto *applicationsegmentpra.CommonAppsDto) []map[string]interface{} {
+// 	if commonAppDto == nil {
+// 		return nil
+// 	}
+// 	return []map[string]interface{}{
+// 		{
+// 			"apps_config": flattenAppsConfig(commonAppDto.AppsConfig),
+// 		},
+// 	}
+// }
 
-func flattenAppsConfig(appsConfig []app_segment_sra_apps.AppsConfig) []interface{} {
-	appsConfigs := make([]interface{}, len(appsConfig))
-	for i, appsConfig := range appsConfig {
-		appsConfigs[i] = map[string]interface{}{
-			"allow_options":        appsConfig.AllowOptions,
-			"app_id":               appsConfig.AppID,
-			"app_types":            appsConfig.AppTypes,
-			"application_port":     appsConfig.ApplicationPort,
-			"application_protocol": appsConfig.ApplicationProtocol,
-			"ba_app_id":            appsConfig.BaAppId,
-			"certificate_id":       appsConfig.CertificateID,
-			"certificate_name":     appsConfig.CertificateName,
-			"cname":                appsConfig.Cname,
-			"connection_security":  appsConfig.ConnectionSecurity,
-			"description":          appsConfig.Description,
-			"domain":               appsConfig.Domain,
-			"enabled":              appsConfig.Enabled,
-			"hidden":               appsConfig.Hidden,
-			"local_domain":         appsConfig.LocalDomain,
-			"name":                 appsConfig.Name,
-			"path":                 appsConfig.Path,
-			"portal":               appsConfig.Portal,
-			"sra_app_id":           appsConfig.SraAppId,
-			"trust_untrusted_cert": appsConfig.TrustUntrustedCert,
-		}
-	}
+// func flattenAppsConfig(appsConfig []applicationsegmentpra.AppsConfig) []interface{} {
+// 	appsConfigs := make([]interface{}, len(appsConfig))
+// 	for i, appsConfig := range appsConfig {
+// 		appsConfigs[i] = map[string]interface{}{
+// 			"allow_options":        appsConfig.AllowOptions,
+// 			"app_id":               appsConfig.AppID,
+// 			"app_types":            appsConfig.AppTypes,
+// 			"application_port":     appsConfig.ApplicationPort,
+// 			"application_protocol": appsConfig.ApplicationProtocol,
+// 			"ba_app_id":            appsConfig.BaAppId,
+// 			"certificate_id":       appsConfig.CertificateID,
+// 			"certificate_name":     appsConfig.CertificateName,
+// 			"cname":                appsConfig.Cname,
+// 			"connection_security":  appsConfig.ConnectionSecurity,
+// 			"description":          appsConfig.Description,
+// 			"domain":               appsConfig.Domain,
+// 			"enabled":              appsConfig.Enabled,
+// 			"hidden":               appsConfig.Hidden,
+// 			"local_domain":         appsConfig.LocalDomain,
+// 			"name":                 appsConfig.Name,
+// 			"path":                 appsConfig.Path,
+// 			"portal":               appsConfig.Portal,
+// 			"sra_app_id":           appsConfig.SraAppId,
+// 			"trust_untrusted_cert": appsConfig.TrustUntrustedCert,
+// 		}
+// 	}
 
-	return appsConfigs
-}
+// 	return appsConfigs
+// }
 
-func flattenSRAApps(sraApp *app_segment_sra_apps.AppSegmentSraApps) []interface{} {
-	sraApps := make([]interface{}, len(sraApp.SraApps))
-	for i, val := range sraApp.SraApps {
+func flattenSRAApps(sraApp *applicationsegmentpra.AppSegmentPRA) []interface{} {
+	sraApps := make([]interface{}, len(sraApp.SRAAppsDto))
+	for i, val := range sraApp.SRAAppsDto {
 		sraApps[i] = map[string]interface{}{
 			"id":                   val.ID,
 			"app_id":               val.AppID,

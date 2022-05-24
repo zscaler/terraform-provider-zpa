@@ -10,10 +10,10 @@ import (
 
 const (
 	mgmtConfig            = "/mgmtconfig/v1/admin/customers/"
-	browserAccessEndpoint = "/application"
+	appSegmentPraEndpoint = "/application"
 )
 
-type BrowserAccess struct {
+type AppSegmentPRA struct {
 	ID                   string                `json:"id,omitempty"`
 	SegmentGroupID       string                `json:"segmentGroupId,omitempty"`
 	SegmentGroupName     string                `json:"segmentGroupName,omitempty"`
@@ -23,6 +23,7 @@ type BrowserAccess struct {
 	Name                 string                `json:"name,omitempty"`
 	Description          string                `json:"description,omitempty"`
 	Enabled              bool                  `json:"enabled"`
+	ICMPAccessType       string                `json:"icmpAccessType,omitempty"`
 	PassiveHealthEnabled bool                  `json:"passiveHealthEnabled"`
 	DoubleEncrypt        bool                  `json:"doubleEncrypt"`
 	HealthCheckType      string                `json:"healthCheckType,omitempty"`
@@ -37,35 +38,31 @@ type BrowserAccess struct {
 	TCPAppPortRange      []common.NetworkPorts `json:"tcpPortRange,omitempty"`
 	UDPAppPortRange      []common.NetworkPorts `json:"udpPortRange,omitempty"`
 	SRAAppsDto           []SRAAppsDto          `json:"sraApps,omitempty"`
-	CommonAppsDto        CommonAppsDto         `json:"clientlessApps,omitempty"`
+	CommonAppsDto        CommonAppsDto         `json:"commonAppsDto,omitempty"`
 	AppServerGroups      []AppServerGroups     `json:"serverGroups,omitempty"`
 }
 
 type CommonAppsDto struct {
-	AppConfig []AppConfig `json:"appsConfig,omitempty"`
+	AppsConfig []AppsConfig `json:"appsConfig,omitempty"`
 }
 
-type AppConfig struct {
-	ID                  string `json:"id,omitempty"`
+type AppsConfig struct {
 	Name                string `json:"name,omitempty"`
 	AllowOptions        bool   `json:"allowOptions"`
 	AppID               string `json:"appId,omitempty"`
 	AppTypes            string `json:"appTypes,omitempty"`
 	ApplicationPort     string `json:"applicationPort,omitempty"`
 	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
-	BaAppID             string `json:"baAppId,omitempty"`
-	CertificateID       string `json:"certificateId,omitempty"`
-	CertificateName     string `json:"certificateName,omitempty"`
-	Cname               string `json:"cname,omitempty"`
-	Description         string `json:"description,omitempty"`
-	Domain              string `json:"domain,omitempty"`
-	Enabled             bool   `json:"enabled"`
-	Hidden              bool   `json:"hidden"`
-	InspectAppId        string `json:"inspectAppId,omitempty"`
-	LocalDomain         string `json:"localDomain,omitempty"`
-	Path                string `json:"path,omitempty"`
-	Portal              string `json:"portal,omitempty"`
-	TrustUntrustedCert  bool   `json:"trustUntrustedCert"`
+	// CertificateID       string `json:"certificateId,omitempty"`
+	// CertificateName     string `json:"certificateName,omitempty"`
+	Cname              string `json:"cname,omitempty"`
+	ConnectionSecurity string `json:"connectionSecurity,omitempty"`
+	Description        string `json:"description,omitempty"`
+	Domain             string `json:"domain,omitempty"`
+	Enabled            bool   `json:"enabled"`
+	Hidden             bool   `json:"hidden"`
+	LocalDomain        string `json:"localDomain,omitempty"`
+	Portal             bool   `json:"portal"`
 }
 
 type SRAAppsDto struct {
@@ -74,6 +71,9 @@ type SRAAppsDto struct {
 	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
 	CertificateID       string `json:"certificateId,omitempty"`
 	CertificateName     string `json:"certificateName,omitempty"`
+	ConnectionSecurity  string `json:"connectionSecurity,omitempty"`
+	Hidden              bool   `json:"hidden"`
+	Portal              bool   `json:"portal"`
 	Description         string `json:"description,omitempty"`
 	Domain              string `json:"domain,omitempty"`
 	Enabled             bool   `json:"enabled"`
@@ -81,9 +81,13 @@ type SRAAppsDto struct {
 	Name                string `json:"name,omitempty"`
 }
 
-func (service *Service) Get(id string) (*BrowserAccess, *http.Response, error) {
-	v := new(BrowserAccess)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+browserAccessEndpoint, id)
+type AppServerGroups struct {
+	ID string `json:"id"`
+}
+
+func (service *Service) Get(id string) (*AppSegmentPRA, *http.Response, error) {
+	v := new(AppSegmentPRA)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appSegmentPraEndpoint, id)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err
@@ -91,12 +95,12 @@ func (service *Service) Get(id string) (*BrowserAccess, *http.Response, error) {
 	return v, resp, nil
 }
 
-func (service *Service) GetByName(BaName string) (*BrowserAccess, *http.Response, error) {
+func (service *Service) GetByName(BaName string) (*AppSegmentPRA, *http.Response, error) {
 	var v struct {
-		List []BrowserAccess `json:"list"`
+		List []AppSegmentPRA `json:"list"`
 	}
 
-	relativeURL := mgmtConfig + service.Client.Config.CustomerID + browserAccessEndpoint
+	relativeURL := mgmtConfig + service.Client.Config.CustomerID + appSegmentPraEndpoint
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: BaName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
@@ -109,18 +113,18 @@ func (service *Service) GetByName(BaName string) (*BrowserAccess, *http.Response
 	return nil, resp, fmt.Errorf("no browser access application named '%s' was found", BaName)
 }
 
-func (service *Service) Create(browserAccess BrowserAccess) (*BrowserAccess, *http.Response, error) {
-	v := new(BrowserAccess)
-	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+browserAccessEndpoint, nil, browserAccess, &v)
+func (service *Service) Create(appSegmentPra AppSegmentPRA) (*AppSegmentPRA, *http.Response, error) {
+	v := new(AppSegmentPRA)
+	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+appSegmentPraEndpoint, nil, appSegmentPra, &v)
 	if err != nil {
 		return nil, nil, err
 	}
 	return v, resp, nil
 }
 
-func (service *Service) Update(id string, browserAccess *BrowserAccess) (*http.Response, error) {
-	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+browserAccessEndpoint, id)
-	resp, err := service.Client.NewRequestDo("PUT", path, nil, browserAccess, nil)
+func (service *Service) Update(id string, appSegmentPra *AppSegmentPRA) (*http.Response, error) {
+	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appSegmentPraEndpoint, id)
+	resp, err := service.Client.NewRequestDo("PUT", path, nil, appSegmentPra, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +132,7 @@ func (service *Service) Update(id string, browserAccess *BrowserAccess) (*http.R
 }
 
 func (service *Service) Delete(id string) (*http.Response, error) {
-	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+browserAccessEndpoint, id)
+	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appSegmentPraEndpoint, id)
 	resp, err := service.Client.NewRequestDo("DELETE", path, nil, nil, nil)
 	if err != nil {
 		return nil, err

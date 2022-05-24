@@ -7,6 +7,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorcontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorgroup"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentpra"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appservercontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/bacertificate"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/browseraccess"
