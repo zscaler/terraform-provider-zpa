@@ -97,6 +97,7 @@ func zscalerConfigure(d *schema.ResourceData) (interface{}, error) {
 		ClientID:     d.Get("zpa_client_id").(string),
 		ClientSecret: d.Get("zpa_client_secret").(string),
 		CustomerID:   d.Get("zpa_customer_id").(string),
+		BaseURL:      d.Get("zpa_cloud").(string),
 	}
 
 	return config.Client()
