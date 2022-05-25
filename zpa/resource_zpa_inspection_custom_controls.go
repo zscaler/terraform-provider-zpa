@@ -44,8 +44,7 @@ func resourceInspectionCustomControls() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 			},
 			"action": {
 				Type:     schema.TypeString,
@@ -123,7 +122,6 @@ func resourceInspectionCustomControls() *schema.Resource {
 							Type:     schema.TypeList,
 							Optional: true,
 							Computed: true,
-							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"lhs": {
