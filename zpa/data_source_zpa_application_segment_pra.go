@@ -305,7 +305,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-		_ = d.Set("ip_anchored", resp.IPAnchored)
+		_ = d.Set("ip_anchored", resp.IpAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
@@ -318,7 +318,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 		// 	return fmt.Errorf("failed to read common apps %s", err)
 		// }
 
-		if err := d.Set("server_groups", flattenSRAAppServerGroups(resp.AppServerGroups)); err != nil {
+		if err := d.Set("server_groups", flattenSRAAppServerGroups(resp.ServerGroups)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
 		}
 

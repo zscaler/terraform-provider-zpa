@@ -15,31 +15,34 @@ const (
 
 type AppSegmentPRA struct {
 	ID                   string                `json:"id,omitempty"`
-	SegmentGroupID       string                `json:"segmentGroupId,omitempty"`
-	SegmentGroupName     string                `json:"segmentGroupName,omitempty"`
-	BypassType           string                `json:"bypassType,omitempty"`
-	ConfigSpace          string                `json:"configSpace,omitempty"`
 	DomainNames          []string              `json:"domainNames,omitempty"`
 	Name                 string                `json:"name,omitempty"`
 	Description          string                `json:"description,omitempty"`
 	Enabled              bool                  `json:"enabled"`
-	ICMPAccessType       string                `json:"icmpAccessType,omitempty"`
 	PassiveHealthEnabled bool                  `json:"passiveHealthEnabled"`
 	DoubleEncrypt        bool                  `json:"doubleEncrypt"`
+	ConfigSpace          string                `json:"configSpace,omitempty"`
+	Applications         string                `json:"applications,omitempty"`
+	BypassType           string                `json:"bypassType,omitempty"`
 	HealthCheckType      string                `json:"healthCheckType,omitempty"`
 	IsCnameEnabled       bool                  `json:"isCnameEnabled"`
-	IPAnchored           bool                  `json:"ipAnchored"`
+	IpAnchored           bool                  `json:"ipAnchored"`
 	HealthReporting      string                `json:"healthReporting,omitempty"`
+	IcmpAccessType       string                `json:"icmpAccessType,omitempty"`
+	SegmentGroupID       string                `json:"segmentGroupId"`
+	SegmentGroupName     string                `json:"segmentGroupName,omitempty"`
 	CreationTime         string                `json:"creationTime,omitempty"`
 	ModifiedBy           string                `json:"modifiedBy,omitempty"`
 	ModifiedTime         string                `json:"modifiedTime,omitempty"`
-	TCPPortRanges        []string              `json:"tcpPortRanges,omitempty"`
-	UDPPortRanges        []string              `json:"udpPortRanges,omitempty"`
 	TCPAppPortRange      []common.NetworkPorts `json:"tcpPortRange,omitempty"`
 	UDPAppPortRange      []common.NetworkPorts `json:"udpPortRange,omitempty"`
+	ServerGroups         []AppServerGroups     `json:"serverGroups,omitempty"`
+	DefaultIdleTimeout   string                `json:"defaultIdleTimeout,omitempty"`
+	DefaultMaxAge        string                `json:"defaultMaxAge,omitempty"`
+	TCPPortRanges        []string              `json:"tcpPortRanges,omitempty"`
+	UDPPortRanges        []string              `json:"udpPortRanges,omitempty"`
 	SRAAppsDto           []SRAAppsDto          `json:"sraApps,omitempty"`
 	CommonAppsDto        CommonAppsDto         `json:"commonAppsDto,omitempty"`
-	AppServerGroups      []AppServerGroups     `json:"serverGroups,omitempty"`
 }
 
 type CommonAppsDto struct {
@@ -47,12 +50,13 @@ type CommonAppsDto struct {
 }
 
 type AppsConfig struct {
-	Name                string `json:"name,omitempty"`
-	AllowOptions        bool   `json:"allowOptions"`
-	AppID               string `json:"appId,omitempty"`
-	AppTypes            string `json:"appTypes,omitempty"`
-	ApplicationPort     string `json:"applicationPort,omitempty"`
-	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
+	Name                string   `json:"name,omitempty"`
+	AllowOptions        bool     `json:"allowOptions"`
+	ID                  string   `json:"id,omitempty"`
+	AppID               string   `json:"appId,omitempty"`
+	AppTypes            []string `json:"appTypes,omitempty"`
+	ApplicationPort     string   `json:"applicationPort,omitempty"`
+	ApplicationProtocol string   `json:"applicationProtocol,omitempty"`
 	// CertificateID       string `json:"certificateId,omitempty"`
 	// CertificateName     string `json:"certificateName,omitempty"`
 	Cname              string `json:"cname,omitempty"`
