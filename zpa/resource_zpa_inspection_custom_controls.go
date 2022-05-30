@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"errors"
 	"log"
 	"strconv"
 
@@ -213,7 +214,9 @@ func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{
 
 	req := expandInspectionCustomControls(d)
 	log.Printf("[INFO] Creating custom inspection control with request\n%+v\n", req)
-
+	if err := valdateRules(req); err != nil {
+		return err
+	}
 	resp, _, err := zClient.inspection_custom_controls.Create(req)
 	if err != nil {
 		return err
@@ -266,7 +269,9 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 	id := d.Id()
 	log.Printf("[INFO] Updating custom inspection control ID: %v\n", id)
 	req := expandInspectionCustomControls(d)
-
+	if err := valdateRules(req); err != nil {
+		return err
+	}
 	if _, err := zClient.inspection_custom_controls.Update(id, &req); err != nil {
 		return err
 	}
@@ -379,4 +384,64 @@ func expandCustomControlRuleConditions(conditionsObj interface{}) []inspection_c
 	}
 
 	return conditions
+}
+
+func valdateRules(customCtl inspection_custom_controls.InspectionCustomControl) error {
+	/*
+		#Validation Part 1
+		// When type == RESPOSE rules.type must be: "RESPONSE_HEADERS" || "RESPONSE_BODY"
+		// When type == REQUEST and rules.type is: "REQUEST_HEADERS" || REQUEST_COOKIES  the rules.name: [""] must be set
+		// When type == REQUEST and rules.type is: REQUEST_URI || QUERY_STRING || REQUEST_BODY || REQUEST_METHOD the rules.name: [""] is not allowed
+
+	*/
+	for _, rule := range customCtl.Rules {
+		if customCtl.Type == "RESPONSE" {
+			if rule.Type != "RESPONSE_HEADERS" && rule.Type != "RESPONSE_BODY" {
+				return errors.New("when type == RESPONSE rules.type must be: RESPONSE_HEADERS || RESPONSE_BODY")
+			}
+		} else if customCtl.Type == "REQUEST" {
+			if (rule.Type == "REQUEST_HEADERS" || rule.Type == "REQUEST_COOKIES") && len(rule.Names) == 0 {
+				return errors.New("when type == REQUEST and rules.type is: REQUEST_HEADERS || REQUEST_COOKIES  the rules.names must be set")
+			}
+			if (rule.Type == "REQUEST_URI" || rule.Type == "QUERY_STRING" || rule.Type == "REQUEST_BODY" || rule.Type == "REQUEST_METHOD") && len(rule.Names) > 0 {
+				return errors.New("when type == REQUEST and rules.type is: REQUEST_URI || QUERY_STRING || REQUEST_BODY || REQUEST_METHOD the rules.name is not allowed")
+			}
+		}
+		for _, cond := range rule.Conditions {
+			if in(rule.Type, []string{"REQUEST_HEADERS", "REQUEST_COOKIES", "REQUEST_URI", "QUERY_STRING", "REQUEST_BODY"}) {
+				if cond.LHS == "SIZE" && (!in(cond.OP, []string{"EQ", "LE", "GE"}) || !isNumber(cond.RHS)) {
+					return errors.New("when rules.type is: " + rule.Type + " the conditions.lhs must be == SIZE && conditions.op == EQ, LE, GE && condition.rhs must be a number(string)")
+				}
+				if cond.LHS == "VALUE" && (!in(cond.OP, []string{"CONTAINS", "STARTS_WITH", "ENDS_WITH", "RX"})) {
+					return errors.New("when rules.type is: " + rule.Type + " the conditions.lhs must be == VALUE && conditions.op must be == CONTAINS, STARTS_WITH, ENDS_WITH, RX and rhs must be a string value")
+				}
+			}
+			if rule.Type == "REQUEST_METHOD" {
+				if cond.LHS == "SIZE" && (!in(cond.OP, []string{"EQ", "LE", "GE"}) || !isNumber(cond.RHS)) {
+					return errors.New("when rules.type is: " + rule.Type + " the conditions.lhs must be == SIZE && conditions.op == EQ, LE, GE && condition.rhs must be a number(string)")
+				}
+				if cond.LHS == "VALUE" && (!in(cond.OP, []string{"CONTAINS", "STARTS_WITH", "ENDS_WITH", "RX"}) || !in(cond.RHS, []string{"GET", "POST", "PUT", "PATCH", "CONNECT", "HEAD", "OPTIONS", "DELETE", "TRACE"})) {
+					return errors.New("when rules.type is: " + rule.Type + " the conditions.lhs must be == VALUE && conditions.op must be == CONTAINS, STARTS_WITH, ENDS_WITH, RX && condition.rhs== GET,POST,PUT,PATCH,CONNECT,HEAD,OPTIONS,DELETE,TRACE")
+				}
+			}
+		}
+
+	}
+	return nil
+}
+
+func isNumber(str string) bool {
+	if _, err := strconv.Atoi(str); err == nil {
+		return true
+	}
+	return false
+}
+
+func in(val string, list []string) bool {
+	for _, v := range list {
+		if v == val {
+			return true
+		}
+	}
+	return false
 }
