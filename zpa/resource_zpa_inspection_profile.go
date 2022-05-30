@@ -86,11 +86,20 @@ func resourceInspectionProfile() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"action": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"REDIRECT",
+								"BLOCK",
+							}, false),
+						},
+						"action_value": {
+							Type:     schema.TypeString,
 							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 					},
 				},
@@ -123,11 +132,20 @@ func resourceInspectionProfile() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"action": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"REDIRECT",
+								"BLOCK",
+							}, false),
+						},
+						"action_value": {
+							Type:     schema.TypeString,
 							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 					},
 				},
@@ -271,11 +289,16 @@ func expandCustomControls(d *schema.ResourceData) []inspection_profile.Inspectio
 		for _, customControl := range control.List() {
 			customControl, ok := customControl.(map[string]interface{})
 			if ok {
-				for _, id := range customControl["id"].(*schema.Set).List() {
-					customControls = append(customControls, inspection_profile.InspectionCustomControl{
-						ID: id.(string),
-					})
+				actionValue := ""
+				if customControl["action_value"] != nil {
+					actionValue = customControl["action_value"].(string)
 				}
+				customControls = append(customControls, inspection_profile.InspectionCustomControl{
+					ID:          customControl["id"].(string),
+					Action:      customControl["action"].(string),
+					ActionValue: actionValue,
+				})
+
 			}
 		}
 		return customControls
@@ -293,11 +316,15 @@ func expandPredefinedControls(d *schema.ResourceData) []inspection_profile.Prede
 		for _, predControl := range predControl.List() {
 			predControl, ok := predControl.(map[string]interface{})
 			if ok {
-				for _, id := range predControl["id"].(*schema.Set).List() {
-					predControls = append(predControls, inspection_profile.PredefinedControls{
-						ID: id.(string),
-					})
+				actionValue := ""
+				if predControl["action_value"] != nil {
+					actionValue = predControl["action_value"].(string)
 				}
+				predControls = append(predControls, inspection_profile.PredefinedControls{
+					ID:          predControl["id"].(string),
+					Action:      predControl["action"].(string),
+					ActionValue: actionValue,
+				})
 			}
 		}
 		return predControls
