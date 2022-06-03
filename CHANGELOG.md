@@ -8,7 +8,7 @@
 
 - ZPA Beta Cloud: The provider now supports authentication via environment variables or static credentials to ZPA Beta Cloud. For authentication instructions please refer to the documentation page [here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) (PR #130)
 
-- Added new Application Segment parameter ``select_connector_close_to_app``. PR #
+- Added new Application Segment parameter ``select_connector_close_to_app``. PR #137
 
 ### Bug Fixes
 
