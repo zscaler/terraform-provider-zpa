@@ -1,12 +1,17 @@
-## 2.1.6 (Unreleased)
+# 2.2.0 (Unreleased)
 
-### Notes:
+## Notes
+
 - Supported Terraform version: **v1.x**
 
-### Enhancements:
+### Enhancements
+
 - ZPA Beta Cloud: The provider now supports authentication via environment variables or static credentials to ZPA Beta Cloud. For authentication instructions please refer to the documentation page [here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) (PR #130)
 
+- Added new Application Segment parameter ``select_connector_close_to_app``. PR #
+
 ### Bug Fixes
+
 - Fix: Fixed update function on `zpa_app_server_controller` resource to ensure desired state is enforced in the upstream resource. (Issue #128)
 
 ## 2.1.5 (May, 18 2022)
