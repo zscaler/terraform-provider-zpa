@@ -27,6 +27,7 @@ type AppConnector struct {
 	ExpectedVersion                  string                 `json:"expectedVersion,omitempty"`
 	Fingerprint                      string                 `json:"fingerprint,omitempty"`
 	ID                               string                 `json:"id,omitempty"`
+	IDs                              string                 `json:"ids,omitempty"`
 	IPACL                            string                 `json:"ipAcl,omitempty"`
 	IssuedCertID                     string                 `json:"issuedCertId,omitempty"`
 	LastBrokerConnectTime            string                 `json:"lastBrokerConnectTime,omitempty"`
@@ -80,4 +81,35 @@ func (service *Service) GetByName(appConnectorName string) (*AppConnector, *http
 		}
 	}
 	return nil, resp, fmt.Errorf("no app connector named '%s' was found", appConnectorName)
+}
+
+func (service *Service) Update(appConnectorID string, AppConnector *AppConnector) (*http.Response, error) {
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appConnectorEndpoint, appConnectorID)
+	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, AppConnector, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, err
+}
+
+func (service *Service) Delete(appConnectorID string) (*http.Response, error) {
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appConnectorEndpoint, appConnectorID)
+	resp, err := service.Client.NewRequestDo("DELETE", relativeURL, nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+// Need to make this a list.
+func (service *Service) BulkDelete(appConnectorID string) (*http.Response, error) {
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appConnectorEndpoint, appConnectorID)
+	resp, err := service.Client.NewRequestDo("POST", relativeURL, nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
