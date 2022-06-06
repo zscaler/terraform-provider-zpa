@@ -166,6 +166,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 						"apps_config": {
 							Type:     schema.TypeList,
 							Computed: true,
+							ForceNew: true,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -342,7 +343,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
-	if err := d.Set("common_apps_dto", flattenCommonAppsDto(&resp.CommonAppsDto)); err != nil {
+	if err := d.Set("common_apps_dto", flattenCommonAppsDto(resp.SRAAppsDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
@@ -545,34 +546,31 @@ func expandPRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.Ap
 	return []applicationsegmentpra.AppServerGroups{}
 }
 
-func flattenCommonAppsDto(commonApps *applicationsegmentpra.CommonAppsDto) []interface{} {
+func flattenCommonAppsDto(apps []applicationsegmentpra.SRAAppsDto) []interface{} {
 	commonApp := make([]interface{}, 1)
 	commonApp[0] = map[string]interface{}{
-		"apps_config": flattenAppsConfig(commonApps.AppsConfig),
+		"apps_config": flattenAppsConfig(apps),
 	}
 	return commonApp
 }
 
-func flattenAppsConfig(appConfigs []applicationsegmentpra.AppsConfig) []interface{} {
+func flattenAppsConfig(appConfigs []applicationsegmentpra.SRAAppsDto) []interface{} {
 	appConfig := make([]interface{}, len(appConfigs))
 	for i, val := range appConfigs {
 		appConfig[i] = map[string]interface{}{
 			"name":                 val.Name,
-			"allow_options":        val.AllowOptions,
 			"id":                   val.ID,
 			"app_id":               val.AppID,
 			"application_port":     val.ApplicationPort,
 			"application_protocol": val.ApplicationProtocol,
-			"cname":                val.Cname,
 			"connection_security":  val.ConnectionSecurity,
 			"description":          val.Description,
 			"domain":               val.Domain,
 			"enabled":              val.Enabled,
 			"hidden":               val.Hidden,
-			"local_domain":         val.LocalDomain,
 			"portal":               val.Portal,
+			//"app_types":            []string{"SECURE_REMOTE_ACCESS"},
 		}
 	}
-
 	return appConfig
 }
