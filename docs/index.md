@@ -68,8 +68,9 @@ resouce "zpa_application_segment" "app_segment" {
 
 The ZPA provider offers various means of providing credentials for authentication. The following methods are supported:
 
-* Static credentials
+* Static credentials directly in the provider's block
 * Environment variables
+* From the JSON config file
 
 ### Static credentials
 
@@ -115,6 +116,30 @@ env:ZPA_CUSTOMER_ID    = 'xxxxxxxxxxxxxxxx'
 terraform plan
 ```
 
+### Configuration file
+
+You can use a configuration file to specify your credentials. The
+file location is `$HOME/.zpa/credentials.json` on Linux and OS X, or
+`"%USERPROFILE%\.zpa/credentials.json"` for Windows users.
+If we fail to detect credentials inline, or in the environment, Terraform will check
+this location.
+
+Usage:
+
+```hcl
+provider "zpa" {}
+```
+
+credentials.json file:
+
+```json
+{
+  "zpa_client_id": "XXXXXXXXXX",
+  "zpa_client_secret": "XXXXXXXXXX",
+  "zpa_customer_id": "XXXXXXXXXX"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -125,10 +150,9 @@ The following arguments are supported:
 * `zpa_client_secret` - (Required) ZPA client secret, is equivalent to a secret password.
 * `zpa_customer_id` - (Required) ZPA customer ID, is equivalent to your ZPA tenant identification.
 * `zpa_cloud` - (Required) ZPA Cloud name `BETA`. Only required when running in the ZPA beta cloud.
+  * This parameter is `NOT` required when running the provider to provision the ZPA Production cloud.
 
 ### Optional
-
-* `zpa_cloud` - (Optiona) ZPA Cloud name `PRODUCTION`. Optional when running in the ZPA production cloud.
 
 ## Support
 
