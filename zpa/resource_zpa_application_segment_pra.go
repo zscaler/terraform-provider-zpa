@@ -158,15 +158,15 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"common_apps_dto": {
-				Type:     schema.TypeSet,
-				Computed: true,
+				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Computed: true,
-							ForceNew: true,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -473,11 +473,11 @@ func expandCommonAppsDto(d *schema.ResourceData) applicationsegmentpra.CommonApp
 	if !ok {
 		return result
 	}
-	appsConfigSet, ok := appsConfigInterface.(*schema.Set)
+	appsConfigList, ok := appsConfigInterface.([]interface{})
 	if !ok {
 		return result
 	}
-	for _, appconf := range appsConfigSet.List() {
+	for _, appconf := range appsConfigList {
 		appConfMap, ok := appconf.(map[string]interface{})
 		if !ok {
 			return result
@@ -488,13 +488,13 @@ func expandCommonAppsDto(d *schema.ResourceData) applicationsegmentpra.CommonApp
 }
 
 func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.AppsConfig {
-	appsConfig, ok := appsConfigInterface.([]interface{})
+	appsConfig, ok := appsConfigInterface.(*schema.Set)
 	if !ok {
 		return []applicationsegmentpra.AppsConfig{}
 	}
 	log.Printf("[INFO] apps config data: %+v\n", appsConfig)
 	var commonAppConfigDto []applicationsegmentpra.AppsConfig
-	for _, commonAppConfig := range appsConfig {
+	for _, commonAppConfig := range appsConfig.List() {
 		commonAppConfig, ok := commonAppConfig.(map[string]interface{})
 		if ok {
 			appTypesSet, ok := commonAppConfig["app_types"].(*schema.Set)
@@ -569,7 +569,7 @@ func flattenAppsConfig(appConfigs []applicationsegmentpra.SRAAppsDto) []interfac
 			"enabled":              val.Enabled,
 			"hidden":               val.Hidden,
 			"portal":               val.Portal,
-			//"app_types":            []string{"SECURE_REMOTE_ACCESS"},
+			//"app_types":            val.?,
 		}
 	}
 	return appConfig

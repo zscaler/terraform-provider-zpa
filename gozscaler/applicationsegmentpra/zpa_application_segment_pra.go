@@ -46,7 +46,8 @@ type AppSegmentPRA struct {
 }
 
 type CommonAppsDto struct {
-	AppsConfig []AppsConfig `json:"appsConfig,omitempty"`
+	AppsConfig     []AppsConfig `json:"appsConfig,omitempty"`
+	DeletedSraApps []string     `json:"deletedSraApps,omitempty"`
 }
 
 type AppsConfig struct {
@@ -63,10 +64,10 @@ type AppsConfig struct {
 	ConnectionSecurity string `json:"connectionSecurity,omitempty"`
 	Description        string `json:"description,omitempty"`
 	Domain             string `json:"domain,omitempty"`
-	Enabled            bool   `json:"enabled"`
-	Hidden             bool   `json:"hidden"`
+	Enabled            bool   `json:"enabled,omitempty"`
+	Hidden             bool   `json:"hidden,omitempty"`
 	LocalDomain        string `json:"localDomain,omitempty"`
-	Portal             bool   `json:"portal"`
+	Portal             bool   `json:"portal,omitempty"`
 }
 
 type SRAAppsDto struct {
@@ -126,7 +127,55 @@ func (service *Service) Create(appSegmentPra AppSegmentPRA) (*AppSegmentPRA, *ht
 	return v, resp, nil
 }
 
+// return the new items that were added to slice1
+func difference(slice1 []AppsConfig, slice2 []AppsConfig) []AppsConfig {
+	var diff []AppsConfig
+	for _, s1 := range slice1 {
+		found := false
+		for _, s2 := range slice2 {
+			if s1.Domain == s2.Domain || s1.Name == s2.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, s1)
+		}
+	}
+	return diff
+}
+
+func mapSraApp(SRAAppsDto []SRAAppsDto) []AppsConfig {
+	result := []AppsConfig{}
+	for _, app := range SRAAppsDto {
+		result = append(result, AppsConfig{
+			Name:   app.Name,
+			Domain: app.Domain,
+			ID:     app.ID,
+			AppID:  app.AppID,
+		})
+	}
+	return result
+}
+
+func appToListStringIDs(apps []AppsConfig) []string {
+	result := []string{}
+	for _, app := range apps {
+		result = append(result, app.ID)
+	}
+	return result
+}
+
 func (service *Service) Update(id string, appSegmentPra *AppSegmentPRA) (*http.Response, error) {
+	existingResource, _, err := service.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	existingApps := mapSraApp(existingResource.SRAAppsDto)
+	newApps := difference(appSegmentPra.CommonAppsDto.AppsConfig, existingApps)
+	removedApps := difference(existingApps, appSegmentPra.CommonAppsDto.AppsConfig)
+	appSegmentPra.CommonAppsDto.AppsConfig = newApps
+	appSegmentPra.CommonAppsDto.DeletedSraApps = appToListStringIDs(removedApps)
 	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appSegmentPraEndpoint, id)
 	resp, err := service.Client.NewRequestDo("PUT", path, nil, appSegmentPra, nil)
 	if err != nil {
