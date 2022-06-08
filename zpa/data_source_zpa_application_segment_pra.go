@@ -311,7 +311,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
 		if err := d.Set("sra_apps", flattenSRAApps(resp)); err != nil {
-			return fmt.Errorf("failed to read clientless apps %s", err)
+			return fmt.Errorf("failed to read sra apps %s", err)
 		}
 
 		// if err := d.Set("common_apps_dto", flattenCommonAppDto(resp.CommonApplicationDto)); err != nil {
