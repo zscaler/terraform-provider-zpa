@@ -127,10 +127,36 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Description: "Rules of the custom controls applied as conditions (JSON)",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"names": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Computed:    true,
+							Description: "Name of the rules. If rules.type is set to REQUEST_HEADERS, REQUEST_COOKIES, or RESPONSE_HEADERS, the rules.name field is required.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "Type value for the rules. ",
+							ValidateFunc: validation.StringInSlice([]string{
+								"REQUEST_HEADERS",
+								"REQUEST_URI",
+								"QUERY_STRING",
+								"REQUEST_COOKIES",
+								"REQUEST_METHOD",
+								"REQUEST_BODY",
+								"RESPONSE_HEADERS",
+								"RESPONSE_BODY",
+							}, false),
+						},
 						"conditions": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Computed: true,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"lhs": {
@@ -166,31 +192,6 @@ func resourceInspectionCustomControls() *schema.Resource {
 									},
 								},
 							},
-						},
-						"names": {
-							Type:        schema.TypeSet,
-							Optional:    true,
-							Computed:    true,
-							Description: "Name of the rules. If rules.type is set to REQUEST_HEADERS, REQUEST_COOKIES, or RESPONSE_HEADERS, the rules.name field is required.",
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-						"type": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
-							Description: "Type value for the rules. ",
-							ValidateFunc: validation.StringInSlice([]string{
-								"REQUEST_HEADERS",
-								"REQUEST_URI",
-								"QUERY_STRING",
-								"REQUEST_COOKIES",
-								"REQUEST_METHOD",
-								"REQUEST_BODY",
-								"RESPONSE_HEADERS",
-								"RESPONSE_BODY",
-							}, false),
 						},
 					},
 				},
