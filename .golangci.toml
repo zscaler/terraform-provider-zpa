@@ -1,0 +1,18 @@
+[run]
+  deadline = "10m"
+  tests = true
+
+[linters]
+  disable-all = true
+  enable = [
+    "gofmt",
+    "goimports",
+    "deadcode",
+    "gosimple",
+    "govet",
+    "ineffassign",
+    "structcheck",
+    "unconvert",
+    "unused",
+    "varcheck",
+  ]
