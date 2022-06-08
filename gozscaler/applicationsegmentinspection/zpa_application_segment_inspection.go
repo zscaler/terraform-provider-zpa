@@ -44,26 +44,27 @@ type AppSegmentInspection struct {
 }
 
 type CommonAppsDto struct {
-	AppsConfig []AppsConfig `json:"appsConfig,omitempty"`
+	AppsConfig         []AppsConfig `json:"appsConfig,omitempty"`
+	DeletedInspectApps []string     `json:"deletedInspectApps,omitempty"`
 }
 
 type AppsConfig struct {
-	Name                string `json:"name,omitempty"`
-	AllowOptions        bool   `json:"allowOptions"`
-	AppID               string `json:"appId,omitempty"`
-	AppTypes            string `json:"appTypes,omitempty"`
-	ApplicationPort     string `json:"applicationPort,omitempty"`
-	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
-	InspectAppID        string `json:"inspectAppId,omitempty"`
-	CertificateID       string `json:"certificateId,omitempty"`
-	CertificateName     string `json:"certificateName,omitempty"`
-	Cname               string `json:"cname,omitempty"`
-	Description         string `json:"description,omitempty"`
-	Domain              string `json:"domain,omitempty"`
-	Enabled             bool   `json:"enabled"`
-	Hidden              bool   `json:"hidden"`
-	LocalDomain         string `json:"localDomain,omitempty"`
-	Portal              bool   `json:"portal"`
+	Name                string   `json:"name,omitempty"`
+	AllowOptions        bool     `json:"allowOptions"`
+	AppID               string   `json:"appId,omitempty"`
+	AppTypes            []string `json:"appTypes,omitempty"`
+	ApplicationPort     string   `json:"applicationPort,omitempty"`
+	ApplicationProtocol string   `json:"applicationProtocol,omitempty"`
+	InspectAppID        string   `json:"inspectAppId,omitempty"`
+	CertificateID       string   `json:"certificateId,omitempty"`
+	CertificateName     string   `json:"certificateName,omitempty"`
+	Cname               string   `json:"cname,omitempty"`
+	Description         string   `json:"description,omitempty"`
+	Domain              string   `json:"domain,omitempty"`
+	Enabled             bool     `json:"enabled"`
+	Hidden              bool     `json:"hidden"`
+	LocalDomain         string   `json:"localDomain,omitempty"`
+	Portal              bool     `json:"portal"`
 }
 
 type InspectionAppDto struct {
@@ -93,36 +94,84 @@ func (service *Service) Get(id string) (*AppSegmentInspection, *http.Response, e
 	return v, resp, nil
 }
 
-func (service *Service) GetByName(BaName string) (*AppSegmentInspection, *http.Response, error) {
+func (service *Service) GetByName(appSegmentName string) (*AppSegmentInspection, *http.Response, error) {
 	var v struct {
 		List []AppSegmentInspection `json:"list"`
 	}
 
 	relativeURL := mgmtConfig + service.Client.Config.CustomerID + appSegmentInspectionEndpoint
-	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: BaName}, nil, &v)
+	resp, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize, Search: appSegmentName}, nil, &v)
 	if err != nil {
 		return nil, nil, err
 	}
 	for _, app := range v.List {
-		if strings.EqualFold(app.Name, BaName) {
+		if strings.EqualFold(app.Name, appSegmentName) {
 			return &app, resp, nil
 		}
 	}
-	return nil, resp, fmt.Errorf("no browser access application named '%s' was found", BaName)
+	return nil, resp, fmt.Errorf("no inspection application segment named '%s' was found", appSegmentName)
 }
 
-func (service *Service) Create(appSegmentPra AppSegmentInspection) (*AppSegmentInspection, *http.Response, error) {
+func (service *Service) Create(appSegmentInspection AppSegmentInspection) (*AppSegmentInspection, *http.Response, error) {
 	v := new(AppSegmentInspection)
-	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+appSegmentInspectionEndpoint, nil, appSegmentPra, &v)
+	resp, err := service.Client.NewRequestDo("POST", mgmtConfig+service.Client.Config.CustomerID+appSegmentInspectionEndpoint, nil, appSegmentInspection, &v)
 	if err != nil {
 		return nil, nil, err
 	}
 	return v, resp, nil
 }
 
-func (service *Service) Update(id string, appSegmentPra *AppSegmentInspection) (*http.Response, error) {
+// return the new items that were added to slice1
+func difference(slice1 []AppsConfig, slice2 []AppsConfig) []AppsConfig {
+	var diff []AppsConfig
+	for _, s1 := range slice1 {
+		found := false
+		for _, s2 := range slice2 {
+			if s1.Domain == s2.Domain || s1.Name == s2.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			diff = append(diff, s1)
+		}
+	}
+	return diff
+}
+
+func mapInspectionApp(InspectionAppDto []InspectionAppDto) []AppsConfig {
+	result := []AppsConfig{}
+	for _, app := range InspectionAppDto {
+		result = append(result, AppsConfig{
+			Name:   app.Name,
+			Domain: app.Domain,
+			ID:     app.ID,
+			AppID:  app.AppID,
+		})
+	}
+	return result
+}
+
+func appToListStringIDs(apps []AppsConfig) []string {
+	result := []string{}
+	for _, app := range apps {
+		result = append(result, app.ID)
+	}
+	return result
+}
+
+func (service *Service) Update(id string, appSegmentInspection *AppSegmentInspection) (*http.Response, error) {
+	existingResource, _, err := service.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	existingApps := mapInspectionApp(existingResource.InspectionAppDto)
+	newApps := difference(appSegmentInspection.CommonAppsDto.AppsConfig, existingApps)
+	removedApps := difference(existingApps, appSegmentInspection.CommonAppsDto.AppsConfig)
+	appSegmentInspection.CommonAppsDto.AppsConfig = newApps
+	appSegmentInspection.CommonAppsDto.DeletedInspectApps = appToListStringIDs(removedApps)
 	path := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+appSegmentInspectionEndpoint, id)
-	resp, err := service.Client.NewRequestDo("PUT", path, nil, appSegmentPra, nil)
+	resp, err := service.Client.NewRequestDo("PUT", path, nil, appSegmentInspection, nil)
 	if err != nil {
 		return nil, err
 	}
