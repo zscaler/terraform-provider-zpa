@@ -48,9 +48,10 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Required: true,
 			},
 			"action": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The performed action",
 				ValidateFunc: validation.StringInSlice([]string{
 					"PASS",
 					"BLOCK",
@@ -63,9 +64,10 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Computed: true,
 			},
 			"associated_inspection_profile_names": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Computed:    true,
+				Description: "Name of the inspection profile",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -85,13 +87,15 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Computed: true,
 			},
 			"control_rule_json": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The control rule in JSON format that has the conditions and type of control for the inspection control",
 			},
 			"default_action": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The performed action",
 				ValidateFunc: validation.StringInSlice([]string{
 					"PASS",
 					"BLOCK",
@@ -99,24 +103,28 @@ func resourceInspectionCustomControls() *schema.Resource {
 				}, false),
 			},
 			"default_action_value": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "This is used to provide the redirect URL if the default action is set to REDIRECT",
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Description of the custom control",
 			},
 			"paranoia_level": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "OWASP Predefined Paranoia Level. Range: [1-4], inclusive",
 			},
 			"rules": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "Rules of the custom controls applied as conditions (JSON)",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"conditions": {
@@ -126,18 +134,20 @@ func resourceInspectionCustomControls() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"lhs": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "Signifies the key for the object type",
 										ValidateFunc: validation.StringInSlice([]string{
 											"SIZE",
 											"VALUE",
 										}, false),
 									},
 									"op": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "Denotes the operation type.",
 										ValidateFunc: validation.StringInSlice([]string{
 											"RX",
 											"EQ",
@@ -149,25 +159,28 @@ func resourceInspectionCustomControls() *schema.Resource {
 										}, false),
 									},
 									"rhs": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "Denotes the value for the given object type. Its value depends on the key.",
 									},
 								},
 							},
 						},
 						"names": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Computed:    true,
+							Description: "Name of the rules. If rules.type is set to REQUEST_HEADERS, REQUEST_COOKIES, or RESPONSE_HEADERS, the rules.name field is required.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 						},
 						"type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "Type value for the rules. ",
 							ValidateFunc: validation.StringInSlice([]string{
 								"REQUEST_HEADERS",
 								"REQUEST_URI",
@@ -183,8 +196,9 @@ func resourceInspectionCustomControls() *schema.Resource {
 				},
 			},
 			"severity": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Severity of the control number",
 				ValidateFunc: validation.StringInSlice([]string{
 					"CRITICAL",
 					"ERROR",
@@ -193,8 +207,9 @@ func resourceInspectionCustomControls() *schema.Resource {
 				}, false),
 			},
 			"type": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Rules to be applied to the request or response type",
 				ValidateFunc: validation.StringInSlice([]string{
 					"REQUEST",
 					"RESPONSE",
@@ -245,12 +260,9 @@ func resourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{})
 	_ = d.Set("action_value", resp.ActionValue)
 	_ = d.Set("control_number", resp.ControlNumber)
 	_ = d.Set("control_rule_json", resp.ControlRuleJson)
-	// _ = d.Set("creation_time", resp.CreationTime)
 	_ = d.Set("default_action", resp.DefaultAction)
 	_ = d.Set("default_action_value", resp.DefaultActionValue)
 	_ = d.Set("description", resp.Description)
-	// _ = d.Set("modifiedby", resp.ModifiedBy)
-	// _ = d.Set("modified_time", resp.ModifiedTime)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
 	_ = d.Set("severity", resp.Severity)
@@ -334,8 +346,6 @@ func expandAssociatedInspectionProfileNames(d *schema.ResourceData) []inspection
 	return []inspection_custom_controls.AssociatedProfileNames{}
 }
 
-// Expand Rules and Conditions Menu
-//https://help.zscaler.com/zpa/api-reference#/inspection-control-controller/createCustomControl
 func expandInspectionCustomControlsRules(d *schema.ResourceData) []inspection_custom_controls.Rules {
 	rulesObj, ok := d.GetOk("rules")
 	if !ok {
@@ -387,13 +397,7 @@ func expandCustomControlRuleConditions(conditionsObj interface{}) []inspection_c
 }
 
 func valdateRules(customCtl inspection_custom_controls.InspectionCustomControl) error {
-	/*
-		#Validation Part 1
-		// When type == RESPOSE rules.type must be: "RESPONSE_HEADERS" || "RESPONSE_BODY"
-		// When type == REQUEST and rules.type is: "REQUEST_HEADERS" || REQUEST_COOKIES  the rules.name: [""] must be set
-		// When type == REQUEST and rules.type is: REQUEST_URI || QUERY_STRING || REQUEST_BODY || REQUEST_METHOD the rules.name: [""] is not allowed
 
-	*/
 	for _, rule := range customCtl.Rules {
 		if customCtl.Type == "RESPONSE" {
 			if rule.Type != "RESPONSE_HEADERS" && rule.Type != "RESPONSE_BODY" {
@@ -401,7 +405,7 @@ func valdateRules(customCtl inspection_custom_controls.InspectionCustomControl) 
 			}
 		} else if customCtl.Type == "REQUEST" {
 			if (rule.Type == "REQUEST_HEADERS" || rule.Type == "REQUEST_COOKIES") && len(rule.Names) == 0 {
-				return errors.New("when type == REQUEST and rules.type is: REQUEST_HEADERS || REQUEST_COOKIES  the rules.names must be set")
+				return errors.New("when type == REQUEST and rules.type is: REQUEST_HEADERS || REQUEST_COOKIES the rules.names must be set")
 			}
 			if (rule.Type == "REQUEST_URI" || rule.Type == "QUERY_STRING" || rule.Type == "REQUEST_BODY" || rule.Type == "REQUEST_METHOD") && len(rule.Names) > 0 {
 				return errors.New("when type == REQUEST and rules.type is: REQUEST_URI || QUERY_STRING || REQUEST_BODY || REQUEST_METHOD the rules.name is not allowed")
