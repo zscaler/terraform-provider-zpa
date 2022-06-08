@@ -126,10 +126,11 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* ``creation_time`` (Computed)
-* ``description`` (Computed)
-* ``enabled``  (Computed)
-* ``id`` (Computed)
-* ``modified_time``  (Computed)
-* ``modifiedby``  (Computed)
-* ``name``  (Computed)
+* ``creation_time`` (string)
+* ``description`` (string)
+* ``enabled``  (bool)
+* ``id`` (string)
+* ``modified_time``  (string)
+* ``modified_by``  (string)
+* ``name``  (string)
+* ``sorted`` (bool)

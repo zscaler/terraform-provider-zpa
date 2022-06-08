@@ -30,9 +30,9 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `config_space` - (Computed)
-* `description` - (Computed) This field is the description of the server group.
-* `dynamic_discovery` - (Computed) This field controls dynamic discovery of the servers.
-* `enabled` - (Computed) This field defines if the server group is enabled or disabled.
-* `ip_anchored` - (Computed)
-* `app_connector_groups` (Computed)This field is a json array of app-connector-id only.
+* `config_space` - (string)
+* `description` - (string) This field is the description of the server group.
+* `dynamic_discovery` - (bool) This field controls dynamic discovery of the servers.
+* `enabled` - (bool) This field defines if the server group is enabled or disabled.
+* `ip_anchored` - (bool)
+* `app_connector_groups` (string)This field is a json array of app-connector-id only.

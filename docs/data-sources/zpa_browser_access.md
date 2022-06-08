@@ -35,37 +35,46 @@ data "zpa_application_segment" "example" {
 
 In addition to all arguments above, the following attributes are exported:
 
-* `name` - (Required) Name of the application.
-* `description` - (String) Description of the application.
-* `bypass_type` - (String) Indicates whether users can bypass ZPA to access applications. Default: `NEVER`. Supported values: `ALWAYS`, `NEVER`, `ON_NET`. The value `NEVER` indicates the use of the client forwarding policy.
-* `is_cname_enabled` - (Boolean) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors. Default: true. Boolean: `true`, `false`.
-* `health_checktype` - (String) Whether health reporting for the app is Continuous or On Access. Supported values: `NONE`, `ON_ACCESS`, `CONTINUOUS`
-* `double_encrypt` - (String) Whether Double Encryption is enabled or disabled for the app. Default: false. Boolean: `true`, `false`.
+* `description` - (string) Description of the application.
+* `bypass_type` - (string) Indicates whether users can bypass ZPA to access applications. Default: `NEVER`. Supported values: `ALWAYS`, `NEVER`, `ON_NET`. The value `NEVER` indicates the use of the client forwarding policy.
+* `is_cname_enabled` - (bool) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors. Default: true. Boolean: `true`, `false`.
+* `health_checktype` - (string) Whether health reporting for the app is Continuous or On Access. Supported values: `NONE`, `ON_ACCESS`, `CONTINUOUS`
+* `double_encrypt` - (string) Whether Double Encryption is enabled or disabled for the app. Default: false. Boolean: `true`, `false`.
 * `enabled` - (Boolean) Whether this application is enabled or not. Default: false. Supported values: `true`, `false`.
-* `tcp_port_ranges` - TCP port ranges used to access the app.
-* `udp_port_ranges` - UDP port ranges used to access the app.
-* `config_space` - (String)
-* `default_idle_timeout` - (String)
-* `default_max_age` - (String)
+* `tcp_port_ranges` - (string) TCP port ranges used to access the app.
+* `udp_port_ranges` - (string) UDP port ranges used to access the app.
+
+-> **NOTE:**  TCP and UDP ports can also be defined using the following model:
+
+* `tcp_port_range` - (string) TCP port ranges used to access the app.
+  * `from:`
+  * `to:`
+* `udp_port_range` - (string) UDP port ranges used to access the app.
+  * `from:`
+  * `to:`
+
+* `config_space` - (string)
+* `default_idle_timeout` - (string)
+* `default_max_age` - (string)
 * `domain_names` - List of domains and IPs.
-* `health_reporting` - (Optional)
-* `ip_anchored` - (Boolean)
-* `passive_health_enabled` - (Boolean)
-* `segment_group_id` - (String)
-* `segment_group_name` - (String)
+* `health_reporting` - (string)
+* `ip_anchored` - (bool)
+* `passive_health_enabled` - (bool)
+* `segment_group_id` - (string)
+* `segment_group_name` - (string)
 
 * `clientless_apps`
-  * `name` - (String)
-  * `application_port` - (String)
-  * `application_protocol` - (String)
-  * `certificate_id` - (String)
-  * `certificate_name` - (String)
-  * `domain` - (String)
-  * `allow_options` - (Boolean)
-  * `cname` (String)
-  * `description` (String)
-  * `enabled` (Boolean)
-  * `hidden` (Boolean)
-  * `local_domain` (String)
-  * `path` (String)
-  * `trust_untrusted_cert` (Boolean)
+  * `name` - (string)
+  * `application_port` - (string)
+  * `application_protocol` - (string)
+  * `certificate_id` - (string)
+  * `certificate_name` - (string)
+  * `domain` - (string)
+  * `allow_options` - (bool)
+  * `cname` (string)
+  * `description` (string)
+  * `enabled` (bool)
+  * `hidden` (bool)
+  * `local_domain` (string)
+  * `path` (string)
+  * `trust_untrusted_cert` (bool)

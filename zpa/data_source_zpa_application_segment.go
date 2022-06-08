@@ -57,7 +57,7 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"health_checktype": {
+			"health_check_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -185,7 +185,7 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("domain_names", resp.DomainNames)
 		_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 		_ = d.Set("enabled", resp.Enabled)
-		_ = d.Set("health_checktype", resp.HealthCheckType)
+		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("health_reporting", resp.HealthReporting)
 		_ = d.Set("ip_anchored", resp.IpAnchored)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)

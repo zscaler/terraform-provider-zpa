@@ -39,7 +39,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `description` - This field defines the description of the server.
-* `address` - This field defines the domain or IP address of the server.
-* `enabled` - This field defines the status of the server.
+* `description` - (string) This field defines the description of the server.
+* `address` - (string) This field defines the domain or IP address of the server.
+* `enabled` - (bool) This field defines the status of the server.
 * `app_server_group_ids` - (Set of String) This field defines the list of server groups IDs.
