@@ -51,6 +51,7 @@ type CommonAppsDto struct {
 type AppsConfig struct {
 	Name                string   `json:"name,omitempty"`
 	AllowOptions        bool     `json:"allowOptions"`
+	ID                  string   `json:"id,omitempty"`
 	AppID               string   `json:"appId,omitempty"`
 	AppTypes            []string `json:"appTypes,omitempty"`
 	ApplicationPort     string   `json:"applicationPort,omitempty"`
