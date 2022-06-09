@@ -42,7 +42,7 @@ In addition to all arguments above, the following attributes are exported:
 * `enabled` (bool)
 * `modified_by` (string)
 * `modified_name` (string)
-  * `machines` (Computed)
+  * `machines` (string)
     * `creation_time` (string)
     * `description` (string)
     * `fingerprint` (string)

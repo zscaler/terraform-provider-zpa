@@ -40,19 +40,20 @@ In addition to all arguments above, the following attributes are exported:
 * `associated_inspection_profile_names` - (string) Name of the inspection profile
   * `id`- (string)
   * `name`- (string)
-* `control_rule_json` (string) The control rule in JSON format that has the conditions and type of control for the inspection control
 * `control_number` - (string)
+* `control_rule_json` (string) The control rule in JSON format that has the conditions and type of control for the inspection control
 * `creation_time` - (string)
 * `default_action` - (string) The performed action. Supported values: `PASS`, `BLOCK` and `REDIRECT`
 * `default_action_value` - (string) This is used to provide the redirect URL if the default action is set to `REDIRECT`
 * `description` - (string) Description of the custom control
 * `id` - (string)
-* `name` - (string) Name of the custom control
 * `modified_by` - (string)
 * `modified_time` - (string)
+* `name` - (string) Name of the custom control
 * `paranoia_level` - (string) OWASP Predefined Paranoia Level.
 * `severity` - (string) Severity of the control number. Supported values: `CRITICAL`, `ERROR`, `WARNING`, `INFO`
 * `type` - (string) Rules to be applied to the request or response type
+
 * `rules` - (string) Rules of the custom controls applied as conditions `JSON`
   * `conditions` - (string)
     * `lhs` - (string) Signifies the key for the object type Supported values: `SIZE`, `VALUE`

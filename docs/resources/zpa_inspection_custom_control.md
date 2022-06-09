@@ -8,7 +8,7 @@ description: |-
 
 # Resource: zpa_inspection_custom_controls
 
-The  **zpa_inspection_custom_controls** resource creates an inspection custom control. This resource can then be referenced in an inspection profile resource.
+The **zpa_inspection_custom_controls** resource creates an inspection custom control. This resource can then be referenced in an inspection profile resource.
 
 ## Example Usage
 
