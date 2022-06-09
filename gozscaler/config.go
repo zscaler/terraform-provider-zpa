@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -140,7 +141,7 @@ func loadCredentialsFromConfig() (*CredentialsConfig, error) {
 	var config CredentialsConfig
 	err = json.Unmarshal(configBytes, &config)
 	if err != nil || config.ClientID == "" || config.ClientSecret == "" || config.CustomerID == "" || config.ZpaCloud == "" {
-		return nil, errors.New("Could not parse credentials file, needs to contain one json object with keys: zpa_client_id, zpa_client_secret, zpa_customer_id, and zpa_cloud. " + err.Error())
+		return nil, fmt.Errorf("could not parse credentials file, needs to contain one json object with keys: zpa_client_id, zpa_client_secret, zpa_customer_id, and zpa_cloud. error: %v", err)
 	}
 	return &config, nil
 }
