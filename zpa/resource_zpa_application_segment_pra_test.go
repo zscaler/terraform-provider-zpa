@@ -16,7 +16,6 @@ import (
 func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 	var appSegment applicationsegmentpra.AppSegmentPRA
 	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentPRA)
-	// rPort := acctest.RandIntRange(1000, 9999)
 
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
@@ -42,7 +41,6 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
-					// resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "4"),
 				),
 				ExpectNonEmptyPlan: true,
 			},
