@@ -79,6 +79,8 @@ type InspectionAppDto struct {
 	Enabled             bool   `json:"enabled"`
 	ID                  string `json:"id,omitempty"`
 	Name                string `json:"name,omitempty"`
+	Hidden              bool   `json:"hidden"`
+	Portal              bool   `json:"portal"`
 }
 
 type AppServerGroups struct {
