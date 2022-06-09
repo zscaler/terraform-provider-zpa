@@ -463,6 +463,14 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
+		"zpn_inspection_profile_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"zpn_inspection_profile_name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
 		"rule_order": {
 			Type:     schema.TypeString,
 			Optional: true,
