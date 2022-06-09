@@ -90,7 +90,7 @@ func dataSourceInspectionProfile() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -119,6 +119,22 @@ func dataSourceInspectionProfile() *schema.Resource {
 							Computed: true,
 						},
 						"rules": dataInspectionRulesSchema(),
+						"associated_inspection_profile_names": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -135,7 +151,7 @@ func dataSourceInspectionProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -208,7 +224,7 @@ func dataSourceInspectionProfile() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -272,7 +288,7 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("global_control_actions", resp.GlobalControlActions)
 		_ = d.Set("incarnation_number", resp.IncarnationNumber)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("paranoia_level", resp.ParanoiaLevel)
@@ -327,7 +343,7 @@ func flattenCustomControls(customControl []inspection_profile.InspectionCustomCo
 			"paranoia_level":                      custom.ParanoiaLevel,
 			"type":                                custom.Type,
 			"version":                             custom.Version,
-			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(custom),
+			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(custom.AssociatedInspectionProfileNames),
 			"rules":                               flattenInspectionRules(custom.Rules),
 		}
 	}
@@ -335,9 +351,9 @@ func flattenCustomControls(customControl []inspection_profile.InspectionCustomCo
 	return customControls
 }
 
-func flattenAssociatedInspectionProfileNames(associated inspection_profile.InspectionCustomControl) []interface{} {
-	rule := make([]interface{}, len(associated.AssociatedInspectionProfileNames))
-	for i, val := range associated.AssociatedInspectionProfileNames {
+func flattenAssociatedInspectionProfileNames(associatedInspectionProfileNames []inspection_profile.AssociatedProfileNames) []interface{} {
+	rule := make([]interface{}, len(associatedInspectionProfileNames))
+	for i, val := range associatedInspectionProfileNames {
 		rule[i] = map[string]interface{}{
 			"id":   val.ID,
 			"name": val.Name,
@@ -351,22 +367,23 @@ func flattenPredefinedControls(predControl []inspection_profile.PredefinedContro
 	predControls := make([]interface{}, len(predControl))
 	for i, predControl := range predControl {
 		predControls[i] = map[string]interface{}{
-			"id":                   predControl.ID,
-			"action":               predControl.Action,
-			"action_value":         predControl.ActionValue,
-			"attachment":           predControl.Attachment,
-			"control_group":        predControl.ControlGroup,
-			"control_number":       predControl.ControlNumber,
-			"creation_time":        predControl.CreationTime,
-			"default_action":       predControl.DefaultAction,
-			"default_action_value": predControl.DefaultActionValue,
-			"description":          predControl.Description,
-			"modified_by":          predControl.ModifiedBy,
-			"modified_time":        predControl.ModifiedTime,
-			"name":                 predControl.Name,
-			"paranoia_level":       predControl.ParanoiaLevel,
-			"severity":             predControl.Severity,
-			"version":              predControl.Version,
+			"id":                                  predControl.ID,
+			"action":                              predControl.Action,
+			"action_value":                        predControl.ActionValue,
+			"attachment":                          predControl.Attachment,
+			"control_group":                       predControl.ControlGroup,
+			"control_number":                      predControl.ControlNumber,
+			"creation_time":                       predControl.CreationTime,
+			"default_action":                      predControl.DefaultAction,
+			"default_action_value":                predControl.DefaultActionValue,
+			"description":                         predControl.Description,
+			"modified_by":                         predControl.ModifiedBy,
+			"modified_time":                       predControl.ModifiedTime,
+			"name":                                predControl.Name,
+			"paranoia_level":                      predControl.ParanoiaLevel,
+			"severity":                            predControl.Severity,
+			"version":                             predControl.Version,
+			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(predControl.AssociatedInspectionProfileNames),
 		}
 	}
 

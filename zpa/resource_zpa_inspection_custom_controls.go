@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_custom_controls"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_profile"
 )
 
 func resourceInspectionCustomControls() *schema.Resource {
@@ -296,7 +297,27 @@ func resourceInspectionCustomControlsDelete(d *schema.ResourceData, m interface{
 	zClient := m.(*Client)
 
 	log.Printf("[INFO] Deleting custom inspection control ID: %v\n", d.Id())
-
+	// First de-associate it from all inspection profiles
+	c, _, err := zClient.inspection_custom_controls.Get(d.Id())
+	if err != nil {
+		return err
+	}
+	for _, inspectionProfile := range c.AssociatedInspectionProfileNames {
+		inspectionProfileRemote, _, err := zClient.inspection_profile.Get(inspectionProfile.ID)
+		if err != nil {
+			continue
+		}
+		old := inspectionProfileRemote.CustomControls
+		new := []inspection_profile.InspectionCustomControl{}
+		for _, tmp := range old {
+			if tmp.ID == c.ID {
+				continue
+			}
+			new = append(new, tmp)
+		}
+		inspectionProfileRemote.CustomControls = new
+		zClient.inspection_profile.Update(inspectionProfile.ID, inspectionProfileRemote)
+	}
 	if _, err := zClient.inspection_custom_controls.Delete(d.Id()); err != nil {
 		return err
 	}

@@ -47,6 +47,11 @@ func resourceInspectionProfile() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"modified_by": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"common_global_override_actions_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -194,7 +199,7 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("global_control_actions", resp.GlobalControlActions)
 	_ = d.Set("incarnation_number", resp.IncarnationNumber)
-	_ = d.Set("modifiedby", resp.ModifiedBy)
+	_ = d.Set("modified_by", resp.ModifiedBy)
 	_ = d.Set("modified_time", resp.ModifiedTime)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
@@ -204,15 +209,42 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	if err := d.Set("custom_controls", flattenCustomControls(resp.CustomControls)); err != nil {
+	if err := d.Set("custom_controls", flattenCustomControlsSimple(resp.CustomControls)); err != nil {
 		return err
 	}
 
-	if err := d.Set("predefined_controls", flattenPredefinedControls(resp.PredefinedControls)); err != nil {
+	if err := d.Set("predefined_controls", flattenPredefinedControlsSimple(resp.PredefinedControls)); err != nil {
 		return err
 	}
 	return nil
 
+}
+
+func flattenPredefinedControlsSimple(predControl []inspection_profile.PredefinedControls) []interface{} {
+	predControls := make([]interface{}, len(predControl))
+	for i, predControl := range predControl {
+		predControls[i] = map[string]interface{}{
+			"id":           predControl.ID,
+			"action":       predControl.Action,
+			"action_value": predControl.ActionValue,
+		}
+	}
+
+	return predControls
+}
+
+func flattenCustomControlsSimple(customControl []inspection_profile.InspectionCustomControl) []interface{} {
+	customControls := make([]interface{}, len(customControl))
+	for i, custom := range customControl {
+		customControls[i] = map[string]interface{}{
+			"id":           custom.ID,
+			"name":         custom.Name,
+			"action":       custom.Action,
+			"action_value": custom.ActionValue,
+		}
+	}
+
+	return customControls
 }
 
 func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) error {
