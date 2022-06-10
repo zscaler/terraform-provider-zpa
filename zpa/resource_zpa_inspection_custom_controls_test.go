@@ -9,6 +9,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_custom_controls"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
 func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
@@ -26,14 +27,14 @@ func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
 					testAccCheckInspectionCustomControlsExists(resourceTypeAndName, &control),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "PASS"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", "PASS"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "2"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", "CRITICAL"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "type", "RESPONSE"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "1"),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "rules.0.names", "test"),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", variable.InspectionCustomControlAction),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.InspectionCustomControlDefaultAction),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.InspectionCustomControlSeverity),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.InspectionCustomControlType),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "2"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
@@ -43,14 +44,14 @@ func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
 					testAccCheckInspectionCustomControlsExists(resourceTypeAndName, &control),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "PASS"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", "PASS"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "2"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", "CRITICAL"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "type", "RESPONSE"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "1"),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "rules.0.names", "test"),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", variable.InspectionCustomControlAction),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.InspectionCustomControlDefaultAction),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.InspectionCustomControlSeverity),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.InspectionCustomControlType),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "2"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -102,7 +103,7 @@ func testAccCheckInspectionCustomControlsExists(resource string, rule *inspectio
 
 func testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName string) string {
 	return fmt.Sprintf(`
-// app connector group resource
+// inspection custom control resource
 %s
 
 data "%s" "%s" {
@@ -123,20 +124,29 @@ func getInspectionCustomControlsResourceHCL(generatedName string) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
-	name           = "%s"
-	description    = "%s"
-	action         = "PASS"
-	default_action = "PASS"
+	name           = "tf-acc-test-%s"
+	description    = "tf-acc-test-%s"
+	action         = "%s"
+	default_action = "%s"
 	paranoia_level = "1"
-	severity       = "CRITICAL"
-	type           = "RESPONSE"
+	severity       = "%s"
+	type           = "%s"
 	rules {
-	  type  = "RESPONSE_BODY"
+	  names = ["test"]
+	  type  = "RESPONSE_HEADERS"
 	  conditions {
-		lhs = "VALUE"
-		op  = "STARTS_WITH"
-		rhs = "GET"
+		lhs = "SIZE"
+		op  = "GE"
+		rhs = "1000"
 	  }
+	}
+	rules {
+		type  = "RESPONSE_BODY"
+		conditions {
+		  lhs = "SIZE"
+		  op  = "GE"
+		  rhs = "1000"
+		}
 	}
   }
 `,
@@ -145,5 +155,10 @@ resource "%s" "%s" {
 		generatedName,
 		generatedName,
 		generatedName,
+
+		variable.InspectionCustomControlAction,
+		variable.InspectionCustomControlDefaultAction,
+		variable.InspectionCustomControlSeverity,
+		variable.InspectionCustomControlType,
 	)
 }

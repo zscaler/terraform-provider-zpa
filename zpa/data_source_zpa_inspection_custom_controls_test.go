@@ -11,9 +11,6 @@ import (
 func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionCustomControl)
 
-	// appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
-	// appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -30,8 +27,9 @@ func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "paranoia_level", resourceTypeAndName, "paranoia_level"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "severity", resourceTypeAndName, "severity"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "type", resourceTypeAndName, "type"),
-					resource.TestCheckResourceAttr(dataSourceTypeAndName, "rules.#", "1"),
+					resource.TestCheckResourceAttr(dataSourceTypeAndName, "rules.#", "2"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
