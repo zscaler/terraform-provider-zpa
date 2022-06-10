@@ -92,8 +92,12 @@ func dataSourceInspectionCustomControls() *schema.Resource {
 							},
 						},
 						"names": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "Name of the rules. If rules.type is set to REQUEST_HEADERS, REQUEST_COOKIES, or RESPONSE_HEADERS, the rules.name field is required.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						"type": {
 							Type:     schema.TypeString,
