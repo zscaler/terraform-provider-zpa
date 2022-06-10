@@ -231,6 +231,9 @@ func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{
 
 	req := expandInspectionCustomControls(d)
 	log.Printf("[INFO] Creating custom inspection control with request\n%+v\n", req)
+	if req.Action == "REDIRECT" && req.ActionValue == "" {
+		return errors.New("when action is REDIRECT, action value must be set")
+	}
 	if err := valdateRules(req); err != nil {
 		return err
 	}

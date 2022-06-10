@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"errors"
 	"log"
 	"strconv"
 
@@ -164,12 +165,28 @@ func resourceInspectionProfile() *schema.Resource {
 	}
 }
 
+func validateInspectionProfile(profile *inspection_profile.InspectionProfile) error {
+	for _, d := range profile.CustomControls {
+		if d.Action == "REDIRECT" && d.ActionValue == "" {
+			return errors.New("when action is REDIRECT, action value must be set")
+		}
+	}
+	for _, d := range profile.PredefinedControls {
+		if d.Action == "REDIRECT" && d.ActionValue == "" {
+			return errors.New("when action is REDIRECT, action value must be set")
+		}
+	}
+	return nil
+}
+
 func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	req := expandInspectionProfile(d)
 	log.Printf("[INFO] Creating inspection profile with request\n%+v\n", req)
-
+	if err := validateInspectionProfile(&req); err != nil {
+		return err
+	}
 	resp, _, err := zClient.inspection_profile.Create(req)
 	if err != nil {
 		return err
@@ -253,7 +270,9 @@ func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) erro
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection profile ID: %v\n", id)
 	req := expandInspectionProfile(d)
-
+	if err := validateInspectionProfile(&req); err != nil {
+		return err
+	}
 	if _, err := zClient.inspection_profile.Update(id, &req); err != nil {
 		return err
 	}
