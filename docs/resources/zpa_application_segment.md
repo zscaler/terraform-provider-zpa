@@ -166,7 +166,7 @@ The following arguments are supported:
 * `health_reporting` - (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.
 * `health_check_type` (Optional)
 * `icmp_access_type` - (Optional)
-* `p_anchored` - (Optional)
+* `ip_anchored` - (Optional)
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
 * `log_features` - (Optional)
 * `passive_health_enabled` - (Optional)
