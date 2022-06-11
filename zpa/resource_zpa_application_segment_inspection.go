@@ -345,7 +345,7 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
-	if err := d.Set("common_apps_dto", flattenCommonAppsDto(resp.InspectionAppDto)); err != nil {
+	if err := d.Set("common_apps_dto", flattenInspectionCommonAppsDto(resp.InspectionAppDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
@@ -441,7 +441,7 @@ func expandInspectionApplicationSegment(d *schema.ResourceData) applicationsegme
 		TCPPortRanges:        expandList(d.Get("tcp_port_ranges").([]interface{})),
 		UDPPortRanges:        expandList(d.Get("udp_port_ranges").([]interface{})),
 		AppServerGroups:      expandInspectionAppServerGroups(d),
-		CommonAppsDto:        expandCommonAppsDto(d),
+		CommonAppsDto:        expandInspectionCommonAppsDto(d),
 	}
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
@@ -469,7 +469,7 @@ func expandInspectionApplicationSegment(d *schema.ResourceData) applicationsegme
 	return details
 }
 
-func expandCommonAppsDto(d *schema.ResourceData) applicationsegmentinspection.CommonAppsDto {
+func expandInspectionCommonAppsDto(d *schema.ResourceData) applicationsegmentinspection.CommonAppsDto {
 	result := applicationsegmentinspection.CommonAppsDto{}
 	appsConfigInterface, ok := d.GetOk("common_apps_dto")
 	if !ok {
@@ -484,12 +484,12 @@ func expandCommonAppsDto(d *schema.ResourceData) applicationsegmentinspection.Co
 		if !ok {
 			return result
 		}
-		result.AppsConfig = expandAppsConfig(appConfMap["apps_config"])
+		result.AppsConfig = expandInspectionAppsConfig(appConfMap["apps_config"])
 	}
 	return result
 }
 
-func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentinspection.AppsConfig {
+func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationsegmentinspection.AppsConfig {
 	appsConfig, ok := appsConfigInterface.(*schema.Set)
 	if !ok {
 		return []applicationsegmentinspection.AppsConfig{}
@@ -549,15 +549,15 @@ func expandInspectionAppServerGroups(d *schema.ResourceData) []applicationsegmen
 	return []applicationsegmentinspection.AppServerGroups{}
 }
 
-func flattenCommonAppsDto(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
+func flattenInspectionCommonAppsDto(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
 	commonApp := make([]interface{}, 1)
 	commonApp[0] = map[string]interface{}{
-		"apps_config": flattenAppsConfig(apps),
+		"apps_config": flattenInspectionAppsConfig(apps),
 	}
 	return commonApp
 }
 
-func flattenAppsConfig(appConfigs []applicationsegmentinspection.InspectionAppDto) []interface{} {
+func flattenInspectionAppsConfig(appConfigs []applicationsegmentinspection.InspectionAppDto) []interface{} {
 	appConfig := make([]interface{}, len(appConfigs))
 	for i, val := range appConfigs {
 		appConfig[i] = map[string]interface{}{

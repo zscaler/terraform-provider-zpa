@@ -7,11 +7,8 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorcontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorgroup"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
-<<<<<<< HEAD
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentinspection"
-=======
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentpra"
->>>>>>> master
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appservercontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/bacertificate"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/browseraccess"
@@ -40,10 +37,10 @@ func init() {
 }
 
 type Client struct {
-<<<<<<< HEAD
 	appconnectorgroup            appconnectorgroup.Service
 	appconnectorcontroller       appconnectorcontroller.Service
 	applicationsegment           applicationsegment.Service
+	applicationsegmentpra        applicationsegmentpra.Service
 	applicationsegmentinspection applicationsegmentinspection.Service
 	appservercontroller          appservercontroller.Service
 	bacertificate                bacertificate.Service
@@ -65,32 +62,6 @@ type Client struct {
 	serviceedgecontroller        serviceedgecontroller.Service
 	trustednetwork               trustednetwork.Service
 	browseraccess                browseraccess.Service
-=======
-	appconnectorgroup      appconnectorgroup.Service
-	appconnectorcontroller appconnectorcontroller.Service
-	applicationsegment     applicationsegment.Service
-	applicationsegmentpra  applicationsegmentpra.Service
-	appservercontroller    appservercontroller.Service
-	bacertificate          bacertificate.Service
-	cloudconnectorgroup    cloudconnectorgroup.Service
-	customerversionprofile customerversionprofile.Service
-	enrollmentcert         enrollmentcert.Service
-	idpcontroller          idpcontroller.Service
-	lssconfigcontroller    lssconfigcontroller.Service
-	machinegroup           machinegroup.Service
-	postureprofile         postureprofile.Service
-	policysetcontroller    policysetcontroller.Service
-	provisioningkey        provisioningkey.Service
-	samlattribute          samlattribute.Service
-	scimgroup              scimgroup.Service
-	scimattributeheader    scimattributeheader.Service
-	segmentgroup           segmentgroup.Service
-	servergroup            servergroup.Service
-	serviceedgegroup       serviceedgegroup.Service
-	serviceedgecontroller  serviceedgecontroller.Service
-	trustednetwork         trustednetwork.Service
-	browseraccess          browseraccess.Service
->>>>>>> master
 }
 
 type Config struct {
@@ -107,10 +78,10 @@ func (c *Config) Client() (*Client, error) {
 	}
 
 	client := &Client{
-<<<<<<< HEAD
 		appconnectorgroup:            *appconnectorgroup.New(config),
 		appconnectorcontroller:       *appconnectorcontroller.New(config),
 		applicationsegment:           *applicationsegment.New(config),
+		applicationsegmentpra:        *applicationsegmentpra.New(config),
 		applicationsegmentinspection: *applicationsegmentinspection.New(config),
 		appservercontroller:          *appservercontroller.New(config),
 		bacertificate:                *bacertificate.New(config),
@@ -132,32 +103,6 @@ func (c *Config) Client() (*Client, error) {
 		serviceedgecontroller:        *serviceedgecontroller.New(config),
 		trustednetwork:               *trustednetwork.New(config),
 		browseraccess:                *browseraccess.New(config),
-=======
-		appconnectorgroup:      *appconnectorgroup.New(config),
-		appconnectorcontroller: *appconnectorcontroller.New(config),
-		applicationsegment:     *applicationsegment.New(config),
-		applicationsegmentpra:  *applicationsegmentpra.New(config),
-		appservercontroller:    *appservercontroller.New(config),
-		bacertificate:          *bacertificate.New(config),
-		cloudconnectorgroup:    *cloudconnectorgroup.New(config),
-		customerversionprofile: *customerversionprofile.New(config),
-		enrollmentcert:         *enrollmentcert.New(config),
-		idpcontroller:          *idpcontroller.New(config),
-		lssconfigcontroller:    *lssconfigcontroller.New(config),
-		machinegroup:           *machinegroup.New(config),
-		postureprofile:         *postureprofile.New(config),
-		policysetcontroller:    *policysetcontroller.New(config),
-		provisioningkey:        *provisioningkey.New(config),
-		samlattribute:          *samlattribute.New(config),
-		scimgroup:              *scimgroup.New(config),
-		scimattributeheader:    *scimattributeheader.New(config),
-		segmentgroup:           *segmentgroup.New(config),
-		servergroup:            *servergroup.New(config),
-		serviceedgegroup:       *serviceedgegroup.New(config),
-		serviceedgecontroller:  *serviceedgecontroller.New(config),
-		trustednetwork:         *trustednetwork.New(config),
-		browseraccess:          *browseraccess.New(config),
->>>>>>> master
 	}
 
 	log.Println("[INFO] initialized ZPA client")
