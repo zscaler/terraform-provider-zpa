@@ -2,7 +2,6 @@ package zpa
 
 import (
 	"log"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -13,28 +12,24 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"zpa_client_id": {
 				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: envDefaultFunc("ZPA_CLIENT_ID"),
+				Optional:    true,
 				Description: "zpa client id",
 			},
 			"zpa_client_secret": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
-				DefaultFunc: envDefaultFunc("ZPA_CLIENT_SECRET"),
 				Description: "zpa client secret",
 			},
 			"zpa_customer_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
-				DefaultFunc: envDefaultFunc("ZPA_CUSTOMER_ID"),
 				Description: "zpa customer id",
 			},
 			"zpa_cloud": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				DefaultFunc:  envDefaultFunc("ZPA_CLOUD"),
 				Description:  "Cloud to use BETA or PRODUCTION",
 				ValidateFunc: validation.StringInSlice([]string{"BETA", "PRODUCTION"}, true),
 				Default:      "PRODUCTION",
@@ -97,17 +92,8 @@ func zscalerConfigure(d *schema.ResourceData) (interface{}, error) {
 		ClientID:     d.Get("zpa_client_id").(string),
 		ClientSecret: d.Get("zpa_client_secret").(string),
 		CustomerID:   d.Get("zpa_customer_id").(string),
+		BaseURL:      d.Get("zpa_cloud").(string),
 	}
 
 	return config.Client()
-}
-
-func envDefaultFunc(k string) schema.SchemaDefaultFunc {
-	return func() (interface{}, error) {
-		if v := os.Getenv(k); v != "" {
-			return v, nil
-		}
-
-		return nil, nil
-	}
 }
