@@ -163,7 +163,7 @@ func (service *Service) PutAssociate(profileID string, inspectionProfile *Inspec
 
 func (service *Service) PutDeassociate(profileID string, inspectionProfile *InspectionProfile) (*http.Response, error) {
 	setVersion(inspectionProfile)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"associateAllPredefinedControls")
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"deAssociateAllPredefinedControls")
 	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, inspectionProfile, nil)
 	if err != nil {
 		return nil, err
