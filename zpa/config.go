@@ -7,6 +7,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorcontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorgroup"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentpra"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/appservercontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/bacertificate"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/browseraccess"
@@ -38,6 +39,7 @@ type Client struct {
 	appconnectorgroup      appconnectorgroup.Service
 	appconnectorcontroller appconnectorcontroller.Service
 	applicationsegment     applicationsegment.Service
+	applicationsegmentpra  applicationsegmentpra.Service
 	appservercontroller    appservercontroller.Service
 	bacertificate          bacertificate.Service
 	cloudconnectorgroup    cloudconnectorgroup.Service
@@ -77,6 +79,7 @@ func (c *Config) Client() (*Client, error) {
 		appconnectorgroup:      *appconnectorgroup.New(config),
 		appconnectorcontroller: *appconnectorcontroller.New(config),
 		applicationsegment:     *applicationsegment.New(config),
+		applicationsegmentpra:  *applicationsegmentpra.New(config),
 		appservercontroller:    *appservercontroller.New(config),
 		bacertificate:          *bacertificate.New(config),
 		cloudconnectorgroup:    *cloudconnectorgroup.New(config),
