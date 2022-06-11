@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentpra"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
 )
 
 func dataSourceApplicationSegmentPRA() *schema.Resource {
@@ -176,11 +176,11 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 
 func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	var resp *applicationsegmentpra.AppSegmentPRA
+	var resp *applicationsegment.ApplicationSegmentResource
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for sra application %s\n", id)
-		res, _, err := zClient.applicationsegmentpra.Get(id)
+		res, _, err := zClient.applicationsegment.Get(id)
 		if err != nil {
 			return err
 		}
@@ -189,7 +189,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for sra application name %s\n", name)
-		res, _, err := zClient.applicationsegmentpra.GetByName(name)
+		res, _, err := zClient.applicationsegment.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -209,7 +209,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-		_ = d.Set("ip_anchored", resp.IpAnchored)
+		_ = d.Set("ip_anchored", resp.IPAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
@@ -237,7 +237,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 
 }
 
-func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerGroups) []interface{} {
+func flattenSRAAppServerGroups(appServerGroup []applicationsegment.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
 	ids := make([]string, len(appServerGroup))
@@ -249,9 +249,9 @@ func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerG
 	return result
 }
 
-func flattenSRAApps(sraApp *applicationsegmentpra.AppSegmentPRA) []interface{} {
-	sraApps := make([]interface{}, len(sraApp.SRAAppsDto))
-	for i, val := range sraApp.SRAAppsDto {
+func flattenSRAApps(sraApp *applicationsegment.ApplicationSegmentResource) []interface{} {
+	sraApps := make([]interface{}, len(sraApp.SRAAppDto))
+	for i, val := range sraApp.SRAAppDto {
 		sraApps[i] = map[string]interface{}{
 			"id":                   val.ID,
 			"app_id":               val.AppID,

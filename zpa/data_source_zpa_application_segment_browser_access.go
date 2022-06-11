@@ -5,12 +5,12 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/browseraccess"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
 )
 
-func dataSourceBrowserAccess() *schema.Resource {
+func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBrowserAccessRead,
+		Read: dataSourceApplicationSegmentBrowserAccessRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -186,13 +186,13 @@ func dataSourceBrowserAccess() *schema.Resource {
 	}
 }
 
-func dataSourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	var resp *browseraccess.BrowserAccess
+	var resp *applicationsegment.ApplicationSegmentResource
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for browser access application %s\n", id)
-		res, _, err := zClient.browseraccess.Get(id)
+		res, _, err := zClient.applicationsegment.Get(id)
 		if err != nil {
 			return err
 		}
@@ -201,7 +201,7 @@ func dataSourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for browser access application name %s\n", name)
-		res, _, err := zClient.browseraccess.GetByName(name)
+		res, _, err := zClient.applicationsegment.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -230,7 +230,7 @@ func dataSourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 			return fmt.Errorf("failed to read clientless apps %s", err)
 		}
 
-		if err := d.Set("server_groups", flattenClientlessAppServerGroups(resp.AppServerGroups)); err != nil {
+		if err := d.Set("server_groups", flattenClientlessAppServerGroups(resp.ServerGroups)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
 		}
 

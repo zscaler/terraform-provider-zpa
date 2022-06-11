@@ -187,7 +187,7 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("health_checktype", resp.HealthCheckType)
 		_ = d.Set("health_reporting", resp.HealthReporting)
-		_ = d.Set("ip_anchored", resp.IpAnchored)
+		_ = d.Set("ip_anchored", resp.IPAnchored)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)

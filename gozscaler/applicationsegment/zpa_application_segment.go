@@ -26,7 +26,7 @@ type ApplicationSegmentResource struct {
 	BypassType           string                `json:"bypassType,omitempty"`
 	HealthCheckType      string                `json:"healthCheckType,omitempty"`
 	IsCnameEnabled       bool                  `json:"isCnameEnabled"`
-	IpAnchored           bool                  `json:"ipAnchored"`
+	IPAnchored           bool                  `json:"ipAnchored"`
 	HealthReporting      string                `json:"healthReporting,omitempty"`
 	IcmpAccessType       string                `json:"icmpAccessType,omitempty"`
 	SegmentGroupID       string                `json:"segmentGroupId"`
@@ -39,6 +39,96 @@ type ApplicationSegmentResource struct {
 	ServerGroups         []AppServerGroups     `json:"serverGroups,omitempty"`
 	DefaultIdleTimeout   string                `json:"defaultIdleTimeout,omitempty"`
 	DefaultMaxAge        string                `json:"defaultMaxAge,omitempty"`
+	TCPPortRanges        []string              `json:"tcpPortRanges,omitempty"`
+	UDPPortRanges        []string              `json:"udpPortRanges,omitempty"`
+	ClientlessApps       []ClientlessApps      `json:"clientlessApps,omitempty"`
+	InspectAppDto        []InspectAppDto       `json:"inspectionApps,omitempty"`
+	SRAAppDto            []SRAAppDto           `json:"sraApps,omitempty"`
+	CommonAppsDto        CommonAppsDto         `json:"commonAppsDto,omitempty"`
+}
+
+type ClientlessApps struct {
+	AllowOptions        bool   `json:"allowOptions"`
+	AppID               string `json:"appId,omitempty"`
+	ApplicationPort     string `json:"applicationPort,omitempty"`
+	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
+	CertificateID       string `json:"certificateId,omitempty"`
+	CertificateName     string `json:"certificateName,omitempty"`
+	Cname               string `json:"cname,omitempty"`
+	CreationTime        string `json:"creationTime,omitempty"`
+	Description         string `json:"description,omitempty"`
+	Domain              string `json:"domain,omitempty"`
+	Enabled             bool   `json:"enabled"`
+	Hidden              bool   `json:"hidden"`
+	ID                  string `json:"id,omitempty"`
+	LocalDomain         string `json:"localDomain,omitempty"`
+	ModifiedBy          string `json:"modifiedBy,omitempty"`
+	ModifiedTime        string `json:"modifiedTime,omitempty"`
+	Name                string `json:"name,omitempty"`
+	Path                string `json:"path,omitempty"`
+	TrustUntrustedCert  bool   `json:"trustUntrustedCert"`
+}
+
+type CommonAppsDto struct {
+	AppsConfig     []AppsConfig `json:"appsConfig,omitempty"`
+	DeletedSraApps []string     `json:"deletedSraApps,omitempty"`
+}
+
+type AppsConfig struct {
+	AllowOptions        bool     `json:"allowOptions"`
+	AppID               string   `json:"appId,omitempty"`
+	ID                  string   `json:"id,omitempty"`
+	AppTypes            []string `json:"appTypes,omitempty"`
+	ApplicationPort     string   `json:"applicationPort,omitempty"`
+	ApplicationProtocol string   `json:"applicationProtocol,omitempty"`
+	BaAppID             string   `json:"baAppId,omitempty"`
+	CertificateID       string   `json:"certificateId,omitempty"`
+	CertificateName     string   `json:"certificateName,omitempty"`
+	Cname               string   `json:"cname,omitempty"`
+	ConnectionSecurity  string   `json:"connectionSecurity,omitempty"`
+	Description         string   `json:"description,omitempty"`
+	Domain              string   `json:"domain,omitempty"`
+	Enabled             bool     `json:"enabled,omitempty"`
+	Hidden              bool     `json:"hidden,omitempty"`
+	InspectAppID        string   `json:"inspectAppId,omitempty"`
+	LocalDomain         string   `json:"localDomain,omitempty"`
+	Name                string   `json:"name,omitempty"`
+	Path                string   `json:"path,omitempty"`
+	Portal              bool     `json:"portal,omitempty"`
+	SRAAppID            string   `json:"sraAppId,omitempty"`
+	TrustUntrustedCert  bool     `json:"trustUntrustedCert,omitempty"`
+}
+
+type InspectAppDto struct {
+	AppID               string `json:"appId,omitempty"`
+	ApplicationPort     string `json:"applicationPort,omitempty"`
+	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
+	CertificateID       string `json:"certificateId,omitempty"`
+	CertificateName     string `json:"certificateName,omitempty"`
+	ConnectionSecurity  string `json:"connectionSecurity,omitempty"`
+	Hidden              bool   `json:"hidden"`
+	Portal              bool   `json:"portal"`
+	Description         string `json:"description,omitempty"`
+	Domain              string `json:"domain,omitempty"`
+	Enabled             bool   `json:"enabled"`
+	ID                  string `json:"id,omitempty"`
+	Name                string `json:"name,omitempty"`
+}
+
+type SRAAppDto struct {
+	AppID               string `json:"appId,omitempty"`
+	ApplicationPort     string `json:"applicationPort,omitempty"`
+	ApplicationProtocol string `json:"applicationProtocol,omitempty"`
+	CertificateID       string `json:"certificateId,omitempty"`
+	CertificateName     string `json:"certificateName,omitempty"`
+	ConnectionSecurity  string `json:"connectionSecurity,omitempty"`
+	Hidden              bool   `json:"hidden"`
+	Portal              bool   `json:"portal"`
+	Description         string `json:"description,omitempty"`
+	Domain              string `json:"domain,omitempty"`
+	Enabled             bool   `json:"enabled"`
+	ID                  string `json:"id,omitempty"`
+	Name                string `json:"name,omitempty"`
 }
 
 type AppServerGroups struct {
