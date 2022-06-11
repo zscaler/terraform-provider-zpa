@@ -12,7 +12,6 @@
     "govet",
     "ineffassign",
     "structcheck",
-    "unconvert",
     "unused",
     "varcheck",
   ]
