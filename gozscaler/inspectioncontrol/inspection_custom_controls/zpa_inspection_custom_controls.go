@@ -86,7 +86,7 @@ func (service *Service) GetByName(controlName string) (*InspectionCustomControl,
 			return &control, resp, err
 		}
 	}
-	return nil, resp, fmt.Errorf("no inspection profile named '%s' was found", controlName)
+	return nil, resp, fmt.Errorf("no custom inspection control named '%s' was found", controlName)
 }
 
 func (service *Service) Create(customControls InspectionCustomControl) (*InspectionCustomControl, *http.Response, error) {

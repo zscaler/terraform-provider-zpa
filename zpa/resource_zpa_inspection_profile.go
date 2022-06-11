@@ -48,11 +48,6 @@ func resourceInspectionProfile() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"modified_by": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"common_global_override_actions_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -216,8 +211,6 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("global_control_actions", resp.GlobalControlActions)
 	_ = d.Set("incarnation_number", resp.IncarnationNumber)
-	_ = d.Set("modified_by", resp.ModifiedBy)
-	_ = d.Set("modified_time", resp.ModifiedTime)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
 	_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
