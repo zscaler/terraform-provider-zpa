@@ -1,7 +1,7 @@
-# Application Segment Privileged Remote Access Example
+# Inspection Custom Control Example
 
 This example will show you how to use Terraform to implement a ZPA application segment resource.
-This example codifies [this API](https://help.zscaler.com/zpa/api-reference#/application-controller/addApplication).
+This example codifies [this API](https://help.zscaler.com/zpa/inspection-control-controller#/mgmtconfig/v1/admin/customers/{customerId}/inspectionControls/custom-post).
 
 To run, configure your ZPA provider as described [Here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.html.markdown)
 
