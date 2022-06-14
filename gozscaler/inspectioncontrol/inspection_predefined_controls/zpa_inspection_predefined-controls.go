@@ -53,6 +53,22 @@ func (service *Service) Get(controlID string) (*PredefinedControls, *http.Respon
 	return v, resp, nil
 }
 
+func (service *Service) GetAll(version string) ([]PredefinedControls, error) {
+	v := []ControlGroupItem{}
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + predControlsEndpoint)
+	_, err := service.Client.NewRequestDo("GET", relativeURL, struct {
+		Version string `url:"version"`
+	}{Version: version}, nil, &v)
+	if err != nil {
+		return nil, err
+	}
+	predefinedControls := []PredefinedControls{}
+	for _, group := range v {
+		predefinedControls = append(predefinedControls, group.PredefinedInspectionControls...)
+	}
+	return predefinedControls, nil
+}
+
 func (service *Service) GetByName(name, version string) (*PredefinedControls, *http.Response, error) {
 	v := []ControlGroupItem{}
 	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + predControlsEndpoint)
