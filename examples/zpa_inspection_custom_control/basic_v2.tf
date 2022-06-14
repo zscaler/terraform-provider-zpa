@@ -14,20 +14,37 @@ resource "zpa_inspection_custom_controls" "tf-test01" {
     id = [data.zpa_inspection_profile.this.id]
   }
   rules {
-    names = ["test1", "test2", "test3"]
-    type  = "RESPONSE_HEADERS"
+    names = ["test", "test1", "test2"]
+    type  = "REQUEST_HEADERS"
     conditions {
       lhs = "SIZE"
-      op  = "GE"
+      op  = "EQ"
       rhs = "1000"
     }
   }
   rules {
-    type  = "RESPONSE_BODY"
+    names = ["test", "test1", "test2"]
+    type  = "REQUEST_COOKIES"
     conditions {
       lhs = "SIZE"
-      op  = "GE"
+      op  = "LE"
       rhs = "1000"
+    }
+  }
+  rules {
+    type = "REQUEST_URI"
+    conditions {
+      lhs = "VALUE"
+      op  = "CONTAINS"
+      rhs = "tf-test"
+    }
+  }
+  rules {
+    type = "QUERY_STRING"
+    conditions {
+      lhs = "VALUE"
+      op  = "STARTS_WITH"
+      rhs = "tf-test"
     }
   }
 }
