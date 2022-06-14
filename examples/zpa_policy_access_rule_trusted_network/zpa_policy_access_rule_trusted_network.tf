@@ -1,5 +1,5 @@
 // Trusted Network Policy Rule
-resource "zpa_policyset_rule" "corp_trusted_network" {
+resource "zpa_policy_access_rule" "corp_trusted_network" {
   name                          = "Corp Trusted Network"
   description                   = "Corp Trusted Network"
   action                        = "ALLOW"
