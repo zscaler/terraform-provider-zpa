@@ -256,7 +256,7 @@ func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{
 	if req.Action == "REDIRECT" && req.ActionValue == "" {
 		return errors.New("when action is REDIRECT, action value must be set")
 	}
-	if err := valdateRules(req); err != nil {
+	if err := validateRules(req); err != nil {
 		return err
 	}
 	resp, _, err := zClient.inspection_custom_controls.Create(req)
@@ -309,7 +309,7 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 	id := d.Id()
 	log.Printf("[INFO] Updating custom inspection control ID: %v\n", id)
 	req := expandInspectionCustomControls(d)
-	if err := valdateRules(req); err != nil {
+	if err := validateRules(req); err != nil {
 		return err
 	}
 	if _, err := zClient.inspection_custom_controls.Update(id, &req); err != nil {
@@ -444,7 +444,7 @@ func expandCustomControlRuleConditions(conditionsObj interface{}) []inspection_c
 	return conditions
 }
 
-func valdateRules(customCtl inspection_custom_controls.InspectionCustomControl) error {
+func validateRules(customCtl inspection_custom_controls.InspectionCustomControl) error {
 
 	for _, rule := range customCtl.Rules {
 		if customCtl.Type == "RESPONSE" {

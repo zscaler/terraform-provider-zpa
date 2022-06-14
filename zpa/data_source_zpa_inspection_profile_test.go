@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -8,17 +9,17 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
 )
 
-func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
+func TestAccDataSourceInspectionProfile_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionCustomControl)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckInspectionCustomControlsDestroy,
+		CheckDestroy: testAccCheckInspectionProfileDestroy,
 		Steps: []resource.TestStep{
 
 			{
-				Config: testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
@@ -34,3 +35,4 @@ func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
 		},
 	})
 }
+*/

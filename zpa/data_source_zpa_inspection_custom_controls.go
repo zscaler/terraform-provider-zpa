@@ -167,7 +167,7 @@ func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{
 		}
 
 	} else {
-		return fmt.Errorf("couldn't find any predefined inspection controls with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any custom inspection controls with name '%s' or id '%s'", name, id)
 	}
 
 	return nil
