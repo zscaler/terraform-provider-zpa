@@ -226,6 +226,28 @@ func resourceInspectionCustomControls() *schema.Resource {
 	}
 }
 
+func updateInspectionProfile(zClient *Client, customControlId string, req *inspection_custom_controls.InspectionCustomControl) {
+	obj, _, err := zClient.inspection_custom_controls.Get(customControlId)
+	if err == nil {
+		for _, i := range req.AssociatedInspectionProfileNames {
+			profile, _, err := zClient.inspection_profile.Get(i.ID)
+			if err != nil {
+				continue
+			}
+			zClient.inspection_profile.Patch(profile.ID, &inspection_profile.InspectionProfile{
+				CustomControls: []inspection_profile.InspectionCustomControl{
+					{
+						ID:          obj.ID,
+						Action:      req.Action,
+						ActionValue: req.ActionValue,
+					},
+				},
+				PredefinedControls: profile.PredefinedControls,
+			})
+		}
+	}
+}
+
 func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
@@ -244,6 +266,7 @@ func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{
 	log.Printf("[INFO] Created custom inspection control request. ID: %v\n", resp)
 
 	d.SetId(resp.ID)
+	updateInspectionProfile(zClient, resp.ID, &req)
 	return resourceInspectionCustomControlsRead(d, m)
 }
 
@@ -292,7 +315,7 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 	if _, err := zClient.inspection_custom_controls.Update(id, &req); err != nil {
 		return err
 	}
-
+	updateInspectionProfile(zClient, id, &req)
 	return resourceInspectionCustomControlsRead(d, m)
 }
 

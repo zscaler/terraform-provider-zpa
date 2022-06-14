@@ -14,6 +14,10 @@ const (
 	defaultVersion            = "OWASP_CRS/3.3.0"
 )
 
+type PatchQuery struct {
+	Version string `json:"version,omitempty" url:"version,omitempty"`
+}
+
 type InspectionProfile struct {
 	ID                                string                    `json:"id,omitempty"`
 	CommonGlobalOverrideActionsConfig map[string]interface{}    `json:"commonGlobalOverrideActionsConfig,omitempty"`
@@ -26,7 +30,7 @@ type InspectionProfile struct {
 	Name                              string                    `json:"name,omitempty"`
 	ParanoiaLevel                     string                    `json:"paranoiaLevel,omitempty"`
 	PredefinedControlsVersion         string                    `json:"predefinedControlsVersion,omitempty"`
-	ControlInfoResource               []ControlInfoResource     `json:"controlsInfo"`
+	ControlInfoResource               []ControlInfoResource     `json:"controlsInfo,omitempty"`
 	CustomControls                    []InspectionCustomControl `json:"customControls"`
 	PredefinedControls                []PredefinedControls      `json:"predefinedControls"`
 }
@@ -152,8 +156,8 @@ func (service *Service) Update(profileID string, inspectionProfile *InspectionPr
 
 func (service *Service) PutAssociate(profileID string, inspectionProfile *InspectionProfile) (*http.Response, error) {
 	setVersion(inspectionProfile)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"associateAllPredefinedControls")
-	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, inspectionProfile, nil)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"/associateAllPredefinedControls")
+	resp, err := service.Client.NewRequestDo("PUT", relativeURL, PatchQuery{Version: inspectionProfile.PredefinedControlsVersion}, inspectionProfile, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -163,8 +167,8 @@ func (service *Service) PutAssociate(profileID string, inspectionProfile *Inspec
 
 func (service *Service) PutDeassociate(profileID string, inspectionProfile *InspectionProfile) (*http.Response, error) {
 	setVersion(inspectionProfile)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"associateAllPredefinedControls")
-	resp, err := service.Client.NewRequestDo("PUT", relativeURL, nil, inspectionProfile, nil)
+	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID+"/deAssociateAllPredefinedControls")
+	resp, err := service.Client.NewRequestDo("PUT", relativeURL, PatchQuery{Version: inspectionProfile.PredefinedControlsVersion}, inspectionProfile, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +179,7 @@ func (service *Service) PutDeassociate(profileID string, inspectionProfile *Insp
 func (service *Service) Patch(profileID string, inspectionProfile *InspectionProfile) (*http.Response, error) {
 	setVersion(inspectionProfile)
 	relativeURL := fmt.Sprintf("%s/%s/patch", mgmtConfig+service.Client.Config.CustomerID+inspectionProfileEndpoint, profileID)
-	resp, err := service.Client.NewRequestDo("PATCH", relativeURL, nil, inspectionProfile, nil)
+	resp, err := service.Client.NewRequestDo("PATCH", relativeURL, PatchQuery{Version: inspectionProfile.PredefinedControlsVersion}, inspectionProfile, nil)
 	if err != nil {
 		return nil, err
 	}

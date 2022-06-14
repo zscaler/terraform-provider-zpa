@@ -48,6 +48,11 @@ func resourceInspectionProfile() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"associate_all_controls": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"modified_by": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -194,6 +199,13 @@ func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] Created inspection profile  request. ID: %v\n", resp)
 
 	d.SetId(resp.ID)
+	if v, ok := d.GetOk("associate_all_controls"); ok && v.(bool) {
+		p, _, err := zClient.inspection_profile.Get(resp.ID)
+		if err != nil {
+			return err
+		}
+		zClient.inspection_profile.PutAssociate(resp.ID, p)
+	}
 	return resourceInspectionProfileRead(d, m)
 }
 
@@ -212,6 +224,7 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	log.Printf("[INFO] Getting inspection profile:\n%+v\n", resp)
 	d.SetId(resp.ID)
 	_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
+	_ = d.Set("associate_all_controls", d.Get("associate_all_controls"))
 	_ = d.Set("creation_time", resp.CreationTime)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("global_control_actions", resp.GlobalControlActions)
@@ -276,7 +289,13 @@ func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) erro
 	if _, err := zClient.inspection_profile.Update(id, &req); err != nil {
 		return err
 	}
-
+	if v, ok := d.GetOk("associate_all_controls"); ok && v.(bool) {
+		p, _, err := zClient.inspection_profile.Get(req.ID)
+		if err != nil {
+			return err
+		}
+		zClient.inspection_profile.PutAssociate(req.ID, p)
+	}
 	return resourceInspectionProfileRead(d, m)
 }
 
