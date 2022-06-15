@@ -23,6 +23,7 @@ import (
 const (
 	defaultBaseURL           = "https://config.private.zscaler.com"
 	betaBaseURL              = "https://config.zpabeta.net"
+	govBaseURL               = "https://config.zpagov.net"
 	defaultTimeout           = 240 * time.Second
 	loggerPrefix             = "zpa-logger: "
 	ZPA_CLIENT_ID            = "ZPA_CLIENT_ID"
@@ -102,6 +103,9 @@ func NewConfig(clientID, clientSecret, customerID, cloud string) (*Config, error
 	}
 	if strings.EqualFold(cloud, "BETA") {
 		rawUrl = betaBaseURL
+	}
+	if strings.EqualFold(cloud, "GOV") {
+		rawUrl = govBaseURL
 	}
 
 	var logger *log.Logger
