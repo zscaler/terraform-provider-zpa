@@ -184,6 +184,33 @@ func validateInspectionProfile(profile *inspection_profile.InspectionProfile) er
 	return nil
 }
 
+/*
+func injectPredefinedControls(zClient *Client, req *inspection_profile.InspectionProfile) error {
+	defaultControls, err := zClient.inspection_predefined_controls.GetAllByGroup(req.PredefinedControlsVersion, "Preprocessors")
+	if err != nil {
+		return nil
+	}
+	inexistingOnes := []inspection_profile.PredefinedControls{}
+	for _, control1 := range defaultControls {
+		found := false
+		for _, control2 := range req.PredefinedControls {
+			if control1.ID == control2.ID || control1.Name == control2.Name {
+				found = true
+				break
+			}
+		}
+		if !found {
+			inexistingOnes = append(inexistingOnes, inspection_profile.PredefinedControls{
+				ID:          control1.ID,
+				Action:      control1.Action,
+				ActionValue: control1.ActionValue,
+			})
+		}
+	}
+	req.PredefinedControls = append(req.PredefinedControls, inexistingOnes...)
+	return nil
+}*/
+
 func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
@@ -192,6 +219,7 @@ func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) erro
 	if err := validateInspectionProfile(&req); err != nil {
 		return err
 	}
+	//injectPredefinedControls(zClient, &req)
 	resp, _, err := zClient.inspection_profile.Create(req)
 	if err != nil {
 		return err
@@ -284,6 +312,7 @@ func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) erro
 	if err := validateInspectionProfile(&req); err != nil {
 		return err
 	}
+	//injectPredefinedControls(zClient, &req)
 	if _, err := zClient.inspection_profile.Update(id, &req); err != nil {
 		return err
 	}

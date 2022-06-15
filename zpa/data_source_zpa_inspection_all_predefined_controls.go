@@ -15,6 +15,10 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"group_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"list": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -115,7 +119,14 @@ func dataSourceInspectionAllPredefinedControlsRead(d *schema.ResourceData, m int
 	if !versionSet || version == "" {
 		return fmt.Errorf("when the name is set, version must be set as well")
 	}
-	list, err := zClient.inspection_predefined_controls.GetAll(version)
+	var list []inspection_predefined_controls.PredefinedControls
+	var err error
+	groupName, groupNameSet := d.Get("group_name").(string)
+	if groupNameSet && groupName != "" {
+		list, err = zClient.inspection_predefined_controls.GetAllByGroup(version, groupName)
+	} else {
+		list, err = zClient.inspection_predefined_controls.GetAll(version)
+	}
 	if err != nil {
 		return err
 	}
@@ -128,6 +139,7 @@ func flattenList(list []inspection_predefined_controls.PredefinedControls) []map
 	result := []map[string]interface{}{}
 	for _, control := range list {
 		result = append(result, map[string]interface{}{
+			"id":                                  control.ID,
 			"action":                              control.Action,
 			"action_value":                        control.ActionValue,
 			"attachment":                          control.Attachment,

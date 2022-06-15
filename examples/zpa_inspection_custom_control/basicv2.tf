@@ -1,18 +1,19 @@
 # Validating RESPONSE Type
 
-resource "zpa_inspection_custom_controls" "test10" {
-  name           = "Test200"
-  description    = "Test200"
+provider "zpa" {}
+resource "zpa_inspection_custom_controls" "test300" {
+  name           = "Test3000"
+  description    = "Test3000"
   action         = "PASS"
   default_action = "PASS"
   paranoia_level = "1"
   severity       = "CRITICAL"
   type           = "RESPONSE"
-  # associated_inspection_profile_names {
-  #     id = [data.zpa_inspection_profile.example.id, data.zpa_inspection_profile.example2.id]
-  # }
+  associated_inspection_profile_names {
+    id = [data.zpa_inspection_profile.example.id]
+  }
   rules {
-    names = []
+    names = ["test"]
     type  = "RESPONSE_HEADERS"
     conditions {
       lhs = "SIZE"
@@ -29,4 +30,12 @@ resource "zpa_inspection_custom_controls" "test10" {
       rhs = "1000"
     }
   }
+}
+
+output "zpa_inspection_custom_controls" {
+  value = zpa_inspection_custom_controls.test300
+}
+
+data "zpa_inspection_profile" "example" {
+  name = "Test100"
 }

@@ -89,3 +89,20 @@ func (service *Service) GetByName(name, version string) (*PredefinedControls, *h
 	log.Printf("[ERROR] no predefined control named '%s' found", name)
 	return nil, resp, fmt.Errorf("no predefined control named '%s' found", name)
 }
+
+func (service *Service) GetAllByGroup(version, groupName string) ([]PredefinedControls, error) {
+	v := []ControlGroupItem{}
+	relativeURL := fmt.Sprintf(mgmtConfig + service.Client.Config.CustomerID + predControlsEndpoint)
+	_, err := service.Client.NewRequestDo("GET", relativeURL, struct {
+		Version string `url:"version"`
+	}{Version: version}, nil, &v)
+	if err != nil {
+		return nil, err
+	}
+	for _, group := range v {
+		if strings.EqualFold(group.ControlGroup, groupName) {
+			return group.PredefinedInspectionControls, nil
+		}
+	}
+	return []PredefinedControls{}, nil
+}
