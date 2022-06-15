@@ -24,6 +24,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/samlattribute"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimattributeheader"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimgroup"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimuserattributeheader"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/segmentgroup"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/servergroup"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/serviceedgecontroller"
@@ -56,6 +57,7 @@ type Client struct {
 	samlattribute                samlattribute.Service
 	scimgroup                    scimgroup.Service
 	scimattributeheader          scimattributeheader.Service
+	scimuserattributeheader      scimuserattributeheader.Service
 	segmentgroup                 segmentgroup.Service
 	servergroup                  servergroup.Service
 	serviceedgegroup             serviceedgegroup.Service
@@ -97,6 +99,7 @@ func (c *Config) Client() (*Client, error) {
 		samlattribute:                *samlattribute.New(config),
 		scimgroup:                    *scimgroup.New(config),
 		scimattributeheader:          *scimattributeheader.New(config),
+		scimuserattributeheader:      *scimuserattributeheader.New(config),
 		segmentgroup:                 *segmentgroup.New(config),
 		servergroup:                  *servergroup.New(config),
 		serviceedgegroup:             *serviceedgegroup.New(config),
