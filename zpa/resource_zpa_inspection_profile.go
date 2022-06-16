@@ -53,11 +53,6 @@ func resourceInspectionProfile() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"modified_by": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"common_global_override_actions_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -253,7 +248,6 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	d.SetId(resp.ID)
 	_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
 	_ = d.Set("associate_all_controls", d.Get("associate_all_controls"))
-	_ = d.Set("creation_time", resp.CreationTime)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("global_control_actions", resp.GlobalControlActions)
 	_ = d.Set("incarnation_number", resp.IncarnationNumber)
