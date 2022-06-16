@@ -78,7 +78,7 @@ func resourceInspectionProfile() *schema.Resource {
 							}, false),
 						},
 						"count": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
 						},
@@ -116,7 +116,7 @@ func resourceInspectionProfile() *schema.Resource {
 				Computed: true,
 			},
 			"global_control_actions": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -250,13 +250,15 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("associate_all_controls", d.Get("associate_all_controls"))
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("global_control_actions", resp.GlobalControlActions)
-	_ = d.Set("incarnation_number", resp.IncarnationNumber)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
-	_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
-
-	if err := d.Set("controls_info", flattenControlInfoResource(resp.ControlInfoResource)); err != nil {
-		return err
+	if resp.PredefinedControlsVersion != "" {
+		_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
+	}
+	if len(resp.ControlInfoResource) > 0 {
+		if err := d.Set("controls_info", flattenControlInfoResource(resp.ControlInfoResource)); err != nil {
+			return err
+		}
 	}
 
 	if err := d.Set("custom_controls", flattenCustomControlsSimple(resp.CustomControls)); err != nil {
@@ -364,7 +366,7 @@ func expandControlsInfo(d *schema.ResourceData) []inspection_profile.ControlInfo
 		}
 		controlItems = append(controlItems, inspection_profile.ControlInfoResource{
 			ControlType: controlItem["control_type"].(string),
-			Count:       controlItem["count"].(string),
+			Count:       controlItem["count"].(int),
 		})
 	}
 	return controlItems

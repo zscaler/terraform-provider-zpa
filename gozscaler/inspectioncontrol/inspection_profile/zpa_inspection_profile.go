@@ -37,7 +37,7 @@ type InspectionProfile struct {
 
 type ControlInfoResource struct {
 	ControlType string `json:"controlType,omitempty"`
-	Count       string `json:"count,omitempty"`
+	Count       int    `json:"count,omitempty"`
 }
 
 type InspectionCustomControl struct {
