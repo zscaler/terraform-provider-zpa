@@ -11,7 +11,8 @@ import (
 
 func resourceAppConnectorController() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAppConnectorBulkeDelete,
+		// Create: resourceAppConnectorBulkeDelete,
+		Create: resourceAppConnectorControllerCreate,
 		Read:   resourceAppConnectorControllerRead,
 		Update: resourceAppConnectorControllerUpdate,
 		Delete: resourceAppConnectorControllerDelete,
@@ -43,13 +44,13 @@ func resourceAppConnectorController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"ids": {
-				Type:        schema.TypeSet,
-				Computed:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: "This field defines the list of app connector ids IDs.",
-				Optional:    true,
-			},
+			// "ids": {
+			// 	Type:        schema.TypeSet,
+			// 	Computed:    true,
+			// 	Elem:        &schema.Schema{Type: schema.TypeString},
+			// 	Description: "This field defines the list of app connector ids IDs.",
+			// 	Optional:    true,
+			// },
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -71,6 +72,7 @@ func resourceAppConnectorController() *schema.Resource {
 	}
 }
 
+/*
 func resourceAppConnectorBulkeDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
@@ -85,6 +87,11 @@ func resourceAppConnectorBulkeDelete(d *schema.ResourceData, m interface{}) erro
 	d.SetId(resp.IDs)
 
 	return resourceAppConnectorControllerRead(d, m)
+}
+*/
+
+func resourceAppConnectorControllerCreate(d *schema.ResourceData, m interface{}) error {
+	return nil
 }
 
 func resourceAppConnectorControllerRead(d *schema.ResourceData, m interface{}) error {
@@ -102,6 +109,7 @@ func resourceAppConnectorControllerRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	log.Printf("[INFO] Getting application server:\n%+v\n", resp)
+	d.SetId(resp.ID)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
@@ -138,8 +146,8 @@ func resourceAppConnectorControllerDelete(d *schema.ResourceData, m interface{})
 
 func expandAppConnectorController(d *schema.ResourceData) appconnectorcontroller.AppConnector {
 	AppConnectorController := appconnectorcontroller.AppConnector{
-		ID:          d.Get("id").(string),
-		IDs:         d.Get("ids").(string),
+		ID: d.Get("id").(string),
+		// IDs:         d.Get("ids").(string),
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Enabled:     d.Get("enabled").(bool),
