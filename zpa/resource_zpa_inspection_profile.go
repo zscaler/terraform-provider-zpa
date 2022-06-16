@@ -288,7 +288,6 @@ func flattenCustomControlsSimple(customControl []inspection_profile.InspectionCu
 	for i, custom := range customControl {
 		customControls[i] = map[string]interface{}{
 			"id":           custom.ID,
-			"name":         custom.Name,
 			"action":       custom.Action,
 			"action_value": custom.ActionValue,
 		}
