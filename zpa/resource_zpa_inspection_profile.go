@@ -78,7 +78,7 @@ func resourceInspectionProfile() *schema.Resource {
 							}, false),
 						},
 						"count": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 						},
@@ -366,7 +366,7 @@ func expandControlsInfo(d *schema.ResourceData) []inspection_profile.ControlInfo
 		}
 		controlItems = append(controlItems, inspection_profile.ControlInfoResource{
 			ControlType: controlItem["control_type"].(string),
-			Count:       controlItem["count"].(int),
+			Count:       controlItem["count"].(string),
 		})
 	}
 	return controlItems
