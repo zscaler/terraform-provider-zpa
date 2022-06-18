@@ -3,6 +3,11 @@ data "zpa_inspection_all_predefined_controls" "default_predefined_controls" {
   group_name = "preprocessors"
 }
 
+data "zpa_inspection_predefined_controls" "this" {
+  name    = "Failed to parse request body"
+  version = "OWASP_CRS/3.3.0"
+}
+
 resource "zpa_inspection_profile" "example" {
   name                        = "Example"
   description                 = "Example"
@@ -25,10 +30,10 @@ resource "zpa_inspection_profile" "example" {
     }
   }
   predefined_controls {
-    id     = "72057594037930388"
+    id     = data.zpa_inspection_predefined_controls.this.id
     action = "BLOCK"
   }
-   global_control_actions = [
+  global_control_actions = [
     "PREDEFINED:PASS",
     "CUSTOM:NONE",
     "OVERRIDE_ACTION:COMMON"
@@ -57,7 +62,7 @@ resource "zpa_inspection_custom_controls" "this" {
     }
   }
   rules {
-    type  = "RESPONSE_BODY"
+    type = "RESPONSE_BODY"
     conditions {
       lhs = "SIZE"
       op  = "GE"
