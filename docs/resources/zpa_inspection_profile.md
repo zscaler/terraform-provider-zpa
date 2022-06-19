@@ -13,6 +13,7 @@ The  **zpa_inspection_profile** resource creates an inspection profile in the Zs
 ## Example Usage
 
 ```hcl
+<<<<<<< HEAD
 data "zpa_inspection_all_predefined_controls" "this" {
   version    = "OWASP_CRS/3.3.0"
   group_name = "Preprocessors"
@@ -21,11 +22,16 @@ data "zpa_inspection_all_predefined_controls" "this" {
 data "zpa_inspection_predefined_controls" "this" {
   name     = "Failed to parse request body"
   version  = "OWASP_CRS/3.3.0"
+=======
+data "zpa_inspection_profile" "this" {
+  name = "Example"
+>>>>>>> master
 }
 
 resource "zpa_inspection_profile" "this" {
   name                          = "Example"
   description                   = "Example"
+<<<<<<< HEAD
   paranoia_level                = "1"
   predefined_controls_version   = "OWASP_CRS/3.3.0"
   incarnation_number            = "6"
@@ -52,6 +58,28 @@ resource "zpa_inspection_profile" "this" {
   common_global_override_actions_config = {
     "PREDEF_CNTRL_GLOBAL_ACTION" : "PASS",
     "IS_OVERRIDE_ACTION_COMMON" : "TRUE"
+=======
+  paranoia_level                = "2"
+  predefined_controls_version   = "OWASP_CRS/3.3.0"
+  incarnation_number            = "6"
+  custom_controls {
+      id = [ "216196257331305413" ]
+  }
+  predefined_controls {
+      id = [ "72057594037930388"]
+  }
+  controls_info {
+    control_type = "PREDEFINED"
+  }
+  global_control_actions = [
+          "PREDEFINED:PASS",
+          "CUSTOM:NONE",
+          "OVERRIDE_ACTION:COMMON"
+  ]
+  common_global_override_actions_config = {
+          "PREDEF_CNTRL_GLOBAL_ACTION": "PASS",
+          "IS_OVERRIDE_ACTION_COMMON": "TRUE"
+>>>>>>> master
   }
 }
 ```
@@ -63,6 +91,7 @@ The following arguments are supported:
 * `name` - (Required) The name of the inspection profile.
 * `description` - (Optional) Description of the inspection profile.
 * `paranoia_level` - (Required) OWASP Predefined Paranoia Level. Range: [1-4], inclusive
+<<<<<<< HEAD
 * `predefined_controls` - (Required) The predefined controls. The default predefined control `Preprocessors` are mandatory and injected in the request by default. Individual `predefined_controls` can be set by using the data source `data_source_zpa_predefined_controls` or by group using the data source `zpa_inspection_all_predefined_controls`.
   * `id` - (Required) ID of the predefined control
   * `action` - (Required) The action of the predefined control. Supported values: `PASS`, `BLOCK` and `REDIRECT`
@@ -77,6 +106,14 @@ The following arguments are supported:
 
 * `attachment` (Optional) Control attachment
 * `control_group` (Optional) Control group
+=======
+* `predefined_controls` - (Required) The predefined controls
+  * `id` - (Required) ID of the predefined control
+  * `action` - (Required) The action of the predefined control. Supported values: `PASS`, `BLOCK` and `REDIRECT`
+  * `action_value` - (Required) Value for the predefined controls action. This field is only required if the action is set to REDIRECT. This field is only required if the action is set to `REDIRECT`.
+  * `attachment` (Optional) Control attachment
+  * `control_group` (Optional) Control group
+>>>>>>> master
 
 * `custom_controls` - (Optional) Types for custom controls
   * `type` (Optional) Types for custom controls
@@ -98,3 +135,8 @@ The following arguments are supported:
 * `controls_info` - (Optional) Types for custom controls
   * `control_type` - (Optional) Control types. Supported Values: `CUSTOM`, `PREDEFINED`, `ZSCALER`
   * `count` - (Optional) Control information counts `Long`
+<<<<<<< HEAD
+=======
+
+## Attributes Reference
+>>>>>>> master
