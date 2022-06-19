@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/terraform-provider-zpa/gozscaler/idpcontroller"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimattributeheader"
 )
 
@@ -39,7 +40,7 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 			},
 			"idp_id": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"idp_name": {
 				Type:     schema.TypeString,
@@ -81,6 +82,11 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"values": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -89,22 +95,40 @@ func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, m interface{}) er
 	zClient := m.(*Client)
 
 	var resp *scimattributeheader.ScimAttributeHeader
+	idpId, okidpId := d.Get("idp_id").(string)
+	idpName, okIdpName := d.Get("idp_name").(string)
+	if !okIdpName && !okidpId || idpId == "" && idpName == "" {
+		log.Printf("[INFO] idp name or id is required\n")
+		return fmt.Errorf("idp name or id is required")
+	}
+	var idpResp *idpcontroller.IdpController
+	// getting Idp controller by id or name
+	if idpId != "" {
+		resp, _, err := zClient.idpcontroller.Get(idpId)
+		if err != nil || resp == nil {
+			log.Printf("[INFO] couldn't find idp by id: %s\n", idpId)
+			return err
+		}
+		idpResp = resp
+	} else {
+		resp, _, err := zClient.idpcontroller.GetByName(idpName)
+		if err != nil || resp == nil {
+			log.Printf("[INFO] couldn't find idp by name: %s\n", idpName)
+			return err
+		}
+		idpResp = resp
+	}
+	// getting scim attribute header by id or name
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
-		res, _, err := zClient.scimattributeheader.Get(id)
+		res, _, err := zClient.scimattributeheader.Get(idpResp.ID, id)
 		if err != nil {
 			return err
 		}
 		resp = res
 	}
-	idpName, ok := d.Get("idp_name").(string)
-	name, ok2 := d.Get("name").(string)
-	if id == "" && ok && ok2 && idpName != "" && name != "" {
-		idpResp, _, err := zClient.idpcontroller.GetByName(idpName)
-		if err != nil || idpResp == nil {
-			log.Printf("[INFO] couldn't find idp by name: %s\n", idpName)
-			return err
-		}
+	name, ok := d.Get("name").(string)
+	if id == "" && ok && name != "" {
 		res, _, err := zClient.scimattributeheader.GetByName(name, idpResp.ID)
 		if err != nil {
 			return err
@@ -112,6 +136,7 @@ func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, m interface{}) er
 		resp = res
 	}
 	if resp != nil {
+		values, _ := zClient.scimattributeheader.GetValues(resp.IdpID, resp.ID)
 		d.SetId(resp.ID)
 		_ = d.Set("canonical_values", resp.CanonicalValues)
 		_ = d.Set("case_sensitive", resp.CaseSensitive)
@@ -128,6 +153,7 @@ func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, m interface{}) er
 		_ = d.Set("returned", resp.Returned)
 		_ = d.Set("schema_uri", resp.SchemaURI)
 		_ = d.Set("uniqueness", resp.Uniqueness)
+		_ = d.Set("values", values)
 
 	} else {
 		return fmt.Errorf("no scim attribute name '%s' & idp name '%s' OR id '%s' was found", name, idpName, id)

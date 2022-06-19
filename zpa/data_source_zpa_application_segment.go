@@ -65,6 +65,10 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -187,6 +191,7 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("health_reporting", resp.HealthReporting)
+		_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 		_ = d.Set("ip_anchored", resp.IpAnchored)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
@@ -199,6 +204,15 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		if err := d.Set("server_groups", flattenAppServerGroups(resp)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
 		}
+
+		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
+			return err
+		}
+
+		if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+			return err
+		}
+
 	} else {
 		return fmt.Errorf("couldn't find any application segment with name '%s' or id '%s'", name, id)
 	}

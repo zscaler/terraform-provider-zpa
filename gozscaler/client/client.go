@@ -47,7 +47,8 @@ func (client *Client) newRequestDoCustom(method, urlStr string, options, body, v
 		req, err := http.NewRequest("POST", client.Config.BaseURL.String()+"/signin", strings.NewReader(data.Encode()))
 		if err != nil {
 			log.Printf("[ERROR] Failed to signin the user %s=%s, err: %v\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
-			return nil, err
+			return nil, fmt.Errorf("[ERROR] Failed to signin the user %s=%s, err: %v", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
+
 		}
 
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -56,22 +57,25 @@ func (client *Client) newRequestDoCustom(method, urlStr string, options, body, v
 
 		if err != nil {
 			log.Printf("[ERROR] Failed to signin the user %s=%s, err: %v\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
-			return nil, err
+			return nil, fmt.Errorf("[ERROR] Failed to signin the user %s=%s, err: %v", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
 		}
 		defer resp.Body.Close()
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.Printf("[ERROR] Failed to signin the user %s=%s, err: %v\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
-			return nil, err
+			return nil, fmt.Errorf("[ERROR] Failed to signin the user %s=%s, err: %v", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
 		}
-
+		if resp.StatusCode >= 300 {
+			log.Printf("[ERROR] Failed to signin the user %s=%s, got http status:%dn response body:%s\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, resp.StatusCode, respBody)
+			return nil, fmt.Errorf("[ERROR] Failed to signin the user %s=%s, got http status:%d, response body:%s", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, resp.StatusCode, respBody)
+		}
 		var a gozscaler.AuthToken
 		err = json.Unmarshal(respBody, &a)
 		if err != nil {
 			log.Printf("[ERROR] Failed to signin the user %s=%s, err: %v\n", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
-			return nil, err
-		}
+			return nil, fmt.Errorf("[ERROR] Failed to signin the user %s=%s, err: %v", gozscaler.ZPA_CLIENT_ID, client.Config.ClientID, err)
 
+		}
 		// we need keep auth token for future http request
 		client.Config.AuthToken = &a
 	}
