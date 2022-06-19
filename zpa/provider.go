@@ -45,21 +45,6 @@ func Provider() *schema.Provider {
 			   terraform resource name: resource schema
 			   resource formation: provider-resourcename-subresource
 			*/
-<<<<<<< HEAD
-			"zpa_app_connector_group":    resourceAppConnectorGroup(),
-			"zpa_application_server":     resourceApplicationServer(),
-			"zpa_application_segment":    resourceApplicationSegment(),
-			"zpa_segment_group":          resourceSegmentGroup(),
-			"zpa_server_group":           resourceServerGroup(),
-			"zpa_browser_access":         resourceBrowserAccess(),
-			"zpa_policy_access_rule":     resourcePolicyAccessRule(),
-			"zpa_policy_timeout_rule":    resourcePolicyTimeoutRule(),
-			"zpa_policy_forwarding_rule": resourcePolicyForwardingRule(),
-			"zpa_policy_inspection_rule": resourcePolicyInspectionRule(),
-			"zpa_provisioning_key":       resourceProvisioningKey(),
-			"zpa_service_edge_group":     resourceServiceEdgeGroup(),
-			"zpa_lss_config_controller":  resourceLSSConfigController(),
-=======
 			"zpa_app_connector_group":            resourceAppConnectorGroup(),
 			"zpa_application_server":             resourceApplicationServer(),
 			"zpa_application_segment":            resourceApplicationSegment(),
@@ -69,6 +54,7 @@ func Provider() *schema.Provider {
 			"zpa_server_group":                   resourceServerGroup(),
 			"zpa_browser_access":                 resourceBrowserAccess(),
 			"zpa_policy_access_rule":             resourcePolicyAccessRule(),
+			"zpa_policy_inspection_rule":         resourcePolicyInspectionRule(),
 			"zpa_policy_timeout_rule":            resourcePolicyTimeoutRule(),
 			"zpa_policy_forwarding_rule":         resourcePolicyForwardingRule(),
 			"zpa_provisioning_key":               resourceProvisioningKey(),
@@ -76,7 +62,6 @@ func Provider() *schema.Provider {
 			"zpa_lss_config_controller":          resourceLSSConfigController(),
 			"zpa_inspection_custom_controls":     resourceInspectionCustomControls(),
 			"zpa_inspection_profile":             resourceInspectionProfile(),
->>>>>>> master
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform data source name: data source schema
