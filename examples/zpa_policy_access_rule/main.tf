@@ -1,6 +1,23 @@
-resource "zpa_policy_access_rule" "all_other_services" {
-  name                          = "All Other Services"
-  description                   = "All Other Services"
+// Retrieve Policy Types
+data "zpa_policy_type" "access_policy" {
+    policy_type = "ACCESS_POLICY"
+}
+
+data "zpa_application_segment" "this"{
+  name = "Example"
+}
+
+data "zpa_idp_controller" "user_idp_name" {
+ name = "User_IDP_Name"
+}
+
+data "zpa_scim_groups" "engineering" {
+  name     = "Engineering"
+  idp_name = "User_IDP_Name"
+}
+resource "zpa_policy_access_rule" "this" {
+  name                          = "Example"
+  description                   = "Example"
   action                        = "ALLOW"
   rule_order                     = 2
   operator = "AND"
@@ -10,10 +27,10 @@ resource "zpa_policy_access_rule" "all_other_services" {
     negated = false
     operator = "OR"
     operands {
-      name =  "All Other Services"
+      name =  "Example"
       object_type = "APP"
       lhs = "id"
-      rhs = data.zpa_application_segment.all_other_services.id
+      rhs = data.zpa_application_segment.this.id
     }
   }
 
@@ -32,26 +49,4 @@ resource "zpa_policy_access_rule" "all_other_services" {
       idp_id = data.zpa_idp_controller.user_idp_name.id
     }
   }
-}
-
-output "all_zpa_policy_access_rule" {
-  value = zpa_policyset_rule.all_other_services
-}
-
-// Retrieve Policy Types
-data "zpa_policy_type" "access_policy" {
-    policy_type = "ACCESS_POLICY"
-}
-
-data "zpa_application_segment" "all_other_services"{
-  name = "All Other Services"
-}
-
-data "zpa_idp_controller" "user_idp_name" {
- name = "User_IDP_Name"
-}
-
-data "zpa_scim_groups" "engineering" {
-  name     = "Engineering"
-  idp_name = "User_IDP_Name"
 }

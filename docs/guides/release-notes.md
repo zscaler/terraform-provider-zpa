@@ -50,7 +50,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - Fix: Fixed Golangci linter
 
 ### Documentation
-1. Added release notes guide to documentation PR #140
+1. Added release notes guide to documentation PR [#140](https://github.com/zscaler/terraform-provider-zpa/pull/140)
 2. Fixed documentation misspellings
 
 ## 2.1.5

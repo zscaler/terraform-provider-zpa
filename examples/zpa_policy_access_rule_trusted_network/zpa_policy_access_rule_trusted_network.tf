@@ -1,3 +1,15 @@
+
+// Retrieve Policy Types
+data "zpa_policy_type" "access_policy" {
+    policy_type = "ACCESS_POLICY"
+}
+
+// Retrieve Trusted Network NetworkID Information
+data "zpa_trusted_network" "corp_trusted_network" {
+ name = "Corp-Trusted-Networks"
+}
+
+
 // Trusted Network Policy Rule
 resource "zpa_policy_access_rule" "corp_trusted_network" {
   name                          = "Corp Trusted Network"
@@ -16,14 +28,3 @@ resource "zpa_policy_access_rule" "corp_trusted_network" {
     }
   }
 }
-
-// Retrieve Policy Types
-data "zpa_policy_type" "access_policy" {
-    policy_type = "ACCESS_POLICY"
-}
-
-// Retrieve Trusted Network NetworkID Information
-data "zpa_trusted_network" "corp_trusted_network" {
- name = "Corp-Trusted-Networks"
-}
-
