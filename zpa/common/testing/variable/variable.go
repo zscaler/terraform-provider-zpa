@@ -80,6 +80,13 @@ const (
 	AccessRuleOrder       = 1
 )
 
+// Policy Access Inspection Rule
+const (
+	AccessRuleInspectionDescription = "testAcc_access_rule"
+	AccessRuleInspectionAction      = "INSPECT"
+	AccessRuleInspectionOrder       = 1
+)
+
 // Inspection Custom Control
 const (
 	InspectionCustomControlAction        = "PASS"

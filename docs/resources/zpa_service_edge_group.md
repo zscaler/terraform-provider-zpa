@@ -57,8 +57,8 @@ The following arguments are supported:
 * `country_code` - (Optional) This field is an array of app-connector-id only.
 * `is_public` - (Optional) Enable or disable public access for the Service Edge Group. Default value: `FALSE` Supported values: `DEFAULT`, `TRUE`, `FALSE`
 
-* `overrideVersionProfile` - (Optional) Whether the default version profile of the App Connector Group is applied or overridden. Default: `true`. Supported values: `true`, `false`
-* `service_edges` - (Optional) This field becomes required when `dynamic_discovery` is disabled.
+* `override_version_profile` - (Optional) Whether the default version profile of the App Connector Group is applied or overridden. Default: `true`. Supported values: `true`, `false`
+* `service_edges` - (Optional)
 * `trusted_networks` - (Optional) Trusted networks for this Service Edge Group. List of trusted network objects
 * `upgrade_day` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified day. Default value: `SUNDAY` List of valid days (i.e., Sunday, Monday)
 * `upgrade_time_in_secs` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600` Integer in seconds (i..e, 66600). The integer must be greater than or equal to 0 and less than `86400`, in `15` minute intervals

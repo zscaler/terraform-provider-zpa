@@ -21,6 +21,7 @@ type PolicySet struct {
 	ModifiedBy   string       `json:"modifiedBy,omitempty"`
 	ModifiedTime string       `json:"modifiedTime,omitempty"`
 	Name         string       `json:"name,omitempty"`
+	Sorted       bool         `json:"sorted"`
 	PolicyType   string       `json:"policyType,omitempty"`
 	Rules        []PolicyRule `json:"rules"`
 }

@@ -37,19 +37,19 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `cert_chain` - (Computed)
-* `certificate` - (Computed) The certificate text is in PEM format.
-* `cname` - (Computed)
-* `creation_time` - (Computed)
-* `description` - (Computed)
-* `issued_by` - (Computed)
-* `issued_to` - (Computed)
-* `modified_time` - (Computed)
-* `modifiedby` - (Computed)
-* `san` - (Computed)
-* `serial_no` - (Computed)
-* `status` - (Computed)
-* `valid_from_in_epochsec` - (Computed)
-* `valid_to_in_epochsec` - (Computed)
+* `cert_chain` - (string)
+* `certificate` - (string) The certificate text is in PEM format.
+* `cname` - (string)
+* `creation_time` - (string)
+* `description` - (string)
+* `issued_by` - (string)
+* `issued_to` - (string)
+* `modified_time` - (string)
+* `modifiedby` - (string)
+* `san` - (string)
+* `serial_no` - (string)
+* `status` - (string)
+* `valid_from_in_epochsec` - (string)
+* `valid_to_in_epochsec` - (string)
 
 :warning: Notice that certificate and public_keys are omitted from the output.

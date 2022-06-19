@@ -66,11 +66,11 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `creation_time` - (Computed)
-* `domain` - (Computed)
-* `master_customer_id` - (Computed)
-* `modified_by` - (Computed)
-* `modified_time` - (Computed)
-* `posture_udid` - (Computed)
-* `zscaler_cloud` - (Computed)
-* `zscaler_customer_id` - (Computed)
+* `creation_time` - (string)
+* `domain` - (string)
+* `master_customer_id` - (string)
+* `modified_by` - (string)
+* `modified_time` - (string)
+* `posture_udid` - (string)
+* `zscaler_cloud` - (string)
+* `zscaler_customer_id` - (string)

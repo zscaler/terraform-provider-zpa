@@ -45,19 +45,19 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `creation_time` - (Computed)
-* `enabled` - (Computed)
-* `expiration_in_epoch_sec` - (Computed)
-* `ip_acl` - (Computed)
-* `max_usage` - (Computed)
-* `modified_by` - (Computed)
-* `modified_time` - (Computed)
-* `provisioning_key` - (Computed) Ignored in PUT/POST calls.
-* `enrollment_cert_id` - (Computed)
-* `enrollment_cert_name` - (Computed) Applicable only for GET calls, ignored in PUT/POST calls.
-* `ui_config` - (Computed)
-* `usage_count` - (Computed)
-* `zcomponent_id` - (Computed)
-* `zcomponent_name` - (Computed) Applicable only for GET calls, ignored in PUT/POST calls.
+* `creation_time` - (string)
+* `enabled` - (bool)
+* `expiration_in_epoch_sec` - (string)
+* `ip_acl` - (string)
+* `max_usage` - (string)
+* `modified_by` - (string)
+* `modified_time` - (string)
+* `provisioning_key` - (string) Ignored in PUT/POST calls.
+* `enrollment_cert_id` - (string)
+* `enrollment_cert_name` - (string) Applicable only for GET calls, ignored in PUT/POST calls.
+* `ui_config` - (string)
+* `usage_count` - (string)
+* `zcomponent_id` - (string)
+* `zcomponent_name` - (string) Applicable only for GET calls, ignored in PUT/POST calls.
 
 :warning: Notice that certificate and public_keys are omitted from the output.

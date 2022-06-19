@@ -30,37 +30,37 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `enabled` - (Computed) Whether this Service Edge Controller is enabled or not. Default value: `true`. Supported values: `true`, `false`
-* `description` (Computed) - Description of the App Connector.
+* `enabled` - (bool) Whether this Service Edge Controller is enabled or not. Default value: `true`. Supported values: `true`, `false`
+* `description` (string) - Description of the App Connector.
 * `app_connector_group_name` (Computed) - Expected values: UNKNOWN/ZPN_STATUS_AUTHENTICATED(1)/ZPN_STATUS_DISCONNECTED
-* `latitude` - (Computed) Latitude of the Service Edge Controller. Integer or decimal. With values in the range of `-90` to `90`
-* `longitude` - (Computed) Longitude of the Service Edge Controller. Integer or decimal. With values in the range of `-180` to `180`
-* `location` - (Computed) Location of the Service Edge Controller.
-* `application_start_time` (Computed)
-* `app_connector_group_id` (Computed)
-* `control_channel_status` (Computed)
-* `creation_time` (Computed)
-* `modified_by` (Computed)
-* `modified_time` (Computed)
-* `ctrl_broker_name` (Computed)
-* `current_version` (Computed)
-* `expected_upgrade_time` (Computed)
-* `expected_version` (Computed)
-* `figerprint` (Computed)
-* `ip_acl` (Computed)
-* `issued_cert_id` (Computed)
-* `last_broker_connect_time` (Computed)
-* `last_broker_connect_time_duration` (Computed)
-* `last_broker_disconnect_time` (Computed)
-* `last_broker_disconnect_time_duration` (Computed)
-* `last_upgrade_time` (Computed)
-* `provisioning_key_id` (Computed)
-* `provisioning_key_name` (Computed)
-* `platform` (Computed)
-* `previous_version` (Computed)
-* `private_ip` (Computed)
-* `public_ip` (Computed)
-* `sarge_version` (Computed)
-* `enrollment_cert` (Computed)
-* `upgrade_attempt` (Computed)
-* `upgrade_status` (Computed)
+* `latitude` - (string) Latitude of the Service Edge Controller. Integer or decimal. With values in the range of `-90` to `90`
+* `longitude` - (string) Longitude of the Service Edge Controller. Integer or decimal. With values in the range of `-180` to `180`
+* `location` - (string) Location of the Service Edge Controller.
+* `application_start_time` (string)
+* `app_connector_group_id` (string)
+* `control_channel_status` (string)
+* `creation_time` (string)
+* `modified_by` (string)
+* `modified_time` (string)
+* `ctrl_broker_name` (string)
+* `current_version` (string)
+* `expected_upgrade_time` (string)
+* `expected_version` (string)
+* `figerprint` (string)
+* `ip_acl` (string)
+* `issued_cert_id` (string)
+* `last_broker_connect_time` (string)
+* `last_broker_connect_time_duration` (string)
+* `last_broker_disconnect_time` (string)
+* `last_broker_disconnect_time_duration` (string)
+* `last_upgrade_time` (string)
+* `provisioning_key_id` (string)
+* `provisioning_key_name` (string)
+* `platform` (string)
+* `previous_version` (string)
+* `private_ip` (string)
+* `public_ip` (string)
+* `sarge_version` (string)
+* `enrollment_cert` (string)
+* `upgrade_attempt` (string)
+* `upgrade_status` (string)

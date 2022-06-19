@@ -35,18 +35,24 @@ data "zpa_app_connector_group" "foo" {
 In addition to all arguments above, the following attributes are exported:
 
 * `name` - (Required) Name of the App Connector Group.
-* `description` (Optional) Description of the App Connector Group.
-* `enabled` - (Optional) Whether this App Connector Group is enabled or not. Default value: `true`. Supported values: `true`, `false`
-* `latitude` - (Required) Latitude of the App Connector Group. Integer or decimal. With values in the range of `-90` to `90`
-* `longitude` - (Required) Longitude of the App Connector Group. Integer or decimal. With values in the range of `-180` to `180`
-* `location` - (Required) Location of the App Connector Group.
-* `city_country` - (Optional) Whether Double Encryption is enabled or disabled for the app.
-* `upgrade_day` - (Optional) App Connectors in this group will attempt to update to a newer version of the software during this specified day
-* `upgrade_time_in_secs` - (Optional) App Connectors in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600`. Integer in seconds (i.e., `-66600`). The integer should be greater than or equal to `0` and less than `86400`, in `15` minute intervals
-* `override_version_profile` - (Optional) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
-* `version_profile_id` - (Optional) ID of the version profile. To learn more, see Version Profile Use Cases.
-* `version_profile_name` - (Optional)
-* `version_profile_visibility_scope` - (Optional)
-* `country_code` - (Optional)
-* `dns_query_type` - (Optional)
-* `geo_location_id` - (Optional)
+* `id` - (Required) ID of the App Connector Group.
+
+## Attribute Reference
+
+The following attributes are exported:
+
+* `description` (String) Description of the App Connector Group.
+* `enabled` - (String) Whether this App Connector Group is enabled or not. Default value: `true`. Supported values: `true`, `false`
+* `latitude` - (String) Latitude of the App Connector Group. Integer or decimal. With values in the range of `-90` to `90`
+* `longitude` - (String) Longitude of the App Connector Group. Integer or decimal. With values in the range of `-180` to `180`
+* `location` - (String) Location of the App Connector Group.
+* `city_country` - (String) Whether Double Encryption is enabled or disabled for the app.
+* `upgrade_day` - (String) App Connectors in this group will attempt to update to a newer version of the software during this specified day
+* `upgrade_time_in_secs` - (String) App Connectors in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600`. Integer in seconds (i.e., `-66600`). The integer should be greater than or equal to `0` and less than `86400`, in `15` minute intervals
+* `override_version_profile` - (bool) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
+* `version_profile_id` - (String) ID of the version profile. To learn more, see Version Profile Use Cases.
+* `version_profile_name` - (String)
+* `version_profile_visibility_scope` - (String)
+* `country_code` - (String)
+* `dns_query_type` - (String)
+* `geo_location_id` - (String)

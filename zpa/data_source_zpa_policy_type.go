@@ -28,7 +28,7 @@ func dataSourcePolicyType() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -38,6 +38,10 @@ func dataSourcePolicyType() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"sorted": {
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"policy_type": {
@@ -89,7 +93,7 @@ func dataSourcePolicyType() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -158,7 +162,7 @@ func dataSourcePolicyType() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"modifiedby": {
+									"modified_by": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -195,7 +199,7 @@ func dataSourcePolicyType() *schema.Resource {
 													Type:     schema.TypeString,
 													Computed: true,
 												},
-												"modifiedby": {
+												"modified_by": {
 													Type:     schema.TypeString,
 													Computed: true,
 												},
@@ -252,9 +256,10 @@ func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("creation_time", resp.CreationTime)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
-	_ = d.Set("modifiedby", resp.ModifiedBy)
+	_ = d.Set("modified_by", resp.ModifiedBy)
 	_ = d.Set("modified_time", resp.ModifiedTime)
 	_ = d.Set("name", resp.Name)
+	_ = d.Set("sorted", resp.Sorted)
 	_ = d.Set("policy_type", resp.PolicyType)
 
 	if err := d.Set("rules", flattenPolicySetRules(resp)); err != nil {
@@ -275,7 +280,7 @@ func flattenPolicySetRules(policySetRules *policysetcontroller.PolicySet) []inte
 			"description":                 ruleItem.Description,
 			"id":                          ruleItem.ID,
 			"isolation_default_rule":      ruleItem.IsolationDefaultRule,
-			"modifiedby":                  ruleItem.ModifiedBy,
+			"modified_by":                 ruleItem.ModifiedBy,
 			"modified_time":               ruleItem.ModifiedTime,
 			"operator":                    ruleItem.Operator,
 			"policy_set_id":               ruleItem.PolicySetID,
@@ -301,7 +306,7 @@ func flattenRuleConditions(conditions policysetcontroller.PolicyRule) []interfac
 		ruleConditions[i] = map[string]interface{}{
 			"creation_time": ruleCondition.CreationTime,
 			"id":            ruleCondition.ID,
-			"modifiedby":    ruleCondition.ModifiedBy,
+			"modified_by":   ruleCondition.ModifiedBy,
 			"modified_time": ruleCondition.ModifiedTime,
 			"negated":       ruleCondition.Negated,
 			"operator":      ruleCondition.Operator,
@@ -320,7 +325,7 @@ func flattenConditionOperands(operands policysetcontroller.Conditions) []interfa
 			"id":            conditionOperand.ID,
 			"idp_id":        conditionOperand.IdpID,
 			"lhs":           conditionOperand.LHS,
-			"modifiedby":    conditionOperand.ModifiedBy,
+			"modified_by":   conditionOperand.ModifiedBy,
 			"modified_time": conditionOperand.ModifiedTime,
 			"name":          conditionOperand.Name,
 			"object_type":   conditionOperand.ObjectType,
