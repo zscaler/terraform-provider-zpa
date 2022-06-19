@@ -75,7 +75,7 @@ func dataSourceSegmentGroup() *schema.Resource {
 							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -120,7 +120,7 @@ func dataSourceSegmentGroup() *schema.Resource {
 										Type:     schema.TypeBool,
 										Computed: true,
 									},
-									"modifiedby": {
+									"modified_by": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -178,7 +178,7 @@ func dataSourceSegmentGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -231,7 +231,7 @@ func dataSourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("enabled", resp.Enabled)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("policy_migrated", resp.PolicyMigrated)
@@ -264,7 +264,7 @@ func flattenSegmentGroupApplications(segmentGroup *segmentgroup.SegmentGroup) []
 			"health_check_type":      segmentGroupApplication.HealthCheckType,
 			"ip_anchored":            segmentGroupApplication.IPAnchored,
 			"log_features":           segmentGroupApplication.LogFeatures,
-			"modifiedby":             segmentGroupApplication.ModifiedBy,
+			"modified_by":            segmentGroupApplication.ModifiedBy,
 			"modified_time":          segmentGroupApplication.ModifiedTime,
 			"name":                   segmentGroupApplication.Name,
 			"id":                     segmentGroupApplication.ID,
@@ -288,7 +288,7 @@ func flattenAppServerGroup(segmentGroup segmentgroup.Application) []interface{} 
 			"description":   segmentServerGroup.Description,
 			"enabled":       segmentServerGroup.Enabled,
 			"id":            segmentServerGroup.ID,
-			"modifiedby":    segmentServerGroup.ModifiedBy,
+			"modified_by":   segmentServerGroup.ModifiedBy,
 			"modified_time": segmentServerGroup.ModifiedTime,
 			"name":          segmentServerGroup.Name,
 		}

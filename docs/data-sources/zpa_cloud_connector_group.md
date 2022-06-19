@@ -39,23 +39,23 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `description` (Computed) - This field defines the description of the cloud connector group.
-* `enabled` (Computed) - This field defines the status of the cloud connector group.
-* `creation_time` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-* `modified_by` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-* `modified_time` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-* `geolocation_id` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-* `zia_cloud` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-* `zia_org_id` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+* `description` (string) - This field defines the description of the cloud connector group.
+* `enabled` (bool) - This field defines the status of the cloud connector group.
+* `creation_time` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+* `modified_by` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+* `modified_time` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+* `geolocation_id` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+* `zia_cloud` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+* `zia_org_id` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
 
-* `cloud_connectors` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `creation_time` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `description` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `enabled` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `figerprint` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `ip_acl` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `issued_cert_id` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `modified_by` (Computed) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `modified_time`(Computed)- Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
-  * `name` (Computed) - This field defines the name of the cloud connector group.
-  * `enrollment_cert` (Computed) - This field defines the name of the cloud connector group.
+* `cloud_connectors` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `creation_time` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `description` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `enabled` (bool) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `figerprint` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `ip_acl` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `issued_cert_id` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `modified_by` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `modified_time`(string)- Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
+  * `name` (string) - This field defines the name of the cloud connector group.
+  * `enrollment_cert` (string) - This field defines the name of the cloud connector group.

@@ -86,6 +86,10 @@ func resourceBrowserAccess() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "DEFAULT",
+				ValidateFunc: validation.StringInSlice([]string{
+					"DEFAULT",
+					"SIEM",
+				}, false),
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -144,36 +148,28 @@ func resourceBrowserAccess() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"allow_options": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"app_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "If you want ZPA to forward unauthenticated HTTP preflight OPTIONS requests from the browser to the app.",
 						},
 						"application_port": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Port for the BA app.",
 						},
 						"application_protocol": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Protocol for the BA app.",
 							ValidateFunc: validation.StringInSlice([]string{
 								"HTTP",
 								"HTTPS",
-								"FTP",
-								"RDP",
 							}, false),
 						},
 						"certificate_id": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"certificate_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "ID of the BA certificate.",
 						},
 						"cname": {
 							Type:     schema.TypeString,
@@ -185,8 +181,9 @@ func resourceBrowserAccess() *schema.Resource {
 							Optional: true,
 						},
 						"domain": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Domain name or IP address of the BA app.",
 						},
 						"enabled": {
 							Type:     schema.TypeBool,
@@ -215,9 +212,10 @@ func resourceBrowserAccess() *schema.Resource {
 							Optional: true,
 						},
 						"trust_untrusted_cert": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Indicates whether Use Untrusted Certificates is enabled or disabled for a BA app.",
 						},
 					},
 				},
@@ -249,7 +247,7 @@ func resourceBrowserAccessCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Creating browser access request\n%+v\n", req)
 
 	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
 		return fmt.Errorf("please provde a valid segment group for the application segment")
 	}
 
@@ -324,8 +322,8 @@ func resourceBrowserAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	req := expandBrowserAccess(d)
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the browser access application segment")
-		return fmt.Errorf("please provde a valid segment group for the browser access application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the browser access application segment")
+		return fmt.Errorf("please provide a valid segment group for the browser access application segment")
 	}
 
 	if _, err := zClient.browseraccess.Update(id, &req); err != nil {
@@ -427,11 +425,9 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 			if ok {
 				clientlessApps = append(clientlessApps, browseraccess.ClientlessApps{
 					AllowOptions:        clientlessApp["allow_options"].(bool),
-					AppID:               clientlessApp["app_id"].(string),
 					ApplicationPort:     clientlessApp["application_port"].(string),
 					ApplicationProtocol: clientlessApp["application_protocol"].(string),
 					CertificateID:       clientlessApp["certificate_id"].(string),
-					CertificateName:     clientlessApp["certificate_name"].(string),
 					Cname:               clientlessApp["cname"].(string),
 					Description:         clientlessApp["description"].(string),
 					Domain:              clientlessApp["domain"].(string),
@@ -477,11 +473,9 @@ func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []inter
 	for i, clientlessApp := range clientlessApp.ClientlessApps {
 		clientlessApps[i] = map[string]interface{}{
 			"allow_options":        clientlessApp.AllowOptions,
-			"app_id":               clientlessApp.AppID,
 			"application_port":     clientlessApp.ApplicationPort,
 			"application_protocol": clientlessApp.ApplicationProtocol,
 			"certificate_id":       clientlessApp.CertificateID,
-			"certificate_name":     clientlessApp.CertificateName,
 			"cname":                clientlessApp.Cname,
 			"description":          clientlessApp.Description,
 			"domain":               clientlessApp.Domain,

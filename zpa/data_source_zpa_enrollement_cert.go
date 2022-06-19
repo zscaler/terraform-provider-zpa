@@ -53,7 +53,7 @@ func dataSourceEnrollmentCert() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -138,7 +138,7 @@ func dataSourceEnrollmentCertRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("issued_by", resp.IssuedBy)
 		_ = d.Set("issued_to", resp.IssuedTo)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("parent_cert_id", resp.ParentCertID)

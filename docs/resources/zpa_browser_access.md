@@ -85,34 +85,32 @@ The following arguments are supported:
   * `id` - (Required)
 
 * `clientless_apps`
-  * `name` - (Required)
-  * `application_port` - (Required)
-  * `application_protocol` - (Required)
-  * `certificate_id` - (Required)
-  * `certificate_name` - (Required)
-  * `domain` - (Required)
-  * `allow_options` - (Optional)
-  * `cname` (Optional)
-  * `description` (Optional)
-  * `enabled` (Optional)
-  * `hidden` (Optional)
-  * `local_domain` (Optional)
-  * `path` (Optional)
-  * `trust_untrusted_cert` (Optional)
+  * `name` - (Required) - Name of BA app.
+  * `application_port` - (Required) - Port for the BA app.
+  * `application_protocol` - (Required) - Protocol for the BA app. Supported values: `HTTP` and `HTTPS`
+  * `certificate_id` - (Required) - ID of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
+  * `domain` - (Required) - Domain name or IP address of the BA app.
+  * `allow_options` - (Optional) - If you want ZPA to forward unauthenticated HTTP preflight OPTIONS requests from the browser to the app.. Supported values: `true` and `false`
 
 ## Attribute Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `description` (Optional) Description of the application.
-* `bypass_type` (Optional) Indicates whether users can bypass ZPA to access applications.
-* `config_space` (Optional)
+* `cname` (Optional)
+* `hidden` (Optional)
+* `local_domain` (Optional)
+* `path` (Optional)
+* `trust_untrusted_cert` (Optional)
+* `bypass_type` (Optional) Indicates whether users can bypass ZPA to access applications. Default value is: `NEVER` and supported values are: `ALWAYS`, `NEVER` and `ON_NET`. The value `NEVER` indicates the use of the client forwarding policy.
+* `config_space` (Optional) Default: `DEFAULT`. Supported values: `DEFAULT`, `SIEM`
 * `double_encrypt` (Optional) Whether Double Encryption is enabled or disabled for the app.
-* `enabled` (Optional)
-* `health_check_type` (Optional)
-* `health_reporting` (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.
-* `ip_anchored` (Optional)
+* `enabled` (Optional) - Whether this app is enabled or not.
+* `health_check_type` (Optional) Default: `DEFAULT`. Supported values: `DEFAULT`, `NONE`
+* `health_reporting` (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: `NONE`, `ON_ACCESS`, `CONTINUOUS`.
+* `ip_anchored` (Optional) - If Source IP Anchoring for use with ZIA, is enabled or disabled for the app. Supported values are `true` and `false`
 * `is_cname_enabled` (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
+  * `certificate_name` - (Optional) - Name of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
 
 ## Import
 

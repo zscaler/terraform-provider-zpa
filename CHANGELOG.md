@@ -10,21 +10,27 @@
 
 1. The provider now supports the following ZPA Privileged Remote Access (PRA) features:
 
-**zpa_application_segment_pra** - The resource supports enabling `SECURE_REMOTE_ACCESS` for RDP and SSH via the `app_types` parameter. PR #133
+**zpa_application_segment_pra** - The resource supports enabling `SECURE_REMOTE_ACCESS` for RDP and SSH via the `app_types` parameter. PR [#133](https://github.com/zscaler/terraform-provider-zpa/pull/133)
 
 2. The provider now supports the following ZPA Inspection features:
-**zpa_inspection_custom_controls** PR #134
-**zpa_inpection_predefined_controls** PR #134
-**zpa_inspection_profile** PR #134
-**zpa_policy_access_inspection_rule** PR #134
-**zpa_application_segment_inspection** - The resource supports enabling `INSPECT` for HTTP and HTTPS via the `app_types` parameter. PR #135
+**zpa_inspection_custom_controls** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
+**zpa_inpection_predefined_controls** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
+**zpa_inspection_profile** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
+**zpa_policy_access_inspection_rule** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
+**zpa_application_segment_inspection** - The resource supports enabling `INSPECT` for HTTP and HTTPS via the `app_types` parameter. PR [#135](https://github.com/zscaler/terraform-provider-zpa/pull/135)
 
-3. ZPA Beta Cloud: The provider now supports authentication via environment variables or static credentials to ZPA Beta Cloud. For authentication instructions please refer to the documentation page [here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) (PR #136)
+4. Implemented a new Application Segment resource parameter ``select_connector_close_to_app``. The parameter can only be set for TCP based applications. PR [#137](https://github.com/zscaler/terraform-provider-zpa/pull/137)
 
-4. Implemented a new Application Segment resource parameter ``select_connector_close_to_app``. The parameter can only be set for TCP based applications. PR #137
+### Enhancements
+
+- Added support to `scim_attribute_header` to support policy access SCIM criteria based on SCIM attribute values.  Issue [#146](https://github.com/zscaler/terraform-provider-zpa/issues/146) / PR [#147]((https://github.com/zscaler/terraform-provider-zpa/pull/147))
+
+- ZPA Beta Cloud: The provider now supports authentication via environment variables or static credentials to ZPA Beta Cloud. For authentication instructions please refer to the documentation page [here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) PR [#136](https://github.com/zscaler/terraform-provider-zpa/pull/136)
+
+- ZPA Gov Cloud: The provider now supports authentication via environment variables or static credentials to ZPA Gov Cloud. For authentication instructions please refer to the documentation page [here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) PR [#145](https://github.com/zscaler/terraform-provider-zpa/pull/145)
 
 ### Bug Fixes
-- Fix: Fixed update function on **zpa_app_server_controller** resource to ensure desired state is enforced in the upstream resource. (Issue #128)
+- Fix: Fixed update function on **zpa_app_server_controller** resource to ensure desired state is enforced in the upstream resource. Issue [#128](https://github.com/zscaler/terraform-provider-zpa/issues/128)
 - Fix: Fixed Golangci linter
 
 ### Documentation

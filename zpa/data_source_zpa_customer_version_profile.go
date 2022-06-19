@@ -65,7 +65,7 @@ func dataSourceCustomerVersionProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -98,7 +98,7 @@ func dataSourceCustomerVersionProfile() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -164,7 +164,7 @@ func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, m interface{})
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("customer_id", resp.CustomerID)
 		_ = d.Set("description", resp.Description)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("upgrade_priority", resp.UpgradePriority)
@@ -206,7 +206,7 @@ func flattenVersions(version []customerversionprofile.Versions) []interface{} {
 			"creation_time":                val.CreationTime,
 			"customer_id":                  val.CustomerID,
 			"id":                           val.ID,
-			"modifiedby":                   val.ModifiedBy,
+			"modified_by":                  val.ModifiedBy,
 			"modified_time":                val.ModifiedTime,
 			"platform":                     val.Platform,
 			"restart_after_uptime_in_days": val.RestartAfterUptimeInDays,

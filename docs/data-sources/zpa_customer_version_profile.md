@@ -46,24 +46,24 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `allow_signing` - (Boolean)
-* `cname` - (String)
-* `certificate` - (String) The certificate text is in PEM format.
-* `client_cert_type` - (String) Returned values are:
+* `allow_signing` - (bool)
+* `cname` - (string)
+* `certificate` - (string) The certificate text is in PEM format.
+* `client_cert_type` - (string) Returned values are:
   * `ZAPP_CLIENT`
   * `ISOLATION_CLIENT`
   * `NONE`
 
-* `creation_time` - (String)
-* `csr` - (String)
-* `description` - (String)
-* `issued_by` - (String)
-* `issued_to` - (String)
-* `modified_time` - (String)
-* `modifiedby` - (String)
-* `parent_cert_id` - (String)
-* `parent_cert_name` - (String)
-* `cert_chain` - (String)
-* `serial_no` - (String)
-* `valid_from_in_epoch_sec` - (String)
-* `valid_to_in_epochsec` - (String)
+* `creation_time` - (string)
+* `csr` - (string)
+* `description` - (string)
+* `issued_by` - (string)
+* `issued_to` - (string)
+* `modified_time` - (string)
+* `modified_by` - (string)
+* `parent_cert_id` - (string)
+* `parent_cert_name` - (string)
+* `cert_chain` - (string)
+* `serial_no` - (string)
+* `valid_from_in_epoch_sec` - (string)
+* `valid_to_in_epochsec` - (string)

@@ -40,10 +40,10 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `creation_time` - (Computed)
-* `idp_id` - (Computed) The ID of the IdP corresponding to the SAML attribute.
-* `name` - (Computed)
-* `modified_by` (Computed)
-* `modified_time` (Computed)
-* `saml_name` - (Computed)
-* `user_attribute` - (Computed)
+* `creation_time` - (string)
+* `idp_id` - (string) The ID of the IdP corresponding to the SAML attribute.
+* `name` - (string)
+* `modified_by` (string)
+* `modified_time` (string)
+* `saml_name` - (string)
+* `user_attribute` - (string)

@@ -141,6 +141,21 @@ data "zpa_policy_type" "access_policy" {
 	policy_type = "ACCESS_POLICY"
 }
 
+data "zpa_scim_attribute_header" "givenName" {
+    name = "name.givenName"
+    idp_name = "BD_Okta_Users"
+}
+
+data "zpa_scim_attribute_header" "familyName" {
+    name = "name.familyName"
+    idp_name = "BD_Okta_Users"
+}
+
+data "zpa_scim_attribute_header" "username" {
+    name = "userName"
+    idp_name = "BD_Okta_Users"
+}
+
 resource "%s" "%s" {
 	name          		= "%s"
 	description   		= "%s"
@@ -158,7 +173,25 @@ resource "%s" "%s" {
 		  lhs         = "id"
 		  rhs         = "${%s.id}"
 		}
-	  }
+		operands {
+			object_type = "SCIM"
+			lhs =  data.zpa_scim_attribute_header.givenName.id
+			rhs = "William"
+			idp_id = data.zpa_scim_attribute_header.givenName.idp_id
+		  }
+		  operands {
+			object_type = "SCIM"
+			lhs =  data.zpa_scim_attribute_header.familyName.id
+			rhs = "Guilherme"
+			idp_id = data.zpa_scim_attribute_header.familyName.idp_id
+		  }
+		  operands {
+			object_type = "SCIM"
+			lhs =  data.zpa_scim_attribute_header.username.id
+			rhs = "charles.keenan@bd-hashicorp.com"
+			idp_id = data.zpa_scim_attribute_header.username.idp_id
+		}
+	}
 	depends_on = [ %s, %s ]
 }
 `,

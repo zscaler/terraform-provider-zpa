@@ -65,7 +65,7 @@ func dataSourceMachineGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -87,7 +87,7 @@ func dataSourceMachineGroup() *schema.Resource {
 					},
 				},
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -130,7 +130,7 @@ func dataSourceMachineGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("enabled", resp.Enabled)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("machines", flattenMachines(resp))
@@ -154,7 +154,7 @@ func flattenMachines(machineGroup *machinegroup.MachineGroup) []interface{} {
 			"machine_group_id":   machineItem.MachineGroupID,
 			"machine_group_name": machineItem.MachineGroupName,
 			"machine_token_id":   machineItem.MachineTokenID,
-			"modifiedby":         machineItem.ModifiedBy,
+			"modified_by":        machineItem.ModifiedBy,
 			"modified_time":      machineItem.ModifiedTime,
 			"name":               machineItem.Name,
 			"signing_cert":       machineItem.SigningCert,

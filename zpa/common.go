@@ -109,11 +109,15 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool
 		}
 		return true
 	case "SCIM":
+		if operand.IdpID == "" {
+			log.Printf("[WARN] when operand object type is %v Idp ID must be set\n", operand.ObjectType)
+			return false
+		}
 		if operand.LHS == "" {
 			lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, nil)
 			return false
 		}
-		_, _, err := zClient.scimattributeheader.Get(operand.LHS)
+		scim, _, err := zClient.scimattributeheader.Get(operand.IdpID, operand.LHS)
 		if err != nil {
 			lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, err)
 			return false
@@ -121,6 +125,20 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool
 		if operand.RHS == "" {
 			rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
 			return false
+		}
+		values, _ := zClient.scimattributeheader.GetValues(scim.IdpID, scim.ID)
+		if len(values) > 0 {
+			found := false
+			for _, v := range values {
+				if v == operand.RHS {
+					found = true
+					break
+				}
+			}
+			if !found {
+				rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
+				return false
+			}
 		}
 		return true
 	case "SCIM_GROUP":
@@ -463,6 +481,14 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
+		"zpn_inspection_profile_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"zpn_inspection_profile_name": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
 		"rule_order": {
 			Type:     schema.TypeString,
 			Optional: true,
@@ -572,4 +598,69 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 		}
 		return []*schema.ResourceData{d}, nil
 	}
+}
+
+func dataInspectionRulesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"conditions": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"lhs": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"op": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"rhs": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+						},
+					},
+				},
+				"names": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"type": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+			},
+		},
+	}
+}
+
+func flattenInspectionRules(rule []common.Rules) []interface{} {
+	rules := make([]interface{}, len(rule))
+	for i, rule := range rule {
+		rules[i] = map[string]interface{}{
+			"conditions": flattenInspectionRulesConditions(rule),
+			"names":      rule.Names,
+			"type":       rule.Type,
+		}
+	}
+
+	return rules
+}
+
+func flattenInspectionRulesConditions(condition common.Rules) []interface{} {
+	conditions := make([]interface{}, len(condition.Conditions))
+	for i, val := range condition.Conditions {
+		conditions[i] = map[string]interface{}{
+			"lhs": val.LHS,
+			"rhs": val.RHS,
+			"op":  val.OP,
+		}
+	}
+
+	return conditions
 }
