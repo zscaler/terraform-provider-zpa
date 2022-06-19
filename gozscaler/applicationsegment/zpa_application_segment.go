@@ -14,31 +14,32 @@ const (
 )
 
 type ApplicationSegmentResource struct {
-	ID                   string                `json:"id,omitempty"`
-	DomainNames          []string              `json:"domainNames,omitempty"`
-	Name                 string                `json:"name,omitempty"`
-	Description          string                `json:"description,omitempty"`
-	Enabled              bool                  `json:"enabled"`
-	PassiveHealthEnabled bool                  `json:"passiveHealthEnabled"`
-	DoubleEncrypt        bool                  `json:"doubleEncrypt"`
-	ConfigSpace          string                `json:"configSpace,omitempty"`
-	Applications         string                `json:"applications,omitempty"`
-	BypassType           string                `json:"bypassType,omitempty"`
-	HealthCheckType      string                `json:"healthCheckType,omitempty"`
-	IsCnameEnabled       bool                  `json:"isCnameEnabled"`
-	IpAnchored           bool                  `json:"ipAnchored"`
-	HealthReporting      string                `json:"healthReporting,omitempty"`
-	IcmpAccessType       string                `json:"icmpAccessType,omitempty"`
-	SegmentGroupID       string                `json:"segmentGroupId"`
-	SegmentGroupName     string                `json:"segmentGroupName,omitempty"`
-	CreationTime         string                `json:"creationTime,omitempty"`
-	ModifiedBy           string                `json:"modifiedBy,omitempty"`
-	ModifiedTime         string                `json:"modifiedTime,omitempty"`
-	TCPAppPortRange      []common.NetworkPorts `json:"tcpPortRange,omitempty"`
-	UDPAppPortRange      []common.NetworkPorts `json:"udpPortRange,omitempty"`
-	ServerGroups         []AppServerGroups     `json:"serverGroups,omitempty"`
-	DefaultIdleTimeout   string                `json:"defaultIdleTimeout,omitempty"`
-	DefaultMaxAge        string                `json:"defaultMaxAge,omitempty"`
+	ID                        string                `json:"id,omitempty"`
+	DomainNames               []string              `json:"domainNames,omitempty"`
+	Name                      string                `json:"name,omitempty"`
+	Description               string                `json:"description,omitempty"`
+	Enabled                   bool                  `json:"enabled"`
+	PassiveHealthEnabled      bool                  `json:"passiveHealthEnabled"`
+	DoubleEncrypt             bool                  `json:"doubleEncrypt"`
+	ConfigSpace               string                `json:"configSpace,omitempty"`
+	Applications              string                `json:"applications,omitempty"`
+	BypassType                string                `json:"bypassType,omitempty"`
+	HealthCheckType           string                `json:"healthCheckType,omitempty"`
+	IsCnameEnabled            bool                  `json:"isCnameEnabled"`
+	IpAnchored                bool                  `json:"ipAnchored"`
+	HealthReporting           string                `json:"healthReporting,omitempty"`
+	SelectConnectorCloseToApp bool                  `json:"selectConnectorCloseToApp"`
+	IcmpAccessType            string                `json:"icmpAccessType,omitempty"`
+	SegmentGroupID            string                `json:"segmentGroupId"`
+	SegmentGroupName          string                `json:"segmentGroupName,omitempty"`
+	CreationTime              string                `json:"creationTime,omitempty"`
+	ModifiedBy                string                `json:"modifiedBy,omitempty"`
+	ModifiedTime              string                `json:"modifiedTime,omitempty"`
+	TCPAppPortRange           []common.NetworkPorts `json:"tcpPortRange,omitempty"`
+	UDPAppPortRange           []common.NetworkPorts `json:"udpPortRange,omitempty"`
+	ServerGroups              []AppServerGroups     `json:"serverGroups,omitempty"`
+	DefaultIdleTimeout        string                `json:"defaultIdleTimeout,omitempty"`
+	DefaultMaxAge             string                `json:"defaultMaxAge,omitempty"`
 }
 
 type AppServerGroups struct {

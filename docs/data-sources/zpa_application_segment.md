@@ -46,5 +46,6 @@ In addition to all arguments above, the following attributes are exported:
 * `health_reporting` - (Optional)
 * `ip_anchored` - (Boolean)
 * `passive_health_enabled` - (Boolean)
-* `segment_group_id` - (Optional)
-* `segment_group_name` - (Optional)
+* `select_connector_close_to_app` - (Boolean)
+* `segment_group_id` - (string)
+* `segment_group_name` - (string)

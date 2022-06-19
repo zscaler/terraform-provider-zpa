@@ -10,6 +10,7 @@ import (
 
 const (
 	mgmtConfig       = "/mgmtconfig/v1/admin/customers/"
+	userConfig       = "/userconfig/v1/customers"
 	idpId            = "/idp"
 	scimAttrEndpoint = "/scimattribute"
 )
@@ -33,15 +34,28 @@ type ScimAttributeHeader struct {
 	Uniqueness      bool     `json:"uniqueness,omitempty"`
 }
 
-func (service *Service) Get(ScimAttrHeaderID string) (*ScimAttributeHeader, *http.Response, error) {
+func (service *Service) Get(idpId, scimAttrHeaderID string) (*ScimAttributeHeader, *http.Response, error) {
 	v := new(ScimAttributeHeader)
-	relativeURL := fmt.Sprintf("%s/%s", mgmtConfig+service.Client.Config.CustomerID+idpId+scimAttrEndpoint, ScimAttrHeaderID)
+	relativeURL := fmt.Sprintf("%s/idp/%s/scimattribute/%s", mgmtConfig+service.Client.Config.CustomerID, idpId, scimAttrHeaderID)
 	resp, err := service.Client.NewRequestDo("GET", relativeURL, nil, nil, v)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return v, resp, nil
+}
+
+func (service *Service) GetValues(idpId, ScimAttrHeaderID string) ([]string, error) {
+	var v struct {
+		List []string `json:"list"`
+	}
+	relativeURL := fmt.Sprintf("%s/%s/scimattribute/idpId/%s/attributeId/%s", userConfig, service.Client.Config.CustomerID, idpId, ScimAttrHeaderID)
+	_, err := service.Client.NewRequestDo("GET", relativeURL, common.Pagination{PageSize: common.DefaultPageSize}, nil, &v)
+	if err != nil {
+		return nil, err
+	}
+
+	return v.List, nil
 }
 
 func (service *Service) GetByName(scimAttributeName, IdpId string) (*ScimAttributeHeader, *http.Response, error) {

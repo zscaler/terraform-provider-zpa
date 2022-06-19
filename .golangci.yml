@@ -3,7 +3,7 @@ issues:
     - 'not declared by package utf8'
     - 'unicode/utf8/utf8.go'
   exclude-rules:
-    - path: ./zia
+    - path: ./zpa
       linters:
         - staticcheck
       text: SA1019

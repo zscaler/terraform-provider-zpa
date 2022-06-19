@@ -163,10 +163,11 @@ The following arguments are supported:
 * `config_space` - (Optional)
 * `double_encrypt` - (Optional) Whether Double Encryption is enabled or disabled for the app.
 * `enabled` - (Optional) Whether this application is enabled or not.
-* `health_reporting` - (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.
+* `health_reporting` - (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: `NONE`, `ON_ACCESS`, `CONTINUOUS`.
 * `health_check_type` (Optional)
 * `icmp_access_type` - (Optional)
 * `ip_anchored` - (Optional)
+* `select_connector_close_to_app` - (Optional) This parameter is only supporte for TCP applications.
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
 * `log_features` - (Optional)
 * `passive_health_enabled` - (Optional)

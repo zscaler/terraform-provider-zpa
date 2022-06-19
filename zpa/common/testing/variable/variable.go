@@ -79,3 +79,11 @@ const (
 	AccessRuleAction      = "ALLOW"
 	AccessRuleOrder       = 1
 )
+
+// Inspection Custom Control
+const (
+	InspectionCustomControlAction        = "PASS"
+	InspectionCustomControlDefaultAction = "PASS"
+	InspectionCustomControlSeverity      = "CRITICAL"
+	InspectionCustomControlType          = "RESPONSE"
+)
