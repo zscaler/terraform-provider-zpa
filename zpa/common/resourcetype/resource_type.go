@@ -16,6 +16,7 @@ const (
 	ZPAPolicyAccessRule             = "zpa_policy_access_rule"
 	ZPAPolicyTimeOutRule            = "zpa_policy_timeout_rule"
 	ZPAPolicyForwardingRule         = "zpa_policy_forwarding_rule"
+	ZPAPolicyInspectionRule         = "zpa_policy_inspection_rule"
 	ZPACustomerVersionProfile       = "zpa_customer_version_profile"
 	ZPAEnrollmentCertificate        = "zpa_enrollment_cert"
 	ZPALSSController                = "zpa_lss_config_controller"
