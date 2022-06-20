@@ -14,9 +14,9 @@ The **zpa_policy_access_rule** resource creates and manages policy access rule i
 
 ```hcl
 #Create Policy Access Rule
-resource "zpa_policy_access_rule" "test_policy_access" {
-  name                          = "test1-policy-access"
-  description                   = "test1-policy-access"
+resource "zpa_policy_access_rule" "this" {
+  name                          = "Example"
+  description                   = "Example"
   action                        = "ALLOW"
   operator                      = "AND"
   policy_set_id                 = data.zpa_policy_type.access_policy.id
@@ -27,7 +27,7 @@ resource "zpa_policy_access_rule" "test_policy_access" {
     operands {
       object_type = "APP"
       lhs = "id"
-      rhs = [ zpa_application_segment.test_app_segment.id ]
+      rhs = zpa_application_segment.test_app_segment.id
     }
   }
   conditions {
@@ -39,12 +39,6 @@ resource "zpa_policy_access_rule" "test_policy_access" {
       rhs = [data.zpa_scim_groups.engineering.id]
     }
   }
-  depends_on = [
-  data.zpa_policy_type.access_policy,
-  data.zpa_idp_controller.idp_name,
-  data.zpa_scim_groups.engineering,
-  zpa_application_segment.test_app_segment
-  ]
 }
 
 # Get Global Access Policy ID
@@ -59,7 +53,7 @@ data "zpa_idp_controller" "idp_name" {
 
 # Get SCIM Group attribute ID
 data "zpa_scim_groups" "engineering" {
-  name = "Engineering"
+  name     = "Engineering"
   idp_name = "IdP_Name"
 }
 ```
