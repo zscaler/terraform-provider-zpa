@@ -3,16 +3,30 @@ subcategory: "Policy Set Controller"
 layout: "zscaler"
 page_title: "ZPA: policy_access_rule"
 description: |-
-  Creates and manages ZPA Policy Access Rule for Browser Access.
+  Creates and manages ZPA Policy Access Rule with SCIM Attribute Header conditions.
 ---
 
 # Resource: zpa_policy_access_rule
 
-The **zpa_policy_access_rule** resource creates and manages policy access rule to support Browser Access  in the Zscaler Private Access cloud.
+The **zpa_policy_access_rule** resource creates and manages a policy access rule with SCIM attribute header conditions in the Zscaler Private Access cloud.
 
 ## Example Usage
 
 ```hcl
+data "zpa_policy_type" "access_policy" {
+  policy_type = "ACCESS_POLICY"
+}
+
+data "zpa_scim_attribute_header" "givenName" {
+  name     = "name.givenName"
+  idp_name = "IdP_Name"
+}
+
+data "zpa_scim_attribute_header" "familyName" {
+  name     = "name.familyName"
+  idp_name = "IdP_Name"
+}
+
 resource "zpa_policy_access_rule" "browser_access_rule" {
   name                          = "test1-ba-policy-access"
   description                   = "test1-ba-policy-access"
@@ -21,67 +35,21 @@ resource "zpa_policy_access_rule" "browser_access_rule" {
   policy_set_id                 = data.zpa_policy_type.access_policy.id
 
   conditions {
-    negated = false
+    negated  = false
     operator = "OR"
     operands {
-      object_type = "APP"
-      lhs = "id"
-      rhs = zpa_application_segment.test_app_segment.id
+      object_type = "SCIM"
+      idp_id      = data.zpa_scim_attribute_header.givenName.idp_id
+      lhs         = data.zpa_scim_attribute_header.givenName.id
+      rhs         = "John"
     }
-  }
-
-  conditions {
-    negated = false
-    operator = "OR"
     operands {
-      object_type = "CLIENT_TYPE"
-      lhs = "id"
-      rhs = "zpn_client_type_exporter"
+      object_type = "SCIM"
+      idp_id      = data.zpa_scim_attribute_header.familyName.idp_id
+      lhs         = data.zpa_scim_attribute_header.familyName.id
+      rhs         = "Smith"
     }
   }
-
-  conditions {
-    negated = false
-    operator = "OR"
-    operands {
-      object_type = "SCIM_GROUP"
-      lhs = data.zpa_idp_controller.idp_name.id
-      rhs = data.zpa_scim_groups.engineering.id
-    }
-  }
-}
-
-// Get Global Access Policy ID
-data "zpa_policy_type" "access_policy" {
-    policy_type = "ACCESS_POLICY"
-}
-
-// Get IdP ID
-data "zpa_idp_controller" "idp_name" {
- name = "IdP_Name"
-}
-
-// Get SCIM Group attribute ID
-data "zpa_scim_groups" "engineering" {
-  name = "Engineering"
-  idp_name = "IdP_Name"
-}
-
-# ZPA Application Segment resource
-resource "zpa_application_segment" "test_app_segment" {
-    name              = "test1-app-segment"
-    description       = "test1-app-segment"
-    enabled           = true
-    health_reporting  = "ON_ACCESS"
-    bypass_type       = "NEVER"
-    is_cname_enabled  = true
-    tcp_port_ranges   = ["8080", "8080"]
-    domain_names      = ["server.acme.com"]
-    segment_group_id  = zpa_segment_group.test_segment_group.id
-    server_groups {
-        id = [ zpa_server_group.test_server_group.id]
-    }
-    depends_on = [ zpa_server_group.test_server_group, zpa_server_group.test_segment_group]
 }
 ```
 

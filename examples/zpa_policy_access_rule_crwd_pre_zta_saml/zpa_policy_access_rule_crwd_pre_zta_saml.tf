@@ -11,7 +11,7 @@ data "zpa_idp_controller" "idp_name" {
 }
 
 data "zpa_saml_attribute" "email_user_sso" {
-    name = "Email_SGIO-User-Okta"
+    name = "Email_IdP_Name"
 }
 
 // CrowdStrike_ZTA_Score_Policy
