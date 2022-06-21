@@ -59,7 +59,7 @@ func accPreCheck() error {
 	client_secret := os.Getenv("ZPA_CLIENT_SECRET")
 	customer_id := os.Getenv("ZPA_CUSTOMER_ID")
 	if client_id == "" && (client_id == "" || client_secret == "" || customer_id == "") {
-		return errors.New("either ZPA_CLIENT_ID or OKTA_API_CLIENT_ID, OKTA_API_SCOPES and OKTA_API_PRIVATE_KEY must be set for acceptance tests")
+		return errors.New("either ZPA_CLIENT_ID or ZPA_CLIENT_SECRET, and ZPA_CUSTOMER_ID must be set for acceptance tests")
 	}
 	return nil
 }
