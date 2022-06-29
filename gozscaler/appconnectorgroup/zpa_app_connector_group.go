@@ -19,7 +19,7 @@ type AppConnectorGroup struct {
 	CreationTime                  string           `json:"creationTime,omitempty"`
 	Description                   string           `json:"description,omitempty"`
 	DNSQueryType                  string           `json:"dnsQueryType,omitempty"`
-	Enabled                       bool             `json:"enabled,omitempty"`
+	Enabled                       bool             `json:"enabled"`
 	GeoLocationID                 string           `json:"geoLocationId,omitempty"`
 	ID                            string           `json:"id,omitempty"`
 	Latitude                      string           `json:"latitude,omitempty"`
