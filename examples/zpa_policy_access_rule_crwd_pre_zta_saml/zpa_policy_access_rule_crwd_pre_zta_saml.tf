@@ -1,3 +1,19 @@
+data "zpa_policy_type" "access_policy" {
+    policy_type = "ACCESS_POLICY"
+}
+
+data "zpa_posture_profile" "crwd_zpa_pre_zta" {
+ name = "CrowdStrike_ZPA_Pre-ZTA"
+}
+
+data "zpa_idp_controller" "idp_name" {
+ name = "IdP_Name"
+}
+
+data "zpa_saml_attribute" "email_user_sso" {
+    name = "Email_IdP_Name"
+}
+
 // CrowdStrike_ZTA_Score_Policy
 resource "zpa_policy_access_rule" "crwd_zpa_pre_zta" {
   name                          = "CrowdStrike_ZPA_Pre-ZTA"
@@ -25,20 +41,4 @@ resource "zpa_policy_access_rule" "crwd_zpa_pre_zta" {
       idp_id = data.zpa_idp_controller.idp_name.id
     }
   }
-}
-
-data "zpa_policy_type" "access_policy" {
-    policy_type = "ACCESS_POLICY"
-}
-
-data "zpa_posture_profile" "crwd_zpa_pre_zta" {
- name = "CrowdStrike_ZPA_Pre-ZTA"
-}
-
-data "zpa_idp_controller" "idp_name" {
- name = "IdP_Name"
-}
-
-data "zpa_saml_attribute" "email_user_sso" {
-    name = "Email_SGIO-User-Okta"
 }

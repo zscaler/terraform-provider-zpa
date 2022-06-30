@@ -3,58 +3,46 @@ subcategory: "Policy Set Controller"
 layout: "zscaler"
 page_title: "ZPA: policy_access_rule"
 description: |-
-  Creates and manages ZPA Policy Access Rule.
+  Creates and manages ZPA Policy Access Rule with SAML Attribute conditions.
 ---
 
 # Resource: zpa_policy_access_rule
 
-The **zpa_policy_access_rule** resource creates and manages policy access rule in the Zscaler Private Access cloud.
+The **zpa_policy_access_rule** resource creates and manages a policy access rule with SAML attribute conditions in the Zscaler Private Access cloud.
 
 ## Example Usage
 
 ```hcl
-#Create Policy Access Rule
-resource "zpa_policy_access_rule" "this" {
-  name                          = "Example"
-  description                   = "Example"
-  action                        = "ALLOW"
-  operator                      = "AND"
-  policy_set_id                 = data.zpa_policy_type.access_policy.id
-
-  conditions {
-    negated   = false
-    operator  = "OR"
-    operands {
-      object_type = "APP"
-      lhs = "id"
-      rhs = zpa_application_segment.test_app_segment.id
-    }
-  }
-  conditions {
-    negated = false
-    operator = "OR"
-    operands {
-      object_type = "SCIM_GROUP"
-      lhs = data.zpa_idp_controller.idp_name.id
-      rhs = data.zpa_scim_groups.engineering.id
-    }
-  }
-}
-
-# Get Global Access Policy ID
 data "zpa_policy_type" "access_policy" {
     policy_type = "ACCESS_POLICY"
 }
 
-# Get IdP ID
 data "zpa_idp_controller" "idp_name" {
  name = "IdP_Name"
 }
 
-# Get SCIM Group attribute ID
-data "zpa_scim_groups" "engineering" {
-  name     = "Engineering"
-  idp_name = "IdP_Name"
+data "zpa_saml_attribute" "email_user_sso" {
+    name = "Email_IdP_Name"
+}
+
+resource "zpa_policy_access_rule" "this" {
+  name                          = "Example"
+  description                   = "Example"
+  action                        = "ALLOW"
+  rule_order                    = 1
+  operator = "AND"
+  policy_set_id = data.zpa_policy_type.access_policy.id
+
+  conditions {
+     negated    = false
+     operator   = "OR"
+    operands {
+      object_type = "SAML"
+      lhs = data.zpa_saml_attribute.email_user_sso.id
+      rhs = "user1@acme.com"
+      idp_id = data.zpa_idp_controller.idp_name.id
+    }
+  }
 }
 ```
 
@@ -65,13 +53,18 @@ data "zpa_scim_groups" "engineering" {
 
 ## Attributes Reference
 
-* `action` (Optional) This is for providing the rule action.
-* `action_id` (Optional) This field defines the description of the server.
-* `custom_msg` (Optional) This is for providing a customer message for the user.
-* `description` (Optional) This is the description of the access policy rule.
-* `operator` (Optional)
-* `policy_type` (Optional)
-* `rule_order` (Optional)
+* `action` (String) This is for providing the rule action.
+* `action_id` (String) This field defines the description of the server.
+* `bypass_default_rule` (Boolean)
+* `custom_msg` (String) This is for providing a customer message for the user.
+* `description` (String) This is the description of the access policy rule.
+* `operator` (String)
+* `policy_type` (String)
+* `priority` (String)
+* `reauth_default_rule` (Boolean)
+* `reauth_idle_timeout` (String)
+* `reauth_timeout` (String)
+* `rule_order` (String)
 
 * `conditions` - (Optional)
   * `negated` - (Optional)
@@ -98,7 +91,7 @@ data "zpa_scim_groups" "engineering" {
 
 ## Import
 
-Policy access rule can be imported by using `<POLICY ACCESS RULE ID>` as the import ID.
+Policy Access Rule for Browser Access can be imported by using`<POLICY ACCESS RULE ID>` as the import ID.
 
 For example:
 

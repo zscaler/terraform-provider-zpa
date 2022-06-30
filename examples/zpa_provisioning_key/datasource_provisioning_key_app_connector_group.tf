@@ -1,6 +1,6 @@
 // Retrieve Provisioning Key for App Connector Group
 data "zpa_provisioning_key" "example" {
-    name            = "App_Connector_Provisioning_Key"
+    name             = "App_Connector_Provisioning_Key"
     association_type = "CONNECTOR_GRP"
 }
 

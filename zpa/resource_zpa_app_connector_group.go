@@ -77,7 +77,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
+				Computed:    true,
 				Description: "Whether this App Connector Group is enabled or not",
 			},
 			"latitude": {
@@ -117,7 +117,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"override_version_profile": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "Whether the default version profile of the App Connector Group is applied or overridden. Supported values: true, false",
 			},
 			"version_profile_id": {

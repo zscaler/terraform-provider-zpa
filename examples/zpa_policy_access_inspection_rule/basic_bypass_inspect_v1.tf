@@ -1,8 +1,25 @@
-// ZPA Inspection Application Segment using HTTPS
+// Retrieve Policy Set ID
+data "zpa_policy_type" "inspection_policy" {
+    policy_type = "INSPECTION_POLICY"
+}
 
-// Retrieve Certificate
-data "zpa_ba_certificate" "jenkins" {
-  name = "jenkins.example.com"
+resource "zpa_policy_inspection_rule" "this" {
+  name          = "Example"
+  description   = "Example"
+  action        = "BYPASS_INSPECT"
+  rule_order    = 1
+  operator      = "AND"
+  policy_set_id = data.zpa_policy_type.inspection_policy.id
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "APP"
+      lhs         = "id"
+      rhs         = zpa_application_segment_inspection.this.id
+    }
+  }
+  depends_on = [ zpa_application_segment_inspection.this ]
 }
 
 // Create Inspection Application Segment
@@ -13,7 +30,7 @@ resource "zpa_application_segment_inspection" "this" {
   health_reporting = "ON_ACCESS"
   bypass_type      = "NEVER"
   is_cname_enabled = true
-  tcp_port_ranges  = ["443", "443"]
+  tcp_port_ranges  = ["80", "80"]
   domain_names     = ["jenkins.example.com"]
   segment_group_id = zpa_segment_group.this.id
   server_groups {
@@ -23,13 +40,14 @@ resource "zpa_application_segment_inspection" "this" {
     apps_config {
       name                 = "jenkins.example.com"
       domain               = "jenkins.example.com"
-      application_protocol = "HTTPS"
-      application_port     = "443"
+      application_protocol = "HTTP"
+      application_port     = "80"
       certificate_id       = data.zpa_ba_certificate.jenkins.id
       enabled              = true
-      app_types            = [ "INSPECT" ]
+      app_types            = ["INSPECT"]
     }
   }
+  depends_on = [ zpa_segment_group.this, zpa_server_group.this ]
 }
 
 // Create Segment Group

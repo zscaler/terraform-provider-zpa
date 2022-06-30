@@ -43,5 +43,14 @@ output "zpa_policy_type_client_forwarding_policy" {
     value = data.zpa_policy_type.client_forwarding_policy
 }
 
+// Get information for "INSPECTION_POLICY" ID
+data "zpa_policy_type" "inspection_policy" {
+    policy_type = "INSPECTION_POLICY"
+}
+
+output "zpa_policy_type_inspection_policy" {
+    value = data.zpa_policy_type.inspection_policy
+}
+
 
 

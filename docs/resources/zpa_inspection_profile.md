@@ -13,33 +13,45 @@ The  **zpa_inspection_profile** resource creates an inspection profile in the Zs
 ## Example Usage
 
 ```hcl
-data "zpa_inspection_profile" "this" {
-  name = "Example"
+data "zpa_inspection_all_predefined_controls" "this" {
+  version    = "OWASP_CRS/3.3.0"
+  group_name = "Preprocessors"
+}
+
+data "zpa_inspection_predefined_controls" "this" {
+  name     = "Failed to parse request body"
+  version  = "OWASP_CRS/3.3.0"
 }
 
 resource "zpa_inspection_profile" "this" {
   name                          = "Example"
   description                   = "Example"
-  paranoia_level                = "2"
+  paranoia_level                = "1"
   predefined_controls_version   = "OWASP_CRS/3.3.0"
   incarnation_number            = "6"
-  custom_controls {
-      id = [ "216196257331305413" ]
-  }
-  predefined_controls {
-      id = [ "72057594037930388"]
-  }
   controls_info {
     control_type = "PREDEFINED"
   }
+  dynamic "predefined_controls" {
+    for_each = data.zpa_inspection_all_predefined_controls.default_predefined_controls.list
+    content {
+      id           = predefined_controls.value.id
+      action       = predefined_controls.value.action == "" ? predefined_controls.value.default_action : predefined_controls.value.action
+      action_value = predefined_controls.value.action_value
+    }
+  }
+  predefined_controls {
+    id     = data.zpa_inspection_predefined_controls.this.id
+    action = "BLOCK"
+  }
   global_control_actions = [
-          "PREDEFINED:PASS",
-          "CUSTOM:NONE",
-          "OVERRIDE_ACTION:COMMON"
+    "PREDEFINED:PASS",
+    "CUSTOM:NONE",
+    "OVERRIDE_ACTION:COMMON"
   ]
   common_global_override_actions_config = {
-          "PREDEF_CNTRL_GLOBAL_ACTION": "PASS",
-          "IS_OVERRIDE_ACTION_COMMON": "TRUE"
+    "PREDEF_CNTRL_GLOBAL_ACTION" : "PASS",
+    "IS_OVERRIDE_ACTION_COMMON" : "TRUE"
   }
 }
 ```
@@ -51,12 +63,20 @@ The following arguments are supported:
 * `name` - (Required) The name of the inspection profile.
 * `description` - (Optional) Description of the inspection profile.
 * `paranoia_level` - (Required) OWASP Predefined Paranoia Level. Range: [1-4], inclusive
-* `predefined_controls` - (Required) The predefined controls
+* `predefined_controls` - (Required) The predefined controls. The default predefined control `Preprocessors` are mandatory and injected in the request by default. Individual `predefined_controls` can be set by using the data source `data_source_zpa_predefined_controls` or by group using the data source `zpa_inspection_all_predefined_controls`.
   * `id` - (Required) ID of the predefined control
   * `action` - (Required) The action of the predefined control. Supported values: `PASS`, `BLOCK` and `REDIRECT`
   * `action_value` - (Required) Value for the predefined controls action. This field is only required if the action is set to REDIRECT. This field is only required if the action is set to `REDIRECT`.
-  * `attachment` (Optional) Control attachment
-  * `control_group` (Optional) Control group
+
+-> **NOTE:** When assigning predefined controls by control group, use the data source `zpa_inspection_all_predefined_controls` with the following parameters:
+
+* `version`    = "OWASP_CRS/3.3.0"
+* `group_name` = "preprocessors"
+
+## Attributes Reference
+
+* `attachment` (Optional) Control attachment
+* `control_group` (Optional) Control group
 
 * `custom_controls` - (Optional) Types for custom controls
   * `type` (Optional) Types for custom controls
@@ -78,5 +98,3 @@ The following arguments are supported:
 * `controls_info` - (Optional) Types for custom controls
   * `control_type` - (Optional) Control types. Supported Values: `CUSTOM`, `PREDEFINED`, `ZSCALER`
   * `count` - (Optional) Control information counts `Long`
-
-## Attributes Reference

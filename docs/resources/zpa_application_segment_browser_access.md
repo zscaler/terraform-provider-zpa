@@ -1,7 +1,7 @@
 ---
 subcategory: "Application Segment"
 layout: "zscaler"
-page_title: "ZPA: browser_access"
+page_title: "ZPA: application_segment_browser_access"
 description: |-
   Creates and manages ZPA Browser Access Application Segment.
 ---
