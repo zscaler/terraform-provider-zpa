@@ -106,7 +106,6 @@ func resourcePolicyInspectionRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
 	_ = d.Set("zpn_inspection_profile_id", resp.ZpnInspectionProfileID)
-	_ = d.Set("zpn_inspection_profile_name", resp.ZpnInspectionProfileName)
 	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
@@ -170,19 +169,18 @@ func expandCreatePolicyInspectionRule(d *schema.ResourceData) (*policysetcontrol
 		return nil, err
 	}
 	return &policysetcontroller.PolicyRule{
-		Action:                   d.Get("action").(string),
-		ActionID:                 d.Get("action_id").(string),
-		CustomMsg:                d.Get("custom_msg").(string),
-		Description:              d.Get("description").(string),
-		ID:                       d.Get("id").(string),
-		Name:                     d.Get("name").(string),
-		Operator:                 d.Get("operator").(string),
-		PolicySetID:              policySetID,
-		PolicyType:               d.Get("policy_type").(string),
-		Priority:                 d.Get("priority").(string),
-		ZpnInspectionProfileID:   d.Get("zpn_inspection_profile_id").(string),
-		ZpnInspectionProfileName: d.Get("zpn_inspection_profile_name").(string),
-		RuleOrder:                d.Get("rule_order").(string),
-		Conditions:               conditions,
+		Action:                 d.Get("action").(string),
+		ActionID:               d.Get("action_id").(string),
+		CustomMsg:              d.Get("custom_msg").(string),
+		Description:            d.Get("description").(string),
+		ID:                     d.Get("id").(string),
+		Name:                   d.Get("name").(string),
+		Operator:               d.Get("operator").(string),
+		PolicySetID:            policySetID,
+		PolicyType:             d.Get("policy_type").(string),
+		Priority:               d.Get("priority").(string),
+		ZpnInspectionProfileID: d.Get("zpn_inspection_profile_id").(string),
+		RuleOrder:              d.Get("rule_order").(string),
+		Conditions:             conditions,
 	}, nil
 }

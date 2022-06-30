@@ -8,12 +8,11 @@ description: |-
 
 # Resource: zpa_application_segment_inspection
 
-The **zpa_application_segment_inspection** resource creates an application segment for Inspection in the Zscaler Private Access cloud. This resource can then be referenced in an access policy inspection rule. This resource supports Inspection for both `HTTP` and `HTTPS`.
+The **zpa_application_segment_inspection** resource creates an inspection application segment in the Zscaler Private Access cloud. This resource can then be referenced in an access policy inspection rule. This resource supports Inspection for both `HTTP` and `HTTPS`.
 
 ## Example Usage
 
 ```hcl
-
 data "zpa_ba_certificate" "jenkins" {
   name = "jenkins.securitygeek.io"
 }
@@ -55,10 +54,10 @@ The following arguments are supported:
 * `segment_group_id` - (Required) List of Segment Group IDs
 * `common_apps_dto` - (Required) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
   * `apps_config:` - (Required) List of applications to be configured
-    * `name` - (Required) Name of the Privileged Remote Access
-    * `domain` - (Required) Domain name of the Privileged Remote Access
-    * `application_protocol` - (Required) Protocol for the Privileged Remote Access. Supported values: `HTTP` and `HTTPS`
-    * `application_port` - (Required) Port for the Privileged Remote Access
+    * `name` - (Required) Name of the Inspection Application Segment.
+    * `domain` - (Required) Domain name of the Inspection Application Segment.
+    * `application_protocol` - (Required) Protocol for the Inspection Application Segment.. Supported values: `HTTP` and `HTTPS`
+    * `application_port` - (Required) Port for the Inspection Application Segment.
     * `app_types` - (Required) Indicates the type of application as inspection. Supported value: `INSPECT`
     * `certificate_id` - (string) - ID of the signing certificate. This field is required if the applicationProtocol is set to `HTTPS`. The certificateId is not supported if the applicationProtocol is set to `HTTP`.
     * `enabled` - (Optional) Whether this application is enabled or not
