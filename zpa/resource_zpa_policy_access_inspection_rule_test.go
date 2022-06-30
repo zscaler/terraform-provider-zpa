@@ -29,9 +29,8 @@ func TestAccPolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "INSPECT"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "2"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
@@ -43,9 +42,8 @@ func TestAccPolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "INSPECT"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "2"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -133,6 +131,15 @@ resource "%s" "%s" {
 	operator      				= "AND"
 	policy_set_id 				= data.zpa_policy_type.inspection_policy.id
 	zpn_inspection_profile_id 	= zpa_inspection_profile.this.id
+	conditions {
+		negated  = false
+		operator = "OR"
+		operands {
+			object_type = "CLIENT_TYPE"
+			lhs         = "id"
+			rhs         = "zpn_client_type_exporter"
+			}
+		}
 	depends_on = [zpa_inspection_profile.this]
 }
 
@@ -163,7 +170,6 @@ data "zpa_inspection_predefined_controls" "this" {
 	  action = "BLOCK"
 	}
 }
-
 `,
 		// resource variables
 		resourcetype.ZPAPolicyInspectionRule,
