@@ -136,6 +136,10 @@ data "%s" "%s" {
 func getApplicationSegmentInspectionResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
+data "zpa_ba_certificate" "jenkins" {
+	name = "jenkins.bd-hashicorp.com"
+}
+
 resource "%s" "%s" {
 	name = "tf-acc-test-%s"
 	description = "tf-acc-test-%s"
@@ -143,15 +147,19 @@ resource "%s" "%s" {
 	is_cname_enabled = "%s"
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
-	tcp_port_ranges = ["80", "80"]
+	tcp_port_range {
+		from = "443"
+		to = "443"
+	}
 	domain_names = ["jenkins.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	common_apps_dto {
 		apps_config {
 		  name                 = "jenkins.bd-hashicorp.com"
 		  domain               = "jenkins.bd-hashicorp.com"
-		  application_protocol = "HTTP"
-		  application_port     = "80"
+		  application_protocol = "HTTPS"
+		  application_port     = "443"
+		  certificate_id       = data.zpa_ba_certificate.jenkins.id
 		  enabled = true
 		  app_types = ["INSPECT"]
 		}

@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"testing"
 
@@ -16,6 +15,8 @@ func TestAccDataSourceBaCertificate_Basic(t *testing.T) {
 				Config: testAccCheckDataSourceBaCertificateConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceBaCertificateCheck("data.zpa_ba_certificate.certificate"),
+					testAccDataSourceBaCertificateCheck("data.zpa_ba_certificate.jenkins"),
+					testAccDataSourceBaCertificateCheck("data.zpa_ba_certificate.sales"),
 				),
 			},
 		},
@@ -31,6 +32,14 @@ func testAccDataSourceBaCertificateCheck(name string) resource.TestCheckFunc {
 
 var testAccCheckDataSourceBaCertificateConfig_basic = `
 data "zpa_ba_certificate" "certificate" {
-    name = "jenkins.securitygeek.io"
-}`
-*/
+    name = "bd-hashicorp.com"
+}
+
+data "zpa_ba_certificate" "jenkins" {
+    name = "jenkins.bd-hashicorp.com"
+}
+
+data "zpa_ba_certificate" "sales" {
+    name = "sales.bd-hashicorp.com"
+}
+`

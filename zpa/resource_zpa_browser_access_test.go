@@ -1,12 +1,10 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/gozscaler/browseraccess"
@@ -18,7 +16,7 @@ import (
 func TestAccResourceBrowserAccessBasic(t *testing.T) {
 	var browserAccess browseraccess.BrowserAccess
 	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPABrowserAccess)
-	rPort := acctest.RandIntRange(1000, 9999)
+	// rPort := acctest.RandIntRange(1000, 9999)
 
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
@@ -32,7 +30,7 @@ func TestAccResourceBrowserAccessBasic(t *testing.T) {
 		CheckDestroy: testAccCheckBrowserAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
@@ -43,14 +41,13 @@ func TestAccResourceBrowserAccessBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(browserAccessTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "clientless_apps.#", "1"),
-					resource.TestCheckResourceAttr(browserAccessTypeAndName, "tcp_port_ranges.#", "2"),
-					resource.TestCheckResourceAttr(browserAccessTypeAndName, "udp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "tcp_port_range.#", "1"),
 				),
 			},
 
 			// Update test
 			{
-				Config: testAccCheckBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
@@ -61,8 +58,7 @@ func TestAccResourceBrowserAccessBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(browserAccessTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "clientless_apps.#", "1"),
-					resource.TestCheckResourceAttr(browserAccessTypeAndName, "tcp_port_ranges.#", "2"),
-					resource.TestCheckResourceAttr(browserAccessTypeAndName, "udp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "tcp_port_range.#", "1"),
 				),
 			},
 		},
@@ -111,7 +107,7 @@ func testAccCheckBrowserAccessExists(resource string, segment *browseraccess.Bro
 	}
 }
 
-func testAccCheckBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
+func testAccCheckBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 // segment group resource
@@ -127,7 +123,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, rPort, enabled, cnameEnabled),
+		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled),
 
 		// data source variables
 		resourcetype.ZPABrowserAccess,
@@ -136,11 +132,11 @@ data "%s" "%s" {
 	)
 }
 
-func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
+func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
-data "zpa_ba_certificate" "testAcc" {
-	name = "jenkins.securitygeek.io"
+data "zpa_ba_certificate" "jenkins" {
+	name = "jenkins.bd-hashicorp.com"
 }
 
 resource "%s" "%s" {
@@ -150,18 +146,20 @@ resource "%s" "%s" {
 	is_cname_enabled = "%s"
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
-	tcp_port_ranges = ["%d", "%d"]
-	udp_port_ranges = ["%d", "%d"]
-	domain_names = ["test.example.com"]
+	tcp_port_range {
+		from = "443"
+		to = "443"
+	}
+	domain_names = ["jenkins.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	clientless_apps {
-		name                 = "testacc.securitygeek.io"
-		application_protocol = "HTTP"
-		application_port     = "%d"
-		certificate_id       = data.zpa_ba_certificate.testAcc.id
+		name                 = "jenkins.bd-hashicorp.com"
+		application_protocol = "HTTPS"
+		application_port     = "443"
+		certificate_id       = data.zpa_ba_certificate.jenkins.id
 		trust_untrusted_cert = true
 		enabled              = true
-		domain               = "testacc.securitygeek.io"
+		domain               = "jenkins.bd-hashicorp.com"
 	}
 	server_groups {
 		id = []
@@ -177,15 +175,9 @@ resource "%s" "%s" {
 		generatedName,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
-		rPort,
-		rPort,
-		rPort,
-		rPort,
 		segmentGroupTypeAndName,
-		rPort,
 		// serverGroupTypeAndName,
 		segmentGroupTypeAndName,
 		// serverGroupTypeAndName,
 	)
 }
-*/
