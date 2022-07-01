@@ -14,7 +14,6 @@ Use the **zpa_policy_type** data source to get information about an a ``policy_s
 2. Access policy timeout rules
 3. Access policy forwarding rules
 4. Access policy inspection rules
-5. Access policy isolation rules
 
 ~> **NOTE** The parameters ``policy_set_id`` is required in all circumstances and is exported when checking for the policy_type parameter. The policy_type value is used for differentiating the policy types, in the request endpoint. The supported values are:
 
@@ -22,8 +21,6 @@ Use the **zpa_policy_type** data source to get information about an a ``policy_s
 * ``TIMEOUT_POLICY/REAUTH_POLICY``
 * ``BYPASS_POLICY/CLIENT_FORWARDING_POLICY``
 * ``INSPECTION_POLICY``
-* ``ISOLATION_POLICY``
-* ``SIEM_POLICY``
 
 ## Example Usage
 
@@ -90,28 +87,6 @@ data "zpa_policy_type" "inspection_policy" {
 
 output "zpa_policy_type_inspection_policy" {
     value = data.zpa_policy_type.inspection_policy.id
-}
-```
-
-```hcl
-# Get information for "ISOLATION_POLICY" ID
-data "zpa_policy_type" "isolation_policy" {
-    policy_type = "ISOLATION_POLICY"
-}
-
-output "zpa_policy_type_isolation_policy" {
-    value = data.zpa_policy_type.isolation_policy.id
-}
-```
-
-```hcl
-# Get information for "SIEM_POLICY" ID
-data "zpa_policy_type" "siem_policy" {
-    policy_type = "SIEM_POLICY"
-}
-
-output "zpa_policy_type_siem_policy" {
-    value = data.zpa_policy_type.siem_policy
 }
 ```
 

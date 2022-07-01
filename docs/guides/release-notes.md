@@ -18,36 +18,22 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 ## 2.2.0
 
 ### Notes:
-<<<<<<< HEAD
-- Release date: **(June 21 2022)**
-=======
 - Release date: **(June 30 2022)**
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 - Supported Terraform version: **v1.x**
 
 ### New Features
 
 1. The provider now supports the following ZPA Privileged Remote Access (PRA) features:
 
-<<<<<<< HEAD
-- **zpa_application_segment_pra** - The resource supports enabling Priviledged Remove Access Application Segment ``SECURE_REMOTE_ACCESS``option for RDP and SSH via the ``app_types`` parameter. PR [#133](https://github.com/zscaler/terraform-provider-zpa/pull/133)
-=======
 - **zpa_application_segment_pra** - The resource supports enabling Priviledged Remote Access Application Segment ``SECURE_REMOTE_ACCESS``option for `RDP` and `SSH` via the ``app_types`` parameter. PR [#133](https://github.com/zscaler/terraform-provider-zpa/pull/133)
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 
 2. The provider now supports the following ZPA Inspection features:
 - **zpa_inspection_custom_controls** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
 - **zpa_inpection_predefined_controls** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
-<<<<<<< HEAD
-- **zpa_inspection_profile** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
-- **zpa_policy_access_inspection_rule** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
-- **zpa_application_segment_inspection** - The resource supports enabling `INSPECT` for HTTP and HTTPS via the `app_types` parameter. PR [#135](https://github.com/zscaler/terraform-provider-zpa/pull/135)
-=======
 - **zpa_inspection_all_predefined_controls** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
 - **zpa_inspection_profile** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
 - **zpa_policy_access_inspection_rule** PR[#134](https://github.com/zscaler/terraform-provider-zpa/pull/134)
 - **zpa_application_segment_inspection** - The resource supports enabling `INSPECT` for `HTTP` and `HTTPS` via the `app_types` parameter. PR [#135](https://github.com/zscaler/terraform-provider-zpa/pull/135)
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 
 4. Implemented a new Application Segment resource parameter ``select_connector_close_to_app``. The parameter can only be set for TCP based applications. PR [#137](https://github.com/zscaler/terraform-provider-zpa/pull/137)
 
@@ -61,12 +47,8 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Bug Fixes
 - Fix: Fixed update function on **zpa_app_server_controller** resource to ensure desired state is enforced in the upstream resource. Issue [#128](https://github.com/zscaler/terraform-provider-zpa/issues/128)
-<<<<<<< HEAD
-- Fix: Fixed Golangci linter
-=======
 - Fix: Fixed `enabled` parameter on **zpa_app_connector_group** resource by removing default action from resource schema. Issue [#128](https://github.com/zscaler/terraform-provider-zpa/issues/128)
 - Fix: Fixed Golangci linter and upgraded to golangci-lint-action@v3
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 
 ### Documentation
 1. Added release notes guide to documentation PR [#140](https://github.com/zscaler/terraform-provider-zpa/pull/140)

@@ -1,11 +1,7 @@
 ---
 subcategory: "Policy Set Controller"
 layout: "zscaler"
-<<<<<<< HEAD
-page_title: "ZPA: policy_forwarding_rule"
-=======
 page_title: "ZPA: policy_inspection_rule"
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 description: |-
   Creates and manages ZPA Policy Access Inspection Rule.
 ---
@@ -14,11 +10,6 @@ description: |-
 
 The **zpa_policy_inspection_rule** resource creates a policy inspection access rule in the Zscaler Private Access cloud.
 
-<<<<<<< HEAD
-## Example Usage
-
-```hcl
-=======
 ## Example Usage 1
 
 ```hcl
@@ -27,7 +18,6 @@ data "zpa_policy_type" "inspection_policy" {
   policy_type = "INSPECTION_POLICY"
 }
 
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 #Create Inspection Access Rule
 resource "zpa_policy_inspection_rule" "this" {
   name                      = "Example"
@@ -46,25 +36,16 @@ resource "zpa_policy_inspection_rule" "this" {
     }
   }
 }
-<<<<<<< HEAD
-
-=======
 ```
 
 ## Example Usage 2
 
 ```hcl
 # Retrieve Inspection policy type
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 data "zpa_policy_type" "inspection_policy" {
   policy_type = "INSPECTION_POLICY"
 }
 
-<<<<<<< HEAD
-### Required
-
-* `name` - (Required) This is the name of the forwarding policy rule.
-=======
 #Create Inspection Access Rule
 resource "zpa_policy_inspection_rule" "this" {
   name                      = "Example"
@@ -87,29 +68,20 @@ resource "zpa_policy_inspection_rule" "this" {
 ### Required
 
 * `name` - (Required) This is the name of the policy inspection rule.
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 * `policy_set_id` - (Required)
 
 ## Attributes Reference
 
 * `action` - (Optional) This is for providing the rule action.
-<<<<<<< HEAD
-  * The supported actions for a policy forwarding rule are: `BYPASS`, `INTERCEPT` or `INTERCEPT_ACCESSIBLE`
-=======
   * The supported actions for a policy inspection rule are: `BYPASS_INSPECT`, or `INSPECT`
 * `zpn_inspection_profile_id` (Optional) An inspection profile is required if the `action` is set to `INSPECT`
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 * `action_id` - (Optional) This field defines the description of the server.
 * `bypass_default_rule` - (Optional)
 * `custom_msg` - (Optional) This is for providing a customer message for the user.
 * `description` - (Optional) This is the description of the access policy rule.
 * `operator` (Optional)
 * `policy_type` - (Optional)
-<<<<<<< HEAD
-  * The supported policy type values for a policy forwarding rule are: `CLIENT_FORWARDING_POLICY` and `BYPASS_POLICY`
-=======
   * The supported policy type values for a policy inspection rule is: `INSPECTION_POLICY`
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 * `rule_order` - (Optional)
 
 * `conditions` - (Optional)
@@ -131,18 +103,10 @@ resource "zpa_policy_inspection_rule" "this" {
 
 ## Import
 
-<<<<<<< HEAD
-Policy Access Forwarding Rule can be imported by using `<POLICY FORWARDING RULE ID>` as the import ID.
-=======
 Policy Access Inspection Rule can be imported by using `<POLICY INSPECTION RULE ID>` as the import ID.
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 
 For example:
 
 ```shell
-<<<<<<< HEAD
-terraform import zpa_policy_forwarding_rule.example <policy_forwarding_rule_id>
-=======
 terraform import zpa_policy_inspection_rule.example <policy_inspection_rule_id>
->>>>>>> zpa-#74-v2.2.0-fix-documentation
 ```
