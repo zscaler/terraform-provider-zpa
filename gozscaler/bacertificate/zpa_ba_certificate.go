@@ -79,13 +79,13 @@ func (service *Service) Create(certificate BaCertificate) (*BaCertificate, *http
 
 // /zpn/api/v1/admin/customers/{customerId}/clientlessCertificate/generateCSR
 // Generate a certificate request
-func (service *Service) CreateCSR(generateCSR GenerateCSR) (*GenerateCSR, *http.Response, error) {
-	v := new(GenerateCSR)
-	resp, err := service.Client.NewRequestDo("POST", mgmtConfigV1+service.Client.Config.CustomerID+baCertificateEndpoint+"/generateCSR", nil, generateCSR, &v)
+func (service *Service) Reorder(policySetID, ruleId string, order int) (*http.Response, error) {
+	path := fmt.Sprintf("/zpn/api/v1/admin/customers/%s/generateCSR", service.Client.Config.CustomerID)
+	resp, err := service.Client.NewPrivateRequestDo("PUT", path, nil, nil, nil)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return v, resp, nil
+	return resp, err
 }
 
 // /zpn/api/v1/admin/customers/{customerId}/clientlessCertificate/{certificateId}
