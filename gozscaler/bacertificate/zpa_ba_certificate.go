@@ -32,6 +32,14 @@ type BaCertificate struct {
 	ValidToInEpochSec   string   `json:"validToInEpochSec,omitempty"`
 }
 
+type GenerateCSR struct {
+	CSRString   string   `json:"csrString,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	SANS        []string `json:"sans,omitempty"`
+	Subject     string   `json:"subject,omitempty"`
+}
+
 func (service *Service) Get(baCertificateID string) (*BaCertificate, *http.Response, error) {
 	v := new(BaCertificate)
 	relativeURL := fmt.Sprintf("%v/%v", mgmtConfigV1+service.Client.Config.CustomerID+baCertificateEndpoint, baCertificateID)
@@ -58,4 +66,44 @@ func (service *Service) GetIssuedByName(CertName string) (*BaCertificate, *http.
 		}
 	}
 	return nil, resp, fmt.Errorf("no issued certificate named '%s' was found", CertName)
+}
+
+func (service *Service) Create(certificate BaCertificate) (*BaCertificate, *http.Response, error) {
+	v := new(BaCertificate)
+	resp, err := service.Client.NewRequestDo("POST", mgmtConfigV1+service.Client.Config.CustomerID+baCertificateEndpoint, nil, certificate, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+	return v, resp, nil
+}
+
+// /zpn/api/v1/admin/customers/{customerId}/clientlessCertificate/generateCSR
+// Generate a certificate request
+func (service *Service) CreateCSR(generateCSR GenerateCSR) (*GenerateCSR, *http.Response, error) {
+	v := new(GenerateCSR)
+	resp, err := service.Client.NewRequestDo("POST", mgmtConfigV1+service.Client.Config.CustomerID+baCertificateEndpoint+"/generateCSR", nil, generateCSR, &v)
+	if err != nil {
+		return nil, nil, err
+	}
+	return v, resp, nil
+}
+
+// /zpn/api/v1/admin/customers/{customerId}/clientlessCertificate/{certificateId}
+// Update name/description on ClientlessCertificate
+func (service *Service) Update(id string, certificate BaCertificate) (*http.Response, error) {
+	path := fmt.Sprintf("%s/%s", mgmtConfigV1+service.Client.Config.CustomerID+baCertificateEndpoint, id)
+	resp, err := service.Client.NewRequestDo("PUT", path, nil, certificate, nil)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func (service *Service) Delete(id string) (*http.Response, error) {
+	path := fmt.Sprintf("%s/%s", mgmtConfigV1+service.Client.Config.CustomerID+baCertificateEndpoint, id)
+	resp, err := service.Client.NewRequestDo("DELETE", path, nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
 }
