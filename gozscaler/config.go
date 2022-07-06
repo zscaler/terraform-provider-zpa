@@ -88,7 +88,7 @@ func NewConfig(clientID, clientSecret, customerID, cloud string) (*Config, error
 		cloud = os.Getenv(ZPA_CLOUD)
 	}
 	// last resort to configuration file:
-	if clientID == "" || clientSecret == "" || customerID == "" || cloud == "" {
+	if clientID == "" || clientSecret == "" || customerID == "" {
 		creds, err := loadCredentialsFromConfig()
 		if err != nil || creds == nil {
 			return nil, err

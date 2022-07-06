@@ -2,7 +2,6 @@ package zpa
 
 import (
 	"log"
-	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -14,21 +13,18 @@ func Provider() *schema.Provider {
 			"zpa_client_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: envDefaultFunc("ZPA_CLIENT_ID"),
 				Description: "zpa client id",
 			},
 			"zpa_client_secret": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				DefaultFunc: envDefaultFunc("ZPA_CLIENT_SECRET"),
 				Description: "zpa client secret",
 			},
 			"zpa_customer_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				DefaultFunc: envDefaultFunc("ZPA_CUSTOMER_ID"),
 				Description: "zpa customer id",
 			},
 			"zpa_cloud": {
@@ -36,7 +32,6 @@ func Provider() *schema.Provider {
 				Optional:     true,
 				Description:  "Cloud to use PRODUCTION, BETA, GOV",
 				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV"}, true),
-				DefaultFunc:  envDefaultFunc("ZPA_CLOUD"),
 				Default:      "PRODUCTION",
 			},
 		},
@@ -112,14 +107,4 @@ func zscalerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	return config.Client()
-}
-
-func envDefaultFunc(k string) schema.SchemaDefaultFunc {
-	return func() (interface{}, error) {
-		if v := os.Getenv(k); v != "" {
-			return v, nil
-		}
-
-		return nil, nil
-	}
 }
