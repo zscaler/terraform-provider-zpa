@@ -36,6 +36,7 @@ func Provider() *schema.Provider {
 				Optional:     true,
 				Description:  "Cloud to use PRODUCTION, BETA, GOV",
 				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV"}, true),
+				DefaultFunc:  envDefaultFunc("ZPA_CLOUD"),
 				Default:      "PRODUCTION",
 			},
 		},
@@ -107,6 +108,7 @@ func zscalerConfigure(d *schema.ResourceData) (interface{}, error) {
 		ClientID:     d.Get("zpa_client_id").(string),
 		ClientSecret: d.Get("zpa_client_secret").(string),
 		CustomerID:   d.Get("zpa_customer_id").(string),
+		BaseURL:      d.Get("zpa_cloud").(string),
 	}
 
 	return config.Client()
