@@ -23,6 +23,7 @@ import (
 const (
 	defaultBaseURL           = "https://config.private.zscaler.com"
 	betaBaseURL              = "https://config.zpabeta.net"
+	govBaseURL               = "https://config.zpagov.net"
 	defaultTimeout           = 240 * time.Second
 	loggerPrefix             = "zpa-logger: "
 	ZPA_CLIENT_ID            = "ZPA_CLIENT_ID"
@@ -80,10 +81,12 @@ func NewConfig(clientID, clientSecret, customerID, cloud string) (*Config, error
 		RetryWaitMinSeconds: 5,
 	}
 	// if creds not provided in TF config, try loading from env vars
-	if clientID == "" || clientSecret == "" || customerID == "" {
+	if clientID == "" || clientSecret == "" || customerID == "" || cloud == "" {
 		clientID = os.Getenv(ZPA_CLIENT_ID)
 		clientSecret = os.Getenv(ZPA_CLIENT_SECRET)
 		customerID = os.Getenv(ZPA_CUSTOMER_ID)
+		customerID = os.Getenv(ZPA_CUSTOMER_ID)
+		cloud = os.Getenv(ZPA_CLOUD)
 	}
 	// last resort to configuration file:
 	if clientID == "" || clientSecret == "" || customerID == "" {
@@ -102,6 +105,9 @@ func NewConfig(clientID, clientSecret, customerID, cloud string) (*Config, error
 	}
 	if strings.EqualFold(cloud, "BETA") {
 		rawUrl = betaBaseURL
+	}
+	if strings.EqualFold(cloud, "GOV") {
+		rawUrl = govBaseURL
 	}
 
 	var logger *log.Logger
@@ -129,7 +135,7 @@ func loadCredentialsFromConfig() (*CredentialsConfig, error) {
 	usr, _ := user.Current()
 	dir := usr.HomeDir
 	path := filepath.Join(dir, configPath)
-	log.Printf("[INFO]Loading confiuration file at:%s", path)
+	log.Printf("[INFO]Loading configuration file at:%s", path)
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, errors.New("Could not open credentials file, needs to contain one json object with keys: zpa_client_id, zpa_client_secret, zpa_customer_id, and zpa_cloud. " + err.Error())
