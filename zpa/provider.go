@@ -12,25 +12,25 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"zpa_client_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "zpa client id",
 			},
 			"zpa_client_secret": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "zpa client secret",
 			},
 			"zpa_customer_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "zpa customer id",
 			},
 			"zpa_cloud": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "Cloud to use PRODUCTION, BETA, GOV",
+				Description:  "Cloud to use PRODUCTION, BETA or GOV",
 				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV"}, true),
 				Default:      "PRODUCTION",
 			},
