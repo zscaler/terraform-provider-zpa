@@ -85,7 +85,6 @@ func NewConfig(clientID, clientSecret, customerID, cloud string) (*Config, error
 		clientID = os.Getenv(ZPA_CLIENT_ID)
 		clientSecret = os.Getenv(ZPA_CLIENT_SECRET)
 		customerID = os.Getenv(ZPA_CUSTOMER_ID)
-		customerID = os.Getenv(ZPA_CUSTOMER_ID)
 		cloud = os.Getenv(ZPA_CLOUD)
 	}
 	// last resort to configuration file:
