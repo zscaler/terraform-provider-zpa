@@ -51,6 +51,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 			},
 			"city_country": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"country_code": {
