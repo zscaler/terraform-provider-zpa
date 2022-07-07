@@ -14,7 +14,7 @@ const (
 )
 
 type AppConnectorGroup struct {
-	CityCountry                   string           `json:"cityCountry,omitempty"`
+	CityCountry                   string           `json:"cityCountry"`
 	CountryCode                   string           `json:"countryCode,omitempty"`
 	CreationTime                  string           `json:"creationTime,omitempty"`
 	Description                   string           `json:"description,omitempty"`

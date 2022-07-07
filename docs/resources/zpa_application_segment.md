@@ -14,45 +14,45 @@ The **zpa_application_segment** resource creates an application segment in the Z
 
 ```hcl
 # ZPA Application Segment resource
-resource "zpa_application_segment" "test_app_segment" {
-    name              = "test1-app-segment"
-    description       = "test1-app-segment"
+resource "zpa_application_segment" "this" {
+    name              = "Example"
+    description       = "Example"
     enabled           = true
     health_reporting  = "ON_ACCESS"
     bypass_type       = "NEVER"
     is_cname_enabled  = true
     tcp_port_ranges   = ["8080", "8080"]
     domain_names      = ["server.acme.com"]
-    segment_group_id  = zpa_segment_group.test_segment_group.id
+    segment_group_id  = zpa_segment_group.this.id
     server_groups {
-        id = [ zpa_server_group.test_server_group.id]
+        id = [ zpa_server_group.this.id]
     }
-    depends_on = [ zpa_server_group.test_server_group, zpa_server_group.test_segment_group]
+    depends_on = [ zpa_server_group.this, zpa_segment_group.this]
 }
 
 # ZPA Segment Group resource
-resource "zpa_segment_group" "test_segment_group" {
-  name            = "test1-segment-group"
-  description     = "test1-segment-group"
+resource "zpa_segment_group" "this" {
+  name            = "Example"
+  description     = "Example"
   enabled         = true
 }
 
 # ZPA Server Group resource
-resource "zpa_server_group" "test_server_group" {
-  name              = "test1-server-group"
-  description       = "test1-server-group"
+resource "zpa_server_group" "this" {
+  name              = "Example"
+  description       = "Example"
   enabled           = true
   dynamic_discovery = false
   app_connector_groups {
-    id = [ zpa_app_connector_group.example.id ]
+    id = [ zpa_app_connector_group.this.id ]
   }
-  depends_on = [ zpa_app_connector_group.test_app_connector_group ]
+  depends_on = [ zpa_app_connector_group.this ]
 }
 
 # ZPA App Connector Group resource
-resource "zpa_app_connector_group" "test_app_connector_group" {
-  name                          = "test1-appconnector-group"
-  description                   = "test1-appconnector-group"
+resource "zpa_app_connector_group" "this" {
+  name                          = "Example"
+  description                   = "Example"
   enabled                       = true
   city_country                  = "San Jose, CA"
   country_code                  = "US"
@@ -71,9 +71,9 @@ resource "zpa_app_connector_group" "test_app_connector_group" {
 
 ```hcl
 # ZPA Application Segment resource
-resource "zpa_application_segment" "test_app_segment" {
-    name              = "test1-app-segment"
-    description       = "test1-app-segment"
+resource "zpa_application_segment" "this" {
+    name              = "Example"
+    description       = "Example"
     enabled           = true
     health_reporting  = "ON_ACCESS"
     bypass_type       = "NEVER"
@@ -91,36 +91,36 @@ resource "zpa_application_segment" "test_app_segment" {
     }
   ]
     domain_names      = ["server.acme.com"]
-    segment_group_id  = zpa_segment_group.test_segment_group.id
+    segment_group_id  = zpa_segment_group.this.id
     server_groups {
-        id = [ zpa_server_group.test_server_group.id]
+        id = [ zpa_server_group.this.id]
     }
-    depends_on = [ zpa_server_group.test_server_group, zpa_server_group.test_segment_group]
+    depends_on = [ zpa_server_group.this, zpa_segment_group.this]
 }
 
 # ZPA Segment Group resource
-resource "zpa_segment_group" "test_segment_group" {
-  name            = "test1-segment-group"
-  description     = "test1-segment-group"
+resource "zpa_segment_group" "this" {
+  name            = "Example"
+  description     = "Example"
   enabled         = true
 }
 
 # ZPA Server Group resource
-resource "zpa_server_group" "test_server_group" {
-  name              = "test1-server-group"
-  description       = "test1-server-group"
+resource "zpa_server_group" "this" {
+  name              = "Example"
+  description       = "Example"
   enabled           = true
   dynamic_discovery = false
   app_connector_groups {
-    id = [ zpa_app_connector_group.example.id ]
+    id = [ zpa_app_connector_group.this.id ]
   }
-  depends_on = [ zpa_app_connector_group.test_app_connector_group ]
+  depends_on = [ zpa_app_connector_group.this ]
 }
 
 # ZPA App Connector Group resource
-resource "zpa_app_connector_group" "test_app_connector_group" {
-  name                          = "test1-appconnector-group"
-  description                   = "test1-appconnector-group"
+resource "zpa_app_connector_group" "this" {
+  name                          = "Example"
+  description                   = "Example"
   enabled                       = true
   city_country                  = "San Jose, CA"
   country_code                  = "US"

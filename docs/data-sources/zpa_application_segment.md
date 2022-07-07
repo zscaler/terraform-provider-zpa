@@ -14,14 +14,14 @@ Use the **zpa_application_segment** data source to get information about a appli
 
 ```hcl
 # ZPA Application Segment Data Source
-data "zpa_application_segment" "foo" {
+data "zpa_application_segment" "this" {
   name = "example"
 }
 ```
 
 ```hcl
 # ZPA Application Segment Data Source
-data "zpa_application_segment" "foo" {
+data "zpa_application_segment" "this" {
   id = "123456789"
 }
 ```
