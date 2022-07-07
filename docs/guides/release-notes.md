@@ -11,9 +11,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.2.0``
+``Last updated: v2.2.1``
 
 ---
+
+## 2.2.1
+### Notes:
+- Release date: **(July 6 2022)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- Fix: Fixed authentication mechanism variables for ZPA Beta and GOV
+
+### Documentation
+1. Fixed application segment documentation and examples
 
 ## 2.2.0
 
