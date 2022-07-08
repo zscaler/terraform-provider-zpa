@@ -58,7 +58,6 @@ release:
   # github:
   #   owner: zscaler
   #   name: terraform-provider-zpa
-  # draft: true
-  # discussion_category_name: Annoucements
+  draft: true
 changelog:
   skip: true
