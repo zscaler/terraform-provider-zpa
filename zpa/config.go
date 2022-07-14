@@ -71,14 +71,25 @@ type Client struct {
 }
 
 type Config struct {
-	ClientID     string
+
+	// ZPA Client ID for API Client
+	ClientID string
+
+	// ZPA Client Secret for API Client
 	ClientSecret string
-	CustomerID   string
-	BaseURL      string
+
+	// ZPA Customer ID for API Client
+	CustomerID string
+
+	// ZPA Base URL for API Client
+	BaseURL string
+
+	// UserAgent for API Client
+	UserAgent string
 }
 
 func (c *Config) Client() (*Client, error) {
-	config, err := gozscaler.NewConfig(c.ClientID, c.ClientSecret, c.CustomerID, c.BaseURL)
+	config, err := gozscaler.NewConfig(c.ClientID, c.ClientSecret, c.CustomerID, c.BaseURL, c.UserAgent)
 	if err != nil {
 		return nil, err
 	}

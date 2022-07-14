@@ -42,7 +42,6 @@ type BackoffConfig struct {
 type AuthToken struct {
 	TokenType   string `json:"token_type"`
 	AccessToken string `json:"access_token"`
-	//ExpiresIn   string `json:"expires_in"`
 }
 type CredentialsConfig struct {
 	ClientID     string `json:"zpa_client_id"`
@@ -63,6 +62,7 @@ type Config struct {
 	BackoffConf *BackoffConfig
 	AuthToken   *AuthToken
 	sync.Mutex
+	UserAgent string
 }
 
 /*
@@ -73,7 +73,7 @@ By default it will try to read the access and te secret from the environment var
 // 20 times in a 10 second interval for a GET call.
 // 10 times in a 10 second interval for any POST/PUT/DELETE call.
 // TODO Add healthCheck method to NewConfig
-func NewConfig(clientID, clientSecret, customerID, cloud string) (*Config, error) {
+func NewConfig(clientID, clientSecret, customerID, cloud, userAgent string) (*Config, error) {
 	backoffConf := &BackoffConfig{
 		Enabled:             true,
 		MaxNumOfRetries:     100,
@@ -81,7 +81,7 @@ func NewConfig(clientID, clientSecret, customerID, cloud string) (*Config, error
 		RetryWaitMinSeconds: 5,
 	}
 	// if creds not provided in TF config, try loading from env vars
-	if clientID == "" || clientSecret == "" || customerID == "" || cloud == "" {
+	if clientID == "" || clientSecret == "" || customerID == "" || cloud == "" || userAgent == "" {
 		clientID = os.Getenv(ZPA_CLIENT_ID)
 		clientSecret = os.Getenv(ZPA_CLIENT_SECRET)
 		customerID = os.Getenv(ZPA_CUSTOMER_ID)
