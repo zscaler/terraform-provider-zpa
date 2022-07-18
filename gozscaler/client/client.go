@@ -19,10 +19,12 @@ type Client struct {
 	Config *gozscaler.Config
 }
 
+// var ProviderVersion string
+
 // NewClient returns a new client for the specified apiKey.
 func NewClient(config *gozscaler.Config) (c *Client) {
 	if config == nil {
-		config, _ = gozscaler.NewConfig("", "", "", "")
+		config, _ = gozscaler.NewConfig("", "", "", "", "")
 	}
 	c = &Client{Config: config}
 	return
@@ -52,7 +54,9 @@ func (client *Client) newRequestDoCustom(method, urlStr string, options, body, v
 		}
 
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
+		if client.Config.UserAgent != "" {
+			req.Header.Add("User-Agent", client.Config.UserAgent)
+		}
 		resp, err := client.Config.GetHTTPClient().Do(req)
 
 		if err != nil {
@@ -129,7 +133,11 @@ func (client *Client) newRequest(method, urlPath string, options, body interface
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", client.Config.AuthToken.AccessToken))
 	req.Header.Add("Content-Type", "application/json")
-	//req.Header.Add("Accept", "application/json")
+
+	if client.Config.UserAgent != "" {
+		req.Header.Add("User-Agent", client.Config.UserAgent)
+	}
+
 	return req, nil
 }
 

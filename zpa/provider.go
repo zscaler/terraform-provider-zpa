@@ -1,14 +1,16 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
+	"runtime"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func Provider() *schema.Provider {
-	return &schema.Provider{
+	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"zpa_client_id": {
 				Type:        schema.TypeString,
@@ -93,17 +95,28 @@ func Provider() *schema.Provider {
 			"zpa_inspection_custom_controls":         dataSourceInspectionCustomControls(),
 			"zpa_inspection_profile":                 dataSourceInspectionProfile(),
 		},
-		ConfigureFunc: zscalerConfigure,
 	}
+	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+		terraformVersion := p.TerraformVersion
+		if terraformVersion == "" {
+			// Terraform 0.12 introduced this field to the protocol
+			// We can therefore assume that if it's missing it's 0.10 or 0.11
+			terraformVersion = "0.11+compatible"
+		}
+		return zscalerConfigure(d, terraformVersion)
+	}
+
+	return p
 }
 
-func zscalerConfigure(d *schema.ResourceData) (interface{}, error) {
+func zscalerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
 	log.Printf("[INFO] Initializing ZPA client")
 	config := Config{
 		ClientID:     d.Get("zpa_client_id").(string),
 		ClientSecret: d.Get("zpa_client_secret").(string),
 		CustomerID:   d.Get("zpa_customer_id").(string),
 		BaseURL:      d.Get("zpa_cloud").(string),
+		UserAgent:    fmt.Sprintf("(%s %s) Terraform/%s", runtime.GOOS, runtime.GOARCH, terraformVersion),
 	}
 
 	return config.Client()
