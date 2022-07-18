@@ -10,8 +10,6 @@ import (
 )
 
 func Provider() *schema.Provider {
-	// log.Printf("Sumo Logic Terraform Provider Version=%s\n", ProviderVersion)
-	// return &schema.Provider{
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"zpa_client_id": {
@@ -97,7 +95,6 @@ func Provider() *schema.Provider {
 			"zpa_inspection_custom_controls":         dataSourceInspectionCustomControls(),
 			"zpa_inspection_profile":                 dataSourceInspectionProfile(),
 		},
-		// ConfigureFunc: zscalerConfigure,
 	}
 	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
 		terraformVersion := p.TerraformVersion
