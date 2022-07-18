@@ -54,8 +54,9 @@ func (client *Client) newRequestDoCustom(method, urlStr string, options, body, v
 		}
 
 		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-		// req.Header.Add("User-Agent", "ZPATerraformProvider/"+ProviderVersion)
-
+		if client.Config.UserAgent != "" {
+			req.Header.Add("User-Agent", client.Config.UserAgent)
+		}
 		resp, err := client.Config.GetHTTPClient().Do(req)
 
 		if err != nil {

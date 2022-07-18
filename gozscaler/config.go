@@ -126,6 +126,7 @@ func NewConfig(clientID, clientSecret, customerID, cloud, userAgent string) (*Co
 		ClientSecret: clientSecret,
 		CustomerID:   customerID,
 		BackoffConf:  backoffConf,
+		UserAgent:    userAgent,
 	}, err
 }
 
