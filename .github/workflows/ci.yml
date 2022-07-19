@@ -58,7 +58,6 @@ jobs:
 
   # run acceptance tests
   test:
-    needs: build
     runs-on: ubuntu-latest
     steps:
 
