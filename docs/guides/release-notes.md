@@ -6,14 +6,26 @@ description: |-
 ---
 # ZPA Provider: Release Notes
 
-## USAGE:
+## USAGE
+
 Track all ZPA Terraform provider's releases. New resources, features, and bug fixes will be tracked here.
 
 ---
 
-``Last updated: v2.2.1``
+``Last updated: v2.2.2``
 
 ---
+
+## 2.2.2
+
+### Notes
+
+- Release date: **(July 19 2022)**
+- Supported Terraform version: **v1.x**
+
+### Ehancements
+
+- [PR #159](https://github.com/zscaler/terraform-provider-zpa/pull/159) Added Terraform UserAgent for Backend API tracking
 
 ## 2.2.1
 ### Notes:
