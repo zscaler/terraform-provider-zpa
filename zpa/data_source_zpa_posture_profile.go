@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/postureprofile"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/postureprofile"
 )
 
 func dataSourcePostureProfile() *schema.Resource {

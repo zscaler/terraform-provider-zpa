@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/serviceedgegroup"
+	client "github.com/zscaler/zscaler-sdk-go/zpa"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgegroup"
 )
 
 func resourceServiceEdgeGroup() *schema.Resource {
