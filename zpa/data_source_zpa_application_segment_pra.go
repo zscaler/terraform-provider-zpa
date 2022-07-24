@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentpra"
 )
 
 func dataSourceApplicationSegmentPRA() *schema.Resource {

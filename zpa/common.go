@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/common"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
 
 func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client) bool {

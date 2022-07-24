@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/servergroup"
 )
 
 func dataSourceServerGroup() *schema.Resource {

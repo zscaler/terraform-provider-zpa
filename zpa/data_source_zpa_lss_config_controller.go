@@ -5,7 +5,7 @@ import (
 	"html"
 	"log"
 
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/lssconfigcontroller"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )

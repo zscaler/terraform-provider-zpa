@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/idpcontroller"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimattributeheader"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/scimattributeheader"
 )
 
 func dataSourceScimAttributeHeader() *schema.Resource {

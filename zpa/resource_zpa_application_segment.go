@@ -7,9 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/client"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/segmentgroup"
+	client "github.com/zscaler/zscaler-sdk-go/zpa"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
 )
 
 func resourceApplicationSegment() *schema.Resource {

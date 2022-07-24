@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/common"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
 )
 
 func ValidateStringFloatBetween(min, max float64) schema.SchemaValidateFunc {

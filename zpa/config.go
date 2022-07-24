@@ -3,35 +3,35 @@ package zpa
 import (
 	"log"
 
-	"github.com/zscaler/terraform-provider-zpa/gozscaler"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorcontroller"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/appconnectorgroup"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegment"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentinspection"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentpra"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/appservercontroller"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/bacertificate"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/browseraccess"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/cloudconnectorgroup"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/customerversionprofile"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/enrollmentcert"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/idpcontroller"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_custom_controls"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_predefined_controls"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_profile"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/lssconfigcontroller"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/machinegroup"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/policysetcontroller"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/postureprofile"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/provisioningkey"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/samlattribute"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimattributeheader"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/scimgroup"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/segmentgroup"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/servergroup"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/serviceedgecontroller"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/serviceedgegroup"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/trustednetwork"
+	gozscaler "github.com/zscaler/zscaler-sdk-go/zpa"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorcontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/bacertificate"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/customerversionprofile"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/enrollmentcert"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_custom_controls"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_predefined_controls"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_profile"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/lssconfigcontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/machinegroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/postureprofile"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/provisioningkey"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/samlattribute"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/scimattributeheader"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/scimgroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgecontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgegroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/trustednetwork"
 )
 
 func init() {
@@ -93,36 +93,36 @@ func (c *Config) Client() (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	zpaClient := gozscaler.NewClient(config)
 	client := &Client{
-		appconnectorgroup:              *appconnectorgroup.New(config),
-		appconnectorcontroller:         *appconnectorcontroller.New(config),
-		applicationsegment:             *applicationsegment.New(config),
-		applicationsegmentpra:          *applicationsegmentpra.New(config),
-		applicationsegmentinspection:   *applicationsegmentinspection.New(config),
-		appservercontroller:            *appservercontroller.New(config),
-		bacertificate:                  *bacertificate.New(config),
-		cloudconnectorgroup:            *cloudconnectorgroup.New(config),
-		customerversionprofile:         *customerversionprofile.New(config),
-		enrollmentcert:                 *enrollmentcert.New(config),
-		idpcontroller:                  *idpcontroller.New(config),
-		lssconfigcontroller:            *lssconfigcontroller.New(config),
-		machinegroup:                   *machinegroup.New(config),
-		postureprofile:                 *postureprofile.New(config),
-		policysetcontroller:            *policysetcontroller.New(config),
-		provisioningkey:                *provisioningkey.New(config),
-		samlattribute:                  *samlattribute.New(config),
-		scimgroup:                      *scimgroup.New(config),
-		scimattributeheader:            *scimattributeheader.New(config),
-		segmentgroup:                   *segmentgroup.New(config),
-		servergroup:                    *servergroup.New(config),
-		serviceedgegroup:               *serviceedgegroup.New(config),
-		serviceedgecontroller:          *serviceedgecontroller.New(config),
-		trustednetwork:                 *trustednetwork.New(config),
-		browseraccess:                  *browseraccess.New(config),
-		inspection_custom_controls:     *inspection_custom_controls.New(config),
-		inspection_predefined_controls: *inspection_predefined_controls.New(config),
-		inspection_profile:             *inspection_profile.New(config),
+		appconnectorgroup:              *appconnectorgroup.New(zpaClient),
+		appconnectorcontroller:         *appconnectorcontroller.New(zpaClient),
+		applicationsegment:             *applicationsegment.New(zpaClient),
+		applicationsegmentpra:          *applicationsegmentpra.New(zpaClient),
+		applicationsegmentinspection:   *applicationsegmentinspection.New(zpaClient),
+		appservercontroller:            *appservercontroller.New(zpaClient),
+		bacertificate:                  *bacertificate.New(zpaClient),
+		cloudconnectorgroup:            *cloudconnectorgroup.New(zpaClient),
+		customerversionprofile:         *customerversionprofile.New(zpaClient),
+		enrollmentcert:                 *enrollmentcert.New(zpaClient),
+		idpcontroller:                  *idpcontroller.New(zpaClient),
+		lssconfigcontroller:            *lssconfigcontroller.New(zpaClient),
+		machinegroup:                   *machinegroup.New(zpaClient),
+		postureprofile:                 *postureprofile.New(zpaClient),
+		policysetcontroller:            *policysetcontroller.New(zpaClient),
+		provisioningkey:                *provisioningkey.New(zpaClient),
+		samlattribute:                  *samlattribute.New(zpaClient),
+		scimgroup:                      *scimgroup.New(zpaClient),
+		scimattributeheader:            *scimattributeheader.New(zpaClient),
+		segmentgroup:                   *segmentgroup.New(zpaClient),
+		servergroup:                    *servergroup.New(zpaClient),
+		serviceedgegroup:               *serviceedgegroup.New(zpaClient),
+		serviceedgecontroller:          *serviceedgecontroller.New(zpaClient),
+		trustednetwork:                 *trustednetwork.New(zpaClient),
+		browseraccess:                  *browseraccess.New(zpaClient),
+		inspection_custom_controls:     *inspection_custom_controls.New(zpaClient),
+		inspection_predefined_controls: *inspection_predefined_controls.New(zpaClient),
+		inspection_profile:             *inspection_profile.New(zpaClient),
 	}
 
 	log.Println("[INFO] initialized ZPA client")
