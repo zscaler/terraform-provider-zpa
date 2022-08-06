@@ -37,9 +37,18 @@ jobs:
       run: |
         go mod vendor && go mod tidy
 
+    - name: Setup Go Tools
+      run: make tools
+
+    - name: Check Formatting
+      run: make fmtcheck
+
     - name: Build
       run: |
         go build -v .
+
+    - name: Vet Code
+      run: make vet
 
   golangci:
     name: lint

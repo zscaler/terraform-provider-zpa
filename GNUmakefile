@@ -6,22 +6,34 @@ ZPA_PROVIDER_NAMESPACE=zscaler.com/zpa/zpa
 
 default: build
 
+dep: # Download required dependencies
+	go mod tidy
+
+clean:
+	go clean -cache -testcache ./...
+
+clean-all:
+	go clean -cache -testcache -modcache ./...
+
+sweep:
+	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	go test $(TEST) -v -sweep=$(SWEEP) $(SWEEPARGS)
+
 build: fmtcheck
 	go install
-
 
 build13: GOOS=$(shell go env GOOS)
 build13: GOARCH=$(shell go env GOARCH)
 ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
-build13: DESTINATION=$(APPDATA)/terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/2.2.2/$(GOOS)_$(GOARCH)
+build13: DESTINATION=$(APPDATA)/terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/2.3.0/$(GOOS)_$(GOARCH)
 else
-build13: DESTINATION=$(HOME)/.terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/2.2.2/$(GOOS)_$(GOARCH)
+build13: DESTINATION=$(HOME)/.terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/2.3.0/$(GOOS)_$(GOARCH)
 endif
 build13: fmtcheck
 	go mod tidy && go mod vendor
 	@echo "==> Installing plugin to $(DESTINATION)"
 	@mkdir -p $(DESTINATION)
-	go build -o $(DESTINATION)/terraform-provider-zpa_v2.2.2
+	go build -o $(DESTINATION)/terraform-provider-zpa_v2.3.0
 
 test: fmtcheck
 	go test $(TEST) || exit 1
@@ -67,5 +79,15 @@ test-compile:
 		exit 1; \
 	fi
 	go test -c $(TEST) $(TESTARGS)
+
+tools:
+	@which $(GOFMT) || go install mvdan.cc/gofumpt@v0.3.1
+	@which $(TFPROVIDERLINT) || go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.28.1
+	@which $(STATICCHECK) || go install honnef.co/go/tools/cmd/staticcheck@v0.3.2
+
+tools-update:
+	@go install mvdan.cc/gofumpt@v0.3.1
+	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.28.1
+	@go install honnef.co/go/tools/cmd/staticcheck@v0.3.2
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck tools vendor-status test-compile website-lint website website-test
