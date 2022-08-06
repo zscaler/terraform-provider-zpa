@@ -7,10 +7,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/serviceedgegroup"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgegroup"
 )
 
 func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {

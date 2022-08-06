@@ -6,10 +6,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/inspectioncontrol/inspection_custom_controls"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_custom_controls"
 )
 
 func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {

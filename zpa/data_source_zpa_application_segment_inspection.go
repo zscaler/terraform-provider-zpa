@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentinspection"
 )
 
 func dataSourceApplicationSegmentInspection() *schema.Resource {

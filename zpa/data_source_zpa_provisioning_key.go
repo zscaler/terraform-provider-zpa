@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/zscaler/terraform-provider-zpa/gozscaler/provisioningkey"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/provisioningkey"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
