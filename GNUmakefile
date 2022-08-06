@@ -44,6 +44,7 @@ testacc: fmtcheck
 	TF_ACC=true go test $(TEST) -v $(TESTARGS) -timeout 600m
 
 vet:
+	@echo "==> Checking source code against go vet and staticcheck"
 	@echo "go vet ."
 	@go vet $$(go list ./... | grep -v vendor/) ; if [ $$? -eq 1 ]; then \
 		echo ""; \
@@ -56,6 +57,7 @@ imports:
 	goimports -w $(GOFMT_FILES)
 
 fmt:
+	@echo "formatting the code with $(GOFMT)..."
 	gofmt -w $(GOFMT_FILES)
 
 fmtcheck:
