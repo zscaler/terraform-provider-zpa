@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.2.2``
+``Last updated: v2.3.0``
 
 ---
+
+## 2.3.0
+
+### Notes
+
+- Release date: **(August 17 2022)**
+- Supported Terraform version: **v1.x**
+
+### Ehancements
+
+- [PR #161](https://github.com/zscaler/terraform-provider-zpa/pull/161) Integrated newly created Zscaler GO SDK. Models are now centralized in the repository [zscaler-sdk-go](https://github.com/zscaler/zscaler-sdk-go)
 
 ## 2.2.2
 

@@ -52,6 +52,7 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 			"segment_group_name": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"bypass_type": {
@@ -196,7 +197,7 @@ func resourceApplicationSegment() *schema.Resource {
 func applicationSegmentValidation(appSegment applicationsegment.ApplicationSegmentResource) error {
 
 	if appSegment.SelectConnectorCloseToApp && appSegment.UDPAppPortRange != nil {
-		return fmt.Errorf("Selecting App Connector Closer to App can be only enabled for TCP applications")
+		return fmt.Errorf("selecting app connector closer to app can be only enabled for tcp applications")
 	}
 	return nil
 }

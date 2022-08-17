@@ -1,5 +1,6 @@
 TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep "zpa/")
+WEBSITE_REPO=github.com/hashicorp/terraform-website
 PKG_NAME=zpa
 TF_PLUGIN_DIR=~/.terraform.d/plugins
 ZPA_PROVIDER_NAMESPACE=zscaler.com/zpa/zpa
@@ -8,16 +9,6 @@ default: build
 
 dep: # Download required dependencies
 	go mod tidy
-
-clean:
-	go clean -cache -testcache ./...
-
-clean-all:
-	go clean -cache -testcache -modcache ./...
-
-sweep:
-	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
-	go test $(TEST) -v -sweep=$(SWEEP) $(SWEEPARGS)
 
 build: fmtcheck
 	go install
@@ -82,14 +73,22 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-tools:
-	@which $(GOFMT) || go install mvdan.cc/gofumpt@v0.3.1
-	@which $(TFPROVIDERLINT) || go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.28.1
-	@which $(STATICCHECK) || go install honnef.co/go/tools/cmd/staticcheck@v0.3.2
+website:
+ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
+	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
+	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
+endif
+	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
-tools-update:
-	@go install mvdan.cc/gofumpt@v0.3.1
-	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.28.1
-	@go install honnef.co/go/tools/cmd/staticcheck@v0.3.2
+website-lint:
+	@echo "==> Checking website against linters..."
+	@misspell -error -source=text website/
+
+website-test:
+ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
+	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
+	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
+endif
+	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck tools vendor-status test-compile website-lint website website-test
