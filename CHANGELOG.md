@@ -10,7 +10,8 @@
 ### Bug Fixes
 
 - [PR #169](https://github.com/zscaler/terraform-provider-zpa/pull/161) Fixed policy rule order, where the rule order in the UI didn't correspond to the desired order set in HCL. Issue [[#166](https://github.com/zscaler/terraform-provider-zpa/issues/166)]
-- [PR #170](https://github.com/zscaler/terraform-provider-zpa/pull/161) Fixed special character encoding, where certain symbols caused Terraform to indicate potential configuration drifts. Issue [[#149](https://github.com/zscaler/terraform-provider-zpa/issues/149)]
+- [PR #170](https://github.com/zscaler/terraform-provider-zpa/pull/170) Fixed special character encoding, where certain symbols caused Terraform to indicate potential configuration drifts. Issue [[#149](https://github.com/zscaler/terraform-provider-zpa/issues/149)]
+- [PR #171](https://github.com/zscaler/terraform-provider-zpa/pull/171) Fixed policy configuration attributes where i.e SCIM_GROUPs were causing drifts without changes have been performed.
 
 ## 2.3.0
 
