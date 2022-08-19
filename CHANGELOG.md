@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.3.1
+
+### Notes
+
+- Release date: **(August 30 2022)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #169](https://github.com/zscaler/terraform-provider-zpa/pull/161) Fixed policy rule order, where the rule order in the UI didn't correspond to the desired order set in HCL. Issue [[#166](https://github.com/zscaler/terraform-provider-zpa/issues/166)]
+- [PR #170](https://github.com/zscaler/terraform-provider-zpa/pull/161) Fixed special character encoding, where certain symbols caused Terraform to indicate potential configuration drifts. Issue [[#149](https://github.com/zscaler/terraform-provider-zpa/issues/149)]
+
 ## 2.3.0
 
 ### Notes
