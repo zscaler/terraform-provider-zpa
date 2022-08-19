@@ -1,0 +1,7 @@
+{
+    "githubPullRequests.remotes": [
+        "origin",
+        "upstream",
+        "clydetwo-guru/terraform-provider-zpa"
+    ]
+}
