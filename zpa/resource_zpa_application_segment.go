@@ -208,8 +208,11 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 	req := expandApplicationSegmentRequest(d)
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
-		return fmt.Errorf("please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
+	} else if req.SegmentGroupName == "" {
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
 	if err := applicationSegmentValidation(req); err != nil {
 		return err
@@ -293,8 +296,11 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 	req := expandApplicationSegmentRequest(d)
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
-		return fmt.Errorf("please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
+	} else if d.HasChange("segment_group_name") && req.SegmentGroupName == "" {
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
 	if err := applicationSegmentValidation(req); err != nil {
 		return err
@@ -320,7 +326,16 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 			}
 		}
 	}
-
+	segmentGroupName, ok := d.GetOk("segment_group_name")
+	if ok && segmentGroupName != nil {
+		gID, ok := segmentGroupName.(string)
+		if ok && gID != "" {
+			// detach it from segment group first
+			if err := detachAppSegmentFromGroup(zClient, id, gID); err != nil {
+				return err
+			}
+		}
+	}
 	if _, err := zClient.applicationsegment.Delete(id); err != nil {
 		return err
 	}
