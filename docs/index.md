@@ -39,7 +39,7 @@ resouce "zpa_application_segment" "app_segment" {
 
 ## Example Usage ZPA Beta and GOV Cloud
 
-For customers who want to use this provider with ZPA Beta Cloud or Gov Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA` or `GOV` values, or via environment variable `ZPA_CLOUD=BETA` or `ZPA_CLOUD=GOV`.
+For customers who want to use this provider with ZPA Beta Cloud or Gov Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA` or `GOV` values or via environment variable `ZPA_CLOUD=BETA` or `ZPA_CLOUD=GOV` are required.
 
 ```hcl
 # Configure ZPA provider source and version
