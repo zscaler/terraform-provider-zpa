@@ -4,13 +4,24 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sort"
 	"strconv"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
+
+type listrules struct {
+	orders map[string]map[string]int
+	sync.Mutex
+}
+
+var rules = listrules{
+	orders: make(map[string]map[string]int),
+}
 
 func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client) bool {
 	for _, condition := range conditions {
@@ -195,8 +206,8 @@ func lhsWarn(objType, expected, lhs interface{}, err error) {
 	log.Printf("[WARN] when operand object type is %v LHS must be %#v value is \"%v\", %v\n", objType, expected, lhs, err)
 }
 
-func reorder(orderI interface{}, policySetID, id string, zClient *Client) {
-	defer reorderAll(policySetID, zClient)
+func reorder(orderI interface{}, policySetID, policyType, id string, zClient *Client) {
+	defer reorderAll(policySetID, policyType, zClient)
 	if orderI == nil {
 		log.Printf("[WARN] Invalid order for policy set %s: %v\n", id, orderI)
 		return
@@ -212,19 +223,44 @@ func reorder(orderI interface{}, policySetID, id string, zClient *Client) {
 		return
 	}
 	rules.Lock()
-	rules.orders[id] = orderInt
+	rules.orders[policyType][id] = orderInt
 	rules.Unlock()
 }
 
+func sortOrders(ruleOrderMap map[string]int) RuleIDOrderPairList {
+	pl := make(RuleIDOrderPairList, len(ruleOrderMap))
+	i := 0
+	for k, v := range ruleOrderMap {
+		pl[i] = RuleIDOrderPair{k, v}
+		i++
+	}
+	sort.Sort(pl)
+	return pl
+}
+
+type RuleIDOrderPair struct {
+	ID    string
+	Order int
+}
+
+type RuleIDOrderPairList []RuleIDOrderPair
+
+func (p RuleIDOrderPairList) Len() int           { return len(p) }
+func (p RuleIDOrderPairList) Less(i, j int) bool { return p[i].Order < p[j].Order }
+func (p RuleIDOrderPairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
 // we keep calling reordering endpoint to reorder all rules after new rule was added
 // because the reorder endpoint shifts all order up to replac the new order.
-func reorderAll(policySetID string, zClient *Client) {
+func reorderAll(policySetID, policyType string, zClient *Client) {
 	rules.Lock()
 	defer rules.Unlock()
-	count, _, _ := zClient.policysetcontroller.RulesCount()
-	for k, v := range rules.orders {
-		if v <= count {
-			_, err := zClient.policysetcontroller.Reorder(policySetID, k, v)
+	list, _, _ := zClient.policysetcontroller.GetAllByType(policyType)
+	count := len(list)
+	// sort by order (ascending)
+	sorted := sortOrders(rules.orders[policyType])
+	for _, v := range sorted {
+		if v.Order <= count {
+			_, err := zClient.policysetcontroller.Reorder(policySetID, v.ID, v.Order)
 			if err != nil {
 				log.Printf("[ERROR] couldn't reorder the policy set, the order may not have taken place: %v\n", err)
 			}

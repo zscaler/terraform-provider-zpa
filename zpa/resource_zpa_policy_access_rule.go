@@ -3,7 +3,7 @@ package zpa
 import (
 	"fmt"
 	"log"
-	"sync"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -11,13 +11,16 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
 
-type listrules struct {
-	orders map[string]int
-	sync.Mutex
-}
-
-var rules = listrules{
-	orders: make(map[string]int),
+func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
+	o, err := strconv.Atoi(order)
+	if err != nil || o < 1 {
+		return fmt.Errorf("order must be a valid number >= 1")
+	}
+	policy, _, err := zClient.policysetcontroller.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
+	if err == nil && policy != nil && o == 1 {
+		return fmt.Errorf("policy Zscaler Deception exists, orders must be start from 2")
+	}
+	return nil
 }
 
 func resourcePolicyAccessRule() *schema.Resource {
@@ -104,20 +107,22 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
-	if ValidateConditions(req.Conditions, zClient) {
-		policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
-		if err != nil {
-			return err
-		}
-		d.SetId(policysetcontroller.ID)
-		order, ok := d.GetOk("rule_order")
-		if ok {
-			reorder(order, policysetcontroller.PolicySetID, policysetcontroller.ID, zClient)
-		}
-		return resourcePolicyAccessRead(d, m)
-	} else {
+	if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
+		return err
+	}
+	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
+	policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
+	if err != nil {
+		return err
+	}
+	d.SetId(policysetcontroller.ID)
+	order, ok := d.GetOk("rule_order")
+	if ok {
+		reorder(order, policysetcontroller.PolicySetID, "ACCESS_POLICY", policysetcontroller.ID, zClient)
+	}
+	return resourcePolicyAccessRead(d, m)
 }
 
 func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
@@ -172,21 +177,22 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	if ValidateConditions(req.Conditions, zClient) {
-		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
-			return err
-		}
-		if d.HasChange("rule_order") {
-			order, ok := d.GetOk("rule_order")
-			if ok {
-				reorder(order, globalPolicySet.ID, ruleID, zClient)
-			}
-		}
-		return resourcePolicyAccessRead(d, m)
-	} else {
+	if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
+		return err
+	}
+	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
-
+	if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
+		return err
+	}
+	if d.HasChange("rule_order") {
+		order, ok := d.GetOk("rule_order")
+		if ok {
+			reorder(order, globalPolicySet.ID, "ACCESS_POLICY", ruleID, zClient)
+		}
+	}
+	return resourcePolicyAccessRead(d, m)
 }
 
 func resourcePolicyAccessDelete(d *schema.ResourceData, m interface{}) error {

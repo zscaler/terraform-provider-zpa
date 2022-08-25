@@ -64,7 +64,7 @@ func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, m interface{}) erro
 		d.SetId(policysetcontroller.ID)
 		order, ok := d.GetOk("rule_order")
 		if ok {
-			reorder(order, policysetcontroller.PolicySetID, policysetcontroller.ID, zClient)
+			reorder(order, policysetcontroller.PolicySetID, "TIMEOUT_POLICY", policysetcontroller.ID, zClient)
 		}
 		return resourcePolicyTimeoutRuleRead(d, m)
 	} else {
@@ -132,7 +132,7 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		if d.HasChange("rule_order") {
 			order, ok := d.GetOk("rule_order")
 			if ok {
-				reorder(order, globalPolicySet.ID, ruleID, zClient)
+				reorder(order, globalPolicySet.ID, "TIMEOUT_POLICY", ruleID, zClient)
 			}
 		}
 		return resourcePolicyTimeoutRuleRead(d, m)
