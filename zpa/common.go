@@ -223,6 +223,9 @@ func reorder(orderI interface{}, policySetID, policyType, id string, zClient *Cl
 		return
 	}
 	rules.Lock()
+	if len(rules.orders[policyType]) == 0 {
+		rules.orders[policyType] = map[string]int{}
+	}
 	rules.orders[policyType][id] = orderInt
 	rules.Unlock()
 }
@@ -250,7 +253,7 @@ func (p RuleIDOrderPairList) Less(i, j int) bool { return p[i].Order < p[j].Orde
 func (p RuleIDOrderPairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 // we keep calling reordering endpoint to reorder all rules after new rule was added
-// because the reorder endpoint shifts all order up to replac the new order.
+// because the reorder endpoint shifts all order up to replace the new order.
 func reorderAll(policySetID, policyType string, zClient *Client) {
 	rules.Lock()
 	defer rules.Unlock()
