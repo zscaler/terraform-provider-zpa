@@ -18,7 +18,7 @@ func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
 	}
 	policy, _, err := zClient.policysetcontroller.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
 	if err == nil && policy != nil && o == 1 {
-		return fmt.Errorf("policy Zscaler Deception exists, orders must be start from 2")
+		return fmt.Errorf("policy Zscaler Deception exists, order must start from 2")
 	}
 	return nil
 }
