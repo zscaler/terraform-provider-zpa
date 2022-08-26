@@ -296,6 +296,7 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
 		return fmt.Errorf("please provde a valid segment group for the application segment")
 	}
+
 	if err := applicationSegmentValidation(req); err != nil {
 		return err
 	}
