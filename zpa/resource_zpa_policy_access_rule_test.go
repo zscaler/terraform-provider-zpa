@@ -160,6 +160,7 @@ resource "%s" "%s" {
 	name          		= "%s"
 	description   		= "%s"
 	action        		= "ALLOW"
+	rule_order    		= 1
 	operator      		= "AND"
 	policy_set_id 		= data.zpa_policy_type.access_policy.id
 	app_connector_groups {

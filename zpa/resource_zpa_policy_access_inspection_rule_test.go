@@ -128,6 +128,7 @@ resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
 	action              		= "INSPECT"
+	rule_order    				= 1
 	operator      				= "AND"
 	policy_set_id 				= data.zpa_policy_type.inspection_policy.id
 	zpn_inspection_profile_id 	= zpa_inspection_profile.this.id

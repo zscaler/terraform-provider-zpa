@@ -132,6 +132,7 @@ resource "%s" "%s" {
 	name          		= "%s"
 	description   		= "%s"
 	action              = "RE_AUTH"
+	rule_order    		= 1
 	reauth_idle_timeout = "600"
 	reauth_timeout      = "172800"
 	operator      		= "AND"
