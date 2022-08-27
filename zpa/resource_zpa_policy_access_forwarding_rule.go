@@ -67,7 +67,7 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 		d.SetId(policysetcontroller.ID)
 		order, ok := d.GetOk("rule_order")
 		if ok {
-			reorder(order, policysetcontroller.PolicySetID, policysetcontroller.ID, zClient)
+			reorder(order, policysetcontroller.PolicySetID, "CLIENT_FORWARDING_POLICY", policysetcontroller.ID, zClient)
 		}
 		return resourcePolicyForwardingRuleRead(d, m)
 	} else {
@@ -133,7 +133,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 		if d.HasChange("rule_order") {
 			order, ok := d.GetOk("rule_order")
 			if ok {
-				reorder(order, globalPolicySet.ID, ruleID, zClient)
+				reorder(order, globalPolicySet.ID, "CLIENT_FORWARDING_POLICY", ruleID, zClient)
 			}
 		}
 		return resourcePolicyForwardingRuleRead(d, m)
