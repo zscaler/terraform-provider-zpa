@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
 )
 
@@ -205,7 +206,7 @@ func applicationSegmentValidation(appSegment applicationsegment.ApplicationSegme
 func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	req := expandApplicationSegmentRequest(d)
+	req := expandApplicationSegmentRequest(d, zClient, "")
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
@@ -290,7 +291,7 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 
 	id := d.Id()
 	log.Printf("[INFO] Updating role ID: %v\n", id)
-	req := expandApplicationSegmentRequest(d)
+	req := expandApplicationSegmentRequest(d, zClient, id)
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
@@ -356,7 +357,7 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 	return applicationSegmentList
 }
 
-func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.ApplicationSegmentResource {
+func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id string) applicationsegment.ApplicationSegmentResource {
 	details := applicationsegment.ApplicationSegmentResource{
 		SegmentGroupID:            d.Get("segment_group_id").(string),
 		SegmentGroupName:          d.Get("segment_group_name").(string),
@@ -375,22 +376,71 @@ func expandApplicationSegmentRequest(d *schema.ResourceData) applicationsegment.
 		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
 		Name:                      d.Get("name").(string),
 		ServerGroups:              expandAppServerGroups(d),
+		TCPAppPortRange:           []common.NetworkPorts{},
+		UDPAppPortRange:           []common.NetworkPorts{},
 	}
-	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
-	if TCPAppPortRange != nil {
-		details.TCPAppPortRange = TCPAppPortRange
+	remoteTCPAppPortRanges := []string{}
+	remoteUDPAppPortRanges := []string{}
+	if zClient != nil && id != "" {
+		resource, _, err := zClient.applicationsegment.Get(id)
+		if err == nil {
+			remoteTCPAppPortRanges = resource.TCPPortRanges
+			remoteUDPAppPortRanges = resource.UDPPortRanges
+		}
 	}
-	UDPAppPortRange := expandNetwokPorts(d, "udp_port_range")
-	if UDPAppPortRange != nil {
-		details.UDPAppPortRange = UDPAppPortRange
+	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
+	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
+		details.TCPPortRanges = TCPAppPortRanges
+	} else {
+		details.TCPPortRanges = TCPAppPortRange
 	}
-	if d.HasChange("udp_port_ranges") {
-		details.UDPAppPortRange = convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+
+	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
+	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
+		details.UDPPortRanges = UDPAppPortRanges
+	} else {
+		details.UDPPortRanges = UDPAppPortRange
 	}
-	if d.HasChange("tcp_port_ranges") {
-		details.TCPAppPortRange = convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+
+	if details.TCPPortRanges == nil {
+		details.TCPPortRanges = []string{}
+	}
+	if details.UDPPortRanges == nil {
+		details.UDPPortRanges = []string{}
 	}
 	return details
+}
+
+func isSameSlice(s1, s2 []string) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
+	var ports []string
+	if portsInterface, ok := d.GetOk(key); ok {
+		portSet, ok := portsInterface.(*schema.Set)
+		if !ok {
+			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
+			return []string{}
+		}
+		ports = make([]string, len(portSet.List())*2)
+		for i, val := range portSet.List() {
+			portItem := val.(map[string]interface{})
+			ports[2*i] = portItem["from"].(string)
+			ports[2*i+1] = portItem["to"].(string)
+		}
+	}
+	return ports
 }
 
 func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServerGroups {

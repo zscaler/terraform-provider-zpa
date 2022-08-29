@@ -93,15 +93,14 @@ func convertPortsToListString(portRangeLst []common.NetworkPorts) []string {
 	}
 	return portRanges
 }
-
-func convertToPortRange(portRangeLst []interface{}) []common.NetworkPorts {
-	portRanges := make([]common.NetworkPorts, len(portRangeLst)/2)
+func convertToPortRange(portRangeLst []interface{}) []string {
+	portRanges := make([]string, len(portRangeLst))
 	for i := range portRanges {
-		portRanges[i].From = portRangeLst[2*i].(string)
-		portRanges[i].To = portRangeLst[2*i+1].(string)
+		portRanges[i] = portRangeLst[i].(string)
 	}
 	return portRanges
 }
+
 func convertToListString(obj interface{}) []string {
 	listI, ok := obj.([]interface{})
 	if ok && len(listI) > 0 {
