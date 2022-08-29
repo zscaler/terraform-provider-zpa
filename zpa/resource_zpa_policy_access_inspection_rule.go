@@ -66,7 +66,7 @@ func resourcePolicyInspectionRuleCreate(d *schema.ResourceData, m interface{}) e
 		d.SetId(policysetcontroller.ID)
 		order, ok := d.GetOk("rule_order")
 		if ok {
-			reorder(order, policysetcontroller.PolicySetID, policysetcontroller.ID, zClient)
+			reorder(order, policysetcontroller.PolicySetID, "INSPECTION_POLICY", policysetcontroller.ID, zClient)
 		}
 		return resourcePolicyInspectionRuleRead(d, m)
 	} else {
@@ -131,7 +131,7 @@ func resourcePolicyInspectionRuleUpdate(d *schema.ResourceData, m interface{}) e
 		if d.HasChange("rule_order") {
 			order, ok := d.GetOk("rule_order")
 			if ok {
-				reorder(order, globalPolicySet.ID, ruleID, zClient)
+				reorder(order, globalPolicySet.ID, "INSPECTION_POLICY", ruleID, zClient)
 			}
 		}
 		return resourcePolicyInspectionRuleRead(d, m)
