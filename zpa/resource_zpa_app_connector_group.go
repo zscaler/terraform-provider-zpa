@@ -121,11 +121,20 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Whether the default version profile of the App Connector Group is applied or overridden. Supported values: true, false",
 			},
+			"version_profile_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Name of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Default", "Previous Default", "New Release",
+				}, false),
+			},
 			"version_profile_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "ID of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
-				Default:     "0",
 				ValidateFunc: validation.StringInSlice([]string{
 					"0", "1", "2",
 				}, false),
@@ -178,6 +187,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("upgrade_day", resp.UpgradeDay)
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
+	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	return nil
 
@@ -227,6 +237,7 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		UpgradeTimeInSecs:      d.Get("upgrade_time_in_secs").(string),
 		OverrideVersionProfile: d.Get("override_version_profile").(bool),
 		VersionProfileID:       d.Get("version_profile_id").(string),
+		VersionProfileName:     d.Get("version_profile_name").(string),
 	}
 	return appConnectorGroup
 }
