@@ -74,7 +74,7 @@ func testAccCheckApplicationSegmentInspectionDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, _, err := client.applicationsegment.GetByName(rs.Primary.Attributes["name"])
+		_, _, err := client.applicationsegmentinspection.GetByName(rs.Primary.Attributes["name"])
 		if err == nil {
 			return fmt.Errorf("Inspection Application Segment still exists")
 		}

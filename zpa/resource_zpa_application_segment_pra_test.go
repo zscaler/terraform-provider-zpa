@@ -70,13 +70,13 @@ func testAccCheckApplicationSegmentPRADestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != resourcetype.ZPAApplicationSegment {
+		if rs.Type != resourcetype.ZPAApplicationSegmentPRA {
 			continue
 		}
 
-		_, _, err := client.applicationsegment.GetByName(rs.Primary.Attributes["name"])
+		_, _, err := client.applicationsegmentpra.GetByName(rs.Primary.Attributes["name"])
 		if err == nil {
-			return fmt.Errorf("Application Segment still exists")
+			return fmt.Errorf("Application Segment PRA still exists")
 		}
 
 		return nil
@@ -88,10 +88,10 @@ func testAccCheckApplicationSegmentPRAExists(resource string, segment *applicati
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("Application Segment Not found: %s", resource)
+			return fmt.Errorf("Application Segment PRA Not found: %s", resource)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Application Segment ID is set")
+			return fmt.Errorf("no Application Segment PRA ID is set")
 		}
 		client := testAccProvider.Meta().(*Client)
 		resp, _, err := client.applicationsegmentpra.GetByName(rs.Primary.Attributes["name"])
@@ -114,7 +114,7 @@ func testAccCheckApplicationSegmentPRAConfigure(resourceTypeAndName, generatedNa
 // segment group resource
 %s
 
-// application segment resource
+// application segment pra resource
 %s
 
 data "%s" "%s" {
