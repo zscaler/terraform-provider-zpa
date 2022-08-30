@@ -35,7 +35,7 @@ jobs:
 
     - name: Download Go Dependencies
       run: |
-        go mod vendor && go mod tidy
+         go mod tidy && go mod vendor
 
     - name: Setup Go Tools
       run: make tools
@@ -73,7 +73,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: '1.18'
+        go-version: ^1.18
       id: go
 
     - uses: hashicorp/setup-terraform@v2
@@ -86,7 +86,7 @@ jobs:
 
     - name: Download Go Dependencies
       run: |
-        go mod vendor && go mod tidy
+        go mod tidy && go mod vendor
 
     - name: TF acceptance tests
       env:
