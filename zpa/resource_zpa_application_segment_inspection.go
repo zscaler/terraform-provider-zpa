@@ -349,10 +349,6 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
-	// if err := d.Set("server_groups", flattenInspectionAppServerGroups(resp.AppServerGroups)); err != nil {
-	// 	return fmt.Errorf("failed to read app server groups %s", err)
-	// }
-
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
 	}
