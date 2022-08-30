@@ -127,13 +127,32 @@ func expandList(portRangeLst []interface{}) []string {
 	return portRanges
 }
 
-/*
-func expandList(strings []interface{}) []string {
-	expandedStrings := make([]string, len(strings))
-	for i, v := range strings {
-		expandedStrings[i] = v.(string)
+func isSameSlice(s1, s2 []string) bool {
+	if len(s1) != len(s2) {
+		return false
 	}
-
-	return expandedStrings
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
 }
-*/
+
+func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
+	var ports []string
+	if portsInterface, ok := d.GetOk(key); ok {
+		portSet, ok := portsInterface.(*schema.Set)
+		if !ok {
+			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
+			return []string{}
+		}
+		ports = make([]string, len(portSet.List())*2)
+		for i, val := range portSet.List() {
+			portItem := val.(map[string]interface{})
+			ports[2*i] = portItem["from"].(string)
+			ports[2*i+1] = portItem["to"].(string)
+		}
+	}
+	return ports
+}
