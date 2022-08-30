@@ -294,12 +294,11 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	req := expandInspectionApplicationSegment(d)
-	log.Printf("[INFO] Creating inspection application segment request\n%+v\n", req)
-
+	req := expandInspectionApplicationSegment(d, zClient, "")
+	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the inspection application segment")
-		return fmt.Errorf("please provde a valid segment group for the inspection application segment")
+		log.Println("[ERROR] Please provde a valid segment group for the application segment")
+		return fmt.Errorf("please provde a valid segment group for the application segment")
 	}
 
 	resp, _, err := zClient.applicationsegmentinspection.Create(req)
@@ -344,14 +343,15 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
+	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp))
 
 	if err := d.Set("common_apps_dto", flattenInspectionCommonAppsDto(resp.InspectionAppDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
-	if err := d.Set("server_groups", flattenInspectionAppServerGroups(resp.AppServerGroups)); err != nil {
-		return fmt.Errorf("failed to read app server groups %s", err)
-	}
+	// if err := d.Set("server_groups", flattenInspectionAppServerGroups(resp.AppServerGroups)); err != nil {
+	// 	return fmt.Errorf("failed to read app server groups %s", err)
+	// }
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
@@ -365,12 +365,24 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 
 }
 
+func flattenInspectionAppServerGroupsSimple(serverGroup *applicationsegmentinspection.AppSegmentInspection) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroup.AppServerGroups))
+	for i, group := range serverGroup.AppServerGroups {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+
 func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection application segment ID: %v\n", id)
-	req := expandInspectionApplicationSegment(d)
+	req := expandInspectionApplicationSegment(d, zClient, id)
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the inspection application segment")
@@ -424,7 +436,7 @@ func detachInspectionPortalsFromGroup(client *Client, segmentID, segmentGroupID 
 
 }
 
-func expandInspectionApplicationSegment(d *schema.ResourceData) applicationsegmentinspection.AppSegmentInspection {
+func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
 	details := applicationsegmentinspection.AppSegmentInspection{
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		BypassType:           d.Get("bypass_type").(string),
@@ -452,20 +464,38 @@ func expandInspectionApplicationSegment(d *schema.ResourceData) applicationsegme
 	if d.HasChange("server_groups") {
 		details.AppServerGroups = expandInspectionAppServerGroups(d)
 	}
-	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
-	if TCPAppPortRange != nil {
-		details.TCPAppPortRange = TCPAppPortRange
+	remoteTCPAppPortRanges := []string{}
+	remoteUDPAppPortRanges := []string{}
+	if zClient != nil && id != "" {
+		resource, _, err := zClient.applicationsegment.Get(id)
+		if err == nil {
+			remoteTCPAppPortRanges = resource.TCPPortRanges
+			remoteUDPAppPortRanges = resource.UDPPortRanges
+		}
 	}
-	UDPAppPortRange := expandNetwokPorts(d, "udp_port_range")
-	if UDPAppPortRange != nil {
-		details.UDPAppPortRange = UDPAppPortRange
+	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
+	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
+		details.TCPPortRanges = TCPAppPortRanges
+	} else {
+		details.TCPPortRanges = TCPAppPortRange
 	}
-	if d.HasChange("udp_port_ranges") {
-		details.UDPPortRanges = convertToListString(d.Get("udp_port_ranges"))
+
+	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
+	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
+		details.UDPPortRanges = UDPAppPortRanges
+	} else {
+		details.UDPPortRanges = UDPAppPortRange
 	}
-	if d.HasChange("tcp_port_ranges") {
-		details.TCPPortRanges = convertToListString(d.Get("tcp_port_ranges"))
+
+	if details.TCPPortRanges == nil {
+		details.TCPPortRanges = []string{}
 	}
+	if details.UDPPortRanges == nil {
+		details.UDPPortRanges = []string{}
+	}
+
 	return details
 }
 
