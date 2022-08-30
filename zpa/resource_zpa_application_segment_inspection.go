@@ -82,6 +82,15 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"config_space": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"DEFAULT",
+					"SIEM",
+				}, false),
+				Default: "DEFAULT",
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -330,6 +339,7 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
 	_ = d.Set("bypass_type", resp.BypassType)
+	_ = d.Set("config_space", resp.ConfigSpace)
 	_ = d.Set("domain_names", resp.DomainNames)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("description", resp.Description)
@@ -436,6 +446,7 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 	details := applicationsegmentinspection.AppSegmentInspection{
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		BypassType:           d.Get("bypass_type").(string),
+		ConfigSpace:          d.Get("config_space").(string),
 		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
 		ICMPAccessType:       d.Get("icmp_access_type").(string),
 		Description:          d.Get("description").(string),
