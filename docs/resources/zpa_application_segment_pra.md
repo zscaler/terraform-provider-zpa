@@ -69,6 +69,7 @@ The following arguments are supported:
 * `udp_port_ranges` - (Required) UDP port ranges used to access the app.
 
 -> **NOTE:**  TCP and UDP ports can also be defined using the following model:
+-> **NOTE:** When removing TCP and/or UDP ports, parameter must be defined but set as empty due to current API behavior.
 
 * `tcp_port_range` - (Required) TCP port ranges used to access the app.
   * `from:`

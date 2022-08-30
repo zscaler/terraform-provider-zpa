@@ -147,6 +147,7 @@ The following arguments are supported:
 * `udp_port_ranges` - (Required) UDP port ranges used to access the app.
 
 -> **NOTE:**  TCP and UDP ports can also be defined using the following model:
+-> **NOTE:** When removing TCP and/or UDP ports, parameter must be defined but set as empty due to current API behavior.
 
 * `tcp_port_range` - (Required) TCP port ranges used to access the app.
   * `from:`
@@ -155,6 +156,7 @@ The following arguments are supported:
 * `udp_port_range` - (Required) UDP port ranges used to access the app.
   * `from:`
   * `to:`
+
 
 ## Attributes Reference
 
@@ -167,7 +169,6 @@ The following arguments are supported:
 * `health_check_type` (Optional)
 * `icmp_access_type` - (Optional)
 * `ip_anchored` - (Optional)
-* `select_connector_close_to_app` - (Optional) This parameter is only supporte for TCP applications.
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
 * `log_features` - (Optional)
 * `passive_health_enabled` - (Optional)
