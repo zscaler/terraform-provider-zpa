@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
 )
 
@@ -81,6 +82,15 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Computed:    true,
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"config_space": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"DEFAULT",
+					"SIEM",
+				}, false),
+				Default: "DEFAULT",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -292,12 +302,11 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	req := expandSRAApplicationSegment(d)
-	log.Printf("[INFO] Creating sra application segment request\n%+v\n", req)
-
+	req := expandSRAApplicationSegment(d, zClient, "")
+	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the sra application segment")
-		return fmt.Errorf("please provde a valid segment group for the sra application segment")
+		log.Println("[ERROR] Please provde a valid segment group for the application segment")
+		return fmt.Errorf("please provde a valid segment group for the application segment")
 	}
 
 	resp, _, err := zClient.applicationsegmentpra.Create(req)
@@ -305,10 +314,10 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	log.Printf("[INFO] Created sra application segment request. ID: %v\n", resp.ID)
+	log.Printf("[INFO] Created application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceApplicationSegmentPRARead(d, m)
+	return resourceApplicationSegmentRead(d, m)
 }
 
 func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
@@ -329,6 +338,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
 	_ = d.Set("bypass_type", resp.BypassType)
+	_ = d.Set("config_space", resp.ConfigSpace)
 	_ = d.Set("domain_names", resp.DomainNames)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("description", resp.Description)
@@ -340,22 +350,19 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
-	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
+	_ = d.Set("server_groups", flattenPRAAppServerGroupsSimple(resp))
 
 	if err := d.Set("common_apps_dto", flattenCommonAppsDto(resp.SRAAppsDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
-	}
-
-	if err := d.Set("server_groups", flattenSRAAppServerGroups(resp.ServerGroups)); err != nil {
-		return fmt.Errorf("failed to read app server groups %s", err)
 	}
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
 	}
 
-	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
 
@@ -363,12 +370,23 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 
 }
 
+func flattenPRAAppServerGroupsSimple(serverGroup *applicationsegmentpra.AppSegmentPRA) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroup.ServerGroups))
+	for i, group := range serverGroup.ServerGroups {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
 func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	id := d.Id()
-	log.Printf("[INFO] Updating sra application segment ID: %v\n", id)
-	req := expandSRAApplicationSegment(d)
+	log.Printf("[INFO] Updating pra application segment ID: %v\n", id)
+	req := expandSRAApplicationSegment(d, zClient, id)
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the sra application segment")
@@ -422,10 +440,11 @@ func detachSraPortalsFromGroup(client *Client, segmentID, segmentGroupID string)
 
 }
 
-func expandSRAApplicationSegment(d *schema.ResourceData) applicationsegmentpra.AppSegmentPRA {
+func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentpra.AppSegmentPRA {
 	details := applicationsegmentpra.AppSegmentPRA{
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		BypassType:           d.Get("bypass_type").(string),
+		ConfigSpace:          d.Get("config_space").(string),
 		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
 		IcmpAccessType:       d.Get("icmp_access_type").(string),
 		Description:          d.Get("description").(string),
@@ -436,8 +455,8 @@ func expandSRAApplicationSegment(d *schema.ResourceData) applicationsegmentpra.A
 		IpAnchored:           d.Get("ip_anchored").(bool),
 		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
 		DomainNames:          expandStringInSlice(d, "domain_names"),
-		TCPPortRanges:        expandList(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges:        expandList(d.Get("udp_port_ranges").([]interface{})),
+		TCPAppPortRange:      []common.NetworkPorts{},
+		UDPAppPortRange:      []common.NetworkPorts{},
 		ServerGroups:         expandPRAAppServerGroups(d),
 		CommonAppsDto:        expandCommonAppsDto(d),
 	}
@@ -450,20 +469,38 @@ func expandSRAApplicationSegment(d *schema.ResourceData) applicationsegmentpra.A
 	if d.HasChange("server_groups") {
 		details.ServerGroups = expandPRAAppServerGroups(d)
 	}
-	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
-	if TCPAppPortRange != nil {
-		details.TCPAppPortRange = TCPAppPortRange
+	remoteTCPAppPortRanges := []string{}
+	remoteUDPAppPortRanges := []string{}
+	if zClient != nil && id != "" {
+		resource, _, err := zClient.applicationsegment.Get(id)
+		if err == nil {
+			remoteTCPAppPortRanges = resource.TCPPortRanges
+			remoteUDPAppPortRanges = resource.UDPPortRanges
+		}
 	}
-	UDPAppPortRange := expandNetwokPorts(d, "udp_port_range")
-	if UDPAppPortRange != nil {
-		details.UDPAppPortRange = UDPAppPortRange
+	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
+	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
+		details.TCPPortRanges = TCPAppPortRanges
+	} else {
+		details.TCPPortRanges = TCPAppPortRange
 	}
-	if d.HasChange("udp_port_ranges") {
-		details.UDPPortRanges = convertToListString(d.Get("udp_port_ranges"))
+
+	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
+	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
+		details.UDPPortRanges = UDPAppPortRanges
+	} else {
+		details.UDPPortRanges = UDPAppPortRange
 	}
-	if d.HasChange("tcp_port_ranges") {
-		details.TCPPortRanges = convertToListString(d.Get("tcp_port_ranges"))
+
+	if details.TCPPortRanges == nil {
+		details.TCPPortRanges = []string{}
 	}
+	if details.UDPPortRanges == nil {
+		details.UDPPortRanges = []string{}
+	}
+
 	return details
 }
 

@@ -290,7 +290,7 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 	zClient := m.(*Client)
 
 	id := d.Id()
-	log.Printf("[INFO] Updating role ID: %v\n", id)
+	log.Printf("[INFO] Updating application segment ID: %v\n", id)
 	req := expandApplicationSegmentRequest(d, zClient, id)
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
@@ -411,36 +411,6 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id
 		details.UDPPortRanges = []string{}
 	}
 	return details
-}
-
-func isSameSlice(s1, s2 []string) bool {
-	if len(s1) != len(s2) {
-		return false
-	}
-	for i := range s1 {
-		if s1[i] != s2[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
-	var ports []string
-	if portsInterface, ok := d.GetOk(key); ok {
-		portSet, ok := portsInterface.(*schema.Set)
-		if !ok {
-			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
-			return []string{}
-		}
-		ports = make([]string, len(portSet.List())*2)
-		for i, val := range portSet.List() {
-			portItem := val.(map[string]interface{})
-			ports[2*i] = portItem["from"].(string)
-			ports[2*i+1] = portItem["to"].(string)
-		}
-	}
-	return ports
 }
 
 func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServerGroups {
