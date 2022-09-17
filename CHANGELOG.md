@@ -1,5 +1,29 @@
 # Changelog
 
+# Changelog
+
+## 2.3.3
+
+### Notes
+
+- Release date: **(September xx 2022)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
+
+## 2.3.2
+
+### Notes
+
+- Release date: **(September 2 2022)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+Fixed authentication issue when specifying zpa_cloud="PRODUCTION"
+
 ## 2.3.1
 
 ### Notes
