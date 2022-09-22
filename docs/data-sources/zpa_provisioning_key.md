@@ -39,7 +39,7 @@ The following arguments are supported:
 
 * `name` - (Required) Name of the provisioning key.
 * `association_type` (Required) Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are `CONNECTOR_GRP` and `SERVICE_EDGE_GRP`
-* `id` - (Optional) The ID of the posture profile to be exported.
+* `id` - (Optional) The ID of the provisioning key to be exported.
 
 ## Attribute Reference
 
