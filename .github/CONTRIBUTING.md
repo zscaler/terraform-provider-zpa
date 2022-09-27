@@ -489,6 +489,6 @@ When executing the test, the following steps are taken for each `TestStep`:
    CheckDestroy: testAccCheckAppConnectorGroupDestroy,
    ```
 
-[website]: https://github.com/zscaler/terraform-provider-zpa/tree/master/website
+[website]: https://github.com/zscaler/terraform-provider-zpa/blob/master/.github/CONTRIBUTING.md
 [acctests]: https://github.com/hashicorp/terraform#acceptance-tests
 [ml]: https://groups.google.com/group/terraform-tool

@@ -125,7 +125,9 @@ terraform {
 Examples
 --------
 
-Visit [here](https://github.com/zscaler/terraform-provider-zpa/tree/master/website/docs/) for the complete documentation for all resources on github.
+Visit [here](https://github.com/zscaler/terraform-provider-zpa/tree/master/docs) for the complete documentation for all resources on github.
+
+Examples [here] (https://github.com/zscaler/terraform-provider-zpa/tree/master/examples) for the complete list of examples on github.
 
 Issues
 =========
