@@ -273,6 +273,25 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"tcp_quick_ack_app": {
+				Description: "Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value.",
+				Type:        schema.TypeBool,
+				Computed:    true,
+			},
+			"tcp_quick_ack_assistant": {
+				Description: "Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value.",
+				Type:        schema.TypeBool,
+				Computed:    true,
+			},
+			"tcp_quick_ack_read_assistant": {
+				Description: "Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value.",
+				Type:        schema.TypeBool,
+				Computed:    true,
+			},
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"upgrade_day": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -336,6 +355,10 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 		_ = d.Set("lss_app_connector_group", resp.LSSAppConnectorGroup)
+		_ = d.Set("tcp_quick_ack_app", resp.TCPQuickAckApp)
+		_ = d.Set("tcp_quick_ack_assistant", resp.TCPQuickAckAssistant)
+		_ = d.Set("tcp_quick_ack_read_assistant", resp.TCPQuickAckReadAssistant)
+		_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 		_ = d.Set("upgrade_day", resp.UpgradeDay)
 		_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
