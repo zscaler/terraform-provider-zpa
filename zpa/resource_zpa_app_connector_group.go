@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -172,6 +173,10 @@ func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) erro
 	req := expandAppConnectorGroup(d)
 	log.Printf("[INFO] Creating zpa app connector group with request\n%+v\n", req)
 
+	if err := validateTCPQuickAck(req); err != nil {
+		return err
+	}
+
 	resp, _, err := zClient.appconnectorgroup.Create(req)
 	if err != nil {
 		return err
@@ -227,6 +232,10 @@ func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] Updating app connector group ID: %v\n", id)
 	req := expandAppConnectorGroup(d)
 
+	if err := validateTCPQuickAck(req); err != nil {
+		return err
+	}
+
 	if _, err := zClient.appconnectorgroup.Update(id, &req); err != nil {
 		return err
 	}
@@ -271,4 +280,17 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		VersionProfileName:       d.Get("version_profile_name").(string),
 	}
 	return appConnectorGroup
+}
+
+func validateTCPQuickAck(tcp appconnectorgroup.AppConnectorGroup) error {
+	if tcp.TCPQuickAckApp != tcp.TCPQuickAckAssistant {
+		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
+	}
+	if tcp.TCPQuickAckApp != tcp.TCPQuickAckReadAssistant {
+		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
+	}
+	if tcp.TCPQuickAckAssistant != tcp.TCPQuickAckReadAssistant {
+		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
+	}
+	return nil
 }
