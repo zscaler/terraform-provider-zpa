@@ -10,9 +10,9 @@ description: |-
 
 The **zpa_app_connector_group** resource creates a and manages app connector groups in the Zscaler Private Access (ZPA) cloud. This resource can then be associated with the following resoueces: server groups, log receivers and access policies.
 
-## Zenith Community - ZPA App Connector Group Video
+## Zenith Community - ZPA App Connector Group
 
-[![VIDEO ZPA Terraform provider Video Series Ep2 - Connector Groups](../../images/zpa-app_connector_group.png)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep2-connector-groups/18692)
+[![ZPA Terraform provider Video Series Ep2 - Connector Groups](../../images/zpa-app_connector_group.png)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep2-connector-groups/18692)
 
 ## Example Usage
 

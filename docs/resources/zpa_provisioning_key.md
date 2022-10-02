@@ -13,6 +13,11 @@ The **zpa_provisioning_key** resource provides creates a provisioning key in the
 1. App Connector Groups
 2. Service Edge Groups
 
+## Zenith Community - ZPA Provisioning Keys
+
+[![ZPA Terraform provider Video Series Ep3 - Provisioning Keys](../../images/zpa_provisioning_key.png)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep3-provisioning-keys/18694)
+
+
 ## App Connector Group Provisioning Key Example Usage
 
 ```hcl
