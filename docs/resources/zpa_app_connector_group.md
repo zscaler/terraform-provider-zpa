@@ -12,7 +12,7 @@ The **zpa_app_connector_group** resource creates a and manages app connector gro
 
 ## Zenith Community - ZPA App Connector Group
 
-[![ZPA Terraform provider Video Series Ep2 - Connector Groups](../../images/zpa-app_connector_group.png)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep2-connector-groups/18692)
+[![ZPA Terraform provider Video Series Ep2 - Connector Groups](../../images/zpa_app_connector_group.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep2-connector-groups/18692)
 
 ## Example Usage
 
