@@ -9,6 +9,17 @@
 - Release date: **(September xx 2022)**
 - Supported Terraform version: **v1.x**
 
+### Ehancements
+
+- [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - feat(new parameters added to App Connector Group resource TCPQuick*
+  - The following new App Connector Group parameters have been added:
+  - tcpQuickAckApp - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - tcpQuickAckAssistant - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - tcpQuickAckReadAssistant - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - UseInDrMode
+
+- [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - Upgrade to zscaler-sdk-go v0.0.12 to support new App Connector Group parameters ``TCPQuick*`` and ``UseInDrMode``
+
 ### Bug Fixes
 
 - [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
