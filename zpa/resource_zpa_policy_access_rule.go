@@ -12,12 +12,19 @@ import (
 )
 
 func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
-	o, err := strconv.Atoi(order)
-	if err != nil || o < 1 {
-		return fmt.Errorf("order must be a valid number >= 1")
-	}
 	policy, _, err := zClient.policysetcontroller.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
-	if err == nil && policy != nil && o == 1 {
+	if err != nil || policy == nil {
+		return nil
+	}
+	if order == "" {
+		return nil
+	}
+	o, err := strconv.Atoi(order)
+	if err != nil {
+		return nil
+	}
+
+	if o == 1 {
 		return fmt.Errorf("policy Zscaler Deception exists, order must start from 2")
 	}
 	return nil
