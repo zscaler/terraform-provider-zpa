@@ -6,6 +6,10 @@ const (
 	AppConnectorDescription     = "testAcc_app_connector_group"
 	AppConnectorEnabled         = true
 	AppConnectorOverrideProfile = true
+	TCPQuickAckApp              = true
+	TCPQuickAckAssistant        = true
+	TCPQuickAckReadAssistant    = true
+	UseInDrMode                 = false
 )
 
 // Service Edge Group

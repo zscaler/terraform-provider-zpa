@@ -29,6 +29,10 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckApp)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_assistant", strconv.FormatBool(variable.TCPQuickAckAssistant)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_read_assistant", strconv.FormatBool(variable.TCPQuickAckReadAssistant)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "use_in_dr_mode", strconv.FormatBool(variable.UseInDrMode)),
 				),
 			},
 
@@ -40,6 +44,10 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckApp)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_assistant", strconv.FormatBool(variable.TCPQuickAckAssistant)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_read_assistant", strconv.FormatBool(variable.TCPQuickAckReadAssistant)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "use_in_dr_mode", strconv.FormatBool(variable.UseInDrMode)),
 				),
 			},
 		},
@@ -116,6 +124,7 @@ resource "%s" "%s" {
 	description                   = "%s"
 	enabled                       = "%s"
 	country_code                  = "US"
+	city_country                  = "San Jose, US"
 	latitude                      = "37.3382082"
 	longitude                     = "-121.8863286"
 	location                      = "San Jose, CA, USA"
@@ -123,7 +132,11 @@ resource "%s" "%s" {
 	upgrade_time_in_secs          = "66600"
 	override_version_profile      = true
 	version_profile_id            = 0
-	dns_query_type                = "IPV4"
+	dns_query_type                = "IPV4_IPV6"
+	tcp_quick_ack_app 			  = true
+	tcp_quick_ack_assistant 	  = true
+	tcp_quick_ack_read_assistant  = true
+	use_in_dr_mode 				  = false
 }
 `,
 		// resource variables
