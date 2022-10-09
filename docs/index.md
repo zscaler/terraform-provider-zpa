@@ -11,6 +11,9 @@ The Zscaler Private Access (ZPA) provider is used to interact with [ZPA](https:/
 
 Use the navigation on the left to read about the available resources.
 
+## Zenith Community - ZPA Terraform Provider Introduction
+
+[![ZPA Terraform provider Video Series Ep1](../images/zpa_terraform_provider_introduction.png)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep1/18691)
 ## Example Usage ZPA Production Cloud
 
 For customers running this provider in their production tenant, the variable `ZPA_CLOUD` is optional. If provided, it must be followed by the value `PRODUCTION`.
