@@ -49,39 +49,26 @@ resource "zpa_policy_access_rule" "this" {
 ### Required
 
 * `name` - (Required) This is the name of the policy rule.
-* `policy_set_id` - (Required)
+* `policy_set_id` - (Required) Use [zpa_policy_type](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_policy_type) data source to retrieve the necessary policy Set ID ``policy_set_id``
 
 ## Attributes Reference
 
-* `action` (String) This is for providing the rule action.
-* `action_id` (String) This field defines the description of the server.
-* `bypass_default_rule` (Boolean)
-* `custom_msg` (String) This is for providing a customer message for the user.
-* `description` (String) This is the description of the access policy rule.
-* `operator` (String)
-* `policy_type` (String)
-* `priority` (String)
-* `reauth_default_rule` (Boolean)
-* `reauth_idle_timeout` (String)
-* `reauth_timeout` (String)
-* `rule_order` (String)
+* `action` (Optional) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``
+* `custom_msg` (Optional) This is for providing a customer message for the user.
+* `description` (Optional) This is the description of the access policy rule.
+* `operator` (Optional) Supported values: ``AND``, ``OR``
+* `policy_type` (Optional) Supported values: ``ACCESS_POLICY`` or ``GLOBAL_POLICY``
+* `rule_order` (Optional)
 
 * `conditions` - (Optional)
-  * `negated` - (Optional)
-  * `operator` (Optional)
-  * `operands`
+  * `negated` - (Optional) Supported values: ``true`` or ``false``
+  * `operator` (Optional) Supported values: ``AND``, and ``OR``
+  * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
     * `name` (Optional)
     * `lhs` (Optional)
     * `rhs` (Optional) This denotes the value for the given object type. Its value depends upon the key.
     * `idp_id` (Optional)
-    * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `APP`, `APP_GROUP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
-    * `CLIENT_TYPE` (Optional) - The below options are the only ones supported in an access policy rule.
-      * `zpn_client_type_exporter`
-      * `zpn_client_type_browser_isolation`
-      * `zpn_client_type_machine_tunnel`
-      * `zpn_client_type_ip_anchoring`
-      * `zpn_client_type_edge_connector`
-      * `zpn_client_type_zapp`
+    * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `SAML`. Use [zpa_saml_attribute](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) data source to retrieve the SAML attribute ``id``.
 
 * `app_connector_groups`
   * `id` - (Optional) The ID of an app connector group resource
@@ -98,3 +85,21 @@ For example:
 ```shell
 terraform import zpa_policy_access_rule.example <policy_access_rule_id>
 ```
+
+## LHS and RHS Values
+
+LHS and RHS values differ based on object types. Refer to the following table:
+
+| Object Type | LHS| RHS
+|----------|-----------|----------
+| [APP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment) | "id" | <application_segment_ID> |
+| [APP_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_segment_group) | "id" | <segment_group_ID> |
+| [CLIENT_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment_browser_access) | "id" | zpn_client_type_zappl or zpn_client_type_exporter |
+| [EDGE_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group) | "id" | <edge_connector_ID> |
+| [IDP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_idp_controller) | "id" | <identity_provider_ID> |
+| [MACHINE_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group) | "id" | <machine_group_ID> |
+| [POSTURE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile) | <posture_udid>  | "true" / "false" |
+| [TRUSTED_NETWORK](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network) | <network_id>  | "true" |
+| [SAML](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) | <saml_attribute_id>  | <Attribute_value_to_match> |
+| [SCIM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header) | <scim_attribute_id>  | <Attribute_value_to_match>  |
+| [SCIM_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) | <scim_group_attribute_id>  | <Attribute_value_to_match>  |

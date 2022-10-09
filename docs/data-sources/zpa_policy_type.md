@@ -6,7 +6,7 @@ description: |-
   Get information about Policy Set ID in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_policy_timeout
+# Data Source: zpa_policy_type
 
 Use the **zpa_policy_type** data source to get information about an a ``policy_set_id`` and ``policy_type``. This data source is required when creating:
 

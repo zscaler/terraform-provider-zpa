@@ -3,12 +3,12 @@ subcategory: "Policy Set Controller"
 layout: "zscaler"
 page_title: "ZPA: policy_access_rule"
 description: |-
-  Creates and manages ZPA Policy Access Rule with SCIM Group conditions.
+  Creates and manages ZPA Policy Access Rule with Trusted Networks conditions.
 ---
 
 # Resource: zpa_policy_access_rule
 
-The **zpa_policy_access_rule** resource creates and manages a policy access rule with SCIM Group conditions in the Zscaler Private Access cloud.
+The **zpa_policy_access_rule** resource creates and manages a policy access rule with Trusted Networks conditions in the Zscaler Private Access cloud.
 
 ## Example Usage
 
@@ -17,13 +17,8 @@ data "zpa_policy_type" "access_policy" {
     policy_type = "ACCESS_POLICY"
 }
 
-data "zpa_idp_controller" "idp_name" {
- name = "IdP_Name"
-}
-
-data "zpa_scim_groups" "engineering" {
-  name = "Engineering"
-  idp_name = "IdP_Name"
+data "zpa_trusted_network" "corp_trusted_network" {
+ name = "CrowdStrike_ZPA_Pre_ZTA"
 }
 
 resource "zpa_policy_access_rule" "this" {
@@ -31,16 +26,16 @@ resource "zpa_policy_access_rule" "this" {
   description                   = "Example"
   action                        = "ALLOW"
   rule_order                    = 1
-  operator                      = "AND"
-  policy_set_id                 = data.zpa_policy_type.access_policy.id
+  operator = "AND"
+  policy_set_id = data.zpa_policy_type.access_policy.id
 
   conditions {
     negated = false
     operator = "OR"
     operands {
-      object_type = "SCIM_GROUP"
-      lhs         = data.zpa_idp_controller.idp_name.id
-      rhs         = data.zpa_scim_groups.engineering.id
+      object_type = "TRUSTED_NETWORK"
+      lhs = data.zpa_trusted_network.corp_trusted_network.network_id
+      rhs = true
     }
   }
 }
@@ -54,21 +49,23 @@ resource "zpa_policy_access_rule" "this" {
 ## Attributes Reference
 
 * `action` (Optional) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``
-* `custom_msg` (Optional) This is for providing a customer message for the user.
-* `description` (Optional) This is the description of the access policy rule.
+* `custom_msg` (optional) This is for providing a customer message for the user.
+* `description` (optional) This is the description of the access policy rule.
 * `operator` (Optional) Supported values: ``AND``, ``OR``
 * `policy_type` (Optional) Supported values: ``ACCESS_POLICY`` or ``GLOBAL_POLICY``
-* `rule_order` (Optional)
+* `rule_order` (optional)
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``
   * `operator` (Optional) Supported values: ``AND``, and ``OR``
-  * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.`object_type` conditions are to be added to the rule.
+  * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
+    * `object_type` (Optional) This is for specifying the policy critiera. For posture profile the supported value is:  `TRUSTED_NETWORK`
     * `name` (Optional)
-    * `lhs` (Optional)
-    * `rhs` (Optional) This denotes the value for the given object type. Its value depends upon the key.
+    * `lhs` (Optional) - Trusted Network (``network_id``) required when ``object_type = "TRUSTED_NETWORK"``. Use [zpa_trusted_network](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network) data source to retrieve the ``network_id``
+    * `rhs` (Optional) Required when ``object_type = "TRUSTED_NETWORK"``. Supported values are:
+      * ``true``
+      * ``false``
     * `idp_id` (Optional)
-    * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`. Use [zpa_scim_groups](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) data source to retrieve the SCIM Group ``id``.
 
 * `app_connector_groups`
   * `id` - (Optional) The ID of an app connector group resource
