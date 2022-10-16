@@ -8,9 +8,9 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
 )
 
-func dataSourceBrowserAccess() *schema.Resource {
+func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBrowserAccessRead,
+		Read: dataSourceApplicationSegmentBrowserAccessRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -186,7 +186,7 @@ func dataSourceBrowserAccess() *schema.Resource {
 	}
 }
 
-func dataSourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	var resp *browseraccess.BrowserAccess
 	id, ok := d.Get("id").(string)

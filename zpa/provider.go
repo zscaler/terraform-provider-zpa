@@ -74,7 +74,7 @@ func Provider() *schema.Provider {
 			"zpa_application_segment":                dataSourceApplicationSegment(),
 			"zpa_application_segment_pra":            dataSourceApplicationSegmentPRA(),
 			"zpa_application_segment_inspection":     dataSourceApplicationSegmentInspection(),
-			"zpa_browser_access":                     dataSourceBrowserAccess(),
+			"zpa_application_segment_browser_access": dataSourceApplicationSegmentBrowserAccess(),
 			"zpa_segment_group":                      dataSourceSegmentGroup(),
 			"zpa_app_connector_group":                dataSourceAppConnectorGroup(),
 			"zpa_app_connector_controller":           dataSourceAppConnectorController(),
