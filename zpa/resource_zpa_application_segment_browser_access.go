@@ -9,15 +9,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
 )
 
-func resourceBrowserAccess() *schema.Resource {
+func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBrowserAccessCreate,
-		Read:   resourceBrowserAccessRead,
-		Update: resourceBrowserAccessUpdate,
-		Delete: resourceBrowserAccessDelete,
+		Create: resourceApplicationSegmentBrowserAccessCreate,
+		Read:   resourceApplicationSegmentBrowserAccessRead,
+		Update: resourceApplicationSegmentBrowserAccessUpdate,
+		Delete: resourceApplicationSegmentBrowserAccessDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
@@ -65,8 +66,8 @@ func resourceBrowserAccess() *schema.Resource {
 					"ON_NET",
 				}, false),
 			},
-			"tcp_port_range": resourceNetworkPortsSchema("tcp port range"),
-			"udp_port_range": resourceNetworkPortsSchema("udp port range"),
+			"tcp_port_range": resourceAppSegmentPortRange("tcp port range"),
+			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
 
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
@@ -97,8 +98,8 @@ func resourceBrowserAccess() *schema.Resource {
 				Description: "Description of the application.",
 			},
 			"domain_names": {
-				Type:        schema.TypeList,
-				Optional:    true,
+				Type:        schema.TypeSet,
+				Required:    true,
 				Description: "List of domains and IPs.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -144,7 +145,7 @@ func resourceBrowserAccess() *schema.Resource {
 			},
 			"clientless_apps": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"allow_options": {
@@ -155,11 +156,13 @@ func resourceBrowserAccess() *schema.Resource {
 						"application_port": {
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Description: "Port for the BA app.",
 						},
 						"application_protocol": {
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Description: "Protocol for the BA app.",
 							ValidateFunc: validation.StringInSlice([]string{
 								"HTTP",
@@ -240,10 +243,10 @@ func resourceBrowserAccess() *schema.Resource {
 	}
 }
 
-func resourceBrowserAccessCreate(d *schema.ResourceData, m interface{}) error {
+func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	req := expandBrowserAccess(d)
+	req := expandBrowserAccess(d, zClient, "")
 	log.Printf("[INFO] Creating browser access request\n%+v\n", req)
 
 	if req.SegmentGroupID == "" {
@@ -259,10 +262,10 @@ func resourceBrowserAccessCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Created browser access request. ID: %v\n", browseraccess.ID)
 	d.SetId(browseraccess.ID)
 
-	return resourceBrowserAccessRead(d, m)
+	return resourceApplicationSegmentBrowserAccessRead(d, m)
 }
 
-func resourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
+func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	resp, _, err := zClient.browseraccess.Get(d.Id())
@@ -314,12 +317,12 @@ func resourceBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 
 }
 
-func resourceBrowserAccessUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	id := d.Id()
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
-	req := expandBrowserAccess(d)
+	req := expandBrowserAccess(d, zClient, "")
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the browser access application segment")
@@ -330,10 +333,10 @@ func resourceBrowserAccessUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourceBrowserAccessRead(d, m)
+	return resourceApplicationSegmentBrowserAccessRead(d, m)
 }
 
-func resourceBrowserAccessDelete(d *schema.ResourceData, m interface{}) error {
+func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	id := d.Id()
 	segmentGroupID, ok := d.GetOk("segment_group_id")
@@ -373,17 +376,56 @@ func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID stri
 
 }
 
-func expandBrowserAccess(d *schema.ResourceData) browseraccess.BrowserAccess {
+func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
 	details := browseraccess.BrowserAccess{
-		BypassType:      d.Get("bypass_type").(string),
+		SegmentGroupID:       d.Get("segment_group_id").(string),
+		SegmentGroupName:     d.Get("segment_group_name").(string),
+		BypassType:           d.Get("bypass_type").(string),
+		ConfigSpace:          d.Get("config_space").(string),
+		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
+		// IcmpAccessType:       d.Get("icmp_access_type").(string),
 		Description:     d.Get("description").(string),
+		DomainNames:     SetToStringList(d, "domain_names"),
 		DoubleEncrypt:   d.Get("double_encrypt").(bool),
 		Enabled:         d.Get("enabled").(bool),
+		HealthCheckType: d.Get("health_check_type").(string),
 		HealthReporting: d.Get("health_reporting").(string),
-		IPAnchored:      d.Get("ip_anchored").(bool),
+		// IpAnchored:      d.Get("ip_anchored").(bool),
 		IsCnameEnabled:  d.Get("is_cname_enabled").(bool),
-		DomainNames:     expandStringInSlice(d, "domain_names"),
-		SegmentGroupID:  d.Get("segment_group_id").(string),
+		Name:            d.Get("name").(string),
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
+	}
+	remoteTCPAppPortRanges := []string{}
+	remoteUDPAppPortRanges := []string{}
+	if zClient != nil && id != "" {
+		resource, _, err := zClient.applicationsegment.Get(id)
+		if err == nil {
+			remoteTCPAppPortRanges = resource.TCPPortRanges
+			remoteUDPAppPortRanges = resource.UDPPortRanges
+		}
+	}
+	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
+	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
+		details.TCPPortRanges = TCPAppPortRanges
+	} else {
+		details.TCPPortRanges = TCPAppPortRange
+	}
+
+	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
+	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
+		details.UDPPortRanges = UDPAppPortRanges
+	} else {
+		details.UDPPortRanges = UDPAppPortRange
+	}
+
+	if details.TCPPortRanges == nil {
+		details.TCPPortRanges = []string{}
+	}
+	if details.UDPPortRanges == nil {
+		details.UDPPortRanges = []string{}
 	}
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
@@ -396,20 +438,6 @@ func expandBrowserAccess(d *schema.ResourceData) browseraccess.BrowserAccess {
 	}
 	if d.HasChange("clientless_apps") {
 		details.ClientlessApps = expandClientlessApps(d)
-	}
-	TCPAppPortRange := expandNetwokPorts(d, "tcp_port_range")
-	if TCPAppPortRange != nil {
-		details.TCPAppPortRange = TCPAppPortRange
-	}
-	UDPAppPortRange := expandNetwokPorts(d, "udp_port_range")
-	if UDPAppPortRange != nil {
-		details.UDPAppPortRange = UDPAppPortRange
-	}
-	if d.HasChange("udp_port_ranges") {
-		details.UDPPortRanges = convertToListString(d.Get("udp_port_ranges"))
-	}
-	if d.HasChange("tcp_port_ranges") {
-		details.TCPPortRanges = convertToListString(d.Get("tcp_port_ranges"))
 	}
 	return details
 }

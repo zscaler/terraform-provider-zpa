@@ -15,7 +15,7 @@ import (
 
 func TestAccResourceBrowserAccessBasic(t *testing.T) {
 	var browserAccess browseraccess.BrowserAccess
-	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPABrowserAccess)
+	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentBrowserAccess)
 	// rPort := acctest.RandIntRange(1000, 9999)
 
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
@@ -69,7 +69,7 @@ func testAccCheckBrowserAccessDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != resourcetype.ZPABrowserAccess {
+		if rs.Type != resourcetype.ZPAApplicationSegmentBrowserAccess {
 			continue
 		}
 
@@ -87,10 +87,10 @@ func testAccCheckBrowserAccessExists(resource string, segment *browseraccess.Bro
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("Broser Access Not found: %s", resource)
+			return fmt.Errorf("Browser Access Not found: %s", resource)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Broser Access ID is set")
+			return fmt.Errorf("no Browser Access ID is set")
 		}
 		client := testAccProvider.Meta().(*Client)
 		resp, _, err := client.browseraccess.GetByName(rs.Primary.Attributes["name"])
@@ -110,10 +110,10 @@ func testAccCheckBrowserAccessExists(resource string, segment *browseraccess.Bro
 func testAccCheckBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
-// segment group resource
+// application segment browser access resource
 %s
 
-// application segment resource
+// application segment browser access resource
 %s
 
 data "%s" "%s" {
@@ -126,7 +126,7 @@ data "%s" "%s" {
 		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled),
 
 		// data source variables
-		resourcetype.ZPABrowserAccess,
+		resourcetype.ZPAApplicationSegmentBrowserAccess,
 		generatedName,
 		resourceTypeAndName,
 	)
@@ -169,7 +169,7 @@ resource "%s" "%s" {
 `,
 
 		// resource variables
-		resourcetype.ZPABrowserAccess,
+		resourcetype.ZPAApplicationSegmentBrowserAccess,
 		generatedName,
 		generatedName,
 		generatedName,
