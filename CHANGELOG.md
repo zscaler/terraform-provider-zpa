@@ -2,7 +2,7 @@
 
 # Changelog
 
-## 2.3.3
+## 2.4.0
 
 ### Notes
 
@@ -10,6 +10,8 @@
 - Supported Terraform version: **v1.x**
 
 ### Ehancements
+
+- [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
 
 - [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - feat(new parameters added to App Connector Group resource TCPQuick*
   - The following new App Connector Group parameters have been added:
@@ -20,9 +22,14 @@
 
 - [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - Upgrade to zscaler-sdk-go v0.0.12 to support new App Connector Group parameters ``TCPQuick*`` and ``UseInDrMode``
 
+- [PR #194](https://github.com/zscaler/terraform-provider-zpa/pull/194) - Updated provider to zscaler-sdk-go v0.1.1
+
+- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Renamed ``zpa_browser_access`` resource and datasource to ``zpa_application_segment_browser_access`` for consistency with other application segment resources. Previous resource name still works, but a deprecated message will be displayed after the apply.
+
 ### Bug Fixes
 
-- [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
+- [PR #193](https://github.com/zscaler/terraform-provider-zpa/pull/193) - fix rule order issue when no Zscaler Deception rule exists
+- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Fixed ``zpa_application_segment_browser_access`` ``clientless_apps`` inner parameters, which were not being updated during PUT method.
 
 ## 2.3.2
 
