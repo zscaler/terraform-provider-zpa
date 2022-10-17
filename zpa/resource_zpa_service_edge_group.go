@@ -148,17 +148,23 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			"version_profile_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "ID of the version profile. To learn more",
+				Description: "ID of the version profile.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1", "2",
+				}, false),
 			},
 			"version_profile_name": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "ID of the version profile. To learn more",
+				Description: "ID of the version profile.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Default", "Previous Default", "New Release",
+				}, false),
 			},
 			"version_profile_visibility_scope": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "ID of the version profile. To learn more",
+				Description: "ID of the version profile.",
 			},
 		},
 	}
