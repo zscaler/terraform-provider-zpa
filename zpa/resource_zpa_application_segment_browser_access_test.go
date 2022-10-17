@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
 )
 
-func TestAccResourceBrowserAccessBasic(t *testing.T) {
+func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 	var browserAccess browseraccess.BrowserAccess
 	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentBrowserAccess)
 	// rPort := acctest.RandIntRange(1000, 9999)
@@ -27,12 +27,12 @@ func TestAccResourceBrowserAccessBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBrowserAccessDestroy,
+		CheckDestroy: testAccCheckApplicationSegmentBrowserAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
+					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", "tf-acc-test-"+browserAccessGeneratedName),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
@@ -47,9 +47,9 @@ func TestAccResourceBrowserAccessBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
+					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", "tf-acc-test-"+browserAccessGeneratedName),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
@@ -65,7 +65,7 @@ func TestAccResourceBrowserAccessBasic(t *testing.T) {
 	})
 }
 
-func testAccCheckBrowserAccessDestroy(s *terraform.State) error {
+func testAccCheckApplicationSegmentBrowserAccessDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
@@ -83,7 +83,7 @@ func testAccCheckBrowserAccessDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckBrowserAccessExists(resource string, segment *browseraccess.BrowserAccess) resource.TestCheckFunc {
+func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment *browseraccess.BrowserAccess) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
@@ -107,7 +107,7 @@ func testAccCheckBrowserAccessExists(resource string, segment *browseraccess.Bro
 	}
 }
 
-func testAccCheckBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 // application segment browser access resource
