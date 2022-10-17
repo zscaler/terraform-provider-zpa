@@ -129,10 +129,10 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
 			},
-			"ip_anchored": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
+			// "ip_anchored": {
+			// 	Type:     schema.TypeBool,
+			// 	Optional: true,
+			// },
 			"is_cname_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -292,7 +292,7 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	_ = d.Set("ip_anchored", resp.IPAnchored)
+	// _ = d.Set("ip_anchored", resp.IPAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
