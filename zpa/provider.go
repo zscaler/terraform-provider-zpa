@@ -1,10 +1,13 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"runtime"
 
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -96,14 +99,25 @@ func Provider() *schema.Provider {
 			"zpa_inspection_profile":                 dataSourceInspectionProfile(),
 		},
 	}
-	p.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		terraformVersion := p.TerraformVersion
 		if terraformVersion == "" {
 			// Terraform 0.12 introduced this field to the protocol
 			// We can therefore assume that if it's missing it's 0.10 or 0.11
 			terraformVersion = "0.11+compatible"
 		}
-		return zscalerConfigure(d, terraformVersion)
+		r, err := zscalerConfigure(d, terraformVersion)
+		if err != nil {
+			return nil, diag.Diagnostics{
+				diag.Diagnostic{
+					Severity:      diag.Error,
+					Summary:       "failed configuring the provided",
+					Detail:        fmt.Sprintf("error:%v", err),
+					AttributePath: cty.Path{},
+				},
+			}
+		}
+		return r, nil
 	}
 
 	return p
