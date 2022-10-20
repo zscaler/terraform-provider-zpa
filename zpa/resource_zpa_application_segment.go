@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -194,6 +195,9 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 	zClient := m.(*Client)
 
 	req := expandApplicationSegmentRequest(d, zClient, "")
+	if err := checkForPortsOverlap(zClient, req); err != nil {
+		return err
+	}
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
@@ -275,7 +279,9 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 	id := d.Id()
 	log.Printf("[INFO] Updating application segment ID: %v\n", id)
 	req := expandApplicationSegmentRequest(d, zClient, id)
-
+	if err := checkForPortsOverlap(zClient, req); err != nil {
+		return err
+	}
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
 		return fmt.Errorf("please provde a valid segment group for the application segment")
@@ -412,4 +418,66 @@ func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServe
 	}
 
 	return []applicationsegment.AppServerGroups{}
+}
+
+func checkForPortsOverlap(client *Client, app applicationsegment.ApplicationSegmentResource) error {
+	apps, _, err := client.applicationsegment.GetAll()
+	if err != nil {
+		return err
+	}
+	for _, app2 := range apps {
+		if app2.ID != app.ID {
+			// check for udp ports
+			if overlap, o1, o2 := portOverlap(app.TCPPortRanges, app2.TCPPortRanges); overlap {
+				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s)", o1, app.Name, o2, app2.Name, app2.ID)
+			}
+			if overlap, o1, o2 := portOverlap(app.UDPPortRanges, app2.UDPPortRanges); overlap {
+				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s)", o1, app.Name, o2, app2.Name, app2.ID)
+			}
+			if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found {
+				return fmt.Errorf("found same domain name: %s of application %s & %s (%s)", common, app.Name, app2.Name, app2.ID)
+			}
+		}
+	}
+	return nil
+
+}
+
+func sliceHasCommon(s1, s2 []string) (bool, string) {
+	for _, i1 := range s1 {
+		for _, i2 := range s2 {
+			if i1 == i2 {
+				return true, i1
+			}
+		}
+	}
+	return false, ""
+}
+func portOverlap(s1, s2 []string) (bool, []string, []string) {
+	for i1 := 0; i1 < len(s1); i1 += 2 {
+		port1Start, _ := strconv.Atoi(s1[i1])
+		port1End, _ := strconv.Atoi(s1[i1+1])
+		port1Start, port1End = int(math.Min(float64(port1Start), float64(port1End))), int(math.Max(float64(port1Start), float64(port1End)))
+		for i2 := 0; i2 < len(s2); i2 += 2 {
+			port2Start, _ := strconv.Atoi(s2[i2])
+			port2End, _ := strconv.Atoi(s2[i2+1])
+			port2Start, port2End = int(math.Min(float64(port2Start), float64(port2End))), int(math.Max(float64(port2Start), float64(port2End)))
+			if port1Start == port2Start || port1End == port2End || port1Start == port2End || port2Start == port1End {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port1Start < port2Start && port1End > port2Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port1End < port2End && port1End > port2Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port2Start < port1Start && port2End > port1Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port2End < port1End && port2End > port1Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+		}
+	}
+	return false, nil, nil
 }
