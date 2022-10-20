@@ -26,7 +26,8 @@
 - [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
 - [PR #193](https://github.com/zscaler/terraform-provider-zpa/pull/193) - Fixed rule order in access policies, when Zscaler Deception rule exists.
 - [PR #198](https://github.com/zscaler/terraform-provider-zpa/pull/198) - Due to Golang update the function ``ConfigureFunc`` used to configure the provider was deprecated; hence, the ZPA Terraform Provider was updated to use the ``ConfigureContextFunc`` instead.
-
+- [PR #199](https://github.com/zscaler/terraform-provider-zpa/pull/199) - Per API definition, an application segment cannot have overlapping ports when the same domain name is used in other application segments. This PR checks for overlapping TCP/UDP ports and triggers an error message.
+- [PR #200](https://github.com/zscaler/terraform-provider-zpa/pull/200) - Updated to zscaler-sdk-go v0.1.3 to fix application segment deletion error due to introduction of new parameter ``forceDelete``.
 
 ## 2.3.2
 
