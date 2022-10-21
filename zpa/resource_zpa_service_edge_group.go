@@ -1,7 +1,7 @@
 package zpa
 
 import (
-	"fmt"
+	"errors"
 	"log"
 	"strconv"
 	"strings"
@@ -175,17 +175,16 @@ func resourceServiceEdgeGroup() *schema.Resource {
 	}
 }
 func validateAndSetProfileNameID(d *schema.ResourceData) error {
-	versionProfileID, versionProfileIDSet := d.GetOk("version_profile_id")
+	_, versionProfileIDSet := d.GetOk("version_profile_id")
 	versionProfileName, versionProfileNameSet := d.GetOk("version_profile_name")
-	if versionProfileIDSet && versionProfileNameSet {
-		if id, ok := versionProfileNameIDMapping[versionProfileName.(string)]; ok && id != versionProfileID {
-			return fmt.Errorf("mismatch version_profile_id '%s' & version_profile_name '%s'", versionProfileID, versionProfileName)
-		}
-	}
-	if !versionProfileIDSet {
+	if versionProfileNameSet && d.HasChange("version_profile_name") {
 		if id, ok := versionProfileNameIDMapping[versionProfileName.(string)]; ok {
 			d.Set("version_profile_id", id)
 		}
+		return nil
+	}
+	if !versionProfileNameSet && !versionProfileIDSet {
+		return errors.New("one of version_profile_id or version_profile_name must be set")
 	}
 	return nil
 }
