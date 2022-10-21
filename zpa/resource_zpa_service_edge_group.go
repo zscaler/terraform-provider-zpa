@@ -1,14 +1,22 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgegroup"
 )
+
+var versionProfileNameIDMapping map[string]string = map[string]string{
+	"Default":          "0",
+	"Previous Default": "1",
+	"New Release":      "2",
+}
 
 func resourceServiceEdgeGroup() *schema.Resource {
 	return &schema.Resource{
@@ -70,15 +78,10 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Description: "Whether this Service Edge Group is enabled or not.",
 			},
 			"is_public": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     "FALSE",
+				Default:     false,
 				Description: "Enable or disable public access for the Service Edge Group.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"DEFAULT",
-					"TRUE",
-					"FALSE",
-				}, false),
 			},
 			"latitude": {
 				Type:         schema.TypeString,
@@ -147,7 +150,8 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			},
 			"version_profile_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: "ID of the version profile.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"0", "1", "2",
@@ -155,6 +159,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			},
 			"version_profile_name": {
 				Type:        schema.TypeString,
+				Optional:    true,
 				Computed:    true,
 				Description: "ID of the version profile.",
 				ValidateFunc: validation.StringInSlice([]string{
@@ -169,10 +174,27 @@ func resourceServiceEdgeGroup() *schema.Resource {
 		},
 	}
 }
+func validateAndSetProfileNameID(d *schema.ResourceData) error {
+	versionProfileID, versionProfileIDSet := d.GetOk("version_profile_id")
+	versionProfileName, versionProfileNameSet := d.GetOk("version_profile_name")
+	if versionProfileIDSet && versionProfileNameSet {
+		if id, ok := versionProfileNameIDMapping[versionProfileName.(string)]; ok && id != versionProfileID {
+			return fmt.Errorf("mismatch version_profile_id '%s' & version_profile_name '%s'", versionProfileID, versionProfileName)
+		}
+	}
+	if !versionProfileIDSet {
+		if id, ok := versionProfileNameIDMapping[versionProfileName.(string)]; ok {
+			d.Set("version_profile_id", id)
+		}
+	}
+	return nil
+}
 
 func resourceServiceEdgeGroupCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	if err := validateAndSetProfileNameID(d); err != nil {
+		return err
+	}
 	req := expandServiceEdgeGroup(d)
 	log.Printf("[INFO] Creating zpa service edge group with request\n%+v\n", req)
 
@@ -202,12 +224,13 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Getting service edge group:\n%+v\n", resp)
 	d.SetId(resp.ID)
+	isPublic, _ := strconv.ParseBool(resp.IsPublic)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("city_country", resp.CityCountry)
 	_ = d.Set("country_code", resp.CountryCode)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
-	_ = d.Set("is_public", resp.IsPublic)
+	_ = d.Set("is_public", isPublic)
 	_ = d.Set("latitude", resp.Latitude)
 	_ = d.Set("longitude", resp.Longitude)
 	_ = d.Set("location", resp.Location)
@@ -225,7 +248,9 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	if err := validateAndSetProfileNameID(d); err != nil {
+		return err
+	}
 	id := d.Id()
 	log.Printf("[INFO] Updating service edge group ID: %v\n", id)
 	req := expandServiceEdgeGroup(d)
@@ -258,7 +283,7 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		CountryCode:                   d.Get("country_code").(string),
 		Description:                   d.Get("description").(string),
 		Enabled:                       d.Get("enabled").(bool),
-		IsPublic:                      d.Get("is_public").(string),
+		IsPublic:                      strings.ToUpper(strconv.FormatBool(d.Get("is_public").(bool))),
 		Latitude:                      d.Get("latitude").(string),
 		Location:                      d.Get("location").(string),
 		Longitude:                     d.Get("longitude").(string),
