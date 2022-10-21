@@ -1,12 +1,10 @@
 # Changelog
 
-# Changelog
-
 ## 2.4.0
 
 ### Notes
 
-- Release date: **(September xx 2022)**
+- Release date: **(October 24 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Ehancements
