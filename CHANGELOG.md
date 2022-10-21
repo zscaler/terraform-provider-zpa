@@ -4,7 +4,7 @@
 
 ### Notes
 
-- Release date: **(October 21 2022)**
+- Release date: **(October 24 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Ehancements
