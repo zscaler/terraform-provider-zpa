@@ -12,9 +12,47 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.3.1``
+``Last updated: v2.3.2``
 
 ---
+
+## 2.4.0
+
+### Notes
+
+- Release date: **(October 24 2022)**
+- Supported Terraform version: **v1.x**
+
+### Ehancements
+
+- [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - feat(new parameters added to App Connector Group resource TCPQuick*
+  - The following new App Connector Group parameters have been added:
+  - tcpQuickAckApp - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - tcpQuickAckAssistant - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - tcpQuickAckReadAssistant - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - UseInDrMode
+- [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - Upgrade to zscaler-sdk-go v0.0.12 to support new App Connector Group parameters ``TCPQuick*`` and ``UseInDrMode``
+- [PR #190](https://github.com/zscaler/terraform-provider-zpa/pull/190) - Added ZPA Terraform Provider Video Series link in the documentation, leading to [Zenith Community Portal](https://community.zscaler.com/tag/devops)
+- [PR #194](https://github.com/zscaler/terraform-provider-zpa/pull/194) - Updated Provider to Zscaler-SDK-GO v0.1.1
+- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Renamed ``zpa_browser_access`` resource and data source to ``zpa_application_segment_browser_access`` for better distinction with other application segment resources. The use of the preivous resource name is still supported; however, a warning message will be displayed after the apply process to inform about the change.
+- [PR #197](https://github.com/zscaler/terraform-provider-zpa/pull/197) - Updated ``zpa_service_edge_group`` parameter ``is_public`` to accept a value of Bool (true or false) instead of the current String values of (DEFAULT, TRUE or FALSE) for easier configuration. The Provider will convert the input value to string during run-time.
+
+### Bug Fixes
+
+- [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
+- [PR #193](https://github.com/zscaler/terraform-provider-zpa/pull/193) - Fixed rule order in access policies, when Zscaler Deception rule exists.
+- [PR #198](https://github.com/zscaler/terraform-provider-zpa/pull/198) - Due to Golang update the function ``ConfigureFunc`` used to configure the provider was deprecated; hence, the ZPA Terraform Provider was updated to use the ``ConfigureContextFunc`` instead.
+
+## 2.3.2
+
+### Notes
+
+- Release date: **(September 2 2022)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+Fixed authentication issue when specifying zpa_cloud="PRODUCTION"
 
 ## 2.3.1
 
