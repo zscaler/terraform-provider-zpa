@@ -14,9 +14,14 @@ const (
 
 // Service Edge Group
 const (
-	ServiceEdgeResourceName = "testAcc_service_edge_group"
-	ServiceEdgeDescription  = "testAcc_service_edge_group"
-	ServiceEdgeEnabled      = true
+	ServiceEdgeResourceName       = "testAcc_service_edge_group"
+	ServiceEdgeDescription        = "testAcc_service_edge_group"
+	ServiceEdgeEnabled            = true
+	ServiceEdgeIsPublic           = true
+	ServiceEdgeLatitude           = "37.3382082"
+	ServiceEdgeLongitude          = "-121.8863286"
+	ServiceEdgeLocation           = "San Jose, CA, USA"
+	ServiceEdgeVersionProfileName = "New Release"
 )
 
 // Provisioning Key

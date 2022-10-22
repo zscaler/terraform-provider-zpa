@@ -2,6 +2,7 @@ package zpa
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -21,6 +22,29 @@ type listrules struct {
 
 var rules = listrules{
 	orders: make(map[string]map[string]int),
+}
+
+// Common values shared between Service Edge Groups and App Connector Groups
+var versionProfileNameIDMapping map[string]string = map[string]string{
+	"Default":          "0",
+	"Previous Default": "1",
+	"New Release":      "2",
+}
+
+// Common validation shared between Service Edge Groups and App Connector Groups
+func validateAndSetProfileNameID(d *schema.ResourceData) error {
+	_, versionProfileIDSet := d.GetOk("version_profile_id")
+	versionProfileName, versionProfileNameSet := d.GetOk("version_profile_name")
+	if versionProfileNameSet && d.HasChange("version_profile_name") {
+		if id, ok := versionProfileNameIDMapping[versionProfileName.(string)]; ok {
+			d.Set("version_profile_id", id)
+		}
+		return nil
+	}
+	if !versionProfileNameSet && !versionProfileIDSet {
+		return errors.New("one of version_profile_id or version_profile_name must be set")
+	}
+	return nil
 }
 
 func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client) bool {

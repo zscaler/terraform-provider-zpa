@@ -29,6 +29,11 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "is_public", strconv.FormatBool(variable.ServiceEdgeIsPublic)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "latitude", variable.ServiceEdgeLatitude),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "longitude", variable.ServiceEdgeLongitude),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "location", variable.ServiceEdgeLocation),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "version_profile_name", variable.ServiceEdgeVersionProfileName),
 				),
 			},
 
@@ -40,6 +45,11 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "is_public", strconv.FormatBool(variable.ServiceEdgeIsPublic)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "latitude", variable.ServiceEdgeLatitude),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "longitude", variable.ServiceEdgeLongitude),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "location", variable.ServiceEdgeLocation),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "version_profile_name", variable.ServiceEdgeVersionProfileName),
 				),
 			},
 		},
@@ -115,12 +125,14 @@ resource "%s" "%s" {
 	name                 = "%s"
 	description          = "%s"
 	enabled				 = "%s"
+	is_public			 = "%s"
 	upgrade_day          = "SUNDAY"
 	upgrade_time_in_secs = "66600"
 	latitude             = "37.3382082"
 	longitude            = "-121.8863286"
 	location             = "San Jose, CA, USA"
-	version_profile_id   = "0"
+
+	version_profile_name = "New Release"
 }
 `,
 		// resource variables
@@ -129,6 +141,7 @@ resource "%s" "%s" {
 		generatedName,
 		// variable.ServiceEdgeResourceName,
 		description,
+		strconv.FormatBool(enabled),
 		strconv.FormatBool(enabled),
 	)
 }

@@ -1,7 +1,6 @@
 package zpa
 
 import (
-	"errors"
 	"log"
 	"strconv"
 	"strings"
@@ -11,12 +10,6 @@ import (
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgegroup"
 )
-
-var versionProfileNameIDMapping map[string]string = map[string]string{
-	"Default":          "0",
-	"Previous Default": "1",
-	"New Release":      "2",
-}
 
 func resourceServiceEdgeGroup() *schema.Resource {
 	return &schema.Resource{
@@ -173,20 +166,6 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			},
 		},
 	}
-}
-func validateAndSetProfileNameID(d *schema.ResourceData) error {
-	_, versionProfileIDSet := d.GetOk("version_profile_id")
-	versionProfileName, versionProfileNameSet := d.GetOk("version_profile_name")
-	if versionProfileNameSet && d.HasChange("version_profile_name") {
-		if id, ok := versionProfileNameIDMapping[versionProfileName.(string)]; ok {
-			d.Set("version_profile_id", id)
-		}
-		return nil
-	}
-	if !versionProfileNameSet && !versionProfileIDSet {
-		return errors.New("one of version_profile_id or version_profile_name must be set")
-	}
-	return nil
 }
 
 func resourceServiceEdgeGroupCreate(d *schema.ResourceData, m interface{}) error {
