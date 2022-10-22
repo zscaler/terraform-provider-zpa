@@ -22,12 +22,6 @@
 - [PR #197](https://github.com/zscaler/terraform-provider-zpa/pull/197) - Updated ``zpa_service_edge_group`` parameter ``is_public`` to accept a value of Bool (true or false) instead of the current String values of (DEFAULT, TRUE or FALSE) for easier configuration. The Provider will convert the input value to string during run-time.
 - [PR #202](https://github.com/zscaler/terraform-provider-zpa/pull/202) - Included validation function in the ``zpa_app_connector_group`` resource for the parameters ``version_profile_name`` and ``version_profile_id``. Users can now use ``version_profile_name`` with one of the following values: ``Default``, ``Previous Default``, ``New Release``
 
-### Bug Fixes
-
-- [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
-- [PR #193](https://github.com/zscaler/terraform-provider-zpa/pull/193) - Fixed rule order in access policies, when Zscaler Deception rule exists.
-- [PR #198](https://github.com/zscaler/terraform-provider-zpa/pull/198) - Due to Golang update the function ``ConfigureFunc`` used to configure the provider was deprecated; hence, the ZPA Terraform Provider was updated to use the ``ConfigureContextFunc`` instead.
-
 ## 2.3.2
 
 ### Notes
