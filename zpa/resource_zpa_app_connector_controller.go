@@ -243,7 +243,7 @@ func resourceAppConnectorControllerUpdate(d *schema.ResourceData, m interface{})
 	app := expandAppConnectorController(d)
 	_, _, err := zClient.appconnectorcontroller.Update(app.ID, app)
 	if err != nil {
-		return fmt.Errorf("failed updating application controller :%v", err)
+		return fmt.Errorf("failed updating app connector controller :%v", err)
 	}
 	return resourceAppConnectorControllerRead(d, m)
 }
@@ -253,7 +253,7 @@ func resourceAppConnectorControllerDelete(d *schema.ResourceData, m interface{})
 	zClient := m.(*Client)
 	_, err := zClient.appconnectorcontroller.Delete(d.Id())
 	if err != nil {
-		return fmt.Errorf("failed deleting application controller :%v", err)
+		return fmt.Errorf("failed deleting app connector controller :%v", err)
 	}
 	d.SetId("")
 	return nil
