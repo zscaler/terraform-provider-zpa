@@ -3,6 +3,7 @@ package zpa
 import (
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -70,15 +71,10 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Description: "Whether this Service Edge Group is enabled or not.",
 			},
 			"is_public": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     "FALSE",
+				Default:     false,
 				Description: "Enable or disable public access for the Service Edge Group.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"DEFAULT",
-					"TRUE",
-					"FALSE",
-				}, false),
 			},
 			"latitude": {
 				Type:         schema.TypeString,
@@ -147,18 +143,26 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			},
 			"version_profile_id": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "ID of the version profile. To learn more",
+				Optional:    true,
+				Computed:    true,
+				Description: "ID of the version profile.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1", "2",
+				}, false),
 			},
 			"version_profile_name": {
 				Type:        schema.TypeString,
+				Optional:    true,
 				Computed:    true,
-				Description: "ID of the version profile. To learn more",
+				Description: "ID of the version profile.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Default", "Previous Default", "New Release",
+				}, false),
 			},
 			"version_profile_visibility_scope": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "ID of the version profile. To learn more",
+				Description: "ID of the version profile.",
 			},
 		},
 	}
@@ -166,7 +170,9 @@ func resourceServiceEdgeGroup() *schema.Resource {
 
 func resourceServiceEdgeGroupCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	if err := validateAndSetProfileNameID(d); err != nil {
+		return err
+	}
 	req := expandServiceEdgeGroup(d)
 	log.Printf("[INFO] Creating zpa service edge group with request\n%+v\n", req)
 
@@ -196,12 +202,13 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Getting service edge group:\n%+v\n", resp)
 	d.SetId(resp.ID)
+	isPublic, _ := strconv.ParseBool(resp.IsPublic)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("city_country", resp.CityCountry)
 	_ = d.Set("country_code", resp.CountryCode)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
-	_ = d.Set("is_public", resp.IsPublic)
+	_ = d.Set("is_public", isPublic)
 	_ = d.Set("latitude", resp.Latitude)
 	_ = d.Set("longitude", resp.Longitude)
 	_ = d.Set("location", resp.Location)
@@ -219,7 +226,9 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	if err := validateAndSetProfileNameID(d); err != nil {
+		return err
+	}
 	id := d.Id()
 	log.Printf("[INFO] Updating service edge group ID: %v\n", id)
 	req := expandServiceEdgeGroup(d)
@@ -252,7 +261,7 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		CountryCode:                   d.Get("country_code").(string),
 		Description:                   d.Get("description").(string),
 		Enabled:                       d.Get("enabled").(bool),
-		IsPublic:                      d.Get("is_public").(string),
+		IsPublic:                      strings.ToUpper(strconv.FormatBool(d.Get("is_public").(bool))),
 		Latitude:                      d.Get("latitude").(string),
 		Location:                      d.Get("location").(string),
 		Longitude:                     d.Get("longitude").(string),
