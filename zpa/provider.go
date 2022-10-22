@@ -9,6 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
+// Resource names, defined in place, used throughout the provider and tests
+const (
+	zpaBrowserAccess = "zpa_application_segment_browser_access"
+)
+
 func Provider() *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -42,23 +47,26 @@ func Provider() *schema.Provider {
 			   terraform resource name: resource schema
 			   resource formation: provider-resourcename-subresource
 			*/
-			"zpa_app_connector_group":            resourceAppConnectorGroup(),
-			"zpa_application_server":             resourceApplicationServer(),
-			"zpa_application_segment":            resourceApplicationSegment(),
-			"zpa_application_segment_pra":        resourceApplicationSegmentPRA(),
-			"zpa_application_segment_inspection": resourceApplicationSegmentInspection(),
-			"zpa_segment_group":                  resourceSegmentGroup(),
-			"zpa_server_group":                   resourceServerGroup(),
-			"zpa_browser_access":                 resourceBrowserAccess(),
-			"zpa_policy_access_rule":             resourcePolicyAccessRule(),
-			"zpa_policy_inspection_rule":         resourcePolicyInspectionRule(),
-			"zpa_policy_timeout_rule":            resourcePolicyTimeoutRule(),
-			"zpa_policy_forwarding_rule":         resourcePolicyForwardingRule(),
-			"zpa_provisioning_key":               resourceProvisioningKey(),
-			"zpa_service_edge_group":             resourceServiceEdgeGroup(),
-			"zpa_lss_config_controller":          resourceLSSConfigController(),
-			"zpa_inspection_custom_controls":     resourceInspectionCustomControls(),
-			"zpa_inspection_profile":             resourceInspectionProfile(),
+			"zpa_app_connector_group":                resourceAppConnectorGroup(),
+			"zpa_application_server":                 resourceApplicationServer(),
+			"zpa_application_segment":                resourceApplicationSegment(),
+			"zpa_application_segment_pra":            resourceApplicationSegmentPRA(),
+			"zpa_application_segment_inspection":     resourceApplicationSegmentInspection(),
+			"zpa_application_segment_browser_access": resourceApplicationSegmentBrowserAccess(),
+			"zpa_segment_group":                      resourceSegmentGroup(),
+			"zpa_server_group":                       resourceServerGroup(),
+			"zpa_policy_access_rule":                 resourcePolicyAccessRule(),
+			"zpa_policy_inspection_rule":             resourcePolicyInspectionRule(),
+			"zpa_policy_timeout_rule":                resourcePolicyTimeoutRule(),
+			"zpa_policy_forwarding_rule":             resourcePolicyForwardingRule(),
+			"zpa_provisioning_key":                   resourceProvisioningKey(),
+			"zpa_service_edge_group":                 resourceServiceEdgeGroup(),
+			"zpa_lss_config_controller":              resourceLSSConfigController(),
+			"zpa_inspection_custom_controls":         resourceInspectionCustomControls(),
+			"zpa_inspection_profile":                 resourceInspectionProfile(),
+
+			// The day I realized I was naming stuff wrong :'-(
+			"zpa_browser_access": deprecateIncorrectNaming(resourceApplicationSegmentBrowserAccess(), zpaBrowserAccess),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			// terraform data source name: data source schema
@@ -66,7 +74,7 @@ func Provider() *schema.Provider {
 			"zpa_application_segment":                dataSourceApplicationSegment(),
 			"zpa_application_segment_pra":            dataSourceApplicationSegmentPRA(),
 			"zpa_application_segment_inspection":     dataSourceApplicationSegmentInspection(),
-			"zpa_browser_access":                     dataSourceBrowserAccess(),
+			"zpa_application_segment_browser_access": dataSourceApplicationSegmentBrowserAccess(),
 			"zpa_segment_group":                      dataSourceSegmentGroup(),
 			"zpa_app_connector_group":                dataSourceAppConnectorGroup(),
 			"zpa_app_connector_controller":           dataSourceAppConnectorController(),
@@ -107,6 +115,11 @@ func Provider() *schema.Provider {
 	}
 
 	return p
+}
+
+func deprecateIncorrectNaming(d *schema.Resource, newResource string) *schema.Resource {
+	d.DeprecationMessage = fmt.Sprintf("Resource is deprecated due to a correction in naming conventions, please use '%s' instead.", newResource)
+	return d
 }
 
 func zscalerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
