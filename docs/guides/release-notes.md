@@ -20,12 +20,10 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Notes
 
-- Release date: **(October 20 2022)**
+- Release date: **(October 24 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Ehancements
-
-- [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
 
 - [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - feat(new parameters added to App Connector Group resource TCPQuick*
   - The following new App Connector Group parameters have been added:
@@ -33,17 +31,22 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
   - tcpQuickAckAssistant - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
   - tcpQuickAckReadAssistant - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
   - UseInDrMode
-
 - [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - Upgrade to zscaler-sdk-go v0.0.12 to support new App Connector Group parameters ``TCPQuick*`` and ``UseInDrMode``
-
-- [PR #194](https://github.com/zscaler/terraform-provider-zpa/pull/194) - Updated provider to zscaler-sdk-go v0.1.1
-
-- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Renamed ``zpa_browser_access`` resource and datasource to ``zpa_application_segment_browser_access`` for consistency with other application segment resources. Previous resource name still works, but a deprecated message will be displayed after the apply.
+- [PR #190](https://github.com/zscaler/terraform-provider-zpa/pull/190) - Added ZPA Terraform Provider Video Series link in the documentation, leading to [Zenith Community Portal](https://community.zscaler.com/tag/devops)
+- [PR #194](https://github.com/zscaler/terraform-provider-zpa/pull/194) - Updated Provider to Zscaler-SDK-GO v0.1.1
+- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Renamed ``zpa_browser_access`` resource and data source to ``zpa_application_segment_browser_access`` for better distinction with other application segment resources. The use of the previous resource name is still supported; however, a warning message will be displayed after the apply process to inform about the change.
+- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Fixed ``zpa_application_segment_browser_access`` ``clientless_apps`` inner parameters, which were not being updated during PUT method.
+- [PR #197](https://github.com/zscaler/terraform-provider-zpa/pull/197) - Updated ``zpa_service_edge_group`` parameter ``is_public`` to accept a value of Bool (true or false) instead of the current String values of (DEFAULT, TRUE or FALSE) for easier configuration. The Provider will convert the input value to string during run-time.
+- [PR #201](https://github.com/zscaler/terraform-provider-zpa/pull/201) - Added ``zpa_app_connector_controller`` resource to allow app connector resource management and bulk delete action for app connector deproviosioning.
+- [PR #202](https://github.com/zscaler/terraform-provider-zpa/pull/202) - Included validation function in the ``zpa_app_connector_group`` resource for the parameters ``version_profile_name`` and ``version_profile_id``. Users can now use ``version_profile_name`` with one of the following values: ``Default``, ``Previous Default``, ``New Release``
 
 ### Bug Fixes
 
-- [PR #193](https://github.com/zscaler/terraform-provider-zpa/pull/193) - fix rule order issue when no Zscaler Deception rule exists
-- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Fixed ``zpa_application_segment_browser_access`` ``clientless_apps`` inner parameters, which were not being updated during PUT method.
+- [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
+- [PR #193](https://github.com/zscaler/terraform-provider-zpa/pull/193) - Fixed rule order in access policies, when Zscaler Deception rule exists.
+- [PR #198](https://github.com/zscaler/terraform-provider-zpa/pull/198) - Due to Golang update the function ``ConfigureFunc`` used to configure the provider was deprecated; hence, the ZPA Terraform Provider was updated to use the ``ConfigureContextFunc`` instead.
+- [PR #199](https://github.com/zscaler/terraform-provider-zpa/pull/199) - Fix application segment tcp/udp port conflict. The provider will issue an error message when 2 application segments have conflicting domain_name, tcp/udp ports
+- [PR #200](https://github.com/zscaler/terraform-provider-zpa/pull/200) - Implemented new application segment parameter ``force_delete`` to ensure dependency removal prior to delete action.
 
 ## 2.3.2
 
