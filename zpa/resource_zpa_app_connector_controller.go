@@ -1,11 +1,13 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorcontroller"
 )
 
 func resourceAppConnectorController() *schema.Resource {
@@ -150,6 +152,12 @@ func resourceAppConnectorController() *schema.Resource {
 // https://help.zscaler.com/zpa/connector-controller#/mgmtconfig/v1/admin/customers/{customerId}/connector/bulkDelete-post
 func resourceAppConnectorControllerCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	ids := ListToStringSlice(d.Get("ids").([]interface{}))
+	_, err := zClient.appconnectorcontroller.BulkDelete(ids)
+	if err != nil {
+		return fmt.Errorf("failed bulk deleting application controllers (%#v):%v", ids, err)
+	}
+	return nil
 }
 
 // https://help.zscaler.com/zpa/connector-controller#/mgmtconfig/v1/admin/customers/{customerId}/connector/{connectorId}-get
@@ -191,12 +199,49 @@ func resourceAppConnectorControllerRead(d *schema.ResourceData, m interface{}) e
 
 }
 
+func expandAppConnectorController(d *schema.ResourceData) appconnectorcontroller.AppConnector {
+	return appconnectorcontroller.AppConnector{
+		ID:                    d.Id(),
+		ApplicationStartTime:  d.Get("application_start_time").(string),
+		AppConnectorGroupID:   d.Get("app_connector_group_id").(string),
+		AppConnectorGroupName: d.Get("app_connector_group_name").(string),
+		Description:           d.Get("description").(string),
+		Enabled:               d.Get("enabled").(bool),
+		Fingerprint:           d.Get("fingerprint").(string),
+		IPACL:                 d.Get("ip_acl").(string),
+		IssuedCertID:          d.Get("issued_cert_id").(string),
+		Latitude:              d.Get("latitude").(string),
+		Location:              d.Get("location").(string),
+		Longitude:             d.Get("longitude").(string),
+		Name:                  d.Get("name").(string),
+		ProvisioningKeyID:     d.Get("provisioning_key_id").(string),
+		ProvisioningKeyName:   d.Get("provisioning_key_name").(string),
+		Platform:              d.Get("platform").(string),
+		PrivateIP:             d.Get("private_ip").(string),
+		PublicIP:              d.Get("public_ip").(string),
+		SargeVersion:          d.Get("sarge_version").(string),
+		EnrollmentCert:        d.Get("enrollment_cert").(map[string]interface{}),
+	}
+}
+
 // https://help.zscaler.com/zpa/connector-controller#/mgmtconfig/v1/admin/customers/{customerId}/connector/{connectorId}-put
 func resourceAppConnectorControllerUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	app := expandAppConnectorController(d)
+	_, _, err := zClient.appconnectorcontroller.Update(app.ID, app)
+	if err != nil {
+		return fmt.Errorf("failed updating application controller :%v", err)
+	}
+	return resourceAppConnectorControllerRead(d, m)
 }
 
 // https://help.zscaler.com/zpa/connector-controller#/mgmtconfig/v1/admin/customers/{customerId}/connector/{connectorId}-delete
 func resourceAppConnectorControllerDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	_, err := zClient.appconnectorcontroller.Delete(d.Id())
+	if err != nil {
+		return fmt.Errorf("failed deleting application controller :%v", err)
+	}
+	d.SetId("")
+	return nil
 }
