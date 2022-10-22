@@ -43,16 +43,80 @@ In addition to all arguments above, the following attributes are exported:
 
 * `description` (string) Description of the Service Edge Group.
 * `enabled` - (bool) Whether this App Connector Group is enabled or not. Default value: `true`. Supported values: `true`, `false`
+* `city_country` - (string) Whether Double Encryption is enabled or disabled for the app.
+* `country_code` - (string)
+* `creation_time` - (string)
+* `geo_location_id` - (string)
+* `is_public` - (string)
 * `latitude` - (string) Latitude of the Service Edge Group. Integer or decimal. With values in the range of `-90` to `90`
 * `longitude` - (string) Longitude of the Service Edge Group.Integer or decimal. With values in the range of `-180` to `180`
 * `location` - (string) Location of the Service Edge Group.
-* `city_country` - (string) Whether Double Encryption is enabled or disabled for the app.
+* `modified_by` - (string)
+* `modified_time` - (string)
 * `upgrade_day` - (string) App Connectors in this group will attempt to update to a newer version of the software during this specified day
 * `upgrade_time_in_secs` - (string) App Connectors in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600`. Integer in seconds (i.e., `-66600`). The integer should be greater than or equal to `0` and less than `86400`, in `15` minute intervals
 * `override_version_profile` - (bool) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
-* `version_profile_id` - (string) ID of the version profile. To learn more, see Version Profile Use Cases.
-* `version_profile_name` - (string)
+* `version_profile_id` - (String) ID of the version profile.
+  Exported values are:
+  * ``0`` = ``Default``
+  * ``1`` = ``Previous Default``
+  * ``2`` = ``New Release``
+* `version_profile_name` - (String)
+  Exported values are:
+  * ``Default`` = ``0``
+  * ``Previous Default`` = ``1``
+  * ``New Release`` = ``2``
 * `version_profile_visibility_scope` - (string)
-* `country_code` - (string)
-* `dns_query_type` - (string)
-* `geo_location_id` - (string)
+  Exported values are:
+  * ``ALL``
+  * ``NONE``
+  * ``CUSTOM``
+* `service_edges` - (string)
+  * `name` (string)
+  * `application_start_time` (string)
+  * `service_edge_group_id` (string)
+  * `service_edge_group_name` (string)
+  * `control_channel_status` (string)
+  * `creation_time` (string)
+  * `modified_by` (string)
+  * `modified_time` (string)
+  * `ctrl_broker_name` (string)
+  * `current_version` (string)
+  * `expected_upgrade_time` (string)
+  * `expected_version` (string)
+  * `figerprint` (string)
+  * `ip_acl` (string)
+  * `issued_cert_id` (string)
+  * `last_broker_connect_time` (string)
+  * `last_broker_connect_time_duration` (string)
+  * `last_broker_disconnect_time` (string)
+  * `last_broker_disconnect_time_duration` (string)
+  * `last_upgrade_time` (string)
+  * `latitude` (string)
+  * `listen_ips` (string)
+  * `location` (string)
+  * `longitude` (string)
+  * `provisioning_key_id` (string)
+  * `provisioning_key_name` (string)
+  * `platform` (string)
+  * `previous_version` (string)
+  * `private_ip` (string)
+  * `public_ip` (string)
+  * `publish_ips` (string)
+  * `sarge_version` (string)
+  * `enrollment_cert` (string)
+  * `upgrade_attempt` (string)
+  * `upgrade_status` (string)
+
+* `trusted_networks` - (string)
+  * `creation_time` (string)
+  * `domain` (string)
+  * `id` (string)
+  * `master_customer_id` (string)
+  * `modified_by` (string)
+  * `modified_time` (string)
+  * `name` (string)
+  * `network_id` (string)
+  * `zscaler_cloud` (string)
+
+:warning: Notice that certificate and public_keys are omitted from the output.

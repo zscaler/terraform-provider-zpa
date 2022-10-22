@@ -161,6 +161,7 @@ The following arguments are supported:
   * `from:`
   * `to:`
 
+-> **NOTE:** Application segments must have unique ports and cannot have overlapping domain names using the same tcp/udp ports across multiple application segments.
 
 ## Attributes Reference
 

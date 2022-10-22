@@ -6,7 +6,7 @@ resource "zpa_service_edge_group" "service_edge_group_sjc" {
   latitude             = "37.3382082"
   longitude            = "-121.8863286"
   location             = "San Jose, CA, USA"
-  version_profile_id   = "0"
+  version_profile_name = "New Release"
   trusted_networks {
     id = [data.zpa_trusted_network.example.id]
   }
@@ -20,7 +20,7 @@ resource "zpa_service_edge_group" "service_edge_group_nyc" {
   latitude             = "40.7128"
   longitude            = "-73.935242"
   location             = "New York, NY, USA"
-  version_profile_id   = "0"
+  version_profile_name = "Previous Default"
   trusted_networks {
     id = [data.zpa_trusted_network.example.id]
   }
