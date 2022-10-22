@@ -152,15 +152,25 @@ func resourceAppConnectorController() *schema.Resource {
 // https://help.zscaler.com/zpa/connector-controller#/mgmtconfig/v1/admin/customers/{customerId}/connector/bulkDelete-post
 func resourceAppConnectorControllerCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	ids := ListToStringSlice(d.Get("ids").([]interface{}))
-	if len(ids) > 0 && d.HasChange("ids") {
-		_, err := zClient.appconnectorcontroller.BulkDelete(ids)
-		if err != nil {
-			return fmt.Errorf("failed bulk deleting application controllers (%#v):%v", ids, err)
+	if d.HasChange("ids") {
+		i, ok := d.GetOk("ids")
+		if ok {
+			idsI, ok := i.([]interface{})
+			if ok && len(idsI) > 0 {
+				ids := []string{}
+				for _, id := range idsI {
+					ids = append(ids, id.(string))
+				}
+				_, err := zClient.appconnectorcontroller.BulkDelete(ids)
+				if err != nil {
+					return fmt.Errorf("failed bulk deleting application controllers (%#v):%v", ids, err)
+				}
+			}
 		}
+
 	}
 
-	return dataSourceAppConnectorControllerRead(d, m)
+	return resourceAppConnectorControllerRead(d, m)
 }
 
 // https://help.zscaler.com/zpa/connector-controller#/mgmtconfig/v1/admin/customers/{customerId}/connector/{connectorId}-get
