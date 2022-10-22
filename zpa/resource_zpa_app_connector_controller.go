@@ -26,7 +26,7 @@ func resourceAppConnectorController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.appconnectorgroup.GetByName(id)
+					resp, _, err := zClient.appconnectorcontroller.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -180,7 +180,7 @@ func resourceAppConnectorControllerRead(d *schema.ResourceData, m interface{}) e
 	resp, _, err := zClient.appconnectorcontroller.Get(d.Id())
 	if err != nil {
 		if err.(*client.ErrorResponse).IsObjectNotFound() {
-			log.Printf("[WARN] Removing app connector group %s from state because it no longer exists in ZPA", d.Id())
+			log.Printf("[WARN] Removing app connector controller %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
