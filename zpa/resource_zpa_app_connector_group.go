@@ -170,6 +170,9 @@ func resourceAppConnectorGroup() *schema.Resource {
 func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
+	if err := validateAndSetProfileNameID(d); err != nil {
+		return err
+	}
 	req := expandAppConnectorGroup(d)
 	log.Printf("[INFO] Creating zpa app connector group with request\n%+v\n", req)
 
@@ -228,6 +231,9 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
+	if err := validateAndSetProfileNameID(d); err != nil {
+		return err
+	}
 	id := d.Id()
 	log.Printf("[INFO] Updating app connector group ID: %v\n", id)
 	req := expandAppConnectorGroup(d)
