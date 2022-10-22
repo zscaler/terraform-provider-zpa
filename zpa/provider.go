@@ -43,6 +43,7 @@ func Provider() *schema.Provider {
 			   resource formation: provider-resourcename-subresource
 			*/
 			"zpa_app_connector_group":            resourceAppConnectorGroup(),
+			"zpa_app_connector_controller":       resourceAppConnectorController(),
 			"zpa_application_server":             resourceApplicationServer(),
 			"zpa_application_segment":            resourceApplicationSegment(),
 			"zpa_application_segment_pra":        resourceApplicationSegmentPRA(),
