@@ -14,7 +14,7 @@ data "zpa_segment_group" "crm_app_group" {
 }
 
 // Create Browser Access Application Segment
-resource "zpa_browser_access" "this" {
+resource "zpa_application_segment_browser_access" "this" {
   name             = "Example"
   description      = "Example"
   enabled          = true

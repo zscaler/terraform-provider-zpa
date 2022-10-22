@@ -2,7 +2,7 @@
 layout: "zscaler"
 page_title: "Release Notes"
 description: |-
-  The Zscaler Private Access (ZPA) provider Release Notes
+  The Zscaler Private Access (ZPA) Provider Release Notes
 ---
 # ZPA Provider: Release Notes
 
@@ -12,10 +12,49 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.3.1``
+``Last updated: v2.4.0``
 
 ---
 
+## 2.4.0
+
+### Notes
+
+- Release date: **(October 20 2022)**
+- Supported Terraform version: **v1.x**
+
+### Ehancements
+
+- [PR #181](https://github.com/zscaler/terraform-provider-zpa/pull/181) - Added Support to ZPA Preview Cloud and updated to zscaler-sdk-go v0.0.9
+
+- [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - feat(new parameters added to App Connector Group resource TCPQuick*
+  - The following new App Connector Group parameters have been added:
+  - tcpQuickAckApp - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - tcpQuickAckAssistant - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - tcpQuickAckReadAssistant - Whether TCP Quick Acknowledgement is enabled or disabled for the application.
+  - UseInDrMode
+
+- [PR #188](https://github.com/zscaler/terraform-provider-zpa/pull/188) - Upgrade to zscaler-sdk-go v0.0.12 to support new App Connector Group parameters ``TCPQuick*`` and ``UseInDrMode``
+
+- [PR #194](https://github.com/zscaler/terraform-provider-zpa/pull/194) - Updated provider to zscaler-sdk-go v0.1.1
+
+- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Renamed ``zpa_browser_access`` resource and datasource to ``zpa_application_segment_browser_access`` for consistency with other application segment resources. Previous resource name still works, but a deprecated message will be displayed after the apply.
+
+### Bug Fixes
+
+- [PR #193](https://github.com/zscaler/terraform-provider-zpa/pull/193) - fix rule order issue when no Zscaler Deception rule exists
+- [PR #196](https://github.com/zscaler/terraform-provider-zpa/pull/196) - Fixed ``zpa_application_segment_browser_access`` ``clientless_apps`` inner parameters, which were not being updated during PUT method.
+
+## 2.3.2
+
+### Notes
+
+- Release date: **(September 2 2022)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+Fixed authentication issue when specifying zpa_cloud="PRODUCTION"
 ## 2.3.1
 
 ### Notes
