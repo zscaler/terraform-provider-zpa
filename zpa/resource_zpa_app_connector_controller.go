@@ -45,7 +45,6 @@ func resourceAppConnectorController() *schema.Resource {
 			},
 			"ids": {
 				Type:        schema.TypeList,
-				Computed:    true,
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "The list of IDs for bulk deleting the Connectors",
