@@ -169,7 +169,7 @@ func resourceAppConnectorControllerCreate(d *schema.ResourceData, m interface{})
 
 	}
 
-	return resourceAppConnectorControllerRead(d, m)
+	return nil
 }
 
 // https://help.zscaler.com/zpa/connector-controller#/mgmtconfig/v1/admin/customers/{customerId}/connector/{connectorId}-get
