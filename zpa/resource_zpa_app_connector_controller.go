@@ -106,7 +106,7 @@ func resourceAppConnectorController() *schema.Resource {
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"provisioning_key_id": {
 				Type:     schema.TypeString,
