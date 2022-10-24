@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"errors"
 	"log"
 	"strconv"
 
@@ -89,19 +90,7 @@ func resourceApplicationServer() *schema.Resource {
 }
 
 func resourceApplicationServerCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-
-	req := expandCreateAppServerRequest(d)
-	log.Printf("[INFO] Creating zpa application server with request\n%+v\n", req)
-
-	resp, _, err := zClient.appservercontroller.Create(req)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Created application server request. ID: %v\n", resp)
-	d.SetId(resp.ID)
-
-	return resourceApplicationServerRead(d, m)
+	return errors.New("application connector can only be imported then updated or deleted")
 }
 
 func resourceApplicationServerRead(d *schema.ResourceData, m interface{}) error {

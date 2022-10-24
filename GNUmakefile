@@ -91,4 +91,18 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
+appconnectorbulk: GOOS=$(shell go env GOOS)
+appconnectorbulk: GOARCH=$(shell go env GOARCH)
+ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
+appconnectorbulk: DESTINATION=C:\Windows\System32
+else
+appconnectorbulk: DESTINATION=/usr/local/bin
+endif
+appconnectorbulk:
+	@echo "==> Installing appconnectorbulk cli in: $(DESTINATION)/appconnectorbulk"
+	@mkdir -p $(DESTINATION)
+	@rm -f $(DESTINATION)/appconnectorbulk
+	@go build -o $(DESTINATION)/appconnectorbulk ./cli/appconnectorbulk.go
+
+
 .PHONY: build test testacc vet fmt fmtcheck errcheck tools vendor-status test-compile website-lint website website-test
