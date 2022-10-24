@@ -101,23 +101,24 @@ func convertToPortRange(portRangeLst []interface{}) []string {
 	return portRanges
 }
 
-func convertToListString(obj interface{}) []string {
-	listI, ok := obj.([]interface{})
-	if ok && len(listI) > 0 {
-		list := make([]string, len(listI))
-		for i, e := range listI {
-			s, ok := e.(string)
-			if ok {
-				list[i] = e.(string)
-			} else {
-				log.Printf("[WARN] invalid type: %v\n", s)
+/*
+	func convertToListString(obj interface{}) []string {
+		listI, ok := obj.([]interface{})
+		if ok && len(listI) > 0 {
+			list := make([]string, len(listI))
+			for i, e := range listI {
+				s, ok := e.(string)
+				if ok {
+					list[i] = e.(string)
+				} else {
+					log.Printf("[WARN] invalid type: %v\n", s)
+				}
 			}
+			return list
 		}
-		return list
+		return []string{}
 	}
-	return []string{}
-}
-
+*/
 func expandList(portRangeLst []interface{}) []string {
 	portRanges := make([]string, len(portRangeLst))
 	for i, port := range portRangeLst {

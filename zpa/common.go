@@ -592,6 +592,7 @@ func flattenNetworkPorts(ports []common.NetworkPorts) []interface{} {
 	return portsObj
 }
 
+/*
 func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
 	var ports []common.NetworkPorts
 	if portsInterface, ok := d.GetOk(key); ok {
@@ -611,6 +612,7 @@ func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts
 	}
 	return ports
 }
+*/
 
 func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{
