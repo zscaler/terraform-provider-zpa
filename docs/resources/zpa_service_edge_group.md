@@ -17,12 +17,14 @@ The **zpa_service_edge_group** resource creates a service edge group in the Zsca
 resource "zpa_service_edge_group" "service_edge_group_sjc" {
   name                 = "Service Edge Group San Jose"
   description          = "Service Edge Group in San Jose"
+  enabled              = true
+  is_public            = true
   upgrade_day          = "SUNDAY"
   upgrade_time_in_secs = "66600"
   latitude             = "37.3382082"
   longitude            = "-121.8863286"
   location             = "San Jose, CA, USA"
-  version_profile_id   = "0"
+  version_profile_name = "New Release"
   trusted_networks {
     id = [ data.zpa_trusted_network.example.id ]
   }
@@ -34,12 +36,14 @@ resource "zpa_service_edge_group" "service_edge_group_sjc" {
 resource "zpa_service_edge_group" "service_edge_group_nyc" {
   name                 = "Service Edge Group New York"
   description          = "Service Edge Group in New York"
+  enabled              = true
+  is_public            = true
   upgrade_day          = "SUNDAY"
   upgrade_time_in_secs = "66600"
   latitude             = "40.7128"
   longitude            = "-73.935242"
   location             = "New York, NY, USA"
-  version_profile_id   = "0"
+  version_profile_name = "New Release"
 }
 ```
 
