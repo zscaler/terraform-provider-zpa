@@ -10,6 +10,10 @@ description: |-
 
 The **zpa_server_group** resource creates a server group in the Zscaler Private Access cloud. This resource can then be referenced in an application segment or application server resource.
 
+## Zenith Community - ZPA Server Groups
+
+[![ZPA Terraform provider Video Series Ep4 - Server Groups](../../images/zpa_server_groups.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep4-server-groups/18695)
+
 ## Example Usage
 
 ```hcl

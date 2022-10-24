@@ -10,6 +10,10 @@ description: |-
 
 The **zpa_application_segment** resource creates an application segment in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
 
+## Zenith Community - ZPA Application Segment
+
+[![ZPA Terraform provider Video Series Ep7 - Application Segment](../../images/zpa_application_segments.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep-7-zpa-application-segment/18946)
+
 ## Example 1 Usage
 
 ```hcl
@@ -157,6 +161,7 @@ The following arguments are supported:
   * `from:`
   * `to:`
 
+-> **NOTE:** Application segments must have unique ports and cannot have overlapping domain names using the same tcp/udp ports across multiple application segments.
 
 ## Attributes Reference
 

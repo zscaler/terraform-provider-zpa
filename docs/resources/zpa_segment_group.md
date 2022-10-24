@@ -10,6 +10,8 @@ description: |-
 
 The **zpa_segment_group** resource creates a segment group in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule or application segment resource.
 
+[![ZPA Terraform provider Video Series Ep6 - Segment Group](../../images/zpa_segment_groups.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep-6-zpa-segment-group/18808)
+
 ## Example Usage
 
 ```hcl

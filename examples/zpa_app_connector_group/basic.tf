@@ -10,6 +10,6 @@ resource "zpa_app_connector_group" "example" {
   upgrade_day                   = "SUNDAY"
   upgrade_time_in_secs          = "66600"
   override_version_profile      = true
-  version_profile_id            = 0
+  version_profile_name          = "New Release"
   dns_query_type                = "IPV4"
 }
