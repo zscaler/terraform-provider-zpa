@@ -15,8 +15,7 @@ The **zpa_provisioning_key** resource provides creates a provisioning key in the
 
 ## Zenith Community - ZPA Provisioning Keys
 
-[![ZPA Terraform provider Video Series Ep3 - Provisioning Keys](../../images/zpa_provisioning_key.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep3-provisioning-keys/18694)
-
+[![ZPA Terraform provider Video Series Ep3 - Provisioning Keys](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_provisioning_key.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep3-provisioning-keys/18694)
 
 ## App Connector Group Provisioning Key Example Usage
 
