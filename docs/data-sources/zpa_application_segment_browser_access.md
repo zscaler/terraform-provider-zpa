@@ -13,15 +13,15 @@ Use the **zpa_application_segment** data source to get information about a brows
 ## Example Usage
 
 ```hcl
-# ZPA Application Segment Data Source
-data "zpa_application_segment" "example" {
+# ZPA Application Segment Browser Access Data Source
+data "zpa_application_segment_browser_access" "example" {
   name = "example"
 }
 ```
 
 ```hcl
-# ZPA Application Segment Data Source
-data "zpa_application_segment" "example" {
+# ZPA Application Segment Browser Access Data Source
+data "zpa_application_segment_browser_access" "example" {
   id = "123456789"
 }
 ```

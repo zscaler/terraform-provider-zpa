@@ -6,9 +6,9 @@ description: |-
   Creates and manages ZPA Browser Access Application Segment.
 ---
 
-# Resource: zpa_browser_access
+# Resource: zpa_application_segment_browser_access
 
-The **zpa_browser_access** creates and manages a browser access application segment resource in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
+The **zpa_application_segment_browser_access** creates and manages a browser access application segment resource in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
 
 ## Zenith Community - ZPA Application Segment Browser Access
 
@@ -23,7 +23,7 @@ data "zpa_ba_certificate" "test_cert" {
 }
 
 # Create Browser Access Application
-resource "zpa_browser_access" "browser_access_apps" {
+resource "zpa_application_segment_browser_access" "browser_access_apps" {
     name                      = "Browser Access Apps"
     description               = "Browser Access Apps"
     enabled                   = true
@@ -118,16 +118,16 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-**zpa_browser_access** Application Segment can be imported by using <`BROWSER ACCESS ID`> or `<<BROWSER ACCESS NAME>` as the import ID.
+**zpa_application_segment_browser_access** Application Segment Browser Access can be imported by using <`BROWSER ACCESS ID`> or `<<BROWSER ACCESS NAME>` as the import ID.
 
 For example:
 
 ```shell
-terraform import zpa_browser_access.example <browser_access_id>.
+terraform import zpa_application_segment_browser_access.example <browser_access_id>.
 ```
 
 or
 
 ```shell
-terraform import zpa_segment_group.example <browser_access_name>
+terraform import zpa_application_segment_browser_access.example <browser_access_name>
 ```

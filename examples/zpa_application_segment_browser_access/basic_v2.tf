@@ -1,5 +1,5 @@
 // Create Browser Access Application Segment
-resource "zpa_browser_access" "crm_browser_access" {
+resource "zpa_application_segment_browser_access" "crm_browser_access" {
   name             = "CRM Application"
   description      = "CRM Application"
   enabled          = true
