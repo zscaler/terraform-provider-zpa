@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -421,6 +423,7 @@ func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServe
 }
 
 func checkForPortsOverlap(client *Client, app applicationsegment.ApplicationSegmentResource) error {
+	time.Sleep(time.Second * time.Duration(rand.Intn(5)))
 	apps, _, err := client.applicationsegment.GetAll()
 	if err != nil {
 		return err
