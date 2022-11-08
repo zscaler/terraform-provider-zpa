@@ -347,6 +347,7 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 
 func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id string) applicationsegment.ApplicationSegmentResource {
 	details := applicationsegment.ApplicationSegmentResource{
+		ID:                   d.Id(),
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		SegmentGroupName:     d.Get("segment_group_name").(string),
 		BypassType:           d.Get("bypass_type").(string),
