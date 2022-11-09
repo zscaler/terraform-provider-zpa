@@ -426,13 +426,13 @@ func checkForPortsOverlap(client *Client, app applicationsegment.ApplicationSegm
 		return err
 	}
 	for _, app2 := range apps {
-		if app2.ID != app.ID && app2.Name != app.Name {
+		if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found && app2.ID != app.ID && app2.Name != app.Name {
 			// check for udp ports
 			if overlap, o1, o2 := portOverlap(app.TCPPortRanges, app2.TCPPortRanges); overlap {
-				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s)", o1, app.Name, o2, app2.Name, app2.ID)
+				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
 			}
 			if overlap, o1, o2 := portOverlap(app.UDPPortRanges, app2.UDPPortRanges); overlap {
-				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s)", o1, app.Name, o2, app2.Name, app2.ID)
+				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
 			}
 		}
 	}
@@ -440,6 +440,16 @@ func checkForPortsOverlap(client *Client, app applicationsegment.ApplicationSegm
 
 }
 
+func sliceHasCommon(s1, s2 []string) (bool, string) {
+	for _, i1 := range s1 {
+		for _, i2 := range s2 {
+			if i1 == i2 {
+				return true, i1
+			}
+		}
+	}
+	return false, ""
+}
 func portOverlap(s1, s2 []string) (bool, []string, []string) {
 	for i1 := 0; i1 < len(s1); i1 += 2 {
 		port1Start, _ := strconv.Atoi(s1[i1])
