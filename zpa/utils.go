@@ -157,3 +157,14 @@ func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
 	}
 	return ports
 }
+
+func sliceHasCommon(s1, s2 []string) (bool, string) {
+	for _, i1 := range s1 {
+		for _, i2 := range s2 {
+			if i1 == i2 {
+				return true, i1
+			}
+		}
+	}
+	return false, ""
+}

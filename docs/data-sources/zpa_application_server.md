@@ -12,6 +12,10 @@ Use the **zpa_application_server** data source to get information about an appli
 
 1. Server Group (When Dynamic Discovery is set to false)
 
+## Zenith Community - ZPA Application Server
+
+[![ZPA Terraform provider Video Series Ep5 - Application Server](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_application_servers.svg)](https://community.zscaler.com/t/video-terraform-provider-video-series-ep-5-zpa-application-server/18807)
+
 ## Example Usage
 
 ```hcl
