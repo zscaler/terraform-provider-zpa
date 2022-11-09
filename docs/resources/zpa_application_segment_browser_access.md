@@ -12,7 +12,7 @@ The **zpa_application_segment_browser_access** creates and manages a browser acc
 
 ## Zenith Community - ZPA Browser Access Application Segment
 
-[![ZPA Terraform provider Video Series Ep8 - Browser Access Application Segment](zpa_browser_access_application_segments.svg)](https://community.zscaler.com/t/zpa-terraform-provider-video-series-ep-8-zpa-browser-access-application-segment/19150)
+[![ZPA Terraform provider Video Series Ep8 - Browser Access Application Segment](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_browser_access_application_segments.svg)](https://community.zscaler.com/t/zpa-terraform-provider-video-series-ep-8-zpa-browser-access-application-segment/19150)
 
 ## Example Usage
 
