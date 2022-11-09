@@ -444,16 +444,17 @@ func checkForPortsOverlap(client *Client, app applicationsegment.ApplicationSegm
 
 }
 
-func sliceHasCommon(s1, s2 []string) (bool, string) {
-	for _, i1 := range s1 {
-		for _, i2 := range s2 {
-			if i1 == i2 {
-				return true, i1
-			}
-		}
-	}
-	return false, ""
-}
+// func sliceHasCommon(s1, s2 []string) (bool, string) {
+// 	for _, i1 := range s1 {
+// 		for _, i2 := range s2 {
+// 			if i1 == i2 {
+// 				return true, i1
+// 			}
+// 		}
+// 	}
+// 	return false, ""
+// }
+
 func portOverlap(s1, s2 []string) (bool, []string, []string) {
 	for i1 := 0; i1 < len(s1); i1 += 2 {
 		port1Start, _ := strconv.Atoi(s1[i1])

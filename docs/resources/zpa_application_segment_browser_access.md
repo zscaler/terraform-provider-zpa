@@ -10,6 +10,10 @@ description: |-
 
 The **zpa_application_segment_browser_access** creates and manages a browser access application segment resource in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
 
+## Zenith Community - ZPA Browser Access Application Segment
+
+[![ZPA Terraform provider Video Series Ep8 - Browser Access Application Segment](zpa_browser_access_application_segments.svg)](https://community.zscaler.com/t/zpa-terraform-provider-video-series-ep-8-zpa-browser-access-application-segment/19150)
+
 ## Example Usage
 
 ```hcl

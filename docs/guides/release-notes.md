@@ -12,9 +12,26 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.4.0``
+``Last updated: v2.4.1``
 
 ---
+
+## 2.4.1
+
+### Notes
+
+- Release date: **(November 9 2022)**
+- Supported Terraform version: **v1.x**
+
+### Ehancements
+
+- [PR #208](https://github.com/zscaler/terraform-provider-zpa/pull/208) - Implemented TCP/UDP Port overlap check and duplicated domain validation.
+
+### Bug Fixes
+
+- [PR #206](https://github.com/zscaler/terraform-provider-zpa/pull/206) - Fix TCP/UDP port overlap check issue
+
+- [PR #207](https://github.com/zscaler/terraform-provider-zpa/pull/207) - Fix duplicated domain_name entries during TCP/UDP port overlap issues
 
 ## 2.4.0
 
