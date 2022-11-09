@@ -25,7 +25,9 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Ehancements
 
-- [PR #208](https://github.com/zscaler/terraform-provider-zpa/pull/208) - Implemented TCP/UDP Port overlap check and duplicated domain validation.
+- [PR #208](https://github.com/zscaler/terraform-provider-zpa/pull/208) - Implemented TCP/UDP Port overlap check and duplicated domain validation for ``zpa_application_segment_browser_access``
+- [PR #209](https://github.com/zscaler/terraform-provider-zpa/pull/209) - Implemented TCP/UDP Port overlap check and duplicated domain validation for ``zpa_application_segment_pra``.
+- [PR #210](https://github.com/zscaler/terraform-provider-zpa/pull/210) - Implemented TCP/UDP Port overlap check and duplicated domain validation for ``zpa_application_segment_inspection``.
 
 ### Bug Fixes
 
