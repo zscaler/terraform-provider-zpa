@@ -193,6 +193,7 @@ func resourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("zcomponent_name", resp.ZcomponentName)
 	_ = d.Set("ip_acl", resp.IPACL)
 	_ = d.Set("provisioning_key", resp.ProvisioningKey)
+	_ = d.Set("association_type", resp.AssociationType)
 	return nil
 
 }

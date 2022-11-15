@@ -150,6 +150,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 		_ = d.Set("usage_count", resp.UsageCount)
 		_ = d.Set("zcomponent_id", resp.ZcomponentID)
 		_ = d.Set("zcomponent_name", resp.ZcomponentName)
+		_ = d.Set("association_type", resp.AssociationType)
 	} else {
 		return fmt.Errorf("couldn't find any provisioning key with name '%s' or id '%s'", name, id)
 	}
