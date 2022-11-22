@@ -221,6 +221,14 @@ func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[ERROR] Can't update server group: servers must not be empty when DynamicDiscovery is disabled\n")
 		return fmt.Errorf("can't update server group: servers must not be empty when DynamicDiscovery is disabled")
 	}
+
+	if _, _, err := zClient.servergroup.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.servergroup.Update(id, &req); err != nil {
 		return err
 	}

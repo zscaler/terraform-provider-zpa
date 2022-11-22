@@ -307,6 +307,14 @@ func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) erro
 	if err := validateInspectionProfile(&req); err != nil {
 		return err
 	}
+
+	if _, _, err := zClient.inspection_profile.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	//injectPredefinedControls(zClient, &req)
 	if _, err := zClient.inspection_profile.Update(id, &req); err != nil {
 		return err

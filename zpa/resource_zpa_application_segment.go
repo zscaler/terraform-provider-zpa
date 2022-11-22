@@ -288,6 +288,14 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
 		return fmt.Errorf("please provde a valid segment group for the application segment")
 	}
+
+	if _, _, err := zClient.applicationsegment.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.applicationsegment.Update(id, req); err != nil {
 		return err
 	}

@@ -312,6 +312,14 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 	if err := validateRules(req); err != nil {
 		return err
 	}
+
+	if _, _, err := zClient.inspection_custom_controls.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.inspection_custom_controls.Update(id, &req); err != nil {
 		return err
 	}

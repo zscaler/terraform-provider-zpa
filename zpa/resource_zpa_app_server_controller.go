@@ -137,6 +137,13 @@ func resourceApplicationServerUpdate(d *schema.ResourceData, m interface{}) erro
 	if d.HasChange("app_server_group_ids") || d.HasChange("name") || d.HasChange("description") || d.HasChange("address") || d.HasChange("enabled") {
 		log.Println("The AppServerGroupID, name, description or address has been changed")
 
+		if _, _, err := zClient.appservercontroller.Get(d.Id()); err != nil {
+			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+				d.SetId("")
+				return nil
+			}
+		}
+
 		if _, err := zClient.appservercontroller.Update(d.Id(), appservercontroller.ApplicationServer{
 			AppServerGroupIds: SetToStringSlice(d.Get("app_server_group_ids").(*schema.Set)),
 			Name:              d.Get("name").(string),

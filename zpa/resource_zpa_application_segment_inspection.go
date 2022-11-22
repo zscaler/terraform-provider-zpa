@@ -401,6 +401,13 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 		return fmt.Errorf("please provde a valid segment group for the inspection application segment")
 	}
 
+	if _, _, err := zClient.applicationsegmentinspection.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.applicationsegmentinspection.Update(id, &req); err != nil {
 		return err
 	}

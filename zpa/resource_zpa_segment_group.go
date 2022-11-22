@@ -157,6 +157,13 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Updating segment group ID: %v\n", id)
 	req := expandSegmentGroup(d)
 
+	if _, _, err := zClient.segmentgroup.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.segmentgroup.Update(id, &req); err != nil {
 		return err
 	}

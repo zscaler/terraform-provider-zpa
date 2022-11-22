@@ -206,6 +206,12 @@ func resourceProvisioningKeyUpdate(d *schema.ResourceData, m interface{}) error 
 	id := d.Id()
 	log.Printf("[INFO] Updating provisining key ID: %v\n", id)
 	req := expandProvisioningKey(d)
+	if _, _, err := zClient.provisioningkey.Get(associationType, id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
 
 	if _, err := zClient.provisioningkey.Update(associationType, id, &req); err != nil {
 		return err

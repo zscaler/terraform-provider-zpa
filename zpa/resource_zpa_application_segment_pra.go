@@ -403,6 +403,13 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("please provde a valid segment group for the sra application segment")
 	}
 
+	if _, _, err := zClient.applicationsegmentpra.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.applicationsegmentpra.Update(id, &req); err != nil {
 		return err
 	}

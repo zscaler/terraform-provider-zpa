@@ -265,6 +265,13 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) er
 	log.Printf("[INFO] Updating lss config controller ID: %v\n", id)
 	req := expandLSSResource(d)
 
+	if _, _, err := zClient.lssconfigcontroller.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.lssconfigcontroller.Update(id, &req); err != nil {
 		return err
 	}

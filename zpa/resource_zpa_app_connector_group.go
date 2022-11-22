@@ -242,6 +242,13 @@ func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
+	if _, _, err := zClient.appconnectorgroup.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.appconnectorgroup.Update(id, &req); err != nil {
 		return err
 	}
