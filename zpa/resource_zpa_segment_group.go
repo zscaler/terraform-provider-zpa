@@ -73,15 +73,14 @@ func resourceSegmentGroup() *schema.Resource {
 				Computed: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "Name of the app group.",
-				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				Type:        schema.TypeString,
+				Description: "Name of the app group.",
+				Required:    true,
 			},
 			"policy_migrated": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				Default:  false,
 			},
 			"tcp_keep_alive_enabled": {
 				Type:     schema.TypeString,
@@ -128,12 +127,13 @@ func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Getting segment group:\n%+v\n", resp)
 	d.SetId(resp.ID)
+	tcpKeepAliveEnabled, _ := strconv.ParseBool(resp.TcpKeepAliveEnabled)
 	_ = d.Set("config_space", resp.ConfigSpace)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("name", resp.Name)
-	//_ = d.Set("policy_migrated", resp.PolicyMigrated)
-	_ = d.Set("tcp_keep_alive_enabled", resp.TcpKeepAliveEnabled)
+	_ = d.Set("policy_migrated", resp.PolicyMigrated)
+	_ = d.Set("tcp_keep_alive_enabled", tcpKeepAliveEnabled)
 	if err := d.Set("applications", flattenSegmentGroupApplicationsSimple(resp)); err != nil {
 		return fmt.Errorf("failed to read applications %s", err)
 	}
