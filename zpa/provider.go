@@ -56,6 +56,7 @@ func Provider() *schema.Provider {
 			"zpa_application_segment_pra":            resourceApplicationSegmentPRA(),
 			"zpa_application_segment_inspection":     resourceApplicationSegmentInspection(),
 			"zpa_application_segment_browser_access": resourceApplicationSegmentBrowserAccess(),
+			"zpa_ba_certificate":                     resourceBaCertificate(),
 			"zpa_segment_group":                      resourceSegmentGroup(),
 			"zpa_server_group":                       resourceServerGroup(),
 			"zpa_policy_access_rule":                 resourcePolicyAccessRule(),
