@@ -362,6 +362,7 @@ func resourceInspectionCustomControlsDelete(d *schema.ResourceData, m interface{
 
 func expandInspectionCustomControls(d *schema.ResourceData) inspection_custom_controls.InspectionCustomControl {
 	custom_control := inspection_custom_controls.InspectionCustomControl{
+		ID:                               d.Id(),
 		Action:                           d.Get("action").(string),
 		ActionValue:                      d.Get("action_value").(string),
 		ControlNumber:                    d.Get("control_number").(string),

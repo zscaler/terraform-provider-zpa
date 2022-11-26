@@ -457,6 +457,7 @@ func detachInspectionPortalsFromGroup(client *Client, segmentID, segmentGroupID 
 
 func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
 	details := applicationsegmentinspection.AppSegmentInspection{
+		ID:                   d.Id(),
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		BypassType:           d.Get("bypass_type").(string),
 		ConfigSpace:          d.Get("config_space").(string),

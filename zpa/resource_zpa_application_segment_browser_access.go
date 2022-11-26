@@ -395,6 +395,7 @@ func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID stri
 
 func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
 	details := browseraccess.BrowserAccess{
+		ID:                   d.Id(),
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		SegmentGroupName:     d.Get("segment_group_name").(string),
 		BypassType:           d.Get("bypass_type").(string),

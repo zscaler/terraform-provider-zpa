@@ -250,6 +250,7 @@ func resourceServerGroupDelete(d *schema.ResourceData, m interface{}) error {
 
 func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 	result := servergroup.ServerGroup{
+		ID:                 d.Id(),
 		Enabled:            d.Get("enabled").(bool),
 		Description:        d.Get("description").(string),
 		IpAnchored:         d.Get("ip_anchored").(bool),

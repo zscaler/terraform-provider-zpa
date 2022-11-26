@@ -186,6 +186,7 @@ func resourceSegmentGroupDelete(d *schema.ResourceData, m interface{}) error {
 
 func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 	segmentGroup := segmentgroup.SegmentGroup{
+		ID:                  d.Id(),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		Enabled:             d.Get("enabled").(bool),

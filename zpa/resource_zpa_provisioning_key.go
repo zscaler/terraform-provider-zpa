@@ -238,6 +238,7 @@ func resourceProvisioningKeyDelete(d *schema.ResourceData, m interface{}) error 
 
 func expandProvisioningKey(d *schema.ResourceData) provisioningkey.ProvisioningKey {
 	provisioningKey := provisioningkey.ProvisioningKey{
+		ID:                    d.Id(),
 		AppConnectorGroupID:   d.Get("app_connector_group_id").(string),
 		AppConnectorGroupName: d.Get("app_connector_group_name").(string),
 		Enabled:               d.Get("enabled").(bool),

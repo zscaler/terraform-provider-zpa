@@ -109,7 +109,7 @@ func resourceApplicationServerRead(d *schema.ResourceData, m interface{}) error 
 
 	resp, _, err := zClient.appservercontroller.Get(d.Id())
 	if err != nil {
-		if err.(*client.ErrorResponse).IsObjectNotFound() {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing application server %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
@@ -169,6 +169,10 @@ func resourceApplicationServerDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if _, err = zClient.appservercontroller.Delete(d.Id()); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 
@@ -180,6 +184,9 @@ func removeServerFromGroup(zClient *Client, serverID string) error {
 
 	resp, _, err := zClient.appservercontroller.Get(serverID)
 	if err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			return nil
+		}
 		return err
 	}
 
@@ -200,6 +207,7 @@ func removeServerFromGroup(zClient *Client, serverID string) error {
 
 func expandCreateAppServerRequest(d *schema.ResourceData) appservercontroller.ApplicationServer {
 	applicationServer := appservercontroller.ApplicationServer{
+		ID:                d.Id(),
 		Address:           d.Get("address").(string),
 		ConfigSpace:       d.Get("config_space").(string),
 		AppServerGroupIds: SetToStringSlice(d.Get("app_server_group_ids").(*schema.Set)),

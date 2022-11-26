@@ -344,6 +344,7 @@ func resourceInspectionProfileDelete(d *schema.ResourceData, m interface{}) erro
 
 func expandInspectionProfile(d *schema.ResourceData) inspection_profile.InspectionProfile {
 	inspection_profile := inspection_profile.InspectionProfile{
+		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
 		Description:               d.Get("description").(string),
 		GlobalControlActions:      SetToStringList(d, "global_control_actions"),
