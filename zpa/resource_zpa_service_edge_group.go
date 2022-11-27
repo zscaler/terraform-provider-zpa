@@ -233,6 +233,13 @@ func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error
 	log.Printf("[INFO] Updating service edge group ID: %v\n", id)
 	req := expandServiceEdgeGroup(d)
 
+	if _, _, err := zClient.serviceedgegroup.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.serviceedgegroup.Update(id, &req); err != nil {
 		return err
 	}

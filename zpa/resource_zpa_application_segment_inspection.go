@@ -401,6 +401,13 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 		return fmt.Errorf("please provde a valid segment group for the inspection application segment")
 	}
 
+	if _, _, err := zClient.applicationsegmentinspection.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.applicationsegmentinspection.Update(id, &req); err != nil {
 		return err
 	}
@@ -450,6 +457,7 @@ func detachInspectionPortalsFromGroup(client *Client, segmentID, segmentGroupID 
 
 func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
 	details := applicationsegmentinspection.AppSegmentInspection{
+		ID:                   d.Id(),
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		BypassType:           d.Get("bypass_type").(string),
 		ConfigSpace:          d.Get("config_space").(string),

@@ -73,15 +73,14 @@ func resourceSegmentGroup() *schema.Resource {
 				Computed: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Description:  "Name of the app group.",
-				Required:     true,
-				ValidateFunc: validation.StringIsNotEmpty,
+				Type:        schema.TypeString,
+				Description: "Name of the app group.",
+				Required:    true,
 			},
 			"policy_migrated": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				Default:  false,
 			},
 			"tcp_keep_alive_enabled": {
 				Type:     schema.TypeString,
@@ -132,7 +131,7 @@ func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("name", resp.Name)
-	//_ = d.Set("policy_migrated", resp.PolicyMigrated)
+	_ = d.Set("policy_migrated", resp.PolicyMigrated)
 	_ = d.Set("tcp_keep_alive_enabled", resp.TcpKeepAliveEnabled)
 	if err := d.Set("applications", flattenSegmentGroupApplicationsSimple(resp)); err != nil {
 		return fmt.Errorf("failed to read applications %s", err)
@@ -157,6 +156,13 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Updating segment group ID: %v\n", id)
 	req := expandSegmentGroup(d)
 
+	if _, _, err := zClient.segmentgroup.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.segmentgroup.Update(id, &req); err != nil {
 		return err
 	}
@@ -179,6 +185,7 @@ func resourceSegmentGroupDelete(d *schema.ResourceData, m interface{}) error {
 
 func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 	segmentGroup := segmentgroup.SegmentGroup{
+		ID:                  d.Id(),
 		Name:                d.Get("name").(string),
 		Description:         d.Get("description").(string),
 		Enabled:             d.Get("enabled").(bool),

@@ -12,9 +12,21 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.4.1``
+``Last updated: v2.5.0``
 
 ---
+
+## 2.5.0 (November, 30 2022)
+
+### Notes
+
+- Release date: **(November, 30 2022)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #217](https://github.com/zscaler/terraform-provider-zia/pull/217) Fixed Read/Update/Delete functions to allow automatic recreation of resources, that have been manually deleted via the UI.
+- [PR #217](https://github.com/zscaler/terraform-provider-zia/pull/217) Updated provider to zscaler-sdk-go v0.2.2
 
 ## 2.4.1
 

@@ -190,6 +190,13 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
+	if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 		return err
 	}

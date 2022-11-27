@@ -339,6 +339,13 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m int
 		return fmt.Errorf("please provide a valid segment group for the browser access application segment")
 	}
 
+	if _, _, err := zClient.browseraccess.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.browseraccess.Update(id, &req); err != nil {
 		return err
 	}
@@ -388,6 +395,7 @@ func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID stri
 
 func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
 	details := browseraccess.BrowserAccess{
+		ID:                   d.Id(),
 		SegmentGroupID:       d.Get("segment_group_id").(string),
 		SegmentGroupName:     d.Get("segment_group_name").(string),
 		BypassType:           d.Get("bypass_type").(string),

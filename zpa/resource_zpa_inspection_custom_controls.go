@@ -312,6 +312,14 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 	if err := validateRules(req); err != nil {
 		return err
 	}
+
+	if _, _, err := zClient.inspection_custom_controls.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.inspection_custom_controls.Update(id, &req); err != nil {
 		return err
 	}
@@ -354,6 +362,7 @@ func resourceInspectionCustomControlsDelete(d *schema.ResourceData, m interface{
 
 func expandInspectionCustomControls(d *schema.ResourceData) inspection_custom_controls.InspectionCustomControl {
 	custom_control := inspection_custom_controls.InspectionCustomControl{
+		ID:                               d.Id(),
 		Action:                           d.Get("action").(string),
 		ActionValue:                      d.Get("action_value").(string),
 		ControlNumber:                    d.Get("control_number").(string),
