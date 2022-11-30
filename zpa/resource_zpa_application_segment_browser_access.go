@@ -132,10 +132,20 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
 			},
-			// "ip_anchored": {
-			// 	Type:     schema.TypeBool,
-			// 	Optional: true,
-			// },
+			"icmp_access_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "NONE",
+				ValidateFunc: validation.StringInSlice([]string{
+					"PING_TRACEROUTING",
+					"PING",
+					"NONE",
+				}, false),
+			},
+			"ip_anchored": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"is_cname_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -298,7 +308,8 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	// _ = d.Set("ip_anchored", resp.IPAnchored)
+	_ = d.Set("ip_anchored", resp.IPAnchored)
+	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
@@ -401,18 +412,18 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 		BypassType:           d.Get("bypass_type").(string),
 		ConfigSpace:          d.Get("config_space").(string),
 		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
-		// IcmpAccessType:       d.Get("icmp_access_type").(string),
-		Description:     d.Get("description").(string),
-		DomainNames:     SetToStringList(d, "domain_names"),
-		DoubleEncrypt:   d.Get("double_encrypt").(bool),
-		Enabled:         d.Get("enabled").(bool),
-		HealthCheckType: d.Get("health_check_type").(string),
-		HealthReporting: d.Get("health_reporting").(string),
-		// IpAnchored:      d.Get("ip_anchored").(bool),
-		IsCnameEnabled:  d.Get("is_cname_enabled").(bool),
-		Name:            d.Get("name").(string),
-		TCPAppPortRange: []common.NetworkPorts{},
-		UDPAppPortRange: []common.NetworkPorts{},
+		ICMPAccessType:       d.Get("icmp_access_type").(string),
+		Description:          d.Get("description").(string),
+		DomainNames:          SetToStringList(d, "domain_names"),
+		DoubleEncrypt:        d.Get("double_encrypt").(bool),
+		Enabled:              d.Get("enabled").(bool),
+		HealthCheckType:      d.Get("health_check_type").(string),
+		HealthReporting:      d.Get("health_reporting").(string),
+		IPAnchored:           d.Get("ip_anchored").(bool),
+		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
+		Name:                 d.Get("name").(string),
+		TCPAppPortRange:      []common.NetworkPorts{},
+		UDPAppPortRange:      []common.NetworkPorts{},
 	}
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
