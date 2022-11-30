@@ -103,3 +103,8 @@ const (
 	InspectionCustomControlSeverity      = "CRITICAL"
 	InspectionCustomControlType          = "RESPONSE"
 )
+
+// Inspection Custom Control
+const (
+	InspectionProfileDescription = "testAcc_access_rule"
+)
