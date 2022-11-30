@@ -29,11 +29,11 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - [PR #219](https://github.com/zscaler/terraform-provider-zia/pull/219) Added missing ``ip_anchored`` parameter to ``resource_zpa_application_segment_browser_access``
 - [PR #220](https://github.com/zscaler/terraform-provider-zia/pull/220) Udated provider to Zscaler-SDK-Go v0.3.2 to ensure pagination works correctly when more than 500 items on a list.
 
-## 2.5.0 (November, 30 2022)
+## 2.5.0 (November, 27 2022)
 
 ### Notes
 
-- Release date: **(November, 30 2022)**
+- Release date: **(November, 27 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Fixes
@@ -41,11 +41,11 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - [PR #217](https://github.com/zscaler/terraform-provider-zia/pull/217) Fixed Read/Update/Delete functions to allow automatic recreation of resources, that have been manually deleted via the UI.
 - [PR #217](https://github.com/zscaler/terraform-provider-zia/pull/217) Updated provider to zscaler-sdk-go v0.2.2
 
-## 2.4.1
+## 2.4.1 (November, 9 2022)
 
 ### Notes
 
-- Release date: **(November 9 2022)**
+- Release date: **(November, 9 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Ehancements
@@ -57,14 +57,13 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 ### Bug Fixes
 
 - [PR #206](https://github.com/zscaler/terraform-provider-zpa/pull/206) - Fix TCP/UDP port overlap check issue
-
 - [PR #207](https://github.com/zscaler/terraform-provider-zpa/pull/207) - Fix duplicated domain_name entries during TCP/UDP port overlap issues
 
-## 2.4.0
+## 2.4.0 (October, 24 2022)
 
 ### Notes
 
-- Release date: **(October 24 2022)**
+- Release date: **(October, 24 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Ehancements
@@ -92,21 +91,21 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - [PR #199](https://github.com/zscaler/terraform-provider-zpa/pull/199) - Fix application segment tcp/udp port conflict. The provider will issue an error message when 2 application segments have conflicting domain_name, tcp/udp ports
 - [PR #200](https://github.com/zscaler/terraform-provider-zpa/pull/200) - Implemented new application segment parameter ``force_delete`` to ensure dependency removal prior to delete action.
 
-## 2.3.2
+## 2.3.2 (September, 2 2022)
 
 ### Notes
 
-- Release date: **(September 2 2022)**
+- Release date: **(September, 2 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
 
 Fixed authentication issue when specifying zpa_cloud="PRODUCTION"
-## 2.3.1
+## 2.3.1 (August 17 2022)
 
 ### Notes
 
-- Release date: **(August 17 2022)**
+- Release date: **(August, 17 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
@@ -118,43 +117,47 @@ Fixed authentication issue when specifying zpa_cloud="PRODUCTION"
 - [PR #176](https://github.com/zscaler/terraform-provider-zpa/pull/176) Fixed application segment PRA drifts caused by tcp & udp ports.
 - [PR #177](https://github.com/zscaler/terraform-provider-zpa/pull/177) Fixed application segment Inspection drifts caused by tcp & udp ports.
 
-## 2.3.0
+## 2.3.0 (August, 17 2022)
 
 ### Notes
 
-- Release date: **(August 17 2022)**
+- Release date: **(August, 17 2022)**
 - Supported Terraform version: **v1.x**
 
-### Ehancements
+### Enhancements
 
 - [PR #161](https://github.com/zscaler/terraform-provider-zpa/pull/161) Integrated newly created Zscaler GO SDK. Models are now centralized in the repository [zscaler-sdk-go](https://github.com/zscaler/zscaler-sdk-go)
 
-## 2.2.2
+## 2.2.2 (July, 19 2022)
 
 ### Notes
 
-- Release date: **(July 19 2022)**
+- Release date: **(July, 19 2022)**
 - Supported Terraform version: **v1.x**
 
-### Ehancements
+### Enhancements
 
 - [PR #159](https://github.com/zscaler/terraform-provider-zpa/pull/159) Added Terraform UserAgent for Backend API tracking
 
-## 2.2.1
-### Notes:
-- Release date: **(July 6 2022)**
+## 2.2.1 (July, 6 2022)
+
+### Notes
+
+- Release date: **(July, 6 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
+
 - Fix: Fixed authentication mechanism variables for ZPA Beta and GOV
 
 ### Documentation
+
 1. Fixed application segment documentation and examples
 
-## 2.2.0
+## 2.2.0 (June 30, 2022)
 
 ### Notes:
-- Release date: **(June 30 2022)**
+- Release date: **(June, 30 2022)**
 - Supported Terraform version: **v1.x**
 
 ### New Features
@@ -190,10 +193,10 @@ Fixed authentication issue when specifying zpa_cloud="PRODUCTION"
 1. Added release notes guide to documentation PR [#140](https://github.com/zscaler/terraform-provider-zpa/pull/140)
 2. Fixed documentation misspellings
 
-## 2.1.5
+## 2.1.5 (May, 18 2022)
 
 ### Notes:
-- Release date: **(May 18 2022)**
+- Release date: **(May, 18 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Annoucements:
@@ -219,14 +222,15 @@ provider "zpa" {}
 - ``zpa_posture_profile`` Updated search mechanism to support posture profile name search without the Zscaler cloud name. PR #123
 - ``zpa_trusted_network`` Updated search mechanism to support trusted network name search without the Zscaler cloud name. PR #123
 
-### Bug Fixes:
+### Bug Fixes
 
 - Fixed ``zpa_application_segment`` to support updates on ``tcp_port_ranges``, ``udp_port_ranges`` and ``tcp_port_range``, ``udp_port_range`` Issue #103
 
-## 2.1.3
+## 2.1.3 (May, 18 2022)
 
 ### Notes:
-- Release date: **(May 18 2022)**
+
+- Release date: **(May, 18 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Annoucements:
@@ -247,39 +251,43 @@ provider "zpa" {}
 
 ```
 
-## 2.1.2
+## 2.1.2 (May, 6 2022)
 
 ### Notes:
-- Release date: **(May 6 2022)**
+- Release date: **(May, 6 2022)**
 - Supported Terraform version: **v1.x**
 
-### Bug Fixes:
+### Bug Fixes
 
 - Fix: tcp and udp ports were not being updated during changes, requiring the application segment resource to be fully destroyed and rebuilt. Implemented ``ForceNew`` in the the ``zpa_application_segment`` resource parameters: ``tcp_port_range``, ``udp_port_range``, ``tcp_port_ranges``, ``udp_port_ranges``. This behavior instructs Terraform to first destroy and then recreate the resource if any of the attributes change in the configuration, as opposed to trying to update the existing resource. The destruction of the resource does not impact attached resources such as server groups, segment groups or policies.
 
-## 2.1.1
+## 2.1.1 (April, 27 2022)
 
 ### Notes:
-- Release date: **(April 27 2022)**
+- Release date: **(April, 27 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements:
+
 1. Refactored and added new acceptance tests for better statement coverage. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#88], [PR#96], [PR#98], [PR#99]
 
 2. Support explicitly empty port ranges. Allow optional use of Attributes as Blocks syntax for ``zpa_application_segment`` {tcp,udp}_port_range blocks, allowing clean specification of "no port ranges" in dynamic contexts. [PR#97](https://github.com/zscaler/terraform-provider-zpa/pull/97) Thanks @isometry
 
-### Deprecations:
+### Deprecations
+
 1. Deprecated all legacy policy set controller endpoints: ``/policySet/global``, ``/policySet/reauth``, ``/policySet/bypass`` [PR#88](https://github.com/zscaler/terraform-provider-zpa/pull/88)
 
 2. Deprecated all references to ZPA private API gateway. [PR#87](https://github.com/zscaler/terraform-provider-zpa/pull/87)
 
-## 2.1.0
+## 2.1.0 (March, 05 2022)
 
-### Notes:
-- Release date: **(March 05 2022)**
+### Notes
+
+- Release date: **(March, 05 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements:
+
 1. Refactored and added new acceptance tests. These tests are considered best practice and were added to routinely verify that the ZPA Terraform Plugin produces the expected outcome. [PR#xx](https://github.com/zscaler/terraform-provider-zpa/pull/xx)
 
 - ``data_source_zpa_app_connector_controller_test``
@@ -310,28 +318,31 @@ provider "zpa" {}
 - ``resource_zpa_policy_access_timeout_rule_test``
 - ``resource_zpa_policy_access_forwarding_rule_test``
 
-### Bug Fixes:
+### Bug Fixes
+
 - Fix: Acceptance Tests for ``zpa_browser_access_test``
 - Fix: Consolidate Policy Type resources
 - Fix: Refactor ZPA API Client
 
-## 2.0.7
+## 2.0.7 (February, 17 2022)
 
 ### Notes:
-- Release date: **(February 17 2022)**
+- Release date: **(February, 17 2022)**
 - Supported Terraform version: **v1.x**
 
-### Bug Fixes:
+### Bug Fixes
+
 - ZPA-50: Fixed and removed deprecated arguments from ``zpa_application_segments`` data source and resource :wrench:
 - ZPA-50: Fixed ``zpa_posture_profile`` and ``zpa_trusted_networks`` acceptance tests to include ZIA cloud name :wrench:
 
 ### Enhancements:
+
 - ZPA-51: Updated common ``NetworkPorts`` flatten and expand functions for better optimization and global use across multiple application segment resources. This update affects the following resources: ``data_source_zpa_application_segment``, ``data_source_zpa_browser_access`` and ``resource_zpa_application_segment``, ``resource_source_zpa_browser_access`` :rocket:
 
-## 2.0.6
+## 2.0.6 (February, 3 2022)
 
 ### Notes:
-- Release date: **(February 3 2022)**
+- Release date: **(February, 3 2022)**
 - Supported Terraform version: **v1.x**
 
 ### New Data Sources:
@@ -366,13 +377,14 @@ These tests are considered best practice and were added to routinely verify that
 - ``resource_zpa_server_group_test``
 - ``resource_zpa_service_edge_group_test``
 
-## 2.0.5
+## 2.0.5 (December, 20 2021)
 
 ### Notes:
-- Release date: **(December 20 2021)**
+- Release date: **(December, 20 2021)**
 - Supported Terraform version: **v1.x**
 
-### Enhancements:
+### Enhancements
+
 - The provider now supports the ability to import policy access resources via its `name` and/or `id` property to support easier migration of existing ZPA resources via `terraform import` command.
 - The  following policy access resources are supported:
   - resource_zpa_policy_access_rule - [PR#51](https://github.com/zscaler/terraform-provider-zpa/issues/51)] :rocket:
@@ -392,10 +404,10 @@ These tests are considered best practice and were added to routinely verify that
 - Fixed pagination issues with all resources where only the default pagesize was being returned. [PR#52](https://github.com/zscaler/terraform-provider-zpa/pull/52) :wrench:
 - Fixed issue where Terraform showed that resources had been modified even though nothing had been changed in the upstream resources.[PR#54](https://github.com/zscaler/terraform-provider-zpa/pull/54) :wrench:
 
-## 2.0.4
+## 2.0.4 (December, 6 2021)
 
 ### Notes:
-- Release date: **(December 6 2021)**
+- Release date: **(December, 6 2021)**
 - Supported Terraform version: **v1.x**
 
 ### New Data Sources:
@@ -419,40 +431,40 @@ Note: To import resources not currently supported, the resource numeric ID is re
 ### Bug Fixes:
 - Fixed [INFO] and [Error] message in ``data_source_zpa_lss_config_controller`` [PR#43](https://github.com/zscaler/terraform-provider-zpa/pull/43) 🔧
 
-## 2.0.3
+## 2.0.3 (November, 21 2021)
 
 ### Notes:
-- Release date: **(November 21 2021)**
+- Release date: **(November, 21 2021)**
 - Supported Terraform version: **v1.x**
 
 ###  Dependabot Updates:
 - Dependabot updates [PR#33](https://github.com/zscaler/terraform-provider-zpa/pull/33/) Bump github.com/hashicorp/terraform-plugin-docs from 0.5.0 to 0.5.1 #33
 - Dependabot updates [PR#34](https://github.com/zscaler/terraform-provider-zpa/pull/34) Bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.8.0 to 2.9.0
 
-## 2.0.2
+## 2.0.2 (November, 7 2021)
 
 ### Notes:
-- Release date: **(November 7 2021)**
+- Release date: **(November, 7 2021)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements:
 - Added custom validation function ``ValidateStringFloatBetween`` to ``resource_zpa_app_connector_group`` to validate ``longitude`` and ``latitude`` parameters. [ZPA-17](https://github.com/zscaler/terraform-provider-zpa/pull/17).
 - Added custom validation function ``ValidateStringFloatBetween`` to ``resource_zpa_service_edge_group`` to validate ``longitude`` and ``latitude`` parameters. [ZPA-18](https://github.com/zscaler/terraform-provider-zpa/pull/18).
 
-## 2.0.1
+## 2.0.1 (November, 4 2021)
 
 ### Notes:
-- Release date: **(November 4 2021)**
+- Release date: **(November, 4 2021)**
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes:
 - Fixed issue where provider authentication parameters for hard coded credentials was not working:
 - Changed the following variable names: ``client_id``, ``client_secret`` and ``customerid`` to ``zpa_client_id``, ``zpa_client_secret`` and ``zpa_customer_id``.
 
-## 2.0.0
+## 2.0.0 (November, 3 2021)
 
 ### Notes:
-- Release date: **(November 3 2021)**
+- Release date: **(November, 3 2021)**
 - Supported Terraform version: **v1.x**
 
 - New management APIs are now available to manage App Connectors, App Connector Groups, Service Edges, Service Edge Groups, and Log Streaming Service (LSS) configurations.
@@ -505,10 +517,10 @@ Note: To import resources not currently supported, the resource numeric ID is re
 
 3. Deprecated ``tcp_port_ranges`` and ``udp_port_ranges`` fields are deprecated and replaced with ``tcp_port_range`` and ``udp_port_range``. The values will be kept in Terraform schema until next provider update for backwards compatibility. 💥
 
-## 1.0.0
+## 1.0.0 (September, 23 2021)
 
 ### Notes:
-- Release date: **(September 23 2021)**
+- Release date: **(September, 23 2021)**
 - Supported Terraform version: **v1.x**
 
 ### Initial Release
