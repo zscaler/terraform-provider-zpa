@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
 )
 
 func TestAccDataSourceInspectionProfile_Basic(t *testing.T) {
@@ -18,10 +19,11 @@ func TestAccDataSourceInspectionProfile_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 
 			{
-				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "description", resourceTypeAndName, "description"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "paranoia_level", resourceTypeAndName, "paranoia_level"),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "predefined_controls.#", "7"),
 				),
