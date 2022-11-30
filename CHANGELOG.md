@@ -1,15 +1,17 @@
 # Changelog
 
-## 2.5.1 (November, xx 2022)
+## 2.5.1 (November, 30 2022)
 
 ### Notes
 
-- Release date: **(November, xx 2022)**
+- Release date: **(November, 30 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Fixes
 
 - [PR #219](https://github.com/zscaler/terraform-provider-zia/pull/219) Added ForceNew helper to ``zpa_policy_timeout_rule`` parameters ``reauth_idle_timeout`` and ``reauth_timeout``. Changing the values will cause the resource to be recreated on the fly.
+- [PR #219](https://github.com/zscaler/terraform-provider-zia/pull/219) Added missing ``ip_anchored`` parameter to ``resource_zpa_application_segment_browser_access``
+- [PR #220](https://github.com/zscaler/terraform-provider-zia/pull/220) Udated provider to Zscaler-SDK-Go v0.3.2 to ensure pagination works correctly when more than 500 items on a list.
 
 ## 2.5.0 (November, 30 2022)
 
