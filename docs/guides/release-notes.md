@@ -16,11 +16,11 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 2.5.1 (November, xx 2022)
+## 2.5.1 (November, 30 2022)
 
 ### Notes
 
-- Release date: **(November, xx 2022)**
+- Release date: **(November, 30 2022)**
 - Supported Terraform version: **v1.x**
 
 ### Fixes
