@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.5.1 (November, xx 2022)
+
+### Notes
+
+- Release date: **(November, xx 2022)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #219](https://github.com/zscaler/terraform-provider-zia/pull/219) Added ForceNew helper to ``zpa_policy_timeout_rule`` parameters ``reauth_idle_timeout`` and ``reauth_timeout``. Changing the values will cause the resource to be recreated on the fly.
+
 ## 2.5.0 (November, 30 2022)
 
 ### Notes
