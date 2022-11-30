@@ -539,10 +539,12 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"reauth_idle_timeout": {
 			Type:     schema.TypeString,
 			Optional: true,
+			ForceNew: true,
 		},
 		"reauth_timeout": {
 			Type:     schema.TypeString,
 			Optional: true,
+			ForceNew: true,
 		},
 		"zpn_inspection_profile_id": {
 			Type:     schema.TypeString,
