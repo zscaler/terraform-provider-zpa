@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.5.1``
+``Last updated: v2.5.2``
 
 ---
+
+# 2.5.2 (December, 02 2022)
+
+### Notes
+
+- Release date: **(December, 02 2022)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #223](https://github.com/zscaler/zscaler-sdk-go/pull/223) Fixed pagination issue with ZPA endpoints
 
 ## 2.5.1 (November, 30 2022)
 
