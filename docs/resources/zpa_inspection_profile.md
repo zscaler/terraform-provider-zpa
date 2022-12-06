@@ -98,3 +98,8 @@ The following arguments are supported:
 * `controls_info` - (Optional) Types for custom controls
   * `control_type` - (Optional) Control types. Supported Values: `CUSTOM`, `PREDEFINED`, `ZSCALER`
   * `count` - (Optional) Control information counts `Long`
+
+## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)

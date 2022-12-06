@@ -156,3 +156,8 @@ In addition to all arguments above, the following attributes are exported:
             - `zpn_client_type_ip_anchoring`
             - `zpn_client_type_edge_connector`
             - `zpn_client_type_zapp`
+
+## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)

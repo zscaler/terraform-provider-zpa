@@ -118,6 +118,9 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
+
 **zpa_application_segment_browser_access** Application Segment Browser Access can be imported by using <`BROWSER ACCESS ID`> or `<<BROWSER ACCESS NAME>` as the import ID.
 
 For example:

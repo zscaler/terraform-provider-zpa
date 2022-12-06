@@ -77,3 +77,8 @@ The following arguments are supported:
 * `control_rule_json` (Optional) The control rule in JSON format that has the conditions and type of control for the inspection control
 * `default_action` - (Required) The performed action. Supported values: `PASS`, `BLOCK` and `REDIRECT`
 * `default_action_value` - (Optional) This is used to provide the redirect URL if the default action is set to `REDIRECT`
+
+## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
