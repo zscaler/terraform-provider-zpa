@@ -3,12 +3,14 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
 )
 
+/*
 func ValidateStringFloatBetween(min, max float64) schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (warnings []string, errors []error) {
 		str, ok := i.(string)
@@ -30,6 +32,29 @@ func ValidateStringFloatBetween(min, max float64) schema.SchemaValidateFunc {
 
 		return
 	}
+}
+*/
+
+func ValidateLatitude(val interface{}, key string) (warns []string, errs []error) {
+	v, _ := strconv.ParseFloat(val.(string), 64)
+	if v < -90 || v > 90 {
+		errs = append(errs, fmt.Errorf("latitude must be between -90 and 90"))
+	}
+	return
+}
+
+func ValidateLongitude(val interface{}, key string) (warns []string, errs []error) {
+	v, _ := strconv.ParseFloat(val.(string), 64)
+	if v < -180 || v > 180 {
+		errs = append(errs, fmt.Errorf("longitude must be between -180 and 180"))
+	}
+	return
+}
+
+func DiffSuppressFuncCoordinate(k, old, new string, d *schema.ResourceData) bool {
+	o, _ := strconv.ParseFloat(old, 64)
+	n, _ := strconv.ParseFloat(new, 64)
+	return math.Round(o*1000000)/1000000 == math.Round(n*1000000)/1000000
 }
 
 func SetToStringSlice(d *schema.Set) []string {

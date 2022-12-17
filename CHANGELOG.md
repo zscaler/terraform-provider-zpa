@@ -1,5 +1,16 @@
 # Changelog
 
+# 2.5.3 (January, 2 2023)
+
+### Notes
+
+- Release date: **(January, 2 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #224](https://github.com/zscaler/terraform-provider-zpa/pull/224) Implemented longitude/latitude math function validation for more accurancy when configuring ``zpa_app_connector_group`` resources.
+
 # 2.5.2 (December, 02 2022)
 
 ### Notes
@@ -9,7 +20,7 @@
 
 ### Bug Fix
 
-- [PR #223](https://github.com/zscaler/zscaler-sdk-go/pull/223) Fixed pagination issue with ZPA endpoints
+- [PR #223](https://github.com/zscaler/terraform-provider-zpa/pull/223) Fixed pagination issue with ZPA endpoints
 
 ## 2.5.1 (November, 30 2022)
 
