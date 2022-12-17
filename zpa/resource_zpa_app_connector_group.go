@@ -83,10 +83,11 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Description: "Whether this App Connector Group is enabled or not",
 			},
 			"latitude": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Latitude of the App Connector Group. Integer or decimal. With values in the range of -90 to 90",
-				ValidateFunc: ValidateStringFloatBetween(-90, 90),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     ValidateLatitude,
+				DiffSuppressFunc: DiffSuppressFuncCoordinate,
+				Description:      "Latitude of the App Connector Group. Integer or decimal. With values in the range of -90 to 90",
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -94,10 +95,11 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Description: "Location of the App Connector Group",
 			},
 			"longitude": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Longitude of the App Connector Group. Integer or decimal. With values in the range of -180 to 180",
-				ValidateFunc: ValidateStringFloatBetween(-180.0, 180.0),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     ValidateLongitude,
+				DiffSuppressFunc: DiffSuppressFuncCoordinate,
+				Description:      "Longitude of the App Connector Group. Integer or decimal. With values in the range of -180 to 180",
 			},
 			"lss_app_connector_group": {
 				Type:     schema.TypeBool,

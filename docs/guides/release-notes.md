@@ -12,9 +12,21 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.5.2``
+``Last updated: v2.5.3``
 
 ---
+
+# 2.5.3 (January, 2 2023)
+
+### Notes
+
+- Release date: **(January, 2 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #224](https://github.com/zscaler/terraform-provider-zpa/pull/224) Implemented longitude/latitude math function validation for more accurancy when configuring ``zpa_app_connector_group`` resources.
+
 
 # 2.5.2 (December, 02 2022)
 
