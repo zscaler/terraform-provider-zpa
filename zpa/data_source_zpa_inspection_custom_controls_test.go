@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
 )
 
 func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/zscaler/terraform-provider-zpa/zpa"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa"
 )
 
 func main() {
