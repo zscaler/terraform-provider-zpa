@@ -29,13 +29,14 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentPRADestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentPRAConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentPRAConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled, variable.AppSegmentSelectConnectorCloseToApp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentPRAExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", "tf-acc-test-"+appSegmentGeneratedName),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "select_connector_close_to_app", strconv.FormatBool(variable.AppSegmentSelectConnectorCloseToApp)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
@@ -47,13 +48,14 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentPRAConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentPRAConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled, variable.AppSegmentSelectConnectorCloseToApp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentPRAExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", "tf-acc-test-"+appSegmentGeneratedName),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "select_connector_close_to_app", strconv.FormatBool(variable.AppSegmentSelectConnectorCloseToApp)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
@@ -108,7 +110,7 @@ func testAccCheckApplicationSegmentPRAExists(resource string, segment *applicati
 	}
 }
 
-func testAccCheckApplicationSegmentPRAConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentPRAConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled, connectorCloseEnabled bool) string {
 	return fmt.Sprintf(`
 
 // segment group resource
@@ -124,7 +126,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled),
+		getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled, connectorCloseEnabled),
 
 		// data source variables
 		resourcetype.ZPAApplicationSegmentPRA,
@@ -133,7 +135,7 @@ data "%s" "%s" {
 	)
 }
 
-func getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+func getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled, connectorCloseEnabled bool) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
@@ -141,6 +143,7 @@ resource "%s" "%s" {
 	description = "tf-acc-test-%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
+	select_connector_close_to_app = "%s"
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_port_ranges = ["22", "22", "3389", "3389"]
@@ -179,6 +182,7 @@ resource "%s" "%s" {
 		generatedName,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
+		strconv.FormatBool(connectorCloseEnabled),
 		// rPort,
 		// rPort,
 		segmentGroupTypeAndName,

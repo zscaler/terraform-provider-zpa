@@ -31,35 +31,35 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled, variable.AppSegmentSelectConnectorCloseToApp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", "tf-acc-test-"+appSegmentGeneratedName),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "select_connector_close_to_app", strconv.FormatBool(variable.AppSegmentSelectConnectorCloseToApp)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
 				),
 			},
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled, variable.AppSegmentSelectConnectorCloseToApp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", "tf-acc-test-"+appSegmentGeneratedName),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "select_connector_close_to_app", strconv.FormatBool(variable.AppSegmentSelectConnectorCloseToApp)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
 				),
 			},
 		},
@@ -108,7 +108,7 @@ func testAccCheckApplicationSegmentExists(resource string, segment *applications
 	}
 }
 
-func testAccCheckApplicationSegmentConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled, connectorCloseEnabled bool) string {
 	return fmt.Sprintf(`
 
 // segment group resource
@@ -124,7 +124,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getApplicationSegmentResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, rPort, enabled, cnameEnabled),
+		getApplicationSegmentResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, rPort, enabled, cnameEnabled, connectorCloseEnabled),
 
 		// data source variables
 		resourcetype.ZPAApplicationSegment,
@@ -133,7 +133,7 @@ data "%s" "%s" {
 	)
 }
 
-func getApplicationSegmentResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
+func getApplicationSegmentResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled, connectorCloseEnabled bool) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
@@ -141,10 +141,10 @@ resource "%s" "%s" {
 	description = "tf-acc-test-%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
+	select_connector_close_to_app = "%s"
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_port_ranges = ["%d", "%d"]
-	udp_port_ranges = ["%d", "%d"]
 	domain_names = ["test.example.com"]
 	segment_group_id = "${%s.id}"
 	server_groups {
@@ -161,8 +161,7 @@ resource "%s" "%s" {
 		generatedName,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
-		rPort,
-		rPort,
+		strconv.FormatBool(connectorCloseEnabled),
 		rPort,
 		rPort,
 		segmentGroupTypeAndName,

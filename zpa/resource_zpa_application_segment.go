@@ -76,14 +76,14 @@ func resourceApplicationSegment() *schema.Resource {
 			"tcp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
+				ForceNew:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
+				ForceNew:    true,
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -173,6 +173,12 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				// Computed: true,
+				Default: false,
+			},
 			"server_groups": {
 				Type:        schema.TypeSet,
 				Required:    true,
@@ -202,9 +208,10 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 	}
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
-		return fmt.Errorf("please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
+
 	resp, _, err := zClient.applicationsegment.Create(req)
 	if err != nil {
 		return err
@@ -233,6 +240,8 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 
 	log.Printf("[INFO] Reading application segment and settings states: %+v\n", resp)
 	_ = d.Set("id", resp.ID)
+	_ = d.Set("name", resp.Name)
+	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
 	_ = d.Set("bypass_type", resp.BypassType)
@@ -240,14 +249,13 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("domain_names", resp.DomainNames)
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
-	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
+	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
@@ -355,25 +363,27 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 
 func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id string) applicationsegment.ApplicationSegmentResource {
 	details := applicationsegment.ApplicationSegmentResource{
-		ID:                   d.Id(),
-		SegmentGroupID:       d.Get("segment_group_id").(string),
-		SegmentGroupName:     d.Get("segment_group_name").(string),
-		BypassType:           d.Get("bypass_type").(string),
-		ConfigSpace:          d.Get("config_space").(string),
-		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
-		IcmpAccessType:       d.Get("icmp_access_type").(string),
-		Description:          d.Get("description").(string),
-		DomainNames:          SetToStringList(d, "domain_names"),
-		DoubleEncrypt:        d.Get("double_encrypt").(bool),
-		Enabled:              d.Get("enabled").(bool),
-		HealthCheckType:      d.Get("health_check_type").(string),
-		HealthReporting:      d.Get("health_reporting").(string),
-		IpAnchored:           d.Get("ip_anchored").(bool),
-		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
-		Name:                 d.Get("name").(string),
-		ServerGroups:         expandAppServerGroups(d),
-		TCPAppPortRange:      []common.NetworkPorts{},
-		UDPAppPortRange:      []common.NetworkPorts{},
+		ID:                        d.Id(),
+		Name:                      d.Get("name").(string),
+		SegmentGroupID:            d.Get("segment_group_id").(string),
+		SegmentGroupName:          d.Get("segment_group_name").(string),
+		BypassType:                d.Get("bypass_type").(string),
+		ConfigSpace:               d.Get("config_space").(string),
+		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
+		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
+		IcmpAccessType:            d.Get("icmp_access_type").(string),
+		Description:               d.Get("description").(string),
+		DomainNames:               SetToStringList(d, "domain_names"),
+		DoubleEncrypt:             d.Get("double_encrypt").(bool),
+		Enabled:                   d.Get("enabled").(bool),
+		HealthCheckType:           d.Get("health_check_type").(string),
+		HealthReporting:           d.Get("health_reporting").(string),
+		IpAnchored:                d.Get("ip_anchored").(bool),
+		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
+
+		ServerGroups:    expandAppServerGroups(d),
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
 	}
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}

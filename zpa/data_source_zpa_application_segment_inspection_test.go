@@ -25,7 +25,7 @@ func TestAccDataSourceApplicationSegmentInspection_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentInspectionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, generatedName, generatedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, generatedName, generatedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled, variable.AppSegmentSelectConnectorCloseToApp),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
@@ -35,6 +35,7 @@ func TestAccDataSourceApplicationSegmentInspection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "segment_group_id", resourceTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "select_connector_close_to_app", strconv.FormatBool(variable.AppSegmentSelectConnectorCloseToApp)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "tcp_port_ranges.#", "2"),
 				),

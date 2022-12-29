@@ -71,6 +71,10 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
@@ -218,6 +222,7 @@ func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m int
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
+		_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 		_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)

@@ -138,6 +138,12 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				// Computed: true,
+				Default: false,
+			},
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -350,6 +356,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
+	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
@@ -459,24 +466,25 @@ func detachSraPortalsFromGroup(client *Client, segmentID, segmentGroupID string)
 
 func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentpra.AppSegmentPRA {
 	details := applicationsegmentpra.AppSegmentPRA{
-		ID:                   d.Id(),
-		SegmentGroupID:       d.Get("segment_group_id").(string),
-		BypassType:           d.Get("bypass_type").(string),
-		ConfigSpace:          d.Get("config_space").(string),
-		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
-		IcmpAccessType:       d.Get("icmp_access_type").(string),
-		Description:          d.Get("description").(string),
-		DoubleEncrypt:        d.Get("double_encrypt").(bool),
-		Enabled:              d.Get("enabled").(bool),
-		HealthReporting:      d.Get("health_reporting").(string),
-		HealthCheckType:      d.Get("health_check_type").(string),
-		IpAnchored:           d.Get("ip_anchored").(bool),
-		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
-		DomainNames:          expandStringInSlice(d, "domain_names"),
-		TCPAppPortRange:      []common.NetworkPorts{},
-		UDPAppPortRange:      []common.NetworkPorts{},
-		ServerGroups:         expandPRAAppServerGroups(d),
-		CommonAppsDto:        expandCommonAppsDto(d),
+		ID:                        d.Id(),
+		SegmentGroupID:            d.Get("segment_group_id").(string),
+		BypassType:                d.Get("bypass_type").(string),
+		ConfigSpace:               d.Get("config_space").(string),
+		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
+		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
+		IcmpAccessType:            d.Get("icmp_access_type").(string),
+		Description:               d.Get("description").(string),
+		DoubleEncrypt:             d.Get("double_encrypt").(bool),
+		Enabled:                   d.Get("enabled").(bool),
+		HealthReporting:           d.Get("health_reporting").(string),
+		HealthCheckType:           d.Get("health_check_type").(string),
+		IpAnchored:                d.Get("ip_anchored").(bool),
+		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
+		DomainNames:               expandStringInSlice(d, "domain_names"),
+		TCPAppPortRange:           []common.NetworkPorts{},
+		UDPAppPortRange:           []common.NetworkPorts{},
+		ServerGroups:              expandPRAAppServerGroups(d),
+		CommonAppsDto:             expandCommonAppsDto(d),
 	}
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)

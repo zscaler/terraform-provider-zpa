@@ -573,10 +573,12 @@ func resourceNetworkPortsSchema(desc string) *schema.Schema {
 				"from": {
 					Type:     schema.TypeString,
 					Optional: true,
+					ForceNew: true,
 				},
 				"to": {
 					Type:     schema.TypeString,
 					Optional: true,
+					ForceNew: true,
 				},
 			},
 		},
@@ -620,7 +622,7 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Optional: true,
-		Computed: true,
+		ForceNew: true,
 		// Activate the "Attributes as Blocks" processing mode to permit dynamic declaration of no ports
 		ConfigMode:  schema.SchemaConfigModeAttr,
 		Description: desc,
@@ -629,12 +631,14 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 				"from": {
 					Type:         schema.TypeString,
 					Optional:     true,
-					ValidateFunc: validation.NoZeroValues,
+					ForceNew:     true,
+					ValidateFunc: validation.IsPortNumber,
 				},
 				"to": {
 					Type:         schema.TypeString,
 					Optional:     true,
-					ValidateFunc: validation.NoZeroValues,
+					ForceNew:     true,
+					ValidateFunc: validation.IsPortNumber,
 				},
 			},
 		},

@@ -30,13 +30,14 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentBrowserAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled, variable.AppSegmentSelectConnectorCloseToApp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", "tf-acc-test-"+browserAccessGeneratedName),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessCnameEnabled)),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "select_connector_close_to_app", strconv.FormatBool(variable.AppSegmentSelectConnectorCloseToApp)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "bypass_type", "NEVER"),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(browserAccessTypeAndName, "segment_group_id"),
@@ -47,13 +48,14 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled, variable.AppSegmentSelectConnectorCloseToApp),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", "tf-acc-test-"+browserAccessGeneratedName),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessCnameEnabled)),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "select_connector_close_to_app", strconv.FormatBool(variable.AppSegmentSelectConnectorCloseToApp)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "bypass_type", "NEVER"),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(browserAccessTypeAndName, "segment_group_id"),
@@ -107,7 +109,7 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 	}
 }
 
-func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled, connectorCloseEnabled bool) string {
 	return fmt.Sprintf(`
 
 // application segment browser access resource
@@ -123,7 +125,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled),
+		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled, connectorCloseEnabled),
 
 		// data source variables
 		resourcetype.ZPAApplicationSegmentBrowserAccess,
@@ -132,7 +134,7 @@ data "%s" "%s" {
 	)
 }
 
-func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled, connectorCloseEnabled bool) string {
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "jenkins" {
@@ -144,6 +146,7 @@ resource "%s" "%s" {
 	description = "tf-acc-test-%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
+	select_connector_close_to_app = "%s"
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_port_range {
@@ -175,6 +178,7 @@ resource "%s" "%s" {
 		generatedName,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
+		strconv.FormatBool(connectorCloseEnabled),
 		segmentGroupTypeAndName,
 		// serverGroupTypeAndName,
 		segmentGroupTypeAndName,
