@@ -1,4 +1,4 @@
-module github.com/zscaler/terraform-provider-zpa
+module github.com/zscaler/terraform-provider-zpa/v2
 
 go 1.19
 
