@@ -214,8 +214,8 @@ github.com/hashicorp/go-plugin v1.3.0/go.mod h1:F9eH4LrE/ZsRdbwhfjs9k9HoDUwAHnYt
 github.com/hashicorp/go-plugin v1.4.0/go.mod h1:5fGEH17QVwTTcR0zV7yhDPLLmFX9YSZ38b18Udy6vYQ=
 github.com/hashicorp/go-plugin v1.4.6 h1:MDV3UrKQBM3du3G7MApDGvOsMYy3JQJ4exhSoKBAeVA=
 github.com/hashicorp/go-plugin v1.4.6/go.mod h1:viDMjcLJuDui6pXb8U4HVfb8AamCWhHGUjr2IrTF67s=
-github.com/hashicorp/go-retryablehttp v0.7.1 h1:sUiuQAnLlbvmExtFQs72iFW/HXeUn8Z1aJLQ4LJJbTQ=
-github.com/hashicorp/go-retryablehttp v0.7.1/go.mod h1:vAew36LZh98gCBJNLH42IQ1ER/9wtLZZ8meHqQvEYWY=
+github.com/hashicorp/go-retryablehttp v0.7.2 h1:AcYqCvkpalPnPF2pn0KamgwamS42TqUDDYFRKq/RAd0=
+github.com/hashicorp/go-retryablehttp v0.7.2/go.mod h1:Jy/gPYAdjqffZ/yFGCFV2doI5wjtH1ewM9u8iYVjtX8=
 github.com/hashicorp/go-safetemp v1.0.0/go.mod h1:oaerMy3BhqiTbVye6QuFhFtIceqFoDHxNAB65b+Rj1I=
 github.com/hashicorp/go-uuid v1.0.0/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/go-uuid v1.0.1/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
@@ -424,8 +424,8 @@ github.com/zclconf/go-cty v1.12.1 h1:PcupnljUm9EIvbgSHQnHhUr3fO6oFmkOrvs2BAFNXXY
 github.com/zclconf/go-cty v1.12.1/go.mod h1:s9IfD1LK5ccNMSWCVFCE2rJfHiZgi7JijgeWIMfhLvA=
 github.com/zclconf/go-cty-debug v0.0.0-20191215020915-b22d67c1ba0b/go.mod h1:ZRKQfBXbGkpdV6QMzT3rU1kSTAnfu1dO8dPKjYprgj8=
 github.com/zclconf/go-cty-yaml v1.0.2/go.mod h1:IP3Ylp0wQpYm50IHK8OZWKMu6sPJIUgKa8XhiVHura0=
-github.com/zscaler/zscaler-sdk-go v0.5.5 h1:CZ4rEb1IrT7QRM2S7g9Nrtp9JxS8FOcN5ZgmxuGOqlk=
-github.com/zscaler/zscaler-sdk-go v0.5.5/go.mod h1:BvxM0j3xTM3Vb6FHUmuOKqRgNHv0EqGXfe99d1geUwc=
+github.com/zscaler/zscaler-sdk-go v0.5.7 h1:pofcewZTNMgCPnHtSxbKG5d23cRlo7pawnfIlNLvkBA=
+github.com/zscaler/zscaler-sdk-go v0.5.7/go.mod h1:ta9P9guhFY1ivEhesMUjdJ3+40AHsJOR4dEUDXLQ6z8=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=
