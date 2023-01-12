@@ -1,5 +1,24 @@
 # Changelog
 
+# 2.5.4 (January, 11 2023)
+
+### Notes
+
+- Release date: **(January, 11 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #232](https://github.com/zscaler/terraform-provider-zpa/pull/232) - Added new ZPA Inspection control parameters
+
+  - ZPA Inspection Profile: ``web_socket_controls``
+  - ZPA Custom Inspection Control:
+    - ``control_type``: The following values are supported:
+      - ``WEBSOCKET_PREDEFINED``, ``WEBSOCKET_CUSTOM``, ``ZSCALER``, ``CUSTOM``, ``PREDEFINED``
+
+    - ``protocol_type``: The following values are supported:
+      - ``HTTP``, ``WEBSOCKET_CUSTOM``, ``ZSCALER``, ``CUSTOM``, ``PREDEFINED``
+
 # 2.5.3 (January, 2 2023)
 
 ### Notes
