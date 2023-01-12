@@ -27,6 +27,7 @@ func TestAccDataSourceInspectionProfile_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "paranoia_level", resourceTypeAndName, "paranoia_level"),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "predefined_controls.#", "7"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

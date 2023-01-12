@@ -30,6 +30,7 @@ func TestAccResourceInspectionProfileBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
@@ -42,6 +43,7 @@ func TestAccResourceInspectionProfileBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -126,7 +128,7 @@ data "zpa_inspection_predefined_controls" "this" {
 resource "%s" "%s" {
 	name                          = "%s"
 	description                   = "%s"
-	paranoia_level              = "1"
+	paranoia_level                = "1"
 
 	dynamic "predefined_controls" {
 		for_each = data.zpa_inspection_all_predefined_controls.default_predefined_controls.list
@@ -140,6 +142,12 @@ resource "%s" "%s" {
 	predefined_controls {
 		id     = data.zpa_inspection_predefined_controls.this.id
 		action = "BLOCK"
+		protocol_type = "HTTP"
+	}
+	web_socket_controls {
+		id     = data.zpa_inspection_predefined_controls.this.id
+		action = "BLOCK"
+		protocol_type = "HTTP"
 	}
 }
 `,
