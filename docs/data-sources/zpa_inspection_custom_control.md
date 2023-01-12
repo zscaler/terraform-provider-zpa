@@ -35,15 +35,16 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `action` - (string) The performed action. Supported values: `PASS`, `BLOCK` and `REDIRECT`
+* `action` - (string) The performed action. Returned values: `PASS`, `BLOCK` and `REDIRECT`
 * `action_value` - (string) Denotes the action
 * `associated_inspection_profile_names` - (string) Name of the inspection profile
   * `id`- (string)
   * `name`- (string)
 * `control_number` - (string)
 * `control_rule_json` (string) The control rule in JSON format that has the conditions and type of control for the inspection control
+* `control_type` - (string) Returned values: `WEBSOCKET_PREDEFINED`, `WEBSOCKET_CUSTOM`, `ZSCALER`, `CUSTOM`, `PREDEFINED`
 * `creation_time` - (string)
-* `default_action` - (string) The performed action. Supported values: `PASS`, `BLOCK` and `REDIRECT`
+* `default_action` - (string) The performed action. Returned values: `PASS`, `BLOCK` and `REDIRECT`
 * `default_action_value` - (string) This is used to provide the redirect URL if the default action is set to `REDIRECT`
 * `description` - (string) Description of the custom control
 * `id` - (string)
@@ -51,7 +52,8 @@ In addition to all arguments above, the following attributes are exported:
 * `modified_time` - (string)
 * `name` - (string) Name of the custom control
 * `paranoia_level` - (string) OWASP Predefined Paranoia Level.
-* `severity` - (string) Severity of the control number. Supported values: `CRITICAL`, `ERROR`, `WARNING`, `INFO`
+* `protocol_type` - (string) Returned values: `HTTP`, `HTTPS`, `FTP`, `RDP`, `SSH`, `WEBSOCKET`
+* `severity` - (string) Severity of the control number. Returned values: `CRITICAL`, `ERROR`, `WARNING`, `INFO`
 * `type` - (string) Rules to be applied to the request or response type
 
 * `rules` - (string) Rules of the custom controls applied as conditions `JSON`

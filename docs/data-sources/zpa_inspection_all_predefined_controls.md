@@ -41,6 +41,7 @@ In addition to all arguments above, the following attributes are exported:
 * `attachment` - (string)
 * `control_group` - (string)
 * `control_number` - (string)
+* `control_type` - (string) Returned values: `WEBSOCKET_PREDEFINED`, `WEBSOCKET_CUSTOM`, `ZSCALER`, `CUSTOM`, `PREDEFINED`
 * `creation_time` - (string)
 * `default_action` - (string)
   * `PASS`
@@ -52,6 +53,7 @@ In addition to all arguments above, the following attributes are exported:
 * `modified_by` - (string)
 * `modified_time` - (string)
 * `paranoia_level` - (string)
+* `protocol_type` - (string) Returned values: `HTTP`, `HTTPS`, `FTP`, `RDP`, `SSH`, `WEBSOCKET`
 * `severity` - (string)
   * `CRITICAL`
   * `ERROR`

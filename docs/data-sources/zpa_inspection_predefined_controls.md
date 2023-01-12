@@ -42,6 +42,7 @@ In addition to all arguments above, the following attributes are exported:
 * `attachment` - (Computed)
 * `control_group` - (Computed)
 * `control_number` - (Computed)
+* `control_type` - (Computed)
 * `creation_time` - (Computed)
 * `default_action` - (Computed)
 * `default_action_value` - (Computed)
@@ -50,4 +51,5 @@ In addition to all arguments above, the following attributes are exported:
 * `modified_by` - (Computed)
 * `modified_time` - (Computed)
 * `paranoia_level` - (Computed)
+* `protocol_type` - (Computed)
 * `severity` - (Computed)
