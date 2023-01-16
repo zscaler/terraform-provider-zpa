@@ -1,10 +1,10 @@
 # Changelog
 
-# 2.5.4 (January, 11 2023)
+# 2.5.4 (January, 16 2023)
 
 ### Notes
 
-- Release date: **(January, 11 2023)**
+- Release date: **(January, 16 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Enhacements
@@ -18,6 +18,10 @@
 
     - ``protocol_type``: The following values are supported:
       - ``HTTP``, ``WEBSOCKET_CUSTOM``, ``ZSCALER``, ``CUSTOM``, ``PREDEFINED``
+
+### Fixes
+
+- [PR #234](https://github.com/zscaler/terraform-provider-zpa/pull/234) - Removed Segment Group detachment function, so it can use the new ``force_delete`` parameter when removing application segments from a segment group.
 
 # 2.5.3 (January, 2 2023)
 
