@@ -59,6 +59,10 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"control_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"creation_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -84,6 +88,10 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 				Computed: true,
 			},
 			"paranoia_level": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"protocol_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -134,6 +142,7 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("control_group", resp.ControlGroup)
 		_ = d.Set("control_number", resp.ControlNumber)
+		_ = d.Set("control_type", resp.ControlType)
 		_ = d.Set("default_action", resp.DefaultAction)
 		_ = d.Set("default_action_value", resp.DefaultActionValue)
 		_ = d.Set("description", resp.Description)
@@ -141,6 +150,7 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("paranoia_level", resp.ParanoiaLevel)
+		_ = d.Set("protocol_type", resp.ProtocolType)
 		_ = d.Set("severity", resp.Severity)
 		_ = d.Set("version", resp.Version)
 		_ = d.Set("associated_inspection_profile_names", flattenInspectionProfileNames(resp.AssociatedInspectionProfileNames))

@@ -70,6 +70,10 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"control_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"creation_time": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -95,6 +99,10 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 							Computed: true,
 						},
 						"paranoia_level": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"protocol_type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -146,6 +154,7 @@ func flattenList(list []inspection_predefined_controls.PredefinedControls) []map
 			"creation_time":                       control.CreationTime,
 			"control_group":                       control.ControlGroup,
 			"control_number":                      control.ControlNumber,
+			"control_type":                        control.ControlType,
 			"default_action":                      control.DefaultAction,
 			"default_action_value":                control.DefaultActionValue,
 			"description":                         control.Description,
@@ -153,6 +162,7 @@ func flattenList(list []inspection_predefined_controls.PredefinedControls) []map
 			"modified_time":                       control.ModifiedTime,
 			"name":                                control.Name,
 			"paranoia_level":                      control.ParanoiaLevel,
+			"protocol_type":                       control.ProtocolType,
 			"severity":                            control.Severity,
 			"version":                             control.Version,
 			"associated_inspection_profile_names": flattenInspectionProfileNames(control.AssociatedInspectionProfileNames),

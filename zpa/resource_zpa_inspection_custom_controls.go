@@ -93,6 +93,18 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Computed:    true,
 				Description: "The control rule in JSON format that has the conditions and type of control for the inspection control",
 			},
+			"control_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"WEBSOCKET_PREDEFINED",
+					"WEBSOCKET_CUSTOM",
+					"ZSCALER",
+					"CUSTOM",
+					"PREDEFINED",
+				}, false),
+			},
 			"default_action": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -120,6 +132,19 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "OWASP Predefined Paranoia Level. Range: [1-4], inclusive",
+			},
+			"protocol_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"HTTP",
+					"HTTPS",
+					"FTP",
+					"RDP",
+					"SSH",
+					"WEBSOCKET",
+				}, false),
 			},
 			"rules": {
 				Type:        schema.TypeList,
