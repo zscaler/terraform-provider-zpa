@@ -38,6 +38,10 @@ func dataSourceInspectionCustomControls() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"control_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"creation_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -63,6 +67,10 @@ func dataSourceInspectionCustomControls() *schema.Resource {
 				Computed: true,
 			},
 			"paranoia_level": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"protocol_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -150,6 +158,7 @@ func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{
 		_ = d.Set("action_value", resp.ActionValue)
 		_ = d.Set("control_number", resp.ControlNumber)
 		_ = d.Set("control_rule_json", resp.ControlRuleJson)
+		_ = d.Set("control_type", resp.ControlType)
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("default_action", resp.DefaultAction)
 		_ = d.Set("default_action_value", resp.DefaultActionValue)
@@ -158,6 +167,7 @@ func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("paranoia_level", resp.ParanoiaLevel)
+		_ = d.Set("protocol_type", resp.ProtocolType)
 		_ = d.Set("severity", resp.Severity)
 		_ = d.Set("version", resp.Version)
 		_ = d.Set("type", resp.Type)

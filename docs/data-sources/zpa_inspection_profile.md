@@ -54,5 +54,9 @@ In addition to all arguments above, the following attributes are exported:
 
 * `common_global_override_actions_config` - (string)
 * `controls_info` - (string) Types for custom controls
-  * `control_type` - (string) Control types. Supported Values: `CUSTOM`, `PREDEFINED`, `ZSCALER`
+  * `control_type` - (string) Control types. Supported Values: `WEBSOCKET_PREDEFINED`, `WEBSOCKET_CUSTOM`, `CUSTOM`, `PREDEFINED`, `ZSCALER`
   * `count` - (string) Control information counts `Long`
+* `web_socket_controls` - (string)
+  * `id` - (string) ID of the predefined control
+  * `action` - (string) The action of the predefined control. Supported values: `PASS`, `BLOCK` and `REDIRECT`
+  * `action_value` - (string) Value for the predefined controls action. This field is only required if the action is set to REDIRECT. This field is only required if the action is set to `REDIRECT`.
