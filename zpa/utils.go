@@ -193,3 +193,13 @@ func sliceHasCommon(s1, s2 []string) (bool, string) {
 	}
 	return false, ""
 }
+
+func expandStringInSlice(d *schema.ResourceData, key string) []string {
+	applicationSegments := d.Get(key).([]interface{})
+	applicationSegmentList := make([]string, len(applicationSegments))
+	for i, applicationSegment := range applicationSegments {
+		applicationSegmentList[i] = applicationSegment.(string)
+	}
+
+	return applicationSegmentList
+}

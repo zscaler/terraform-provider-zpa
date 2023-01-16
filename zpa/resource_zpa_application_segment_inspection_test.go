@@ -148,8 +148,8 @@ resource "%s" "%s" {
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_port_range {
-		from = "443"
-		to = "443"
+		from = "4443"
+		to = "4443"
 	}
 	domain_names = ["jenkins.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
@@ -158,7 +158,7 @@ resource "%s" "%s" {
 		  name                 = "jenkins.bd-hashicorp.com"
 		  domain               = "jenkins.bd-hashicorp.com"
 		  application_protocol = "HTTPS"
-		  application_port     = "443"
+		  application_port     = "4443"
 		  certificate_id       = data.zpa_ba_certificate.jenkins.id
 		  enabled = true
 		  app_types = ["INSPECT"]
