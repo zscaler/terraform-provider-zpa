@@ -13,7 +13,6 @@ import (
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
 )
 
 func resourceApplicationSegment() *schema.Resource {
@@ -307,16 +306,6 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 	zClient := m.(*Client)
 	id := d.Id()
 	log.Printf("[INFO] Deleting application segment with id %v\n", id)
-	segmentGroupId, ok := d.GetOk("segment_group_id")
-	if ok && segmentGroupId != nil {
-		gID, ok := segmentGroupId.(string)
-		if ok && gID != "" {
-			// detach it from segment group first
-			if err := detachAppSegmentFromGroup(zClient, id, gID); err != nil {
-				return err
-			}
-		}
-	}
 
 	if _, err := zClient.applicationsegment.Delete(id); err != nil {
 		return err
@@ -325,24 +314,6 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func detachAppSegmentFromGroup(client *Client, segmentID, segmentGroupId string) error {
-	log.Printf("[INFO] Detaching application segment  %s from segment group: %s\n", segmentID, segmentGroupId)
-	segGroup, _, err := client.segmentgroup.Get(segmentGroupId)
-	if err != nil {
-		log.Printf("[error] Error while getting segment group id: %s", segmentGroupId)
-		return err
-	}
-	adaptedApplications := []segmentgroup.Application{}
-	for _, app := range segGroup.Applications {
-		if app.ID != segmentID {
-			adaptedApplications = append(adaptedApplications, app)
-		}
-	}
-	segGroup.Applications = adaptedApplications
-	_, err = client.segmentgroup.Update(segmentGroupId, segGroup)
-	return err
-
-}
 func expandStringInSlice(d *schema.ResourceData, key string) []string {
 	applicationSegments := d.Get(key).([]interface{})
 	applicationSegmentList := make([]string, len(applicationSegments))
