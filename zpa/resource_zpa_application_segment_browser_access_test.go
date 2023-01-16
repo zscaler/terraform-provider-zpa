@@ -147,15 +147,15 @@ resource "%s" "%s" {
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_port_range {
-		from = "443"
-		to = "443"
+		from = "4883"
+		to = "4883"
 	}
 	domain_names = ["jenkins.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	clientless_apps {
 		name                 = "jenkins.bd-hashicorp.com"
 		application_protocol = "HTTPS"
-		application_port     = "443"
+		application_port     = "4883"
 		certificate_id       = data.zpa_ba_certificate.jenkins.id
 		trust_untrusted_cert = true
 		enabled              = true

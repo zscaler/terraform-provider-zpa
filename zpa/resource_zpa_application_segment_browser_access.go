@@ -414,7 +414,7 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
 		ICMPAccessType:       d.Get("icmp_access_type").(string),
 		Description:          d.Get("description").(string),
-		DomainNames:          SetToStringList(d, "domain_names"),
+		DomainNames:          expandStringInSlice(d, "domain_names"),
 		DoubleEncrypt:        d.Get("double_encrypt").(bool),
 		Enabled:              d.Get("enabled").(bool),
 		HealthCheckType:      d.Get("health_check_type").(string),

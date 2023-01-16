@@ -314,16 +314,6 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func expandStringInSlice(d *schema.ResourceData, key string) []string {
-	applicationSegments := d.Get(key).([]interface{})
-	applicationSegmentList := make([]string, len(applicationSegments))
-	for i, applicationSegment := range applicationSegments {
-		applicationSegmentList[i] = applicationSegment.(string)
-	}
-
-	return applicationSegmentList
-}
-
 func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id string) applicationsegment.ApplicationSegmentResource {
 	details := applicationsegment.ApplicationSegmentResource{
 		ID:                   d.Id(),
