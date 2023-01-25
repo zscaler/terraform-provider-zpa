@@ -37,22 +37,36 @@ var testAccCheckDataSourceLSSLogTypeFormats_basic = `
 data "zpa_lss_config_log_type_formats" "zpn_trans_log" {
 	log_type = "zpn_trans_log"
 }
+
 data "zpa_lss_config_log_type_formats" "zpn_auth_log" {
 	log_type = "zpn_auth_log"
 }
+
 data "zpa_lss_config_log_type_formats" "zpn_ast_auth_log" {
 	log_type = "zpn_ast_auth_log"
 }
+
 data "zpa_lss_config_log_type_formats" "zpn_http_trans_log" {
 	log_type = "zpn_http_trans_log"
 }
+
 data "zpa_lss_config_log_type_formats" "zpn_audit_log" {
 	log_type = "zpn_audit_log"
 }
+
 data "zpa_lss_config_log_type_formats" "zpn_ast_comprehensive_stats" {
 	log_type = "zpn_ast_comprehensive_stats"
 }
+
 data "zpa_lss_config_log_type_formats" "zpn_sys_auth_log" {
 	log_type = "zpn_sys_auth_log"
+}
+
+data "zpa_lss_config_log_type_formats" "zpn_waf_http_exchanges_log" {
+	log_type = "zpn_waf_http_exchanges_log"
+}
+
+data "zpa_lss_config_log_type_formats" "zpn_pbroker_comprehensive_stats" {
+	log_type = "zpn_pbroker_comprehensive_stats"
 }
 `

@@ -42,7 +42,11 @@ data "zpa_lss_config_log_type_formats" "zpn_ast_comprehensive_stats" {
 }
 
 data "zpa_lss_config_log_type_formats" "zpn_waf_http_exchanges_log" {
-  log_type = "zpn_waf_http_exchanges_log"
+ log_type = "zpn_waf_http_exchanges_log"
+}
+
+data "zpa_lss_config_log_type_formats" "zpn_pbroker_comprehensive_stats" {
+  log_type = "zpn_pbroker_comprehensive_stats"
 }
 ```
 
@@ -59,3 +63,4 @@ The following arguments are supported:
   * `zpn_sys_auth_log`
   * `zpn_ast_comprehensive_stats`
   * `zpn_waf_http_exchanges_log`
+  * `zpn_pbroker_comprehensive_stats`
