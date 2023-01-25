@@ -200,9 +200,10 @@ func resourceLSSConfigController() *schema.Resource {
 								"zpn_ast_auth_log",
 								"zpn_http_trans_log",
 								"zpn_audit_log",
-								"zpn_sys_auth_log",
-								"zpn_http_insp",
 								"zpn_ast_comprehensive_stats",
+								"zpn_sys_auth_log",
+								"zpn_waf_http_exchanges_log",
+								"zpn_pbroker_comprehensive_stats",
 							}, false),
 						},
 						"use_tls": {

@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.5.4``
+``Last updated: v2.5.5``
 
 ---
+
+# 2.5.5 (January, 24 2023)
+
+### Notes
+
+- Release date: **(January, 24 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #238](https://github.com/zscaler/terraform-provider-zpa/pull/238) - Added new log_type (``zpn_pbroker_comprehensive_stats``) attribute to ``zpa_lss_config_log_type_formats`` and ``zpa_lss_config_controller``.
 
 ### Notes
 

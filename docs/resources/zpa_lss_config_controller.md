@@ -132,6 +132,15 @@ In addition to all arguments above, the following attributes are exported:
   * `filter` - (Optional)
   * `use_tls` - (Optional)
   * `source_log_type` - (Required)
+    * `zpn_trans_log`
+    * `zpn_auth_log`
+    * `zpn_ast_auth_log`
+    * `zpn_http_trans_log`
+    * `zpn_audit_log`
+    * `zpn_sys_auth_log`
+    * `zpn_ast_comprehensive_stats`
+    * `zpn_waf_http_exchanges_log`
+    * `zpn_pbroker_comprehensive_stats`
   * `connector_groups` - (Required)
         - `id` - (Required) - App Connector Group ID(s) where logs will be forwarded to.
 
