@@ -352,7 +352,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 								Description: "This denotes the value for the given object type. Its value depends upon the key.",
 							},
 							"rhs_list": {
-								Type:        schema.TypeList,
+								Type:        schema.TypeSet,
 								Optional:    true,
 								Description: "This denotes a list of values for the given object type. The value depend upon the key. If rhs is defined this list will be ignored",
 								Elem: &schema.Schema{
@@ -424,10 +424,10 @@ func expandOperandsList(ops interface{}) ([]policysetcontroller.Operands, error)
 				}
 			} else {
 				// try rhs_list
-				rhsList, ok := operandSet["rhs_list"].([]interface{})
+				rhsList := SetToStringSlice(operandSet["rhs_list"].(*schema.Set))
 				if ok && len(rhsList) > 0 {
 					for _, e := range rhsList {
-						op.RHS, _ = e.(string)
+						op.RHS = e
 						operandsSets = append(operandsSets, op)
 					}
 				} else {
