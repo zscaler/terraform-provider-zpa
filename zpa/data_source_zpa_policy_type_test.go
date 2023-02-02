@@ -20,6 +20,7 @@ func TestAccDataSourcePolicyType_Basic(t *testing.T) {
 					testAccDataSourcePolicyTypeCheck("data.zpa_policy_type.reauth_policy"),
 					testAccDataSourcePolicyTypeCheck("data.zpa_policy_type.client_forwarding_policy"),
 					testAccDataSourcePolicyTypeCheck("data.zpa_policy_type.inspection_policy"),
+					testAccDataSourcePolicyTypeCheck("data.zpa_policy_type.isolation_policy"),
 					testAccDataSourcePolicyTypeCheck("data.zpa_policy_type.bypass_policy"),
 					testAccDataSourcePolicyTypeCheck("data.zpa_policy_type.siem_policy"),
 				),
@@ -59,6 +60,11 @@ data "zpa_policy_type" "client_forwarding_policy" {
 data "zpa_policy_type" "inspection_policy" {
     policy_type = "INSPECTION_POLICY"
 }
+
+data "zpa_policy_type" "isolation_policy" {
+    policy_type = "ISOLATION_POLICY"
+}
+
 
 data "zpa_policy_type" "bypass_policy" {
     policy_type = "BYPASS_POLICY"
