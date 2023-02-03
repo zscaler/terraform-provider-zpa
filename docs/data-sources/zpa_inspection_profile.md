@@ -1,7 +1,7 @@
 ---
 subcategory: "Inspection"
 layout: "zscaler"
-page_title: "ZPA: zpa_inspection"
+page_title: "ZPA: inspection_profile"
 description: |-
   Get information about an Inspection Profile in Zscaler Private Access cloud.
 ---
@@ -20,8 +20,8 @@ data "zpa_inspection_profile" "this" {
 
 ## Argument Reference
 
-* `name` - (Required) This field defines the name of the server.
-* `id` - (Optional) This field defines the id of the application server.
+* `name` - (Required) This field defines the name of the inspection profile.
+* `id` - (Optional) This field defines the id of the inspection profile.
 
 ## Attribute Reference
 
