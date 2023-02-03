@@ -89,6 +89,7 @@ func Provider() *schema.Provider {
 			"zpa_machine_group":                      dataSourceMachineGroup(),
 			"zpa_provisioning_key":                   dataSourceProvisioningKey(),
 			"zpa_policy_type":                        dataSourcePolicyType(),
+			"zpa_isolation_profile":                  dataSourceIsolationProfile(),
 			"zpa_posture_profile":                    dataSourcePostureProfile(),
 			"zpa_service_edge_group":                 dataSourceServiceEdgeGroup(),
 			"zpa_service_edge_controller":            dataSourceServiceEdgeController(),

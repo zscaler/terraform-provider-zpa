@@ -1,5 +1,18 @@
 # Changelog
 
+# 2.6.0 (February, 3 2023)
+
+### Notes
+
+- Release date: **(February, 3 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #242](https://github.com/zscaler/terraform-provider-zpa/pull/242) - Added new data source and resources below:
+  - ``zpa_isolation_profile`` - This data source gets all isolation profiles for the specified customer. The Isolation Profile ID can then be referenced in a ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
+  - ``zpa_policy_isolation_rule`` - This resource, creates an Isolation Rule. Notice that in order to create an isolation policy the ZPA tenant must be licensed accordingly. ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
+
 # 2.5.5 (January, 24 2023)
 
 ### Notes
