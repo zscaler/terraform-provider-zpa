@@ -129,6 +129,11 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"pra_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"upgrade_day": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -224,6 +229,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("upgrade_day", resp.UpgradeDay)
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
+	_ = d.Set("pra_enabled", resp.PRAEnabled)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	return nil
@@ -291,6 +297,7 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		UpgradeDay:               d.Get("upgrade_day").(string),
 		UpgradeTimeInSecs:        d.Get("upgrade_time_in_secs").(string),
 		OverrideVersionProfile:   d.Get("override_version_profile").(bool),
+		PRAEnabled:               d.Get("pra_enabled").(bool),
 		VersionProfileID:         d.Get("version_profile_id").(string),
 		VersionProfileName:       d.Get("version_profile_name").(string),
 	}
