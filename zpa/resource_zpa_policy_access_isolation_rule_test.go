@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"testing"
@@ -28,7 +27,7 @@ func TestAccPolicyIsolationRuleBasic(t *testing.T) {
 					testAccCheckPolicyIsolationRuleExists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "BYPASS_ISOLATE"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ISOLATE"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
@@ -41,7 +40,7 @@ func TestAccPolicyIsolationRuleBasic(t *testing.T) {
 					testAccCheckPolicyIsolationRuleExists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "BYPASS_ISOLATE"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ISOLATE"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
@@ -125,13 +124,17 @@ data "zpa_policy_type" "isolation_policy" {
 	policy_type = "ISOLATION_POLICY"
 }
 
+data "zpa_isolation_profile" "bd_sa_profile1" {
+	name = "BD_SA_Profile1"
+}
 resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
-	action              		= "BYPASS_ISOLATE"
+	action              		= "ISOLATE"
 	rule_order    				= 1
 	operator      				= "AND"
 	policy_set_id 				= data.zpa_policy_type.isolation_policy.id
+	zpn_isolation_profile_id 	= data.zpa_isolation_profile.bd_sa_profile1.id
 	conditions {
 		negated  = false
 		operator = "OR"
@@ -151,4 +154,3 @@ resource "%s" "%s" {
 		desc,
 	)
 }
-*/
