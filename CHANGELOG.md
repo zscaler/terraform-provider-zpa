@@ -16,6 +16,7 @@
 ### Bug Fix
 
 - [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_server_groups`` resource ``servers`` attribute to support typeSet instead of typeList.
+- [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_app_connector_group`` resource ``connectors`` attribute to support typeSet instead of typeList.
 
 # 2.5.5 (January, 24 2023)
 
