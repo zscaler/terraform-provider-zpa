@@ -13,6 +13,10 @@
   - ``zpa_isolation_profile`` - This data source gets all isolation profiles for the specified customer. The Isolation Profile ID can then be referenced in a ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
   - ``zpa_policy_isolation_rule`` - This resource, creates an Isolation Rule. Notice that in order to create an isolation policy the ZPA tenant must be licensed accordingly. ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
 
+### Bug Fix
+
+- [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_server_groups`` resource ``servers`` attribute to support typeSet instead of typeList.
+
 # 2.5.5 (January, 24 2023)
 
 ### Notes
