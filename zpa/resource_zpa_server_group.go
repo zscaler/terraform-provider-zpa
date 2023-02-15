@@ -85,7 +85,7 @@ func resourceServerGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -315,12 +315,12 @@ func expandApplicationServers(d *schema.ResourceData) []servergroup.ApplicationS
 	applicationServersInterface, ok := d.GetOk("servers")
 	if ok {
 		applicationServer := applicationServersInterface.(*schema.Set)
-		log.Printf("[INFO] server group application data: %+v\n", applicationServer)
+		log.Printf("[INFO] servers data: %+v\n", applicationServer)
 		var applicationServers []servergroup.ApplicationServer
 		for _, applicationServer := range applicationServer.List() {
-			applicationServer, _ := applicationServer.(map[string]interface{})
-			if applicationServer != nil {
-				for _, id := range applicationServer["id"].([]interface{}) {
+			applicationServer, ok := applicationServer.(map[string]interface{})
+			if ok {
+				for _, id := range applicationServer["id"].(*schema.Set).List() {
 					applicationServers = append(applicationServers, servergroup.ApplicationServer{
 						ID: id.(string),
 					})
