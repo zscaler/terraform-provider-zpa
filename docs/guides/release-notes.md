@@ -12,13 +12,46 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.6.0``
+``Last updated: v2.6.2``
 
 ---
 
+# 2.6.2 (February, 28 2023)
+
 ### Notes
 
-- Release date: **(February, 3 2023)**
+- Release date: **(February, 28 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #251](https://github.com/zscaler/terraform-provider-zpa/pull/251) - Added new action ``REQUIRE_APPROVAL`` to ``zpa_policy_access_rule`` - [Issue [#250](https://github.com/zscaler/terraform-provider-zpa/issues/250)]
+
+# 2.6.1 (February, 15 2023)
+
+### Notes
+
+- Release date: **(February, 15 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #242](https://github.com/zscaler/terraform-provider-zpa/pull/242) - Added new data source and resources below:
+  - ``zpa_isolation_profile`` - This data source gets all isolation profiles for the specified customer. The Isolation Profile ID can then be referenced in a ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
+  - ``zpa_policy_isolation_rule`` - This resource, creates an Isolation Rule. Notice that in order to create an isolation policy the ZPA tenant must be licensed accordingly. ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
+
+### Bug Fix
+
+- [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_server_groups`` resource ``servers`` attribute to support typeSet instead of typeList.
+- [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_app_connector_group`` resource ``connectors`` attribute to support typeSet instead of typeList.
+
+
+# 2.6.0 (February, 15 2023)
+
+
+### Notes
+
+- Release date: **(February, 15 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Enhacements

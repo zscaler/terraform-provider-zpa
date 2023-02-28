@@ -65,7 +65,7 @@ resource "zpa_policy_access_rule" "this" {
 
 ## Attributes Reference
 
-* `action` (Optional) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``
+* `action` (Optional) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``, and ``REQUIRE_APPROVAL``
 * `custom_msg` (Optional) This is for providing a customer message for the user.
 * `description` (Optional) This is the description of the access policy rule.
 * `operator` (Optional) Supported values: ``AND``, ``OR``
