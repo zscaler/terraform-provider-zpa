@@ -49,6 +49,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 					ValidateFunc: validation.StringInSlice([]string{
 						"ALLOW",
 						"DENY",
+						"REQUIRE_APPROVAL",
 					}, false),
 				},
 				"app_server_groups": {
