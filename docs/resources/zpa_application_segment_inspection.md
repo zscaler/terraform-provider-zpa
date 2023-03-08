@@ -88,7 +88,11 @@ The following arguments are supported:
 * `icmp_access_type` - (Optional)
 * `ip_anchored` - (Optional)
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
-* `passive_health_enabled` - (Optional)
+* `passive_health_enabled` - (Optional) Supported values: `true`, `false`
+* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
+* `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
+* `is_incomplete_dr_config` - (Optional) Supported values: `true`, `false`
+* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
 
 ## Import
 

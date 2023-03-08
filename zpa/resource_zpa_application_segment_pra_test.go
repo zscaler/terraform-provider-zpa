@@ -141,11 +141,13 @@ resource "%s" "%s" {
 	description = "tf-acc-test-%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
+	select_connector_close_to_app = true
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_port_ranges = ["22", "22", "3389", "3389"]
 	domain_names = ["ssh_pra.example.com", "rdp_pra.example.com"]
 	segment_group_id = "${%s.id}"
+	tcp_keep_alive = "1"
 	common_apps_dto {
 		apps_config {
 		  name                 = "testAcc_ssh_pra"

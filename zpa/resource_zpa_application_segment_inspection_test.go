@@ -145,8 +145,10 @@ resource "%s" "%s" {
 	description = "tf-acc-test-%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
+	select_connector_close_to_app = true
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
+	tcp_keep_alive = "1"
 	tcp_port_range {
 		from = "4443"
 		to = "4443"
