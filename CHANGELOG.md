@@ -11,13 +11,13 @@
 
 - [PR #257](https://github.com/zscaler/terraform-provider-zpa/pull/257) Added the new ZPA Application Segment attributes for the following resources:
   - ``zpa_application_segment``, ``zpa_application_segment_browser_access``, ``zpa_application_segment_inspection``, ``zpa_application_segment_pra``
-    - ``tcpKeepAlive``
-    - ``isIncompleteDRConfig``
-    - ``useInDrMode``
-    - ``selectConnectorCloseToApp``
+    - ``tcp_keep_alive``
+    - ``is_incomplete_dr_config``
+    - ``use_in_dr_mode``
+    - ``select_connector_close_to_app``
 
   - ``zpa_app_connector_group``
-    - ``useInDrMode``
+    - ``use_in_dr_mode``
 
 # 2.6.2 (March, 1 2023)
 
