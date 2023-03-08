@@ -82,3 +82,7 @@ In addition to all arguments above, the following attributes are exported:
   * `local_domain` (string)
   * `path` (string)
   * `trust_untrusted_cert` (bool)
+  * `select_connector_close_to_app` (bool)
+  * `use_in_dr_mode` (bool)
+  * `is_incomplete_dr_config` (bool)
+  * `select_connector_close_to_app` (bool)

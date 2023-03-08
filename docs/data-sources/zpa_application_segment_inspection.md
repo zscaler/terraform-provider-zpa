@@ -78,3 +78,7 @@ In addition to all arguments above, the following attributes are exported:
   * `certificate_id` - (string) - ID of the signing certificate. This field is required if the applicationProtocol is set to `HTTPS`. The certificateId is not supported if the applicationProtocol is set to `HTTP`.
   * `certificate_name` - (string) - Parameter required when `application_protocol` is of type `HTTPS`
   * `enabled` - (bool) Whether this application is enabled or not
+  * `select_connector_close_to_app` (bool)
+  * `use_in_dr_mode` (bool)
+  * `is_incomplete_dr_config` (bool)
+  * `select_connector_close_to_app` (bool)
