@@ -1,5 +1,24 @@
 # Changelog
 
+# 2.6.3 (March, 7 2023)
+
+### Notes
+
+- Release date: **(March, 7 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #257](https://github.com/zscaler/terraform-provider-zpa/pull/257) Added the new ZPA Application Segment attributes for the following resources:
+  - ``zpa_application_segment``, ``zpa_application_segment_browser_access``, ``zpa_application_segment_inspection``, ``zpa_application_segment_pra``
+    - ``tcpKeepAlive``
+    - ``isIncompleteDRConfig``
+    - ``useInDrMode``
+    - ``selectConnectorCloseToApp``
+
+  - ``zpa_app_connector_group``
+    - ``useInDrMode``
+
 # 2.6.2 (March, 1 2023)
 
 ### Notes

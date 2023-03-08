@@ -32,6 +32,7 @@ resource "zpa_app_connector_group" "example" {
   override_version_profile      = true
   version_profile_name          = "New Release"
   dns_query_type                = "IPV4_IPV6"
+  use_in_dr_mode                = true
 }
 ```
 
@@ -65,6 +66,7 @@ The following arguments are supported:
 * `tcp_quick_ack_assistant` - (Optional) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
 * `tcp_quick_ack_read_assistant` - (Optional) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
+* `pra_enabled` - (Optional) Supported values: `true`, `false`
 
 ## Attributes Reference
 

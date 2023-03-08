@@ -12,6 +12,14 @@ func dataSourceApplicationSegment() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceApplicationSegmentRead,
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -69,13 +77,14 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
-			"name": {
-				Type:     schema.TypeString,
+			"is_incomplete_dr_config": {
+				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 			},
 			"ip_anchored": {
 				Type:     schema.TypeBool,
@@ -192,6 +201,8 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("health_reporting", resp.HealthReporting)
 		_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
+		_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
+		_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 		_ = d.Set("ip_anchored", resp.IpAnchored)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 		_ = d.Set("modifiedby", resp.ModifiedBy)

@@ -76,3 +76,7 @@ In addition to all arguments above, the following attributes are exported:
   * `application_protocol` - (string) Protocol for the Privileged Remote Access. Supported values: `RDP` and `SSH`
   * `connection_security` - (string) - Parameter required when `application_protocol` is of type `RDP`
   * `enabled` - (bool) Whether this application is enabled or not
+  * `select_connector_close_to_app` (bool)
+  * `use_in_dr_mode` (bool)
+  * `is_incomplete_dr_config` (bool)
+  * `select_connector_close_to_app` (bool)

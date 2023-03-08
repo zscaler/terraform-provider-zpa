@@ -48,6 +48,12 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Name of the application.",
+				ValidateFunc: validation.StringIsNotEmpty,
+			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -157,17 +163,31 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"is_incomplete_dr_config": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"is_cname_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
 			},
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Name of the application.",
-				ValidateFunc: validation.StringIsNotEmpty,
+			"tcp_keep_alive": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1",
+				}, false),
 			},
 			"common_apps_dto": {
 				Type:     schema.TypeList,
@@ -357,6 +377,11 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("ip_anchored", resp.IPAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
+	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
+	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
+	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
+	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
+	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp))
@@ -457,24 +482,28 @@ func detachInspectionPortalsFromGroup(client *Client, segmentID, segmentGroupID 
 
 func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
 	details := applicationsegmentinspection.AppSegmentInspection{
-		ID:                   d.Id(),
-		SegmentGroupID:       d.Get("segment_group_id").(string),
-		BypassType:           d.Get("bypass_type").(string),
-		ConfigSpace:          d.Get("config_space").(string),
-		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
-		ICMPAccessType:       d.Get("icmp_access_type").(string),
-		Description:          d.Get("description").(string),
-		DoubleEncrypt:        d.Get("double_encrypt").(bool),
-		Enabled:              d.Get("enabled").(bool),
-		HealthReporting:      d.Get("health_reporting").(string),
-		HealthCheckType:      d.Get("health_check_type").(string),
-		IPAnchored:           d.Get("ip_anchored").(bool),
-		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
-		DomainNames:          expandStringInSlice(d, "domain_names"),
-		TCPPortRanges:        expandList(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges:        expandList(d.Get("udp_port_ranges").([]interface{})),
-		AppServerGroups:      expandInspectionAppServerGroups(d),
-		CommonAppsDto:        expandInspectionCommonAppsDto(d),
+		ID:                        d.Id(),
+		SegmentGroupID:            d.Get("segment_group_id").(string),
+		BypassType:                d.Get("bypass_type").(string),
+		ConfigSpace:               d.Get("config_space").(string),
+		ICMPAccessType:            d.Get("icmp_access_type").(string),
+		Description:               d.Get("description").(string),
+		HealthReporting:           d.Get("health_reporting").(string),
+		HealthCheckType:           d.Get("health_check_type").(string),
+		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		DoubleEncrypt:             d.Get("double_encrypt").(bool),
+		Enabled:                   d.Get("enabled").(bool),
+		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
+		IPAnchored:                d.Get("ip_anchored").(bool),
+		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
+		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
+		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
+		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+		DomainNames:               expandStringInSlice(d, "domain_names"),
+		TCPPortRanges:             expandList(d.Get("tcp_port_ranges").([]interface{})),
+		UDPPortRanges:             expandList(d.Get("udp_port_ranges").([]interface{})),
+		AppServerGroups:           expandInspectionAppServerGroups(d),
+		CommonAppsDto:             expandInspectionCommonAppsDto(d),
 	}
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
