@@ -115,6 +115,7 @@ In addition to all arguments above, the following attributes are exported:
 * `ip_anchored` (Optional) - If Source IP Anchoring for use with ZIA, is enabled or disabled for the app. Supported values are `true` and `false`
 * `is_cname_enabled` (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
   * `certificate_name` - (Optional) - Name of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
+* `tcp_keep_alive` (Optional) Supported values: ``1`` for Enabled and ``0`` for Disabled
 * `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `is_incomplete_dr_config` - (Optional) Supported values: `true`, `false`
