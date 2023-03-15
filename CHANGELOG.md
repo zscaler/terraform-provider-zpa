@@ -1,5 +1,18 @@
 # Changelog
 
+# 2.6.4 (March, 16 2023)
+
+### Notes
+
+- Release date: **(March, 16 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #262](https://github.com/zscaler/terraform-provider-zpa/pull/262) (fix) SCIM Group Search Pagination Issue affecting the following resource:
+  - ``zpa_scim_groups``
+- [PR #263](https://github.com/zscaler/terraform-provider-zpa/pull/263) (fix) Added missing new object_type ``PLATFORM`` validation for access policy resources
+
 # 2.6.3 (March, 7 2023)
 
 ### Notes
