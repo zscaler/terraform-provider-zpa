@@ -1,5 +1,47 @@
 # Changelog
 
+# 2.6.4 (March, 16 2023)
+
+### Notes
+
+- Release date: **(March, 16 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #263](https://github.com/zscaler/terraform-provider-zpa/pull/263) Added the following new datasources:
+  - ``zpa_access_policy_platforms``: Get information about all platforms for the specified customer.
+  - ``zpa_access_policy_client_types``: Get information about all client types for the specified customer.
+
+### Bug Fix
+
+- [PR #254](https://github.com/zscaler/terraform-provider-zpa/pull/254) Added custom function to detach server group from an app connector group prior to deletion.
+- [PR #263](https://github.com/zscaler/terraform-provider-zpa/pull/263) Added new object_type "PLATFORM" to the following access policy resources:
+  - ``zpa_policy_access_rule``
+  - ``zpa_policy_timeout_rule``
+  - ``zpa_policy_forwarding_rule``
+  - ``zpa_policy_isolation_rule``
+  - ``zpa_policy_inspection_rule``
+
+# 2.6.3 (March, 7 2023)
+
+### Notes
+
+- Release date: **(March, 7 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #257](https://github.com/zscaler/terraform-provider-zpa/pull/257) Added the new ZPA Application Segment attributes for the following resources:
+  - ``zpa_application_segment``, ``zpa_application_segment_browser_access``, ``zpa_application_segment_inspection``, ``zpa_application_segment_pra``
+    - ``tcp_keep_alive``
+    - ``is_incomplete_dr_config``
+    - ``use_in_dr_mode``
+    - ``select_connector_close_to_app``
+
+  - ``zpa_app_connector_group``
+    - ``use_in_dr_mode``
+
 # 2.6.2 (March, 1 2023)
 
 ### Notes
