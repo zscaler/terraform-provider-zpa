@@ -99,6 +99,8 @@ func Provider() *schema.Provider {
 			"zpa_server_group":                       dataSourceServerGroup(),
 			"zpa_enrollment_cert":                    dataSourceEnrollmentCert(),
 			"zpa_trusted_network":                    dataSourceTrustedNetwork(),
+			"zpa_access_policy_platforms":            dataSourceAccessPolicyPlatforms(),
+			"zpa_access_policy_client_types":         dataSourceAccessPolicyClientTypes(),
 			"zpa_lss_config_controller":              dataSourceLSSConfigController(),
 			"zpa_lss_config_client_types":            dataSourceLSSClientTypes(),
 			"zpa_lss_config_status_codes":            dataSourceLSSStatusCodes(),
