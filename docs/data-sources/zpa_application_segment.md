@@ -53,3 +53,7 @@ In addition to all arguments above, the following attributes are exported:
 * `select_connector_close_to_app` - (Boolean)
 * `segment_group_id` - (string)
 * `segment_group_name` - (string)
+* `select_connector_close_to_app` (bool)
+* `use_in_dr_mode` (bool)
+* `is_incomplete_dr_config` (bool)
+* `select_connector_close_to_app` (bool)

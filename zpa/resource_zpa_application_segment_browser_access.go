@@ -142,7 +142,27 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 					"NONE",
 				}, false),
 			},
+			"tcp_keep_alive": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1",
+				}, false),
+			},
 			"ip_anchored": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"is_incomplete_dr_config": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
@@ -309,6 +329,11 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("ip_anchored", resp.IPAnchored)
+	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
+	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
+	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
+	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
+	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
@@ -406,24 +431,29 @@ func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID stri
 
 func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
 	details := browseraccess.BrowserAccess{
-		ID:                   d.Id(),
-		SegmentGroupID:       d.Get("segment_group_id").(string),
-		SegmentGroupName:     d.Get("segment_group_name").(string),
-		BypassType:           d.Get("bypass_type").(string),
-		ConfigSpace:          d.Get("config_space").(string),
-		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
-		ICMPAccessType:       d.Get("icmp_access_type").(string),
-		Description:          d.Get("description").(string),
-		DomainNames:          SetToStringList(d, "domain_names"),
-		DoubleEncrypt:        d.Get("double_encrypt").(bool),
-		Enabled:              d.Get("enabled").(bool),
-		HealthCheckType:      d.Get("health_check_type").(string),
-		HealthReporting:      d.Get("health_reporting").(string),
-		IPAnchored:           d.Get("ip_anchored").(bool),
-		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
-		Name:                 d.Get("name").(string),
-		TCPAppPortRange:      []common.NetworkPorts{},
-		UDPAppPortRange:      []common.NetworkPorts{},
+		ID:                        d.Id(),
+		Name:                      d.Get("name").(string),
+		SegmentGroupID:            d.Get("segment_group_id").(string),
+		SegmentGroupName:          d.Get("segment_group_name").(string),
+		BypassType:                d.Get("bypass_type").(string),
+		ConfigSpace:               d.Get("config_space").(string),
+		ICMPAccessType:            d.Get("icmp_access_type").(string),
+		Description:               d.Get("description").(string),
+		DomainNames:               SetToStringList(d, "domain_names"),
+		HealthCheckType:           d.Get("health_check_type").(string),
+		HealthReporting:           d.Get("health_reporting").(string),
+		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		DoubleEncrypt:             d.Get("double_encrypt").(bool),
+		Enabled:                   d.Get("enabled").(bool),
+		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
+		IPAnchored:                d.Get("ip_anchored").(bool),
+		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
+		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
+		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
+		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
 	}
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
