@@ -128,6 +128,21 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool
 			return false
 		}
 		return true
+	case "PLATFORM":
+		if operand.LHS == "" {
+			lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, nil)
+			return false
+		}
+		_, _, err := zClient.platforms.GetAllPlatforms()
+		if err != nil {
+			lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, err)
+			return false
+		}
+		if operand.RHS != "true" {
+			rhsWarn(operand.ObjectType, "\"true\"", operand.RHS, nil)
+			return false
+		}
+		return true
 	case "SAML":
 		if operand.LHS == "" {
 			lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, nil)
