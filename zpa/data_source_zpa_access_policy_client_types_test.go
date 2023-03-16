@@ -23,5 +23,4 @@ func TestAccDataSourceAccessPolicyClientTypes_Basic(t *testing.T) {
 }
 
 var testAccCheckDataSourceAccessPolicyClientTypes_basic = `
-data "zpa_access_policy_client_types" "this" {}
-}`
+data "zpa_access_policy_client_types" "this" {}`
