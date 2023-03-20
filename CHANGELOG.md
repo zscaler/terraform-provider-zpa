@@ -1,6 +1,18 @@
 # Changelog
 
-# 2.6.4 (March, 16 2023)
+## 2.6.5 (March, 19 2023)
+
+### Notes
+
+- Release date: **(March, 19 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #262](https://github.com/zscaler/terraform-provider-zpa/pull/262) SCIM Group Search Pagination Issue affecting the following resource:
+  - ``zpa_scim_groups``
+
+## 2.6.4 (March, 16 2023)
 
 ### Notes
 
@@ -9,11 +21,9 @@
 
 ### Bug Fix
 
-- [PR #262](https://github.com/zscaler/terraform-provider-zpa/pull/262) (fix) SCIM Group Search Pagination Issue affecting the following resource:
-  - ``zpa_scim_groups``
 - [PR #263](https://github.com/zscaler/terraform-provider-zpa/pull/263) (fix) Added missing new object_type ``PLATFORM`` validation for access policy resources
 
-# 2.6.3 (March, 7 2023)
+## 2.6.3 (March, 7 2023)
 
 ### Notes
 
@@ -32,7 +42,7 @@
   - ``zpa_app_connector_group``
     - ``use_in_dr_mode``
 
-# 2.6.2 (March, 1 2023)
+## 2.6.2 (March, 1 2023)
 
 ### Notes
 
@@ -43,7 +53,7 @@
 
 - [PR #251](https://github.com/zscaler/terraform-provider-zpa/pull/251) - Added new action ``REQUIRE_APPROVAL`` to ``zpa_policy_access_rule`` - [Issue [#250](https://github.com/zscaler/terraform-provider-zpa/issues/250)]
 
-# 2.6.1 (February, 15 2023)
+## 2.6.1 (February, 15 2023)
 
 ### Notes
 
@@ -61,7 +71,7 @@
 - [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_server_groups`` resource ``servers`` attribute to support typeSet instead of typeList.
 - [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_app_connector_group`` resource ``connectors`` attribute to support typeSet instead of typeList.
 
-# 2.6.0 (February, 15 2023)
+## 2.6.0 (February, 15 2023)
 
 ### Notes
 
@@ -79,7 +89,7 @@
 - [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_server_groups`` resource ``servers`` attribute to support typeSet instead of typeList.
 - [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_app_connector_group`` resource ``connectors`` attribute to support typeSet instead of typeList.
 
-# 2.5.5 (January, 24 2023)
+## 2.5.5 (January, 24 2023)
 
 ### Notes
 
@@ -90,7 +100,7 @@
 
 - [PR #238](https://github.com/zscaler/terraform-provider-zpa/pull/238) - Added new log_type (``zpn_pbroker_comprehensive_stats``) attribute to ``zpa_lss_config_log_type_formats`` and ``zpa_lss_config_controller``.
 
-# 2.5.4 (January, 16 2023)
+## 2.5.4 (January, 16 2023)
 
 ### Notes
 
@@ -113,7 +123,7 @@
 
 - [PR #234](https://github.com/zscaler/terraform-provider-zpa/pull/234) - Removed Segment Group detachment function, so it can use the new ``force_delete`` parameter when removing application segments from a segment group.
 
-# 2.5.3 (January, 2 2023)
+## 2.5.3 (January, 2 2023)
 
 ### Notes
 
@@ -124,7 +134,7 @@
 
 - [PR #224](https://github.com/zscaler/terraform-provider-zpa/pull/224) Implemented longitude/latitude math function validation for more accurancy when configuring ``zpa_app_connector_group`` resources.
 
-# 2.5.2 (December, 02 2022)
+## 2.5.2 (December, 02 2022)
 
 ### Notes
 

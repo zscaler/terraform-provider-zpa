@@ -12,9 +12,32 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.6.3``
+``Last updated: v2.6.5``
 
 ---
+
+## 2.6.5 (March, 19 2023)
+
+### Notes
+
+- Release date: **(March, 19 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #262](https://github.com/zscaler/terraform-provider-zpa/pull/262) SCIM Group Search Pagination Issue affecting the following resource:
+  - ``zpa_scim_groups``
+
+## 2.6.4 (March, 16 2023)
+
+### Notes
+
+- Release date: **(March, 16 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #263](https://github.com/zscaler/terraform-provider-zpa/pull/263) (fix) Added missing new object_type ``PLATFORM`` validation for access policy resources
 
 ## 2.6.3 (March, 7 2023)
 
