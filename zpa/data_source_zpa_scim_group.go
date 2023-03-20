@@ -48,29 +48,6 @@ func dataSourceScimGroup() *schema.Resource {
 
 func dataSourceScimGroupRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	// var resp *scimgroup.ScimGroup
-	// id, ok := d.Get("id").(string)
-	// if ok && id != "" {
-	// 	res, _, err := zClient.scimgroup.Get(id)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	resp = res
-	// }
-	// idpName, ok := d.Get("idp_name").(string)
-	// name, ok2 := d.Get("name").(string)
-	// if id == "" && ok && ok2 && idpName != "" && name != "" {
-	// 	idpResp, _, err := zClient.idpcontroller.GetByName(idpName)
-	// 	if err != nil || idpResp == nil {
-	// 		log.Printf("[INFO] couldn't find idp by name: %s\n", idpName)
-	// 		return err
-	// 	}
-	// 	res, _, err := zClient.scimgroup.GetByName(name, idpResp.ID)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	resp = res
-	// }
 	var resp *scimgroup.ScimGroup
 	idpId, okidpId := d.Get("idp_id").(string)
 	idpName, okIdpName := d.Get("idp_name").(string)
