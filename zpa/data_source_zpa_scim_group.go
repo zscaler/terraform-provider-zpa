@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/idpcontroller"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/scimgroup"
 )
 
@@ -48,22 +49,40 @@ func dataSourceScimGroup() *schema.Resource {
 func dataSourceScimGroupRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	var resp *scimgroup.ScimGroup
+	idpId, okidpId := d.Get("idp_id").(string)
+	idpName, okIdpName := d.Get("idp_name").(string)
+	if !okIdpName && !okidpId || idpId == "" && idpName == "" {
+		log.Printf("[INFO] idp name or id is required\n")
+		return fmt.Errorf("idp name or id is required")
+	}
+	var idpResp *idpcontroller.IdpController
+	// getting Idp controller by id or name
+	if idpId != "" {
+		resp, _, err := zClient.idpcontroller.Get(idpId)
+		if err != nil || resp == nil {
+			log.Printf("[INFO] couldn't find idp by id: %s\n", idpId)
+			return err
+		}
+		idpResp = resp
+	} else {
+		resp, _, err := zClient.idpcontroller.GetByName(idpName)
+		if err != nil || resp == nil {
+			log.Printf("[INFO] couldn't find idp by name: %s\n", idpName)
+			return err
+		}
+		idpResp = resp
+	}
+	// getting scim attribute header by id or name
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
-		res, _, err := zClient.scimgroup.Get(id)
+		res, _, err := zClient.scimgroup.Get(idpResp.ID)
 		if err != nil {
 			return err
 		}
 		resp = res
 	}
-	idpName, ok := d.Get("idp_name").(string)
-	name, ok2 := d.Get("name").(string)
-	if id == "" && ok && ok2 && idpName != "" && name != "" {
-		idpResp, _, err := zClient.idpcontroller.GetByName(idpName)
-		if err != nil || idpResp == nil {
-			log.Printf("[INFO] couldn't find idp by name: %s\n", idpName)
-			return err
-		}
+	name, ok := d.Get("name").(string)
+	if id == "" && ok && name != "" {
 		res, _, err := zClient.scimgroup.GetByName(name, idpResp.ID)
 		if err != nil {
 			return err
