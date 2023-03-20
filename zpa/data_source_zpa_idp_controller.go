@@ -235,6 +235,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 }
 func flattenAdminMeta(metaData *idpcontroller.AdminMetadata) []map[string]interface{} {
 	result := make([]map[string]interface{}, 1)
+	result[0] = make(map[string]interface{})
 	result[0]["certificate_url"] = metaData.CertificateURL
 	result[0]["sp_base_url"] = metaData.SpBaseURL
 	result[0]["sp_entity_id"] = metaData.SpEntityID
@@ -245,6 +246,7 @@ func flattenAdminMeta(metaData *idpcontroller.AdminMetadata) []map[string]interf
 
 func flattenUserMeta(metaData *idpcontroller.UserMetadata) []map[string]interface{} {
 	result := make([]map[string]interface{}, 1)
+	result[0] = make(map[string]interface{})
 	result[0]["certificate_url"] = metaData.CertificateURL
 	result[0]["sp_base_url"] = metaData.SpBaseURL
 	result[0]["sp_metadata_url"] = metaData.SpMetadataURL
