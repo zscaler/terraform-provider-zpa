@@ -96,6 +96,18 @@ func dataSourceIdpController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"login_hint": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"force_auth": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"enable_arbitrary_auth_domains": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"modifiedby": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -209,6 +221,9 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("idp_entity_id", resp.IdpEntityID)
 		_ = d.Set("login_name_attribute", resp.LoginNameAttribute)
 		_ = d.Set("login_url", resp.LoginURL)
+		_ = d.Set("login_hint", resp.LoginHint)
+		_ = d.Set("force_auth", resp.ForceAuth)
+		_ = d.Set("enable_arbitrary_auth_domains", resp.EnableArbitraryAuthDomains)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
@@ -235,6 +250,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 }
 func flattenAdminMeta(metaData *idpcontroller.AdminMetadata) []map[string]interface{} {
 	result := make([]map[string]interface{}, 1)
+	result[0] = make(map[string]interface{})
 	result[0]["certificate_url"] = metaData.CertificateURL
 	result[0]["sp_base_url"] = metaData.SpBaseURL
 	result[0]["sp_entity_id"] = metaData.SpEntityID
@@ -245,6 +261,7 @@ func flattenAdminMeta(metaData *idpcontroller.AdminMetadata) []map[string]interf
 
 func flattenUserMeta(metaData *idpcontroller.UserMetadata) []map[string]interface{} {
 	result := make([]map[string]interface{}, 1)
+	result[0] = make(map[string]interface{})
 	result[0]["certificate_url"] = metaData.CertificateURL
 	result[0]["sp_base_url"] = metaData.SpBaseURL
 	result[0]["sp_metadata_url"] = metaData.SpMetadataURL

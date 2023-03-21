@@ -1,5 +1,33 @@
 # Changelog
 
+## 2.6.6 (March, 20 2023)
+
+### Notes
+
+- Release date: **(March, 20 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #268](https://github.com/zscaler/terraform-provider-zpa/pull/268) Fixed provider crashing when flattening IDP controller user metadata function Issue [#267](https://github.com/zscaler/terraform-provider-zpa/issues/267)
+
+- [PR #268](https://github.com/zscaler/terraform-provider-zpa/pull/268) Added new ZPA IDP Controller attributes to data source. The following new attributes have been added:
+  - ``login_hint``
+  - ``force_auth``
+  - ``enable_arbitrary_auth_domains``
+
+## 2.6.5 (March, 19 2023)
+
+### Notes
+
+- Release date: **(March, 19 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #262](https://github.com/zscaler/terraform-provider-zpa/pull/262) SCIM Group Search Pagination Issue affecting the following resource:
+  - ``zpa_scim_groups``
+
 ## 2.6.5 (March, 19 2023)
 
 ### Notes
