@@ -96,6 +96,18 @@ func dataSourceIdpController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"login_hint": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"force_auth": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"enable_arbitrary_auth_domains": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"modifiedby": {
 				Type:     schema.TypeString,
 				Computed: true,
