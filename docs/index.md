@@ -25,7 +25,7 @@ terraform {
   required_providers {
     zpa = {
       source = "zscaler/zpa"
-      version = "2.2.0"
+      version = "~> 2.7.0"
     }
   }
 }
@@ -41,9 +41,9 @@ resouce "zpa_application_segment" "app_segment" {
 }
 ```
 
-## Example Usage ZPA Beta and GOV Cloud
+## Example Usage ZPA Beta, GOV, Preview, and Dev Cloud
 
-For customers who want to use this provider with ZPA Beta Cloud or Gov Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA` or `GOV` values or via environment variable `ZPA_CLOUD=BETA` or `ZPA_CLOUD=GOV` are required.
+For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `GOV`, `PREVIEW` or `DEV` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
 
 ```hcl
 # Configure ZPA provider source and version
@@ -51,7 +51,7 @@ terraform {
   required_providers {
     zpa = {
       source = "zscaler/zpa"
-      version = "2.2.0"
+      version = "~> 2.7.0"
     }
   }
 }
@@ -60,7 +60,7 @@ provider "zpa" {
   zpa_client_id         = "xxxxxxxxxxxxxxxx"
   zpa_client_secret     = "xxxxxxxxxxxxxxxx"
   zpa_customer_id       = "xxxxxxxxxxxxxxxx"
-  zpa_cloud             = "BETA" // Use "GOV" for ZPA Gov Cloud
+  zpa_cloud             = "BETA" // Use `BETA`, `GOV`, `PREVIEW` or `DEV`
 }
 
 resouce "zpa_application_segment" "app_segment" {
@@ -96,7 +96,7 @@ provider "zpa" {
 
 You can provide credentials via the `ZPA_CLIENT_ID`, `ZPA_CLIENT_SECRET`, `ZPA_CUSTOMER_ID`, `ZPA_CLOUD` environment variables, representing your ZPA API key credentials and customer ID, of your ZPA account, respectively.
 
-~> **NOTE** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production, but required if running in the ZPA Beta Cloud or Gov Cloud.
+~> **NOTE** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production, but required if running in the ZPA Beta Cloud, Gov Cloud, Preview Cloud or Dev Cloud.
 
 ```hcl
 provider "zpa" {}
@@ -153,7 +153,7 @@ The following arguments are supported:
 * `zpa_client_id` - (Required) ZPA client ID, is equivalent to a username.
 * `zpa_client_secret` - (Required) ZPA client secret, is equivalent to a secret password.
 * `zpa_customer_id` - (Required) ZPA customer ID, is equivalent to your ZPA tenant identification.
-* `zpa_cloud` - (Required) ZPA Cloud name `BETA` or `GOV`. Only required when running in the ZPA beta cloud.
+* `zpa_cloud` - (Required) ZPA Cloud name `BETA`, `GOV`, `PREVIEW` or `DEV`. Only required when running in the ZPA beta cloud.
 
 ### Optional
 

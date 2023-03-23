@@ -16,12 +16,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 2.7.0 (March, 22 2023)
+## 2.7.0 (March, 23 2023)
 
 ### Notes
 
-- Release date: **(March, 22 2023)**
+- Release date: **(March, 23 2023)**
 - Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) The ZPA Terraform Provider API Client, will now support long runs, that exceeds the 3600 seconds token validity. Terraform will automatically request a new API bearer token at that time in order to continue the resource provisioning. This enhacement will prevent long pipeline runs from being interrupted.
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) Update provider to Zscaler-SDK-GO v1.3.0
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) The SDK now supports authentication to ZPA DEV environment.
 
 ### Bug Fix
 
