@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.7.0 (March, 23 2023)
+
+### Notes
+
+- Release date: **(March, 23 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) The ZPA Terraform Provider API Client, will now support long runs, that exceeds the 3600 seconds token validity. Terraform will automatically request a new API bearer token at that time in order to continue the resource provisioning. This enhacement will prevent long pipeline runs from being interrupted.
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) Update provider to Zscaler-SDK-GO v1.3.0
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) The SDK now supports authentication to ZPA DEV environment.
+
+### Bug Fix
+
+- [PR #271](https://github.com/zscaler/terraform-provider-zpa/pull/271) Added deprecate message to ``zpa_segment_group`` under the following attributes:
+  - ``policy_migrated``: "The `policy_migrated` field is now deprecated for the resource `zpa_segment_group`, please remove this attribute to prevent configuration drifts"
+  - ``tcp_keep_alive_enabled``: "The `tcp_keep_alive_enabled` field is now deprecated for the resource `zpa_segment_group`, please replace all uses of this within the `zpa_application_segment`resources with the attribute `tcp_keep_alive`".
+
+  Both the above attributes can be safely removed without impact to production configuration; however, they are still supported for backwards compatibity purposes. [#270](https://github.com/zscaler/terraform-provider-zpa/issues/270)
+
 ## 2.6.6 (March, 20 2023)
 
 ### Notes
