@@ -6,9 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/variable"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_custom_controls"
 )
 
@@ -30,6 +30,7 @@ func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
 					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", variable.InspectionCustomControlAction),
 					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.InspectionCustomControlDefaultAction),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "protocol_type", "HTTP"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.InspectionCustomControlSeverity),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.InspectionCustomControlType),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "2"),
@@ -47,6 +48,7 @@ func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
 					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", variable.InspectionCustomControlAction),
 					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.InspectionCustomControlDefaultAction),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "protocol_type", "HTTP"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.InspectionCustomControlSeverity),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.InspectionCustomControlType),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "2"),
@@ -129,6 +131,7 @@ resource "%s" "%s" {
 	action         = "%s"
 	default_action = "%s"
 	paranoia_level = "1"
+	protocol_type  = "HTTP"
 	severity       = "%s"
 	type           = "%s"
 	rules {

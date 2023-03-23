@@ -12,6 +12,10 @@ Use the **zpa_segment_group** data source to get information about a machine gro
 
 -> **NOTE:** Segment Groups association is only supported in an Access Policy rule.
 
+## Zenith Community - ZPA Segment Group
+
+[![ZPA Terraform provider Video Series Ep6 - Segment Group](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_segment_groups.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep-6-zpa-segment-group/18808)
+
 ## Example Usage
 
 ```hcl

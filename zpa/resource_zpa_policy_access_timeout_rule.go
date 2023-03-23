@@ -88,7 +88,6 @@ func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error 
 			d.SetId("")
 			return nil
 		}
-
 		return err
 	}
 
@@ -126,6 +125,13 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 	if ValidateConditions(req.Conditions, zClient) {
+		if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
+			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+				d.SetId("")
+				return nil
+			}
+		}
+
 		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}

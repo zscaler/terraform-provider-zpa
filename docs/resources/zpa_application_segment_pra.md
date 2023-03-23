@@ -92,9 +92,17 @@ The following arguments are supported:
 * `icmp_access_type` - (Optional)
 * `ip_anchored` - (Optional)
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
-* `passive_health_enabled` - (Optional)
+* `tcp_keep_alive` (Optional) Supported values: ``1`` for Enabled and ``0`` for Disabled
+* `passive_health_enabled` - (Optional) Supported values: `true`, `false`
+* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
+* `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
+* `is_incomplete_dr_config` - (Optional) Supported values: `true`, `false`
+* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Application Segment can be imported by using `<APPLICATION SEGMENT ID>` or `<APPLICATION SEGMENT NAME>` as the import ID.
 

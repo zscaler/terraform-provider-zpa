@@ -12,7 +12,7 @@ The **zpa_application_segment** resource creates an application segment in the Z
 
 ## Zenith Community - ZPA Application Segment
 
-[![ZPA Terraform provider Video Series Ep7 - Application Segment](../../images/zpa_application_segments.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep-7-zpa-application-segment/18946)
+[![ZPA Terraform provider Video Series Ep7 - Application Segment](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_application_segments.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep-7-zpa-application-segment/18946)
 
 ## Example 1 Usage
 
@@ -176,9 +176,17 @@ The following arguments are supported:
 * `ip_anchored` - (Optional)
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
 * `log_features` - (Optional)
-* `passive_health_enabled` - (Optional)
+* `tcp_keep_alive` (Optional) Supported values: ``1`` for Enabled and ``0`` for Disabled
+* `passive_health_enabled` - (Optional) Supported values: `true`, `false`
+* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
+* `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
+* `is_incomplete_dr_config` - (Optional) Supported values: `true`, `false`
+* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Application Segment can be imported by using `<APPLICATION SEGMENT ID>` or `<APPLICATION SEGMENT NAME>` as the import ID.
 

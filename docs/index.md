@@ -13,7 +13,7 @@ Use the navigation on the left to read about the available resources.
 
 ## Zenith Community - ZPA Terraform Provider Introduction
 
-[![ZPA Terraform provider Video Series Ep1](../images/zpa_terraform_provider_introduction.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep1/18691)
+[![ZPA Terraform provider Video Series Ep1](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_terraform_provider_introduction.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep1/18691)
 
 ## Example Usage ZPA Production Cloud
 
@@ -25,7 +25,7 @@ terraform {
   required_providers {
     zpa = {
       source = "zscaler/zpa"
-      version = "2.2.0"
+      version = "~> 2.7.0"
     }
   }
 }
@@ -41,9 +41,9 @@ resouce "zpa_application_segment" "app_segment" {
 }
 ```
 
-## Example Usage ZPA Beta and GOV Cloud
+## Example Usage ZPA Beta, GOV, Preview, and Dev Cloud
 
-For customers who want to use this provider with ZPA Beta Cloud or Gov Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA` or `GOV` values or via environment variable `ZPA_CLOUD=BETA` or `ZPA_CLOUD=GOV` are required.
+For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `GOV`, `PREVIEW` or `DEV` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
 
 ```hcl
 # Configure ZPA provider source and version
@@ -51,7 +51,7 @@ terraform {
   required_providers {
     zpa = {
       source = "zscaler/zpa"
-      version = "2.2.0"
+      version = "~> 2.7.0"
     }
   }
 }
@@ -60,7 +60,7 @@ provider "zpa" {
   zpa_client_id         = "xxxxxxxxxxxxxxxx"
   zpa_client_secret     = "xxxxxxxxxxxxxxxx"
   zpa_customer_id       = "xxxxxxxxxxxxxxxx"
-  zpa_cloud             = "BETA" // Use "GOV" for ZPA Gov Cloud
+  zpa_cloud             = "BETA" // Use `BETA`, `GOV`, `PREVIEW` or `DEV`
 }
 
 resouce "zpa_application_segment" "app_segment" {
@@ -96,7 +96,7 @@ provider "zpa" {
 
 You can provide credentials via the `ZPA_CLIENT_ID`, `ZPA_CLIENT_SECRET`, `ZPA_CUSTOMER_ID`, `ZPA_CLOUD` environment variables, representing your ZPA API key credentials and customer ID, of your ZPA account, respectively.
 
-~> **NOTE** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production, but required if running in the ZPA Beta Cloud or Gov Cloud.
+~> **NOTE** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production, but required if running in the ZPA Beta Cloud, Gov Cloud, Preview Cloud or Dev Cloud.
 
 ```hcl
 provider "zpa" {}
@@ -153,7 +153,7 @@ The following arguments are supported:
 * `zpa_client_id` - (Required) ZPA client ID, is equivalent to a username.
 * `zpa_client_secret` - (Required) ZPA client secret, is equivalent to a secret password.
 * `zpa_customer_id` - (Required) ZPA customer ID, is equivalent to your ZPA tenant identification.
-* `zpa_cloud` - (Required) ZPA Cloud name `BETA` or `GOV`. Only required when running in the ZPA beta cloud.
+* `zpa_cloud` - (Required) ZPA Cloud name `BETA`, `GOV`, `PREVIEW` or `DEV`. Only required when running in the ZPA beta cloud.
 
 ### Optional
 
@@ -171,6 +171,6 @@ support options. The underlying product used (Zscaler Private Access API) but th
 scripts or templates are still supported, but the support is only for the
 product functionality and not for help in deploying or using the template or
 script itself. Unless explicitly tagged, all projects or work posted in our
-GitHub repository at (<https://github.com/zscaler>) or sites other
-than our official Downloads page on (<https://help.zscaler.com/login-tickets>)
+[GitHub repository](https://github.com/zscaler) or sites other
+than our official [Downloads page](https://help.zscaler.com/login-tickets)
 are provided under the best effort policy.

@@ -7,9 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/variable"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentinspection"
 )
 
@@ -145,11 +145,13 @@ resource "%s" "%s" {
 	description = "tf-acc-test-%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
+	select_connector_close_to_app = true
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
+	tcp_keep_alive = "1"
 	tcp_port_range {
-		from = "443"
-		to = "443"
+		from = "4443"
+		to = "4443"
 	}
 	domain_names = ["jenkins.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
@@ -158,7 +160,7 @@ resource "%s" "%s" {
 		  name                 = "jenkins.bd-hashicorp.com"
 		  domain               = "jenkins.bd-hashicorp.com"
 		  application_protocol = "HTTPS"
-		  application_port     = "443"
+		  application_port     = "4443"
 		  certificate_id       = data.zpa_ba_certificate.jenkins.id
 		  enabled = true
 		  app_types = ["INSPECT"]

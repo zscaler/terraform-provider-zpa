@@ -12,6 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/appservercontroller"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/bacertificate"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/clienttypes"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/customerversionprofile"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/enrollmentcert"
@@ -19,8 +20,10 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_custom_controls"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_predefined_controls"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_profile"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/isolationprofile"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/lssconfigcontroller"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/machinegroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/platforms"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/postureprofile"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/provisioningkey"
@@ -54,6 +57,7 @@ type Client struct {
 	lssconfigcontroller            lssconfigcontroller.Service
 	machinegroup                   machinegroup.Service
 	postureprofile                 postureprofile.Service
+	isolationprofile               isolationprofile.Service
 	policysetcontroller            policysetcontroller.Service
 	provisioningkey                provisioningkey.Service
 	samlattribute                  samlattribute.Service
@@ -64,6 +68,8 @@ type Client struct {
 	serviceedgegroup               serviceedgegroup.Service
 	serviceedgecontroller          serviceedgecontroller.Service
 	trustednetwork                 trustednetwork.Service
+	platforms                      platforms.Service
+	clienttypes                    clienttypes.Service
 	browseraccess                  browseraccess.Service
 	inspection_custom_controls     inspection_custom_controls.Service
 	inspection_predefined_controls inspection_predefined_controls.Service
@@ -109,6 +115,7 @@ func (c *Config) Client() (*Client, error) {
 		lssconfigcontroller:            *lssconfigcontroller.New(zpaClient),
 		machinegroup:                   *machinegroup.New(zpaClient),
 		postureprofile:                 *postureprofile.New(zpaClient),
+		isolationprofile:               *isolationprofile.New(zpaClient),
 		policysetcontroller:            *policysetcontroller.New(zpaClient),
 		provisioningkey:                *provisioningkey.New(zpaClient),
 		samlattribute:                  *samlattribute.New(zpaClient),
@@ -119,6 +126,8 @@ func (c *Config) Client() (*Client, error) {
 		serviceedgegroup:               *serviceedgegroup.New(zpaClient),
 		serviceedgecontroller:          *serviceedgecontroller.New(zpaClient),
 		trustednetwork:                 *trustednetwork.New(zpaClient),
+		platforms:                      *platforms.New(zpaClient),
+		clienttypes:                    *clienttypes.New(zpaClient),
 		browseraccess:                  *browseraccess.New(zpaClient),
 		inspection_custom_controls:     *inspection_custom_controls.New(zpaClient),
 		inspection_predefined_controls: *inspection_predefined_controls.New(zpaClient),

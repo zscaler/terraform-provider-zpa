@@ -59,16 +59,26 @@ The following arguments are supported:
 * `enabled` - (Optional) Whether this Service Edge Group is enabled or not. Default value: `true` Supported values: `true`, `false`
 * `city_country` - (Optional) This field controls dynamic discovery of the servers.
 * `country_code` - (Optional) This field is an array of app-connector-id only.
-* `is_public` - (Optional) Enable or disable public access for the Service Edge Group. Default value: `FALSE` Supported values: `DEFAULT`, `TRUE`, `FALSE`
+* `is_public` - (Optional) Enable or disable public access for the Service Edge Group. Default value: `false` Supported values: `true`, `false`
 
-* `override_version_profile` - (Optional) Whether the default version profile of the App Connector Group is applied or overridden. Default: `true`. Supported values: `true`, `false`
+* `override_version_profile` - (Optional) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
+* `version_profile_id` - (Optional) ID of the version profile. To learn more, see Version Profile Use Cases. Supported values are:
+  * ``0`` = ``Default``
+  * ``1`` = ``Previous Default``
+  * ``2`` = ``New Release``
+* `version_profile_name` - (Optional)
+  * ``Default`` = ``0``
+  * ``Previous Default`` = ``1``
+  * ``New Release`` = ``2``
 * `service_edges` - (Optional)
 * `trusted_networks` - (Optional) Trusted networks for this Service Edge Group. List of trusted network objects
 * `upgrade_day` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified day. Default value: `SUNDAY` List of valid days (i.e., Sunday, Monday)
 * `upgrade_time_in_secs` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600` Integer in seconds (i..e, 66600). The integer must be greater than or equal to 0 and less than `86400`, in `15` minute intervals
-* `version_profile_id` - (Optional) ID of the version profile. To learn more, see Version Profile Use Cases. This value becomes required if the value for `override_version_profile` is set to `true`.
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Service Edge Group can be imported; use `<SERVER EDGE GROUP ID>` or `<SERVER EDGE GROUP NAME>` as the import ID.
 

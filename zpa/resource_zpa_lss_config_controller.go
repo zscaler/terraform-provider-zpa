@@ -200,9 +200,10 @@ func resourceLSSConfigController() *schema.Resource {
 								"zpn_ast_auth_log",
 								"zpn_http_trans_log",
 								"zpn_audit_log",
-								"zpn_sys_auth_log",
-								"zpn_http_insp",
 								"zpn_ast_comprehensive_stats",
+								"zpn_sys_auth_log",
+								"zpn_waf_http_exchanges_log",
+								"zpn_pbroker_comprehensive_stats",
 							}, false),
 						},
 						"use_tls": {
@@ -264,6 +265,13 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) er
 	id := d.Id()
 	log.Printf("[INFO] Updating lss config controller ID: %v\n", id)
 	req := expandLSSResource(d)
+
+	if _, _, err := zClient.lssconfigcontroller.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
 
 	if _, err := zClient.lssconfigcontroller.Update(id, &req); err != nil {
 		return err

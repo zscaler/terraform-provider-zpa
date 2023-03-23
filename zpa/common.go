@@ -87,9 +87,9 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool
 			return err
 		}))
 	case "CLIENT_TYPE":
-		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector'", Getter(func(id string) error {
-			if id != "zpn_client_type_zapp" && id != "zpn_client_type_exporter" && id != "zpn_client_type_ip_anchoring" && id != "zpn_client_type_browser_isolation" && id != "zpn_client_type_machine_tunnel" && id != "zpn_client_type_edge_connector" {
-				return fmt.Errorf("RHS values must be 'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' when object type is CLIENT_TYPE")
+		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' or 'zpn_client_type_exporter_noauth' or 'zpn_client_type_slogger' or 'zpn_client_type_branch_connector'", Getter(func(id string) error {
+			if id != "zpn_client_type_zapp" && id != "zpn_client_type_exporter" && id != "zpn_client_type_exporter_noauth" && id != "zpn_client_type_ip_anchoring" && id != "zpn_client_type_browser_isolation" && id != "zpn_client_type_machine_tunnel" && id != "zpn_client_type_edge_connector" && id != "zpn_client_type_slogger" && id != "zpn_client_type_branch_connector" {
+				return fmt.Errorf("RHS values must be 'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_exporter_noauth' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' or 'zpn_client_type_slogger' or 'zpn_client_type_branch_connector' when object type is CLIENT_TYPE")
 			}
 			return nil
 		}))
@@ -121,6 +121,21 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool
 		_, _, err := zClient.trustednetwork.GetByNetID(operand.LHS)
 		if err != nil {
 			lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, err)
+			return false
+		}
+		if operand.RHS != "true" {
+			rhsWarn(operand.ObjectType, "\"true\"", operand.RHS, nil)
+			return false
+		}
+		return true
+	case "PLATFORM":
+		if operand.LHS == "" {
+			lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, nil)
+			return false
+		}
+		_, _, err := zClient.platforms.GetAllPlatforms()
+		if err != nil {
+			lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, err)
 			return false
 		}
 		if operand.RHS != "true" {
@@ -352,7 +367,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 								Description: "This denotes the value for the given object type. Its value depends upon the key.",
 							},
 							"rhs_list": {
-								Type:        schema.TypeList,
+								Type:        schema.TypeSet,
 								Optional:    true,
 								Description: "This denotes a list of values for the given object type. The value depend upon the key. If rhs is defined this list will be ignored",
 								Elem: &schema.Schema{
@@ -424,10 +439,10 @@ func expandOperandsList(ops interface{}) ([]policysetcontroller.Operands, error)
 				}
 			} else {
 				// try rhs_list
-				rhsList, ok := operandSet["rhs_list"].([]interface{})
+				rhsList := SetToStringSlice(operandSet["rhs_list"].(*schema.Set))
 				if ok && len(rhsList) > 0 {
 					for _, e := range rhsList {
-						op.RHS, _ = e.(string)
+						op.RHS = e
 						operandsSets = append(operandsSets, op)
 					}
 				} else {
@@ -539,14 +554,27 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"reauth_idle_timeout": {
 			Type:     schema.TypeString,
 			Optional: true,
+			ForceNew: true,
 		},
 		"reauth_timeout": {
 			Type:     schema.TypeString,
 			Optional: true,
+			ForceNew: true,
+		},
+		"zpn_isolation_profile_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
+		"zpn_cbi_profile_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
 		},
 		"zpn_inspection_profile_id": {
 			Type:     schema.TypeString,
 			Optional: true,
+			Computed: true,
 		},
 		"rule_order": {
 			Type:     schema.TypeString,
@@ -592,6 +620,7 @@ func flattenNetworkPorts(ports []common.NetworkPorts) []interface{} {
 	return portsObj
 }
 
+/*
 func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
 	var ports []common.NetworkPorts
 	if portsInterface, ok := d.GetOk(key); ok {
@@ -611,6 +640,7 @@ func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts
 	}
 	return ports
 }
+*/
 
 func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{

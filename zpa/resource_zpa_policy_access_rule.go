@@ -49,6 +49,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 					ValidateFunc: validation.StringInSlice([]string{
 						"ALLOW",
 						"DENY",
+						"REQUIRE_APPROVAL",
 					}, false),
 				},
 				"app_server_groups": {
@@ -88,18 +89,21 @@ func resourcePolicyAccessRule() *schema.Resource {
 				"conditions": GetPolicyConditionsSchema([]string{
 					"USER",
 					"USER_GROUP",
-					"LOCATION",
 					"APP",
 					"APP_GROUP",
-					"SAML",
-					"POSTURE",
-					"CLIENT_TYPE",
+					"LOCATION",
 					"IDP",
-					"TRUSTED_NETWORK",
-					"EDGE_CONNECTOR_GROUP",
-					"MACHINE_GRP",
+					"SAML",
 					"SCIM",
 					"SCIM_GROUP",
+					"CLIENT_TYPE",
+					"POSTURE",
+					"TRUSTED_NETWORK",
+					"BRANCH_CONNECTOR_GROUP",
+					"EDGE_CONNECTOR_GROUP",
+					"MACHINE_GRP",
+					"COUNTRY_CODE",
+					"PLATFORM",
 				}),
 			},
 		),
@@ -190,6 +194,13 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
+	if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 		return err
 	}

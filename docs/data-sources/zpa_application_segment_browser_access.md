@@ -1,14 +1,18 @@
 ---
 subcategory: "Application Segment"
 layout: "zscaler"
-page_title: "ZPA: browser_access"
+page_title: "ZPA: application_segment_browser_access"
 description: |-
   Get information about ZPA Browser Access Application Segment in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_browser_access
+# Data Source: zpa_application_segment_browser_access
 
-Use the **zpa_application_segment** data source to get information about a browser access application segment created in the Zscaler Private Access cloud. This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
+Use the **zpa_application_segment_browser_access** data source to get information about a browser access application segment created in the Zscaler Private Access cloud. This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
+
+## Zenith Community - ZPA Browser Access Application Segment
+
+[![ZPA Terraform provider Video Series Ep8 - Browser Access Application Segment](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_browser_access_application_segments.svg)](https://community.zscaler.com/t/zpa-terraform-provider-video-series-ep-8-zpa-browser-access-application-segment/19150)
 
 ## Example Usage
 
@@ -78,3 +82,7 @@ In addition to all arguments above, the following attributes are exported:
   * `local_domain` (string)
   * `path` (string)
   * `trust_untrusted_cert` (bool)
+  * `select_connector_close_to_app` (bool)
+  * `use_in_dr_mode` (bool)
+  * `is_incomplete_dr_config` (bool)
+  * `select_connector_close_to_app` (bool)

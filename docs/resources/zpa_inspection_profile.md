@@ -96,5 +96,15 @@ The following arguments are supported:
 
 * `common_global_override_actions_config` - (Optional)
 * `controls_info` - (Optional) Types for custom controls
-  * `control_type` - (Optional) Control types. Supported Values: `CUSTOM`, `PREDEFINED`, `ZSCALER`
+  * `control_type` - (string) Control types. Supported Values: `WEBSOCKET_PREDEFINED`, `WEBSOCKET_CUSTOM`, `CUSTOM`, `PREDEFINED`, `ZSCALER`
   * `count` - (Optional) Control information counts `Long`
+
+* `web_socket_controls` - (string)
+  * `id` - (string) ID of the predefined control
+  * `action` - (string) The action of the predefined control. Supported values: `PASS`, `BLOCK` and `REDIRECT`
+  * `action_value` - (string) Value for the predefined controls action. This field is only required if the action is set to REDIRECT. This field is only required if the action is set to `REDIRECT`.
+
+## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)

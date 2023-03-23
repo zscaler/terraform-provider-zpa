@@ -15,8 +15,7 @@ The **zpa_provisioning_key** resource provides creates a provisioning key in the
 
 ## Zenith Community - ZPA Provisioning Keys
 
-[![ZPA Terraform provider Video Series Ep3 - Provisioning Keys](../../images/zpa_provisioning_key.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep3-provisioning-keys/18694)
-
+[![ZPA Terraform provider Video Series Ep3 - Provisioning Keys](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_provisioning_key.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep3-provisioning-keys/18694)
 
 ## App Connector Group Provisioning Key Example Usage
 
@@ -95,6 +94,9 @@ The following arguments are supported:
 * `association_type` (Required) Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are `CONNECTOR_GRP` and `SERVICE_EDGE_GRP`
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Provisioning key can be imported by using `<PROVISIONING KEY ID>` or `<PROVISIONING KEY NAME>` as the import ID.
 

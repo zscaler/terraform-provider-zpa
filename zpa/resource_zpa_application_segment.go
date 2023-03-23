@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
 )
 
 func resourceApplicationSegment() *schema.Resource {
@@ -154,6 +155,18 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"is_incomplete_dr_config": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"is_cname_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -170,6 +183,14 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
+			},
+			"tcp_keep_alive": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1",
+				}, false),
 			},
 			"server_groups": {
 				Type:        schema.TypeSet,
@@ -195,6 +216,7 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 	zClient := m.(*Client)
 
 	req := expandApplicationSegmentRequest(d, zClient, "")
+
 	if err := checkForPortsOverlap(zClient, req); err != nil {
 		return err
 	}
@@ -243,7 +265,11 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
+	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
+	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
+	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
+	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
@@ -283,9 +309,17 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 		return err
 	}
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
-		return fmt.Errorf("please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
+
+	if _, _, err := zClient.applicationsegment.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.applicationsegment.Update(id, req); err != nil {
 		return err
 	}
@@ -297,16 +331,6 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 	zClient := m.(*Client)
 	id := d.Id()
 	log.Printf("[INFO] Deleting application segment with id %v\n", id)
-	segmentGroupId, ok := d.GetOk("segment_group_id")
-	if ok && segmentGroupId != nil {
-		gID, ok := segmentGroupId.(string)
-		if ok && gID != "" {
-			// detach it from segment group first
-			if err := detachAppSegmentFromGroup(zClient, id, gID); err != nil {
-				return err
-			}
-		}
-	}
 
 	if _, err := zClient.applicationsegment.Delete(id); err != nil {
 		return err
@@ -315,54 +339,32 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func detachAppSegmentFromGroup(client *Client, segmentID, segmentGroupId string) error {
-	log.Printf("[INFO] Detaching application segment  %s from segment group: %s\n", segmentID, segmentGroupId)
-	segGroup, _, err := client.segmentgroup.Get(segmentGroupId)
-	if err != nil {
-		log.Printf("[error] Error while getting segment group id: %s", segmentGroupId)
-		return err
-	}
-	adaptedApplications := []segmentgroup.Application{}
-	for _, app := range segGroup.Applications {
-		if app.ID != segmentID {
-			adaptedApplications = append(adaptedApplications, app)
-		}
-	}
-	segGroup.Applications = adaptedApplications
-	_, err = client.segmentgroup.Update(segmentGroupId, segGroup)
-	return err
-
-}
-func expandStringInSlice(d *schema.ResourceData, key string) []string {
-	applicationSegments := d.Get(key).([]interface{})
-	applicationSegmentList := make([]string, len(applicationSegments))
-	for i, applicationSegment := range applicationSegments {
-		applicationSegmentList[i] = applicationSegment.(string)
-	}
-
-	return applicationSegmentList
-}
-
 func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id string) applicationsegment.ApplicationSegmentResource {
 	details := applicationsegment.ApplicationSegmentResource{
-		SegmentGroupID:       d.Get("segment_group_id").(string),
-		SegmentGroupName:     d.Get("segment_group_name").(string),
-		BypassType:           d.Get("bypass_type").(string),
-		ConfigSpace:          d.Get("config_space").(string),
-		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
-		IcmpAccessType:       d.Get("icmp_access_type").(string),
-		Description:          d.Get("description").(string),
-		DomainNames:          SetToStringList(d, "domain_names"),
-		DoubleEncrypt:        d.Get("double_encrypt").(bool),
-		Enabled:              d.Get("enabled").(bool),
-		HealthCheckType:      d.Get("health_check_type").(string),
-		HealthReporting:      d.Get("health_reporting").(string),
-		IpAnchored:           d.Get("ip_anchored").(bool),
-		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
-		Name:                 d.Get("name").(string),
-		ServerGroups:         expandAppServerGroups(d),
-		TCPAppPortRange:      []common.NetworkPorts{},
-		UDPAppPortRange:      []common.NetworkPorts{},
+		ID:                        d.Id(),
+		Name:                      d.Get("name").(string),
+		SegmentGroupID:            d.Get("segment_group_id").(string),
+		SegmentGroupName:          d.Get("segment_group_name").(string),
+		BypassType:                d.Get("bypass_type").(string),
+		ConfigSpace:               d.Get("config_space").(string),
+		IcmpAccessType:            d.Get("icmp_access_type").(string),
+		Description:               d.Get("description").(string),
+		DomainNames:               SetToStringList(d, "domain_names"),
+		HealthCheckType:           d.Get("health_check_type").(string),
+		HealthReporting:           d.Get("health_reporting").(string),
+		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
+		DoubleEncrypt:             d.Get("double_encrypt").(bool),
+		Enabled:                   d.Get("enabled").(bool),
+		IpAnchored:                d.Get("ip_anchored").(bool),
+		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
+		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
+		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
+		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+
+		ServerGroups:    expandAppServerGroups(d),
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
 	}
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
@@ -421,21 +423,19 @@ func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServe
 }
 
 func checkForPortsOverlap(client *Client, app applicationsegment.ApplicationSegmentResource) error {
+	time.Sleep(time.Second * time.Duration(rand.Intn(5)))
 	apps, _, err := client.applicationsegment.GetAll()
 	if err != nil {
 		return err
 	}
 	for _, app2 := range apps {
-		if app2.ID != app.ID {
+		if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found && app2.ID != app.ID && app2.Name != app.Name {
 			// check for udp ports
 			if overlap, o1, o2 := portOverlap(app.TCPPortRanges, app2.TCPPortRanges); overlap {
-				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s)", o1, app.Name, o2, app2.Name, app2.ID)
+				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
 			}
 			if overlap, o1, o2 := portOverlap(app.UDPPortRanges, app2.UDPPortRanges); overlap {
-				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s)", o1, app.Name, o2, app2.Name, app2.ID)
-			}
-			if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found {
-				return fmt.Errorf("found same domain name: %s of application %s & %s (%s)", common, app.Name, app2.Name, app2.ID)
+				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
 			}
 		}
 	}
@@ -443,16 +443,6 @@ func checkForPortsOverlap(client *Client, app applicationsegment.ApplicationSegm
 
 }
 
-func sliceHasCommon(s1, s2 []string) (bool, string) {
-	for _, i1 := range s1 {
-		for _, i2 := range s2 {
-			if i1 == i2 {
-				return true, i1
-			}
-		}
-	}
-	return false, ""
-}
 func portOverlap(s1, s2 []string) (bool, []string, []string) {
 	for i1 := 0; i1 < len(s1); i1 += 2 {
 		port1Start, _ := strconv.Atoi(s1[i1])

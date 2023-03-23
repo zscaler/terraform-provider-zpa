@@ -92,6 +92,9 @@ resource "zpa_policy_timeout_rule" "this"  {
 
 ## Import
 
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
+
 Policy access timeout can be imported by using `<POLICY TIMEOUT RULE ID>` as the import ID.
 
 For example:

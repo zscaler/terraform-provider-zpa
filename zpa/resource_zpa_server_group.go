@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/servergroup"
 )
+
+var detachLock sync.Mutex
 
 func resourceServerGroup() *schema.Resource {
 	return &schema.Resource{
@@ -221,6 +225,14 @@ func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[ERROR] Can't update server group: servers must not be empty when DynamicDiscovery is disabled\n")
 		return fmt.Errorf("can't update server group: servers must not be empty when DynamicDiscovery is disabled")
 	}
+
+	if _, _, err := zClient.servergroup.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.servergroup.Update(id, &req); err != nil {
 		return err
 	}
@@ -231,7 +243,10 @@ func resourceServerGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	log.Printf("[INFO] Deleting server group ID: %v\n", d.Id())
-
+	err := detachServerGroupFromAppConnectorGroups(zClient, d.Id())
+	if err != nil {
+		log.Printf("[ERROR] Detaching server group ID: %v from app connector groups failed:%v\n", d.Id(), err)
+	}
 	if _, err := zClient.servergroup.Delete(d.Id()); err != nil {
 		return err
 	}
@@ -240,8 +255,39 @@ func resourceServerGroupDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+func detachServerGroupFromAppConnectorGroups(client *Client, serverGroupID string) error {
+	log.Printf("[INFO] Detaching Server Group  %s from App Connector Groups\n", serverGroupID)
+	serverGroup, _, err := client.servergroup.Get(serverGroupID)
+	if err != nil {
+		return err
+	}
+	// lock to avoid updating app connector group with a deleted server group ID when running in parallel
+	detachLock.Lock()
+	defer detachLock.Unlock()
+	for _, appConnectorGroup := range serverGroup.AppConnectorGroups {
+		app, _, err := client.appconnectorgroup.Get(appConnectorGroup.ID)
+		if err != nil {
+			continue
+		}
+		appServerGroups := []appconnectorgroup.AppServerGroup{}
+		for _, s := range app.AppServerGroup {
+			if s.ID == serverGroupID {
+				continue
+			}
+			appServerGroups = append(appServerGroups, s)
+		}
+		app.AppServerGroup = appServerGroups
+		_, err = client.appconnectorgroup.Update(app.ID, app)
+		if err != nil {
+			continue
+		}
+	}
+	return nil
+}
+
 func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 	result := servergroup.ServerGroup{
+		ID:                 d.Id(),
 		Enabled:            d.Get("enabled").(bool),
 		Description:        d.Get("description").(string),
 		IpAnchored:         d.Get("ip_anchored").(bool),

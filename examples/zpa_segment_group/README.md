@@ -20,3 +20,9 @@ terraform apply theplan
 ```bash
 terraform destroy
 ```
+
+## Deprecated Attributes
+
+- ``policy_migrated``: "The `policy_migrated` field is now deprecated for the resource `zpa_segment_group`, please remove this attribute to prevent configuration drifts"
+
+- ``tcp_keep_alive_enabled``: "The `tcp_keep_alive_enabled` field is now deprecated for the resource `zpa_segment_group`, please replace all uses of this within the `zpa_application_segment`resources with the attribute `tcp_keep_alive`"

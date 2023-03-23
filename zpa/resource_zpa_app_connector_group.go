@@ -83,10 +83,11 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Description: "Whether this App Connector Group is enabled or not",
 			},
 			"latitude": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Latitude of the App Connector Group. Integer or decimal. With values in the range of -90 to 90",
-				ValidateFunc: ValidateStringFloatBetween(-90, 90),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     ValidateLatitude,
+				DiffSuppressFunc: DiffSuppressFuncCoordinate,
+				Description:      "Latitude of the App Connector Group. Integer or decimal. With values in the range of -90 to 90",
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -94,10 +95,11 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Description: "Location of the App Connector Group",
 			},
 			"longitude": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Longitude of the App Connector Group. Integer or decimal. With values in the range of -180 to 180",
-				ValidateFunc: ValidateStringFloatBetween(-180.0, 180.0),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     ValidateLongitude,
+				DiffSuppressFunc: DiffSuppressFuncCoordinate,
+				Description:      "Longitude of the App Connector Group. Integer or decimal. With values in the range of -180 to 180",
 			},
 			"lss_app_connector_group": {
 				Type:     schema.TypeBool,
@@ -123,6 +125,11 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Computed:    true,
 			},
 			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"pra_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
@@ -222,6 +229,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("upgrade_day", resp.UpgradeDay)
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
+	_ = d.Set("pra_enabled", resp.PRAEnabled)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	return nil
@@ -240,6 +248,13 @@ func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) erro
 
 	if err := validateTCPQuickAck(req); err != nil {
 		return err
+	}
+
+	if _, _, err := zClient.appconnectorgroup.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
 	}
 
 	if _, err := zClient.appconnectorgroup.Update(id, &req); err != nil {
@@ -282,6 +297,7 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		UpgradeDay:               d.Get("upgrade_day").(string),
 		UpgradeTimeInSecs:        d.Get("upgrade_time_in_secs").(string),
 		OverrideVersionProfile:   d.Get("override_version_profile").(bool),
+		PRAEnabled:               d.Get("pra_enabled").(bool),
 		VersionProfileID:         d.Get("version_profile_id").(string),
 		VersionProfileName:       d.Get("version_profile_name").(string),
 	}

@@ -14,6 +14,10 @@ Use the **zpa_app_connector_group** data source to get information about a app c
 * Provisioning Key
 * Access policy rule
 
+## Zenith Community - ZPA App Connector Group
+
+[![ZPA Terraform provider Video Series Ep2 - Connector Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_app_connector_group.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep2-connector-groups/18692)
+
 ## Example Usage
 
 ```hcl
@@ -71,3 +75,5 @@ The following attributes are exported:
   * ``1`` = ``Previous Default``
   * ``2`` = ``New Release``
 * `geo_location_id` - (String)
+* `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
+* `pra_enabled` - (Optional) Supported values: `true`, `false`

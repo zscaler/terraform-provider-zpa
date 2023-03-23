@@ -12,7 +12,7 @@ The **zpa_server_group** resource creates a server group in the Zscaler Private 
 
 ## Zenith Community - ZPA Server Groups
 
-[![ZPA Terraform provider Video Series Ep4 - Server Groups](../../images/zpa_server_groups.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep4-server-groups/18695)
+[![ZPA Terraform provider Video Series Ep4 - Server Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_server_groups.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep4-server-groups/18695)
 
 ## Example Usage
 
@@ -104,6 +104,9 @@ resource "zpa_app_connector_group" "example" {
 * `servers` (Block List) This field is a list of servers that are applicable only when dynamic discovery is disabled. Server name is required only in cases where the new servers need to be created in this API.
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Server Groups can be imported; use `<SERVER GROUP ID>` or `<SERVER GROUP NAME>` as the import ID.
 

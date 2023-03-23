@@ -10,9 +10,9 @@ description: |-
 
 The **zpa_application_segment_browser_access** creates and manages a browser access application segment resource in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule or access policy client forwarding rule.
 
-## Zenith Community - ZPA Application Segment Browser Access
+## Zenith Community - ZPA Browser Access Application Segment
 
-[![ZPA Terraform provider Video Series Ep7 - Application Segment Browser Access](../../images/zpa_application_segment_browser_access.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep-7-zpa-application-segment/18946)
+[![ZPA Terraform provider Video Series Ep8 - Browser Access Application Segment](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_browser_access_application_segments.svg)](https://community.zscaler.com/t/zpa-terraform-provider-video-series-ep-8-zpa-browser-access-application-segment/19150)
 
 ## Example Usage
 
@@ -115,8 +115,16 @@ In addition to all arguments above, the following attributes are exported:
 * `ip_anchored` (Optional) - If Source IP Anchoring for use with ZIA, is enabled or disabled for the app. Supported values are `true` and `false`
 * `is_cname_enabled` (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
   * `certificate_name` - (Optional) - Name of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
+* `tcp_keep_alive` (Optional) Supported values: ``1`` for Enabled and ``0`` for Disabled
+* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
+* `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
+* `is_incomplete_dr_config` - (Optional) Supported values: `true`, `false`
+* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 **zpa_application_segment_browser_access** Application Segment Browser Access can be imported by using <`BROWSER ACCESS ID`> or `<<BROWSER ACCESS NAME>` as the import ID.
 

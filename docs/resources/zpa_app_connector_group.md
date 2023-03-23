@@ -8,11 +8,11 @@ description: |-
 
 # Resource: zpa_app_connector_group
 
-The **zpa_app_connector_group** resource creates a and manages app connector groups in the Zscaler Private Access (ZPA) cloud. This resource can then be associated with the following resoueces: server groups, log receivers and access policies.
+The **zpa_app_connector_group** resource creates a and manages app connector groups in the Zscaler Private Access (ZPA) cloud. This resource can then be associated with the following resources: server groups, log receivers and access policies.
 
 ## Zenith Community - ZPA App Connector Group
 
-[![ZPA Terraform provider Video Series Ep2 - Connector Groups](../../images/zpa_app_connector_group.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep2-connector-groups/18692)
+[![ZPA Terraform provider Video Series Ep2 - Connector Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_app_connector_group.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep2-connector-groups/18692)
 
 ## Example Usage
 
@@ -32,6 +32,7 @@ resource "zpa_app_connector_group" "example" {
   override_version_profile      = true
   version_profile_name          = "New Release"
   dns_query_type                = "IPV4_IPV6"
+  use_in_dr_mode                = true
 }
 ```
 
@@ -65,12 +66,16 @@ The following arguments are supported:
 * `tcp_quick_ack_assistant` - (Optional) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
 * `tcp_quick_ack_read_assistant` - (Optional) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
+* `pra_enabled` - (Optional) Supported values: `true`, `false`
 
 ## Attributes Reference
 
 * `id` - The ID of the Group Role Assignment.
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 App Connector Group can be imported by using `<APP CONNECTOR GROUP ID>` or `<APP CONNECTOR GROUP NAME>`as the import ID.
 

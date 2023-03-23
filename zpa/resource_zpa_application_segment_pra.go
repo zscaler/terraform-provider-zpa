@@ -3,7 +3,10 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"math"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -45,6 +48,12 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Name of the application.",
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
@@ -155,17 +164,31 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"is_incomplete_dr_config": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"is_cname_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
 			},
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Name of the application.",
-				ValidateFunc: validation.StringIsNotEmpty,
+			"tcp_keep_alive": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1",
+				}, false),
 			},
 			"common_apps_dto": {
 				Type:     schema.TypeList,
@@ -303,6 +326,9 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 	zClient := m.(*Client)
 
 	req := expandSRAApplicationSegment(d, zClient, "")
+	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
+		return err
+	}
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
@@ -348,6 +374,11 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
+	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
+	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
+	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
+	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
+	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
@@ -388,9 +419,20 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 	log.Printf("[INFO] Updating pra application segment ID: %v\n", id)
 	req := expandSRAApplicationSegment(d, zClient, id)
 
+	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
+		return err
+	}
+
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the sra application segment")
 		return fmt.Errorf("please provde a valid segment group for the sra application segment")
+	}
+
+	if _, _, err := zClient.applicationsegmentpra.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
 	}
 
 	if _, err := zClient.applicationsegmentpra.Update(id, &req); err != nil {
@@ -442,23 +484,27 @@ func detachSraPortalsFromGroup(client *Client, segmentID, segmentGroupID string)
 
 func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentpra.AppSegmentPRA {
 	details := applicationsegmentpra.AppSegmentPRA{
-		SegmentGroupID:       d.Get("segment_group_id").(string),
-		BypassType:           d.Get("bypass_type").(string),
-		ConfigSpace:          d.Get("config_space").(string),
-		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
-		IcmpAccessType:       d.Get("icmp_access_type").(string),
-		Description:          d.Get("description").(string),
-		DoubleEncrypt:        d.Get("double_encrypt").(bool),
-		Enabled:              d.Get("enabled").(bool),
-		HealthReporting:      d.Get("health_reporting").(string),
-		HealthCheckType:      d.Get("health_check_type").(string),
-		IpAnchored:           d.Get("ip_anchored").(bool),
-		IsCnameEnabled:       d.Get("is_cname_enabled").(bool),
-		DomainNames:          expandStringInSlice(d, "domain_names"),
-		TCPAppPortRange:      []common.NetworkPorts{},
-		UDPAppPortRange:      []common.NetworkPorts{},
-		ServerGroups:         expandPRAAppServerGroups(d),
-		CommonAppsDto:        expandCommonAppsDto(d),
+		ID:                        d.Id(),
+		SegmentGroupID:            d.Get("segment_group_id").(string),
+		BypassType:                d.Get("bypass_type").(string),
+		ConfigSpace:               d.Get("config_space").(string),
+		IcmpAccessType:            d.Get("icmp_access_type").(string),
+		Description:               d.Get("description").(string),
+		HealthReporting:           d.Get("health_reporting").(string),
+		HealthCheckType:           d.Get("health_check_type").(string),
+		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
+		DoubleEncrypt:             d.Get("double_encrypt").(bool),
+		Enabled:                   d.Get("enabled").(bool),
+		IpAnchored:                d.Get("ip_anchored").(bool),
+		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
+		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
+		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
+		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+		DomainNames:               expandStringInSlice(d, "domain_names"),
+		TCPAppPortRange:           []common.NetworkPorts{},
+		UDPAppPortRange:           []common.NetworkPorts{},
+		ServerGroups:              expandPRAAppServerGroups(d),
+		CommonAppsDto:             expandCommonAppsDto(d),
 	}
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
@@ -610,4 +656,54 @@ func flattenAppsConfig(appConfigs []applicationsegmentpra.SRAAppsDto) []interfac
 		}
 	}
 	return appConfig
+}
+
+func checkForPRAPortsOverlap(client *Client, app applicationsegmentpra.AppSegmentPRA) error {
+	time.Sleep(time.Second * time.Duration(rand.Intn(5)))
+	apps, _, err := client.browseraccess.GetAll()
+	if err != nil {
+		return err
+	}
+	for _, app2 := range apps {
+		if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found && app2.ID != app.ID && app2.Name != app.Name {
+			// check for udp ports
+			if overlap, o1, o2 := PRAPortOverlap(app.TCPPortRanges, app2.TCPPortRanges); overlap {
+				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
+			}
+			if overlap, o1, o2 := PRAPortOverlap(app.UDPPortRanges, app2.UDPPortRanges); overlap {
+				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
+			}
+		}
+	}
+	return nil
+
+}
+
+func PRAPortOverlap(s1, s2 []string) (bool, []string, []string) {
+	for i1 := 0; i1 < len(s1); i1 += 2 {
+		port1Start, _ := strconv.Atoi(s1[i1])
+		port1End, _ := strconv.Atoi(s1[i1+1])
+		port1Start, port1End = int(math.Min(float64(port1Start), float64(port1End))), int(math.Max(float64(port1Start), float64(port1End)))
+		for i2 := 0; i2 < len(s2); i2 += 2 {
+			port2Start, _ := strconv.Atoi(s2[i2])
+			port2End, _ := strconv.Atoi(s2[i2+1])
+			port2Start, port2End = int(math.Min(float64(port2Start), float64(port2End))), int(math.Max(float64(port2Start), float64(port2End)))
+			if port1Start == port2Start || port1End == port2End || port1Start == port2End || port2Start == port1End {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port1Start < port2Start && port1End > port2Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port1End < port2End && port1End > port2Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port2Start < port1Start && port2End > port1Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port2End < port1End && port2End > port1Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+		}
+	}
+	return false, nil, nil
 }

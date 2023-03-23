@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
 )
 
 func TestAccPolicyInspectionRuleBasic(t *testing.T) {
@@ -31,6 +31,7 @@ func TestAccPolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
@@ -44,6 +45,7 @@ func TestAccPolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

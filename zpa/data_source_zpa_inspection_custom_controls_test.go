@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
 )
 
 func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
@@ -25,6 +25,7 @@ func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "action", resourceTypeAndName, "action"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "default_action", resourceTypeAndName, "default_action"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "paranoia_level", resourceTypeAndName, "paranoia_level"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "protocol_type", resourceTypeAndName, "protocol_type"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "severity", resourceTypeAndName, "severity"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "type", resourceTypeAndName, "type"),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "rules.#", "2"),

@@ -204,6 +204,10 @@ func dataSourceInspectionProfile() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"control_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"creation_time": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -255,6 +259,102 @@ func dataSourceInspectionProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"web_socket_controls": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"action": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"action_value": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"associated_inspection_profile_names": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"attachment": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"control_group": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"control_number": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"control_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"creation_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"default_action": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"default_action_value": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"modified_by": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"modified_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"paranoia_level": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"protocol_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"severity": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -303,6 +403,10 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 		}
 
 		if err := d.Set("predefined_controls", flattenPredefinedControls(resp.PredefinedControls)); err != nil {
+			return err
+		}
+
+		if err := d.Set("web_socket_controls", flattenPredefinedControlsSimple(resp.WebSocketControls)); err != nil {
 			return err
 		}
 	} else {
@@ -363,7 +467,7 @@ func flattenAssociatedInspectionProfileNames(associatedInspectionProfileNames []
 	return rule
 }
 
-func flattenPredefinedControls(predControl []inspection_profile.PredefinedControls) []interface{} {
+func flattenPredefinedControls(predControl []inspection_profile.CustomCommonControls) []interface{} {
 	predControls := make([]interface{}, len(predControl))
 	for i, predControl := range predControl {
 		predControls[i] = map[string]interface{}{

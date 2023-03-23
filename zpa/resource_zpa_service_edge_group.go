@@ -77,10 +77,12 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Description: "Enable or disable public access for the Service Edge Group.",
 			},
 			"latitude": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Latitude for the Service Edge Group.",
-				ValidateFunc: ValidateStringFloatBetween(-90, 90),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     ValidateLatitude,
+				DiffSuppressFunc: DiffSuppressFuncCoordinate,
+				Description:      "Latitude for the Service Edge Group.",
+				// ValidateFunc: ValidateStringFloatBetween(-90, 90),
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -88,10 +90,12 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Description: "Location for the Service Edge Group.",
 			},
 			"longitude": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Longitude for the Service Edge Group.",
-				ValidateFunc: ValidateStringFloatBetween(-180.0, 180.0),
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     ValidateLongitude,
+				DiffSuppressFunc: DiffSuppressFuncCoordinate,
+				Description:      "Longitude for the Service Edge Group.",
+				// ValidateFunc: ValidateStringFloatBetween(-180.0, 180.0),
 			},
 			"override_version_profile": {
 				Type:        schema.TypeBool,
@@ -232,6 +236,13 @@ func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error
 	id := d.Id()
 	log.Printf("[INFO] Updating service edge group ID: %v\n", id)
 	req := expandServiceEdgeGroup(d)
+
+	if _, _, err := zClient.serviceedgegroup.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
 
 	if _, err := zClient.serviceedgegroup.Update(id, &req); err != nil {
 		return err

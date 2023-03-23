@@ -1,5 +1,245 @@
 # Changelog
 
+## 2.7.0 (March, 23 2023)
+
+### Notes
+
+- Release date: **(March, 23 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) The ZPA Terraform Provider API Client, will now support long runs, that exceeds the 3600 seconds token validity. Terraform will automatically request a new API bearer token at that time in order to continue the resource provisioning. This enhacement will prevent long pipeline runs from being interrupted.
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) Update provider to Zscaler-SDK-GO v1.3.0
+
+- [PR #272](https://github.com/zscaler/terraform-provider-zpa/pull/272) The SDK now supports authentication to ZPA DEV environment.
+
+### Bug Fix
+
+- [PR #271](https://github.com/zscaler/terraform-provider-zpa/pull/271) Added deprecate message to ``zpa_segment_group`` under the following attributes:
+  - ``policy_migrated``: "The `policy_migrated` field is now deprecated for the resource `zpa_segment_group`, please remove this attribute to prevent configuration drifts"
+  - ``tcp_keep_alive_enabled``: "The `tcp_keep_alive_enabled` field is now deprecated for the resource `zpa_segment_group`, please replace all uses of this within the `zpa_application_segment`resources with the attribute `tcp_keep_alive`".
+
+  Both the above attributes can be safely removed without impact to production configuration; however, they are still supported for backwards compatibity purposes. [#270](https://github.com/zscaler/terraform-provider-zpa/issues/270)
+
+## 2.6.6 (March, 20 2023)
+
+### Notes
+
+- Release date: **(March, 20 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #268](https://github.com/zscaler/terraform-provider-zpa/pull/268) Fixed provider crashing when flattening IDP controller user metadata function Issue [#267](https://github.com/zscaler/terraform-provider-zpa/issues/267)
+
+- [PR #268](https://github.com/zscaler/terraform-provider-zpa/pull/268) Added new ZPA IDP Controller attributes to data source. The following new attributes have been added:
+  - ``login_hint``
+  - ``force_auth``
+  - ``enable_arbitrary_auth_domains``
+
+## 2.6.5 (March, 19 2023)
+
+### Notes
+
+- Release date: **(March, 19 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #262](https://github.com/zscaler/terraform-provider-zpa/pull/262) SCIM Group Search Pagination Issue affecting the following resource:
+  - ``zpa_scim_groups``
+
+## 2.6.5 (March, 19 2023)
+
+### Notes
+
+- Release date: **(March, 19 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #262](https://github.com/zscaler/terraform-provider-zpa/pull/262) SCIM Group Search Pagination Issue affecting the following resource:
+  - ``zpa_scim_groups``
+
+## 2.6.4 (March, 16 2023)
+
+### Notes
+
+- Release date: **(March, 16 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #263](https://github.com/zscaler/terraform-provider-zpa/pull/263) (fix) Added missing new object_type ``PLATFORM`` validation for access policy resources
+
+## 2.6.3 (March, 7 2023)
+
+### Notes
+
+- Release date: **(March, 7 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #257](https://github.com/zscaler/terraform-provider-zpa/pull/257) Added the new ZPA Application Segment attributes for the following resources:
+  - ``zpa_application_segment``, ``zpa_application_segment_browser_access``, ``zpa_application_segment_inspection``, ``zpa_application_segment_pra``
+    - ``tcp_keep_alive``
+    - ``is_incomplete_dr_config``
+    - ``use_in_dr_mode``
+    - ``select_connector_close_to_app``
+
+  - ``zpa_app_connector_group``
+    - ``use_in_dr_mode``
+
+## 2.6.2 (March, 1 2023)
+
+### Notes
+
+- Release date: **(March, 1 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #251](https://github.com/zscaler/terraform-provider-zpa/pull/251) - Added new action ``REQUIRE_APPROVAL`` to ``zpa_policy_access_rule`` - [Issue [#250](https://github.com/zscaler/terraform-provider-zpa/issues/250)]
+
+## 2.6.1 (February, 15 2023)
+
+### Notes
+
+- Release date: **(February, 15 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #242](https://github.com/zscaler/terraform-provider-zpa/pull/242) - Added new data source and resources below:
+  - ``zpa_isolation_profile`` - This data source gets all isolation profiles for the specified customer. The Isolation Profile ID can then be referenced in a ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
+  - ``zpa_policy_isolation_rule`` - This resource, creates an Isolation Rule. Notice that in order to create an isolation policy the ZPA tenant must be licensed accordingly. ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
+
+### Bug Fix
+
+- [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_server_groups`` resource ``servers`` attribute to support typeSet instead of typeList.
+- [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_app_connector_group`` resource ``connectors`` attribute to support typeSet instead of typeList.
+
+## 2.6.0 (February, 15 2023)
+
+### Notes
+
+- Release date: **(February, 15 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #242](https://github.com/zscaler/terraform-provider-zpa/pull/242) - Added new data source and resources below:
+  - ``zpa_isolation_profile`` - This data source gets all isolation profiles for the specified customer. The Isolation Profile ID can then be referenced in a ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
+  - ``zpa_policy_isolation_rule`` - This resource, creates an Isolation Rule. Notice that in order to create an isolation policy the ZPA tenant must be licensed accordingly. ``zpa_policy_isolation_rule`` when the ``action`` is set to ``ISOLATE``
+
+### Bug Fix
+
+- [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_server_groups`` resource ``servers`` attribute to support typeSet instead of typeList.
+- [PR #244](https://github.com/zscaler/terraform-provider-zpa/pull/244) - Fixed ``zpa_app_connector_group`` resource ``connectors`` attribute to support typeSet instead of typeList.
+
+## 2.5.5 (January, 24 2023)
+
+### Notes
+
+- Release date: **(January, 24 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #238](https://github.com/zscaler/terraform-provider-zpa/pull/238) - Added new log_type (``zpn_pbroker_comprehensive_stats``) attribute to ``zpa_lss_config_log_type_formats`` and ``zpa_lss_config_controller``.
+
+## 2.5.4 (January, 16 2023)
+
+### Notes
+
+- Release date: **(January, 16 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #232](https://github.com/zscaler/terraform-provider-zpa/pull/232) - Added new ZPA Inspection control parameters
+
+  - ZPA Inspection Profile: ``web_socket_controls``
+  - ZPA Custom Inspection Control:
+    - ``control_type``: The following values are supported:
+      - ``WEBSOCKET_PREDEFINED``, ``WEBSOCKET_CUSTOM``, ``ZSCALER``, ``CUSTOM``, ``PREDEFINED``
+
+    - ``protocol_type``: The following values are supported:
+      - ``HTTP``, ``WEBSOCKET_CUSTOM``, ``ZSCALER``, ``CUSTOM``, ``PREDEFINED``
+
+### Fixes
+
+- [PR #234](https://github.com/zscaler/terraform-provider-zpa/pull/234) - Removed Segment Group detachment function, so it can use the new ``force_delete`` parameter when removing application segments from a segment group.
+
+## 2.5.3 (January, 2 2023)
+
+### Notes
+
+- Release date: **(January, 2 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #224](https://github.com/zscaler/terraform-provider-zpa/pull/224) Implemented longitude/latitude math function validation for more accurancy when configuring ``zpa_app_connector_group`` resources.
+
+## 2.5.2 (December, 02 2022)
+
+### Notes
+
+- Release date: **(December, 02 2022)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #223](https://github.com/zscaler/terraform-provider-zpa/pull/223) Fixed pagination issue with ZPA endpoints
+
+## 2.5.1 (November, 30 2022)
+
+### Notes
+
+- Release date: **(November, 30 2022)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #219](https://github.com/zscaler/terraform-provider-zia/pull/219) Added ForceNew helper to ``zpa_policy_timeout_rule`` parameters ``reauth_idle_timeout`` and ``reauth_timeout``. Changing the values will cause the resource to be recreated on the fly.
+- [PR #219](https://github.com/zscaler/terraform-provider-zia/pull/219) Added missing ``ip_anchored`` parameter to ``resource_zpa_application_segment_browser_access``
+- [PR #220](https://github.com/zscaler/terraform-provider-zia/pull/220) Udated provider to Zscaler-SDK-Go v0.3.2 to ensure pagination works correctly when more than 500 items on a list.
+
+## 2.5.0 (November, 30 2022)
+
+### Notes
+
+- Release date: **(November, 30 2022)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #217](https://github.com/zscaler/terraform-provider-zia/pull/217) Fixed Read/Update/Delete functions to allow automatic recreation of resources, that have been manually deleted via the UI.
+- [PR #217](https://github.com/zscaler/terraform-provider-zia/pull/217) Updated provider to zscaler-sdk-go v0.2.2
+
+## 2.4.1
+
+### Notes
+
+- Release date: **(November 9 2022)**
+- Supported Terraform version: **v1.x**
+
+### Ehancements
+
+- [PR #208](https://github.com/zscaler/terraform-provider-zpa/pull/208) - Implemented TCP/UDP Port overlap check and duplicated domain validation for ``zpa_application_segment_browser_access``
+- [PR #209](https://github.com/zscaler/terraform-provider-zpa/pull/209) - Implemented TCP/UDP Port overlap check and duplicated domain validation for ``zpa_application_segment_pra``.
+- [PR #210](https://github.com/zscaler/terraform-provider-zpa/pull/210) - Implemented TCP/UDP Port overlap check and duplicated domain validation for ``zpa_application_segment_inspection``.
+
+### Bug Fixes
+
+- [PR #206](https://github.com/zscaler/terraform-provider-zpa/pull/206) - Fix TCP/UDP port overlap check issue
+
+- [PR #207](https://github.com/zscaler/terraform-provider-zpa/pull/207) - Fix duplicated domain_name entries during TCP/UDP port overlap issues
+
 ## 2.4.0
 
 ### Notes

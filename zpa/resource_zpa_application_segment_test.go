@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/variable"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/variable"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
 )
 
@@ -147,6 +147,7 @@ resource "%s" "%s" {
 	udp_port_ranges = ["%d", "%d"]
 	domain_names = ["test.example.com"]
 	segment_group_id = "${%s.id}"
+	tcp_keep_alive = "1"
 	server_groups {
 		id = []
 	}

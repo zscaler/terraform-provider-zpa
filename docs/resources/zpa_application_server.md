@@ -12,7 +12,7 @@ The **zpa_application_server** resource creates an application server in the Zsc
 
 ## Zenith Community - ZPA Application Server
 
-[![ZPA Terraform provider Video Series Ep5 - Application Server](../../images/zpa_application_servers.svg)](https://community.zscaler.com/t/video-terraform-provider-video-series-ep-5-zpa-application-server/18807)
+[![ZPA Terraform provider Video Series Ep5 - Application Server](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_application_servers.svg)](https://community.zscaler.com/t/video-terraform-provider-video-series-ep-5-zpa-application-server/18807)
 
 ## Example Usage
 
@@ -66,6 +66,9 @@ The following arguments are supported:
 * `config_space` - (Optional)
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Application Server can be imported by using `<APPLICATION SERVER ID>` or `<APPLICATION SERVER NAME>` as the import ID
 

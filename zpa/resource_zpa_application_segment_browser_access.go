@@ -3,7 +3,10 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"math"
+	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -129,10 +132,40 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
 			},
-			// "ip_anchored": {
-			// 	Type:     schema.TypeBool,
-			// 	Optional: true,
-			// },
+			"icmp_access_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "NONE",
+				ValidateFunc: validation.StringInSlice([]string{
+					"PING_TRACEROUTING",
+					"PING",
+					"NONE",
+				}, false),
+			},
+			"tcp_keep_alive": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"0", "1",
+				}, false),
+			},
+			"ip_anchored": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"select_connector_close_to_app": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"is_incomplete_dr_config": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"is_cname_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -247,6 +280,9 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m int
 	zClient := m.(*Client)
 
 	req := expandBrowserAccess(d, zClient, "")
+	if err := checkForBrowserAccessPortsOverlap(zClient, req); err != nil {
+		return err
+	}
 	log.Printf("[INFO] Creating browser access request\n%+v\n", req)
 
 	if req.SegmentGroupID == "" {
@@ -292,7 +328,13 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	// _ = d.Set("ip_anchored", resp.IPAnchored)
+	_ = d.Set("ip_anchored", resp.IPAnchored)
+	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
+	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
+	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
+	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
+	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
+	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
@@ -324,9 +366,20 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m int
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
 	req := expandBrowserAccess(d, zClient, "")
 
+	if err := checkForBrowserAccessPortsOverlap(zClient, req); err != nil {
+		return err
+	}
+
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the browser access application segment")
 		return fmt.Errorf("please provide a valid segment group for the browser access application segment")
+	}
+
+	if _, _, err := zClient.browseraccess.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
 	}
 
 	if _, err := zClient.browseraccess.Update(id, &req); err != nil {
@@ -378,21 +431,27 @@ func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID stri
 
 func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
 	details := browseraccess.BrowserAccess{
-		SegmentGroupID:       d.Get("segment_group_id").(string),
-		SegmentGroupName:     d.Get("segment_group_name").(string),
-		BypassType:           d.Get("bypass_type").(string),
-		ConfigSpace:          d.Get("config_space").(string),
-		PassiveHealthEnabled: d.Get("passive_health_enabled").(bool),
-		// IcmpAccessType:       d.Get("icmp_access_type").(string),
-		Description:     d.Get("description").(string),
-		DomainNames:     SetToStringList(d, "domain_names"),
-		DoubleEncrypt:   d.Get("double_encrypt").(bool),
-		Enabled:         d.Get("enabled").(bool),
-		HealthCheckType: d.Get("health_check_type").(string),
-		HealthReporting: d.Get("health_reporting").(string),
-		// IpAnchored:      d.Get("ip_anchored").(bool),
-		IsCnameEnabled:  d.Get("is_cname_enabled").(bool),
-		Name:            d.Get("name").(string),
+		ID:                        d.Id(),
+		Name:                      d.Get("name").(string),
+		SegmentGroupID:            d.Get("segment_group_id").(string),
+		SegmentGroupName:          d.Get("segment_group_name").(string),
+		BypassType:                d.Get("bypass_type").(string),
+		ConfigSpace:               d.Get("config_space").(string),
+		ICMPAccessType:            d.Get("icmp_access_type").(string),
+		Description:               d.Get("description").(string),
+		DomainNames:               SetToStringList(d, "domain_names"),
+		HealthCheckType:           d.Get("health_check_type").(string),
+		HealthReporting:           d.Get("health_reporting").(string),
+		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		DoubleEncrypt:             d.Get("double_encrypt").(bool),
+		Enabled:                   d.Get("enabled").(bool),
+		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
+		IPAnchored:                d.Get("ip_anchored").(bool),
+		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
+		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
+		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
+		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+
 		TCPAppPortRange: []common.NetworkPorts{},
 		UDPAppPortRange: []common.NetworkPorts{},
 	}
@@ -530,4 +589,54 @@ func flattenClientlessAppServerGroups(appServerGroup []browseraccess.AppServerGr
 	mapIds["id"] = ids
 	result[0] = mapIds
 	return result
+}
+
+func checkForBrowserAccessPortsOverlap(client *Client, app browseraccess.BrowserAccess) error {
+	time.Sleep(time.Second * time.Duration(rand.Intn(5)))
+	apps, _, err := client.browseraccess.GetAll()
+	if err != nil {
+		return err
+	}
+	for _, app2 := range apps {
+		if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found && app2.ID != app.ID && app2.Name != app.Name {
+			// check for udp ports
+			if overlap, o1, o2 := browserAccessPortOverlap(app.TCPPortRanges, app2.TCPPortRanges); overlap {
+				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
+			}
+			if overlap, o1, o2 := browserAccessPortOverlap(app.UDPPortRanges, app2.UDPPortRanges); overlap {
+				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
+			}
+		}
+	}
+	return nil
+
+}
+
+func browserAccessPortOverlap(s1, s2 []string) (bool, []string, []string) {
+	for i1 := 0; i1 < len(s1); i1 += 2 {
+		port1Start, _ := strconv.Atoi(s1[i1])
+		port1End, _ := strconv.Atoi(s1[i1+1])
+		port1Start, port1End = int(math.Min(float64(port1Start), float64(port1End))), int(math.Max(float64(port1Start), float64(port1End)))
+		for i2 := 0; i2 < len(s2); i2 += 2 {
+			port2Start, _ := strconv.Atoi(s2[i2])
+			port2End, _ := strconv.Atoi(s2[i2+1])
+			port2Start, port2End = int(math.Min(float64(port2Start), float64(port2End))), int(math.Max(float64(port2Start), float64(port2End)))
+			if port1Start == port2Start || port1End == port2End || port1Start == port2End || port2Start == port1End {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port1Start < port2Start && port1End > port2Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port1End < port2End && port1End > port2Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port2Start < port1Start && port2End > port1Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+			if port2End < port1End && port2End > port1Start {
+				return true, s1[i1 : i1+2], s2[i2 : i2+2]
+			}
+		}
+	}
+	return false, nil, nil
 }

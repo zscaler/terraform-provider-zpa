@@ -16,6 +16,7 @@ Use the **zpa_saml_attribute** data source to get information about a SAML Attri
 # ZPA SAML Attribute Data Source
 data "zpa_saml_attribute" "email_user_sso" {
     name = "Email_User SSO"
+    idp_name = "idp_name"
 }
 ```
 
@@ -23,6 +24,7 @@ data "zpa_saml_attribute" "email_user_sso" {
 # ZPA SAML Attribute Data Source
 data "zpa_saml_attribute" "department" {
     name = "DepartmentName_IdP_Name_Users"
+    idp_name = "idp_name"
 }
 ```
 

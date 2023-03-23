@@ -93,6 +93,18 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Computed:    true,
 				Description: "The control rule in JSON format that has the conditions and type of control for the inspection control",
 			},
+			"control_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"WEBSOCKET_PREDEFINED",
+					"WEBSOCKET_CUSTOM",
+					"ZSCALER",
+					"CUSTOM",
+					"PREDEFINED",
+				}, false),
+			},
 			"default_action": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -120,6 +132,19 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "OWASP Predefined Paranoia Level. Range: [1-4], inclusive",
+			},
+			"protocol_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"HTTP",
+					"HTTPS",
+					"FTP",
+					"RDP",
+					"SSH",
+					"WEBSOCKET",
+				}, false),
 			},
 			"rules": {
 				Type:        schema.TypeList,
@@ -312,6 +337,14 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 	if err := validateRules(req); err != nil {
 		return err
 	}
+
+	if _, _, err := zClient.inspection_custom_controls.Get(id); err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+	}
+
 	if _, err := zClient.inspection_custom_controls.Update(id, &req); err != nil {
 		return err
 	}
@@ -354,6 +387,7 @@ func resourceInspectionCustomControlsDelete(d *schema.ResourceData, m interface{
 
 func expandInspectionCustomControls(d *schema.ResourceData) inspection_custom_controls.InspectionCustomControl {
 	custom_control := inspection_custom_controls.InspectionCustomControl{
+		ID:                               d.Id(),
 		Action:                           d.Get("action").(string),
 		ActionValue:                      d.Get("action_value").(string),
 		ControlNumber:                    d.Get("control_number").(string),

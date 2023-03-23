@@ -65,7 +65,7 @@ resource "zpa_policy_access_rule" "this" {
 
 ## Attributes Reference
 
-* `action` (Optional) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``
+* `action` (Optional) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``, and ``REQUIRE_APPROVAL``
 * `custom_msg` (Optional) This is for providing a customer message for the user.
 * `description` (Optional) This is the description of the access policy rule.
 * `operator` (Optional) Supported values: ``AND``, ``OR``
@@ -96,6 +96,9 @@ resource "zpa_policy_access_rule" "this" {
   * `id` - (Optional) The ID of a server group resource
 
 ## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Policy access rule can be imported by using `<POLICY ACCESS RULE ID>` as the import ID.
 

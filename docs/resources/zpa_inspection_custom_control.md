@@ -58,6 +58,7 @@ The following arguments are supported:
 * `action_value` - (Required) Denotes the action
 * `name` - (Required) Name of the custom control
 * `paranoia_level` - (Required) OWASP Predefined Paranoia Level.
+* `protocol_type` - (string) Returned values: `HTTP`, `HTTPS`, `FTP`, `RDP`, `SSH`, `WEBSOCKET`
 * `severity` - (Required) Severity of the control number. Supported values: `CRITICAL`, `ERROR`, `WARNING`, `INFO`
 * `type` - (Required) Rules to be applied to the request or response type
 * `rules` - (Required) Rules of the custom controls applied as conditions `JSON`
@@ -75,5 +76,11 @@ The following arguments are supported:
   * `id`- (Optional)
   * `name`- (Optional)
 * `control_rule_json` (Optional) The control rule in JSON format that has the conditions and type of control for the inspection control
+* `control_type` - (string) Returned values: `WEBSOCKET_PREDEFINED`, `WEBSOCKET_CUSTOM`, `ZSCALER`, `CUSTOM`, `PREDEFINED`
 * `default_action` - (Required) The performed action. Supported values: `PASS`, `BLOCK` and `REDIRECT`
 * `default_action_value` - (Optional) This is used to provide the redirect URL if the default action is set to `REDIRECT`
+
+## Import
+
+Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
+[Visit](https://github.com/zscaler/zscaler-terraformer)

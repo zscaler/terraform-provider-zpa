@@ -6,8 +6,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/variable"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_profile"
 )
 
@@ -21,26 +22,28 @@ func TestAccResourceInspectionProfileBasic(t *testing.T) {
 		CheckDestroy: testAccCheckInspectionProfileDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionProfileExists(resourceTypeAndName, &profile),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
 			{
-				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionProfileExists(resourceTypeAndName, &profile),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -90,7 +93,7 @@ func testAccCheckInspectionProfileExists(resource string, rule *inspection_profi
 	}
 }
 
-func testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName string) string {
+func testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, description string) string {
 	return fmt.Sprintf(`
 // inspection profile resource
 %s
@@ -100,7 +103,7 @@ data "%s" "%s" {
 }
 `,
 		// resource variables
-		getInspectionProfileResourceHCL(generatedName),
+		getInspectionProfileResourceHCL(generatedName, description),
 
 		// data source variables
 		resourcetype.ZPAInspectionProfile,
@@ -109,7 +112,7 @@ data "%s" "%s" {
 	)
 }
 
-func getInspectionProfileResourceHCL(generatedName string) string {
+func getInspectionProfileResourceHCL(generatedName, description string) string {
 	return fmt.Sprintf(`
 
 data "zpa_inspection_all_predefined_controls" "default_predefined_controls" {
@@ -123,9 +126,9 @@ data "zpa_inspection_predefined_controls" "this" {
 }
 
 resource "%s" "%s" {
-	name                        = "tf-acc-test-%s"
-	description                 = "tf-acc-test-%s"
-	paranoia_level              = "1"
+	name                          = "%s"
+	description                   = "%s"
+	paranoia_level                = "1"
 
 	dynamic "predefined_controls" {
 		for_each = data.zpa_inspection_all_predefined_controls.default_predefined_controls.list
@@ -139,6 +142,12 @@ resource "%s" "%s" {
 	predefined_controls {
 		id     = data.zpa_inspection_predefined_controls.this.id
 		action = "BLOCK"
+		protocol_type = "HTTP"
+	}
+	web_socket_controls {
+		id     = data.zpa_inspection_predefined_controls.this.id
+		action = "BLOCK"
+		protocol_type = "HTTP"
 	}
 }
 `,
@@ -146,6 +155,6 @@ resource "%s" "%s" {
 		resourcetype.ZPAInspectionProfile,
 		generatedName,
 		generatedName,
-		generatedName,
+		description,
 	)
 }
