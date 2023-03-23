@@ -78,14 +78,15 @@ func resourceSegmentGroup() *schema.Resource {
 				Required:    true,
 			},
 			"policy_migrated": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Deprecated: "The `policy_migrated` field is now deprecated for the resource `zpa_segment_group`, please remove this attribute to prevent configuration drifts",
 			},
 			"tcp_keep_alive_enabled": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  0,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Default:    "1",
+				Deprecated: "The `tcp_keep_alive_enabled` field is now deprecated for the resource `zpa_segment_group`, please replace all uses of this within the `zpa_application_segment`resources with the attribute `tcp_keep_alive`",
 				ValidateFunc: validation.StringInSlice([]string{
 					"0", "1",
 				}, false),

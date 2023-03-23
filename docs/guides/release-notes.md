@@ -12,9 +12,24 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.6.6``
+``Last updated: v2.7.0``
 
 ---
+
+## 2.7.0 (March, 22 2023)
+
+### Notes
+
+- Release date: **(March, 22 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fix
+
+- [PR #271](https://github.com/zscaler/terraform-provider-zpa/pull/271) Added deprecate message to ``zpa_segment_group`` under the following attributes:
+  - ``policy_migrated``: "The `policy_migrated` field is now deprecated for the resource `zpa_segment_group`, please remove this attribute to prevent configuration drifts"
+  - ``tcp_keep_alive_enabled``: "The `tcp_keep_alive_enabled` field is now deprecated for the resource `zpa_segment_group`, please replace all uses of this within the `zpa_application_segment`resources with the attribute `tcp_keep_alive`".
+
+  Both the above attributes can be safely removed without impact to production configuration; however, they are still supported for backwards compatibity purposes. [#270](https://github.com/zscaler/terraform-provider-zpa/issues/270)
 
 ## 2.6.6 (March, 20 2023)
 
