@@ -182,6 +182,8 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
 			},
+			// Implement a function that supports both bool or string value to enable this attribute
+			// Ideally a common function that can be used across all application segment types.
 			"tcp_keep_alive": {
 				Type:     schema.TypeString,
 				Optional: true,

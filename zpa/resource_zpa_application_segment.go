@@ -184,6 +184,8 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			// Implement a function that supports both bool or string value to enable this attribute
+			// Ideally a common function that can be used across all application segment types.
 			"tcp_keep_alive": {
 				Type:     schema.TypeString,
 				Optional: true,
