@@ -191,7 +191,7 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"0", "1",
+					"0", "1", "true", "false",
 				}, false),
 			},
 			"server_groups": {
@@ -341,6 +341,14 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
+func bool01(val string) string {
+	v, _ := strconv.ParseBool(val)
+	if v {
+		return "1"
+	}
+	return "0"
+}
+
 func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id string) applicationsegment.ApplicationSegmentResource {
 	details := applicationsegment.ApplicationSegmentResource{
 		ID:                        d.Id(),
@@ -354,7 +362,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
 		HealthReporting:           d.Get("health_reporting").(string),
-		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(string)),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),

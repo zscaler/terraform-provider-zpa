@@ -189,7 +189,7 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"0", "1",
+					"0", "1", "true", "false",
 				}, false),
 			},
 			"common_apps_dto": {
@@ -493,7 +493,7 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 		Description:               d.Get("description").(string),
 		HealthReporting:           d.Get("health_reporting").(string),
 		HealthCheckType:           d.Get("health_check_type").(string),
-		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(string)),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
