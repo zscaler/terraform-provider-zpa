@@ -187,12 +187,9 @@ func resourceApplicationSegment() *schema.Resource {
 			// Implement a function that supports both bool or string value to enable this attribute
 			// Ideally a common function that can be used across all application segment types.
 			"tcp_keep_alive": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"0", "1", "true", "false",
-				}, false),
 			},
 			"server_groups": {
 				Type:        schema.TypeSet,
@@ -341,9 +338,8 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func bool01(val string) string {
-	v, _ := strconv.ParseBool(val)
-	if v {
+func bool01(val bool) string {
+	if val {
 		return "1"
 	}
 	return "0"
@@ -362,7 +358,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
 		HealthReporting:           d.Get("health_reporting").(string),
-		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(string)),
+		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),

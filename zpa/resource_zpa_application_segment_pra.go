@@ -497,7 +497,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id str
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
-		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(string)),
+		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
 		IpAnchored:                d.Get("ip_anchored").(bool),
 		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
