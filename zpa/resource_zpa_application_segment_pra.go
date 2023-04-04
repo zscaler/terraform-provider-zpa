@@ -185,12 +185,9 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			// Implement a function that supports both bool or string value to enable this attribute
 			// Ideally a common function that can be used across all application segment types.
 			"tcp_keep_alive": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"0", "1", "true", "false",
-				}, false),
 			},
 			"common_apps_dto": {
 				Type:     schema.TypeList,
@@ -380,7 +377,8 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
+	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
+	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))

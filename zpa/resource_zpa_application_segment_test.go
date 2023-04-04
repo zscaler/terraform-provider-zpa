@@ -147,7 +147,7 @@ resource "%s" "%s" {
 	udp_port_ranges = ["%d", "%d"]
 	domain_names = ["test.example.com"]
 	segment_group_id = "${%s.id}"
-	tcp_keep_alive = "1"
+	tcp_keep_alive = true
 	server_groups {
 		id = []
 	}

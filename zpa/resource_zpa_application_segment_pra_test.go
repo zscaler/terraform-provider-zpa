@@ -147,7 +147,7 @@ resource "%s" "%s" {
 	tcp_port_ranges = ["22", "22", "3389", "3389"]
 	domain_names = ["ssh_pra.example.com", "rdp_pra.example.com"]
 	segment_group_id = "${%s.id}"
-	tcp_keep_alive = "1"
+	tcp_keep_alive = true
 	common_apps_dto {
 		apps_config {
 		  name                 = "testAcc_ssh_pra"

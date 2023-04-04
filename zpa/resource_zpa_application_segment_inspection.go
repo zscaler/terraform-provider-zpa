@@ -185,12 +185,9 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			// Ideally a common function that can be used across all application segment types.
 			// It should be backwards compatible to prevent issues with existing configurations.
 			"tcp_keep_alive": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"0", "1", "true", "false",
-				}, false),
 			},
 			"common_apps_dto": {
 				Type:     schema.TypeList,
@@ -384,7 +381,8 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
+	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
+	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp))

@@ -147,7 +147,7 @@ resource "%s" "%s" {
 	select_connector_close_to_app = true
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
-	tcp_keep_alive = "1"
+	tcp_keep_alive = true
 	tcp_port_range {
 		from = "4883"
 		to = "4883"

@@ -145,12 +145,9 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 			// Implement a function that supports both bool or string value to enable this attribute
 			// Ideally a common function that can be used across all application segment types.
 			"tcp_keep_alive": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"0", "1", "true", "false",
-				}, false),
 			},
 			"ip_anchored": {
 				Type:     schema.TypeBool,
@@ -334,7 +331,8 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
-	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
+	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
+	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
