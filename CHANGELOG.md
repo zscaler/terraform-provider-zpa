@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.7.1 (April, 11 2023)
+
+### Notes
+
+- Release date: **(April, 11 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #279](https://github.com/zscaler/terraform-provider-zpa/pull/279) Removed TCP/UDP Overlap Port validation to reduce time on creating application segments. This changes helps long Terraform runs to perform faster and without interruptions.
+
 ## 2.7.0 (March, 23 2023)
 
 ### Notes
