@@ -222,8 +222,8 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 	}
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
-		return fmt.Errorf("please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
 	resp, _, err := zClient.applicationsegment.Create(req)
 	if err != nil {
