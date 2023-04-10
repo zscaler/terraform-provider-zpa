@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
@@ -108,6 +109,7 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 }
 
 func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+	port := strconv.Itoa(acctest.RandIntRange(4000, 6000))
 	return fmt.Sprintf(`
 
 // application segment browser access resource
@@ -123,7 +125,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled),
+		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled, port),
 
 		// data source variables
 		resourcetype.ZPAApplicationSegmentBrowserAccess,
@@ -132,7 +134,7 @@ data "%s" "%s" {
 	)
 }
 
-func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled bool, port string) string {
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "jenkins" {
@@ -149,15 +151,15 @@ resource "%s" "%s" {
 	bypass_type = "NEVER"
 	tcp_keep_alive = "1"
 	tcp_port_range {
-		from = "4883"
-		to = "4883"
+		from = "%s"
+		to = "%s"
 	}
 	domain_names = ["jenkins.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	clientless_apps {
 		name                 = "jenkins.bd-hashicorp.com"
 		application_protocol = "HTTPS"
-		application_port     = "4883"
+		application_port     = "%s"
 		certificate_id       = data.zpa_ba_certificate.jenkins.id
 		trust_untrusted_cert = true
 		enabled              = true
@@ -177,7 +179,10 @@ resource "%s" "%s" {
 		generatedName,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
+		port,
+		port,
 		segmentGroupTypeAndName,
+		port,
 		// serverGroupTypeAndName,
 		segmentGroupTypeAndName,
 		// serverGroupTypeAndName,
