@@ -109,7 +109,7 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 }
 
 func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
-	port := strconv.Itoa(acctest.RandIntRange(4000, 6000))
+	port := strconv.Itoa(acctest.RandIntRange(4001, 5001))
 	return fmt.Sprintf(`
 
 // application segment browser access resource
