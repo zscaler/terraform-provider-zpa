@@ -16,16 +16,19 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 2.7.1 (April, 11 2023)
+## 2.7.1 (April, 12 2023)
 
 ### Notes
 
-- Release date: **(April, 11 2023)**
+- Release date: **(April, 12 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
 
-- [PR #279](https://github.com/zscaler/terraform-provider-zpa/pull/279) Removed TCP/UDP Overlap Port validation to reduce time on creating application segments. This changes helps long Terraform runs to perform faster and without interruptions.
+- [PR #279](https://github.com/zscaler/terraform-provider-zpa/pull/279) Update to Zscaler-SDK-GO 1.4.0 to support long Terraform runs and improve exponential backoff mechanism.
+- [PR #280](https://github.com/zscaler/terraform-provider-zpa/pull/280) Added function to support detaching objects from Access policies prior to destroy operation.
+- [PR #281](https://github.com/zscaler/terraform-provider-zpa/pull/281) Fixed browser access acceptance test to prevent port overlap and lingering resources
+- [PR #285](https://github.com/zscaler/terraform-provider-zpa/pull/285) Make ``server_group`` attribute in the application segment optional to support UI behavior Issue[#283](https://github.com/zscaler/terraform-provider-zpa/issues/283)
 
 ## 2.7.0 (March, 23 2023)
 
