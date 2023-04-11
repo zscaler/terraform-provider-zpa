@@ -127,23 +127,16 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Computed: true,
 			},
 			"health_reporting": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
 				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
 			},
 			"icmp_access_type": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  "NONE",
-				ValidateFunc: validation.StringInSlice([]string{
-					"PING_TRACEROUTING",
-					"PING",
-					"NONE",
-				}, false),
+				Computed: true,
 			},
-			// Implement a function that supports both bool or string value to enable this attribute
-			// Ideally a common function that can be used across all application segment types.
 			"tcp_keep_alive": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -331,11 +324,13 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
+	healthReporting, _ := strconv.ParseBool(resp.HealthReporting)
+	_ = d.Set("health_reporting", healthReporting)
+	icmpAccessType, _ := strconv.ParseBool(resp.ICMPAccessType)
+	_ = d.Set("icmp_access_type", icmpAccessType)
 	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
 	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
-	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
@@ -437,12 +432,12 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 		SegmentGroupName:          d.Get("segment_group_name").(string),
 		BypassType:                d.Get("bypass_type").(string),
 		ConfigSpace:               d.Get("config_space").(string),
-		ICMPAccessType:            d.Get("icmp_access_type").(string),
+		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
+		ICMPAccessType:            bool02(d.Get("icmp_access_type").(bool)),
+		HealthReporting:           bool03(d.Get("health_reporting").(bool)),
 		Description:               d.Get("description").(string),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
-		HealthReporting:           d.Get("health_reporting").(string),
-		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),

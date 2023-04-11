@@ -127,17 +127,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 					"NONE",
 				}, false),
 			},
-			"health_reporting": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "NONE",
-				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"NONE",
-					"ON_ACCESS",
-					"CONTINUOUS",
-				}, false),
-			},
 			"passive_health_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -147,16 +136,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-			},
-			"icmp_access_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"PING_TRACEROUTING",
-					"PING",
-					"NONE",
-				}, false),
 			},
 			"ip_anchored": {
 				Type:     schema.TypeBool,
@@ -181,9 +160,17 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
 			},
-			// Implement a function that supports both bool or string value to enable this attribute
-			// Ideally a common function that can be used across all application segment types.
-			// It should be backwards compatible to prevent issues with existing configurations.
+			"health_reporting": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
+			},
+			"icmp_access_type": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"tcp_keep_alive": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -374,13 +361,15 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("ip_anchored", resp.IPAnchored)
-	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
+	healthReporting, _ := strconv.ParseBool(resp.HealthReporting)
+	_ = d.Set("health_reporting", healthReporting)
+	icmpAccessType, _ := strconv.ParseBool(resp.ICMPAccessType)
+	_ = d.Set("icmp_access_type", icmpAccessType)
 	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
 	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
@@ -487,11 +476,11 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 		SegmentGroupID:            d.Get("segment_group_id").(string),
 		BypassType:                d.Get("bypass_type").(string),
 		ConfigSpace:               d.Get("config_space").(string),
-		ICMPAccessType:            d.Get("icmp_access_type").(string),
-		Description:               d.Get("description").(string),
-		HealthReporting:           d.Get("health_reporting").(string),
-		HealthCheckType:           d.Get("health_check_type").(string),
 		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
+		ICMPAccessType:            bool02(d.Get("icmp_access_type").(bool)),
+		HealthReporting:           bool03(d.Get("health_reporting").(bool)),
+		Description:               d.Get("description").(string),
+		HealthCheckType:           d.Get("health_check_type").(string),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),

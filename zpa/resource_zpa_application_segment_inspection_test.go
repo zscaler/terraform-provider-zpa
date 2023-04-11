@@ -146,9 +146,10 @@ resource "%s" "%s" {
 	enabled = "%s"
 	is_cname_enabled = "%s"
 	select_connector_close_to_app = true
-	health_reporting = "ON_ACCESS"
-	bypass_type = "NEVER"
 	tcp_keep_alive = true
+	icmp_access_type = true
+	health_reporting = true
+	bypass_type = "NEVER"
 	tcp_port_range {
 		from = "4443"
 		to = "4443"

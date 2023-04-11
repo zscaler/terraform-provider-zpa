@@ -203,3 +203,25 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 
 	return applicationSegmentList
 }
+
+// Application Segment Functions to Convert String to Bool
+func bool01(val bool) string {
+	if val {
+		return "1"
+	}
+	return "0"
+}
+
+func bool02(val bool) string {
+	if val {
+		return "PING_TRACEROUTING"
+	}
+	return "PING"
+}
+
+func bool03(val bool) string {
+	if val {
+		return "ON_ACCESS"
+	}
+	return "CONTINUOUS"
+}

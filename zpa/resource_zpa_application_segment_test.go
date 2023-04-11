@@ -39,7 +39,6 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
@@ -56,7 +55,6 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
@@ -141,13 +139,14 @@ resource "%s" "%s" {
 	description = "tf-acc-test-%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
-	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_port_ranges = ["%d", "%d"]
 	udp_port_ranges = ["%d", "%d"]
 	domain_names = ["test.example.com"]
 	segment_group_id = "${%s.id}"
 	tcp_keep_alive = true
+	icmp_access_type = true
+	health_reporting = true
 	server_groups {
 		id = []
 	}

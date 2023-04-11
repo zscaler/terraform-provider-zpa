@@ -37,7 +37,6 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
@@ -55,7 +54,6 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
@@ -142,12 +140,13 @@ resource "%s" "%s" {
 	enabled = "%s"
 	is_cname_enabled = "%s"
 	select_connector_close_to_app = true
-	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_port_ranges = ["22", "22", "3389", "3389"]
 	domain_names = ["ssh_pra.example.com", "rdp_pra.example.com"]
 	segment_group_id = "${%s.id}"
 	tcp_keep_alive = true
+	icmp_access_type = true
+	health_reporting = true
 	common_apps_dto {
 		apps_config {
 		  name                 = "testAcc_ssh_pra"

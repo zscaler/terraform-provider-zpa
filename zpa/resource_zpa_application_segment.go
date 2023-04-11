@@ -126,25 +126,20 @@ func resourceApplicationSegment() *schema.Resource {
 				}, false),
 			},
 			"health_reporting": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     "NONE",
+				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"NONE",
-					"ON_ACCESS",
-					"CONTINUOUS",
-				}, false),
 			},
 			"icmp_access_type": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  "NONE",
-				ValidateFunc: validation.StringInSlice([]string{
-					"PING_TRACEROUTING",
-					"PING",
-					"NONE",
-				}, false),
+				Computed: true,
+			},
+			"tcp_keep_alive": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
 			},
 			"default_idle_timeout": {
 				Type:     schema.TypeString,
@@ -180,13 +175,6 @@ func resourceApplicationSegment() *schema.Resource {
 				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"passive_health_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			// Implement a function that supports both bool or string value to enable this attribute
-			// Ideally a common function that can be used across all application segment types.
-			"tcp_keep_alive": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
@@ -261,15 +249,17 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
-	_ = d.Set("health_reporting", resp.HealthReporting)
-	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
+	healthReporting, _ := strconv.ParseBool(resp.HealthReporting)
+	_ = d.Set("health_reporting", healthReporting)
+	icmpAccessType, _ := strconv.ParseBool(resp.IcmpAccessType)
+	_ = d.Set("icmp_access_type", icmpAccessType)
+	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
+	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
-	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
@@ -339,13 +329,6 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func bool01(val bool) string {
-	if val {
-		return "1"
-	}
-	return "0"
-}
-
 func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id string) applicationsegment.ApplicationSegmentResource {
 	details := applicationsegment.ApplicationSegmentResource{
 		ID:                        d.Id(),
@@ -354,12 +337,12 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id
 		SegmentGroupName:          d.Get("segment_group_name").(string),
 		BypassType:                d.Get("bypass_type").(string),
 		ConfigSpace:               d.Get("config_space").(string),
-		IcmpAccessType:            d.Get("icmp_access_type").(string),
 		Description:               d.Get("description").(string),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
-		HealthReporting:           d.Get("health_reporting").(string),
 		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
+		IcmpAccessType:            bool02(d.Get("icmp_access_type").(bool)),
+		HealthReporting:           bool03(d.Get("health_reporting").(bool)),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
