@@ -305,7 +305,7 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			},
 			"server_groups": {
 				Type:        schema.TypeSet,
-				Required:    true,
+				Optional:    true,
 				Description: "List of the server group IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
