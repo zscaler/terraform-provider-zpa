@@ -13,6 +13,7 @@ import (
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
 
 func resourceApplicationSegment() *schema.Resource {
@@ -327,10 +328,46 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 	return resourceApplicationSegmentRead(d, m)
 }
 
+func detachApplicationSegmentFromAllPolicyRules(id string, zClient *Client) {
+	var rules []policysetcontroller.PolicyRule
+	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
+	for _, t := range types {
+		policySet, _, err := zClient.policysetcontroller.GetByPolicyType(t)
+		if err != nil {
+			continue
+		}
+		r, _, err := zClient.policysetcontroller.GetAllByType(t)
+		if err != nil {
+			continue
+		}
+		for _, rule := range r {
+			rule.PolicySetID = policySet.ID
+			rules = append(rules, rule)
+		}
+	}
+	for _, rule := range rules {
+		for i, condition := range rule.Conditions {
+			var operands []policysetcontroller.Operands
+			for _, op := range condition.Operands {
+				if op.ObjectType == "APP" && op.LHS == "id" && op.RHS == id {
+					continue
+				}
+				operands = append(operands, op)
+			}
+			rule.Conditions[i].Operands = operands
+		}
+		if _, err := zClient.policysetcontroller.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
+			continue
+		}
+	}
+}
+
 func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	id := d.Id()
 	log.Printf("[INFO] Deleting application segment with id %v\n", id)
+
+	detachApplicationSegmentFromAllPolicyRules(id, zClient)
 
 	if _, err := zClient.applicationsegment.Delete(id); err != nil {
 		return err

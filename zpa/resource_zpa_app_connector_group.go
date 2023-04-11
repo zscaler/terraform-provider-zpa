@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
 
 func resourceAppConnectorGroup() *schema.Resource {
@@ -264,10 +265,39 @@ func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) erro
 	return resourceAppConnectorGroupRead(d, m)
 }
 
+func detachAppConnectorGroupFromAllAccessPolicyRules(id string, zClient *Client) {
+	accessPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	if err != nil {
+		return
+	}
+	rules, _, err := zClient.policysetcontroller.GetAllByType("ACCESS_POLICY")
+	if err != nil {
+		return
+	}
+	for _, rule := range rules {
+		ids := []policysetcontroller.AppConnectorGroups{}
+		for _, app := range rule.AppConnectorGroups {
+			if app.ID == id {
+				continue
+			}
+			ids = append(ids, policysetcontroller.AppConnectorGroups{
+				ID: app.ID,
+			})
+		}
+		rule.AppConnectorGroups = ids
+		if _, err := zClient.policysetcontroller.Update(accessPolicySet.ID, rule.ID, &rule); err != nil {
+			continue
+		}
+	}
+}
+
 func resourceAppConnectorGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	log.Printf("[INFO] Deleting app connector groupID: %v\n", d.Id())
+
+	// detach app connector group from all access policy rules
+	detachAppConnectorGroupFromAllAccessPolicyRules(d.Id(), zClient)
 
 	if _, err := zClient.appconnectorgroup.Delete(d.Id()); err != nil {
 		return err

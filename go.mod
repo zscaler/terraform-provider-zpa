@@ -1,6 +1,6 @@
 module github.com/zscaler/terraform-provider-zpa/v2
 
-go 1.19
+go 1.18
 
 require (
 	github.com/bflad/tfproviderlint v0.28.1
@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
-	github.com/zscaler/zscaler-sdk-go v1.3.5
+	github.com/zscaler/zscaler-sdk-go v1.4.0
 )
 
 require (
