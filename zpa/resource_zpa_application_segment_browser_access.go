@@ -154,6 +154,11 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			// Need to implement validation.
+			// When attribute is set to true only tcp_port_range and tcp_port_ranges are allowed
+			// udp_port_range and udp_port_ranges are not allowed
+			// Return error message: "The protocol configuration for the application is invalid. App Connector Closest to App supports only TCP applications."
+			// Add validation to utils.go as it will be used across all application segments.
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
