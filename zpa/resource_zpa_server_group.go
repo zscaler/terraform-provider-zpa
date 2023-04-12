@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/servergroup"
 )
 
@@ -239,6 +241,55 @@ func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceServerGroupRead(d, m)
 }
 
+func detachServerGroupFromAllAccessPolicyRules(id string, zClient *Client) {
+	accessPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	if err != nil {
+		return
+	}
+	accessPolicyRules, _, err := zClient.policysetcontroller.GetAllByType("ACCESS_POLICY")
+	if err != nil {
+		return
+	}
+	for _, accessPolicyRule := range accessPolicyRules {
+		ids := []policysetcontroller.AppServerGroups{}
+		for _, app := range accessPolicyRule.AppServerGroups {
+			if app.ID == id {
+				continue
+			}
+			ids = append(ids, policysetcontroller.AppServerGroups{
+				ID: app.ID,
+			})
+		}
+		accessPolicyRule.AppServerGroups = ids
+		if _, err := zClient.policysetcontroller.Update(accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
+			continue
+		}
+	}
+}
+
+func detachServerGroupFromAllAppSegments(id string, zClient *Client) {
+
+	apps, _, err := zClient.applicationsegment.GetAll()
+	if err != nil {
+		return
+	}
+	for _, app := range apps {
+		ids := []applicationsegment.AppServerGroups{}
+		for _, app := range app.ServerGroups {
+			if app.ID == id {
+				continue
+			}
+			ids = append(ids, applicationsegment.AppServerGroups{
+				ID: app.ID,
+			})
+		}
+		app.ServerGroups = ids
+		if _, err := zClient.applicationsegment.Update(app.ID, app); err != nil {
+			continue
+		}
+	}
+}
+
 func resourceServerGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
@@ -247,6 +298,10 @@ func resourceServerGroupDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		log.Printf("[ERROR] Detaching server group ID: %v from app connector groups failed:%v\n", d.Id(), err)
 	}
+
+	detachServerGroupFromAllAccessPolicyRules(d.Id(), zClient)
+	detachServerGroupFromAllAppSegments(d.Id(), zClient)
+
 	if _, err := zClient.servergroup.Delete(d.Id()); err != nil {
 		return err
 	}
