@@ -55,7 +55,7 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessCnameEnabled)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "bypass_type", "NEVER"),
-					resource.TestCheckResourceAttr(browserAccessTypeAndName, "health_reporting", "ON_ACCESS"),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "health_reporting", "true"),
 					resource.TestCheckResourceAttrSet(browserAccessTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "clientless_apps.#", "1"),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "tcp_port_range.#", "1"),

@@ -68,7 +68,7 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 			"health_reporting": {
 				Type:        schema.TypeBool,
 				Computed:    true,
-				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
+				Description: "Whether health reporting for the app is Continuous or On Access.",
 			},
 			"icmp_access_type": {
 				Type:     schema.TypeBool,

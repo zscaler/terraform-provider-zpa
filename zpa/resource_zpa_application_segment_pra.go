@@ -133,7 +133,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Computed:    true,
-				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
+				Description: "Whether health reporting for the app is Continuous or On Access.",
 			},
 			"icmp_access_type": {
 				Type:     schema.TypeBool,
