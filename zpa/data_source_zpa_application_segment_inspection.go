@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentinspection"
@@ -65,12 +66,12 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 				Computed: true,
 			},
 			"health_reporting": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
 			},
 			"icmp_access_type": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"ip_anchored": {
@@ -211,14 +212,14 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interf
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 		_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
-		_ = d.Set("icmp_access_type", resp.ICMPAccessType)
+		_ = d.Set("icmp_access_type", strings.EqualFold(resp.ICMPAccessType, "PING_TRACEROUTING"))
 		_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("ip_anchored", resp.IPAnchored)
-		_ = d.Set("health_reporting", resp.HealthReporting)
+		_ = d.Set("health_reporting", strings.EqualFold(resp.HealthReporting, "ON_ACCESS"))
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 

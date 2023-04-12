@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
@@ -70,7 +71,7 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Computed: true,
 			},
 			"health_reporting": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"select_connector_close_to_app": {
@@ -199,7 +200,7 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("health_check_type", resp.HealthCheckType)
-		_ = d.Set("health_reporting", resp.HealthReporting)
+		_ = d.Set("health_reporting", strings.EqualFold(resp.HealthReporting, "ON_ACCESS"))
 		_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 		_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 		_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)

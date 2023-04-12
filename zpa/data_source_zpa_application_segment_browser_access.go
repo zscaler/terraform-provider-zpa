@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
@@ -76,7 +77,7 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Computed: true,
 			},
 			"health_reporting": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
 			},
@@ -222,7 +223,7 @@ func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m int
 		_ = d.Set("health_check_type", resp.HealthCheckType)
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 		_ = d.Set("ip_anchored", resp.IPAnchored)
-		_ = d.Set("health_reporting", resp.HealthReporting)
+		_ = d.Set("health_reporting", strings.EqualFold(resp.HealthReporting, "ON_ACCESS"))
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
