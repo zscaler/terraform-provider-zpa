@@ -212,14 +212,14 @@ func bool01(val bool) string {
 	return "0"
 }
 
-func bool02(val bool) string {
+func boolToIcmpAccessType(val bool) string {
 	if val {
 		return "PING_TRACEROUTING"
 	}
 	return "PING"
 }
 
-func bool03(val bool) string {
+func boolToHealthReporting(val bool) string {
 	if val {
 		return "ON_ACCESS"
 	}

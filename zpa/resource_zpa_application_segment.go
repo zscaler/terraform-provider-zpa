@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -249,12 +250,13 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
-	healthReporting, _ := strconv.ParseBool(resp.HealthReporting)
-	_ = d.Set("health_reporting", healthReporting)
-	icmpAccessType, _ := strconv.ParseBool(resp.IcmpAccessType)
-	_ = d.Set("icmp_access_type", icmpAccessType)
+
+	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthCheckType, "ON_ACCESS"))
+	_ = d.Set("icmp_access_type", strings.EqualFold(resp.IcmpAccessType, "PING_TRACEROUTING"))
+
 	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
 	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
+
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
@@ -341,8 +343,8 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, zClient *Client, id
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
 		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
-		IcmpAccessType:            bool02(d.Get("icmp_access_type").(bool)),
-		HealthReporting:           bool03(d.Get("health_reporting").(bool)),
+		IcmpAccessType:            boolToIcmpAccessType(d.Get("icmp_access_type").(bool)),
+		HealthReporting:           boolToHealthReporting(d.Get("health_reporting").(bool)),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),

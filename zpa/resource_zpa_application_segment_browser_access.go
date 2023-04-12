@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -324,10 +325,10 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
-	healthReporting, _ := strconv.ParseBool(resp.HealthReporting)
-	_ = d.Set("health_reporting", healthReporting)
-	icmpAccessType, _ := strconv.ParseBool(resp.ICMPAccessType)
-	_ = d.Set("icmp_access_type", icmpAccessType)
+
+	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthCheckType, "ON_ACCESS"))
+	_ = d.Set("icmp_access_type", strings.EqualFold(resp.ICMPAccessType, "PING_TRACEROUTING"))
+
 	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
 	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
@@ -433,8 +434,8 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 		BypassType:                d.Get("bypass_type").(string),
 		ConfigSpace:               d.Get("config_space").(string),
 		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
-		ICMPAccessType:            bool02(d.Get("icmp_access_type").(bool)),
-		HealthReporting:           bool03(d.Get("health_reporting").(bool)),
+		ICMPAccessType:            boolToIcmpAccessType(d.Get("icmp_access_type").(bool)),
+		HealthReporting:           boolToHealthReporting(d.Get("health_reporting").(bool)),
 		Description:               d.Get("description").(string),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),

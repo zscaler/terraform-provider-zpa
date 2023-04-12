@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -360,10 +361,10 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
-	healthReporting, _ := strconv.ParseBool(resp.HealthReporting)
-	_ = d.Set("health_reporting", healthReporting)
-	icmpAccessType, _ := strconv.ParseBool(resp.IcmpAccessType)
-	_ = d.Set("icmp_access_type", icmpAccessType)
+
+	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthCheckType, "ON_ACCESS"))
+	_ = d.Set("icmp_access_type", strings.EqualFold(resp.IcmpAccessType, "PING_TRACEROUTING"))
+
 	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
 	_ = d.Set("tcp_keep_alive", tcpKeepAlive)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
@@ -480,8 +481,8 @@ func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id str
 		BypassType:                d.Get("bypass_type").(string),
 		ConfigSpace:               d.Get("config_space").(string),
 		TCPKeepAlive:              bool01(d.Get("tcp_keep_alive").(bool)),
-		IcmpAccessType:            bool02(d.Get("icmp_access_type").(bool)),
-		HealthReporting:           bool03(d.Get("health_reporting").(bool)),
+		IcmpAccessType:            boolToIcmpAccessType(d.Get("icmp_access_type").(bool)),
+		HealthReporting:           boolToHealthReporting(d.Get("health_reporting").(bool)),
 		Description:               d.Get("description").(string),
 		HealthCheckType:           d.Get("health_check_type").(string),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
