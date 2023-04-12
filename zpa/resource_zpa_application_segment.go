@@ -245,7 +245,7 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 
-	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthCheckType, "ON_ACCESS"))
+	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthReporting, "ON_ACCESS"))
 	_ = d.Set("icmp_access_type", strings.EqualFold(resp.IcmpAccessType, "PING_TRACEROUTING"))
 
 	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)

@@ -362,7 +362,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 
-	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthCheckType, "ON_ACCESS"))
+	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthReporting, "ON_ACCESS"))
 	_ = d.Set("icmp_access_type", strings.EqualFold(resp.IcmpAccessType, "PING_TRACEROUTING"))
 
 	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
@@ -372,7 +372,6 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
-	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenPRAAppServerGroupsSimple(resp))

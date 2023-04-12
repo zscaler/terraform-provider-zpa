@@ -326,7 +326,7 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 
-	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthCheckType, "ON_ACCESS"))
+	_ = d.Set("health_reporting", strings.EqualFold(resp.HealthReporting, "ON_ACCESS"))
 	_ = d.Set("icmp_access_type", strings.EqualFold(resp.ICMPAccessType, "PING_TRACEROUTING"))
 
 	tcpKeepAlive, _ := strconv.ParseBool(resp.TCPKeepAlive)
