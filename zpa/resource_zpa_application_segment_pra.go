@@ -193,65 +193,50 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"common_apps_dto": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
-							Type:     schema.TypeSet,
-							Computed: true,
+							Type: schema.TypeSet,
+							// Computed: true,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"allow_options": {
-										Type:     schema.TypeBool,
-										Computed: true,
-										Optional: true,
-									},
-									"app_id": {
+									"name": {
 										Type:     schema.TypeString,
-										Computed: true,
 										Optional: true,
+										// Computed: true,
 									},
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
+									"enabled": {
+										Type: schema.TypeBool,
+										// Computed: true,
 										Optional: true,
 									},
 									"app_types": {
-										Type:     schema.TypeSet,
-										Computed: true,
+										Type: schema.TypeSet,
+										// Computed: true,
 										Optional: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-											ValidateFunc: validation.StringInSlice([]string{
-												"SECURE_REMOTE_ACCESS",
-											}, false),
-										},
+										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
 									"application_port": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type: schema.TypeString,
+										// Computed: true,
 										Optional: true,
 									},
 									"application_protocol": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type: schema.TypeString,
+										// Computed: true,
 										Optional: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"RDP",
 											"SSH",
 										}, false),
 									},
-									"cname": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-									},
 									"connection_security": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"ANY",
 											"NLA",
@@ -261,40 +246,10 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 											"RDP",
 										}, false),
 									},
-									"description": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-									},
 									"domain": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type: schema.TypeString,
+										// Computed: true,
 										Optional: true,
-									},
-									"enabled": {
-										Type:     schema.TypeBool,
-										Computed: true,
-										Optional: true,
-									},
-									"hidden": {
-										Type:     schema.TypeBool,
-										Computed: true,
-										Optional: true,
-									},
-									"local_domain": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"portal": {
-										Type:     schema.TypeBool,
-										Optional: true,
-										Computed: true,
 									},
 								},
 							},
@@ -332,8 +287,8 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 	}
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
-		return fmt.Errorf("please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
 
 	resp, _, err := zClient.applicationsegmentpra.Create(req)
@@ -378,7 +333,6 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
-	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
@@ -587,20 +541,12 @@ func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.A
 			}
 			appTypes := SetToStringSlice(appTypesSet)
 			commonAppConfigDto = append(commonAppConfigDto, applicationsegmentpra.AppsConfig{
-				AllowOptions:        commonAppConfig["allow_options"].(bool),
-				AppID:               commonAppConfig["app_id"].(string),
-				ID:                  commonAppConfig["id"].(string),
+				Name:                commonAppConfig["name"].(string),
+				Enabled:             commonAppConfig["enabled"].(bool),
+				Domain:              commonAppConfig["domain"].(string),
 				ApplicationPort:     commonAppConfig["application_port"].(string),
 				ApplicationProtocol: commonAppConfig["application_protocol"].(string),
 				ConnectionSecurity:  commonAppConfig["connection_security"].(string),
-				Cname:               commonAppConfig["cname"].(string),
-				Description:         commonAppConfig["description"].(string),
-				Domain:              commonAppConfig["domain"].(string),
-				Enabled:             commonAppConfig["enabled"].(bool),
-				Hidden:              commonAppConfig["hidden"].(bool),
-				LocalDomain:         commonAppConfig["local_domain"].(string),
-				Name:                commonAppConfig["name"].(string),
-				Portal:              commonAppConfig["portal"].(bool),
 				AppTypes:            appTypes,
 			})
 		}
@@ -643,17 +589,12 @@ func flattenAppsConfig(appConfigs []applicationsegmentpra.SRAAppsDto) []interfac
 	for i, val := range appConfigs {
 		appConfig[i] = map[string]interface{}{
 			"name":                 val.Name,
-			"id":                   val.ID,
-			"app_id":               val.AppID,
+			"enabled":              val.Enabled,
+			"domain":               val.Domain,
 			"application_port":     val.ApplicationPort,
 			"application_protocol": val.ApplicationProtocol,
 			"connection_security":  val.ConnectionSecurity,
-			"description":          val.Description,
-			"domain":               val.Domain,
-			"enabled":              val.Enabled,
-			"hidden":               val.Hidden,
-			"portal":               val.Portal,
-			//"app_types":            val.?,
+			"app_types":            val.AppTypes,
 		}
 	}
 	return appConfig
