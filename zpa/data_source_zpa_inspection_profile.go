@@ -22,6 +22,16 @@ func dataSourceInspectionProfile() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"check_control_deployment_status": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"zs_defined_control_choice": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"common_global_override_actions_config": {
 				Type:     schema.TypeMap,
 				Computed: true,
@@ -48,6 +58,147 @@ func dataSourceInspectionProfile() *schema.Resource {
 			"creation_time": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"threat_labz_controls": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"action": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"action_value": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"control_group": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"control_number": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"control_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"default_action": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"default_action_value": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"modified_by": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"creation_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"modified_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"paranoia_level": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"engine_version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"last_deployment_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"rule_metadata": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"rule_processor": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"ruleset_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"ruleset_version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"severity": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"zscaler_info_url": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"associated_customers": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"customer_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"exclude_constellation": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"is_partner": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"associated_inspection_profile_names": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			"custom_controls": {
 				Type:     schema.TypeList,
@@ -288,14 +439,6 @@ func dataSourceInspectionProfile() *schema.Resource {
 								},
 							},
 						},
-						"attachment": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"control_group": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"control_number": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -383,16 +526,18 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
-		_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
-		_ = d.Set("creation_time", resp.CreationTime)
+		_ = d.Set("name", resp.Name)
 		_ = d.Set("description", resp.Description)
+		_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
+		_ = d.Set("check_control_deployment_status", resp.CheckControlDeploymentStatus)
 		_ = d.Set("global_control_actions", resp.GlobalControlActions)
 		_ = d.Set("incarnation_number", resp.IncarnationNumber)
+		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
-		_ = d.Set("name", resp.Name)
 		_ = d.Set("paranoia_level", resp.ParanoiaLevel)
 		_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
+		_ = d.Set("zs_defined_control_choice", resp.ZSDefinedControlChoice)
 
 		if err := d.Set("controls_info", flattenControlInfoResource(resp.ControlInfoResource)); err != nil {
 			return err
@@ -406,7 +551,10 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 
-		if err := d.Set("web_socket_controls", flattenPredefinedControlsSimple(resp.WebSocketControls)); err != nil {
+		if err := d.Set("web_socket_controls", flattenWebSocketControls(resp.WebSocketControls)); err != nil {
+			return err
+		}
+		if err := d.Set("threat_labz_controls", flattenThreatLabzControls(resp.ThreatLabzControls)); err != nil {
 			return err
 		}
 	} else {
@@ -445,6 +593,7 @@ func flattenCustomControls(customControl []inspection_profile.InspectionCustomCo
 			"modified_by":                         custom.ModifiedBy,
 			"modified_time":                       custom.ModifiedTime,
 			"paranoia_level":                      custom.ParanoiaLevel,
+			"protocol_type":                       custom.ProtocolType,
 			"type":                                custom.Type,
 			"version":                             custom.Version,
 			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(custom.AssociatedInspectionProfileNames),
@@ -477,6 +626,7 @@ func flattenPredefinedControls(predControl []inspection_profile.CustomCommonCont
 			"attachment":                          predControl.Attachment,
 			"control_group":                       predControl.ControlGroup,
 			"control_number":                      predControl.ControlNumber,
+			"control_type":                        predControl.ControlType,
 			"creation_time":                       predControl.CreationTime,
 			"default_action":                      predControl.DefaultAction,
 			"default_action_value":                predControl.DefaultActionValue,
@@ -492,4 +642,82 @@ func flattenPredefinedControls(predControl []inspection_profile.CustomCommonCont
 	}
 
 	return predControls
+}
+
+func flattenWebSocketControls(websocketControl []inspection_profile.CustomCommonControls) []interface{} {
+	websocketControls := make([]interface{}, len(websocketControl))
+	for i, websocketControl := range websocketControl {
+		websocketControls[i] = map[string]interface{}{
+			"id":                                  websocketControl.ID,
+			"name":                                websocketControl.Name,
+			"action":                              websocketControl.Action,
+			"action_value":                        websocketControl.ActionValue,
+			"control_number":                      websocketControl.ControlNumber,
+			"control_type":                        websocketControl.ControlType,
+			"creation_time":                       websocketControl.CreationTime,
+			"default_action":                      websocketControl.DefaultAction,
+			"default_action_value":                websocketControl.DefaultActionValue,
+			"description":                         websocketControl.Description,
+			"modified_by":                         websocketControl.ModifiedBy,
+			"modified_time":                       websocketControl.ModifiedTime,
+			"paranoia_level":                      websocketControl.ParanoiaLevel,
+			"severity":                            websocketControl.Severity,
+			"version":                             websocketControl.Version,
+			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(websocketControl.AssociatedInspectionProfileNames),
+		}
+	}
+
+	return websocketControls
+}
+
+func flattenAssociatedCustomers(associatedCustomers []inspection_profile.AssociatedCustomers) []interface{} {
+	rule := make([]interface{}, len(associatedCustomers))
+	for i, val := range associatedCustomers {
+		rule[i] = map[string]interface{}{
+			"customer_id":           val.CustomerID,
+			"exclude_constellation": val.ExcludeConstellation,
+			"is_partner":            val.IsPartner,
+			"name":                  val.Name,
+		}
+	}
+
+	return rule
+}
+
+func flattenThreatLabzControls(threatLabzControl []inspection_profile.ThreatLabzControls) []interface{} {
+	threatLabzControls := make([]interface{}, len(threatLabzControl))
+	for i, threatLabzControl := range threatLabzControl {
+		threatLabzControls[i] = map[string]interface{}{
+			"id":                                  threatLabzControl.ID,
+			"name":                                threatLabzControl.Name,
+			"description":                         threatLabzControl.Description,
+			"enabled":                             threatLabzControl.Enabled,
+			"action":                              threatLabzControl.Action,
+			"action_value":                        threatLabzControl.ActionValue,
+			"control_group":                       threatLabzControl.ControlGroup,
+			"control_number":                      threatLabzControl.ControlNumber,
+			"control_type":                        threatLabzControl.ControlType,
+			"attachment":                          threatLabzControl.Attachment,
+			"creation_time":                       threatLabzControl.CreationTime,
+			"default_action":                      threatLabzControl.DefaultAction,
+			"default_action_value":                threatLabzControl.DefaultActionValue,
+			"engine_version":                      threatLabzControl.EngineVersion,
+			"last_deployment_time":                threatLabzControl.LastDeploymentTime,
+			"rule_deployment_state":               threatLabzControl.RuleDeploymentState,
+			"rule_metadata":                       threatLabzControl.RuleMetadata,
+			"rule_processor":                      threatLabzControl.RuleProcessor,
+			"ruleset_name":                        threatLabzControl.RulesetName,
+			"ruleset_version":                     threatLabzControl.RulesetVersion,
+			"zscaler_info_url":                    threatLabzControl.ZscalerInfoUrl,
+			"modified_by":                         threatLabzControl.ModifiedBy,
+			"modified_time":                       threatLabzControl.ModifiedTime,
+			"paranoia_level":                      threatLabzControl.ParanoiaLevel,
+			"severity":                            threatLabzControl.Severity,
+			"version":                             threatLabzControl.Version,
+			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(threatLabzControl.AssociatedInspectionProfileNames),
+			"associated_customers":                flattenAssociatedCustomers(threatLabzControl.AssociatedCustomers),
+		}
+	}
+
+	return threatLabzControls
 }
