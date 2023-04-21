@@ -338,19 +338,28 @@ func detachAppsFromAllPolicyRules(id string, zClient *Client) {
 			rules = append(rules, rule)
 		}
 	}
-	for _, rule := range rules {
-		for i, condition := range rule.Conditions {
-			var operands []policysetcontroller.Operands
+	log.Printf("[INFO] detachAppsFromAllPolicyRules Updating policy rules, len:%d \n", len(rules))
+	for _, rr := range rules {
+		rule := rr
+		changed := false
+		for i, condition := range rr.Conditions {
+			operands := []policysetcontroller.Operands{}
 			for _, op := range condition.Operands {
 				if op.ObjectType == "APP" && op.LHS == "id" && op.RHS == id {
+					changed = true
 					continue
 				}
 				operands = append(operands, op)
 			}
 			rule.Conditions[i].Operands = operands
 		}
-		if _, err := zClient.policysetcontroller.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
-			continue
+		if len(rule.Conditions) == 0 {
+			rule.Conditions = []policysetcontroller.Conditions{}
+		}
+		if changed {
+			if _, err := zClient.policysetcontroller.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
+				continue
+			}
 		}
 	}
 }
