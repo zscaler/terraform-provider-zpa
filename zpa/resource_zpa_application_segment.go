@@ -10,6 +10,7 @@ import (
 	client "github.com/zscaler/zscaler-sdk-go/zpa"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
 
 func resourceApplicationSegment() *schema.Resource {
