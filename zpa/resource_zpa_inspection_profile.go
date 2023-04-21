@@ -48,6 +48,16 @@ func resourceInspectionProfile() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"check_control_deployment_status": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"zs_defined_control_choice": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"associate_all_controls": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -72,17 +82,175 @@ func resourceInspectionProfile() *schema.Resource {
 							Optional: true,
 							Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"WEBSOCKET_PREDEFINED",
-								"WEBSOCKET_CUSTOM",
-								"ZSCALER",
 								"CUSTOM",
 								"PREDEFINED",
+								"ZSCALER",
+								"THREATLABZ",
+								"WEBSOCKET_PREDEFINED",
+								"WEBSOCKET_CUSTOM",
 							}, false),
 						},
 						"count": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+						},
+					},
+				},
+			},
+			"threat_labz_controls": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"action": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"action_value": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"control_group": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"control_number": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"control_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+
+						"default_action": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"default_action_value": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"paranoia_level": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"engine_version": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"last_deployment_time": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"rule_metadata": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"rule_processor": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"ruleset_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"ruleset_version": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"severity": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"version": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"zscaler_info_url": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"associated_customers": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"customer_id": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+									"exclude_constellation": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"is_partner": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"associated_inspection_profile_names": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -158,11 +326,12 @@ func resourceInspectionProfile() *schema.Resource {
 							Optional: true,
 							Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"WEBSOCKET_PREDEFINED",
-								"WEBSOCKET_CUSTOM",
-								"ZSCALER",
 								"CUSTOM",
 								"PREDEFINED",
+								"THREATLABZ",
+								"ZSCALER",
+								"WEBSOCKET_PREDEFINED",
+								"WEBSOCKET_CUSTOM",
 							}, false),
 						},
 						"action_value": {
@@ -180,6 +349,7 @@ func resourceInspectionProfile() *schema.Resource {
 								"RDP",
 								"SSH",
 								"WEBSOCKET",
+								"VNC",
 							}, false),
 						},
 					},

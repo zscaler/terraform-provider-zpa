@@ -24,12 +24,10 @@ func dataSourceInspectionProfile() *schema.Resource {
 			},
 			"check_control_deployment_status": {
 				Type:     schema.TypeBool,
-				Optional: true,
 				Computed: true,
 			},
 			"zs_defined_control_choice": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"common_global_override_actions_config": {
