@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -12,6 +13,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
+
+var policyRulesDetchLock sync.Mutex
 
 func resourceApplicationSegment() *schema.Resource {
 	return &schema.Resource{
@@ -322,6 +325,8 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 }
 
 func detachAppsFromAllPolicyRules(id string, zClient *Client) {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
 	var rules []policysetcontroller.PolicyRule
 	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
 	for _, t := range types {
