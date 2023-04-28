@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -223,6 +224,10 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 
 	req := expandApplicationSegmentRequest(d, zClient, "")
 
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
+
 	if err := checkForPortsOverlap(zClient, req); err != nil {
 		return err
 	}
@@ -311,6 +316,11 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 	id := d.Id()
 	log.Printf("[INFO] Updating application segment ID: %v\n", id)
 	req := expandApplicationSegmentRequest(d, zClient, id)
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
+
 	if err := checkForPortsOverlap(zClient, req); err != nil {
 		return err
 	}
@@ -462,6 +472,16 @@ func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServe
 	}
 
 	return []applicationsegment.AppServerGroups{}
+}
+
+func validateAppPorts(client *Client, selectConnectorCloseToApp bool, udpAppPortRange []common.NetworkPorts, udpPortRanges []string) error {
+	if selectConnectorCloseToApp {
+		if len(udpAppPortRange) > 0 || len(udpPortRanges) > 0 {
+			return errors.New("the protocol configuration for the application is invalid. App Connector Closest to App supports only TCP applications")
+		}
+	}
+	return nil
+
 }
 
 func checkForPortsOverlap(client *Client, app applicationsegment.ApplicationSegmentResource) error {

@@ -285,6 +285,11 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m int
 	zClient := m.(*Client)
 
 	req := expandBrowserAccess(d, zClient, "")
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
+
 	if err := checkForBrowserAccessPortsOverlap(zClient, req); err != nil {
 		return err
 	}
@@ -370,6 +375,10 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m int
 	id := d.Id()
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
 	req := expandBrowserAccess(d, zClient, "")
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
 
 	if err := checkForBrowserAccessPortsOverlap(zClient, req); err != nil {
 		return err

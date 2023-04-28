@@ -331,6 +331,11 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 	zClient := m.(*Client)
 
 	req := expandSRAApplicationSegment(d, zClient, "")
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
+
 	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
 		return err
 	}
@@ -423,6 +428,10 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 	id := d.Id()
 	log.Printf("[INFO] Updating pra application segment ID: %v\n", id)
 	req := expandSRAApplicationSegment(d, zClient, id)
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
 
 	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
 		return err

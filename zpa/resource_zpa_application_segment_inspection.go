@@ -332,6 +332,11 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interf
 	zClient := m.(*Client)
 
 	req := expandInspectionApplicationSegment(d, zClient, "")
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
+
 	if err := checkForInspectionPortsOverlap(zClient, req); err != nil {
 		return err
 	}
@@ -425,6 +430,14 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection application segment ID: %v\n", id)
 	req := expandInspectionApplicationSegment(d, zClient, id)
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
+
+	if err := checkForInspectionPortsOverlap(zClient, req); err != nil {
+		return err
+	}
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the inspection application segment")
