@@ -3,10 +3,7 @@ package zpa
 import (
 	"fmt"
 	"log"
-	"math"
-	"math/rand"
 	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -281,9 +278,11 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m int
 	zClient := m.(*Client)
 
 	req := expandBrowserAccess(d, zClient, "")
-	if err := checkForBrowserAccessPortsOverlap(zClient, req); err != nil {
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
+
 	log.Printf("[INFO] Creating browser access request\n%+v\n", req)
 
 	if req.SegmentGroupID == "" {
@@ -367,7 +366,7 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m int
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
 	req := expandBrowserAccess(d, zClient, "")
 
-	if err := checkForBrowserAccessPortsOverlap(zClient, req); err != nil {
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 
@@ -590,54 +589,4 @@ func flattenClientlessAppServerGroups(appServerGroup []browseraccess.AppServerGr
 	mapIds["id"] = ids
 	result[0] = mapIds
 	return result
-}
-
-func checkForBrowserAccessPortsOverlap(client *Client, app browseraccess.BrowserAccess) error {
-	time.Sleep(time.Second * time.Duration(rand.Intn(5)))
-	apps, _, err := client.browseraccess.GetAll()
-	if err != nil {
-		return err
-	}
-	for _, app2 := range apps {
-		if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found && app2.ID != app.ID && app2.Name != app.Name {
-			// check for udp ports
-			if overlap, o1, o2 := browserAccessPortOverlap(app.TCPPortRanges, app2.TCPPortRanges); overlap {
-				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
-			}
-			if overlap, o1, o2 := browserAccessPortOverlap(app.UDPPortRanges, app2.UDPPortRanges); overlap {
-				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
-			}
-		}
-	}
-	return nil
-
-}
-
-func browserAccessPortOverlap(s1, s2 []string) (bool, []string, []string) {
-	for i1 := 0; i1 < len(s1); i1 += 2 {
-		port1Start, _ := strconv.Atoi(s1[i1])
-		port1End, _ := strconv.Atoi(s1[i1+1])
-		port1Start, port1End = int(math.Min(float64(port1Start), float64(port1End))), int(math.Max(float64(port1Start), float64(port1End)))
-		for i2 := 0; i2 < len(s2); i2 += 2 {
-			port2Start, _ := strconv.Atoi(s2[i2])
-			port2End, _ := strconv.Atoi(s2[i2+1])
-			port2Start, port2End = int(math.Min(float64(port2Start), float64(port2End))), int(math.Max(float64(port2Start), float64(port2End)))
-			if port1Start == port2Start || port1End == port2End || port1Start == port2End || port2Start == port1End {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-			if port1Start < port2Start && port1End > port2Start {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-			if port1End < port2End && port1End > port2Start {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-			if port2Start < port1Start && port2End > port1Start {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-			if port2End < port1End && port2End > port1Start {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-		}
-	}
-	return false, nil, nil
 }
