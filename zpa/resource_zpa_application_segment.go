@@ -215,6 +215,10 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 
 	req := expandApplicationSegmentRequest(d, zClient, "")
 
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
+
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provde a valid segment group for the application segment")
@@ -300,6 +304,10 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 	id := d.Id()
 	log.Printf("[INFO] Updating application segment ID: %v\n", id)
 	req := expandApplicationSegmentRequest(d, zClient, id)
+
+	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the application segment")
