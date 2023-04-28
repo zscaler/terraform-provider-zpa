@@ -173,6 +173,8 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func detachSegmentGroupFromAllPolicyRules(id string, zClient *Client) {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
 	var rules []policysetcontroller.PolicyRule
 	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
 	for _, t := range types {
@@ -190,18 +192,25 @@ func detachSegmentGroupFromAllPolicyRules(id string, zClient *Client) {
 		}
 	}
 	for _, rule := range rules {
+		changed := false
 		for i, condition := range rule.Conditions {
-			var operands []policysetcontroller.Operands
+			operands := []policysetcontroller.Operands{}
 			for _, op := range condition.Operands {
 				if op.ObjectType == "APP_GROUP" && op.LHS == "id" && op.RHS == id {
+					changed = true
 					continue
 				}
 				operands = append(operands, op)
 			}
 			rule.Conditions[i].Operands = operands
 		}
-		if _, err := zClient.policysetcontroller.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
-			continue
+		if len(rule.Conditions) == 0 {
+			rule.Conditions = []policysetcontroller.Conditions{}
+		}
+		if changed {
+			if _, err := zClient.policysetcontroller.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
+				continue
+			}
 		}
 	}
 }

@@ -203,7 +203,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 
 	resp, _, err := zClient.appconnectorgroup.Get(d.Id())
 	if err != nil {
-		if err.(*client.ErrorResponse).IsObjectNotFound() {
+		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing app connector group %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
@@ -266,6 +266,8 @@ func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) erro
 }
 
 func detachAppConnectorGroupFromAllAccessPolicyRules(id string, zClient *Client) {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
 	accessPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return
@@ -276,8 +278,10 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(id string, zClient *Client)
 	}
 	for _, rule := range rules {
 		ids := []policysetcontroller.AppConnectorGroups{}
+		changed := false
 		for _, app := range rule.AppConnectorGroups {
 			if app.ID == id {
+				changed = true
 				continue
 			}
 			ids = append(ids, policysetcontroller.AppConnectorGroups{
@@ -285,8 +289,10 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(id string, zClient *Client)
 			})
 		}
 		rule.AppConnectorGroups = ids
-		if _, err := zClient.policysetcontroller.Update(accessPolicySet.ID, rule.ID, &rule); err != nil {
-			continue
+		if changed {
+			if _, err := zClient.policysetcontroller.Update(accessPolicySet.ID, rule.ID, &rule); err != nil {
+				continue
+			}
 		}
 	}
 }

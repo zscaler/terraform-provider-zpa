@@ -242,6 +242,8 @@ func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func detachServerGroupFromAllAccessPolicyRules(id string, zClient *Client) {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
 	accessPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return
@@ -252,8 +254,10 @@ func detachServerGroupFromAllAccessPolicyRules(id string, zClient *Client) {
 	}
 	for _, accessPolicyRule := range accessPolicyRules {
 		ids := []policysetcontroller.AppServerGroups{}
+		changed := false
 		for _, app := range accessPolicyRule.AppServerGroups {
 			if app.ID == id {
+				changed = true
 				continue
 			}
 			ids = append(ids, policysetcontroller.AppServerGroups{
@@ -261,8 +265,10 @@ func detachServerGroupFromAllAccessPolicyRules(id string, zClient *Client) {
 			})
 		}
 		accessPolicyRule.AppServerGroups = ids
-		if _, err := zClient.policysetcontroller.Update(accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
-			continue
+		if changed {
+			if _, err := zClient.policysetcontroller.Update(accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
+				continue
+			}
 		}
 	}
 }
