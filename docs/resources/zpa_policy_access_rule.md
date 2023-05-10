@@ -88,6 +88,8 @@ resource "zpa_policy_access_rule" "this" {
       * `zpn_client_type_ip_anchoring`
       * `zpn_client_type_edge_connector`
       * `zpn_client_type_zapp`
+      * `zpn_client_type_zapp_partner`
+      * `zpn_client_type_branch_connector`
 
 * `app_connector_groups`
   * `id` - (Optional) The ID of an app connector group resource
