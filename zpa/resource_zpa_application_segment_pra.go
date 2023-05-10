@@ -191,7 +191,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				}, false),
 			},
 			"common_apps_dto": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				// Computed: true,
 				MaxItems: 1,
@@ -340,7 +340,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenPRAAppServerGroupsSimple(resp))
 
-	if err := d.Set("common_apps_dto", flattenCommonAppsDto(resp.SRAAppsDto)); err != nil {
+	if err := d.Set("common_apps_dto", flattenCommonAppsDto(d, resp.SRAAppsDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
@@ -454,6 +454,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id str
 		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
+		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		DomainNames:               expandStringInSlice(d, "domain_names"),
 		TCPAppPortRange:           []common.NetworkPorts{},
@@ -511,11 +512,11 @@ func expandCommonAppsDto(d *schema.ResourceData) applicationsegmentpra.CommonApp
 	if !ok {
 		return result
 	}
-	appsConfigList, ok := appsConfigInterface.([]interface{})
+	appsConfigList, ok := appsConfigInterface.(*schema.Set)
 	if !ok {
 		return result
 	}
-	for _, appconf := range appsConfigList {
+	for _, appconf := range appsConfigList.List() {
 		appConfMap, ok := appconf.(map[string]interface{})
 		if !ok {
 			return result
@@ -576,17 +577,25 @@ func expandPRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.Ap
 	return []applicationsegmentpra.AppServerGroups{}
 }
 
-func flattenCommonAppsDto(apps []applicationsegmentpra.SRAAppsDto) []interface{} {
+func flattenCommonAppsDto(d *schema.ResourceData, apps []applicationsegmentpra.SRAAppsDto) []interface{} {
 	commonApp := make([]interface{}, 1)
 	commonApp[0] = map[string]interface{}{
-		"apps_config": flattenAppsConfig(apps),
+		"apps_config": flattenAppsConfig(d, apps),
 	}
 	return commonApp
 }
 
-func flattenAppsConfig(appConfigs []applicationsegmentpra.SRAAppsDto) []interface{} {
+func flattenAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentpra.SRAAppsDto) []interface{} {
+	cApp := expandCommonAppsDto(d)
+
 	appConfig := make([]interface{}, len(appConfigs))
 	for i, val := range appConfigs {
+		appTypes := []string{}
+		for _, a := range cApp.AppsConfig {
+			if a.Name == val.Name {
+				appTypes = a.AppTypes
+			}
+		}
 		appConfig[i] = map[string]interface{}{
 			"name":                 val.Name,
 			"enabled":              val.Enabled,
@@ -594,7 +603,7 @@ func flattenAppsConfig(appConfigs []applicationsegmentpra.SRAAppsDto) []interfac
 			"application_port":     val.ApplicationPort,
 			"application_protocol": val.ApplicationProtocol,
 			"connection_security":  val.ConnectionSecurity,
-			"app_types":            val.AppTypes,
+			"app_types":            appTypes,
 		}
 	}
 	return appConfig
