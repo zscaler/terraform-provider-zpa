@@ -12,7 +12,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.7.2``
+``Last updated: v2.7.3``
 
 ---
 
@@ -22,6 +22,10 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 - Release date: **(May, xx 2023)**
 - Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #299](https://github.com/zscaler/terraform-provider-zpa/pull/299) Added new client type ``zpn_client_type_zapp_partner``
 
 ### Bug Fixes
 
