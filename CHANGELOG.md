@@ -7,6 +7,10 @@
 - Release date: **(May, xx 2023)**
 - Supported Terraform version: **v1.x**
 
+### Enhancements
+
+- [PR #299](https://github.com/zscaler/terraform-provider-zpa/pull/299) Added new client type ``zpn_client_type_zapp_partner``
+
 ### Bug Fixes
 
 - [PR #289](https://github.com/zscaler/terraform-provider-zpa/pull/289) Fix Drift on resource ``zpa_application_segment_pra``
