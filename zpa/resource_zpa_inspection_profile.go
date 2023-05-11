@@ -469,12 +469,13 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	}
 	log.Printf("[INFO] Getting inspection profile:\n%+v\n", resp)
 	d.SetId(resp.ID)
-	_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
-	_ = d.Set("associate_all_controls", d.Get("associate_all_controls"))
+	_ = d.Set("name", resp.Name)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("global_control_actions", resp.GlobalControlActions)
-	_ = d.Set("name", resp.Name)
+	_ = d.Set("incarnation_number", resp.IncarnationNumber)
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
+	_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
+	_ = d.Set("associate_all_controls", d.Get("associate_all_controls"))
 	if resp.PredefinedControlsVersion != "" {
 		_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
 	}
