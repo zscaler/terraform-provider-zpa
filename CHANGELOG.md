@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.7.3 (May, 11 2023)
+
+### Notes
+
+- Release date: **(May, 11 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #298](https://github.com/zscaler/terraform-provider-zpa/pull/285) Fixed issue with empty IDs in the resource ``zpa_service_edge_groups``
+- [PR #298](https://github.com/zscaler/terraform-provider-zpa/pull/285) Fix Service Edge Group Trusted Networks  for resource ``zpa_service_edge_groups``
+
 ## 2.7.2 (April, 28 2023)
 
 ### Notes
