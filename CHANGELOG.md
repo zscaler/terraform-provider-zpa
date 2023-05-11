@@ -1,19 +1,16 @@
 # Changelog
 
-## 2.7.3 (May, xx 2023)
+## 2.7.3 (May, 11 2023)
 
 ### Notes
 
-- Release date: **(May, xx 2023)**
+- Release date: **(May, 11 2023)**
 - Supported Terraform version: **v1.x**
-
-### Enhancements
-
-- [PR #299](https://github.com/zscaler/terraform-provider-zpa/pull/299) Added new client type ``zpn_client_type_zapp_partner``
 
 ### Bug Fixes
 
-- [PR #289](https://github.com/zscaler/terraform-provider-zpa/pull/289) Fix Drift on resource ``zpa_application_segment_pra``
+- [PR #298](https://github.com/zscaler/terraform-provider-zpa/pull/285) Fixed issue with empty IDs in the resource ``zpa_service_edge_groups``
+- [PR #298](https://github.com/zscaler/terraform-provider-zpa/pull/285) Fix Service Edge Group Trusted Networks  for resource ``zpa_service_edge_groups``
 
 ## 2.7.2 (April, 28 2023)
 
@@ -27,7 +24,7 @@
 - [PR #285](https://github.com/zscaler/terraform-provider-zpa/pull/285) Allow empty server group attribute in ``server_group`` attribute within an application segment
 - [PR #291](https://github.com/zscaler/terraform-provider-zpa/pull/291) Added function to support detaching objects from all policy types prior to destroy operation.
 
-### Enhancements
+### Enhacements
 
 - [PR #292](https://github.com/zscaler/terraform-provider-zpa/pull/292) Added validation to application segments on attributes ``select_closest_app_connector`` to ensure no UDP port configuration is submitted. By default only TCP ports are supported when this attribute is set to ``true``.
 
