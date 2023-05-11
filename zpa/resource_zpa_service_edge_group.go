@@ -119,8 +119,10 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				},
 			},
 			"trusted_networks": {
-				Type:     schema.TypeSet,
-				Optional: true,
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Computed:    true,
+				Description: "List of trusted network IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -222,10 +224,23 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
-	_ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
+	// _ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
+	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
 	_ = d.Set("service_edges", flattenServiceEdges(resp))
 	return nil
 
+}
+
+func flattenAppTrustedNetworksSimple(trustedNetworks []serviceedgegroup.TrustedNetworks) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(trustedNetworks))
+	for i, networks := range trustedNetworks {
+		ids[i] = networks.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }
 
 func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error {
@@ -310,23 +325,47 @@ func expandServiceEdges(d *schema.ResourceData) []serviceedgegroup.ServiceEdges 
 	return []serviceedgegroup.ServiceEdges{}
 }
 
+/*
+	func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNetworks {
+		trustedNetworksInterface, ok := d.GetOk("trusted_networks")
+		if ok {
+			network := trustedNetworksInterface.(*schema.Set)
+			log.Printf("[INFO] trusted network data: %+v\n", network)
+			var trustedNetworks []serviceedgegroup.TrustedNetworks
+			for _, trustedNetwork := range network.List() {
+				trustedNetwork, ok := trustedNetwork.(map[string]interface{})
+				if ok {
+					for _, id := range trustedNetwork["id"].([]interface{}) {
+						trustedNetworks = append(trustedNetworks, serviceedgegroup.TrustedNetworks{
+							ID: id.(string),
+						})
+					}
+				}
+			}
+			return trustedNetworks
+		}
+
+		return []serviceedgegroup.TrustedNetworks{}
+	}
+*/
+
 func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNetworks {
 	trustedNetworksInterface, ok := d.GetOk("trusted_networks")
 	if ok {
-		network := trustedNetworksInterface.(*schema.Set)
-		log.Printf("[INFO] trusted network data: %+v\n", network)
-		var trustedNetworks []serviceedgegroup.TrustedNetworks
-		for _, trustedNetwork := range network.List() {
-			trustedNetwork, ok := trustedNetwork.(map[string]interface{})
-			if ok {
-				for _, id := range trustedNetwork["id"].([]interface{}) {
-					trustedNetworks = append(trustedNetworks, serviceedgegroup.TrustedNetworks{
+		trusteNetwork := trustedNetworksInterface.(*schema.Set)
+		log.Printf("[INFO] trusted network data: %+v\n", trusteNetwork)
+		var trusteNetworks []serviceedgegroup.TrustedNetworks
+		for _, trusteNetwork := range trusteNetwork.List() {
+			trusteNetwork, _ := trusteNetwork.(map[string]interface{})
+			if trusteNetwork != nil {
+				for _, id := range trusteNetwork["id"].([]interface{}) {
+					trusteNetworks = append(trusteNetworks, serviceedgegroup.TrustedNetworks{
 						ID: id.(string),
 					})
 				}
 			}
 		}
-		return trustedNetworks
+		return trusteNetworks
 	}
 
 	return []serviceedgegroup.TrustedNetworks{}
