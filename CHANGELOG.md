@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.7.4 (May, 13 2023)
+
+### Notes
+
+- Release date: **(May, 13 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #301](https://github.com/zscaler/terraform-provider-zpa/pull/301) Improve scim values searching
+
 ## 2.7.3 (May, 11 2023)
 
 ### Notes
