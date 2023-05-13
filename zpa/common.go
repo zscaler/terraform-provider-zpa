@@ -176,19 +176,11 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool
 			rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
 			return false
 		}
-		values, _ := zClient.scimattributeheader.GetValues(scim.IdpID, scim.ID)
-		if len(values) > 0 {
-			found := false
-			for _, v := range values {
-				if v == operand.RHS {
-					found = true
-					break
-				}
-			}
-			if !found {
-				rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
-				return false
-			}
+		values, _ := zClient.scimattributeheader.SearchValues(scim.IdpID, scim.ID, operand.RHS)
+		if len(values) == 0 {
+			rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
+			return false
+
 		}
 		return true
 	case "SCIM_GROUP":
