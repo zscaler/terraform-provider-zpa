@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.7.4``
+``Last updated: v2.7.5``
 
 ---
+
+## 2.7.5 (May, xx 2023)
+
+### Notes
+
+- Release date: **(May, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #302](https://github.com/zscaler/terraform-provider-zpa/pull/302) Fix ``zpa_application_segment`` ``select_connector_close_to_app`` attribute to ensure validation works during TCP/UDP port updates.
 
 ## 2.7.4 (May, 13 2023)
 
