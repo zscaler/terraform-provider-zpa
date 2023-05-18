@@ -178,7 +178,10 @@ The following arguments are supported:
 * `log_features` - (Optional)
 * `tcp_keep_alive` (Optional) Supported values: ``1`` for Enabled and ``0`` for Disabled
 * `passive_health_enabled` - (Optional) Supported values: `true`, `false`
+
 * `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
+    * !> **WARNING:** Important: Notice that changing this attribute will force Terraform to destroy and recreate the application segment.
+
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `is_incomplete_dr_config` - (Optional) Supported values: `true`, `false`
 * `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
