@@ -167,6 +167,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"use_in_dr_mode": {
 				Type:     schema.TypeBool,
@@ -220,13 +221,11 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
 									"application_port": {
-										Type: schema.TypeString,
-										// Computed: true,
+										Type:     schema.TypeString,
 										Optional: true,
 									},
 									"application_protocol": {
-										Type: schema.TypeString,
-										// Computed: true,
+										Type:     schema.TypeString,
 										Optional: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"RDP",
@@ -236,7 +235,6 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 									"connection_security": {
 										Type:     schema.TypeString,
 										Optional: true,
-										// Computed: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"ANY",
 											"NLA",
@@ -247,8 +245,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 										}, false),
 									},
 									"domain": {
-										Type: schema.TypeString,
-										// Computed: true,
+										Type:     schema.TypeString,
 										Optional: true,
 									},
 								},
@@ -381,8 +378,8 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 	}
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the sra application segment")
-		return fmt.Errorf("please provde a valid segment group for the sra application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the sra application segment")
+		return fmt.Errorf("please provide a valid segment group for the sra application segment")
 	}
 
 	if _, _, err := zClient.applicationsegmentpra.Get(id); err != nil {

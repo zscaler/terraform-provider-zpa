@@ -147,11 +147,6 @@ func resourceApplicationSegment() *schema.Resource {
 					"NONE",
 				}, false),
 			},
-			"default_idle_timeout": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"ip_anchored": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -159,6 +154,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"use_in_dr_mode": {
 				Type:     schema.TypeBool,

@@ -154,6 +154,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"use_in_dr_mode": {
 				Type:     schema.TypeBool,
@@ -287,7 +288,7 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m int
 
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the application segment")
-		return fmt.Errorf("please provde a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
 
 	browseraccess, _, err := zClient.browseraccess.Create(req)
