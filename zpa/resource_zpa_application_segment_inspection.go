@@ -163,6 +163,7 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"use_in_dr_mode": {
 				Type:     schema.TypeBool,
@@ -332,8 +333,8 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interf
 
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the application segment")
-		return fmt.Errorf("please provde a valid segment group for the application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
 
 	resp, _, err := zClient.applicationsegmentinspection.Create(req)
@@ -426,8 +427,8 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 	}
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provde a valid segment group for the inspection application segment")
-		return fmt.Errorf("please provde a valid segment group for the inspection application segment")
+		log.Println("[ERROR] Please provide a valid segment group for the inspection application segment")
+		return fmt.Errorf("please provide a valid segment group for the inspection application segment")
 	}
 
 	if _, _, err := zClient.applicationsegmentinspection.Get(id); err != nil {

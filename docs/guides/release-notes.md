@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.7.4``
+``Last updated: v2.7.5``
 
 ---
+
+## 2.7.5 (May, 18 2023)
+
+### Notes
+
+- Release date: **(May, 18 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #304](https://github.com/zscaler/terraform-provider-zpa/pull/304) Fix attribute ``select_connector_close_to_app`` by setting schema attribute to ``ForceNew`` across all application segments to ensure proper resource update when UDP port is set and ``select``_connector_close_to_app`` is switched to false.
 
 ## 2.7.4 (May, 13 2023)
 
