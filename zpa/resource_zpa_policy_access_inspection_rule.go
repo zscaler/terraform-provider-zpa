@@ -120,7 +120,7 @@ func resourcePolicyInspectionRuleUpdate(d *schema.ResourceData, m interface{}) e
 	}
 	ruleID := d.Id()
 	log.Printf("[INFO] Updating policy inspection rule ID: %v\n", ruleID)
-	req, err := expandCreatePolicyRule(d)
+	req, err := expandCreatePolicyInspectionRule(d)
 	if err != nil {
 		return err
 	}
