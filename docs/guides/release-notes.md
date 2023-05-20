@@ -27,6 +27,9 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 - [PR #306](https://github.com/zscaler/terraform-provider-zpa/pull/306) Fix resource ``zpa_policy_forwarding_rule`` to ensure updates are executed during resource rule modifications.
 - [PR #307](https://github.com/zscaler/terraform-provider-zpa/pull/307) Fix resource ``zpa_policy_timeout_rule`` to ensure updates are executed during resource rule modifications.
+- [PR #308](https://github.com/zscaler/terraform-provider-zpa/pull/308) Fix the following access rule resources to ensure updates are executed during resource rule modifications:
+  * ``zpa_policy_inspection_rule``
+  * ``zpa_policy_isolation_rule``
 
 ## 2.7.5 (May, 18 2023)
 
