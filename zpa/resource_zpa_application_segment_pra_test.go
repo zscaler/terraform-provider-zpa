@@ -42,7 +42,6 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
@@ -60,7 +59,6 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

@@ -38,7 +38,6 @@ func TestAccDataSourceApplicationSegmentPRA_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "tcp_port_ranges.#", "4"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
