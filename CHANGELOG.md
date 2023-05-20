@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.7.6 (May, 20 2023)
+
+### Notes
+
+- Release date: **(May, 20 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #305](https://github.com/zscaler/terraform-provider-zpa/pull/305) Fix resource ``zpa_policy_forwarding_rule`` to ensure updates are executed during resource rule modifications.
+
 ## 2.7.5 (May, 18 2023)
 
 ### Notes
