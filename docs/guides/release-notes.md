@@ -25,7 +25,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Enhancements
 
-- [PR #305](https://github.com/zscaler/terraform-provider-zpa/pull/305) Fix resource ``zpa_policy_forwarding_rule`` to ensure updates are executed during resource rule modifications.
+- [PR #306](https://github.com/zscaler/terraform-provider-zpa/pull/306) Fix resource ``zpa_policy_forwarding_rule`` to ensure updates are executed during resource rule modifications.
 
 ## 2.7.5 (May, 18 2023)
 
