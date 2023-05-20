@@ -120,7 +120,7 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 	ruleID := d.Id()
 	log.Printf("[INFO] Updating policy timeout rule ID: %v\n", ruleID)
-	req, err := expandCreatePolicyRule(d)
+	req, err := expandCreatePolicyTimeoutRule(d)
 	if err != nil {
 		return err
 	}
