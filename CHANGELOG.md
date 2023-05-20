@@ -11,6 +11,9 @@
 
 - [PR #306](https://github.com/zscaler/terraform-provider-zpa/pull/306) Fix resource ``zpa_policy_forwarding_rule`` to ensure updates are executed during resource rule modifications.
 - [PR #307](https://github.com/zscaler/terraform-provider-zpa/pull/307) Fix resource ``zpa_policy_timeout_rule`` to ensure updates are executed during resource rule modifications.
+- [PR #308](https://github.com/zscaler/terraform-provider-zpa/pull/308) Fix the following access rule resources to ensure updates are executed during resource rule modifications:
+  * ``zpa_policy_inspection_rule``
+  * ``zpa_policy_isolation_rule``
 
 ## 2.7.5 (May, 18 2023)
 
@@ -22,7 +25,6 @@
 ### Enhancements
 
 - [PR #304](https://github.com/zscaler/terraform-provider-zpa/pull/304) Fix attribute ``select_connector_close_to_app`` by setting schema attribute to ``ForceNew`` across all application segments to ensure proper resource update when UDP port is set and ``select``_connector_close_to_app`` is switched to false.
-
 ## 2.7.4 (May, 13 2023)
 
 ### Notes
