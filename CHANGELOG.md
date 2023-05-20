@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.7.6 (May, 20 2023)
+
+### Notes
+
+- Release date: **(May, 20 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #308](https://github.com/zscaler/terraform-provider-zpa/pull/308) Fix the following access rule resources to ensure updates are executed during resource rule modifications:
+  * ``zpa_policy_inspection_rule``
+  * ``zpa_policy_isolation_rule``
+
 ## 2.7.5 (May, 18 2023)
 
 ### Notes
@@ -10,7 +23,6 @@
 ### Enhancements
 
 - [PR #304](https://github.com/zscaler/terraform-provider-zpa/pull/304) Fix attribute ``select_connector_close_to_app`` by setting schema attribute to ``ForceNew`` across all application segments to ensure proper resource update when UDP port is set and ``select``_connector_close_to_app`` is switched to false.
-
 ## 2.7.4 (May, 13 2023)
 
 ### Notes

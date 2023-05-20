@@ -118,7 +118,7 @@ func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, m interface{}) er
 	}
 	ruleID := d.Id()
 	log.Printf("[INFO] Updating policy isolation rule ID: %v\n", ruleID)
-	req, err := expandCreatePolicyRule(d)
+	req, err := expandCreatePolicyIsolationRule(d)
 	if err != nil {
 		return err
 	}

@@ -12,9 +12,22 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.7.5``
+``Last updated: v2.7.6``
 
 ---
+
+## 2.7.6 (May, 20 2023)
+
+### Notes
+
+- Release date: **(May, 20 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #308](https://github.com/zscaler/terraform-provider-zpa/pull/308) Fix the following access rule resources to ensure updates are executed during resource rule modifications:
+  * ``zpa_policy_inspection_rule``
+  * ``zpa_policy_isolation_rule``
 
 ## 2.7.5 (May, 18 2023)
 
