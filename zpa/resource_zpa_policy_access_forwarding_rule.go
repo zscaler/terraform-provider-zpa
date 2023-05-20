@@ -58,22 +58,23 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Creating zpa policy forwarding rule with request\n%+v\n", req)
-	if ValidateConditions(req.Conditions, zClient) {
-		policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
-		if err != nil {
-			return err
-		}
-		d.SetId(policysetcontroller.ID)
-		order, ok := d.GetOk("rule_order")
-		if ok {
-			reorder(order, policysetcontroller.PolicySetID, "CLIENT_FORWARDING_POLICY", policysetcontroller.ID, zClient)
-		}
-		return resourcePolicyForwardingRuleRead(d, m)
-	} else {
-		return fmt.Errorf("couldn't validate the zpa policy forwarding (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
+	if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
+		return err
 	}
-
+	if !ValidateConditions(req.Conditions, zClient) {
+		return fmt.Errorf("couldn't validate the zpa policy access forwarding rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+	}
+	policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
+	if err != nil {
+		return err
+	}
+	d.SetId(policysetcontroller.ID)
+	order, ok := d.GetOk("rule_order")
+	if ok {
+		reorder(order, policysetcontroller.PolicySetID, "CLIENT_FORWARDING_POLICY", policysetcontroller.ID, zClient)
+	}
+	return resourcePolicyForwardingRuleRead(d, m)
 }
 
 func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) error {
@@ -122,7 +123,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 	}
 	ruleID := d.Id()
 	log.Printf("[INFO] Updating policy forwarding rule ID: %v\n", ruleID)
-	req, err := expandCreatePolicyRule(d)
+	req, err := expandCreatePolicyForwardingRule(d)
 	if err != nil {
 		return err
 	}
