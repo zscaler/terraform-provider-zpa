@@ -54,11 +54,6 @@ func resourceSegmentGroup() *schema.Resource {
 					},
 				},
 			},
-			"config_space": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "DEFAULT",
-			},
 			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of the app group.",
@@ -129,7 +124,6 @@ func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Getting segment group:\n%+v\n", resp)
 	d.SetId(resp.ID)
-	_ = d.Set("config_space", resp.ConfigSpace)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("name", resp.Name)
@@ -237,7 +231,6 @@ func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 		Description:         d.Get("description").(string),
 		Enabled:             d.Get("enabled").(bool),
 		PolicyMigrated:      d.Get("policy_migrated").(bool),
-		ConfigSpace:         d.Get("config_space").(string),
 		TcpKeepAliveEnabled: d.Get("tcp_keep_alive_enabled").(string),
 		Applications:        expandSegmentGroupApplications(d.Get("applications").([]interface{})),
 	}

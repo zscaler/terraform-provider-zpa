@@ -221,8 +221,9 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Computed: true,
 						},
 						"publish_ips": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeSet,
 							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"sarge_version": {
 							Type:     schema.TypeString,
@@ -240,6 +241,54 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 						"upgrade_status": {
 							Type:     schema.TypeString,
 							Computed: true,
+						},
+						"zpn_sub_module_upgrade_list": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"creation_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"current_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"entity_gid": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"modifiedby": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"modified_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"expected_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"role": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"upgrade_status": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"upgrade_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -361,7 +410,7 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
 		_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
 		_ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
-		_ = d.Set("service_edges", flattenServiceEdges(resp))
+		_ = d.Set("service_edges", flattenServiceEdges(resp.ServiceEdges))
 
 	} else {
 		return fmt.Errorf("couldn't find any service edge group with name '%s' or id '%s'", name, id)
@@ -370,51 +419,72 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error
 	return nil
 }
 
-func flattenServiceEdges(serviceEdge *serviceedgegroup.ServiceEdgeGroup) []interface{} {
-	serviceEdges := make([]interface{}, len(serviceEdge.ServiceEdges))
-	for i, val := range serviceEdge.ServiceEdges {
+func flattenServiceEdges(serviceEdge []serviceedgegroup.ServiceEdges) []interface{} {
+	serviceEdges := make([]interface{}, len(serviceEdge))
+	for i, serviceEdge := range serviceEdge {
 		serviceEdges[i] = map[string]interface{}{
-			"application_start_time":               val.ApplicationStartTime,
-			"control_channel_status":               val.ControlChannelStatus,
-			"creation_time":                        val.CreationTime,
-			"ctrl_broker_name":                     val.CtrlBrokerName,
-			"current_version":                      val.CurrentVersion,
-			"description":                          val.Description,
-			"enabled":                              val.Enabled,
-			"expected_upgrade_time":                val.ExpectedUpgradeTime,
-			"expected_version":                     val.ExpectedVersion,
-			"fingerprint":                          val.Fingerprint,
-			"id":                                   val.ID,
-			"ipacl":                                val.IPACL,
-			"issued_cert_id":                       val.IssuedCertID,
-			"last_broker_connect_time":             val.LastBrokerConnectTime,
-			"last_broker_connect_time_duration":    val.LastBrokerConnectTimeDuration,
-			"last_broker_disconnect_time":          val.LastBrokerDisconnectTime,
-			"last_broker_disconnect_time_duration": val.LastBrokerDisconnectTimeDuration,
-			"last_upgrade_time":                    val.LastUpgradeTime,
-			"latitude":                             val.Latitude,
-			"location":                             val.Location,
-			"longitude":                            val.Longitude,
-			"listen_ips":                           val.ListenIPs,
-			"modifiedby":                           val.ModifiedBy,
-			"modified_time":                        val.ModifiedTime,
-			"name":                                 val.Name,
-			"provisioning_key_id":                  val.ProvisioningKeyID,
-			"provisioning_key_name":                val.ProvisioningKeyName,
-			"platform":                             val.Platform,
-			"previous_version":                     val.PreviousVersion,
-			"service_edge_group_id":                val.ServiceEdgeGroupID,
-			"service_edge_group_name":              val.ServiceEdgeGroupName,
-			"private_ip":                           val.PrivateIP,
-			"public_ip":                            val.PublicIP,
-			"publish_ips":                          val.PublishIPs,
-			"sarge_version":                        val.SargeVersion,
-			"enrollment_cert":                      val.EnrollmentCert,
-			"upgrade_attempt":                      val.UpgradeAttempt,
-			"upgrade_status":                       val.UpgradeStatus,
+			"application_start_time":               serviceEdge.ApplicationStartTime,
+			"control_channel_status":               serviceEdge.ControlChannelStatus,
+			"creation_time":                        serviceEdge.CreationTime,
+			"ctrl_broker_name":                     serviceEdge.CtrlBrokerName,
+			"current_version":                      serviceEdge.CurrentVersion,
+			"description":                          serviceEdge.Description,
+			"enabled":                              serviceEdge.Enabled,
+			"expected_upgrade_time":                serviceEdge.ExpectedUpgradeTime,
+			"expected_version":                     serviceEdge.ExpectedVersion,
+			"fingerprint":                          serviceEdge.Fingerprint,
+			"id":                                   serviceEdge.ID,
+			"ipacl":                                serviceEdge.IPACL,
+			"issued_cert_id":                       serviceEdge.IssuedCertID,
+			"last_broker_connect_time":             serviceEdge.LastBrokerConnectTime,
+			"last_broker_connect_time_duration":    serviceEdge.LastBrokerConnectTimeDuration,
+			"last_broker_disconnect_time":          serviceEdge.LastBrokerDisconnectTime,
+			"last_broker_disconnect_time_duration": serviceEdge.LastBrokerDisconnectTimeDuration,
+			"last_upgrade_time":                    serviceEdge.LastUpgradeTime,
+			"latitude":                             serviceEdge.Latitude,
+			"location":                             serviceEdge.Location,
+			"longitude":                            serviceEdge.Longitude,
+			"listen_ips":                           serviceEdge.ListenIPs,
+			"modifiedby":                           serviceEdge.ModifiedBy,
+			"modified_time":                        serviceEdge.ModifiedTime,
+			"name":                                 serviceEdge.Name,
+			"provisioning_key_id":                  serviceEdge.ProvisioningKeyID,
+			"provisioning_key_name":                serviceEdge.ProvisioningKeyName,
+			"platform":                             serviceEdge.Platform,
+			"previous_version":                     serviceEdge.PreviousVersion,
+			"service_edge_group_id":                serviceEdge.ServiceEdgeGroupID,
+			"service_edge_group_name":              serviceEdge.ServiceEdgeGroupName,
+			"private_ip":                           serviceEdge.PrivateIP,
+			"public_ip":                            serviceEdge.PublicIP,
+			"publish_ips":                          serviceEdge.PublishIPs,
+			"sarge_version":                        serviceEdge.SargeVersion,
+			"enrollment_cert":                      serviceEdge.EnrollmentCert,
+			"upgrade_attempt":                      serviceEdge.UpgradeAttempt,
+			"upgrade_status":                       serviceEdge.UpgradeStatus,
+			"zpn_sub_module_upgrade_list":          flattenZPNSubModuleUpgradeListServiceEdge(serviceEdge),
 		}
 	}
 	return serviceEdges
+}
+
+func flattenZPNSubModuleUpgradeListServiceEdge(zpnSubModule serviceedgegroup.ServiceEdges) []interface{} {
+	zpnModules := make([]interface{}, len(zpnSubModule.ZPNSubModuleUpgradeList))
+	for i, val := range zpnSubModule.ZPNSubModuleUpgradeList {
+		zpnModules[i] = map[string]interface{}{
+			"id":               val.ID,
+			"creation_time":    val.CreationTime,
+			"current_version":  val.CurrentVersion,
+			"entity_gid":       val.EntityGid,
+			"modifiedby":       val.EntityType,
+			"modified_time":    val.ModifiedTime,
+			"expected_version": val.ExpectedVersion,
+			"role":             val.Role,
+			"upgrade_status":   val.UpgradeStatus,
+			"upgrade_time":     val.UpgradeTime,
+		}
+	}
+
+	return zpnModules
 }
 
 func flattenTrustedNetworks(trustedNetwork *serviceedgegroup.ServiceEdgeGroup) []interface{} {
