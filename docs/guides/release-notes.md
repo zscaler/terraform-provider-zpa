@@ -12,9 +12,29 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.7.7``
+``Last updated: v2.7.8``
 
 ---
+
+## 2.7.8 (May, xx 2023) - Unreleased
+
+### Notes
+
+- Release date: **(May, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #311](https://github.com/zscaler/terraform-provider-zpa/pull/311) Fixed ZPA resource ``Service Edge Group`` and ``Service Edge Controller`` Struct to support attribute ``publish_ips``.
+
+## 2.7.7 (May, 23 2023)
+
+### Notes
+
+- Release date: **(May, 23 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
 
 - [PR #309](https://github.com/zscaler/terraform-provider-zpa/pull/309) Updated provider to Zscaler SDK GO v1.5.2. The update added exception handling within the ZPA API Client to deal with simultaneous DB requests, which were affecting the ZPA Policy Access rule order creation.
 

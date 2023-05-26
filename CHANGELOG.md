@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.7.8 (May, xx 2023) - Unreleased
+
+### Notes
+
+- Release date: **(May, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #311](https://github.com/zscaler/terraform-provider-zpa/pull/311) Fixed ZPA resource ``Service Edge Group`` and ``Service Edge Controller`` Struct to support attribute ``publish_ips``.
+
 ## 2.7.7 (May, 23 2023)
 
 ### Notes

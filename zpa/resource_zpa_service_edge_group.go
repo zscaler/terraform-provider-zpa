@@ -82,7 +82,6 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				ValidateFunc:     ValidateLatitude,
 				DiffSuppressFunc: DiffSuppressFuncCoordinate,
 				Description:      "Latitude for the Service Edge Group.",
-				// ValidateFunc: ValidateStringFloatBetween(-90, 90),
 			},
 			"location": {
 				Type:        schema.TypeString,
@@ -95,7 +94,6 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				ValidateFunc:     ValidateLongitude,
 				DiffSuppressFunc: DiffSuppressFuncCoordinate,
 				Description:      "Longitude for the Service Edge Group.",
-				// ValidateFunc: ValidateStringFloatBetween(-180.0, 180.0),
 			},
 			"override_version_profile": {
 				Type:        schema.TypeBool,
@@ -106,11 +104,13 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			"service_edges": {
 				Type:     schema.TypeSet,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -224,23 +224,10 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
-	// _ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
 	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
-	_ = d.Set("service_edges", flattenServiceEdges(resp))
+	_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
 	return nil
 
-}
-
-func flattenAppTrustedNetworksSimple(trustedNetworks []serviceedgegroup.TrustedNetworks) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(trustedNetworks))
-	for i, networks := range trustedNetworks {
-		ids[i] = networks.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
 }
 
 func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error {
@@ -325,30 +312,6 @@ func expandServiceEdges(d *schema.ResourceData) []serviceedgegroup.ServiceEdges 
 	return []serviceedgegroup.ServiceEdges{}
 }
 
-/*
-	func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNetworks {
-		trustedNetworksInterface, ok := d.GetOk("trusted_networks")
-		if ok {
-			network := trustedNetworksInterface.(*schema.Set)
-			log.Printf("[INFO] trusted network data: %+v\n", network)
-			var trustedNetworks []serviceedgegroup.TrustedNetworks
-			for _, trustedNetwork := range network.List() {
-				trustedNetwork, ok := trustedNetwork.(map[string]interface{})
-				if ok {
-					for _, id := range trustedNetwork["id"].([]interface{}) {
-						trustedNetworks = append(trustedNetworks, serviceedgegroup.TrustedNetworks{
-							ID: id.(string),
-						})
-					}
-				}
-			}
-			return trustedNetworks
-		}
-
-		return []serviceedgegroup.TrustedNetworks{}
-	}
-*/
-
 func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNetworks {
 	trustedNetworksInterface, ok := d.GetOk("trusted_networks")
 	if ok {
@@ -369,4 +332,28 @@ func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNet
 	}
 
 	return []serviceedgegroup.TrustedNetworks{}
+}
+
+func flattenAppTrustedNetworksSimple(trustedNetworks []serviceedgegroup.TrustedNetworks) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(trustedNetworks))
+	for i, networks := range trustedNetworks {
+		ids[i] = networks.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+
+func flattenServiceEdgeSimple(serviceEdges []serviceedgegroup.ServiceEdges) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serviceEdges))
+	for i, edges := range serviceEdges {
+		ids[i] = edges.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }
