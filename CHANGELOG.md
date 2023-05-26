@@ -1,15 +1,16 @@
 # Changelog
 
-## 2.7.8 (May, xx 2023) - Unreleased
+## 2.7.8 (May, 29 2023)
 
 ### Notes
 
-- Release date: **(May, xx 2023)**
+- Release date: **(May, 29 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
 
 - [PR #311](https://github.com/zscaler/terraform-provider-zpa/pull/311) Fixed ZPA resource ``Service Edge Group`` and ``Service Edge Controller`` Struct to support attribute ``publish_ips``.
+- [PR #314](https://github.com/zscaler/terraform-provider-zpa/pull/314) Fixed ``rhs`` attribute within the ``GetPolicyConditionsSchema``function to prevent invalid new value inconsistency issue.
 
 ## 2.7.7 (May, 23 2023)
 
