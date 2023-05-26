@@ -109,16 +109,16 @@ func resourceInspectionProfile() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"name": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
+						// "name": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "description": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
 						"action": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -129,82 +129,94 @@ func resourceInspectionProfile() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"control_group": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"control_number": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
+						// "control_group": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "control_number": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
 						"control_type": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"CUSTOM",
+								"PREDEFINED",
+								"THREATLABZ",
+								"ZSCALER",
+								"WEBSOCKET_PREDEFINED",
+								"WEBSOCKET_CUSTOM",
+							}, false),
 						},
-
-						"default_action": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"default_action_value": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"paranoia_level": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"engine_version": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"last_deployment_time": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"rule_metadata": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"rule_processor": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"ruleset_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"ruleset_version": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"severity": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"version": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"zscaler_info_url": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
+						// "default_action": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// 	ValidateFunc: validation.StringInSlice([]string{
+						// 		"PASS",
+						// 		"BLOCK",
+						// 		"REDIRECT",
+						// 	}, false),
+						// },
+						// "default_action_value": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "paranoia_level": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "engine_version": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "last_deployment_time": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "rule_metadata": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "rule_processor": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "ruleset_name": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "ruleset_version": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "severity": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "version": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
+						// "zscaler_info_url": {
+						// 	Type:     schema.TypeString,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
 						"associated_customers": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -384,11 +396,12 @@ func resourceInspectionProfile() *schema.Resource {
 							Optional: true,
 							Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"WEBSOCKET_PREDEFINED",
-								"WEBSOCKET_CUSTOM",
-								"ZSCALER",
 								"CUSTOM",
 								"PREDEFINED",
+								"THREATLABZ",
+								"ZSCALER",
+								"WEBSOCKET_PREDEFINED",
+								"WEBSOCKET_CUSTOM",
 							}, false),
 						},
 						"protocol_type": {
@@ -476,6 +489,8 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
 	_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
 	_ = d.Set("associate_all_controls", d.Get("associate_all_controls"))
+	_ = d.Set("zs_defined_control_choice", resp.ZSDefinedControlChoice)
+	_ = d.Set("check_control_deployment_status", resp.CheckControlDeploymentStatus)
 	if resp.PredefinedControlsVersion != "" {
 		_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
 	}
@@ -494,6 +509,9 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	if err := d.Set("web_socket_controls", flattenPredefinedControlsSimple(resp.WebSocketControls)); err != nil {
+		return err
+	}
+	if err := d.Set("threat_labz_controls", flattenThreatLabzControlsSimple(resp.ThreatLabzControls)); err != nil {
 		return err
 	}
 	return nil
@@ -526,6 +544,21 @@ func flattenCustomControlsSimple(customControl []inspection_profile.InspectionCu
 	}
 
 	return customControls
+}
+
+func flattenThreatLabzControlsSimple(threatLabz []inspection_profile.ThreatLabzControls) []interface{} {
+	threatLabzControls := make([]interface{}, len(threatLabz))
+	for i, threatLabz := range threatLabz {
+		threatLabzControls[i] = map[string]interface{}{
+			"id":           threatLabz.ID,
+			"action":       threatLabz.Action,
+			"action_value": threatLabz.ActionValue,
+			"control_type": threatLabz.ControlType,
+			// "protocol_type": threatLabz.ProtocolType,
+		}
+	}
+
+	return threatLabzControls
 }
 
 func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) error {
@@ -584,6 +617,8 @@ func expandInspectionProfile(d *schema.ResourceData) inspection_profile.Inspecti
 		ControlInfoResource:       expandControlsInfo(d),
 		CustomControls:            expandCustomControls(d),
 		PredefinedControls:        expandPredefinedControls(d),
+		WebSocketControls:         expandWebSocketControls(d),
+		ThreatLabzControls:        expandThreatLabzControls(d),
 	}
 	return inspection_profile
 }
@@ -664,4 +699,85 @@ func expandPredefinedControls(d *schema.ResourceData) []inspection_profile.Custo
 	}
 
 	return []inspection_profile.CustomCommonControls{}
+}
+
+func expandWebSocketControls(d *schema.ResourceData) []inspection_profile.CustomCommonControls {
+	websocketControlsInterface, ok := d.GetOk("web_socket_controls")
+	if ok {
+		websocketControl := websocketControlsInterface.(*schema.Set)
+		log.Printf("[INFO] websocket control data: %+v\n", websocketControl)
+		var websocketControls []inspection_profile.CustomCommonControls
+		for _, websocketControl := range websocketControl.List() {
+			websocketControl, ok := websocketControl.(map[string]interface{})
+			if ok {
+				actionValue := ""
+				if websocketControl["action_value"] != nil {
+					actionValue = websocketControl["action_value"].(string)
+				}
+				websocketControls = append(websocketControls, inspection_profile.CustomCommonControls{
+					ID:           websocketControl["id"].(string),
+					Action:       websocketControl["action"].(string),
+					ControlType:  websocketControl["control_type"].(string),
+					ProtocolType: websocketControl["protocol_type"].(string),
+					ActionValue:  actionValue,
+				})
+			}
+		}
+		return websocketControls
+	}
+
+	return []inspection_profile.CustomCommonControls{}
+}
+
+/*
+	func expandThreatLabzControls(d *schema.ResourceData) []inspection_profile.ThreatLabzControls {
+		threatLabzInterface, ok := d.GetOk("threat_labz_controls")
+		if ok {
+			threatLabz := threatLabzInterface.(*schema.Set)
+			log.Printf("[INFO] threatlabz control data: %+v\n", threatLabz)
+			var threatLabzControls []inspection_profile.ThreatLabzControls
+			for _, threatLabz := range threatLabz.List() {
+				threatLabz, ok := threatLabz.(map[string]interface{})
+				if ok {
+					actionValue := ""
+					if threatLabz["action_value"] != nil {
+						actionValue = threatLabz["action_value"].(string)
+					}
+					threatLabzControls = append(threatLabzControls, inspection_profile.ThreatLabzControls{
+						ID:          threatLabz["id"].(string),
+						Action:      threatLabz["action"].(string),
+						ControlType: threatLabz["control_type"].(string),
+						// ProtocolType: threatLabz["protocol_type"].(string),
+						ActionValue: actionValue,
+					})
+				}
+			}
+			return threatLabzControls
+		}
+
+		return []inspection_profile.ThreatLabzControls{}
+	}
+*/
+func expandThreatLabzControls(d *schema.ResourceData) []inspection_profile.ThreatLabzControls {
+	var threatLabzItems []inspection_profile.ThreatLabzControls
+	threatLabzInterface, ok := d.GetOk("threat_labz_controls")
+	if !ok {
+		return threatLabzItems
+	}
+	threatLabzInfo, ok := threatLabzInterface.(*schema.Set)
+	if !ok {
+		return threatLabzItems
+	}
+	for _, threatLabzItemObj := range threatLabzInfo.List() {
+		threatLabzItem, ok := threatLabzItemObj.(map[string]interface{})
+		if !ok {
+			return threatLabzItems
+		}
+		threatLabzItems = append(threatLabzItems, inspection_profile.ThreatLabzControls{
+			ID:          threatLabzItem["id"].(string),
+			Action:      threatLabzItem["action"].(string),
+			ControlType: threatLabzItem["control_type"].(string),
+		})
+	}
+	return threatLabzItems
 }

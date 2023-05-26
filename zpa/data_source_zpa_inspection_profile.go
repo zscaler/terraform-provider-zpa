@@ -94,7 +94,6 @@ func dataSourceInspectionProfile() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-
 						"default_action": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -116,6 +115,10 @@ func dataSourceInspectionProfile() *schema.Resource {
 							Computed: true,
 						},
 						"paranoia_level": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"rule_deployment_state": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
