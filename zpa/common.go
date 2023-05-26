@@ -356,6 +356,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 							"rhs": {
 								Type:        schema.TypeString,
 								Optional:    true,
+								Computed:    true,
 								Description: "This denotes the value for the given object type. Its value depends upon the key.",
 							},
 							"rhs_list": {
