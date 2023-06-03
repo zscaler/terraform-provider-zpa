@@ -1,10 +1,10 @@
 # Changelog
 
-## 2.7.8 (May, 29 2023)
+## 2.7.8 (June, 3 2023)
 
 ### Notes
 
-- Release date: **(May, 29 2023)**
+- Release date: **(June, 3 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
