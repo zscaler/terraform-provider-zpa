@@ -13,6 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/bacertificate"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/clienttypes"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/cbiregions"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/customerversionprofile"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/enrollmentcert"
@@ -57,6 +58,7 @@ type Client struct {
 	lssconfigcontroller            lssconfigcontroller.Service
 	machinegroup                   machinegroup.Service
 	postureprofile                 postureprofile.Service
+	cbiregions                     cbiregions.Service
 	isolationprofile               isolationprofile.Service
 	policysetcontroller            policysetcontroller.Service
 	provisioningkey                provisioningkey.Service
@@ -115,6 +117,7 @@ func (c *Config) Client() (*Client, error) {
 		lssconfigcontroller:            *lssconfigcontroller.New(zpaClient),
 		machinegroup:                   *machinegroup.New(zpaClient),
 		postureprofile:                 *postureprofile.New(zpaClient),
+		cbiregions:                     *cbiregions.New(zpaClient),
 		isolationprofile:               *isolationprofile.New(zpaClient),
 		policysetcontroller:            *policysetcontroller.New(zpaClient),
 		provisioningkey:                *provisioningkey.New(zpaClient),
