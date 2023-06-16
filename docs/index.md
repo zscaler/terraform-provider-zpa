@@ -13,7 +13,7 @@ Use the navigation on the left to read about the available resources.
 
 ## Zenith Community - ZPA Terraform Provider Introduction
 
-[![ZPA Terraform provider Video Series Ep1](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_terraform_provider_introduction.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep1/18691)
+[![ZPA Terraform provider Video Series Ep1](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_terraform_provider_introduction.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEpCAI/video-zpa-terraform-provider-video-series-ep1)
 
 ## Example Usage ZPA Production Cloud
 
