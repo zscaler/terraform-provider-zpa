@@ -14,7 +14,7 @@ Use the **zpa_segment_group** data source to get information about a machine gro
 
 ## Zenith Community - ZPA Segment Group
 
-[![ZPA Terraform provider Video Series Ep6 - Segment Group](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_segment_groups.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep-6-zpa-segment-group/18808)
+[![ZPA Terraform provider Video Series Ep6 - Segment Group](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_segment_groups.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEfCAI/video-zpa-terraform-provider-video-series-ep6-zpa-segment-group)
 
 ## Example Usage
 

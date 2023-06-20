@@ -17,7 +17,7 @@ Use the **zpa_provisioning_key** data source to get information about a provisio
 
 ## Zenith Community - ZPA Provisioning Keys
 
-[![ZPA Terraform provider Video Series Ep3 - Provisioning Keys](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_provisioning_key.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep3-provisioning-keys/18694)
+[![ZPA Terraform provider Video Series Ep3 - Provisioning Keys](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_provisioning_key.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEnCAI/video-zpa-terraform-provider-video-series-ep3-provisioning-keys)
 
 ## Example Usage
 

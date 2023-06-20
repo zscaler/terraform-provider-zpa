@@ -12,7 +12,7 @@ Use the **zpa_server_group** data source to get information about a server group
 
 ## Zenith Community - ZPA Server Groups
 
-[![ZPA Terraform provider Video Series Ep4 - Server Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_server_groups.svg)](https://community.zscaler.com/t/video-zpa-terraform-provider-video-series-ep4-server-groups/18695)
+[![ZPA Terraform provider Video Series Ep4 - Server Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_server_groups.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEmCAI/video-zpa-terraform-provider-video-series-ep4-server-groups)
 
 ## Example Usage
 
