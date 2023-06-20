@@ -10,6 +10,7 @@
 ### Fixes
 
 - [PR #319](https://github.com/zscaler/terraform-provider-zpa/pull/319) - Fixed links to Zenith Community demo videos in the documentation
+- [PR #321](https://github.com/zscaler/terraform-provider-zpa/pull/321) - Fixed resource ``zpa_server_group``due to panic when set attribute ``dynamic_discovery`` to false.
 
 ## 2.7.9 (June, 10 2023)
 
