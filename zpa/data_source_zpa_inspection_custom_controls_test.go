@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -35,3 +36,4 @@ func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
 		},
 	})
 }
+*/

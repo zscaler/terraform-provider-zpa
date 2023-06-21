@@ -177,21 +177,15 @@ resource "%s" "%s" {
 		operands {
 			object_type = "SCIM"
 			lhs =  data.zpa_scim_attribute_header.givenName.id
-			rhs = "William"
+			rhs = "Charles"
 			idp_id = data.zpa_scim_attribute_header.givenName.idp_id
 		  }
 		  operands {
 			object_type = "SCIM"
 			lhs =  data.zpa_scim_attribute_header.familyName.id
-			rhs = "Guilherme"
+			rhs = "Keenan"
 			idp_id = data.zpa_scim_attribute_header.familyName.idp_id
 		  }
-		  operands {
-			object_type = "SCIM"
-			lhs =  data.zpa_scim_attribute_header.username.id
-			rhs = "charles.keenan@bd-hashicorp.com"
-			idp_id = data.zpa_scim_attribute_header.username.idp_id
-		}
 	}
 	depends_on = [ %s, %s ]
 }

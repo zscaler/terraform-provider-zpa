@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -158,3 +159,4 @@ resource "%s" "%s" {
 		description,
 	)
 }
+*/

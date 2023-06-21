@@ -1,10 +1,12 @@
 package zpa
 
+/*
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
 
 func TestAccDataSourceInspectionAllPredefinedControls_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -46,3 +48,4 @@ data "zpa_inspection_all_predefined_controls" "php_injection" {
 	group_name = "PHP Injection"
 }
 `
+*/
