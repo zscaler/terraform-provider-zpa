@@ -186,12 +186,6 @@ resource "%s" "%s" {
 			rhs = "Guilherme"
 			idp_id = data.zpa_scim_attribute_header.familyName.idp_id
 		  }
-		  operands {
-			object_type = "SCIM"
-			lhs =  data.zpa_scim_attribute_header.username.id
-			rhs = "charles.keenan@bd-hashicorp.com"
-			idp_id = data.zpa_scim_attribute_header.username.idp_id
-		}
 	}
 	depends_on = [ %s, %s ]
 }
