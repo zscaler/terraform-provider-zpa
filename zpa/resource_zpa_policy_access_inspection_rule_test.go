@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"testing"
@@ -182,4 +181,3 @@ data "zpa_inspection_predefined_controls" "this" {
 		desc,
 	)
 }
-*/

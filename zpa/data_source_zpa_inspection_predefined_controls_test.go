@@ -1,6 +1,11 @@
 package zpa
 
-/*
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+)
+
 func TestAccDataSourceInspectionPredefinedControls_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -53,4 +58,3 @@ data "zpa_inspection_predefined_controls" "control05" {
     version = "OWASP_CRS/3.3.0"
 }
 `
-*/

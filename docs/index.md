@@ -11,6 +11,10 @@ The Zscaler Private Access (ZPA) provider is used to interact with [ZPA](https:/
 
 Use the navigation on the left to read about the available resources.
 
+Support Disclaimer
+-------
+!> **Disclaimer:** This Terraform provider is community supported. Although this provider is supported by Zscaler employees, it is **NOT** supported by Zscaler support. Please open all enhancement requests and issues on [Guthub Issues](https://github.com/zscaler/terraform-provider-zpa/issues) for support.
+
 ## Zenith Community - ZPA Terraform Provider Introduction
 
 [![ZPA Terraform provider Video Series Ep1](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_terraform_provider_introduction.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEpCAI/video-zpa-terraform-provider-video-series-ep1)
