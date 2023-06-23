@@ -5,12 +5,12 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/isolationprofile"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/cbizpaprofile"
 )
 
-func dataSourceIsolationProfile() *schema.Resource {
+func dataSourceCBIZPAProfiles() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIsolationProfileRead,
+		Read: dataSourceCBIZPAProfilesRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -40,15 +40,15 @@ func dataSourceIsolationProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"isolation_profile_id": {
+			"cbi_tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"isolation_tenant_id": {
+			"cbi_profile_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"isolation_url": {
+			"cbi_url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -56,14 +56,14 @@ func dataSourceIsolationProfile() *schema.Resource {
 	}
 }
 
-func dataSourceIsolationProfileRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceCBIZPAProfilesRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
-	var resp *isolationprofile.IsolationProfile
+	var resp *cbizpaprofile.ZPAProfiles
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
-		log.Printf("[INFO] Getting data for isolation profile %s\n", id)
-		res, _, err := zClient.isolationprofile.Get(id)
+		log.Printf("[INFO] Getting data for cbi zpa profile %s\n", id)
+		res, _, err := zClient.cbizpaprofile.Get(id)
 		if err != nil {
 			return err
 		}
@@ -71,8 +71,8 @@ func dataSourceIsolationProfileRead(d *schema.ResourceData, m interface{}) error
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
-		log.Printf("[INFO] Getting data for isolation profile name %s\n", name)
-		res, _, err := zClient.isolationprofile.GetByName(name)
+		log.Printf("[INFO] Getting data for cbi zpa profile name %s\n", name)
+		res, _, err := zClient.cbizpaprofile.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -86,12 +86,12 @@ func dataSourceIsolationProfileRead(d *schema.ResourceData, m interface{}) error
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
-		_ = d.Set("isolation_profile_id", resp.IsolationProfileID)
-		_ = d.Set("isolation_tenant_id", resp.IsolationTenantID)
-		_ = d.Set("isolation_url", resp.IsolationURL)
+		_ = d.Set("cbi_tenant_id", resp.CBITenantID)
+		_ = d.Set("cbi_profile_id", resp.CBIProfileID)
+		_ = d.Set("cbi_url", resp.CBIURL)
 
 	} else {
-		return fmt.Errorf("couldn't find any isolation profile with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any cbi zpa profile with name '%s' or id '%s'", name, id)
 	}
 
 	return nil
