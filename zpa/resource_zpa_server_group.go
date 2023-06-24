@@ -83,6 +83,7 @@ func resourceServerGroup() *schema.Resource {
 				Required:    true,
 				Description: "This field defines the name of the server group.",
 			},
+			//
 			"servers": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -186,10 +187,22 @@ func resourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("app_connector_groups", flattenAppConnectorGroupsSimple(resp.AppConnectorGroups))
 	_ = d.Set("applications", flattenServerGroupApplicationsSimple(resp.Applications))
-	_ = d.Set("servers", flattenServers(resp.Servers))
+	_ = d.Set("servers", flattenServersSimple(resp.Servers))
 
 	return nil
 
+}
+
+func flattenServersSimple(appServers []servergroup.ApplicationServer) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(appServers))
+	for i, server := range appServers {
+		ids[i] = server.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }
 
 func flattenAppConnectorGroupsSimple(appConnectorGroups []servergroup.AppConnectorGroups) []interface{} {
