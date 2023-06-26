@@ -309,8 +309,8 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeList,
-							Required: true,
+							Type:     schema.TypeSet,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -385,7 +385,7 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
-	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp))
+	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp.AppServerGroups))
 
 	if err := d.Set("common_apps_dto", flattenInspectionCommonAppsDto(resp.InspectionAppDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
@@ -403,11 +403,11 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 
 }
 
-func flattenInspectionAppServerGroupsSimple(serverGroup *applicationsegmentinspection.AppSegmentInspection) []interface{} {
+func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroup.AppServerGroups))
-	for i, group := range serverGroup.AppServerGroups {
+	ids := make([]string, len(serverGroup))
+	for i, group := range serverGroup {
 		ids[i] = group.ID
 	}
 	mapIds["id"] = ids
@@ -620,8 +620,8 @@ func expandInspectionAppServerGroups(d *schema.ResourceData) []applicationsegmen
 		var serverGroups []applicationsegmentinspection.AppServerGroups
 		for _, appServerGroup := range serverGroup.List() {
 			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if appServerGroup != nil {
-				for _, id := range appServerGroup["id"].([]interface{}) {
+			if ok {
+				for _, id := range appServerGroup["id"].(*schema.Set).List() {
 					serverGroups = append(serverGroups, applicationsegmentinspection.AppServerGroups{
 						ID: id.(string),
 					})

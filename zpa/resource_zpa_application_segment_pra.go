@@ -262,8 +262,8 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeList,
-							Required: true,
+							Type:     schema.TypeSet,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -340,7 +340,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
-	_ = d.Set("server_groups", flattenPRAAppServerGroupsSimple(resp))
+	_ = d.Set("server_groups", flattenPRAAppServerGroupsSimple(resp.ServerGroups))
 
 	if err := d.Set("common_apps_dto", flattenCommonAppsDto(d, resp.SRAAppsDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
@@ -358,17 +358,18 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 
 }
 
-func flattenPRAAppServerGroupsSimple(serverGroup *applicationsegmentpra.AppSegmentPRA) []interface{} {
+func flattenPRAAppServerGroupsSimple(serverGroup []applicationsegmentpra.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroup.ServerGroups))
-	for i, group := range serverGroup.ServerGroups {
+	ids := make([]string, len(serverGroup))
+	for i, group := range serverGroup {
 		ids[i] = group.ID
 	}
 	mapIds["id"] = ids
 	result[0] = mapIds
 	return result
 }
+
 func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
@@ -569,8 +570,8 @@ func expandPRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.Ap
 		var serverGroups []applicationsegmentpra.AppServerGroups
 		for _, appServerGroup := range serverGroup.List() {
 			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if appServerGroup != nil {
-				for _, id := range appServerGroup["id"].([]interface{}) {
+			if ok {
+				for _, id := range appServerGroup["id"].(*schema.Set).List() {
 					serverGroups = append(serverGroups, applicationsegmentpra.AppServerGroups{
 						ID: id.(string),
 					})
