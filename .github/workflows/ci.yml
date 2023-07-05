@@ -94,6 +94,7 @@ jobs:
         ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
         ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
         ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+        ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
 
         # Set whatever additional acceptance test env vars here. You can
         # optionally use data from your repository secrets using the
