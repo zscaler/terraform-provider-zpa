@@ -41,7 +41,7 @@ func Provider() *schema.Provider {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "Cloud to use PRODUCTION, BETA, GOV, PREVIEW or DEV",
-				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV", "PREVIEW, DEV"}, true),
+				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV", "PREVIEW", "DEV", "QA"}, true),
 				Default:      "PRODUCTION",
 			},
 		},

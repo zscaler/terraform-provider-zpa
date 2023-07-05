@@ -26,6 +26,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 ### Enhancements
 
 - [PR #325](https://github.com/zscaler/terraform-provider-zpa/pull/325) - Added new attribute ``waf_disabled`` to resource ``zpa_app_connector_group``
+- [PR #326](https://github.com/zscaler/terraform-provider-zpa/pull/326) - Added support to ZPA ``QA`` environment
 
 ### Fixes
 
