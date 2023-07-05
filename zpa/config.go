@@ -13,6 +13,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/bacertificate"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/clienttypes"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/cbibannercontroller"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/cbiregions"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/cbizpaprofile"
@@ -62,6 +64,8 @@ type Client struct {
 	postureprofile                 postureprofile.Service
 	cbiregions                     cbiregions.Service
 	cbiprofilecontroller           cbiprofilecontroller.Service
+	cbicertificatecontroller       cbicertificatecontroller.Service
+	cbibannercontroller            cbibannercontroller.Service
 	isolationprofile               isolationprofile.Service
 	cbizpaprofile                  cbizpaprofile.Service
 	policysetcontroller            policysetcontroller.Service
@@ -123,6 +127,8 @@ func (c *Config) Client() (*Client, error) {
 		postureprofile:                 *postureprofile.New(zpaClient),
 		cbiregions:                     *cbiregions.New(zpaClient),
 		cbiprofilecontroller:           *cbiprofilecontroller.New(zpaClient),
+		cbicertificatecontroller:       *cbicertificatecontroller.New(zpaClient),
+		cbibannercontroller:            *cbibannercontroller.New(zpaClient),
 		cbizpaprofile:                  *cbizpaprofile.New(zpaClient),
 		isolationprofile:               *isolationprofile.New(zpaClient),
 		policysetcontroller:            *policysetcontroller.New(zpaClient),

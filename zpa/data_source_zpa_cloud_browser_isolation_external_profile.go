@@ -106,7 +106,7 @@ func dataSourceCBIIsolationProfileRead(d *schema.ResourceData, m interface{}) er
 		d.SetId(resp.ID)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("is_default", resp.IsDefault)
-		_ = d.Set("href", resp.HREF)
+		_ = d.Set("href", resp.Href)
 		_ = d.Set("regions", flattenRegions(resp))
 
 		if resp.SecurityControls != nil {
