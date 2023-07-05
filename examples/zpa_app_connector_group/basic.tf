@@ -12,4 +12,6 @@ resource "zpa_app_connector_group" "example" {
   override_version_profile      = true
   version_profile_name          = "New Release"
   dns_query_type                = "IPV4"
+  pra_enabled                   = true
+  waf_disabled                  = false
 }
