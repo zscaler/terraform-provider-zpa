@@ -173,6 +173,14 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"pra_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"waf_disabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"creation_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -363,6 +371,8 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
+		_ = d.Set("pra_enabled", resp.PRAEnabled)
+		_ = d.Set("waf_disabled", resp.WAFDisabled)
 		_ = d.Set("connectors", flattenConnectors(resp.Connectors))
 
 		if err := d.Set("server_groups", flattenServerGroups(resp)); err != nil {

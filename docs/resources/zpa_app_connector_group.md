@@ -67,6 +67,7 @@ The following arguments are supported:
 * `tcp_quick_ack_read_assistant` - (Optional) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `pra_enabled` - (Optional) Supported values: `true`, `false`
+* `waf_disabled` - (Optional) Supported values: `true`, `false`
 
 ## Attributes Reference
 

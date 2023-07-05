@@ -77,3 +77,4 @@ The following attributes are exported:
 * `geo_location_id` - (String)
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `pra_enabled` - (Optional) Supported values: `true`, `false`
+* `waf_disabled` - (Optional) Supported values: `true`, `false`
