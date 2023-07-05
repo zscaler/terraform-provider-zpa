@@ -16,12 +16,16 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 2.8.0 (June, 26 2023)
+## 2.8.0 (July, xx 2023)
 
 ### Notes
 
-- Release date: **(June, 26 2023)**
+- Release date: **(July, xx 2023)**
 - Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #325](https://github.com/zscaler/terraform-provider-zpa/pull/325) - Added new attribute ``waf_disabled`` to resource ``zpa_app_connector_group``
 
 ### Fixes
 
