@@ -262,8 +262,8 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeList,
-							Required: true,
+							Type:     schema.TypeSet,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -542,8 +542,8 @@ func expandClientlessAppServerGroups(d *schema.ResourceData) []browseraccess.App
 		var serverGroups []browseraccess.AppServerGroups
 		for _, appServerGroup := range serverGroup.List() {
 			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if appServerGroup != nil {
-				for _, id := range appServerGroup["id"].([]interface{}) {
+			if ok {
+				for _, id := range appServerGroup["id"].(*schema.Set).List() {
 					serverGroups = append(serverGroups, browseraccess.AppServerGroups{
 						ID: id.(string),
 					})
@@ -580,11 +580,11 @@ func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []inter
 	return clientlessApps
 }
 
-func flattenClientlessAppServerGroups(appServerGroup []browseraccess.AppServerGroups) []interface{} {
+func flattenClientlessAppServerGroups(serverGroups []browseraccess.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appServerGroup))
-	for i, serverGroup := range appServerGroup {
+	ids := make([]string, len(serverGroups))
+	for i, serverGroup := range serverGroups {
 		ids[i] = serverGroup.ID
 	}
 	mapIds["id"] = ids

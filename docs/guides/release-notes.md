@@ -16,11 +16,11 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 2.8.0 (July, xx 2023)
+## 2.8.0 (July, 5 2023)
 
 ### Notes
 
-- Release date: **(July, xx 2023)**
+- Release date: **(July, 5 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements
@@ -31,6 +31,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 - [PR #319](https://github.com/zscaler/terraform-provider-zpa/pull/319) - Fixed links to Zenith Community demo videos in the documentation
 - [PR #321](https://github.com/zscaler/terraform-provider-zpa/pull/321) - Fixed resource ``zpa_server_group``due to panic when set attribute ``dynamic_discovery`` to false.
+- [PR #323](https://github.com/zscaler/terraform-provider-zpa/pull/323) - Fixed attribute ``server_groups`` in all ``zpa_application_segment`` resources due to server group ID reorder, which caused drift behavior. Issue [#322](https://github.com/zscaler/terraform-provider-zpa/issues/322)
 
 ## 2.7.9 (June, 10 2023)
 
