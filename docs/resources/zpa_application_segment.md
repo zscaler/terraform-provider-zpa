@@ -135,7 +135,7 @@ resource "zpa_app_connector_group" "this" {
   upgrade_time_in_secs          = "66600"
   override_version_profile      = true
   version_profile_id            = 0
-  dns_query_type                = "IPV4"
+  dns_query_type                = "IPV4_IPV6"
 }
 ```
 
@@ -166,25 +166,25 @@ The following arguments are supported:
 ## Attributes Reference
 
 * `description` - (Optional) Description of the application.
-* `bypass_type` - (Optional) Indicates whether users can bypass ZPA to access applications.
-* `config_space` - (Optional)
+* `bypass_type` - (Optional) Indicates whether users can bypass ZPA to access applications. Supported values: `ALWAYS`, `NEVER`, `ON_NET`.
+* `bypass_on_reauth` - (Optional) Supported values: `true`, `false`
+* `config_space` - (Optional) Supported values: `DEFAULT`, `SIEM`.
 * `double_encrypt` - (Optional) Whether Double Encryption is enabled or disabled for the app.
 * `enabled` - (Optional) Whether this application is enabled or not.
 * `health_reporting` - (Optional) Whether health reporting for the app is Continuous or On Access. Supported values: `NONE`, `ON_ACCESS`, `CONTINUOUS`.
-* `health_check_type` (Optional)
-* `icmp_access_type` - (Optional)
-* `ip_anchored` - (Optional)
+* `health_check_type` (Optional) Supported values: `DEFAULT`, `NONE`.
+* `icmp_access_type` - (Optional) Supported values: `NONE`, `PING_TRACEROUTING`, `PING`.
+* `ip_anchored` - (Optional) Supported values: `true`, `false`
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
-* `log_features` - (Optional)
+* `inspect_traffic_with_zia` - (Optional) - (Optional) Supported values: `true`, `false`
 * `tcp_keep_alive` (Optional) Supported values: ``1`` for Enabled and ``0`` for Disabled
 * `passive_health_enabled` - (Optional) Supported values: `true`, `false`
 
 * `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
-    * !> **WARNING:** Important: Notice that changing this attribute will force Terraform to destroy and recreate the application segment.
+  * !> **WARNING:** Important: Notice that changing this attribute will force Terraform to destroy and recreate the application segment.
 
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `is_incomplete_dr_config` - (Optional) Supported values: `true`, `false`
-* `select_connector_close_to_app` - (Optional) Supported values: `true`, `false`
 
 ## Import
 
