@@ -66,40 +66,70 @@ jobs:
           only-new-issues: true
 
   # run acceptance tests
-  test:
+  ZPA-QA-Tenant01-Test:
+    strategy:
+      matrix:
+        go-version: [1.19]
+    timeout-minutes: 120
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+        id: go
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: '>=0.13.x'
+          terraform_wrapper: false
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: ^1.19
-      id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
 
-    - uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: '>=0.13.x'
-        terraform_wrapper: false
+      - name: Download Go Dependencies
+        run: |
+          go mod tidy && go mod vendor
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v3
+      - name: Set ZPA QA Tenant01 Credentials
+        env:
+          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+          ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+          TF_ACC: ${{ secrets.TF_ACC }}
+        run: |
+          go test -v -cover ./zpa -timeout 120m -parallel=4
 
-    - name: Download Go Dependencies
-      run: |
-        go mod tidy && go mod vendor
+  ZPA-QA-Tenant02-Test:
+    strategy:
+      matrix:
+        go-version: [1.19]
+    timeout-minutes: 120
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+        id: go
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: '>=0.13.x'
+          terraform_wrapper: false
 
-    - name: TF acceptance tests
-      env:
-        TF_ACC: true
-        ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
-        ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
-        ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
-        ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v3
 
-        # Set whatever additional acceptance test env vars here. You can
-        # optionally use data from your repository secrets using the
-        # following syntax:
-        # SOME_VAR: ${{ secrets.SOME_VAR }}
-        # go test -v -cover ./zpa -v -parallel 30  -timeout 60m
-      run: |
-        go test -v -cover ./zpa -v -parallel 30 -timeout 60m
+      - name: Download Go Dependencies
+        run: |
+          go mod tidy && go mod vendor
+
+      - name: Set ZPA QA Tenant02 Credentials
+        env:
+          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+          ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+          TF_ACC: ${{ secrets.TF_ACC }}
+        run: |
+          go test -v -cover ./zpa -timeout 120m -parallel=4
