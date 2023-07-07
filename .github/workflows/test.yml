@@ -28,7 +28,7 @@ jobs:
       ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
       ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
       ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
-
+      TF_ACC: ${{ secrets.TF_ACC }}
   zpa-qa-tenant02:
     uses: ./.github/workflows/reuse-zpa-tests.yml
     with:
@@ -38,7 +38,7 @@ jobs:
       ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
       ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
       ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
-
+      TF_ACC: ${{ secrets.TF_ACC }}
   zpa-prod-tenant01:
     uses: ./.github/workflows/reuse-zpa-tests.yml
     with:
@@ -48,4 +48,5 @@ jobs:
       ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
       ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
       ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+      TF_ACC: ${{ secrets.TF_ACC }}
     needs: zpa-qa-tenant01

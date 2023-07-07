@@ -14,6 +14,8 @@ on:
         required: true
       ZPA_CLOUD:
         required: true
+      TF_ACC:
+        required: true
 
 jobs:
   zpa-test:
@@ -47,5 +49,6 @@ jobs:
           ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
           ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
           ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+          TF_ACC: ${{ secrets.TF_ACC }}
         run: |
           go test -v -cover ./zpa -v -parallel 30 -timeout 60m
