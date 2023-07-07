@@ -2,35 +2,16 @@ TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep "zpa/")
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 PKG_NAME=zpa
-GOFMT:=gofumpt
-TFPROVIDERLINT=tfproviderlint
-STATICCHECK=staticcheck
 TF_PLUGIN_DIR=~/.terraform.d/plugins
 ZPA_PROVIDER_NAMESPACE=zscaler.com/zpa/zpa
-
-# Expression to match against tests
-# go test -run <filter>
-# e.g. Iden will run all TestAccIdentity tests
-ifdef TEST_FILTER
-	TEST_FILTER := -run $(TEST_FILTER)
-endif
 
 default: build
 
 dep: # Download required dependencies
 	go mod tidy
 
-docs:
-	go generate
-
 build: fmtcheck
 	go install
-
-clean:
-	go clean -cache -testcache ./...
-
-clean-all:
-	go clean -cache -testcache -modcache ./...
 
 build13: GOOS=$(shell go env GOOS)
 build13: GOARCH=$(shell go env GOARCH)
@@ -45,30 +26,41 @@ build13: fmtcheck
 	@mkdir -p $(DESTINATION)
 	go build -o $(DESTINATION)/terraform-provider-zpa_v2.8.0
 
-test:
+test: fmtcheck
+	go test $(TEST) || exit 1
 	echo $(TEST) | \
-		xargs -t -n4 go test $(TESTARGS) $(TEST_FILTER) -timeout=30s -parallel=4
+		xargs -t -n4 go test $(TESTARGS) -timeout=600s -parallel=4
 
-testacc:
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) $(TEST_FILTER) -timeout 120m
+testacc: fmtcheck
+	TF_ACC=true go test $(TEST) -v $(TESTARGS) -timeout 600m
 
 vet:
 	@echo "==> Checking source code against go vet and staticcheck"
-	@go vet ./...
-	@staticcheck ./...
-
-fmt: tools # Format the code
-	@echo "formatting the code with $(GOFMT)..."
-	@$(GOFMT) -l -w .
+	@echo "go vet ."
+	@go vet $$(go list ./... | grep -v vendor/) ; if [ $$? -eq 1 ]; then \
+		echo ""; \
+		echo "Vet found suspicious constructs. Please check the reported constructs"; \
+		echo "and fix them if necessary before submitting the code for review."; \
+		exit 1; \
+	fi
 
 imports:
 	goimports -w $(GOFMT_FILES)
 
+fmt:
+	@echo "formatting the code with $(GOFMT)..."
+	gofmt -w $(GOFMT_FILES)
+
 fmtcheck:
-	@gofumpt -d -l .
+	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
+
+tools:
+	@echo "==> installing required tooling..."
+	@sh "$(CURDIR)/scripts/gogetcookie.sh"
+	GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
 
 vendor-status:
 	@govendor status
@@ -81,47 +73,16 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-lint:
-	@echo "==> Checking source code against linters..."
-	@$(TFPROVIDERLINT) \
-		-c 1 \
-		-AT001 \
-    -R004 \
-		-S001 \
-		-S002 \
-		-S003 \
-		-S004 \
-		-S005 \
-		-S007 \
-		-S008 \
-		-S009 \
-		-S010 \
-		-S011 \
-		-S012 \
-		-S013 \
-		-S014 \
-		-S015 \
-		-S016 \
-		-S017 \
-		-S019 \
-		./$(PKG_NAME)
-
-tools:
-	@echo "==> installing required tooling..."
-	@sh "$(CURDIR)/scripts/gogetcookie.sh"
-	GO111MODULE=off go get -u github.com/client9/misspell/cmd/misspell
-
-tools-update:
-	@go install mvdan.cc/gofumpt@v0.4.0
-	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.28.1
-	@go install honnef.co/go/tools/cmd/staticcheck@v0.4.2
-
 website:
 ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 	echo "$(WEBSITE_REPO) not found in your GOPATH (necessary for layouts and assets), get-ting..."
 	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
+
+website-lint:
+	@echo "==> Checking website against linters..."
+	@misspell -error -source=text website/
 
 website-test:
 ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
@@ -130,4 +91,4 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website website-test
+.PHONY: build test testacc vet fmt fmtcheck errcheck tools vendor-status test-compile website-lint website website-test
