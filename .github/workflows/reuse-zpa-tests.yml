@@ -43,7 +43,7 @@ jobs:
         run: |
           go mod tidy && go mod vendor
 
-      - name: Set ZPA QA Tenant01 Credentials
+      - name: Set ZPA Credentials
         env:
           ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
           ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
