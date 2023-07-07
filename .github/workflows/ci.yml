@@ -98,7 +98,8 @@ jobs:
           ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
           TF_ACC: ${{ secrets.TF_ACC }}
         run: |
-          go test -v -cover ./zpa -v -parallel 10 -timeout 60m
+          make build
+          make test
 
   ZPA-QA-Tenant02-Test:
     strategy:
@@ -132,4 +133,5 @@ jobs:
           ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
           TF_ACC: ${{ secrets.TF_ACC }}
         run: |
-          go test -v -cover ./zpa -v -parallel 10 -timeout 60m
+          make build
+          make test
