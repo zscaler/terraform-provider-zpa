@@ -1,0 +1,51 @@
+name: Test
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - beta
+      - alpha
+      - '[0-9]+.x'
+      - '[0-9]+.[0-9]+.x'
+  pull_request:
+
+  # For systems with an upstream API that could drift unexpectedly (like most SaaS systems, etc.),
+  # we recommend testing at a regular interval not necessarily tied to code changes. This will
+  # ensure you are alerted to something breaking due to an API change, even if the code did not
+  # change.
+
+  schedule:
+    - cron: '0 13 * * *'
+
+jobs:
+  zpa-qa-tenant01:
+    uses: ./.github/workflows/reuse-zpa-tests.yml
+    with:
+      environment: ZPA_QA_TENANT01
+    secrets:
+      ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+      ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+      ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+      ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+
+  zpa-qa-tenant02:
+    uses: ./.github/workflows/reuse-zpa-tests.yml
+    with:
+      environment: ZPA_QA_TENANT02
+    secrets:
+      ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+      ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+      ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+      ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+
+  zpa-prod-tenant01:
+    uses: ./.github/workflows/reuse-zpa-tests.yml
+    with:
+      environment: ZPA_PROD_TENANT01
+    secrets:
+      ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+      ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+      ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+      ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+    needs: zpa-qa-tenant01
