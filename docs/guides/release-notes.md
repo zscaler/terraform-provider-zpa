@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.8.0``
+``Last updated: v2.8.1``
 
 ---
+
+## 2.8.1 (July, xx 2023)
+
+### Notes
+
+- Release date: **(July, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #331](https://github.com/zscaler/terraform-provider-zpa/pull/331) - Fixed filtering by email on search scim attribute values
 
 ## 2.8.0 (July, 5 2023)
 

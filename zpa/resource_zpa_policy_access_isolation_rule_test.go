@@ -29,7 +29,7 @@ func TestAccPolicyIsolationRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ISOLATE"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "2"),
 				),
 			},
 
@@ -42,7 +42,7 @@ func TestAccPolicyIsolationRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ISOLATE"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "2"),
 				),
 			},
 		},
@@ -127,6 +127,31 @@ data "zpa_policy_type" "isolation_policy" {
 data "zpa_isolation_profile" "bd_sa_profile1" {
 	name = "BD_SA_Profile1"
 }
+
+data "zpa_idp_controller" "bd_user_okta" {
+    name = "BD_Okta_Users"
+}
+
+data "zpa_scim_groups" "contractors" {
+	name     = "Contractors"
+	idp_name = "BD_Okta_Users"
+}
+
+data "zpa_scim_attribute_header" "givenName" {
+    name = "name.givenName"
+    idp_name = "BD_Okta_Users"
+}
+
+data "zpa_scim_attribute_header" "familyName" {
+    name = "name.familyName"
+    idp_name = "BD_Okta_Users"
+}
+
+data "zpa_scim_attribute_header" "username" {
+    name = "userName"
+    idp_name = "BD_Okta_Users"
+}
+
 resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
@@ -144,8 +169,35 @@ resource "%s" "%s" {
 			rhs         = "zpn_client_type_exporter"
 			}
 		}
+	conditions {
+		negated  = false
+		operator = "OR"
+		operands {
+			object_type = "SCIM_GROUP"
+			lhs         = data.zpa_idp_controller.bd_user_okta.id
+			rhs         = data.zpa_scim_groups.contractors.id
+			idp_id      = data.zpa_idp_controller.bd_user_okta.id
+		}
+		operands {
+			object_type = "SCIM"
+			lhs =  data.zpa_scim_attribute_header.givenName.id
+			rhs = "Charles"
+			idp_id = data.zpa_scim_attribute_header.givenName.idp_id
+		}
+		operands {
+			object_type = "SCIM"
+			lhs =  data.zpa_scim_attribute_header.familyName.id
+			rhs = "Keenan"
+			idp_id = data.zpa_scim_attribute_header.familyName.idp_id
+		}
+		operands {
+			object_type = "SCIM"
+			lhs =  data.zpa_scim_attribute_header.username.id
+			rhs = "adam.ashcroft@bd-hashicorp.com"
+			idp_id = data.zpa_scim_attribute_header.username.idp_id
+		}
+	}
 }
-
 `,
 		// resource variables
 		resourcetype.ZPAPolicyIsolationRule,
