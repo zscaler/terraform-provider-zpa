@@ -389,8 +389,8 @@ github.com/zclconf/go-cty v1.13.2 h1:4GvrUxe/QUDYuJKAav4EYqdM47/kZa672LwmXFmEKT0
 github.com/zclconf/go-cty v1.13.2/go.mod h1:YKQzy/7pZ7iq2jNFzy5go57xdxdWoLLpaEp4u238AE0=
 github.com/zclconf/go-cty-debug v0.0.0-20191215020915-b22d67c1ba0b/go.mod h1:ZRKQfBXbGkpdV6QMzT3rU1kSTAnfu1dO8dPKjYprgj8=
 github.com/zclconf/go-cty-yaml v1.0.2/go.mod h1:IP3Ylp0wQpYm50IHK8OZWKMu6sPJIUgKa8XhiVHura0=
-github.com/zscaler/zscaler-sdk-go v1.6.3 h1:PmXwjWhPJiQC6xcnjKpn22gN2/+8uGEAi1fBzIIFI6E=
-github.com/zscaler/zscaler-sdk-go v1.6.3/go.mod h1:37jTTyECA0nHtDQJ9RQcDXmtIu6UYA4Y1ppGzfS2rbE=
+github.com/zscaler/zscaler-sdk-go v1.6.4 h1:DVoNCfJHOPJcUhogg8Wk676X+2tzp8BfaYxokPK2Un8=
+github.com/zscaler/zscaler-sdk-go v1.6.4/go.mod h1:37jTTyECA0nHtDQJ9RQcDXmtIu6UYA4Y1ppGzfS2rbE=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=
