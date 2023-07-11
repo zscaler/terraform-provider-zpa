@@ -12,9 +12,27 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.8.0``
+``Last updated: v2.81.0``
 
 ---
+
+## 2.81.0 (July, xx 2023)
+
+### Notes
+
+- Release date: **(July, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #334](https://github.com/zscaler/terraform-provider-zpa/pull/326) - Added support to ZPA ``GOVUS`` environment. Issue [#333](https://github.com/zscaler/terraform-provider-zpa/issues/333)
+
+- [PR #335](https://github.com/zscaler/terraform-provider-zpa/pull/335) - Added support to the following new ZPA Cloud Browser Isolation resources and datasources:
+  - Cloud Browser Isolation Banner Controller: ``zpa_cloud_browser_isolation_banner``
+  - Cloud Browser Isolation Certificate Controller: ``zpa_cloud_browser_isolation_certificate``
+  - Cloud Browser Isolation Profile Controller: ``zpa_cloud_browser_isolation_external_profile``
+  - Cloud Browser Isolation Regions: ``zpa_cloud_browser_isolation_region``
+  - Cloud Browser Isolation ZPA Profile: ``zpa_cloud_browser_isolation_zpa_profile``
 
 ## 2.8.0 (July, 5 2023)
 
