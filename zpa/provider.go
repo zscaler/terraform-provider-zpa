@@ -40,8 +40,8 @@ func Provider() *schema.Provider {
 			"zpa_cloud": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "Cloud to use PRODUCTION, BETA, GOV, PREVIEW or DEV",
-				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV", "PREVIEW", "DEV", "QA"}, true),
+				Description:  "Cloud to use PRODUCTION, BETA, GOV, GOVUS, PREVIEW, DEV, QA",
+				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA"}, true),
 				Default:      "PRODUCTION",
 			},
 		},

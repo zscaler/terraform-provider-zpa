@@ -47,7 +47,7 @@ resouce "zpa_application_segment" "app_segment" {
 
 ## Example Usage ZPA Beta, GOV, Preview, and Dev Cloud
 
-For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `GOV`, `PREVIEW` or `DEV` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
+For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `DEV` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
 
 ```hcl
 # Configure ZPA provider source and version
@@ -55,7 +55,7 @@ terraform {
   required_providers {
     zpa = {
       source = "zscaler/zpa"
-      version = "~> 2.7.0"
+      version = "~> 2.8.0"
     }
   }
 }
@@ -64,7 +64,7 @@ provider "zpa" {
   zpa_client_id         = "xxxxxxxxxxxxxxxx"
   zpa_client_secret     = "xxxxxxxxxxxxxxxx"
   zpa_customer_id       = "xxxxxxxxxxxxxxxx"
-  zpa_cloud             = "BETA" // Use `BETA`, `GOV`, `PREVIEW` or `DEV`
+  zpa_cloud             = "BETA" // Use `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `DEV`
 }
 
 resouce "zpa_application_segment" "app_segment" {

@@ -51,4 +51,4 @@ jobs:
           ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
           TF_ACC: ${{ secrets.TF_ACC }}
         run: |
-          go test -v -cover ./zpa -timeout 120m -parallel=4
+          go test -v -cover ./zpa -v -parallel 30 -timeout 60m
