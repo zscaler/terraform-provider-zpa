@@ -97,6 +97,8 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the application.",
 			},
+			// We need to ensure that all domain name entries are converted to lowercase.
+			// When domain_name values are set to uppercase, the API will return them in lowercase, causing a drift in Terraform.
 			"domain_names": {
 				Type:        schema.TypeSet,
 				Required:    true,
@@ -214,6 +216,8 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						// We need to ensure that all domain name entries are converted to lowercase.
+						// When domain_name values are set to uppercase, the API will return them in lowercase, causing a drift in Terraform.
 						"domain": {
 							Type:        schema.TypeString,
 							Optional:    true,
