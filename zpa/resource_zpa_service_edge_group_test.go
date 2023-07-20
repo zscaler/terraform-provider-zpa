@@ -131,8 +131,7 @@ resource "%s" "%s" {
 	latitude             = "37.3382082"
 	longitude            = "-121.8863286"
 	location             = "San Jose, CA, USA"
-
-	version_profile_name = "New Release"
+	version_profile_name = "Default"
 }
 `,
 		// resource variables
