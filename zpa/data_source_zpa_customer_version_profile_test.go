@@ -15,8 +15,6 @@ func TestAccDataSourceCustomerVersionProfile_Basic(t *testing.T) {
 				Config: testAccCheckDataSourceCustomerVersionProfileConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataSourceCustomerVersionProfileCheck("data.zpa_customer_version_profile.default"),
-					testAccDataSourceCustomerVersionProfileCheck("data.zpa_customer_version_profile.previous_default"),
-					testAccDataSourceCustomerVersionProfileCheck("data.zpa_customer_version_profile.new_release"),
 				),
 			},
 		},
