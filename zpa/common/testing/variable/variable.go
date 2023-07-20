@@ -21,7 +21,7 @@ const (
 	ServiceEdgeLatitude           = "37.3382082"
 	ServiceEdgeLongitude          = "-121.8863286"
 	ServiceEdgeLocation           = "San Jose, CA, USA"
-	ServiceEdgeVersionProfileName = "New Release"
+	ServiceEdgeVersionProfileName = "Default"
 )
 
 // Provisioning Key
