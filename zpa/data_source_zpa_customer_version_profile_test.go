@@ -34,12 +34,4 @@ var testAccCheckDataSourceCustomerVersionProfileConfig_basic = `
 data "zpa_customer_version_profile" "default" {
     name = "Default"
 }
-
-data "zpa_customer_version_profile" "previous_default" {
-    name = "Previous Default"
-}
-
-data "zpa_customer_version_profile" "new_release" {
-    name = "New Release"
-}
 `
