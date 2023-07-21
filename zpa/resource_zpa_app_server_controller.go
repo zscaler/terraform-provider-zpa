@@ -144,7 +144,7 @@ func resourceApplicationServerUpdate(d *schema.ResourceData, m interface{}) erro
 			}
 		}
 
-		if _, err := zClient.appservercontroller.Update(d.Id(), appservercontroller.ApplicationServer{
+		if _, err := zClient.appservercontroller.Update(d.Id(), &appservercontroller.ApplicationServer{
 			AppServerGroupIds: SetToStringSlice(d.Get("app_server_group_ids").(*schema.Set)),
 			Name:              d.Get("name").(string),
 			Description:       d.Get("description").(string),
@@ -195,7 +195,7 @@ func removeServerFromGroup(zClient *Client, serverID string) error {
 		resp.AppServerGroupIds = make([]string, 0)
 
 		log.Printf("[INFO] Updating server group ID: %s", serverID)
-		_, err = zClient.appservercontroller.Update(serverID, *resp)
+		_, err = zClient.appservercontroller.Update(serverID, resp)
 		if err != nil {
 			log.Printf("[ERROR] Failed to update application server ID: %s", serverID)
 			return err
