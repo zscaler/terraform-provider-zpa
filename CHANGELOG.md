@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.81.0 (July, xx 2023)
+## 3.0.0 (July, xx 2023)
 
 ### Notes
 
@@ -17,6 +17,11 @@
   - Cloud Browser Isolation Profile Controller: ``zpa_cloud_browser_isolation_external_profile``
   - Cloud Browser Isolation Regions: ``zpa_cloud_browser_isolation_region``
   - Cloud Browser Isolation ZPA Profile: ``zpa_cloud_browser_isolation_zpa_profile``
+
+### Fixes
+
+- [PR #335](https://github.com/zscaler/terraform-provider-zpa/pull/335) - Fixed ```zpa_application_segment`` to ensure the attribute values for ``domain_names`` and ``domain`` are sent upstream in lowercase due to API constraint that resulted in Terraform drift behavior.
+- [PR #336](https://github.com/zscaler/terraform-provider-zpa/pull/336) - Fixed pointer in expand function in the resource ``zpa_application_server``
 
 ## 2.8.0 (July, 5 2023)
 
