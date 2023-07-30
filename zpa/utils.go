@@ -205,7 +205,7 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 	return applicationSegmentList
 }
 
-func validateAppPorts(client *Client, selectConnectorCloseToApp bool, udpAppPortRange []common.NetworkPorts, udpPortRanges []string) error {
+func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.NetworkPorts, udpPortRanges []string) error {
 	if selectConnectorCloseToApp {
 		if len(udpAppPortRange) > 0 || len(udpPortRanges) > 0 {
 			return errors.New("the protocol configuration for the application is invalid. App Connector Closest to App supports only TCP applications")

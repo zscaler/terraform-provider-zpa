@@ -157,6 +157,14 @@ func dataSourceAppConnectorController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -220,6 +228,8 @@ func dataSourceAppConnectorControllerRead(d *schema.ResourceData, m interface{})
 		_ = d.Set("enrollment_cert", resp.EnrollmentCert)
 		_ = d.Set("upgrade_attempt", resp.UpgradeAttempt)
 		_ = d.Set("upgrade_status", resp.UpgradeStatus)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 	} else {
 		return fmt.Errorf("couldn't find any app connector with name '%s' or id '%s'", name, id)

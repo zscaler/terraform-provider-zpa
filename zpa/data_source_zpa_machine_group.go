@@ -99,6 +99,14 @@ func dataSourceMachineGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -133,6 +141,8 @@ func dataSourceMachineGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("machines", flattenMachines(resp))
 
 	} else {
@@ -158,6 +168,8 @@ func flattenMachines(machineGroup *machinegroup.MachineGroup) []interface{} {
 			"modified_time":      machineItem.ModifiedTime,
 			"name":               machineItem.Name,
 			"signing_cert":       machineItem.SigningCert,
+			"microtenant_id":     machineItem.MicroTenantID,
+			"microtenant_name":   machineItem.MicroTenantName,
 		}
 	}
 

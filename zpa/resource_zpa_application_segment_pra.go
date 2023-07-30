@@ -271,6 +271,43 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 					},
 				},
 			},
+			// "shared_microtenant_details": {
+			// 	Type:     schema.TypeSet,
+			// 	Optional:    true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"shared_from_microtenant": {
+			// 				Type:     schema.TypeSet,
+			// 				Optional:    true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"id": {
+			// 							Type:     schema.TypeInt,
+			// 							Optional:    true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"shared_to_microtenant": {
+			// 				Type:        schema.TypeSet,
+			// 				Optional:    true,
+			// 				Computed:    true,
+			// 				Description: "List of the server group IDs.",
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"id": {
+			// 							Type:     schema.TypeSet,
+			// 							Optional: true,
+			// 							Elem: &schema.Schema{
+			// 								Type: schema.TypeString,
+			// 							},
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
 		},
 	}
 }
@@ -283,7 +320,7 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 
@@ -381,7 +418,7 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 

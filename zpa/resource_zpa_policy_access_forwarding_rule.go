@@ -33,6 +33,10 @@ func resourcePolicyForwardingRule() *schema.Resource {
 						"INTERCEPT_ACCESSIBLE",
 					}, false),
 				},
+				"microtenant_id": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
 				"conditions": GetPolicyConditionsSchema([]string{
 					"APP",
 					"APP_GROUP",
@@ -59,10 +63,10 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
-	if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
+	if err := validateAccessPolicyRuleOrder(req.RuleOrder, &zClient.policysetcontroller); err != nil {
 		return err
 	}
-	if !ValidateConditions(req.Conditions, zClient) {
+	if !ValidateConditions(req.Conditions, zClient, "") {
 		return fmt.Errorf("couldn't validate the zpa policy access forwarding rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
 	policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
@@ -109,6 +113,7 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
@@ -127,7 +132,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return err
 	}
-	if ValidateConditions(req.Conditions, zClient) {
+	if ValidateConditions(req.Conditions, zClient, "") {
 		if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
 			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 				d.SetId("")
@@ -188,6 +193,7 @@ func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetcontrol
 		BypassDefaultRule: d.Get("bypass_default_rule").(bool),
 		DefaultRule:       d.Get("default_rule").(bool),
 		Operator:          d.Get("operator").(string),
+		MicroTenantID:     d.Get("microtenant_id").(string),
 		PolicySetID:       policySetID,
 		PolicyType:        d.Get("policy_type").(string),
 		Priority:          d.Get("priority").(string),

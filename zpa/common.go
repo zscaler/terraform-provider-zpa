@@ -47,32 +47,32 @@ func validateAndSetProfileNameID(d *schema.ResourceData) error {
 	return nil
 }
 
-func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client) bool {
+func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client, microtenantID string) bool {
 	for _, condition := range conditions {
-		if !validateOperands(condition.Operands, zClient) {
+		if !validateOperands(condition.Operands, zClient, microtenantID) {
 			return false
 		}
 	}
 	return true
 }
-func validateOperands(operands []policysetcontroller.Operands, zClient *Client) bool {
+func validateOperands(operands []policysetcontroller.Operands, zClient *Client, microtenantID string) bool {
 	for _, operand := range operands {
-		if !validateOperand(operand, zClient) {
+		if !validateOperand(operand, zClient, microtenantID) {
 			return false
 		}
 	}
 	return true
 }
-func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool {
+func validateOperand(operand policysetcontroller.Operands, zClient *Client, microtenantID string) bool {
 	switch operand.ObjectType {
 	case "APP":
 		return customValidate(operand, []string{"id"}, "application segment ID", Getter(func(id string) error {
-			_, _, err := zClient.applicationsegment.Get(id)
+			_, _, err := zClient.applicationsegment.WithMicroTenant(microtenantID).Get(id)
 			return err
 		}))
 	case "APP_GROUP":
 		return customValidate(operand, []string{"id"}, "Segment Group ID", Getter(func(id string) error {
-			_, _, err := zClient.segmentgroup.Get(id)
+			_, _, err := zClient.segmentgroup.WithMicroTenant(microtenantID).Get(id)
 			return err
 		}))
 
@@ -327,6 +327,11 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 						"OR",
 					}, false),
 				},
+				"microtenant_id": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
+				},
 				"operands": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -421,11 +426,11 @@ func expandOperandsList(ops interface{}) ([]policysetcontroller.Operands, error)
 			rhs, ok := operandSet["rhs"].(string)
 			op := policysetcontroller.Operands{
 				ID:         id,
-				IdpID:      IdpID,
+				Name:       operandSet["name"].(string),
 				LHS:        operandSet["lhs"].(string),
 				ObjectType: operandSet["object_type"].(string),
+				IdpID:      IdpID,
 				RHS:        rhs,
-				Name:       operandSet["name"].(string),
 			}
 			if ok && rhs != "" {
 				if operandSet != nil {
@@ -663,14 +668,15 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 
 func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-		zClient := m.(*Client)
+		service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
 		id := d.Id()
 		_, parseIDErr := strconv.ParseInt(id, 10, 64)
 		if parseIDErr == nil {
 			// assume if the passed value is an int
 			_ = d.Set("id", id)
 		} else {
-			resp, _, err := zClient.policysetcontroller.GetByNameAndTypes(types, id)
+			resp, _, err := service.GetByNameAndTypes(types, id)
 			if err == nil {
 				d.SetId(resp.ID)
 				_ = d.Set("id", resp.ID)
@@ -746,4 +752,47 @@ func flattenInspectionRulesConditions(condition common.Rules) []interface{} {
 	}
 
 	return conditions
+}
+
+func GetString(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	str, ok := v.(string)
+	if ok {
+		return str
+	}
+	return fmt.Sprintf("%v", v)
+}
+
+func detachConnectorGroupsFromAllAccessPolicyRules(d *schema.ResourceData, policySetControllerService *policysetcontroller.Service) {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
+	accessPolicySet, _, err := policySetControllerService.GetByPolicyType("ACCESS_POLICY")
+	if err != nil {
+		return
+	}
+	rules, _, err := policySetControllerService.GetAllByType("ACCESS_POLICY")
+	if err != nil {
+		return
+	}
+	for _, rule := range rules {
+		ids := []policysetcontroller.AppConnectorGroups{}
+		changed := false
+		for _, app := range rule.AppConnectorGroups {
+			if app.ID == d.Id() {
+				changed = true
+				continue
+			}
+			ids = append(ids, policysetcontroller.AppConnectorGroups{
+				ID: app.ID,
+			})
+		}
+		rule.AppConnectorGroups = ids
+		if changed {
+			if _, err := policySetControllerService.WithMicroTenant(GetString(d.Get("microtenant_id"))).Update(accessPolicySet.ID, rule.ID, &rule); err != nil {
+				continue
+			}
+		}
+	}
 }

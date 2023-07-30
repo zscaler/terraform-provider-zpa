@@ -200,6 +200,14 @@ func dataSourceServerGroup() *schema.Resource {
 					},
 				},
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"config_space": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -326,6 +334,8 @@ func dataSourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("modifiedby", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 		if err := d.Set("applications", flattenServerGroupApplications(resp.Applications)); err != nil {
 			return err

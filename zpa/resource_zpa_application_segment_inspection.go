@@ -318,6 +318,43 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 					},
 				},
 			},
+			// "shared_microtenant_details": {
+			// 	Type:     schema.TypeSet,
+			// 	Optional: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"shared_from_microtenant": {
+			// 				Type:     schema.TypeSet,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"id": {
+			// 							Type:     schema.TypeInt,
+			// 							Optional: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"shared_to_microtenant": {
+			// 				Type:        schema.TypeSet,
+			// 				Optional:    true,
+			// 				Computed:    true,
+			// 				Description: "List of the server group IDs.",
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"id": {
+			// 							Type:     schema.TypeSet,
+			// 							Optional: true,
+			// 							Elem: &schema.Schema{
+			// 								Type: schema.TypeString,
+			// 							},
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
 		},
 	}
 }
@@ -327,7 +364,7 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interf
 
 	req := expandInspectionApplicationSegment(d, zClient, "")
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 
@@ -422,7 +459,7 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 	log.Printf("[INFO] Updating inspection application segment ID: %v\n", id)
 	req := expandInspectionApplicationSegment(d, zClient, id)
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 

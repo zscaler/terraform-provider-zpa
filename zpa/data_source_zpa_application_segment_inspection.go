@@ -95,6 +95,14 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 				Optional:    true,
 				Description: "Name of the application.",
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"inspection_apps": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -174,6 +182,46 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 					},
 				},
 			},
+			"shared_microtenant_details": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"shared_from_microtenant": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"shared_to_microtenant": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -219,6 +267,8 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interf
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("ip_anchored", resp.IPAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 

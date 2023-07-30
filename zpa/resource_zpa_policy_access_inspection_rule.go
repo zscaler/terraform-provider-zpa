@@ -32,6 +32,10 @@ func resourcePolicyInspectionRule() *schema.Resource {
 						"BYPASS_INSPECT",
 					}, false),
 				},
+				"microtenant_id": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
 				"conditions": GetPolicyConditionsSchema([]string{
 					"APP",
 					"APP_GROUP",
@@ -58,7 +62,7 @@ func resourcePolicyInspectionRuleCreate(d *schema.ResourceData, m interface{}) e
 	}
 	log.Printf("[INFO] Creating zpa policy inspection rule with request\n%+v\n", req)
 
-	if ValidateConditions(req.Conditions, zClient) {
+	if ValidateConditions(req.Conditions, zClient, "") {
 		policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
 		if err != nil {
 			return err
@@ -105,6 +109,7 @@ func resourcePolicyInspectionRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("zpn_inspection_profile_id", resp.ZpnInspectionProfileID)
 	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
@@ -124,7 +129,7 @@ func resourcePolicyInspectionRuleUpdate(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return err
 	}
-	if ValidateConditions(req.Conditions, zClient) {
+	if ValidateConditions(req.Conditions, zClient, "") {
 		if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
 			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 				d.SetId("")
@@ -188,6 +193,7 @@ func expandCreatePolicyInspectionRule(d *schema.ResourceData) (*policysetcontrol
 		Priority:               d.Get("priority").(string),
 		ZpnInspectionProfileID: d.Get("zpn_inspection_profile_id").(string),
 		RuleOrder:              d.Get("rule_order").(string),
+		MicroTenantID:          d.Get("microtenant_id").(string),
 		Conditions:             conditions,
 	}, nil
 }

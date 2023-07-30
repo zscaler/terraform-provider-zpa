@@ -79,6 +79,14 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 				Optional:    true,
 				Description: "Name of the application.",
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"sra_apps": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -136,6 +144,14 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"microtenant_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -165,6 +181,46 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
+			"shared_microtenant_details": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"shared_from_microtenant": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"shared_to_microtenant": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+									"name": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
 							},
 						},
 					},
@@ -211,6 +267,8 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 		_ = d.Set("ip_anchored", resp.IpAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
@@ -266,6 +324,8 @@ func flattenSRAApps(sraApp *applicationsegmentpra.AppSegmentPRA) []interface{} {
 			"hidden":               val.Hidden,
 			"name":                 val.Name,
 			"portal":               val.Portal,
+			"microtenant_id":       val.MicroTenantID,
+			"microtenant_name":     val.MicroTenantName,
 		}
 	}
 

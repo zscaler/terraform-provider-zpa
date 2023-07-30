@@ -104,7 +104,7 @@ func dataSourceServiceEdgeController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -187,7 +187,7 @@ func dataSourceServiceEdgeController() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -265,7 +265,7 @@ func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("location", resp.Location)
 		_ = d.Set("longitude", resp.Longitude)
 		_ = d.Set("listen_ips", resp.ListenIPs)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("provisioning_key_id", resp.ProvisioningKeyID)
@@ -279,6 +279,8 @@ func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("enrollment_cert", resp.EnrollmentCert)
 		_ = d.Set("upgrade_attempt", resp.UpgradeAttempt)
 		_ = d.Set("upgrade_status", resp.UpgradeStatus)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("zpn_sub_module_upgrade_list", flattenZPNSubModuleUpgradeList(resp))
 
 	} else {
@@ -296,8 +298,9 @@ func flattenZPNSubModuleUpgradeList(zpnSubModule *serviceedgecontroller.ServiceE
 			"creation_time":    val.CreationTime,
 			"current_version":  val.CurrentVersion,
 			"entity_gid":       val.EntityGid,
-			"modifiedby":       val.EntityType,
+			"modified_by":      val.EntityType,
 			"modified_time":    val.ModifiedTime,
+			"previous_version": val.PreviousVersion,
 			"expected_version": val.ExpectedVersion,
 			"role":             val.Role,
 			"upgrade_status":   val.UpgradeStatus,

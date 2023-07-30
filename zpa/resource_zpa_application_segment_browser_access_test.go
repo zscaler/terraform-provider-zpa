@@ -17,7 +17,7 @@ import (
 func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 	var browserAccess browseraccess.BrowserAccess
 	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentBrowserAccess)
-	rDomain := acctest.RandomWithPrefix("tf-acc-test")
+	// rPort := acctest.RandIntRange(1000, 9999)
 
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
@@ -31,7 +31,7 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentBrowserAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
@@ -48,7 +48,7 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
@@ -108,7 +108,7 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 	}
 }
 
-func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
 	port := strconv.Itoa(acctest.RandIntRange(4001, 5001))
 	return fmt.Sprintf(`
 
@@ -125,7 +125,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, rDomain, cnameEnabled, port),
+		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled, port),
 
 		// data source variables
 		resourcetype.ZPAApplicationSegmentBrowserAccess,
@@ -134,7 +134,7 @@ data "%s" "%s" {
 	)
 }
 
-func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool, port string) string {
+func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled bool, port string) string {
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "jenkins" {
@@ -154,16 +154,16 @@ resource "%s" "%s" {
 		from = "%s"
 		to = "%s"
 	}
-	domain_names = ["%s.bd-hashicorp.com"]
+	domain_names = ["jenkins.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	clientless_apps {
-		name                 = "%s.bd-hashicorp.com"
+		name                 = "jenkins.bd-hashicorp.com"
 		application_protocol = "HTTPS"
 		application_port     = "%s"
 		certificate_id       = data.zpa_ba_certificate.jenkins.id
 		trust_untrusted_cert = true
 		enabled              = true
-		domain               = "%s.bd-hashicorp.com"
+		domain               = "jenkins.bd-hashicorp.com"
 	}
 	server_groups {
 		id = []
@@ -181,11 +181,8 @@ resource "%s" "%s" {
 		strconv.FormatBool(cnameEnabled),
 		port,
 		port,
-		rDomain,
 		segmentGroupTypeAndName,
-		rDomain,
 		port,
-		rDomain,
 		// serverGroupTypeAndName,
 		segmentGroupTypeAndName,
 		// serverGroupTypeAndName,

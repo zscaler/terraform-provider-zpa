@@ -20,7 +20,7 @@ func resourceSegmentGroup() *schema.Resource {
 		Delete: resourceSegmentGroupDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+				service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -28,7 +28,7 @@ func resourceSegmentGroup() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.segmentgroup.GetByName(id)
+					resp, _, err := service.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -87,17 +87,22 @@ func resourceSegmentGroup() *schema.Resource {
 					"0", "1",
 				}, false),
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func resourceSegmentGroupCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	req := expandSegmentGroup(d)
 	log.Printf("[INFO] Creating segment group with request\n%+v\n", req)
 
-	segmentgroup, _, err := zClient.segmentgroup.Create(&req)
+	segmentgroup, _, err := service.Create(&req)
 	if err != nil {
 		return err
 	}
@@ -109,9 +114,9 @@ func resourceSegmentGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
-	resp, _, err := zClient.segmentgroup.Get(d.Id())
+	resp, _, err := service.Get(d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing segment group %s from state because it no longer exists in ZPA", d.Id())
@@ -129,6 +134,7 @@ func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("policy_migrated", resp.PolicyMigrated)
 	_ = d.Set("tcp_keep_alive_enabled", resp.TcpKeepAliveEnabled)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	if err := d.Set("applications", flattenSegmentGroupApplicationsSimple(resp)); err != nil {
 		return fmt.Errorf("failed to read applications %s", err)
 	}
@@ -146,37 +152,37 @@ func flattenSegmentGroupApplicationsSimple(segmentGroup *segmentgroup.SegmentGro
 	return segmentGroupApplications
 }
 func resourceSegmentGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	id := d.Id()
 	log.Printf("[INFO] Updating segment group ID: %v\n", id)
 	req := expandSegmentGroup(d)
 
-	if _, _, err := zClient.segmentgroup.Get(id); err != nil {
+	if _, _, err := service.Get(id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.segmentgroup.Update(id, &req); err != nil {
+	if _, err := service.Update(id, &req); err != nil {
 		return err
 	}
 
 	return resourceSegmentGroupRead(d, m)
 }
 
-func detachSegmentGroupFromAllPolicyRules(id string, zClient *Client) {
+func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService *policysetcontroller.Service) {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
 	var rules []policysetcontroller.PolicyRule
 	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
 	for _, t := range types {
-		policySet, _, err := zClient.policysetcontroller.GetByPolicyType(t)
+		policySet, _, err := policySetControllerService.GetByPolicyType(t)
 		if err != nil {
 			continue
 		}
-		r, _, err := zClient.policysetcontroller.GetAllByType(t)
+		r, _, err := policySetControllerService.GetAllByType(t)
 		if err != nil {
 			continue
 		}
@@ -202,7 +208,7 @@ func detachSegmentGroupFromAllPolicyRules(id string, zClient *Client) {
 			rule.Conditions = []policysetcontroller.Conditions{}
 		}
 		if changed {
-			if _, err := zClient.policysetcontroller.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
+			if _, err := policySetControllerService.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
 				continue
 			}
 		}
@@ -211,12 +217,13 @@ func detachSegmentGroupFromAllPolicyRules(id string, zClient *Client) {
 
 func resourceSegmentGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	policySetControllerService := zClient.policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	service := zClient.segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	log.Printf("[INFO] Deleting segment group ID: %v\n", d.Id())
 
-	detachSegmentGroupFromAllPolicyRules(d.Id(), zClient)
+	detachSegmentGroupFromAllPolicyRules(d.Id(), policySetControllerService)
 
-	if _, err := zClient.segmentgroup.Delete(d.Id()); err != nil {
+	if _, err := service.Delete(d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
@@ -232,6 +239,7 @@ func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 		Enabled:             d.Get("enabled").(bool),
 		PolicyMigrated:      d.Get("policy_migrated").(bool),
 		TcpKeepAliveEnabled: d.Get("tcp_keep_alive_enabled").(string),
+		MicroTenantID:       d.Get("microtenant_id").(string),
 		Applications:        expandSegmentGroupApplications(d.Get("applications").([]interface{})),
 	}
 	return segmentGroup

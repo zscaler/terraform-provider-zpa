@@ -32,6 +32,10 @@ func resourcePolicyIsolationRule() *schema.Resource {
 						"BYPASS_ISOLATE",
 					}, false),
 				},
+				"microtenant_id": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
 				"conditions": GetPolicyConditionsSchema([]string{
 					"APP",
 					"CLIENT_TYPE",
@@ -58,7 +62,7 @@ func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) er
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy isolation rule with request\n%+v\n", req)
-	if ValidateConditions(req.Conditions, zClient) {
+	if ValidateConditions(req.Conditions, zClient, "") {
 		policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
 		if err != nil {
 			return err
@@ -104,6 +108,7 @@ func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) erro
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("zpn_cbi_profile_id", resp.ZpnCbiProfileID)
 	_ = d.Set("zpn_isolation_profile_id", resp.ZpnIsolationProfileID)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
@@ -122,7 +127,7 @@ func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return err
 	}
-	if ValidateConditions(req.Conditions, zClient) {
+	if ValidateConditions(req.Conditions, zClient, "") {
 		if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
 			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 				d.SetId("")
@@ -189,6 +194,7 @@ func expandCreatePolicyIsolationRule(d *schema.ResourceData) (*policysetcontroll
 		ZpnIsolationProfileID: d.Get("zpn_isolation_profile_id").(string),
 		Priority:              d.Get("priority").(string),
 		RuleOrder:             d.Get("rule_order").(string),
+		MicroTenantID:         d.Get("microtenant_id").(string),
 		Conditions:            conditions,
 	}, nil
 }

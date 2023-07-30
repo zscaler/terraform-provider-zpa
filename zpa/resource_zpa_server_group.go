@@ -25,7 +25,7 @@ func resourceServerGroup() *schema.Resource {
 		Delete: resourceServerGroupDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+				service := m.(*Client).servergroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -33,7 +33,7 @@ func resourceServerGroup() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.servergroup.GetByName(id)
+					resp, _, err := service.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -83,7 +83,11 @@ func resourceServerGroup() *schema.Resource {
 				Required:    true,
 				Description: "This field defines the name of the server group.",
 			},
-			//
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"servers": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -140,7 +144,7 @@ func resourceServerGroup() *schema.Resource {
 }
 
 func resourceServerGroupCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).servergroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	req := expandServerGroup(d)
 	log.Printf("[INFO] Creating zpa server group with request\n%+v\n", req)
@@ -152,7 +156,7 @@ func resourceServerGroupCreate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[ERROR] Servers must not be empty when DynamicDiscovery is disabled\n")
 		return fmt.Errorf("servers must not be empty when DynamicDiscovery is disabled")
 	}
-	resp, _, err := zClient.servergroup.Create(&req)
+	resp, _, err := service.Create(&req)
 	if err != nil {
 		return err
 	}
@@ -163,9 +167,9 @@ func resourceServerGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).servergroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
-	resp, _, err := zClient.servergroup.Get(d.Id())
+	resp, _, err := service.Get(d.Id())
 	if err != nil {
 		if err.(*client.ErrorResponse).IsObjectNotFound() {
 			log.Printf("[WARN] Removing server group %s from state because it no longer exists in ZPA", d.Id())
@@ -185,24 +189,13 @@ func resourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("dynamic_discovery", resp.DynamicDiscovery)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("name", resp.Name)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("app_connector_groups", flattenAppConnectorGroupsSimple(resp.AppConnectorGroups))
 	_ = d.Set("applications", flattenServerGroupApplicationsSimple(resp.Applications))
-	_ = d.Set("servers", flattenServersSimple(resp.Servers))
+	_ = d.Set("servers", flattenServers(resp.Servers))
 
 	return nil
 
-}
-
-func flattenServersSimple(appServers []servergroup.ApplicationServer) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appServers))
-	for i, server := range appServers {
-		ids[i] = server.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
 }
 
 func flattenAppConnectorGroupsSimple(appConnectorGroups []servergroup.AppConnectorGroups) []interface{} {
@@ -228,7 +221,7 @@ func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []int
 	return result
 }
 func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).servergroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	id := d.Id()
 	log.Printf("[INFO] Updating server group ID: %v\n", id)
 	req := expandServerGroup(d)
@@ -241,27 +234,27 @@ func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("can't update server group: servers must not be empty when DynamicDiscovery is disabled")
 	}
 
-	if _, _, err := zClient.servergroup.Get(id); err != nil {
+	if _, _, err := service.Get(id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.servergroup.Update(id, &req); err != nil {
+	if _, err := service.Update(id, &req); err != nil {
 		return err
 	}
 	return resourceServerGroupRead(d, m)
 }
 
-func detachServerGroupFromAllAccessPolicyRules(id string, zClient *Client) {
+func detachServerGroupFromAllAccessPolicyRules(id string, policySetControllerService *policysetcontroller.Service) {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
-	accessPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	accessPolicySet, _, err := policySetControllerService.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return
 	}
-	accessPolicyRules, _, err := zClient.policysetcontroller.GetAllByType("ACCESS_POLICY")
+	accessPolicyRules, _, err := policySetControllerService.GetAllByType("ACCESS_POLICY")
 	if err != nil {
 		return
 	}
@@ -279,16 +272,16 @@ func detachServerGroupFromAllAccessPolicyRules(id string, zClient *Client) {
 		}
 		accessPolicyRule.AppServerGroups = ids
 		if changed {
-			if _, err := zClient.policysetcontroller.Update(accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
+			if _, err := policySetControllerService.Update(accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
 				continue
 			}
 		}
 	}
 }
 
-func detachServerGroupFromAllAppSegments(id string, zClient *Client) {
+func detachServerGroupFromAllAppSegments(id string, applicationSegmentService *applicationsegment.Service) {
 
-	apps, _, err := zClient.applicationsegment.GetAll()
+	apps, _, err := applicationSegmentService.GetAll()
 	if err != nil {
 		return
 	}
@@ -303,7 +296,7 @@ func detachServerGroupFromAllAppSegments(id string, zClient *Client) {
 			})
 		}
 		app.ServerGroups = ids
-		if _, err := zClient.applicationsegment.Update(app.ID, app); err != nil {
+		if _, err := applicationSegmentService.Update(app.ID, app); err != nil {
 			continue
 		}
 	}
@@ -311,17 +304,20 @@ func detachServerGroupFromAllAppSegments(id string, zClient *Client) {
 
 func resourceServerGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	applicationSegmentService := zClient.applicationsegment.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	policySetControllerService := zClient.policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	appConnectorGroupService := zClient.appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	service := zClient.servergroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	log.Printf("[INFO] Deleting server group ID: %v\n", d.Id())
-	err := detachServerGroupFromAppConnectorGroups(zClient, d.Id())
+	err := detachServerGroupFromAppConnectorGroups(d.Id(), service, appConnectorGroupService)
 	if err != nil {
 		log.Printf("[ERROR] Detaching server group ID: %v from app connector groups failed:%v\n", d.Id(), err)
 	}
 
-	detachServerGroupFromAllAccessPolicyRules(d.Id(), zClient)
-	detachServerGroupFromAllAppSegments(d.Id(), zClient)
+	detachServerGroupFromAllAccessPolicyRules(d.Id(), policySetControllerService)
+	detachServerGroupFromAllAppSegments(d.Id(), applicationSegmentService)
 
-	if _, err := zClient.servergroup.Delete(d.Id()); err != nil {
+	if _, err := service.Delete(d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
@@ -329,9 +325,9 @@ func resourceServerGroupDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func detachServerGroupFromAppConnectorGroups(client *Client, serverGroupID string) error {
+func detachServerGroupFromAppConnectorGroups(serverGroupID string, serevrGroupService *servergroup.Service, apponnectorGroupService *appconnectorgroup.Service) error {
 	log.Printf("[INFO] Detaching Server Group  %s from App Connector Groups\n", serverGroupID)
-	serverGroup, _, err := client.servergroup.Get(serverGroupID)
+	serverGroup, _, err := serevrGroupService.Get(serverGroupID)
 	if err != nil {
 		return err
 	}
@@ -339,7 +335,7 @@ func detachServerGroupFromAppConnectorGroups(client *Client, serverGroupID strin
 	detachLock.Lock()
 	defer detachLock.Unlock()
 	for _, appConnectorGroup := range serverGroup.AppConnectorGroups {
-		app, _, err := client.appconnectorgroup.Get(appConnectorGroup.ID)
+		app, _, err := apponnectorGroupService.Get(appConnectorGroup.ID)
 		if err != nil {
 			continue
 		}
@@ -351,7 +347,7 @@ func detachServerGroupFromAppConnectorGroups(client *Client, serverGroupID strin
 			appServerGroups = append(appServerGroups, s)
 		}
 		app.AppServerGroup = appServerGroups
-		_, err = client.appconnectorgroup.Update(app.ID, app)
+		_, err = apponnectorGroupService.Update(app.ID, app)
 		if err != nil {
 			continue
 		}
@@ -367,6 +363,7 @@ func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 		IpAnchored:         d.Get("ip_anchored").(bool),
 		ConfigSpace:        d.Get("config_space").(string),
 		DynamicDiscovery:   d.Get("dynamic_discovery").(bool),
+		MicroTenantID:      d.Get("microtenant_id").(string),
 		AppConnectorGroups: expandAppConnectorGroups(d),
 		Applications:       expandServerGroupApplications(d),
 		Servers:            expandApplicationServers(d),

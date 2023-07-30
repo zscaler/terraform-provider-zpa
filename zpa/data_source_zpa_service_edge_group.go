@@ -25,6 +25,14 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Name of the Service Edge Group.",
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"city_country": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -75,7 +83,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Whether the default version profile of the App Connector Group is applied or overridden.",
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -176,7 +184,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -263,7 +271,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"modifiedby": {
+									"modified_by": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -314,7 +322,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -400,7 +408,7 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error
 		_ = d.Set("latitude", resp.Latitude)
 		_ = d.Set("location", resp.Location)
 		_ = d.Set("longitude", resp.Longitude)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("upgrade_day", resp.UpgradeDay)
@@ -409,6 +417,8 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
 		_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
 		_ = d.Set("service_edges", flattenServiceEdges(resp.ServiceEdges))
 
@@ -445,7 +455,7 @@ func flattenServiceEdges(serviceEdge []serviceedgegroup.ServiceEdges) []interfac
 			"location":                             serviceEdge.Location,
 			"longitude":                            serviceEdge.Longitude,
 			"listen_ips":                           serviceEdge.ListenIPs,
-			"modifiedby":                           serviceEdge.ModifiedBy,
+			"modified_by":                          serviceEdge.ModifiedBy,
 			"modified_time":                        serviceEdge.ModifiedTime,
 			"name":                                 serviceEdge.Name,
 			"provisioning_key_id":                  serviceEdge.ProvisioningKeyID,
@@ -461,30 +471,9 @@ func flattenServiceEdges(serviceEdge []serviceedgegroup.ServiceEdges) []interfac
 			"enrollment_cert":                      serviceEdge.EnrollmentCert,
 			"upgrade_attempt":                      serviceEdge.UpgradeAttempt,
 			"upgrade_status":                       serviceEdge.UpgradeStatus,
-			"zpn_sub_module_upgrade_list":          flattenZPNSubModuleUpgradeListServiceEdge(serviceEdge),
 		}
 	}
 	return serviceEdges
-}
-
-func flattenZPNSubModuleUpgradeListServiceEdge(zpnSubModule serviceedgegroup.ServiceEdges) []interface{} {
-	zpnModules := make([]interface{}, len(zpnSubModule.ZPNSubModuleUpgradeList))
-	for i, val := range zpnSubModule.ZPNSubModuleUpgradeList {
-		zpnModules[i] = map[string]interface{}{
-			"id":               val.ID,
-			"creation_time":    val.CreationTime,
-			"current_version":  val.CurrentVersion,
-			"entity_gid":       val.EntityGid,
-			"modifiedby":       val.EntityType,
-			"modified_time":    val.ModifiedTime,
-			"expected_version": val.ExpectedVersion,
-			"role":             val.Role,
-			"upgrade_status":   val.UpgradeStatus,
-			"upgrade_time":     val.UpgradeTime,
-		}
-	}
-
-	return zpnModules
 }
 
 func flattenTrustedNetworks(trustedNetwork *serviceedgegroup.ServiceEdgeGroup) []interface{} {
@@ -495,7 +484,7 @@ func flattenTrustedNetworks(trustedNetwork *serviceedgegroup.ServiceEdgeGroup) [
 			"domain":             val.Domain,
 			"id":                 val.ID,
 			"master_customer_id": val.MasterCustomerID,
-			"modifiedby":         val.ModifiedBy,
+			"modified_by":        val.ModifiedBy,
 			"modified_time":      val.ModifiedTime,
 			"name":               val.Name,
 			"network_id":         val.NetworkID,
