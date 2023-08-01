@@ -242,54 +242,6 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"zpn_sub_module_upgrade_list": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"creation_time": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"current_version": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"entity_gid": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"modifiedby": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"modified_time": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"expected_version": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"role": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"upgrade_status": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"upgrade_time": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
 					},
 				},
 			},
@@ -461,30 +413,9 @@ func flattenServiceEdges(serviceEdge []serviceedgegroup.ServiceEdges) []interfac
 			"enrollment_cert":                      serviceEdge.EnrollmentCert,
 			"upgrade_attempt":                      serviceEdge.UpgradeAttempt,
 			"upgrade_status":                       serviceEdge.UpgradeStatus,
-			"zpn_sub_module_upgrade_list":          flattenZPNSubModuleUpgradeListServiceEdge(serviceEdge),
 		}
 	}
 	return serviceEdges
-}
-
-func flattenZPNSubModuleUpgradeListServiceEdge(zpnSubModule serviceedgegroup.ServiceEdges) []interface{} {
-	zpnModules := make([]interface{}, len(zpnSubModule.ZPNSubModuleUpgradeList))
-	for i, val := range zpnSubModule.ZPNSubModuleUpgradeList {
-		zpnModules[i] = map[string]interface{}{
-			"id":               val.ID,
-			"creation_time":    val.CreationTime,
-			"current_version":  val.CurrentVersion,
-			"entity_gid":       val.EntityGid,
-			"modifiedby":       val.EntityType,
-			"modified_time":    val.ModifiedTime,
-			"expected_version": val.ExpectedVersion,
-			"role":             val.Role,
-			"upgrade_status":   val.UpgradeStatus,
-			"upgrade_time":     val.UpgradeTime,
-		}
-	}
-
-	return zpnModules
 }
 
 func flattenTrustedNetworks(trustedNetwork *serviceedgegroup.ServiceEdgeGroup) []interface{} {

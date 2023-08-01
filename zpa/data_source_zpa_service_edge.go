@@ -166,54 +166,6 @@ func dataSourceServiceEdgeController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"zpn_sub_module_upgrade_list": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"creation_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"current_version": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"entity_gid": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modifiedby": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modified_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"expected_version": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"role": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"upgrade_status": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"upgrade_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -279,31 +231,10 @@ func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("enrollment_cert", resp.EnrollmentCert)
 		_ = d.Set("upgrade_attempt", resp.UpgradeAttempt)
 		_ = d.Set("upgrade_status", resp.UpgradeStatus)
-		_ = d.Set("zpn_sub_module_upgrade_list", flattenZPNSubModuleUpgradeList(resp))
 
 	} else {
 		return fmt.Errorf("couldn't find any service edge controller with name '%s' or id '%s'", name, id)
 	}
 
 	return nil
-}
-
-func flattenZPNSubModuleUpgradeList(zpnSubModule *serviceedgecontroller.ServiceEdgeController) []interface{} {
-	zpnSubModules := make([]interface{}, len(zpnSubModule.ZPNSubModuleUpgradeList))
-	for i, val := range zpnSubModule.ZPNSubModuleUpgradeList {
-		zpnSubModules[i] = map[string]interface{}{
-			"id":               val.ID,
-			"creation_time":    val.CreationTime,
-			"current_version":  val.CurrentVersion,
-			"entity_gid":       val.EntityGid,
-			"modifiedby":       val.EntityType,
-			"modified_time":    val.ModifiedTime,
-			"expected_version": val.ExpectedVersion,
-			"role":             val.Role,
-			"upgrade_status":   val.UpgradeStatus,
-			"upgrade_time":     val.UpgradeTime,
-		}
-	}
-
-	return zpnSubModules
 }

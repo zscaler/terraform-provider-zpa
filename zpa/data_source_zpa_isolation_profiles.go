@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/isolationprofile"
+	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/isolationprofile"
 )
 
 func dataSourceIsolationProfile() *schema.Resource {
