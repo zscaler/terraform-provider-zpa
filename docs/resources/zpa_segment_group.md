@@ -38,8 +38,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `description` (Optional) Description of the segment group.
 * `enabled` (Optional) Whether this segment group is enabled or not.
-* `config_space` (Optional)
-* `tcp_keep_alive_enabled` (Optional)
+* `microtenant_id` - (Optional) - Microtenant ID
 
 ## Import
 

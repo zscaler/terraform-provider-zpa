@@ -47,3 +47,5 @@ In addition to all arguments above, the following attributes are exported:
 * `address` - (string) This field defines the domain or IP address of the server.
 * `enabled` - (bool) This field defines the status of the server.
 * `app_server_group_ids` - (Set of String) This field defines the list of server groups IDs.
+* `microtenant_id` (Computed)
+* `microtenant_name` (Computed)

@@ -73,5 +73,7 @@ The following values are ignored in PUT/POST calls. Only applicable for a GET re
 * `enrollment_cert` (Computed)
 * `upgrade_attempt` (Computed)
 * `upgrade_status` (Computed)
+* `microtenant_id` (Computed)
+* `microtenant_name` (Computed)
 
 :warning: Notice that certificate and public_keys are omitted from the output.

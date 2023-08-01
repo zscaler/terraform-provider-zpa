@@ -88,6 +88,7 @@ resource "zpa_application_segment" "this" {
 * `policy_type` (Optional) Supported values: ``CLIENT_FORWARDING_POLICY`` or ``BYPASS_POLICY``
   * The supported policy type values for a policy forwarding rule are: `CLIENT_FORWARDING_POLICY` and `BYPASS_POLICY`
 * `rule_order` - (Optional)
+* `microtenant_id` - (Optional) - Microtenant ID
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``

@@ -119,4 +119,7 @@ In addition to all arguments above, the following attributes are exported:
   * `network_id` (string)
   * `zscaler_cloud` (string)
 
+* `microtenant_id` (string)
+* `microtenant_name` (string)
+
 :warning: Notice that certificate and public_keys are omitted from the output.

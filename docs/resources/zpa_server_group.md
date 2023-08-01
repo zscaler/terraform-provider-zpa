@@ -102,6 +102,7 @@ resource "zpa_app_connector_group" "example" {
 * `dynamic_discovery` (Optional) This field controls dynamic discovery of the servers.
 * `enabled` (Optional) This field defines if the server group is enabled or disabled.
 * `servers` (Block List) This field is a list of servers that are applicable only when dynamic discovery is disabled. Server name is required only in cases where the new servers need to be created in this API.
+* `microtenant_id` - (Optional) - Microtenant ID
 
 ## Import
 

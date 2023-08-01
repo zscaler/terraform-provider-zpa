@@ -63,5 +63,7 @@ In addition to all arguments above, the following attributes are exported:
 * `usage_count` - (string)
 * `zcomponent_id` - (string)
 * `zcomponent_name` - (string) Applicable only for GET calls, ignored in PUT/POST calls.
+* `microtenant_id` (Computed)
+* `microtenant_name` (Computed)
 
 :warning: Notice that certificate and public_keys are omitted from the output.

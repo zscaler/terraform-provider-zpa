@@ -55,3 +55,7 @@ In addition to all arguments above, the following attributes are exported:
     * `modified_by` (string)
     * `name` (string)
     * `signing_cert` (string)
+  * `microtenant_id` (string)
+  * `microtenant_name` (string)
+* `microtenant_id` (Computed)
+* `microtenant_name` (Computed)

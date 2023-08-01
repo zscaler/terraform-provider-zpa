@@ -68,6 +68,7 @@ The following arguments are supported:
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `pra_enabled` - (Optional) Supported values: `true`, `false`
 * `waf_disabled` - (Optional) Supported values: `true`, `false`
+* `microtenant_id` - (Optional) - Microtenant ID
 
 ## Attributes Reference
 

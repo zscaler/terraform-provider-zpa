@@ -99,6 +99,7 @@ resource "zpa_browser_access" "this" {
 * `operator` (Optional) Supported values: ``AND``, and ``OR``
 * `policy_type` (Optional) Supported values: ``ACCESS_POLICY`` or ``GLOBAL_POLICY``
 * `rule_order` (String)
+* `microtenant_id` - (Optional) - Microtenant ID
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``

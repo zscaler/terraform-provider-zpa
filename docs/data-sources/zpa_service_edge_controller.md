@@ -64,3 +64,5 @@ In addition to all arguments above, the following attributes are exported:
 * `enrollment_cert` (string)
 * `upgrade_attempt` (string)
 * `upgrade_status` (string)
+* `microtenant_id` (string)
+* `microtenant_name` (string)

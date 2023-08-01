@@ -40,3 +40,5 @@ In addition to all arguments above, the following attributes are exported:
 * `enabled` - (bool) This field defines if the server group is enabled or disabled.
 * `ip_anchored` - (bool)
 * `app_connector_groups` (string)This field is a json array of app-connector-id only.
+* `microtenant_id` (string)
+* `microtenant_name` (string)

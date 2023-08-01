@@ -21,6 +21,10 @@ Use the **zpa_policy_type** data source to get information about an a ``policy_s
 * ``TIMEOUT_POLICY/REAUTH_POLICY``
 * ``BYPASS_POLICY/CLIENT_FORWARDING_POLICY``
 * ``INSPECTION_POLICY``
+* ``CREDENTIAL_POLICY``
+* ``CAPABILITIES_POLICY``
+* ``ISOLATION_POLICY``
+* ``CLIENTLESS_SESSION_PROTECTION_POLICY``
 
 ## Example Usage
 
@@ -90,12 +94,56 @@ output "zpa_policy_type_inspection_policy" {
 }
 ```
 
+```hcl
+# Get information for "CREDENTIAL_POLICY" ID
+data "zpa_policy_type" "credential_policy" {
+    policy_type = "CREDENTIAL_POLICY"
+}
+
+output "zpa_policy_type_credential_policy" {
+    value = data.zpa_policy_type.credential_policy.id
+}
+```
+
+```hcl
+# Get information for "CAPABILITIES_POLICY" ID
+data "zpa_policy_type" "capabilities_policy" {
+    policy_type = "CAPABILITIES_POLICY"
+}
+
+output "zpa_policy_type_capabilities_policy" {
+    value = data.zpa_policy_type.capabilities_policy.id
+}
+```
+
+```hcl
+# Get information for "ISOLATION_POLICY" ID
+data "zpa_policy_type" "isolation_policy" {
+    policy_type = "ISOLATION_POLICY"
+}
+
+output "zpa_policy_type_isolation_policy" {
+    value = data.zpa_policy_type.isolation_policy.id
+}
+```
+
+```hcl
+# Get information for "CLIENTLESS_SESSION_PROTECTION_POLICY" ID
+data "zpa_policy_type" "isolation_policy" {
+    policy_type = "CLIENTLESS_SESSION_PROTECTION_POLICY"
+}
+
+output "zpa_policy_type_protection_policy" {
+    value = data.zpa_policy_type.protection_policy.id
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `policy_type` - (Optional) The value for differentiating the policy types.
 * `policy_set_id` - (Required) The ID of the global policy set.
+* `policy_type` - (Optional) The value for differentiating the policy types.
 
 ## Attribute Reference
 

@@ -58,3 +58,5 @@ In addition to all arguments above, the following attributes are exported:
 * `segment_group_name` - (string)
 * `default_idle_timeout` - (String)
 * `default_max_age` - (String)
+* `microtenant_id` (Computed)
+* `microtenant_name` (Computed)

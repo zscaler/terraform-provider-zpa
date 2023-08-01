@@ -29,7 +29,7 @@ terraform {
   required_providers {
     zpa = {
       source = "zscaler/zpa"
-      version = "~> 2.7.0"
+      version = "~> 3.0.0"
     }
   }
 }
@@ -47,7 +47,7 @@ resouce "zpa_application_segment" "app_segment" {
 
 ## Example Usage ZPA Beta, GOV, Preview, and Dev Cloud
 
-For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `DEV` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
+For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `GOV`, `GOVUS`, or `PREVIEW` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
 
 ```hcl
 # Configure ZPA provider source and version
@@ -55,7 +55,7 @@ terraform {
   required_providers {
     zpa = {
       source = "zscaler/zpa"
-      version = "~> 2.8.0"
+      version = "~> 3.0.0"
     }
   }
 }
@@ -120,7 +120,9 @@ provider "zpa" {
 
 You can provide credentials via the `ZPA_CLIENT_ID`, `ZPA_CLIENT_SECRET`, `ZPA_CUSTOMER_ID`, `ZPA_CLOUD` environment variables, representing your ZPA API key credentials and customer ID, of your ZPA account, respectively.
 
-~> **NOTE** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production, but required if running in the ZPA Beta Cloud, Gov Cloud, Preview Cloud or Dev Cloud.
+~> **NOTE** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is required to provision resources in the ZPA Beta Cloud, Gov Cloud, Gov US Cloud, or Preview Cloud.
+
+~> **NOTE** `ZPA_MICROTENANT_ID` environment variable is an optional parameter when provisioning resources within a ZPA microtenant
 
 ```hcl
 provider "zpa" {}
@@ -174,14 +176,18 @@ The following arguments are supported:
 
 ### Required
 
-* `zpa_client_id` - (Required) ZPA client ID, is equivalent to a username.
-* `zpa_client_secret` - (Required) ZPA client secret, is equivalent to a secret password.
-* `zpa_customer_id` - (Required) ZPA customer ID, is equivalent to your ZPA tenant identification.
-* `zpa_cloud` - (Required) ZPA Cloud name `BETA`, `GOV`, `PREVIEW` or `DEV`. Only required when running in the ZPA beta cloud.
+* ``zpa_client_id`` - (Required) ZPA client ID, is equivalent to a username.
+* ``zpa_client_secret`` - (Required) ZPA client secret, is equivalent to a secret password.
+* ``zpa_customer_id`` - (Required) ZPA customer ID, is equivalent to your ZPA tenant identification.
+* ``zpa_cloud`` - (Required) ZPA Cloud name `BETA`, `GOV`, or `PREVIEW`.
+* `zpa_microtenant_id` - Only required when provisioning resources within a ZPA microtenant
 
 ### Optional
 
-* `zpa_cloud` - (Optiona) ZPA Cloud name `PRODUCTION`. Optional when running in the ZPA production cloud.
+* `zpa_cloud` - (Optional) ZPA Cloud name `PRODUCTION`. Optional when running in the ZPA production cloud.
+* `zpa_microtenant_id` - (Optional) Only required when provisioning resources within a ZPA microtenant
+
+### Zscaler Private Access Microtenant
 
 ## Support
 

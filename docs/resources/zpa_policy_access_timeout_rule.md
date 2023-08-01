@@ -73,8 +73,8 @@ resource "zpa_policy_timeout_rule" "this"  {
 * `description` (Optional) This is the description of the access policy rule.
 * `operator` (Optional) Supported values: ``AND``, and ``OR``
 * `policy_type` (Optional) Supported values: ``TIMEOUT_POLICY`` or ``REAUTH_POLICY``
-
 * `rule_order` (Optional)
+* `microtenant_id` - (Optional) - Microtenant ID
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``

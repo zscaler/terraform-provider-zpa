@@ -63,7 +63,7 @@ The following arguments are supported:
 * `app_server_group_ids` - (Optional) This field defines the list of server group IDs.
 * `description` - (Optional) This field defines the description of the server.
 * `enabled` - (Optional) This field defines the status of the server.
-* `config_space` - (Optional)
+* `microtenant_id` - (Optional) - Microtenant ID
 
 ## Import
 

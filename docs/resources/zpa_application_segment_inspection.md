@@ -96,6 +96,7 @@ The following arguments are supported:
 
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `is_incomplete_dr_config` - (Optional) Supported values: `true`, `false`
+* `microtenant_id` - (Optional) - Microtenant ID
 
 ## Import
 
