@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"testing"
 
@@ -39,4 +38,3 @@ data "zpa_isolation_profile" "bd_sa_profile2" {
     name = "BD_SA_Profile2"
 }
 `
-*/
