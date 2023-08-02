@@ -1,4 +1,4 @@
-[![CI](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/ci.yml)
+[![Test](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/test.yml)
 [![Release](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml/badge.svg?branch=master)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml)
 [![Zscaler Community](https://img.shields.io/badge/zscaler-community-blue)](https://community.zscaler.com/)
 [![Slack](https://img.shields.io/badge/Join%20Our%20Community-Slack-blue)](https://forms.gle/3iMJvVmJDvmUy36q9)
