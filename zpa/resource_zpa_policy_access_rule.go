@@ -3,7 +3,6 @@ package zpa
 import (
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -11,24 +10,24 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
 
-func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
-	policy, _, err := zClient.policysetcontroller.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
-	if err != nil || policy == nil {
-		return nil
-	}
-	if order == "" {
-		return nil
-	}
-	o, err := strconv.Atoi(order)
-	if err != nil {
-		return nil
-	}
+// func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
+// 	policy, _, err := zClient.policysetcontroller.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
+// 	if err != nil || policy == nil {
+// 		return nil
+// 	}
+// 	if order == "" {
+// 		return nil
+// 	}
+// 	o, err := strconv.Atoi(order)
+// 	if err != nil {
+// 		return nil
+// 	}
 
-	if o == 1 {
-		return fmt.Errorf("policy Zscaler Deception exists, order must start from 2")
-	}
-	return nil
-}
+// 	if o == 1 {
+// 		return fmt.Errorf("policy Zscaler Deception exists, order must start from 2")
+// 	}
+// 	return nil
+// }
 
 func resourcePolicyAccessRule() *schema.Resource {
 	return &schema.Resource{
@@ -118,9 +117,9 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
-	if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
-		return err
-	}
+	// if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
+	// 	return err
+	// }
 	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
@@ -188,9 +187,9 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
-		return err
-	}
+	// if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
+	// 	return err
+	// }
 	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}

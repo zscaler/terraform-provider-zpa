@@ -59,9 +59,9 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
-	if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
-		return err
-	}
+	// if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
+	// 	return err
+	// }
 	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy access forwarding rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
