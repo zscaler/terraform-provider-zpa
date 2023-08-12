@@ -98,7 +98,9 @@ resource "zpa_browser_access" "this" {
 * `description` (String) This is the description of the access policy rule.
 * `operator` (Optional) Supported values: ``AND``, and ``OR``
 * `policy_type` (Optional) Supported values: ``ACCESS_POLICY`` or ``GLOBAL_POLICY``
-* `rule_order` (String)
+* `rule_order` - (Deprecated)
+
+    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``

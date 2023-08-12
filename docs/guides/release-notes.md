@@ -12,9 +12,23 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.81.0``
+``Last updated: v2.82.0``
 
 ---
+
+## 2.82.0 (August, xx 2023) - Beta
+
+### Notes
+
+- Release date: **(August, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #340](https://github.com/zscaler/terraform-provider-zpa/pull/340)
+  1. Implemented a new resource ``zpa_policy_access_rule_reorder`` to support Access policy rule reorder in a more efficient way.
+
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
 
 ## 2.81.0 (August, 1 2023)
 

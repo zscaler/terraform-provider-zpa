@@ -141,7 +141,6 @@ resource "%s" "%s" {
 	name          		= "%s"
 	description   		= "%s"
 	action              = "BYPASS"
-	rule_order    		= 1
 	operator      		= "AND"
 	policy_set_id 		= data.zpa_policy_type.forwarding_policy.id
 	conditions {

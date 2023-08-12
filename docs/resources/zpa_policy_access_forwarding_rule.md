@@ -87,7 +87,9 @@ resource "zpa_application_segment" "this" {
 * `operator` (Optional) Supported values: ``AND``, ``OR``
 * `policy_type` (Optional) Supported values: ``CLIENT_FORWARDING_POLICY`` or ``BYPASS_POLICY``
   * The supported policy type values for a policy forwarding rule are: `CLIENT_FORWARDING_POLICY` and `BYPASS_POLICY`
-* `rule_order` - (Optional)
+* `rule_order` - (Deprecated)
+
+    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``

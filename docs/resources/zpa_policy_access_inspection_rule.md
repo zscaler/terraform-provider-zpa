@@ -23,7 +23,6 @@ resource "zpa_policy_inspection_rule" "this" {
   name                      = "Example"
   description               = "Example"
   action                    = "INSPECT"
-  rule_order                = 1
   operator                  = "AND"
   policy_set_id             = data.zpa_policy_type.inspection_policy.id
   zpn_inspection_profile_id = zpa_inspection_profile.this.id
@@ -81,7 +80,9 @@ resource "zpa_policy_inspection_rule" "this" {
 * `description` - (Optional) This is the description of the access policy rule.
 * `operator` (Optional) Supported values: ``AND``, ``OR``
 * `policy_type` (Optional) Supported values: ``INSPECTION_POLICY``
-* `rule_order` - (Optional)
+* `rule_order` - (Deprecated)
+
+    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``
