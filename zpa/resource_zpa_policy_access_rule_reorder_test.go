@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccZPAResourcePolicyAccessRuleReorder_basic(t *testing.T) {
-    randName := acctest.RandString(10) // This will generate a random string of 10 characters
+	randName := acctest.RandString(10) // This will generate a random string of 10 characters
 	resource.Test(t, resource.TestCase{
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPolicyAccessReorderDestroy,
@@ -24,7 +24,6 @@ func TestAccZPAResourcePolicyAccessRuleReorder_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("zpa_policy_access_rule_reorder.this", "rules.0.order", "1"),
 					resource.TestCheckResourceAttrPair("zpa_policy_access_rule_reorder.this", "rules.1.id", "zpa_policy_access_rule.rule2", "id"),
 					resource.TestCheckResourceAttr("zpa_policy_access_rule_reorder.this", "rules.1.order", "2"),
-
 				),
 			},
 		},
@@ -33,12 +32,12 @@ func TestAccZPAResourcePolicyAccessRuleReorder_basic(t *testing.T) {
 }
 
 func testAccCheckPolicyAccessReorderDestroy(s *terraform.State) error {
-    // Here you can add checks to verify if the resource has been destroyed if applicable.
-    return nil
+	// Here you can add checks to verify if the resource has been destroyed if applicable.
+	return nil
 }
 
 func testAccPolicyAccessRuleReorderConfig(randName string) string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "zpa_policy_type" "access_policy" {
     policy_type = "ACCESS_POLICY"
 }
