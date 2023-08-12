@@ -59,9 +59,7 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
-	// if err := validateAccessPolicyRuleOrder(req.RuleOrder, zClient); err != nil {
-	// 	return err
-	// }
+
 	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy access forwarding rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
@@ -70,10 +68,7 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 	d.SetId(policysetcontroller.ID)
-	order, ok := d.GetOk("rule_order")
-	if ok {
-		reorder(order, policysetcontroller.PolicySetID, "CLIENT_FORWARDING_POLICY", policysetcontroller.ID, zClient)
-	}
+
 	return resourcePolicyForwardingRuleRead(d, m)
 }
 
@@ -109,7 +104,6 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
-	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
 	return nil
@@ -138,12 +132,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
-		if d.HasChange("rule_order") {
-			order, ok := d.GetOk("rule_order")
-			if ok {
-				reorder(order, globalPolicySet.ID, "CLIENT_FORWARDING_POLICY", ruleID, zClient)
-			}
-		}
+
 		return resourcePolicyForwardingRuleRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy forwarding (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
@@ -191,7 +180,6 @@ func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetcontrol
 		PolicySetID:       policySetID,
 		PolicyType:        d.Get("policy_type").(string),
 		Priority:          d.Get("priority").(string),
-		RuleOrder:         d.Get("rule_order").(string),
 		Conditions:        conditions,
 	}, nil
 }

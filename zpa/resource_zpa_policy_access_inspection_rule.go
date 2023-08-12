@@ -64,10 +64,7 @@ func resourcePolicyInspectionRuleCreate(d *schema.ResourceData, m interface{}) e
 			return err
 		}
 		d.SetId(policysetcontroller.ID)
-		order, ok := d.GetOk("rule_order")
-		if ok {
-			reorder(order, policysetcontroller.PolicySetID, "INSPECTION_POLICY", policysetcontroller.ID, zClient)
-		}
+
 		return resourcePolicyInspectionRuleRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy inspection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
@@ -106,7 +103,6 @@ func resourcePolicyInspectionRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
 	_ = d.Set("zpn_inspection_profile_id", resp.ZpnInspectionProfileID)
-	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
 	return nil
@@ -135,12 +131,7 @@ func resourcePolicyInspectionRuleUpdate(d *schema.ResourceData, m interface{}) e
 		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
-		if d.HasChange("rule_order") {
-			order, ok := d.GetOk("rule_order")
-			if ok {
-				reorder(order, globalPolicySet.ID, "INSPECTION_POLICY", ruleID, zClient)
-			}
-		}
+
 		return resourcePolicyInspectionRuleRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy inspection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
@@ -187,7 +178,6 @@ func expandCreatePolicyInspectionRule(d *schema.ResourceData) (*policysetcontrol
 		PolicyType:             d.Get("policy_type").(string),
 		Priority:               d.Get("priority").(string),
 		ZpnInspectionProfileID: d.Get("zpn_inspection_profile_id").(string),
-		RuleOrder:              d.Get("rule_order").(string),
 		Conditions:             conditions,
 	}, nil
 }

@@ -10,6 +10,8 @@ description: |-
 
 The **zpa_policy_inspection_rule** resource creates a policy inspection access rule in the Zscaler Private Access cloud.
 
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
 ## Example Usage 1
 
 ```hcl

@@ -10,6 +10,8 @@ description: |-
 
 The **zpa_policy_timeout_rule** resource creates a policy timeout rule in the Zscaler Private Access cloud.
 
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
 ## Example Usage
 
 ```hcl

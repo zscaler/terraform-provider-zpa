@@ -12,15 +12,15 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.82.0``
+``Last updated: v2.82.0-beta``
 
 ---
 
-## 2.82.0 (August, xx 2023) - Beta
+## 2.82.0-beta (August, 13 2023) - Beta
 
 ### Notes
 
-- Release date: **(August, xx 2023)**
+- Release date: **(August, 13 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements

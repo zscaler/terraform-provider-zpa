@@ -10,6 +10,8 @@ description: |-
 
 The **zpa_policy_access_rule** resource creates and manages a policy access rule with SAML attribute conditions in the Zscaler Private Access cloud.
 
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
 ## Example Usage
 
 ```hcl

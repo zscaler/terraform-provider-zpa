@@ -98,6 +98,7 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
+
 	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
@@ -106,10 +107,7 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.SetId(policysetcontroller.ID)
-	order, ok := d.GetOk("rule_order")
-	if ok {
-		reorder(order, policysetcontroller.PolicySetID, "ACCESS_POLICY", policysetcontroller.ID, zClient)
-	}
+
 	return resourcePolicyAccessRead(d, m)
 }
 
@@ -144,7 +142,6 @@ func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
-	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 	_ = d.Set("app_server_groups", flattenPolicyRuleServerGroups(resp.AppServerGroups))
@@ -165,6 +162,7 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+
 	if !ValidateConditions(req.Conditions, zClient) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
@@ -178,12 +176,7 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 		return err
 	}
-	if d.HasChange("rule_order") {
-		order, ok := d.GetOk("rule_order")
-		if ok {
-			reorder(order, globalPolicySet.ID, "ACCESS_POLICY", ruleID, zClient)
-		}
-	}
+
 	return resourcePolicyAccessRead(d, m)
 }
 
@@ -228,7 +221,6 @@ func expandCreatePolicyRule(d *schema.ResourceData) (*policysetcontroller.Policy
 		PolicySetID:        policySetID,
 		PolicyType:         d.Get("policy_type").(string),
 		Priority:           d.Get("priority").(string),
-		RuleOrder:          d.Get("rule_order").(string),
 		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
 		AppServerGroups:    expandPolicySetControllerAppServerGroups(d),

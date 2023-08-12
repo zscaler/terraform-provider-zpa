@@ -10,6 +10,8 @@ description: |-
 
 The **zpa_policy_forwarding_rule** resource creates a policy forwarding access rule in the Zscaler Private Access cloud.
 
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
 ## Example Usage
 
 ```hcl

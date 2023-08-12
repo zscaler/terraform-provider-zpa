@@ -1,12 +1,46 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 	"sort"
 	"strconv"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+var deceptionAccessPolicyRuleExist *bool = nil
+var m sync.Mutex
+
+func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
+	m.Lock()
+	defer m.Unlock()
+	if deceptionAccessPolicyRuleExist == nil {
+		policy, _, err := zClient.policysetcontroller.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
+		if err != nil || policy == nil {
+			f := false
+			deceptionAccessPolicyRuleExist = &f
+		}
+	}
+	if !*deceptionAccessPolicyRuleExist {
+		return nil
+	}
+
+	if order == "" {
+		return nil
+	}
+
+	o, err := strconv.Atoi(order)
+	if err != nil {
+		return nil
+	}
+
+	if o == 1 {
+		return fmt.Errorf("policy Zscaler Deception exists, order must start from 2")
+	}
+	return nil
+}
 
 func resourcePolicyAccessRuleReorder() *schema.Resource {
 	return &schema.Resource{
@@ -17,16 +51,17 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"policy_set_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"policy_type": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"rules": {
 				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of rules and their orders",
+				MaxItems:    1000,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -89,6 +124,12 @@ func resourcePolicyAccessReorderCreate(d *schema.ResourceData, m interface{}) er
 	rules := getRules(d)
 	log.Printf("[INFO] reorder rules on create: %v\n", rules)
 	for _, r := range rules.Orders {
+		if rules.PolicyType == "ACCESS_POLICY" {
+			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
+				log.Printf("[ERROR] reordering rule ID '%s' failed, order validation error: %v\n", r.ID, err)
+				continue
+			}
+		}
 		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
 		if err != nil {
 			log.Printf("[ERROR] reordering rule ID '%s' failed: %v\n", r.ID, err)
@@ -131,6 +172,10 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 	rules := getRules(d)
 	log.Printf("[INFO] reorder rules on update: %v\n", rules)
 	for _, r := range rules.Orders {
+		if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
+			log.Printf("[ERROR] reordering rule ID '%s' failed, order validation error: %v\n", r.ID, err)
+			continue
+		}
 		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
 		if err != nil {
 			log.Printf("[ERROR] reordering rule ID '%s' failed: %v\n", r.ID, err)
