@@ -574,6 +574,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Optional: true,
 			Computed: true,
+			Deprecated: "The `rule_order` field is now deprecated for all zpa access policy resources in favor of the resource `zpa_policy_access_rule_reorder`",
 		},
 		"lss_default_rule": {
 			Type:     schema.TypeBool,
