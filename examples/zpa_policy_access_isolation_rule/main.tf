@@ -10,7 +10,6 @@ resource "zpa_policy_isolation_rule" "this" {
   name                          = "Example_Isolation_Policy"
   description                   = "Example_Isolation_Policy"
   action                        = "ISOLATE"
-  rule_order                     = 1
   operator = "AND"
   policy_set_id = data.zpa_policy_type.isolation_policy.id
   zpn_isolation_profile_id = data.zpa_isolation_profile.isolation_profile.id

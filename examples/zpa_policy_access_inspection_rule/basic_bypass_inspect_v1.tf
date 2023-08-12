@@ -7,7 +7,6 @@ resource "zpa_policy_inspection_rule" "this" {
   name          = "Example"
   description   = "Example"
   action        = "BYPASS_INSPECT"
-  rule_order    = 1
   operator      = "AND"
   policy_set_id = data.zpa_policy_type.inspection_policy.id
 
