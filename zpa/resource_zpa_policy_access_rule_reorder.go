@@ -170,11 +170,31 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) erro
 func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	rules := getRules(d)
+	remoteRules, _, err := zClient.policysetcontroller.GetAllByType(rules.PolicyType)
+	if err != nil {
+		log.Printf("[ERROR] failed to get rules: %v\n", err)
+		return err
+	}
 	log.Printf("[INFO] reorder rules on update: %v\n", rules)
 	for _, r := range rules.Orders {
-		if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
-			log.Printf("[ERROR] reordering rule ID '%s' failed, order validation error: %v\n", r.ID, err)
+		orderchanged := false
+		found := false
+		for _, r2 := range remoteRules {
+			if r.ID == r2.ID {
+				found = true
+				if strconv.Itoa(r.Order) != r2.RuleOrder {
+					orderchanged = true
+				}
+			}
+		}
+		if !found || !orderchanged {
 			continue
+		}
+		if rules.PolicyType == "ACCESS_POLICY" {
+			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
+				log.Printf("[ERROR] reordering rule ID '%s' failed, order validation error: %v\n", r.ID, err)
+				continue
+			}
 		}
 		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
 		if err != nil {
