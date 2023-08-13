@@ -64,10 +64,7 @@ func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) er
 			return err
 		}
 		d.SetId(policysetcontroller.ID)
-		order, ok := d.GetOk("rule_order")
-		if ok {
-			reorder(order, policysetcontroller.PolicySetID, "ISOLATION_POLICY", policysetcontroller.ID, zClient)
-		}
+
 		return resourcePolicyIsolationRuleRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy isolation (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
@@ -104,7 +101,6 @@ func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) erro
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("zpn_cbi_profile_id", resp.ZpnCbiProfileID)
 	_ = d.Set("zpn_isolation_profile_id", resp.ZpnIsolationProfileID)
-	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
 	return nil
@@ -133,12 +129,7 @@ func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, m interface{}) er
 		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
-		if d.HasChange("rule_order") {
-			order, ok := d.GetOk("rule_order")
-			if ok {
-				reorder(order, globalPolicySet.ID, "ISOLATION_POLICY", ruleID, zClient)
-			}
-		}
+
 		return resourcePolicyIsolationRuleRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy isolation (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
@@ -188,7 +179,6 @@ func expandCreatePolicyIsolationRule(d *schema.ResourceData) (*policysetcontroll
 		ZpnCbiProfileID:       d.Get("zpn_cbi_profile_id").(string),
 		ZpnIsolationProfileID: d.Get("zpn_isolation_profile_id").(string),
 		Priority:              d.Get("priority").(string),
-		RuleOrder:             d.Get("rule_order").(string),
 		Conditions:            conditions,
 	}, nil
 }

@@ -10,6 +10,8 @@ description: |-
 
 The **zpa_policy_access_rule** resource creates and manages a policy access rule with Posture Profile conditions in the Zscaler Private Access cloud.
 
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
 ## Example Usage
 
 ```hcl
@@ -25,7 +27,6 @@ resource "zpa_policy_access_rule" "this" {
   name                          = "Example"
   description                   = "Example"
   action                        = "ALLOW"
-  rule_order                    = 1
   operator = "AND"
   policy_set_id = data.zpa_policy_type.access_policy.id
 
@@ -53,7 +54,9 @@ resource "zpa_policy_access_rule" "this" {
 * `description` (optional) This is the description of the access policy rule.
 * `operator` (Optional) Supported values: ``AND``, ``OR``
 * `policy_type` (Optional) Supported values: ``ACCESS_POLICY`` or ``GLOBAL_POLICY``
-* `rule_order` (optional)
+* `rule_order` - (Deprecated)
+
+    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``

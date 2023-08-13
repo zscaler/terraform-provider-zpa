@@ -8,9 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var testAccProvider *schema.Provider
-var testAccProviders map[string]*schema.Provider
-var testAccProviderFactories map[string]func() (*schema.Provider, error)
+var (
+	testAccProvider          *schema.Provider
+	testAccProviders         map[string]*schema.Provider
+	testAccProviderFactories map[string]func() (*schema.Provider, error)
+)
 
 func init() {
 	testAccProvider = Provider()
@@ -31,35 +33,24 @@ func TestProvider(t *testing.T) {
 	}
 }
 
-func TestProvider_impl(t *testing.T) {
-	_ = Provider()
-}
-
 func testAccPreCheck(t *testing.T) {
-	err := accPreCheck()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-	if v := os.Getenv("ZPA_CLIENT_ID"); v == "" {
-		t.Fatal("ZPA_CLIENT_ID must be set for acceptance tests.")
-	}
-	if v := os.Getenv("ZPA_CLIENT_SECRET"); v == "" {
-		t.Fatal("ZPA_CLIENT_SECRET must be set for acceptance tests.")
-	}
-	if v := os.Getenv("ZPA_CUSTOMER_ID"); v == "" {
-		t.Fatal("ZPA_CUSTOMER_ID must be set for acceptance tests.")
+	if err := accPreCheck(); err != nil {
+		t.Fatal(err)
 	}
 }
 
 func accPreCheck() error {
-	if v := os.Getenv("ZPA_CLIENT_ID"); v == "" {
-		return errors.New("ZPA_CLIENT_ID must be set for acceptance tests")
+	envVars := map[string]string{
+		"ZPA_CLIENT_ID":     os.Getenv("ZPA_CLIENT_ID"),
+		"ZPA_CLIENT_SECRET": os.Getenv("ZPA_CLIENT_SECRET"),
+		"ZPA_CUSTOMER_ID":   os.Getenv("ZPA_CUSTOMER_ID"),
 	}
-	client_id := os.Getenv("ZPA_CLIENT_ID")
-	client_secret := os.Getenv("ZPA_CLIENT_SECRET")
-	customer_id := os.Getenv("ZPA_CUSTOMER_ID")
-	if client_id == "" && (client_id == "" || client_secret == "" || customer_id == "") {
-		return errors.New("either ZPA_CLIENT_ID or ZPA_CLIENT_SECRET, and ZPA_CUSTOMER_ID must be set for acceptance tests")
+
+	for key, value := range envVars {
+		if value == "" {
+			return errors.New(key + " must be set for acceptance tests")
+		}
 	}
+
 	return nil
 }

@@ -35,13 +35,12 @@ func resourcePolicyTimeoutRule() *schema.Resource {
 					"APP",
 					"APP_GROUP",
 					"CLIENT_TYPE",
-					"CLOUD_CONNECTOR_GROUP",
 					"IDP",
 					"POSTURE",
+					"PLATFORM",
 					"SAML",
 					"SCIM",
 					"SCIM_GROUP",
-					"TRUSTED_NETWORK",
 				}),
 			},
 		),
@@ -62,10 +61,7 @@ func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 		d.SetId(policysetcontroller.ID)
-		order, ok := d.GetOk("rule_order")
-		if ok {
-			reorder(order, policysetcontroller.PolicySetID, "TIMEOUT_POLICY", policysetcontroller.ID, zClient)
-		}
+
 		return resourcePolicyTimeoutRuleRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy timeout (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
@@ -106,7 +102,6 @@ func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("reauth_default_rule", resp.ReauthDefaultRule)
 	_ = d.Set("reauth_idle_timeout", resp.ReauthIdleTimeout)
 	_ = d.Set("reauth_timeout", resp.ReauthTimeout)
-	_ = d.Set("rule_order", resp.RuleOrder)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
 	return nil
@@ -135,12 +130,7 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
-		if d.HasChange("rule_order") {
-			order, ok := d.GetOk("rule_order")
-			if ok {
-				reorder(order, globalPolicySet.ID, "TIMEOUT_POLICY", ruleID, zClient)
-			}
-		}
+
 		return resourcePolicyTimeoutRuleRead(d, m)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy timeout (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
@@ -189,7 +179,6 @@ func expandCreatePolicyTimeoutRule(d *schema.ResourceData) (*policysetcontroller
 		ReauthDefaultRule: d.Get("reauth_default_rule").(bool),
 		ReauthIdleTimeout: d.Get("reauth_idle_timeout").(string),
 		ReauthTimeout:     d.Get("reauth_timeout").(string),
-		RuleOrder:         d.Get("rule_order").(string),
 		Conditions:        conditions,
 	}, nil
 }

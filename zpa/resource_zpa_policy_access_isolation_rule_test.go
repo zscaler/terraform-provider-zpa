@@ -131,7 +131,6 @@ resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
 	action              		= "ISOLATE"
-	rule_order    				= 1
 	operator      				= "AND"
 	policy_set_id 				= data.zpa_policy_type.isolation_policy.id
 	zpn_isolation_profile_id 	= data.zpa_isolation_profile.bd_sa_profile1.id
