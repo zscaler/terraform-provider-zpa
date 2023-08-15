@@ -75,12 +75,14 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 	}
 }
 
+// RuleOrder stores the ID and order of a rule, along with its original order (possibly for tracking changes).
 type RuleOrder struct {
 	ID            string
 	Order         int
 	OriginalOrder int
 }
 
+// RulesOrders holds a set of rules for a specific policy type.
 type RulesOrders struct {
 	PolicySetID string
 	PolicyType  string
