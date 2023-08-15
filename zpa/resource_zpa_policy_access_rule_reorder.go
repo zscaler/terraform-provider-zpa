@@ -76,8 +76,9 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 }
 
 type RuleOrder struct {
-	ID    string
-	Order int
+	ID            string
+	Order         int
+	OriginalOrder int
 }
 
 type RulesOrders struct {
@@ -208,6 +209,8 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		return err
 	}
 	log.Printf("[INFO] reorder rules on update: %v\n", rules)
+	orders := map[int]RuleOrder{}
+	ordersList := []RuleOrder{}
 	for _, r := range rules.Orders {
 		orderchanged := false
 		originalOrder := r.Order
@@ -224,6 +227,34 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		if !found || !orderchanged {
 			continue
 		}
+		o := RuleOrder{
+			ID:            r.ID,
+			Order:         r.Order,
+			OriginalOrder: originalOrder,
+		}
+		orders[r.Order] = o
+		ordersList = append(ordersList, o)
+	}
+	sort.SliceStable(ordersList, func(i, j int) bool {
+		return ordersList[i].Order < ordersList[j].Order
+	})
+	for _, r := range ordersList {
+		orderchanged := false
+		originalOrder := r.Order
+		found := false
+		for _, r2 := range remoteRules {
+			if r.ID == r2.ID {
+				found = true
+				if strconv.Itoa(r.Order) != r2.RuleOrder {
+					orderchanged = true
+					originalOrder, _ = strconv.Atoi(r2.RuleOrder)
+				}
+			}
+		}
+		if !found || !orderchanged {
+			continue
+		}
+
 		if rules.PolicyType == "ACCESS_POLICY" {
 			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
 				log.Printf("[ERROR] reordering rule ID '%s' failed, order validation error: %v\n", r.ID, err)
@@ -233,6 +264,10 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
 		if err != nil {
 			log.Printf("[ERROR] reordering rule ID '%s' failed: %v\n", r.ID, err)
+		}
+		// avoid NO adjacent rules issue
+		if replacedByRule, ok := orders[r.OriginalOrder]; ok && replacedByRule.OriginalOrder == r.Order {
+			continue
 		}
 		// reconcile the remote rules copy
 		for i := range remoteRules {
