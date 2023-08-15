@@ -6,12 +6,16 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"sync"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
 )
+
+var policySets = map[string]policysetcontroller.PolicySet{}
+var policySetsMutex sync.Mutex
 
 // Common values shared between Service Edge Groups and App Connector Groups
 var versionProfileNameIDMapping map[string]string = map[string]string{
@@ -671,4 +675,19 @@ func flattenInspectionRulesConditions(condition common.Rules) []interface{} {
 	}
 
 	return conditions
+}
+
+func GetGlobalPolicySetByPolicyType(policysetcontroller policysetcontroller.Service, policyType string) (*policysetcontroller.PolicySet, error) {
+	policySetsMutex.Lock()
+	defer policySetsMutex.Unlock()
+
+	if p, ok := policySets[policyType]; ok {
+		return &p, nil
+	}
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	if err != nil {
+		return nil, err
+	}
+	policySets[policyType] = *globalPolicySet
+	return globalPolicySet, nil
 }

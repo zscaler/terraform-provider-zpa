@@ -49,10 +49,6 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 		Update: resourcePolicyAccessReorderUpdate,
 		Delete: resourcePolicyAccessReorderDelete,
 		Schema: map[string]*schema.Schema{
-			"policy_set_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"policy_type": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -90,11 +86,27 @@ type RulesOrders struct {
 	Orders      []RuleOrder
 }
 
-func getRules(d *schema.ResourceData) RulesOrders {
-	policySetID := d.Get("policy_set_id").(string)
+func validateRuleOrders(orders *RulesOrders) error {
+	sort.Slice(orders.Orders, func(i, j int) bool {
+		return orders.Orders[i].Order < orders.Orders[j].Order
+	})
+	for i := 0; i < len(orders.Orders)-1; i++ {
+		if orders.Orders[i].Order == orders.Orders[i+1].Order {
+			return fmt.Errorf("duplicate order '%d' used by two rule: '%s' & '%s'", orders.Orders[i].Order, orders.Orders[i].ID, orders.Orders[i+1].ID)
+		}
+	}
+	return nil
+}
+
+func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
 	policyType := d.Get("policy_type").(string)
+	globalPolicySet, err := GetGlobalPolicySetByPolicyType(zClient.policysetcontroller, policyType)
+	if err != nil {
+		log.Printf("[ERROR] reordering rules failed getting global policy set '%s': %v\n", policyType, err)
+		return nil, err
+	}
 	orders := RulesOrders{
-		PolicySetID: policySetID,
+		PolicySetID: globalPolicySet.ID,
 		PolicyType:  policyType,
 		Orders:      []RuleOrder{},
 	}
@@ -116,13 +128,22 @@ func getRules(d *schema.ResourceData) RulesOrders {
 	sort.Slice(orders.Orders, func(i, j int) bool {
 		return orders.Orders[i].Order < orders.Orders[j].Order
 	})
-	return orders
+	return &orders, nil
 }
 
 func resourcePolicyAccessReorderCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	rules := getRules(d)
+	rules, err := getRules(d, zClient)
+	if err != nil {
+		return err
+	}
 	log.Printf("[INFO] reorder rules on create: %v\n", rules)
+
+	if err := validateRuleOrders(rules); err != nil {
+		log.Printf("[ERROR] reordering rules failed: %v\n", err)
+		return err
+	}
+
 	for _, r := range rules.Orders {
 		if rules.PolicyType == "ACCESS_POLICY" {
 			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
@@ -142,7 +163,10 @@ func resourcePolicyAccessReorderCreate(d *schema.ResourceData, m interface{}) er
 
 func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	rulesOrders := getRules(d)
+	rulesOrders, err := getRules(d, zClient)
+	if err != nil {
+		return err
+	}
 	rules, _, err := zClient.policysetcontroller.GetAllByType(rulesOrders.PolicyType)
 	if err != nil {
 		log.Printf("[ERROR] failed to get rules: %v\n", err)
@@ -169,7 +193,15 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) erro
 
 func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	rules := getRules(d)
+	rules, err := getRules(d, zClient)
+	if err != nil {
+		return err
+	}
+	if err := validateRuleOrders(rules); err != nil {
+		log.Printf("[ERROR] reordering rules failed: %v\n", err)
+		return err
+	}
+
 	remoteRules, _, err := zClient.policysetcontroller.GetAllByType(rules.PolicyType)
 	if err != nil {
 		log.Printf("[ERROR] failed to get rules: %v\n", err)
@@ -178,12 +210,14 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 	log.Printf("[INFO] reorder rules on update: %v\n", rules)
 	for _, r := range rules.Orders {
 		orderchanged := false
+		originalOrder := r.Order
 		found := false
 		for _, r2 := range remoteRules {
 			if r.ID == r2.ID {
 				found = true
 				if strconv.Itoa(r.Order) != r2.RuleOrder {
 					orderchanged = true
+					originalOrder, _ = strconv.Atoi(r2.RuleOrder)
 				}
 			}
 		}
@@ -199,6 +233,18 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
 		if err != nil {
 			log.Printf("[ERROR] reordering rule ID '%s' failed: %v\n", r.ID, err)
+		}
+		// reconcile the remote rules copy
+		for i := range remoteRules {
+			if r.ID == remoteRules[i].ID {
+				continue
+			}
+			o, _ := strconv.Atoi(remoteRules[i].RuleOrder)
+			if originalOrder > r.Order && o >= r.Order && o < originalOrder {
+				remoteRules[i].RuleOrder = strconv.Itoa(o + 1)
+			} else if originalOrder < r.Order && o <= r.Order && o > originalOrder {
+				remoteRules[i].RuleOrder = strconv.Itoa(o - 1)
+			}
 		}
 	}
 	return resourcePolicyAccessReorderRead(d, m)
