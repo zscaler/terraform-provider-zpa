@@ -66,7 +66,7 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of rules and their orders",
-				MaxItems:    1000,
+				MaxItems:    2000,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
