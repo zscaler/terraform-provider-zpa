@@ -11,23 +11,27 @@ import (
 )
 
 // Global variables for state management
-var deceptionAccessPolicyRuleExist *bool = nil // Pointer to check if deception rule exists.
-var m sync.Mutex                               // Mutex to ensure thread safety.
+var deceptionAccessPolicyRuleExist *bool // Pointer to check if deception rule exists.
+var m sync.Mutex                         // Mutex to ensure thread safety.
 
 // Validate the access policy rule's order.
 func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
 	m.Lock()
 	defer m.Unlock()
+
 	// Check if we've already verified the existence of the Deception rule.
 	if deceptionAccessPolicyRuleExist == nil {
 		policy, _, err := zClient.policysetcontroller.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
 		if err != nil || policy == nil {
 			f := false
 			deceptionAccessPolicyRuleExist = &f
+		} else {
+			t := true
+			deceptionAccessPolicyRuleExist = &t
 		}
 	}
 	// If Deception rule doesn't exist or the order is empty, no further checks needed.
-	if !*deceptionAccessPolicyRuleExist {
+	if deceptionAccessPolicyRuleExist != nil && !*deceptionAccessPolicyRuleExist || order == "" {
 		return nil
 	}
 

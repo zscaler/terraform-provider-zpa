@@ -18,7 +18,6 @@ func TestAccZPAResourcePolicyAccessRuleReorder_basic(t *testing.T) {
 			{
 				Config: testAccPolicyAccessRuleReorderConfig(randName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("zpa_policy_access_rule_reorder.this", "policy_set_id", "data.zpa_policy_type.access_policy", "id"),
 					resource.TestCheckResourceAttr("zpa_policy_access_rule_reorder.this", "policy_type", "ACCESS_POLICY"),
 					resource.TestCheckResourceAttrPair("zpa_policy_access_rule_reorder.this", "rules.0.id", "zpa_policy_access_rule.rule1", "id"),
 					resource.TestCheckResourceAttr("zpa_policy_access_rule_reorder.this", "rules.0.order", "1"),
@@ -68,7 +67,6 @@ resource "zpa_policy_access_rule" "rule2" {
 }
 
 resource "zpa_policy_access_rule_reorder" "this" {
-    policy_set_id = data.zpa_policy_type.access_policy.id
     policy_type   = "ACCESS_POLICY"
 
     dynamic "rules" {
