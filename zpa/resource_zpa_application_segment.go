@@ -101,14 +101,14 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the application.",
 			},
-			// We need to ensure that all domain name entries are converted to lowercase.
-			// When domain_name values are set to uppercase, the API will return them in lowercase, causing a drift in Terraform.
 			"domain_names": {
 				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of domains and IPs.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
+				Set:         customDomainNameHash,
 			},
+
 			"double_encrypt": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -259,7 +259,9 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("bypass_type", resp.BypassType)
 	_ = d.Set("config_space", resp.ConfigSpace)
 	_ = d.Set("description", resp.Description)
-	_ = d.Set("domain_names", resp.DomainNames)
+	// Convert domain names from API to lowercase before setting in state
+	lowercaseDomainNames := convertListToLowercase(resp.DomainNames)
+	_ = d.Set("domain_names", lowercaseDomainNames)
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("health_check_type", resp.HealthCheckType)

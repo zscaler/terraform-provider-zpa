@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
@@ -72,7 +73,21 @@ func SetToStringList(d *schema.ResourceData, key string) []string {
 	if !ok {
 		return []string{}
 	}
-	return SetToStringSlice(set)
+	return convertListToLowercase(SetToStringSlice(set))
+}
+
+func convertListToLowercase(inputList []string) []string {
+	var outputList []string
+	for _, item := range inputList {
+		outputList = append(outputList, strings.ToLower(item))
+	}
+	return outputList
+}
+
+
+func customDomainNameHash(v interface{}) int {
+	// Convert the domain name to lowercase and hash it
+	return schema.HashString(strings.ToLower(v.(string)))
 }
 
 func ListToStringSlice(v []interface{}) []string {
