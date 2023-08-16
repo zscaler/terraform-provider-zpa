@@ -53,7 +53,7 @@ func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
 // Define the Terraform resource for reordering policy access rules.
 func resourcePolicyAccessRuleReorder() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePolicyAccessReorderCreate,
+		Create: resourcePolicyAccessReorderUpdate,
 		Read:   resourcePolicyAccessReorderRead,
 		Update: resourcePolicyAccessReorderUpdate,
 		Delete: resourcePolicyAccessReorderDelete,
@@ -66,7 +66,7 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of rules and their orders",
-				MaxItems:    2000,
+				MaxItems:    1000,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -106,7 +106,7 @@ func validateRuleOrders(orders *RulesOrders) error {
 	// Check for duplicate order values.
 	for i := 0; i < len(orders.Orders)-1; i++ {
 		if orders.Orders[i].Order == orders.Orders[i+1].Order {
-			return fmt.Errorf("duplicate order '%d' used by two rules: '%s' & '%s'", orders.Orders[i].Order, orders.Orders[i].ID, orders.Orders[i+1].ID)
+			return fmt.Errorf("duplicate order '%d' used by two rule: '%s' & '%s'", orders.Orders[i].Order, orders.Orders[i].ID, orders.Orders[i+1].ID)
 		}
 	}
 	return nil
@@ -146,38 +146,6 @@ func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
 		return orders.Orders[i].Order < orders.Orders[j].Order
 	})
 	return &orders, nil
-}
-
-// Create operation for the Terraform resource.
-func resourcePolicyAccessReorderCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	rules, err := getRules(d, zClient)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] reorder rules on create: %v\n", rules)
-
-	// Validate the orders.
-	if err := validateRuleOrders(rules); err != nil {
-		log.Printf("[ERROR] reordering rules failed: %v\n", err)
-		return err
-	}
-
-	for _, r := range rules.Orders {
-		if rules.PolicyType == "ACCESS_POLICY" {
-			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
-				log.Printf("[ERROR] reordering rule ID '%s' failed, order validation error: %v\n", r.ID, err)
-				continue
-			}
-		}
-		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
-		if err != nil {
-			log.Printf("[ERROR] reordering rule ID '%s' failed: %v\n", r.ID, err)
-		}
-	}
-
-	d.SetId(rules.PolicySetID)
-	return resourcePolicyAccessReorderRead(d, m)
 }
 
 func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) error {
@@ -223,6 +191,7 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		log.Printf("[ERROR] reordering rules failed: %v\n", err)
 		return err
 	}
+	d.SetId(rules.PolicySetID)
 	// Fetch the existing remote rules based on the policy type.
 	remoteRules, _, err := zClient.policysetcontroller.GetAllByType(rules.PolicyType)
 	if err != nil {
@@ -250,7 +219,6 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 				}
 			}
 		}
-
 		// If no match was found or order did not change, skip to the next iteration.
 		if !found || !orderchanged {
 			continue
@@ -263,12 +231,10 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		orders[r.Order] = o
 		ordersList = append(ordersList, o)
 	}
-
 	// Sort rules based on the order field.
 	sort.SliceStable(ordersList, func(i, j int) bool {
 		return ordersList[i].Order < ordersList[j].Order
 	})
-
 	// Re-check and re-order the rule set.
 	for _, r := range ordersList {
 		orderchanged := false
@@ -289,7 +255,6 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		if !found || !orderchanged {
 			continue
 		}
-
 		// Check for special rules related to 'ACCESS_POLICY'.
 		if rules.PolicyType == "ACCESS_POLICY" {
 			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
@@ -297,7 +262,6 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 				continue
 			}
 		}
-
 		// Request the service to reorder the rules.
 		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
 		if err != nil {
