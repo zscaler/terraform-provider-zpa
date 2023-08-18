@@ -85,8 +85,8 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 									return diag.Diagnostics{
 										diag.Diagnostic{
 											Severity: diag.Error,
-											Summary:  "Order must be a positive value",
-											Detail:   fmt.Sprintf("Invalid order value: %s. Order must be a positive integer greater than 0.", v.(string)),
+											Summary:  "Invalid order",
+											Detail:   "Orders must start from 1, got:" + v.(string),
 										},
 									}
 								}
@@ -194,7 +194,6 @@ func findExceededOrders(rules []RuleOrder, total int) []int {
 	return exceededOrders
 }
 
-// Fetch and sort the rule orders from the provided data.
 func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
 	policyType := d.Get("policy_type").(string)
 	globalPolicySet, err := GetGlobalPolicySetByPolicyType(zClient.policysetcontroller, policyType)
@@ -207,7 +206,6 @@ func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
 		PolicyType:  policyType,
 		Orders:      []RuleOrder{},
 	}
-	// Extract rules from the data.
 	rulesSet, ok := d.Get("rules").(*schema.Set)
 	if ok && rulesSet != nil {
 		for _, r := range rulesSet.List() {
@@ -223,7 +221,6 @@ func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
 			})
 		}
 	}
-	// Sort the rules by their order.
 	sort.Slice(orders.Orders, func(i, j int) bool {
 		return orders.Orders[i].Order < orders.Orders[j].Order
 	})
@@ -287,23 +284,14 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 
 	// Iterate over the fetched rule orders to determine changes.
 	for _, r := range rules.Orders {
-		orderchanged := false
 		originalOrder := r.Order
-		found := false
-
-		// Check if there's a change in order for each rule against the remote set.
 		for _, r2 := range remoteRules {
 			if r.ID == r2.ID {
-				found = true
 				if strconv.Itoa(r.Order) != r2.RuleOrder {
-					orderchanged = true
 					originalOrder, _ = strconv.Atoi(r2.RuleOrder)
 				}
+				break
 			}
-		}
-		// If no match was found or order did not change, skip to the next iteration.
-		if !found || !orderchanged {
-			continue
 		}
 		o := RuleOrder{
 			ID:            r.ID,
@@ -344,7 +332,6 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 				continue
 			}
 		}
-		// Request the service to reorder the rules.
 		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
 		if err != nil {
 			log.Printf("[ERROR] reordering rule ID '%s' failed: %v\n", r.ID, err)
