@@ -147,8 +147,8 @@ terraform plan
 ### Configuration file
 
 You can use a configuration file to specify your credentials. The
-file location must be `$HOME/.zscaler/credentials.json` on Linux and OS X, or
-`"%USERPROFILE%\.zscaler/credentials.json"` for Windows users.
+file location must be `$HOME/.zpa/credentials.json` on Linux and OS X, or
+`"%USERPROFILE%\.zpa/credentials.json"` for Windows users.
 If we fail to detect credentials inline, or in the environment variable, Terraform will check
 this location.
 
@@ -164,7 +164,8 @@ credentials.json file:
 {
   "zpa_client_id":"zpa_client_id",
   "zpa_client_secret": "zpa_client_secret",
-  "zpa_customer_id": "zpa_customer_id"
+  "zpa_customer_id": "zpa_customer_id",
+  "zpa_cloud": "zpa_cloud"
 }
 ```
 
