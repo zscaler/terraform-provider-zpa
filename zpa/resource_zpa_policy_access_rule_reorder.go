@@ -5,8 +5,11 @@ import (
 	"log"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -76,6 +79,19 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 						"order": {
 							Type:     schema.TypeString,
 							Required: true,
+							ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+								order, _ := strconv.Atoi(v.(string))
+								if order <= 0 {
+									return diag.Diagnostics{
+										diag.Diagnostic{
+											Severity: diag.Error,
+											Summary:  "Order must be a positive value",
+											Detail:   fmt.Sprintf("Invalid order value: %s. Order must be a positive integer greater than 0.", v.(string)),
+										},
+									}
+								}
+								return nil
+							},
 						},
 					},
 				},
@@ -84,7 +100,6 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 	}
 }
 
-// Data structures for rule ordering.
 type RuleOrder struct {
 	ID            string
 	Order         int
@@ -103,13 +118,80 @@ func validateRuleOrders(orders *RulesOrders) error {
 	sort.Slice(orders.Orders, func(i, j int) bool {
 		return orders.Orders[i].Order < orders.Orders[j].Order
 	})
-	// Check for duplicate order values.
-	for i := 0; i < len(orders.Orders)-1; i++ {
-		if orders.Orders[i].Order == orders.Orders[i+1].Order {
-			return fmt.Errorf("duplicate order '%d' used by two rule: '%s' & '%s'", orders.Orders[i].Order, orders.Orders[i].ID, orders.Orders[i+1].ID)
+
+	// Check for orders <= 0
+	for _, rule := range orders.Orders {
+		if rule.Order <= 0 {
+			return fmt.Errorf("order must be a positive integer greater than 0")
 		}
 	}
+	// Check for duplicate order values.
+	if dupOrder, dupRuleIDs, ok := hasDuplicates(orders.Orders); ok {
+		return fmt.Errorf("duplicate order '%d' used by rules with IDs: %v", dupOrder, strings.Join(dupRuleIDs, ", "))
+	}
+	// Check for missing order numbers
+	missingOrders := findMissingOrders(orders.Orders)
+	exceededOrders := findExceededOrders(orders.Orders, len(orders.Orders))
+
+	errMsgs := make([]string, 0)
+
+	if len(missingOrders) > 0 {
+		errMsgs = append(errMsgs, fmt.Sprintf("missing rule order numbers: %v", missingOrders))
+	}
+
+	// Check if rule order numbers exceed the total number of rules available
+	if len(exceededOrders) > 0 {
+		errMsgs = append(errMsgs, fmt.Sprintf("rule orders (%v) exceed the total number of rules (%d)", exceededOrders, len(orders.Orders)))
+	}
+
+	if len(errMsgs) > 0 {
+		return fmt.Errorf(strings.Join(errMsgs, "; "))
+	}
+
 	return nil
+}
+
+// Check for duplicate order values.
+func hasDuplicates(rules []RuleOrder) (int, []string, bool) {
+	ruleSet := make(map[int][]string)
+	for _, rule := range rules {
+		ruleSet[rule.Order] = append(ruleSet[rule.Order], rule.ID)
+	}
+
+	for order, ruleIDs := range ruleSet {
+		if len(ruleIDs) > 1 {
+			return order, ruleIDs, true
+		}
+	}
+	return 0, nil, false
+}
+
+// Function to find missing rule orders
+func findMissingOrders(rules []RuleOrder) []int {
+	var missingOrders []int
+	ruleSet := make(map[int]bool)
+	for _, rule := range rules {
+		ruleSet[rule.Order] = true
+	}
+
+	for i := 1; i <= len(rules); i++ {
+		if !ruleSet[i] {
+			missingOrders = append(missingOrders, i)
+		}
+	}
+
+	return missingOrders
+}
+
+// Function to check if rule order numbers exceed the total number of rules available
+func findExceededOrders(rules []RuleOrder, total int) []int {
+	var exceededOrders []int
+	for _, rule := range rules {
+		if rule.Order > total {
+			exceededOrders = append(exceededOrders, rule.Order)
+		}
+	}
+	return exceededOrders
 }
 
 // Fetch and sort the rule orders from the provided data.
