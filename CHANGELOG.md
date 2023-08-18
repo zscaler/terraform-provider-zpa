@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.82.2-beta (August, 17 2023) - Beta
+
+### Notes
+
+- Release date: **(August, 17 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #345](https://github.com/zscaler/terraform-provider-zpa/pull/345)
+  1. ``zpa_policy_access_rule_reorder`` Added check to prevent ``order <= 0``
+  2. ``zpa_policy_access_rule_reorder`` Added check to prevent non-contigous (gaps) in rule order numbers
+  3. ``zpa_policy_access_rule_reorder`` Added check to prevent rule order number to be greater than the total number of rules being configured.
+
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
 ## 2.82.1-beta (August, 16 2023) - Beta
 
 ### Notes
