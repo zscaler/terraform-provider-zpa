@@ -1,5 +1,44 @@
 # Changelog
 
+## 2.82.4-beta (August, 18 2023) - Beta
+
+### Notes
+
+- Release date: **(August, 18 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #348](https://github.com/zscaler/terraform-provider-zpa/pull/348)
+
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
+## 2.82.3-beta (August, 18 2023) - Beta
+
+### Notes
+
+- Release date: **(August, 18 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #347](https://github.com/zscaler/terraform-provider-zpa/pull/347)
+
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
+## 2.82.2-beta (August, 17 2023) - Beta
+
+### Notes
+
+- Release date: **(August, 17 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #347](https://github.com/zscaler/terraform-provider-zpa/pull/347)
+
+⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+
 ## 2.82.2-beta (August, 17 2023) - Beta
 
 ### Notes
