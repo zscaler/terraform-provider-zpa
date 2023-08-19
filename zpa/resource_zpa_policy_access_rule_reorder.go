@@ -79,13 +79,13 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 						"order": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+							ValidateDiagFunc: func(v interface{}, _ cty.Path) diag.Diagnostics {
 								order, _ := strconv.Atoi(v.(string))
 								if order <= 0 {
 									return diag.Diagnostics{
 										diag.Diagnostic{
 											Severity: diag.Error,
-											Summary:  "Invalid order",
+											Summary:  "Rule order 0 is not allowed",
 											Detail:   "Orders must start from 1, got:" + v.(string),
 										},
 									}
@@ -338,9 +338,9 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		}
 		// avoid NO adjacent rules issue
 		// Handle potential ordering issue related to adjacency.
-		if replacedByRule, ok := orders[r.OriginalOrder]; ok && replacedByRule.OriginalOrder == r.Order && r.Order != replacedByRule.Order+1 && r.Order != replacedByRule.Order-1 {
-			continue
-		}
+		// if replacedByRule, ok := orders[r.OriginalOrder]; ok && replacedByRule.OriginalOrder == r.Order && r.Order != replacedByRule.Order+1 && r.Order != replacedByRule.Order-1 {
+		// 	continue
+		// }
 		// reconcile the remote rules copy
 		// Re-adjust the order of rules in the remote copy for consistency.
 		for i := range remoteRules {
