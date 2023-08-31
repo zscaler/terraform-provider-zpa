@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.82.5-beta (August, 31 2023) - Beta
+
+### Notes
+
+- Release date: **(August, 31 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #350](https://github.com/zscaler/terraform-provider-zpa/pull/350) - Fixed drift within Access Policy Condition to ensure update is performed when adding and removing application segments.
+
 ## 2.82.4-beta (August, 18 2023) - Beta
 
 ### Notes
