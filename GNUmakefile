@@ -26,10 +26,18 @@ build13: fmtcheck
 	@mkdir -p $(DESTINATION)
 	go build -o $(DESTINATION)/terraform-provider-zpa_v2.82.4-beta
 
-test: fmtcheck
-	go test $(TEST) || exit 1
-	echo $(TEST) | \
-		xargs -t -n4 go test $(TESTARGS) -timeout=600s -parallel=4
+lint: vendor
+	@echo "✓ Linting source code with https://staticcheck.io/ ..."
+	@go run honnef.co/go/tools/cmd/staticcheck@v0.4.0 ./...
+
+test: lint
+	@echo "✓ Running tests ..."
+	@go run gotest.tools/gotestsum@latest --format pkgname-and-test-fails --no-summary=skipped --raw-command go test -v -json -short -coverprofile=coverage.txt ./...
+
+
+coverage: test
+	@echo "✓ Opening coverage for unit tests ..."
+	@go tool cover -html=coverage.txt
 
 testacc: fmtcheck
 	TF_ACC=true go test $(TEST) -v $(TESTARGS) -timeout 600m
@@ -48,11 +56,18 @@ imports:
 	goimports -w $(GOFMT_FILES)
 
 fmt:
-	@echo "formatting the code with $(GOFMT)..."
-	gofmt -w $(GOFMT_FILES)
+	@echo "✓ Formatting source code with goimports ..."
+	@go run golang.org/x/tools/cmd/goimports@latest -w $(shell find . -type f -name '*.go' -not -path "./vendor/*")
+	@echo "✓ Formatting source code with gofmt ..."
+	@gofmt -w $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
+
+fmt-docs:
+	@echo "✓ Formatting code samples in documentation"
+	@terrafmt fmt -p '*.md' .
+
 
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"

@@ -4,11 +4,11 @@ page_title: "Troubleshooting Guide"
 
 # How to troubleshoot your problem
 
-If you have problems with code that uses Databricks Terraform provider, follow these steps to solve them:
+If you have problems with code that uses ZPA Terraform provider, follow these steps to solve them:
 
 * Check symptoms and solutions in the [Typical problems](#typical-problems) section below.
 * Upgrade provider to the latest version. The bug might have already been fixed.
-* In case of authentication problems, see the [Data resources and Authentication is not configured errors](#data-resources-and-authentication-is-not-configured-errors) below.
+* In case of authentication problems, see the [Authentication Issues](#authentication-issues) below.
 * Collect debug information using following command:
 
 ```sh
@@ -17,11 +17,29 @@ TF_LOG=DEBUG ZSCALER_SDK_VERBOSE=true ZSCALER_SDK_LOG=true terraform apply -no-c
 
 * Open a [new GitHub issue](https://github.com/zscaler/terraform-provider-zpa/issues/new/choose) providing all information described in the issue template - debug logs, your Terraform code, Terraform & plugin versions, etc.
 
-# Typical problems
+## Typical problems
 
-## Data resources and Authentication is not configured errors
+### Authentication Issues
 
-*In Terraform 0.13 and later*, data resources have the same dependency resolution behavior [as defined for managed resources](https://www.terraform.io/docs/language/resources/behavior.html#resource-dependencies). Most data resources make an API call to a workspace. If a workspace doesn't exist yet, `default auth: cannot configure default credentials` error is raised. To work around this issue and guarantee a proper lazy authentication with data resources, you should add `depends_on = [azurerm_databricks_workspace.this]` or `depends_on = [databricks_mws_workspaces.this]` to the body. This issue doesn't occur if workspace is created *in one module* and resources [within the workspace](guides/workspace-management.md) are created *in another*. We do not recommend using Terraform 0.12 and earlier, if your usage involves data resources.
+### │ Error: Invalid provider configuration and Error: failed configuring the provider
+
+The most common problem with invalid provider is when the ZPA API credentials are not properly set via one of the supported methods. Please make sure to read the documentation for the supported authentication methods [Authentication Methods](https://registry.terraform.io/providers/zscaler/zpa/latest/docs)
+
+```sh
+│ Provider "zscaler/zpa" requires explicit configuration. Add a provider block to the root module and configure the
+│ provider's required arguments as described in the provider documentation.
+```
+
+```sh
+│ Error: failed configuring the provider
+│
+│   with provider["zscaler/zpa"],
+│   on <empty> line 0:
+│   (source code not available)
+│
+│ error:Could not open credentials file, needs to contain one json object with keys: zpa_client_id, zpa_client_secret,
+│ zpa_customer_id, and zpa_cloud. open /Users/username/.zpa/credentials.json: no such file or directory
+```
 
 ## Multiple Provider Configurations
 
@@ -35,7 +53,7 @@ registry.terraform.io does not have a provider named
 registry.terraform.io/hashicorp/zpa
 ```
 
-If you notice below error, it might be due to the fact that [required_providers](https://www.terraform.io/docs/language/providers/requirements.html#requiring-providers) block is not defined in *every module*, that uses Databricks Terraform Provider. Create `versions.tf` file with the following contents:
+If you notice below error, it might be due to the fact that [required_providers](https://www.terraform.io/docs/language/providers/requirements.html#requiring-providers) block is not defined in *every module*, that uses ZPA Terraform Provider. Create `versions.tf` file with the following contents:
 
 ```hcl
 # versions.tf
@@ -77,12 +95,12 @@ Running the `terraform init` command, you may see `Failed to install provider` e
 ```sh
 Error: Failed to install provider
 
-Error while installing databricks/databricks: v2.82.0: checksum list has no SHA-256 hash for "https://github.com/zscaler/terraform-provider-zpa/releases/download/v2.82.0/terraform-provider-zpa_2.82.0_darwin_amd64.zip"
+Error while installing zscaler/zpa: v2.82.0: checksum list has no SHA-256 hash for "https://github.com/zscaler/terraform-provider-zpa/releases/download/v2.82.0/terraform-provider-zpa_2.82.0_darwin_amd64.zip"
 ```
 
 You can fix it by following three simple steps:
 
-* Replace `zscaler.com/zpa/zpa` with `zscaler/zpa` in all your `.tf` files with the `python3 -c "$(curl -Ls https://dbricks.co/updtfns)"` command.
+* Replace `zscaler.com/zpa/zpa` with `zscaler/zpa` in all your `.tf` files with the `python3 -c "$(curl -Ls https://github.com/zscaler/terraform-provider-zpa/scripts/upgrade-namespace.py)"` command.
 * Run the `terraform state replace-provider zscaler.com/zpa/zpa zscaler/zpa` command and approve the changes. See [Terraform CLI](https://www.terraform.io/cli/commands/state/replace-provider) docs for more information.
 * Run `terraform init` to verify everything working.
 
@@ -91,10 +109,6 @@ The terraform apply command should work as expected now.
 ## Error: Failed to query available provider packages
 
 See the same steps as in [Error: Failed to install provider](#error-failed-to-install-provider).
-
-## Error: 'strconv.ParseInt parsing "...." value out of range' or "Attribute must be a whole number, got N.NNNNe+XX"
-
-This kind of errors happens when the 32-bit version of Databricks Terraform provider is used, usually on Microsoft Windows.  To fix the issue you need to switch to use of the 64-bit versions of Terraform and Databricks Terraform provider.
 
 ### Error: Provider registry.terraform.io/zscaler/zpa v... does not have a package available for your current platform, windows_386
 
