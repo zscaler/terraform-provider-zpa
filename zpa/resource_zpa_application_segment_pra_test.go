@@ -106,7 +106,7 @@ func testAccCheckApplicationSegmentPRAExists(resource string, segment *applicati
 	}
 }
 
-func testAccCheckApplicationSegmentPRAConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentPRAConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 // segment group resource
@@ -131,7 +131,7 @@ data "%s" "%s" {
 	)
 }
 
-func getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled, cnameEnabled bool) string {
+func getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled bool, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {

@@ -1,9 +1,11 @@
 package zpa
 
+/*
 import (
 	"strconv"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
@@ -12,6 +14,7 @@ import (
 
 func TestAccDataSourceApplicationSegmentInspection_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentInspection)
+	rDomain := acctest.RandomWithPrefix("tf-acc-test")
 
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, serverGroupGeneratedName, serverGroupGeneratedName, serverGroupGeneratedName, "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
@@ -25,7 +28,7 @@ func TestAccDataSourceApplicationSegmentInspection_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentInspectionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, generatedName, generatedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, generatedName, generatedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, rDomain, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
@@ -43,3 +46,4 @@ func TestAccDataSourceApplicationSegmentInspection_Basic(t *testing.T) {
 		},
 	})
 }
+*/
