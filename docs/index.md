@@ -88,8 +88,7 @@ This recommendation applies to the following resources:
 - ``zpa_policy_forwarding_rule``
 - ``zpa_policy_isolation_rule``
 
-In order to accomplish this, make sure you set the
-[parallelism](https://www.terraform.io/cli/commands/apply#parallelism-n) value at or
+In order to accomplish this, make sure you set the [parallelism](https://www.terraform.io/cli/commands/apply#parallelism-n) value at or
 below this limit to prevent performance impacts.
 
 ## Authentication
@@ -147,8 +146,8 @@ terraform plan
 ### Configuration file
 
 You can use a configuration file to specify your credentials. The
-file location must be `$HOME/.zscaler/credentials.json` on Linux and OS X, or
-`"%USERPROFILE%\.zscaler/credentials.json"` for Windows users.
+file location must be `$HOME/.zpa/credentials.json` on Linux and OS X, or
+`"%USERPROFILE%\.zpa/credentials.json"` for Windows users.
 If we fail to detect credentials inline, or in the environment variable, Terraform will check
 this location.
 
@@ -164,7 +163,8 @@ credentials.json file:
 {
   "zpa_client_id":"zpa_client_id",
   "zpa_client_secret": "zpa_client_secret",
-  "zpa_customer_id": "zpa_customer_id"
+  "zpa_customer_id": "zpa_customer_id",
+  "zpa_cloud": "zpa_cloud"
 }
 ```
 
@@ -177,7 +177,7 @@ The following arguments are supported:
 * `zpa_client_id` - (Required) ZPA client ID, is equivalent to a username.
 * `zpa_client_secret` - (Required) ZPA client secret, is equivalent to a secret password.
 * `zpa_customer_id` - (Required) ZPA customer ID, is equivalent to your ZPA tenant identification.
-* `zpa_cloud` - (Required) ZPA Cloud name `BETA`, `GOV`, `PREVIEW` or `DEV`. Only required when running in the ZPA beta cloud.
+* `zpa_cloud` - (Required) ZPA Cloud name `BETA`, `GOV`, `GOVUS`, `PREVIEW`. Only required when running in ZPA Clouds other than production.
 
 ### Optional
 

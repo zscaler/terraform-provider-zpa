@@ -12,76 +12,74 @@ import (
 )
 
 func TestAccZPAResourcePolicyAccessRuleReorder_basic(t *testing.T) {
-    randName := acctest.RandString(10)
+	randName := acctest.RandString(10)
 
-    resource.Test(t, resource.TestCase{
-        Providers:    testAccProviders,
-        CheckDestroy: testAccCheckPolicyAccessReorderDestroy,
-        Steps: []resource.TestStep{
-            {
-                Config: testAccPolicyAccessRuleReorderConfig(randName),
-                Check: resource.ComposeTestCheckFunc(
-                    // Wrapper function for the CheckPolicyType test
-                    func(s *terraform.State) error {
-                        success := t.Run("CheckPolicyType", func(_ *testing.T) {
-                            resource.TestCheckResourceAttr("zpa_policy_access_rule_reorder.this", "policy_type", "ACCESS_POLICY")(s)
-                        })
-                        if !success {
-                            return fmt.Errorf("CheckPolicyType failed")
-                        }
-                        return nil
-                    },
-                    // Wrapper function for the CheckFirstRuleID test
-                    func(s *terraform.State) error {
-                        success := t.Run("CheckFirstRuleID", func(_ *testing.T) {
-                            resource.TestCheckResourceAttrPair("zpa_policy_access_rule_reorder.this", "rules.0.id", "zpa_policy_access_rule.rule1", "id")(s)
-                        })
-                        if !success {
-                            return fmt.Errorf("CheckFirstRuleID failed")
-                        }
-                        return nil
-                    },
-                    // ... add similar wrappers for the other checks ...
-                    func(s *terraform.State) error {
-                        success := t.Run("CheckZscalerDeceptionOrder", func(_ *testing.T) {
-                            testCheckZscalerDeceptionOrder(s)
-                        })
-                        if !success {
-                            return fmt.Errorf("CheckZscalerDeceptionOrder failed")
-                        }
-                        return nil
-                    },
-                    func(s *terraform.State) error {
-                        success := t.Run("CheckRuleOrderValidity", func(_ *testing.T) {
-                            testCheckRuleOrderValidity(s)
-                        })
-                        if !success {
-                            return fmt.Errorf("CheckRuleOrderValidity failed")
-                        }
-                        return nil
-                    },
-                ),
-            },
-        },
-    })
+	resource.Test(t, resource.TestCase{
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckPolicyAccessReorderDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPolicyAccessRuleReorderConfig(randName),
+				Check: resource.ComposeTestCheckFunc(
+					// Wrapper function for the CheckPolicyType test
+					func(s *terraform.State) error {
+						success := t.Run("CheckPolicyType", func(_ *testing.T) {
+							resource.TestCheckResourceAttr("zpa_policy_access_rule_reorder.this", "policy_type", "ACCESS_POLICY")(s)
+						})
+						if !success {
+							return fmt.Errorf("CheckPolicyType failed")
+						}
+						return nil
+					},
+					// Wrapper function for the CheckFirstRuleID test
+					func(s *terraform.State) error {
+						success := t.Run("CheckFirstRuleID", func(_ *testing.T) {
+							resource.TestCheckResourceAttrPair("zpa_policy_access_rule_reorder.this", "rules.0.id", "zpa_policy_access_rule.rule1", "id")(s)
+						})
+						if !success {
+							return fmt.Errorf("CheckFirstRuleID failed")
+						}
+						return nil
+					},
+					// ... add similar wrappers for the other checks ...
+					func(s *terraform.State) error {
+						success := t.Run("CheckZscalerDeceptionOrder", func(_ *testing.T) {
+							testCheckZscalerDeceptionOrder(s)
+						})
+						if !success {
+							return fmt.Errorf("CheckZscalerDeceptionOrder failed")
+						}
+						return nil
+					},
+					func(s *terraform.State) error {
+						success := t.Run("CheckRuleOrderValidity", func(_ *testing.T) {
+							testCheckRuleOrderValidity(s)
+						})
+						if !success {
+							return fmt.Errorf("CheckRuleOrderValidity failed")
+						}
+						return nil
+					},
+				),
+			},
+		},
+	})
 }
-
 
 func testCheckZscalerDeceptionOrder(s *terraform.State) error {
 	rs, ok := s.RootModule().Resources["zpa_policy_access_rule_reorder.this"]
 	if !ok {
 		return fmt.Errorf("Not found: zpa_policy_access_rule_reorder.this")
 	}
-    for attrKey, attrValue := range rs.Primary.Attributes {
-        if attrKey == "name" && attrValue == "Zscaler Deception" {
-            if rs.Primary.Attributes["order"] != "2" {
-                return fmt.Errorf("Zscaler Deception rule order is not 2")
-            }
-        }
-    }
+	for attrKey, attrValue := range rs.Primary.Attributes {
+		if attrKey == "name" && attrValue == "Zscaler Deception" {
+			if rs.Primary.Attributes["order"] != "2" {
+				return fmt.Errorf("Zscaler Deception rule order is not 2")
+			}
+		}
+	}
 	return nil
 }
-
 
 func testCheckRuleOrderValidity(s *terraform.State) error {
 	rs, ok := s.RootModule().Resources["zpa_policy_access_rule_reorder.this"]

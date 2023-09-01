@@ -124,7 +124,7 @@ func Provider() *schema.Provider {
 			return nil, diag.Diagnostics{
 				diag.Diagnostic{
 					Severity:      diag.Error,
-					Summary:       "failed configuring the provided",
+					Summary:       "failed configuring the provider",
 					Detail:        fmt.Sprintf("error:%v", err),
 					AttributePath: cty.Path{},
 				},
