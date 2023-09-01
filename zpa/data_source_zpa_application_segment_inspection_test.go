@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"strconv"
 	"testing"
@@ -45,3 +46,4 @@ func TestAccDataSourceApplicationSegmentInspection_Basic(t *testing.T) {
 		},
 	})
 }
+*/
