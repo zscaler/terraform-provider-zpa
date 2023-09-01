@@ -155,7 +155,7 @@ resource "%s" "%s" {
 		from = "4443"
 		to = "4443"
 	}
-	domain_names = ["%s.bd-hashicorp.com"]
+	domain_names = ["sales.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	common_apps_dto {
 		apps_config {
@@ -182,7 +182,7 @@ resource "%s" "%s" {
 		generatedName,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
-		generatedName,
+		// generatedName,
 		segmentGroupTypeAndName,
 		generatedName,
 		generatedName,
