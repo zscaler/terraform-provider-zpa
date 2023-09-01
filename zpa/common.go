@@ -258,7 +258,6 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 				"operands": {
 					Type:        schema.TypeList,
 					Optional:    true,
-					Computed:    true,
 					Description: "This signifies the various policy criteria.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
