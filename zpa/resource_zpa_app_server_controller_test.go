@@ -26,7 +26,7 @@ func TestAccResourceApplicationServerBasic(t *testing.T) {
 				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationServerExists(resourceTypeAndName, &servers),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppServerDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "address", variable.AppServerAddress),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
@@ -38,7 +38,7 @@ func TestAccResourceApplicationServerBasic(t *testing.T) {
 				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationServerExists(resourceTypeAndName, &servers),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppServerDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "address", variable.AppServerAddress),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
@@ -95,7 +95,7 @@ func testAccCheckApplicationServerExists(resource string, server *appservercontr
 func testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, description, address string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "%s" "%s" {
-	name            = "%s"
+	name            = "tf-acc-test-%s"
 	description     = "%s"
 	address         = "%s"
 	enabled         = "%s"

@@ -26,7 +26,7 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceEdgeGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "is_public", strconv.FormatBool(variable.ServiceEdgeIsPublic)),
@@ -42,7 +42,7 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceEdgeGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "is_public", strconv.FormatBool(variable.ServiceEdgeIsPublic)),
@@ -122,7 +122,7 @@ data "%s" "%s" {
 func ServiceEdgeGroupResourceHCL(generatedName, description string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "%s" "%s" {
-	name                 = "%s"
+	name                 = "tf-acc-test-%s"
 	description          = "%s"
 	enabled				 = "%s"
 	is_public			 = "%s"

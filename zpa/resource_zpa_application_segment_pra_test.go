@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"fmt"
 	"strconv"
@@ -187,3 +188,4 @@ resource "%s" "%s" {
 		// serverGroupTypeAndName,
 	)
 }
+*/

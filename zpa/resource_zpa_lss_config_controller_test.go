@@ -32,8 +32,8 @@ func TestAccResourceLSSConfigControllerBasic(t *testing.T) {
 				Config: testAccCheckLSSConfigControllerConfigure(lssControllerTypeAndName, lssControllerGeneratedName, lssControllerGeneratedName, lssControllerGeneratedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, rIP, rPort, variable.LSSControllerEnabled, variable.LSSControllerTLSEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLSSConfigControllerExists(lssControllerTypeAndName, &lssConfig),
-					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.name", "test-lss-config-"+lssControllerGeneratedName),
-					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.description", "test-lss-config-"+lssControllerGeneratedName),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.name", "tf-acc-test-"+lssControllerGeneratedName),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.description", "tf-acc-test-"+lssControllerGeneratedName),
 					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.enabled", strconv.FormatBool(variable.LSSControllerEnabled)),
 					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.use_tls", strconv.FormatBool(variable.LSSControllerTLSEnabled)),
 					resource.TestCheckResourceAttr(lssControllerTypeAndName, "policy_rule_resource.#", "1"),
@@ -46,8 +46,8 @@ func TestAccResourceLSSConfigControllerBasic(t *testing.T) {
 				Config: testAccCheckLSSConfigControllerConfigure(lssControllerTypeAndName, lssControllerGeneratedName, lssControllerGeneratedName, lssControllerGeneratedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, rIP, rPort, variable.LSSControllerEnabled, variable.LSSControllerTLSEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLSSConfigControllerExists(lssControllerTypeAndName, &lssConfig),
-					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.name", "test-lss-config-"+lssControllerGeneratedName),
-					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.description", "test-lss-config-"+lssControllerGeneratedName),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.name", "tf-acc-test-"+lssControllerGeneratedName),
+					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.description", "tf-acc-test-"+lssControllerGeneratedName),
 					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.enabled", strconv.FormatBool(variable.LSSControllerEnabled)),
 					resource.TestCheckResourceAttr(lssControllerTypeAndName, "config.0.use_tls", strconv.FormatBool(variable.LSSControllerTLSEnabled)),
 					resource.TestCheckResourceAttr(lssControllerTypeAndName, "policy_rule_resource.#", "1"),
@@ -136,8 +136,8 @@ data "zpa_lss_config_log_type_formats" "zpn_trans_log" {
 
 resource "%s" "%s" {
 	config {
-		name            = "test-lss-config-%s"
-		description     = "test-lss-config-%s"
+		name            = "tf-acc-test-%s"
+		description     = "tf-acc-test-%s"
 		enabled         = "%s"
 		use_tls         = "%s"
 		lss_host        = "%s"

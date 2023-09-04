@@ -26,7 +26,7 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckApp)),
@@ -41,7 +41,7 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckApp)),
@@ -120,7 +120,7 @@ data "%s" "%s" {
 func appConnectorGroupResourceHCL(generatedName, description string, enabled bool) string {
 	return fmt.Sprintf(`
 resource "%s" "%s" {
-	name                          = "%s"
+	name                          = "tf-acc-test-%s"
 	description                   = "%s"
 	enabled                       = "%s"
 	country_code                  = "US"

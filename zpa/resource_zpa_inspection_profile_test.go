@@ -25,7 +25,7 @@ func TestAccResourceInspectionProfileBasic(t *testing.T) {
 				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionProfileExists(resourceTypeAndName, &profile),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
@@ -38,7 +38,7 @@ func TestAccResourceInspectionProfileBasic(t *testing.T) {
 				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionProfileExists(resourceTypeAndName, &profile),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
@@ -126,7 +126,7 @@ data "zpa_inspection_predefined_controls" "this" {
 }
 
 resource "%s" "%s" {
-	name                          = "%s"
+	name                          = "tf-acc-test-%s"
 	description                   = "%s"
 	paranoia_level                = "1"
 

@@ -1,9 +1,22 @@
+SWEEP?=global
 TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep "zpa/")
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 PKG_NAME=zpa
+GOFMT:=gofumpt
+TFPROVIDERLINT=tfproviderlint
+STATICCHECK=staticcheck
 TF_PLUGIN_DIR=~/.terraform.d/plugins
 ZPA_PROVIDER_NAMESPACE=zscaler.com/zpa/zpa
+
+# Expression to match against tests
+# go test -run <filter>
+# e.g. Iden will run all TestAccIdentity tests
+ifdef TEST_FILTER
+	TEST_FILTER := -run $(TEST_FILTER)
+endif
+
+TESTARGS?=-test.v
 
 default: build
 
@@ -12,6 +25,23 @@ dep: # Download required dependencies
 
 build: fmtcheck
 	go install
+
+clean:
+	go clean -cache -testcache ./...
+
+clean-all:
+	go clean -cache -testcache -modcache ./...
+
+sweep:
+	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	go test $(TEST) -sweep=$(SWEEP) $(SWEEPARGS)
+
+test:
+	echo $(TEST) | \
+		xargs -t -n4 go test $(TESTARGS) $(TEST_FILTER) -timeout=30s -parallel=10
+
+testacc:
+	TF_ACC=1 go test $(TEST) $(TESTARGS) $(TEST_FILTER) -timeout 120m
 
 build13: GOOS=$(shell go env GOOS)
 build13: GOARCH=$(shell go env GOARCH)
@@ -30,17 +60,9 @@ lint: vendor
 	@echo "✓ Linting source code with https://staticcheck.io/ ..."
 	@go run honnef.co/go/tools/cmd/staticcheck@v0.4.0 ./...
 
-test: lint
-	@echo "✓ Running tests ..."
-	@go run gotest.tools/gotestsum@latest --format pkgname-and-test-fails --no-summary=skipped --raw-command go test -v -json -short -coverprofile=coverage.txt ./...
-
-
 coverage: test
 	@echo "✓ Opening coverage for unit tests ..."
 	@go tool cover -html=coverage.txt
-
-testacc: fmtcheck
-	TF_ACC=true go test $(TEST) -v $(TESTARGS) -timeout 600m
 
 vet:
 	@echo "==> Checking source code against go vet and staticcheck"

@@ -13,7 +13,7 @@ import (
 
 func TestAccPolicyForwardingRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyForwardingRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test")
+	rName := acctest.RandomWithPrefix("tf-acc-test-")
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
