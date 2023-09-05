@@ -13,7 +13,7 @@ import (
 
 func TestAccPolicyInspectionRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyInspectionRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test")
+	rName := acctest.RandomWithPrefix("tf-acc-test-")
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{

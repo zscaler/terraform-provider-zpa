@@ -16,6 +16,8 @@ on:
         required: true
       TF_ACC:
         required: true
+      ZPA_ACC_TEST_FORCE_SWEEPERS:
+        required: true
 
 jobs:
   zpa-test:
@@ -46,10 +48,14 @@ jobs:
         with:
           max_attempts: 3
           timeout_minutes: 60  # Adjust as needed
-          command: go test -v -cover ./zpa -v -parallel 30 -timeout 60m
+          command: |
+            make sweep
+            go test -v -cover ./zpa -v -parallel 30 -timeout 60m
+            make sweep
         env:
           ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
           ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
           ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
           ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
           TF_ACC: ${{ secrets.TF_ACC }}
+          ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}

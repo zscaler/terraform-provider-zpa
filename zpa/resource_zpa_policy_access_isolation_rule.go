@@ -17,7 +17,7 @@ func resourcePolicyIsolationRule() *schema.Resource {
 		Update: resourcePolicyIsolationRuleUpdate,
 		Delete: resourcePolicyIsolationRuleDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: importPolicyStateContextFunc([]string{"ISOLATE", "BYPASS_ISOLATE"}),
+			StateContext: importPolicyStateContextFunc([]string{"ISOLATION_POLICY"}),
 		},
 
 		Schema: MergeSchema(
