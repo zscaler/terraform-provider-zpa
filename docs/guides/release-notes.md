@@ -12,16 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v2.82.5-beta``
+``Last updated: v2.83.0-beta``
 
 ---
 
-## 2.82.5-beta (August, 31 2023) - Beta
+## 2.83.0-beta (September, 5 2023) - Beta
 
 ### Notes
 
-- Release date: **(August, 31 2023)**
+- Release date: **(September, 5 2023)**
 - Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #350](https://github.com/zscaler/terraform-provider-zpa/pull/350) - Update provider to [Zscaler SDK GO](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v1.8.0-beta) v1.8.0-beta. This version provides caching  mechanism, which aims to enhance the provider performance as well as decrease the number of API calls being made to the ZPA API.
 
 ### Fixes
 
