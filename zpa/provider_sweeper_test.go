@@ -74,7 +74,6 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestInspectionCustomControl(testClient)
 	sweepTestInspectionProfile(testClient)
 	sweepTestLSSConfigController(testClient)
-	sweepTestAccessPolicyRuleByType(testClient)
 	sweepTestProvisioningKey(testClient)
 	sweepTestSegmentGroup(testClient)
 	sweepTestServerGroup(testClient)
@@ -340,47 +339,46 @@ func sweepTestLSSConfigController(client *testClient) error {
 	return condenseError(errorList)
 }
 
-func sweepTestAccessPolicyRuleByType(client *testClient) error {
+func sweepTestAccessPolicyRuleByType(client *testClient, policyType string) error {
 	var errorList []error
 
-	policyTypes := []string{
-		"ACCESS_POLICY",
-		"TIMEOUT_POLICY",
-		"CLIENT_FORWARDING_POLICY",
-		"INSPECTION_POLICY",
-		"ISOLATION_POLICY",
+	skipPolicies := []string{
+		"Global_Policy", "ReAuth_Policy", "Bypass_Policy", "Inspection_Policy",
+		"Isolation_Policy", "Clientless_Session_Protection_Policy",
+		"Capabilities_Policy", "Credential_Policy",
 	}
 
-	for _, policyType := range policyTypes {
-		// Fetch the PolicySet details for the current policy type to get the PolicySetID
-		policySet, _, err := client.sdkClient.policysetcontroller.GetByPolicyType(policyType)
-		if err != nil {
-			// If we fail to get a PolicySetID for a specific policy type, append the error and continue to the next type
-			errorList = append(errorList, fmt.Errorf("Failed to get PolicySetID for policy type %s: %v", policyType, err))
+	// Fetch the PolicySet details for the current policy type to get the PolicySetID
+	policySet, _, err := client.sdkClient.policysetcontroller.GetByPolicyType(policyType)
+	if err != nil {
+		return fmt.Errorf("Failed to get PolicySetID for policy type %s: %v", policyType, err)
+	}
+	policySetID := policySet.ID
+
+	// Fetch all rules for the current policy type
+	rules, _, err := client.sdkClient.policysetcontroller.GetAllByType(policyType)
+	if err != nil {
+		return fmt.Errorf("Failed to get rules for policy type %s: %v", policyType, err)
+	}
+
+	// Logging the number of identified resources before the deletion loop for the current policy type
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep for policy type %s", len(rules), policyType))
+
+	for _, rule := range rules {
+		// Skip policies with names in the skipPolicies list
+		if contains(skipPolicies, rule.Name) {
+			sweeperLogger.Warn(fmt.Sprintf("Skipping sweep for policy: %s", rule.Name))
 			continue
 		}
-		policySetID := policySet.ID
 
-		// Fetch all rules for the current policy type
-		rules, _, err := client.sdkClient.policysetcontroller.GetAllByType(policyType)
-		if err != nil {
-			// If we fail to fetch rules for a specific policy type, append the error and continue to the next type
-			errorList = append(errorList, fmt.Errorf("Failed to get rules for policy type %s: %v", policyType, err))
-			continue
-		}
-		// Logging the number of identified resources before the deletion loop for the current policy type
-		sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep for policy type %s", len(rules), policyType))
-
-		for _, rule := range rules {
-			// Check if the resource name has the required prefix before deleting it
-			if strings.HasPrefix(rule.Name, testResourcePrefix) {
-				// Use the fetched PolicySetID for deletion
-				if _, err := client.sdkClient.policysetcontroller.Delete(policySetID, rule.ID); err != nil {
-					errorList = append(errorList, err)
-					continue
-				}
-				logSweptResource(resourcetype.ZPAPolicyAccessRule, rule.ID, rule.Name)
+		// Check if the resource name has the required prefix before deleting it
+		if strings.HasPrefix(rule.Name, testResourcePrefix) {
+			// Use the fetched PolicySetID for deletion
+			if _, err := client.sdkClient.policysetcontroller.Delete(policySetID, rule.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
 			}
+			logSweptResource(resourcetype.ZPAPolicyAccessRule, rule.ID, rule.Name)
 		}
 	}
 

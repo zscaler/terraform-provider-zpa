@@ -19,8 +19,8 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentBrowserAccess)
 	rDomain := acctest.RandomWithPrefix("tf-acc-test")
 
-	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
-	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
+	// serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
+	// serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
 
 	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
@@ -31,7 +31,7 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentBrowserAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
@@ -48,7 +48,7 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
@@ -67,19 +67,22 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationSegmentBrowserAccessDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPAApplicationSegmentBrowserAccess {
 			continue
 		}
 
-		_, _, err := client.browseraccess.GetByName(rs.Primary.Attributes["name"])
+		rule, _, err := apiClient.browseraccess.Get(rs.Primary.ID)
+
 		if err == nil {
-			return fmt.Errorf("Broser Access still exists")
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
 
-		return nil
+		if rule != nil {
+			return fmt.Errorf("browser access application segment with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
 	}
 	return nil
 }
@@ -88,10 +91,10 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("Browser Access Not found: %s", resource)
+			return fmt.Errorf("Browser Access application segment Not found: %s", resource)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Browser Access ID is set")
+			return fmt.Errorf("no Browser Access application segment ID is set")
 		}
 		client := testAccProvider.Meta().(*Client)
 		resp, _, err := client.browseraccess.GetByName(rs.Primary.Attributes["name"])
@@ -108,7 +111,7 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 	}
 }
 
-func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentBrowserAccessConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool) string {
 	port := strconv.Itoa(acctest.RandIntRange(4001, 5001))
 	return fmt.Sprintf(`
 
@@ -125,7 +128,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, rDomain, cnameEnabled, port),
+		getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, enabled, rDomain, cnameEnabled, port),
 
 		// data source variables
 		resourcetype.ZPAApplicationSegmentBrowserAccess,
@@ -134,7 +137,7 @@ data "%s" "%s" {
 	)
 }
 
-func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool, port string) string {
+func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool, port string) string {
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "jenkins" {

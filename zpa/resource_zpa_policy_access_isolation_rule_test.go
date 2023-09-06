@@ -13,7 +13,7 @@ import (
 
 func TestAccPolicyIsolationRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyIsolationRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test-")
+	rName := acctest.RandomWithPrefix("tf-acc-test")
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{

@@ -35,7 +35,6 @@ func init() {
 // It also delineates between acceptance tests and unit tests
 func TestMain(m *testing.M) {
 	// TF_VAR_hostname allows the real hostname to be scripted into the config tests
-	// see examples/okta_resource_set/basic.tf
 	os.Setenv("TF_VAR_hostname", fmt.Sprintf("%s.%s.%s.%s", os.Getenv("ZPA_CLIENT_ID"), os.Getenv("ZPA_CLIENT_SECRET"), os.Getenv("ZPA_CUSTOMER_ID"), os.Getenv("ZPA_CLOUD")))
 
 	// NOTE: Acceptance test sweepers are necessary to prevent dangling
@@ -55,10 +54,21 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPASegmentGroup, sweepTestSegmentGroup)
 		setupSweeper(resourcetype.ZPAServerGroup, sweepTestServerGroup)
 		setupSweeper(resourcetype.ZPAServiceEdgeGroup, sweepTestServiceEdgeGroup)
-		setupSweeper(resourcetype.ZPAPolicyAccessRule, sweepTestAccessPolicyRuleByType)
+		setupSweeper(resourcetype.ZPAPolicyAccessRule, sweeperForPolicyType("ACCESS_POLICY"))
+		setupSweeper(resourcetype.ZPAPolicyTimeOutRule, sweeperForPolicyType("TIMEOUT_POLICY"))
+		setupSweeper(resourcetype.ZPAPolicyForwardingRule, sweeperForPolicyType("CLIENT_FORWARDING_POLICY"))
+		setupSweeper(resourcetype.ZPAPolicyInspectionRule, sweeperForPolicyType("INSPECTION_POLICY"))
+		setupSweeper(resourcetype.ZPAPolicyIsolationRule, sweeperForPolicyType("ISOLATION_POLICY"))
 	}
 	resource.TestMain(m)
 }
+
+func sweeperForPolicyType(policyType string) func(client *testClient) error {
+	return func(client *testClient) error {
+		return sweepTestAccessPolicyRuleByType(client, policyType)
+	}
+}
+
 func TestProvider(t *testing.T) {
 	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)

@@ -31,7 +31,11 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
 				),
 			},
-
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			// Update test
 			{
 				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
