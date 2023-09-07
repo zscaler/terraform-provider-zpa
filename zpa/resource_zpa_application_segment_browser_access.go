@@ -7,10 +7,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/zpa"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
+	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
 func resourceApplicationSegmentBrowserAccess() *schema.Resource {
@@ -280,7 +280,7 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m int
 
 	req := expandBrowserAccess(d, zClient, "")
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 
@@ -367,7 +367,7 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m int
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
 	req := expandBrowserAccess(d, zClient, "")
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 

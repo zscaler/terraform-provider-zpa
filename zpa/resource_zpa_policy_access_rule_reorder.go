@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 // Global variables for state management
@@ -18,13 +19,13 @@ var deceptionAccessPolicyRuleExist *bool // Pointer to check if deception rule e
 var m sync.Mutex                         // Mutex to ensure thread safety.
 
 // Validate the access policy rule's order.
-func validateAccessPolicyRuleOrder(order string, zClient *Client) error {
+func validateAccessPolicyRuleOrder(order string, service policysetcontroller.Service) error {
 	m.Lock()
 	defer m.Unlock()
 
 	// Check if we've already verified the existence of the Deception rule.
 	if deceptionAccessPolicyRuleExist == nil {
-		policy, _, err := zClient.policysetcontroller.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
+		policy, _, err := service.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
 		if err != nil || policy == nil {
 			f := false
 			deceptionAccessPolicyRuleExist = &f
@@ -64,6 +65,10 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 			"policy_type": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"rules": {
 				Type:        schema.TypeSet,
@@ -194,9 +199,9 @@ func findExceededOrders(rules []RuleOrder, total int) []int {
 	return exceededOrders
 }
 
-func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
+func getRules(d *schema.ResourceData, service policysetcontroller.Service) (*RulesOrders, error) {
 	policyType := d.Get("policy_type").(string)
-	globalPolicySet, err := GetGlobalPolicySetByPolicyType(zClient.policysetcontroller, policyType)
+	globalPolicySet, err := GetGlobalPolicySetByPolicyType(service, policyType)
 	if err != nil {
 		log.Printf("[ERROR] reordering rules failed getting global policy set '%s': %v\n", policyType, err)
 		return nil, err
@@ -228,12 +233,12 @@ func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
 }
 
 func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	rulesOrders, err := getRules(d, zClient)
+	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	rulesOrders, err := getRules(d, *service)
 	if err != nil {
 		return err
 	}
-	rules, _, err := zClient.policysetcontroller.GetAllByType(rulesOrders.PolicyType)
+	rules, _, err := service.GetAllByType(rulesOrders.PolicyType)
 	if err != nil {
 		log.Printf("[ERROR] failed to get rules: %v\n", err)
 		return err
@@ -259,9 +264,9 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) erro
 
 func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) error {
 	// Convert the interface to a client instance.
-	zClient := m.(*Client)
+	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	// Fetch and sort the rule orders from the provided data.
-	rules, err := getRules(d, zClient)
+	rules, err := getRules(d, *service)
 	if err != nil {
 		return err
 	}
@@ -272,7 +277,7 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 	}
 	d.SetId(rules.PolicySetID)
 	// Fetch the existing remote rules based on the policy type.
-	remoteRules, _, err := zClient.policysetcontroller.GetAllByType(rules.PolicyType)
+	remoteRules, _, err := service.GetAllByType(rules.PolicyType)
 	if err != nil {
 		log.Printf("[ERROR] failed to get rules: %v\n", err)
 		return err
@@ -327,12 +332,12 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		}
 		// Check for special rules related to 'ACCESS_POLICY'.
 		if rules.PolicyType == "ACCESS_POLICY" {
-			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), zClient); err != nil {
+			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), *service); err != nil {
 				log.Printf("[ERROR] reordering rule ID '%s' failed, order validation error: %v\n", r.ID, err)
 				continue
 			}
 		}
-		_, err := zClient.policysetcontroller.Reorder(rules.PolicySetID, r.ID, r.Order)
+		_, err := service.Reorder(rules.PolicySetID, r.ID, r.Order)
 		if err != nil {
 			log.Printf("[ERROR] reordering rule ID '%s' failed: %v\n", r.ID, err)
 		}

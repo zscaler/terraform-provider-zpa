@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 )
 
 var (

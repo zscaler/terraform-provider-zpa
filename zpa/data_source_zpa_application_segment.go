@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 )
 
 func dataSourceApplicationSegment() *schema.Resource {
@@ -150,6 +150,14 @@ func dataSourceApplicationSegment() *schema.Resource {
 					},
 				},
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"tcp_port_ranges": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -167,12 +175,12 @@ func dataSourceApplicationSegment() *schema.Resource {
 }
 
 func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).applicationsegment.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	var resp *applicationsegment.ApplicationSegmentResource
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for server group %s\n", id)
-		res, _, err := zClient.applicationsegment.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -181,7 +189,7 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for server group name %s\n", name)
-		res, _, err := zClient.applicationsegment.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -209,6 +217,8 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 		_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 

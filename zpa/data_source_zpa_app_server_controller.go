@@ -5,13 +5,29 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
 )
 
 func dataSourceApplicationServer() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceApplicationServerRead,
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"address": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -29,18 +45,6 @@ func dataSourceApplicationServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"description": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"modifiedby": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -49,7 +53,11 @@ func dataSourceApplicationServer() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"name": {
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -58,13 +66,13 @@ func dataSourceApplicationServer() *schema.Resource {
 }
 
 func dataSourceApplicationServerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).appservercontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	var resp *appservercontroller.ApplicationServer
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for application server  %s\n", id)
-		res, _, err := zClient.appservercontroller.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -73,7 +81,7 @@ func dataSourceApplicationServerRead(d *schema.ResourceData, m interface{}) erro
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for application server name %s\n", name)
-		res, _, err := zClient.appservercontroller.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -81,15 +89,17 @@ func dataSourceApplicationServerRead(d *schema.ResourceData, m interface{}) erro
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
+		_ = d.Set("name", resp.Name)
+		_ = d.Set("description", resp.Description)
+		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("address", resp.Address)
 		_ = d.Set("app_server_group_ids", resp.AppServerGroupIds)
 		_ = d.Set("config_space", resp.ConfigSpace)
 		_ = d.Set("creation_time", resp.CreationTime)
-		_ = d.Set("description", resp.Description)
-		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
-		_ = d.Set("name", resp.Name)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 	} else {
 		return fmt.Errorf("couldn't find any application server with name '%s' or id '%s'", name, id)

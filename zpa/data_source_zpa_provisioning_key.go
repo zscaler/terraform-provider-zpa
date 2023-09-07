@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/provisioningkey"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
 )
 
 func dataSourceProvisioningKey() *schema.Resource {
@@ -102,12 +101,20 @@ func dataSourceProvisioningKey() *schema.Resource {
 					"CONNECTOR_GRP", "SERVICE_EDGE_GRP",
 				}, false),
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).provisioningkey.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	associationType, ok := getAssociationType(d)
 	if !ok {
 		return fmt.Errorf("associationType is required")
@@ -116,7 +123,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data provisioning key %s\n", id)
-		res, _, err := zClient.provisioningkey.Get(associationType, id)
+		res, _, err := service.Get(associationType, id)
 		if err != nil {
 			return err
 		}
@@ -125,7 +132,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for provisioning key name %s\n", name)
-		res, _, err := zClient.provisioningkey.GetByName(associationType, name)
+		res, _, err := service.GetByName(associationType, name)
 		if err != nil {
 			return err
 		}
@@ -150,6 +157,8 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 		_ = d.Set("usage_count", resp.UsageCount)
 		_ = d.Set("zcomponent_id", resp.ZcomponentID)
 		_ = d.Set("zcomponent_name", resp.ZcomponentName)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 	} else {
 		return fmt.Errorf("couldn't find any provisioning key with name '%s' or id '%s'", name, id)
 	}

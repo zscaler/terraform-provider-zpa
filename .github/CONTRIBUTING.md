@@ -373,7 +373,7 @@ TF_ACC=1 go test ./zpa -v -run=TestAccResourceAppConnectorGroupBasic -timeout 12
 === RUN   TestAccResourceAppConnectorGroupBasic
 --- PASS: TestAccResourceAppConnectorGroupBasic (26.56s)
 PASS
-ok  	github.com/zscaler/terraform-provider-zpa/v2/zpa	26.607s
+ok  	github.com/zscaler/terraform-provider-zpa/v3/zpa	26.607s
 ```
 
 #### Writing an Acceptance Test

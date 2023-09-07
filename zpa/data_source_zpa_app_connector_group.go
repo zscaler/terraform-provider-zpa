@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
 )
 
 func dataSourceAppConnectorGroup() *schema.Resource {
@@ -173,14 +173,6 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"pra_enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"waf_disabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
 			"creation_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -320,18 +312,26 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	var resp *appconnectorgroup.AppConnectorGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for app connector group  %s\n", id)
-		res, _, err := zClient.appconnectorgroup.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -340,7 +340,7 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for app connector group name %s\n", name)
-		res, _, err := zClient.appconnectorgroup.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -371,9 +371,9 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
-		_ = d.Set("pra_enabled", resp.PRAEnabled)
-		_ = d.Set("waf_disabled", resp.WAFDisabled)
 		_ = d.Set("connectors", flattenConnectors(resp.Connectors))
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 		if err := d.Set("server_groups", flattenServerGroups(resp)); err != nil {
 			return fmt.Errorf("failed to read server groups %s", err)

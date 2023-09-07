@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgegroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
 )
 
 func dataSourceServiceEdgeGroup() *schema.Resource {
@@ -241,6 +241,54 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 						"upgrade_status": {
 							Type:     schema.TypeString,
 							Computed: true,
+						},
+						"zpn_sub_module_upgrade_list": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"creation_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"current_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"entity_gid": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"modifiedby": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"modified_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"expected_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"role": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"upgrade_status": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"upgrade_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
 						},
 					},
 				},

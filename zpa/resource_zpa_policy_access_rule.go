@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/zpa"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
+	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 func resourcePolicyAccessRule() *schema.Resource {
@@ -92,17 +92,17 @@ func resourcePolicyAccessRule() *schema.Resource {
 
 func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	req, err := expandCreatePolicyRule(d)
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
 
-	if !ValidateConditions(req.Conditions, zClient) {
+	if !ValidateConditions(req.Conditions, zClient, req.MicroTenantID) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
-	policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
+	policysetcontroller, _, err := service.Create(req)
 	if err != nil {
 		return err
 	}
@@ -112,14 +112,13 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-
-	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
-	resp, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, d.Id())
+	resp, _, err := service.GetPolicyRule(globalPolicySet.ID, d.Id())
 	if err != nil {
 		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
@@ -152,7 +151,8 @@ func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 
 func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return err
 	}
@@ -163,17 +163,17 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	if !ValidateConditions(req.Conditions, zClient) {
+	if !ValidateConditions(req.Conditions, zClient, req.MicroTenantID) {
 		return fmt.Errorf("couldn't validate the zpa policy rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
-	if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
+	if _, _, err := service.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
+	if _, err := service.Update(globalPolicySet.ID, ruleID, req); err != nil {
 		return err
 	}
 
@@ -181,15 +181,15 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePolicyAccessDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
 
-	if _, err := zClient.policysetcontroller.Delete(globalPolicySet.ID, d.Id()); err != nil {
+	if _, err := service.Delete(globalPolicySet.ID, d.Id()); err != nil {
 		return err
 	}
 

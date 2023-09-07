@@ -10,8 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 var policySets = map[string]policysetcontroller.PolicySet{}
@@ -40,32 +40,32 @@ func validateAndSetProfileNameID(d *schema.ResourceData) error {
 	return nil
 }
 
-func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client) bool {
+func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client, microtenantID string) bool {
 	for _, condition := range conditions {
-		if !validateOperands(condition.Operands, zClient) {
+		if !validateOperands(condition.Operands, zClient, microtenantID) {
 			return false
 		}
 	}
 	return true
 }
-func validateOperands(operands []policysetcontroller.Operands, zClient *Client) bool {
+func validateOperands(operands []policysetcontroller.Operands, zClient *Client, microtenantID string) bool {
 	for _, operand := range operands {
-		if !validateOperand(operand, zClient) {
+		if !validateOperand(operand, zClient, microtenantID) {
 			return false
 		}
 	}
 	return true
 }
-func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool {
+func validateOperand(operand policysetcontroller.Operands, zClient *Client, microtenantID string) bool {
 	switch operand.ObjectType {
 	case "APP":
 		return customValidate(operand, []string{"id"}, "application segment ID", Getter(func(id string) error {
-			_, _, err := zClient.applicationsegment.Get(id)
+			_, _, err := zClient.applicationsegment.WithMicroTenant(microtenantID).Get(id)
 			return err
 		}))
 	case "APP_GROUP":
 		return customValidate(operand, []string{"id"}, "Segment Group ID", Getter(func(id string) error {
-			_, _, err := zClient.segmentgroup.Get(id)
+			_, _, err := zClient.segmentgroup.WithMicroTenant(microtenantID).Get(id)
 			return err
 		}))
 
@@ -88,7 +88,7 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client) bool
 		}))
 	case "MACHINE_GRP":
 		return customValidate(operand, []string{"id"}, "machine group ID", Getter(func(id string) error {
-			_, _, err := zClient.machinegroup.Get(id)
+			_, _, err := zClient.machinegroup.WithMicroTenant(microtenantID).Get(id)
 			return err
 		}))
 	case "POSTURE":
@@ -234,7 +234,6 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Optional:    true,
-		Computed:    true,
 		Description: "This is for proviidng the set of conditions for the policy.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -254,6 +253,11 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 						"AND",
 						"OR",
 					}, false),
+				},
+				"microtenant_id": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Computed: true,
 				},
 				"operands": {
 					Type:        schema.TypeList,
@@ -281,6 +285,12 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 								Description: "This signifies the key for the object type. String ID example: id ",
 							},
 							"rhs": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								Computed:    true,
+								Description: "This denotes the value for the given object type. Its value depends upon the key.",
+							},
+							"microtenant_id": {
 								Type:        schema.TypeString,
 								Optional:    true,
 								Computed:    true,
@@ -323,10 +333,11 @@ func ExpandPolicyConditions(d *schema.ResourceData) ([]policysetcontroller.Condi
 					return nil, err
 				}
 				conditionSets = append(conditionSets, policysetcontroller.Conditions{
-					ID:       conditionSet["id"].(string),
-					Negated:  conditionSet["negated"].(bool),
-					Operator: conditionSet["operator"].(string),
-					Operands: operands,
+					ID:            conditionSet["id"].(string),
+					Negated:       conditionSet["negated"].(bool),
+					Operator:      conditionSet["operator"].(string),
+					MicroTenantID: conditionSet["microtenant_id"].(string),
+					Operands:      operands,
 				})
 			}
 		}
@@ -348,11 +359,11 @@ func expandOperandsList(ops interface{}) ([]policysetcontroller.Operands, error)
 			rhs, ok := operandSet["rhs"].(string)
 			op := policysetcontroller.Operands{
 				ID:         id,
-				IdpID:      IdpID,
+				Name:       operandSet["name"].(string),
 				LHS:        operandSet["lhs"].(string),
 				ObjectType: operandSet["object_type"].(string),
+				IdpID:      IdpID,
 				RHS:        rhs,
-				Name:       operandSet["name"].(string),
 			}
 			if ok && rhs != "" {
 				if operandSet != nil {
@@ -383,10 +394,11 @@ func flattenPolicyConditions(conditions []policysetcontroller.Conditions) []inte
 	ruleConditions := make([]interface{}, len(conditions))
 	for i, ruleConditionItems := range conditions {
 		ruleConditions[i] = map[string]interface{}{
-			"id":       ruleConditionItems.ID,
-			"negated":  ruleConditionItems.Negated,
-			"operator": ruleConditionItems.Operator,
-			"operands": flattenPolicyRuleOperands(ruleConditionItems.Operands),
+			"id":             ruleConditionItems.ID,
+			"negated":        ruleConditionItems.Negated,
+			"operator":       ruleConditionItems.Operator,
+			"microtenant_id": ruleConditionItems.MicroTenantID,
+			"operands":       flattenPolicyRuleOperands(ruleConditionItems.Operands),
 		}
 	}
 
@@ -503,6 +515,11 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Computed:   true,
 			Deprecated: "The `rule_order` field is now deprecated for all zpa access policy resources in favor of the resource `zpa_policy_access_rule_reorder`",
 		},
+		"microtenant_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Computed: true,
+		},
 		"lss_default_rule": {
 			Type:     schema.TypeBool,
 			Optional: true,
@@ -591,14 +608,15 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 
 func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-		zClient := m.(*Client)
+		service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
 		id := d.Id()
 		_, parseIDErr := strconv.ParseInt(id, 10, 64)
 		if parseIDErr == nil {
 			// assume if the passed value is an int
 			_ = d.Set("id", id)
 		} else {
-			resp, _, err := zClient.policysetcontroller.GetByNameAndTypes(types, id)
+			resp, _, err := service.GetByNameAndTypes(types, id)
 			if err == nil {
 				d.SetId(resp.ID)
 				_ = d.Set("id", resp.ID)
@@ -674,6 +692,17 @@ func flattenInspectionRulesConditions(condition common.Rules) []interface{} {
 	}
 
 	return conditions
+}
+
+func GetString(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	str, ok := v.(string)
+	if ok {
+		return str
+	}
+	return fmt.Sprintf("%v", v)
 }
 
 func GetGlobalPolicySetByPolicyType(policysetcontroller policysetcontroller.Service, policyType string) (*policysetcontroller.PolicySet, error) {

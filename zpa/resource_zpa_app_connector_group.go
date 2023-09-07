@@ -7,9 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/zpa"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
+	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 func resourceAppConnectorGroup() *schema.Resource {
@@ -20,7 +20,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 		Delete: resourceAppConnectorGroupDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+				service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -28,7 +28,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.appconnectorgroup.GetByName(id)
+					resp, _, err := service.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -135,8 +135,8 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"waf_disabled": {
-				Type:     schema.TypeBool,
+			"microtenant_id": {
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
@@ -181,7 +181,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 }
 
 func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	if err := validateAndSetProfileNameID(d); err != nil {
 		return err
@@ -193,7 +193,7 @@ func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-	resp, _, err := zClient.appconnectorgroup.Create(req)
+	resp, _, err := service.Create(req)
 	if err != nil {
 		return err
 	}
@@ -204,9 +204,9 @@ func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
-	resp, _, err := zClient.appconnectorgroup.Get(d.Id())
+	resp, _, err := service.Get(d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing app connector group %s from state because it no longer exists in ZPA", d.Id())
@@ -236,7 +236,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 	_ = d.Set("pra_enabled", resp.PRAEnabled)
-	_ = d.Set("waf_disabled", resp.WAFDisabled)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	return nil
@@ -244,7 +244,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	if err := validateAndSetProfileNameID(d); err != nil {
 		return err
@@ -257,28 +257,28 @@ func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-	if _, _, err := zClient.appconnectorgroup.Get(id); err != nil {
+	if _, _, err := service.Get(id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.appconnectorgroup.Update(id, &req); err != nil {
+	if _, err := service.Update(id, &req); err != nil {
 		return err
 	}
 
 	return resourceAppConnectorGroupRead(d, m)
 }
 
-func detachAppConnectorGroupFromAllAccessPolicyRules(id string, zClient *Client) {
+func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, policySetControllerService *policysetcontroller.Service) {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
-	accessPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	accessPolicySet, _, err := policySetControllerService.GetByPolicyType("ACCESS_POLICY")
 	if err != nil {
 		return
 	}
-	rules, _, err := zClient.policysetcontroller.GetAllByType("ACCESS_POLICY")
+	rules, _, err := policySetControllerService.GetAllByType("ACCESS_POLICY")
 	if err != nil {
 		return
 	}
@@ -286,7 +286,7 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(id string, zClient *Client)
 		ids := []policysetcontroller.AppConnectorGroups{}
 		changed := false
 		for _, app := range rule.AppConnectorGroups {
-			if app.ID == id {
+			if app.ID == d.Id() {
 				changed = true
 				continue
 			}
@@ -296,7 +296,7 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(id string, zClient *Client)
 		}
 		rule.AppConnectorGroups = ids
 		if changed {
-			if _, err := zClient.policysetcontroller.Update(accessPolicySet.ID, rule.ID, &rule); err != nil {
+			if _, err := policySetControllerService.WithMicroTenant(GetString(d.Get("microtenant_id"))).Update(accessPolicySet.ID, rule.ID, &rule); err != nil {
 				continue
 			}
 		}
@@ -305,13 +305,14 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(id string, zClient *Client)
 
 func resourceAppConnectorGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
+	policySetControllerService := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	service := zClient.appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	log.Printf("[INFO] Deleting app connector groupID: %v\n", d.Id())
 
 	// detach app connector group from all access policy rules
-	detachAppConnectorGroupFromAllAccessPolicyRules(d.Id(), zClient)
+	detachAppConnectorGroupFromAllAccessPolicyRules(d, policySetControllerService)
 
-	if _, err := zClient.appconnectorgroup.Delete(d.Id()); err != nil {
+	if _, err := service.Delete(d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
@@ -340,7 +341,7 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		UpgradeTimeInSecs:        d.Get("upgrade_time_in_secs").(string),
 		OverrideVersionProfile:   d.Get("override_version_profile").(bool),
 		PRAEnabled:               d.Get("pra_enabled").(bool),
-		WAFDisabled:              d.Get("waf_disabled").(bool),
+		MicroTenantID:            d.Get("microtenant_id").(string),
 		VersionProfileID:         d.Get("version_profile_id").(string),
 		VersionProfileName:       d.Get("version_profile_name").(string),
 	}

@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorcontroller"
 )
 
 func dataSourceAppConnectorController() *schema.Resource {
@@ -157,18 +157,25 @@ func dataSourceAppConnectorController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func dataSourceAppConnectorControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-
+	service := m.(*Client).appconnectorcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	var resp *appconnectorcontroller.AppConnector
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for app connector  %s\n", id)
-		res, _, err := zClient.appconnectorcontroller.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -177,7 +184,7 @@ func dataSourceAppConnectorControllerRead(d *schema.ResourceData, m interface{})
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for app connector name %s\n", name)
-		res, _, err := zClient.appconnectorcontroller.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -220,6 +227,8 @@ func dataSourceAppConnectorControllerRead(d *schema.ResourceData, m interface{})
 		_ = d.Set("enrollment_cert", resp.EnrollmentCert)
 		_ = d.Set("upgrade_attempt", resp.UpgradeAttempt)
 		_ = d.Set("upgrade_status", resp.UpgradeStatus)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 	} else {
 		return fmt.Errorf("couldn't find any app connector with name '%s' or id '%s'", name, id)

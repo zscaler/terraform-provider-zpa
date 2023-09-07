@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgecontroller"
 )
 
 func dataSourceServiceEdgeController() *schema.Resource {
@@ -104,7 +104,7 @@ func dataSourceServiceEdgeController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -166,6 +166,54 @@ func dataSourceServiceEdgeController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"zpn_sub_module_upgrade_list": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"creation_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"current_version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"entity_gid": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"modified_by": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"modified_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"expected_version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"role": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"upgrade_status": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"upgrade_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -217,7 +265,7 @@ func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("location", resp.Location)
 		_ = d.Set("longitude", resp.Longitude)
 		_ = d.Set("listen_ips", resp.ListenIPs)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("provisioning_key_id", resp.ProvisioningKeyID)
@@ -231,10 +279,34 @@ func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("enrollment_cert", resp.EnrollmentCert)
 		_ = d.Set("upgrade_attempt", resp.UpgradeAttempt)
 		_ = d.Set("upgrade_status", resp.UpgradeStatus)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
+		_ = d.Set("zpn_sub_module_upgrade_list", flattenZPNSubModuleUpgradeList(resp))
 
 	} else {
 		return fmt.Errorf("couldn't find any service edge controller with name '%s' or id '%s'", name, id)
 	}
 
 	return nil
+}
+
+func flattenZPNSubModuleUpgradeList(zpnSubModule *serviceedgecontroller.ServiceEdgeController) []interface{} {
+	zpnSubModules := make([]interface{}, len(zpnSubModule.ZPNSubModuleUpgradeList))
+	for i, val := range zpnSubModule.ZPNSubModuleUpgradeList {
+		zpnSubModules[i] = map[string]interface{}{
+			"id":               val.ID,
+			"creation_time":    val.CreationTime,
+			"current_version":  val.CurrentVersion,
+			"entity_gid":       val.EntityGid,
+			"modified_by":      val.EntityType,
+			"modified_time":    val.ModifiedTime,
+			"previous_version": val.PreviousVersion,
+			"expected_version": val.ExpectedVersion,
+			"role":             val.Role,
+			"upgrade_status":   val.UpgradeStatus,
+			"upgrade_time":     val.UpgradeTime,
+		}
+	}
+
+	return zpnSubModules
 }

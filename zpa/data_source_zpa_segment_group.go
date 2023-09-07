@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
 func dataSourceSegmentGroup() *schema.Resource {
@@ -199,18 +199,26 @@ func dataSourceSegmentGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func dataSourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	var resp *segmentgroup.SegmentGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for server group %s\n", id)
-		res, _, err := zClient.segmentgroup.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -219,12 +227,13 @@ func dataSourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for server group name %s\n", name)
-		res, _, err := zClient.segmentgroup.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
 		resp = res
 	}
+
 	if resp != nil {
 		d.SetId(resp.ID)
 		_ = d.Set("config_space", resp.ConfigSpace)
@@ -236,6 +245,8 @@ func dataSourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("policy_migrated", resp.PolicyMigrated)
 		_ = d.Set("tcp_keep_alive_enabled", resp.TcpKeepAliveEnabled)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 		if err := d.Set("applications", flattenSegmentGroupApplications(resp)); err != nil {
 			return fmt.Errorf("failed to read applications %s", err)

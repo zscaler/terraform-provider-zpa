@@ -8,10 +8,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v2/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
 )
 
 func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {

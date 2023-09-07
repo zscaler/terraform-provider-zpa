@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_predefined_controls"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_predefined_controls"
 )
 
 func dataSourceInspectionPredefinedControls() *schema.Resource {

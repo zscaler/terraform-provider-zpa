@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
 )
 
 func dataSourceApplicationSegmentInspection() *schema.Resource {
@@ -95,6 +95,14 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 				Optional:    true,
 				Description: "Name of the application.",
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"inspection_apps": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -179,12 +187,13 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 }
 
 func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).applicationsegmentinspection.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
 	var resp *applicationsegmentinspection.AppSegmentInspection
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for inspection application segment %s\n", id)
-		res, _, err := zClient.applicationsegmentinspection.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -193,7 +202,7 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interf
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for inspection application segment name %s\n", name)
-		res, _, err := zClient.applicationsegmentinspection.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -219,6 +228,8 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interf
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("ip_anchored", resp.IPAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
