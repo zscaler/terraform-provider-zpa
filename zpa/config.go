@@ -13,6 +13,11 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/clienttypes"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiregions"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbizpaprofile"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/isolationprofile"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/customerversionprofile"
@@ -59,7 +64,12 @@ type Client struct {
 	machinegroup                   machinegroup.Service
 	microtenants                   microtenants.Service
 	postureprofile                 postureprofile.Service
+	cbiregions                     cbiregions.Service
+	cbiprofilecontroller           cbiprofilecontroller.Service
+	cbicertificatecontroller       cbicertificatecontroller.Service
+	cbibannercontroller            cbibannercontroller.Service
 	isolationprofile               isolationprofile.Service
+	cbizpaprofile                  cbizpaprofile.Service
 	policysetcontroller            policysetcontroller.Service
 	provisioningkey                provisioningkey.Service
 	samlattribute                  samlattribute.Service
@@ -118,6 +128,11 @@ func (c *Config) Client() (*Client, error) {
 		machinegroup:                   *machinegroup.New(zpaClient),
 		microtenants:                   *microtenants.New(zpaClient),
 		postureprofile:                 *postureprofile.New(zpaClient),
+		cbiregions:                     *cbiregions.New(zpaClient),
+		cbiprofilecontroller:           *cbiprofilecontroller.New(zpaClient),
+		cbicertificatecontroller:       *cbicertificatecontroller.New(zpaClient),
+		cbibannercontroller:            *cbibannercontroller.New(zpaClient),
+		cbizpaprofile:                  *cbizpaprofile.New(zpaClient),
 		isolationprofile:               *isolationprofile.New(zpaClient),
 		policysetcontroller:            *policysetcontroller.New(zpaClient),
 		provisioningkey:                *provisioningkey.New(zpaClient),

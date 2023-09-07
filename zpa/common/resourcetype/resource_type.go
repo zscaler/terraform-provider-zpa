@@ -12,6 +12,8 @@ const (
 	ZPAApplicationSegmentPRA           = "zpa_application_segment_pra"
 	ZPAApplicationSegmentInspection    = "zpa_application_segment_inspection"
 	ZPAApplicationSegmentBrowserAccess = "zpa_application_segment_browser_access"
+	ZPACBIBannerController             = "zpa_cloud_browser_isolation_banner"
+	ZPACBIExternalIsolationProfile     = "zpa_cloud_browser_isolation_external_profile"
 	ZPAPolicyType                      = "zpa_policy_type"
 	ZPAPolicyAccessRule                = "zpa_policy_access_rule"
 	ZPAPolicyTimeOutRule               = "zpa_policy_timeout_rule"
