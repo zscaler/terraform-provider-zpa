@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"log"
@@ -306,4 +305,4 @@ func flattenMicroTenantUserResource(userResource *microtenants.UserResource) []m
 	result[0]["modified_time"] = userResource.ModifiedTime
 	return result
 }
-*/
+

@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"log"
 	"strconv"
@@ -259,4 +258,3 @@ func flattenMicroTenantUser(user *microtenants.UserResource) []map[string]interf
 
 	return flattenedData
 }
-*/

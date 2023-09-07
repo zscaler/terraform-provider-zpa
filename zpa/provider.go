@@ -69,7 +69,7 @@ func Provider() *schema.Provider {
 			"zpa_lss_config_controller":              resourceLSSConfigController(),
 			"zpa_inspection_custom_controls":         resourceInspectionCustomControls(),
 			"zpa_inspection_profile":                 resourceInspectionProfile(),
-			//"zpa_microtenant_controller":           resourceMicrotenantController(),
+			"zpa_microtenant_controller":             resourceMicrotenantController(),
 
 			// The day I realized I was naming stuff wrong :'-(
 			"zpa_browser_access": deprecateIncorrectNaming(resourceApplicationSegmentBrowserAccess(), zpaBrowserAccess),
@@ -111,7 +111,7 @@ func Provider() *schema.Provider {
 			"zpa_inspection_all_predefined_controls": dataSourceInspectionAllPredefinedControls(),
 			"zpa_inspection_custom_controls":         dataSourceInspectionCustomControls(),
 			"zpa_inspection_profile":                 dataSourceInspectionProfile(),
-			//"zpa_microtenant_controller":           dataSourceMicrotenantController(),
+			"zpa_microtenant_controller":             dataSourceMicrotenantController(),
 		},
 	}
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {

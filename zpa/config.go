@@ -23,6 +23,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/machinegroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/microtenants"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/platforms"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/postureprofile"
@@ -56,6 +57,7 @@ type Client struct {
 	idpcontroller                  idpcontroller.Service
 	lssconfigcontroller            lssconfigcontroller.Service
 	machinegroup                   machinegroup.Service
+	microtenants                   microtenants.Service
 	postureprofile                 postureprofile.Service
 	isolationprofile               isolationprofile.Service
 	policysetcontroller            policysetcontroller.Service
@@ -114,6 +116,7 @@ func (c *Config) Client() (*Client, error) {
 		idpcontroller:                  *idpcontroller.New(zpaClient),
 		lssconfigcontroller:            *lssconfigcontroller.New(zpaClient),
 		machinegroup:                   *machinegroup.New(zpaClient),
+		microtenants:                   *microtenants.New(zpaClient),
 		postureprofile:                 *postureprofile.New(zpaClient),
 		isolationprofile:               *isolationprofile.New(zpaClient),
 		policysetcontroller:            *policysetcontroller.New(zpaClient),
