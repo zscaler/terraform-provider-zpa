@@ -84,6 +84,14 @@ func dataSourceMachineGroup() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"microtenant_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
