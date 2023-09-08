@@ -98,6 +98,7 @@ func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("reauth_default_rule", resp.ReauthDefaultRule)
 	_ = d.Set("reauth_idle_timeout", resp.ReauthIdleTimeout)
 	_ = d.Set("reauth_timeout", resp.ReauthTimeout)
@@ -179,6 +180,7 @@ func expandCreatePolicyTimeoutRule(d *schema.ResourceData) (*policysetcontroller
 		ReauthDefaultRule: d.Get("reauth_default_rule").(bool),
 		ReauthIdleTimeout: d.Get("reauth_idle_timeout").(string),
 		ReauthTimeout:     d.Get("reauth_timeout").(string),
+		MicroTenantID:     GetString(d.Get("microtenant_id")),
 		Conditions:        conditions,
 	}, nil
 }

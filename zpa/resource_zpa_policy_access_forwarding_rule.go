@@ -103,6 +103,7 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
 	return nil
@@ -180,6 +181,7 @@ func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetcontrol
 		PolicySetID:       policySetID,
 		PolicyType:        d.Get("policy_type").(string),
 		Priority:          d.Get("priority").(string),
+		MicroTenantID:     GetString(d.Get("microtenant_id")),
 		Conditions:        conditions,
 	}, nil
 }

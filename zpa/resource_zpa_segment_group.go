@@ -90,6 +90,7 @@ func resourceSegmentGroup() *schema.Resource {
 			"microtenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}
