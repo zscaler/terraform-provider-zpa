@@ -14,14 +14,14 @@ Use the **zpa_app_connector_controller** data source to get information about a 
 
 ```hcl
 # ZPA App Connector Data Source
-data "zpa_app_connector" "example" {
+data "zpa_app_connector_controller" "example" {
   name = "AWS-VPC100-App-Connector"
 }
 ```
 
 ```hcl
 # ZPA App Connector Data Source
-data "zpa_app_connector" "example" {
+data "zpa_app_connector_controller" "example" {
   id = "123456789"
 }
 ```
