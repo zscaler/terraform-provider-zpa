@@ -67,6 +67,8 @@ In addition to all arguments above, the following attributes are exported:
 * `ip_anchored` - (bool)
 * `is_cname_enabled` - (bool) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
 * `passive_health_enabled` - (bool)
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
 
 * `inspection_apps` - (string) TCP port ranges used to access the app.
   * `app_id:` - (string)
@@ -82,3 +84,5 @@ In addition to all arguments above, the following attributes are exported:
   * `use_in_dr_mode` (bool)
   * `is_incomplete_dr_config` (bool)
   * `select_connector_close_to_app` (bool)
+  * `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+  * `microtenant_name` (string) The name of the microtenant the resource is to be associated with.

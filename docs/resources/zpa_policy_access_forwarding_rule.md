@@ -93,9 +93,17 @@ resource "zpa_application_segment" "this" {
 
     ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
 
+* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``
   * `operator` (Optional) Supported values: ``AND``, and ``OR``
+  * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
   * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
     * `name` (Optional)
     * `lhs` (Optional) LHS must always carry the string value ``id`` or the attribute ID of the resource being associated with the rule.
@@ -109,6 +117,9 @@ resource "zpa_application_segment" "this" {
       * `zpn_client_type_ip_anchoring`
       * `zpn_client_type_edge_connector`
       * `zpn_client_type_zapp`
+    * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+    ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 ## Import
 

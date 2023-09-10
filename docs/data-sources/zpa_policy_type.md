@@ -109,3 +109,5 @@ In addition to all arguments above, the following attributes are exported:
 * ``modified_by``  (string)
 * ``name``  (string)
 * ``sorted`` (bool)
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.

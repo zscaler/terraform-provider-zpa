@@ -42,6 +42,8 @@ In addition to all arguments above, the following attributes are exported:
 * `enabled` (bool)
 * `modified_by` (string)
 * `modified_name` (string)
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
   * `machines` (string)
     * `creation_time` (string)
     * `description` (string)
@@ -55,3 +57,5 @@ In addition to all arguments above, the following attributes are exported:
     * `modified_by` (string)
     * `name` (string)
     * `signing_cert` (string)
+    * `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+    * `microtenant_name` (string) The name of the microtenant the resource is to be associated with.

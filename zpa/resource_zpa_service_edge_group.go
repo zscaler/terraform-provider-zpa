@@ -293,6 +293,7 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		VersionProfileName:            d.Get("version_profile_name").(string),
 		VersionProfileVisibilityScope: d.Get("version_profile_visibility_scope").(string),
 		OverrideVersionProfile:        d.Get("override_version_profile").(bool),
+		MicroTenantID:                 d.Get("microtenant_id").(string),
 		ServiceEdges:                  expandServiceEdges(d),
 		TrustedNetworks:               expandTrustedNetworks(d),
 	}

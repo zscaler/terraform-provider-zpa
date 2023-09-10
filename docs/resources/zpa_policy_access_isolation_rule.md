@@ -62,10 +62,17 @@ resource "zpa_policy_isolation_rule" "this" {
 * `rule_order` - (Deprecated)
 
     ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
+* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``
   * `operator` (Optional) Supported values: ``AND``, and ``OR``
+  * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
   * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
     * `name` (Optional)
     * `lhs` (Optional) LHS must always carry the string value ``id`` or the attribute ID of the resource being associated with the rule.
@@ -74,6 +81,9 @@ resource "zpa_policy_isolation_rule" "this" {
     * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `APP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
     * `CLIENT_TYPE` (Optional) - The below options are the only ones supported in a timeout policy rule.
       * ``zpn_client_type_exporter`` "Web Browser"
+    * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+    ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 ## Import
 

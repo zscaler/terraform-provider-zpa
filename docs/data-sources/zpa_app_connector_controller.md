@@ -73,5 +73,7 @@ The following values are ignored in PUT/POST calls. Only applicable for a GET re
 * `enrollment_cert` (Computed)
 * `upgrade_attempt` (Computed)
 * `upgrade_status` (Computed)
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
 
 :warning: Notice that certificate and public_keys are omitted from the output.

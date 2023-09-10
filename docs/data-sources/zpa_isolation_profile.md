@@ -35,3 +35,5 @@ In addition to all arguments above, the following attributes are exported:
 * `creation_time` - (string)
 * `modified_by` - (string)
 * `modified_time` - (string)
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.

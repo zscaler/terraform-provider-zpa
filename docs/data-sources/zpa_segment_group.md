@@ -42,6 +42,8 @@ In addition to all arguments above, the following attributes are exported:
 * `enabled` - (bool)
 * `policy_migrated` - (bool)
 * `tcp_keep_alive_enabled` - (string)
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
 
 * `applications` - (Computed)
   * `bypass_type` - (string)
@@ -61,6 +63,8 @@ In addition to all arguments above, the following attributes are exported:
   * `tcp_port_ranges` - (string)
   * `tcp_ports_in`  - (string)
   * `udp_port_ranges` - (string)
+  * `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+  * `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
 
 * `server_groups` - (Computed)
   * `config_space` - (string)
@@ -72,3 +76,5 @@ In addition to all arguments above, the following attributes are exported:
   * `modified_time` - (string)
   * `modified_by` - (string)
   * `name` - (string)
+  * `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+  * `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
