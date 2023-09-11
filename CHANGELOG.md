@@ -17,20 +17,21 @@
 
 ⚠️ **WARNING:**: This feature is in limited availability and requires additional license. To learn more, contact Zscaler Support or your local account team.
 
-## 2.83.0-beta (September, 5 2023) - Beta
+- [PR #356](https://github.com/zscaler/terraform-provider-zpa/pull/356) - Added support to the following new ZPA Cloud Browser Isolation resources and datasources:
 
-### Notes
+- Resources
+  - `zpa_cloud_browser_isolation_banner` - Cloud Browser Isolation Banner Controller
+  - `zpa_cloud_browser_isolation_certificate` - Cloud Browser Isolation Certificate Controller
+  - `zpa_cloud_browser_isolation_external_profile` - Cloud Browser Isolation External Profile Controller
 
-- Release date: **(September, 5 2023)**
-- Supported Terraform version: **v1.x**
+- Data Sources
+  - `zpa_cloud_browser_isolation_banner` - Cloud Browser Isolation Banner Controller
+  - `zpa_cloud_browser_isolation_certificate` - Cloud Browser Isolation Certificate Controller
+  - `zpa_cloud_browser_isolation_external_profile` - Cloud Browser Isolation External Profile Controller
+  - `zpa_cloud_browser_isolation_region` - Cloud Browser Isolation Regions
+  - `zpa_cloud_browser_isolation_zpa_profile` - Cloud Browser Isolation ZPA Profile
 
-### Enhancements
-
-- [PR #350](https://github.com/zscaler/terraform-provider-zpa/pull/350) - Update provider to [Zscaler SDK GO](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v1.8.0-beta) v1.8.0-beta. This version provides caching  mechanism, which aims to enhance the provider performance as well as decrease the number of API calls being made to the ZPA API.
-
-### Fixes
-
-- [PR #350](https://github.com/zscaler/terraform-provider-zpa/pull/350) - Fixed drift within Access Policy Condition to ensure update is performed when adding and removing application segments.
+  ⚠️ **WARNING:**: Cloud Browser Isolation (CBI) is a licensed feature flag. Please contact Zscaler support or your local account team for details.
 
 ## 2.82.4-beta (August, 18 2023) - Beta
 
@@ -217,8 +218,8 @@ below this limit to prevent performance impacts.
 - [PR #306](https://github.com/zscaler/terraform-provider-zpa/pull/306) Fix resource ``zpa_policy_forwarding_rule`` to ensure updates are executed during resource rule modifications.
 - [PR #307](https://github.com/zscaler/terraform-provider-zpa/pull/307) Fix resource ``zpa_policy_timeout_rule`` to ensure updates are executed during resource rule modifications.
 - [PR #308](https://github.com/zscaler/terraform-provider-zpa/pull/308) Fix the following access rule resources to ensure updates are executed during resource rule modifications:
-  * ``zpa_policy_inspection_rule``
-  * ``zpa_policy_isolation_rule``
+  - ``zpa_policy_inspection_rule``
+  - ``zpa_policy_isolation_rule``
 
 ## 2.7.5 (May, 18 2023)
 

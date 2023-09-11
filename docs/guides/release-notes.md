@@ -33,6 +33,22 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ⚠️ **WARNING:**: This feature is in limited availability and requires additional license. To learn more, contact Zscaler Support or your local account team.
 
+- [PR #356](https://github.com/zscaler/terraform-provider-zpa/pull/356) - Added support to the following new ZPA Cloud Browser Isolation resources and datasources:
+
+- Resources
+  - `zpa_cloud_browser_isolation_banner` - Cloud Browser Isolation Banner Controller
+  - `zpa_cloud_browser_isolation_certificate` - Cloud Browser Isolation Certificate Controller
+  - `zpa_cloud_browser_isolation_external_profile` - Cloud Browser Isolation External Profile Controller
+
+- Data Sources
+  - `zpa_cloud_browser_isolation_banner` - Cloud Browser Isolation Banner Controller
+  - `zpa_cloud_browser_isolation_certificate` - Cloud Browser Isolation Certificate Controller
+  - `zpa_cloud_browser_isolation_external_profile` - Cloud Browser Isolation External Profile Controller
+  - `zpa_cloud_browser_isolation_region` - Cloud Browser Isolation Regions
+  - `zpa_cloud_browser_isolation_zpa_profile` - Cloud Browser Isolation ZPA Profile
+
+  ⚠️ **WARNING:**: Cloud Browser Isolation (CBI) is a licensed feature flag. Please contact Zscaler support or your local account team for details.
+
 ## 2.83.0-beta (September, 5 2023) - Beta
 
 ### Notes

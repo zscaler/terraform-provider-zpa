@@ -1,5 +1,5 @@
 ---
-subcategory: "Isolation"
+subcategory: "Cloud Browser Isolation"
 layout: "zscaler"
 page_title: "ZPA: isolation_profile"
 description: |-
