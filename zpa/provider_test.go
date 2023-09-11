@@ -56,6 +56,7 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPAServerGroup, sweepTestServerGroup)
 		setupSweeper(resourcetype.ZPAServiceEdgeGroup, sweepTestServiceEdgeGroup)
 		setupSweeper(resourcetype.ZPAPolicyAccessRule, sweepTestAccessPolicyRuleByType)
+		setupSweeper(resourcetype.ZPACBIBannerController, sweepTestCBIBanner)
 	}
 	resource.TestMain(m)
 }

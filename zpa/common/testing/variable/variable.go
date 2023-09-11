@@ -88,6 +88,7 @@ const (
 )
 
 // CBI External Profile
+
 // LSS Controller
 const (
 	LSSControllerEnabled    = true

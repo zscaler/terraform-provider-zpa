@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -52,7 +53,7 @@ func resourceCBIExternalProfile() *schema.Resource {
 			},
 			"banner_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"region_ids": {
 				Type:        schema.TypeSet,
@@ -133,6 +134,12 @@ func resourceCBIExternalProfile() *schema.Resource {
 }
 
 func resourceCBIExternalProfileCreate(d *schema.ResourceData, m interface{}) error {
+	// Validate the region_ids length
+	regionIds := d.Get("region_ids").(*schema.Set).List()
+	if len(regionIds) < 2 {
+		return fmt.Errorf("expected region_ids to contain at least 2 items, got %d", len(regionIds))
+	}
+
 	zClient := m.(*Client)
 
 	req := expandCBIExternalProfile(d)
@@ -148,7 +155,6 @@ func resourceCBIExternalProfileCreate(d *schema.ResourceData, m interface{}) err
 
 	d.SetId(cbiProfile.ID)
 	return resourceCBIExternalProfileRead(d, m)
-
 }
 
 func resourceCBIExternalProfileRead(d *schema.ResourceData, m interface{}) error {
@@ -197,31 +203,13 @@ func resourceCBIExternalProfileRead(d *schema.ResourceData, m interface{}) error
 	return nil
 }
 
-func flattenRegionsSimple(regions *cbiprofilecontroller.IsolationProfile) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(regions.Regions))
-	for i, group := range regions.Regions {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-
-func flattenCertificatesSimple(certificates *cbiprofilecontroller.IsolationProfile) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(certificates.Certificates))
-	for i, group := range certificates.Certificates {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-
 func resourceCBIExternalProfileUpdate(d *schema.ResourceData, m interface{}) error {
+	// Validate the region_ids length
+	regionIds := d.Get("region_ids").(*schema.Set).List()
+	if len(regionIds) < 2 {
+		return fmt.Errorf("expected region_ids to contain at least 2 items, got %d", len(regionIds))
+	}
+
 	zClient := m.(*Client)
 
 	id := d.Id()
@@ -330,13 +318,4 @@ func expandCBISecurityControls(d *schema.ResourceData) *cbiprofilecontroller.Sec
 		}
 	}
 	return nil
-}
-
-func flattenUserExperience(experience *cbiprofilecontroller.UserExperience) interface{} {
-	return []map[string]interface{}{
-		{
-			"session_persistence": experience.SessionPersistence,
-			"browser_in_browser":  experience.BrowserInBrowser,
-		},
-	}
 }

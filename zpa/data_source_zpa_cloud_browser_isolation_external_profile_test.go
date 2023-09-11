@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"testing"
 
@@ -9,16 +8,16 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 )
 
-func TestAccDataSourceCBIIsolationProfile_Basic(t *testing.T) {
+func TestAccDataSourceCBIExternalProfile_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBIExternalIsolationProfile)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCBIIsolationProfileDestroy,
+		CheckDestroy: testAccCheckCBIExternalProfileDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCBIIsolationProfileConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckCBIExternalProfileConfigure(resourceTypeAndName, generatedName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
@@ -30,4 +29,3 @@ func TestAccDataSourceCBIIsolationProfile_Basic(t *testing.T) {
 		},
 	})
 }
-*/

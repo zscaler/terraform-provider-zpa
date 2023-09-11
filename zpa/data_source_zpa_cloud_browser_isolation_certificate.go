@@ -21,8 +21,9 @@ func dataSourceCBICertificates() *schema.Resource {
 				Optional: true,
 			},
 			"pem": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"is_default": {
 				Type:     schema.TypeBool,

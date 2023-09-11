@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"testing"
@@ -19,14 +18,14 @@ func TestAccResourceCBIExternalProfileBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckCBIIsolationProfileDestroy,
+		CheckDestroy: testAccCheckCBIExternalProfileDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCBIIsolationProfileConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckCBIExternalProfileConfigure(resourceTypeAndName, generatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCBIIsolationProfileExists(resourceTypeAndName, &cbiIsolationProfile),
+					testAccCheckCBIExternalProfileExists(resourceTypeAndName, &cbiIsolationProfile),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "user_experience.#", "1"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "security_controls.#", "1"),
 				),
@@ -34,10 +33,9 @@ func TestAccResourceCBIExternalProfileBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckCBIIsolationProfileConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckCBIExternalProfileConfigure(resourceTypeAndName, generatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCBIIsolationProfileExists(resourceTypeAndName, &cbiIsolationProfile),
-					testAccCheckCBIIsolationProfileExists(resourceTypeAndName, &cbiIsolationProfile),
+					testAccCheckCBIExternalProfileExists(resourceTypeAndName, &cbiIsolationProfile),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "user_experience.#", "1"),
@@ -48,7 +46,7 @@ func TestAccResourceCBIExternalProfileBasic(t *testing.T) {
 	})
 }
 
-func testAccCheckCBIIsolationProfileDestroy(s *terraform.State) error {
+func testAccCheckCBIExternalProfileDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
@@ -70,7 +68,7 @@ func testAccCheckCBIIsolationProfileDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckCBIIsolationProfileExists(resource string, profile *cbiprofilecontroller.IsolationProfile) resource.TestCheckFunc {
+func testAccCheckCBIExternalProfileExists(resource string, profile *cbiprofilecontroller.IsolationProfile) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
@@ -92,38 +90,47 @@ func testAccCheckCBIIsolationProfileExists(resource string, profile *cbiprofilec
 	}
 }
 
-func testAccCheckCBIIsolationProfileConfigure(resourceTypeAndName, generatedName string) string {
+func testAccCheckCBIExternalProfileConfigure(resourceTypeAndName, generatedName string) string {
 	return fmt.Sprintf(`
-// cbi banner resource
+// cbi external profile resource
 %s
+
+data "%s" "%s" {
+	id = "${%s.id}"
+}
 `,
 		// resource variables
 		CBIExternalProfileResourceHCL(generatedName),
+
+		// data source variables
+		resourcetype.ZPACBIExternalIsolationProfile,
+		generatedName,
+		resourceTypeAndName,
 	)
 }
 
 func CBIExternalProfileResourceHCL(generatedName string) string {
 	return fmt.Sprintf(`
 
-	data "zpa_cloud_browser_isolation_banner" "this" {
-		name = "Default"
-	  }
+data "zpa_cloud_browser_isolation_banner" "this" {
+	name = "Default"
+	}
 
-	  data "zpa_cloud_browser_isolation_region" "singapore" {
-		name = "Singapore"
-	  }
+data "zpa_cloud_browser_isolation_region" "singapore" {
+name = "Singapore"
+}
 
-	  data "zpa_cloud_browser_isolation_region" "frankfurt" {
-		name = "Frankfurt"
-	  }
+data "zpa_cloud_browser_isolation_region" "frankfurt" {
+name = "Frankfurt"
+}
 
-	  data "zpa_cloud_browser_isolation_certificate" "this" {
-		  name = "Zscaler Root Certificate"
-	  }
+data "zpa_cloud_browser_isolation_certificate" "this" {
+	name = "Zscaler Root Certificate"
+}
 
 resource "%s" "%s" {
 	name = "tf-acc-test-%s"
-	description = "%s"
+	description = "tf-acc-test-%s"
     banner_id = data.zpa_cloud_browser_isolation_banner.this.id
     region_ids = [data.zpa_cloud_browser_isolation_region.singapore.id, data.zpa_cloud_browser_isolation_region.frankfurt.id]
     certificate_ids = [data.zpa_cloud_browser_isolation_certificate.this.id]
@@ -149,4 +156,3 @@ resource "%s" "%s" {
 		generatedName,
 	)
 }
-*/
