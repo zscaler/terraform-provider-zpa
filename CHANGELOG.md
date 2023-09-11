@@ -9,6 +9,14 @@
 
 ### Enhancements
 
+- [PR #355](https://github.com/zscaler/terraform-provider-zpa/pull/355) - Introduced the new resource and datasource `zpa_microtenant_controller`
+- [PR #355](https://github.com/zscaler/terraform-provider-zpa/pull/355) - Added support to the new Microtenant Controller feature to the following resources:
+  - `zpa_app_connector_controller`,, `zpa_app_connector_group`, `zpa_application_segment`, `zpa_application_segment_browser_access`, `zpa_application_segment_inspection`, `zpa_application_segment_pra`, `zpa_application_server`, `zpa_policy_type`, `zpa_policy_access_rule`, `zpa_policy_access_forwarding_rule`, `zpa_policy_access_timeout_rule`, `zpa_policy_access_inspection_rule`, `zpa_policy_access_isolation_rule`, `zpa_segment_group`, `zpa_server_group`, `zpa_provisioning_key`, `zpa_machine_group`, `zpa_service_edge_group`, `zpa_service_edge_controller`
+
+⚠️ **WARNING:**: The new attribute ``microtenant_id`` is optional. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
+⚠️ **WARNING:**: This feature is in limited availability and requires additional license. To learn more, contact Zscaler Support or your local account team.
+
 - [PR #356](https://github.com/zscaler/terraform-provider-zpa/pull/356) - Added support to the following new ZPA Cloud Browser Isolation resources and datasources:
 
 - Resources
