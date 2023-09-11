@@ -142,6 +142,7 @@ func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
 	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 	_ = d.Set("app_server_groups", flattenPolicyRuleServerGroups(resp.AppServerGroups))
 	_ = d.Set("app_connector_groups", flattenPolicyRuleAppConnectorGroups(resp.AppConnectorGroups))
@@ -223,6 +224,7 @@ func expandCreatePolicyRule(d *schema.ResourceData) (*policysetcontroller.Policy
 		Priority:           d.Get("priority").(string),
 		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
+		MicroTenantID:      GetString(d.Get("microtenant_id")),
 		AppServerGroups:    expandPolicySetControllerAppServerGroups(d),
 		AppConnectorGroups: expandPolicysetControllerAppConnectorGroups(d),
 	}, nil

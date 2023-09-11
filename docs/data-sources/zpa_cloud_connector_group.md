@@ -59,3 +59,5 @@ In addition to all arguments above, the following attributes are exported:
   * `modified_time`(string)- Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.
   * `name` (string) - This field defines the name of the cloud connector group.
   * `enrollment_cert` (string) - This field defines the name of the cloud connector group.
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.

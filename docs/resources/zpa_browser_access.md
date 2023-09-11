@@ -88,6 +88,10 @@ The following arguments are supported:
 * `segment_group_id` - (Required) List of Segment Group IDs
   * `id` - (Required)
 
+* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
 * `clientless_apps`
   * `name` - (Required) - Name of BA app.
   * `application_port` - (Required) - Port for the BA app.

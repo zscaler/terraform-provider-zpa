@@ -64,6 +64,9 @@ The following arguments are supported:
 * `description` - (Optional) This field defines the description of the server.
 * `enabled` - (Optional) This field defines the status of the server.
 * `config_space` - (Optional)
+* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 ## Import
 

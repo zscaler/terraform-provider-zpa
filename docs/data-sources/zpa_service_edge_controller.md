@@ -64,3 +64,5 @@ In addition to all arguments above, the following attributes are exported:
 * `enrollment_cert` (string)
 * `upgrade_attempt` (string)
 * `upgrade_status` (string)
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.

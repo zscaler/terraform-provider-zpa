@@ -19,7 +19,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 		Delete: resourceServiceEdgeGroupDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+				service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -27,7 +27,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.serviceedgegroup.GetByName(id)
+					resp, _, err := service.GetByName(id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -170,19 +170,25 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Computed:    true,
 				Description: "ID of the version profile.",
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func resourceServiceEdgeGroupCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).serviceedgegroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
 	if err := validateAndSetProfileNameID(d); err != nil {
 		return err
 	}
 	req := expandServiceEdgeGroup(d)
 	log.Printf("[INFO] Creating zpa service edge group with request\n%+v\n", req)
 
-	resp, _, err := zClient.serviceedgegroup.Create(req)
+	resp, _, err := service.Create(req)
 	if err != nil {
 		return err
 	}
@@ -193,9 +199,9 @@ func resourceServiceEdgeGroupCreate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).serviceedgegroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
-	resp, _, err := zClient.serviceedgegroup.Get(d.Id())
+	resp, _, err := service.Get(d.Id())
 	if err != nil {
 		if err.(*client.ErrorResponse).IsObjectNotFound() {
 			log.Printf("[WARN] Removing service edge group %s from state because it no longer exists in ZPA", d.Id())
@@ -223,6 +229,7 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
 	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
 	_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
@@ -231,7 +238,8 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).serviceedgegroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
 	if err := validateAndSetProfileNameID(d); err != nil {
 		return err
 	}
@@ -239,14 +247,14 @@ func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error
 	log.Printf("[INFO] Updating service edge group ID: %v\n", id)
 	req := expandServiceEdgeGroup(d)
 
-	if _, _, err := zClient.serviceedgegroup.Get(id); err != nil {
+	if _, _, err := service.Get(id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.serviceedgegroup.Update(id, &req); err != nil {
+	if _, err := service.Update(id, &req); err != nil {
 		return err
 	}
 
@@ -255,10 +263,11 @@ func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error
 
 func resourceServiceEdgeGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.serviceedgegroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	log.Printf("[INFO] Deleting service edge group ID: %v\n", d.Id())
 
-	if _, err := zClient.serviceedgegroup.Delete(d.Id()); err != nil {
+	if _, err := service.Delete(d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
@@ -284,6 +293,7 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		VersionProfileName:            d.Get("version_profile_name").(string),
 		VersionProfileVisibilityScope: d.Get("version_profile_visibility_scope").(string),
 		OverrideVersionProfile:        d.Get("override_version_profile").(bool),
+		MicroTenantID:                 d.Get("microtenant_id").(string),
 		ServiceEdges:                  expandServiceEdges(d),
 		TrustedNetworks:               expandTrustedNetworks(d),
 	}

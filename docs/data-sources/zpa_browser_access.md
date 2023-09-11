@@ -66,6 +66,8 @@ In addition to all arguments above, the following attributes are exported:
 * `passive_health_enabled` - (bool)
 * `segment_group_id` - (string)
 * `segment_group_name` - (string)
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
 
 * `clientless_apps`
   * `name` - (string)
@@ -82,3 +84,5 @@ In addition to all arguments above, the following attributes are exported:
   * `local_domain` (string)
   * `path` (string)
   * `trust_untrusted_cert` (bool)
+  * `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+  * `microtenant_name` (string) The name of the microtenant the resource is to be associated with.

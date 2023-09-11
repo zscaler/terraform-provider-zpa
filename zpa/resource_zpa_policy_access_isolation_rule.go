@@ -98,6 +98,7 @@ func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) erro
 	_ = d.Set("operator", resp.Operator)
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("zpn_cbi_profile_id", resp.ZpnCbiProfileID)
 	_ = d.Set("zpn_isolation_profile_id", resp.ZpnIsolationProfileID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
@@ -179,6 +180,7 @@ func expandCreatePolicyIsolationRule(d *schema.ResourceData) (*policysetcontroll
 		ZpnCbiProfileID:       d.Get("zpn_cbi_profile_id").(string),
 		ZpnIsolationProfileID: d.Get("zpn_isolation_profile_id").(string),
 		Priority:              d.Get("priority").(string),
+		MicroTenantID:         GetString(d.Get("microtenant_id")),
 		Conditions:            conditions,
 	}, nil
 }

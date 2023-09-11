@@ -101,6 +101,7 @@ func resourcePolicyInspectionRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("zpn_inspection_profile_id", resp.ZpnInspectionProfileID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
@@ -178,6 +179,7 @@ func expandCreatePolicyInspectionRule(d *schema.ResourceData) (*policysetcontrol
 		PolicyType:             d.Get("policy_type").(string),
 		Priority:               d.Get("priority").(string),
 		ZpnInspectionProfileID: d.Get("zpn_inspection_profile_id").(string),
+		MicroTenantID:          GetString(d.Get("microtenant_id")),
 		Conditions:             conditions,
 	}, nil
 }

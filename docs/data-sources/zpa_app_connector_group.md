@@ -78,3 +78,5 @@ The following attributes are exported:
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `pra_enabled` - (Optional) Supported values: `true`, `false`
 * `waf_disabled` - (Optional) Supported values: `true`, `false`
+* `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+* `microtenant_name` (string) The name of the microtenant the resource is to be associated with.

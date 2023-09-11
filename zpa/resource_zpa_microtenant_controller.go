@@ -11,10 +11,10 @@ import (
 
 func resourceMicrotenantController() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceMicrotenantControllerCreate,
-		Read:   resourceMicrotenantControllerRead,
-		Update: resourceMicrotenantControllerUpdate,
-		Delete: resourceMicrotenantControllerDelete,
+		Create: resourceMicrotenantCreate,
+		Read:   resourceMicrotenantRead,
+		Update: resourceMicrotenantUpdate,
+		Delete: resourceMicrotenantDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
@@ -67,57 +67,21 @@ func resourceMicrotenantController() *schema.Resource {
 				Optional: true,
 			},
 			"user": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"username": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"display_name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"email": {
+						"username": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"password": {
 							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"role_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"force_pwd_change": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"local_login_disabled": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"pin_session": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"is_locked": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"sync_version": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"delivery_tag": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"one_identity_user": {
-							Type:     schema.TypeBool,
 							Computed: true,
 						},
 						"microtenant_id": {
@@ -131,7 +95,7 @@ func resourceMicrotenantController() *schema.Resource {
 	}
 }
 
-func resourceMicrotenantControllerCreate(d *schema.ResourceData, m interface{}) error {
+func resourceMicrotenantCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	req := expandMicroTenant(d)
@@ -144,11 +108,16 @@ func resourceMicrotenantControllerCreate(d *schema.ResourceData, m interface{}) 
 	log.Printf("[INFO] Created microtenant request. ID: %v\n", microTenant)
 
 	d.SetId(microTenant.ID)
-	return resourceMicrotenantControllerRead(d, m)
+	if microTenant.UserResource != nil {
+		userList := flattenMicroTenantUser(microTenant.UserResource)
+		_ = d.Set("user", userList)
+		log.Printf("[DEBUG] Flattened User: %s", userList)
+	}
+	return resourceMicrotenantRead(d, m)
 
 }
 
-func resourceMicrotenantControllerRead(d *schema.ResourceData, m interface{}) error {
+func resourceMicrotenantRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	resp, _, err := zClient.microtenants.Get(d.Id())
@@ -180,7 +149,7 @@ func resourceMicrotenantControllerRead(d *schema.ResourceData, m interface{}) er
 	return nil
 }
 
-func resourceMicrotenantControllerUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceMicrotenantUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	id := d.Id()
@@ -198,10 +167,10 @@ func resourceMicrotenantControllerUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	return resourceMicrotenantControllerRead(d, m)
+	return resourceMicrotenantRead(d, m)
 }
 
-func resourceMicrotenantControllerDelete(d *schema.ResourceData, m interface{}) error {
+func resourceMicrotenantDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	log.Printf("[INFO] Deleting microtenant ID: %v\n", d.Id())
@@ -236,21 +205,10 @@ func flattenMicroTenantUser(user *microtenants.UserResource) []map[string]interf
 	}
 
 	flattenedData := []map[string]interface{}{{
-		"name":                 user.Name,
-		"description":          user.Description,
-		"delivery_tag":         user.DeliveryTag,
-		"display_name":         user.DisplayName,
-		"email":                user.Email,
-		"force_pwd_change":     user.ForcePwdChange,
-		"is_locked":            user.IsLocked,
-		"local_login_disabled": user.LocalLoginDisabled,
-		"one_identity_user":    user.OneIdentityUser,
-		"password":             user.Password,
-		"pin_session":          user.PinSession,
-		"role_id":              user.RoleID,
-		"microtenant_id":       user.MicrotenantID,
-		"sync_version":         user.SyncVersion,
-		"username":             user.Username,
+		"display_name":   user.DisplayName,
+		"username":       user.Username,
+		"password":       user.Password,
+		"microtenant_id": user.MicrotenantID,
 	}}
 
 	// Log the flattened data

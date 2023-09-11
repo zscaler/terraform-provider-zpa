@@ -68,6 +68,9 @@ The following arguments are supported:
 * `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
 * `pra_enabled` - (Optional) Supported values: `true`, `false`
 * `waf_disabled` - (Optional) Supported values: `true`, `false`
+* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 ## Attributes Reference
 
