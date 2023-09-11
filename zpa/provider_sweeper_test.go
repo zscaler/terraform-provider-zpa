@@ -79,6 +79,8 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestSegmentGroup(testClient)
 	sweepTestServerGroup(testClient)
 	sweepTestServiceEdgeGroup(testClient)
+	sweepTestCBIBanner(testClient)
+	sweepTestCBIExternalProfile(testClient)
 
 }
 
@@ -516,6 +518,33 @@ func sweepTestCBIBanner(client *testClient) error {
 				continue
 			}
 			logSweptResource(resourcetype.ZPACBIBannerController, fmt.Sprintf(b.ID), b.Name)
+		}
+	}
+	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestCBIExternalProfile(client *testClient) error {
+	var errorList []error
+	group, _, err := client.sdkClient.cbiprofilecontroller.GetAll()
+	if err != nil {
+		return err
+	}
+	// Logging the number of identified resources before the deletion loop
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
+	for _, b := range group {
+		// Check if the resource name has the required prefix before deleting it
+		if strings.HasPrefix(b.Name, testResourcePrefix) {
+			if _, err := client.sdkClient.cbiprofilecontroller.Delete(b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPACBIExternalIsolationProfile, fmt.Sprintf(b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
