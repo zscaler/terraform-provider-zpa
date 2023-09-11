@@ -104,9 +104,17 @@ resource "zpa_browser_access" "this" {
 
     ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
 
+* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``
   * `operator` (Optional) Supported values: ``AND``, and ``OR``
+  * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
   * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
     * `name` (Optional)
     * `object_type` (Optional) This is for specifying the policy critiera. Supported values are:
@@ -117,6 +125,9 @@ resource "zpa_browser_access" "this" {
     * `rhs` (Optional) This is the Client type the policy should support/enforce access to.
       * `zpn_client_type_exporter` - Used to support/enforce access via browser access tp application segments.
       * `zpn_client_type_zappl` - Used to support/enforce access via Zscaler Client Connector to application segments.
+    * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+    ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 * `app_connector_groups`
   * `id` - (Optional) A list of IDs of an app connector group resources

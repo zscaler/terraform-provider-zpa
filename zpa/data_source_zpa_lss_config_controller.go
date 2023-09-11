@@ -5,9 +5,8 @@ import (
 	"html"
 	"log"
 
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/lssconfigcontroller"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 )
 
 func dataSourceLSSConfigController() *schema.Resource {

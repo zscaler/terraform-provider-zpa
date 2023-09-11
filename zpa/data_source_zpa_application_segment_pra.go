@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
 )
 
 func dataSourceApplicationSegmentPRA() *schema.Resource {
@@ -78,6 +78,14 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Name of the application.",
+			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"sra_apps": {
 				Type:     schema.TypeList,
@@ -175,12 +183,12 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 }
 
 func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).applicationsegmentpra.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	var resp *applicationsegmentpra.AppSegmentPRA
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for sra application %s\n", id)
-		res, _, err := zClient.applicationsegmentpra.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -189,7 +197,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for sra application name %s\n", name)
-		res, _, err := zClient.applicationsegmentpra.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -211,6 +219,8 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 		_ = d.Set("ip_anchored", resp.IpAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
@@ -266,6 +276,8 @@ func flattenSRAApps(sraApp *applicationsegmentpra.AppSegmentPRA) []interface{} {
 			"hidden":               val.Hidden,
 			"name":                 val.Name,
 			"portal":               val.Portal,
+			"microtenant_id":       val.MicroTenantID,
+			"microtenant_name":     val.MicroTenantName,
 		}
 	}
 

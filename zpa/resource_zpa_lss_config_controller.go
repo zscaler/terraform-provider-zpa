@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/zpa"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/lssconfigcontroller"
+	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 )
 
 func getPolicyRuleResourceSchema() map[string]*schema.Schema {

@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
 /*
@@ -205,7 +205,7 @@ func expandStringInSlice(d *schema.ResourceData, key string) []string {
 	return applicationSegmentList
 }
 
-func validateAppPorts(client *Client, selectConnectorCloseToApp bool, udpAppPortRange []common.NetworkPorts, udpPortRanges []string) error {
+func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.NetworkPorts, udpPortRanges []string) error {
 	if selectConnectorCloseToApp {
 		if len(udpAppPortRange) > 0 || len(udpPortRanges) > 0 {
 			return errors.New("the protocol configuration for the application is invalid. App Connector Closest to App supports only TCP applications")

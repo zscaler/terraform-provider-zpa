@@ -7,9 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/zpa"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentinspection"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
+	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
 func resourceApplicationSegmentInspection() *schema.Resource {
@@ -327,7 +327,7 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interf
 
 	req := expandInspectionApplicationSegment(d, zClient, "")
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 
@@ -422,7 +422,7 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 	log.Printf("[INFO] Updating inspection application segment ID: %v\n", id)
 	req := expandInspectionApplicationSegment(d, zClient, id)
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 

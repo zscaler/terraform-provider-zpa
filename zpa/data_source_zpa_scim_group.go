@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/idpcontroller"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/scimgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimgroup"
 )
 
 func dataSourceScimGroup() *schema.Resource {

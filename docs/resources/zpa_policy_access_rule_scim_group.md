@@ -62,16 +62,25 @@ resource "zpa_policy_access_rule" "this" {
 * `rule_order` - (Deprecated)
 
     ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
+* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 * `conditions` - (Optional)
   * `negated` - (Optional) Supported values: ``true`` or ``false``
   * `operator` (Optional) Supported values: ``AND``, and ``OR``
+  * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
   * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.`object_type` conditions are to be added to the rule.
     * `name` (Optional)
     * `lhs` (Optional)
     * `rhs` (Optional) This denotes the value for the given object type. Its value depends upon the key.
     * `idp_id` (Optional)
     * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`. Use [zpa_scim_groups](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) data source to retrieve the SCIM Group ``id``.
+
+  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is NOT supported within the `operands` block when the `object_type` is set to `SCIM_GROUP`. IDP Information is controller at the parent tenant level.
 
 * `app_connector_groups`
   * `id` - (Optional) The ID of an app connector group resource

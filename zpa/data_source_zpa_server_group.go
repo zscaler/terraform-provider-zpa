@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
 )
 
 func dataSourceServerGroup() *schema.Resource {
@@ -200,6 +200,14 @@ func dataSourceServerGroup() *schema.Resource {
 					},
 				},
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"config_space": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -294,13 +302,13 @@ func dataSourceServerGroup() *schema.Resource {
 }
 
 func dataSourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).servergroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	var resp *servergroup.ServerGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for server group  %s\n", id)
-		res, _, err := zClient.servergroup.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -309,7 +317,7 @@ func dataSourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for server group name %s\n", name)
-		res, _, err := zClient.servergroup.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -326,6 +334,8 @@ func dataSourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("modifiedby", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 		if err := d.Set("applications", flattenServerGroupApplications(resp.Applications)); err != nil {
 			return err

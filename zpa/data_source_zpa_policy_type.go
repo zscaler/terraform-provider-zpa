@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 func dataSourcePolicyType() *schema.Resource {
@@ -43,6 +43,14 @@ func dataSourcePolicyType() *schema.Resource {
 			"sorted": {
 				Type:     schema.TypeBool,
 				Computed: true,
+			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"policy_type": {
 				Type:     schema.TypeString,
@@ -233,15 +241,15 @@ func dataSourcePolicyType() *schema.Resource {
 }
 
 func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	log.Printf("[INFO] Getting data for policy type\n")
 	var resp *policysetcontroller.PolicySet
 	var err error
 	policyType, policyTypeIsSet := d.GetOk("policy_type")
 	if policyTypeIsSet {
-		resp, _, err = zClient.policysetcontroller.GetByPolicyType(policyType.(string))
+		resp, _, err = service.GetByPolicyType(policyType.(string))
 	} else {
-		resp, _, err = zClient.policysetcontroller.GetByPolicyType("GLOBAL_POLICY")
+		resp, _, err = service.GetByPolicyType("GLOBAL_POLICY")
 	}
 	if err != nil {
 		return err
@@ -257,6 +265,8 @@ func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("sorted", resp.Sorted)
 	_ = d.Set("policy_type", resp.PolicyType)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
+	_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 	if err := d.Set("rules", flattenPolicySetRules(resp)); err != nil {
 		return err
@@ -286,6 +296,8 @@ func flattenPolicySetRules(policySetRules *policysetcontroller.PolicySet) []inte
 			"reauth_idle_timeout":         ruleItem.ReauthIdleTimeout,
 			"reauth_timeout":              ruleItem.ReauthTimeout,
 			"rule_order":                  ruleItem.RuleOrder,
+			"microtenant_id":              ruleItem.MicroTenantID,
+			"microtenant_name":            ruleItem.MicroTenantName,
 			"zpn_isolation_profile_id":    ruleItem.ZpnIsolationProfileID,
 			"zpn_inspection_profile_id":   ruleItem.ZpnInspectionProfileID,
 			"zpn_inspection_profile_name": ruleItem.ZpnInspectionProfileName,
@@ -300,13 +312,14 @@ func flattenRuleConditions(conditions policysetcontroller.PolicyRule) []interfac
 	ruleConditions := make([]interface{}, len(conditions.Conditions))
 	for i, ruleCondition := range conditions.Conditions {
 		ruleConditions[i] = map[string]interface{}{
-			"creation_time": ruleCondition.CreationTime,
-			"id":            ruleCondition.ID,
-			"modified_by":   ruleCondition.ModifiedBy,
-			"modified_time": ruleCondition.ModifiedTime,
-			"negated":       ruleCondition.Negated,
-			"operator":      ruleCondition.Operator,
-			"operands":      flattenConditionOperands(ruleCondition),
+			"creation_time":  ruleCondition.CreationTime,
+			"id":             ruleCondition.ID,
+			"modified_by":    ruleCondition.ModifiedBy,
+			"modified_time":  ruleCondition.ModifiedTime,
+			"negated":        ruleCondition.Negated,
+			"operator":       ruleCondition.Operator,
+			"microtenant_id": ruleCondition.MicroTenantID,
+			"operands":       flattenConditionOperands(ruleCondition),
 		}
 	}
 
@@ -317,15 +330,16 @@ func flattenConditionOperands(operands policysetcontroller.Conditions) []interfa
 	conditionOperands := make([]interface{}, len(operands.Operands))
 	for i, conditionOperand := range operands.Operands {
 		conditionOperands[i] = map[string]interface{}{
-			"creation_time": conditionOperand.CreationTime,
-			"id":            conditionOperand.ID,
-			"idp_id":        conditionOperand.IdpID,
-			"lhs":           conditionOperand.LHS,
-			"modified_by":   conditionOperand.ModifiedBy,
-			"modified_time": conditionOperand.ModifiedTime,
-			"name":          conditionOperand.Name,
-			"object_type":   conditionOperand.ObjectType,
-			"rhs":           conditionOperand.RHS,
+			"creation_time":  conditionOperand.CreationTime,
+			"id":             conditionOperand.ID,
+			"idp_id":         conditionOperand.IdpID,
+			"lhs":            conditionOperand.LHS,
+			"modified_by":    conditionOperand.ModifiedBy,
+			"modified_time":  conditionOperand.ModifiedTime,
+			"name":           conditionOperand.Name,
+			"object_type":    conditionOperand.ObjectType,
+			"rhs":            conditionOperand.RHS,
+			"microtenant_id": conditionOperand.MicroTenantID,
 		}
 	}
 

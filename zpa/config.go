@@ -3,38 +3,39 @@ package zpa
 import (
 	"log"
 
-	gozscaler "github.com/zscaler/zscaler-sdk-go/zpa"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorcontroller"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/appconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentinspection"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentpra"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/appservercontroller"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/bacertificate"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/browseraccess"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/clienttypes"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudbrowserisolation/isolationprofile"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/cloudconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/customerversionprofile"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/enrollmentcert"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/idpcontroller"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_custom_controls"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_predefined_controls"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/inspectioncontrol/inspection_profile"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/lssconfigcontroller"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/machinegroup"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/platforms"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/policysetcontroller"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/postureprofile"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/provisioningkey"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/samlattribute"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/scimattributeheader"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/scimgroup"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/servergroup"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgecontroller"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/serviceedgegroup"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/trustednetwork"
+	gozscaler "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/clienttypes"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/isolationprofile"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/customerversionprofile"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/enrollmentcert"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_predefined_controls"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/machinegroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/microtenants"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/platforms"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/postureprofile"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/samlattribute"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimattributeheader"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/trustednetwork"
 )
 
 func init() {
@@ -56,6 +57,7 @@ type Client struct {
 	idpcontroller                  idpcontroller.Service
 	lssconfigcontroller            lssconfigcontroller.Service
 	machinegroup                   machinegroup.Service
+	microtenants                   microtenants.Service
 	postureprofile                 postureprofile.Service
 	isolationprofile               isolationprofile.Service
 	policysetcontroller            policysetcontroller.Service
@@ -114,6 +116,7 @@ func (c *Config) Client() (*Client, error) {
 		idpcontroller:                  *idpcontroller.New(zpaClient),
 		lssconfigcontroller:            *lssconfigcontroller.New(zpaClient),
 		machinegroup:                   *machinegroup.New(zpaClient),
+		microtenants:                   *microtenants.New(zpaClient),
 		postureprofile:                 *postureprofile.New(zpaClient),
 		isolationprofile:               *isolationprofile.New(zpaClient),
 		policysetcontroller:            *policysetcontroller.New(zpaClient),

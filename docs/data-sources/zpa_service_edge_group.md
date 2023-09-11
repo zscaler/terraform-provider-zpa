@@ -71,6 +71,9 @@ In addition to all arguments above, the following attributes are exported:
   * ``ALL``
   * ``NONE``
   * ``CUSTOM``
+  * `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+  * `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
+
 * `service_edges` - (string)
   * `name` (string)
   * `application_start_time` (string)
@@ -107,6 +110,8 @@ In addition to all arguments above, the following attributes are exported:
   * `enrollment_cert` (string)
   * `upgrade_attempt` (string)
   * `upgrade_status` (string)
+  * `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
+  * `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
 
 * `trusted_networks` - (string)
   * `creation_time` (string)

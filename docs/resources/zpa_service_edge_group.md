@@ -74,6 +74,9 @@ The following arguments are supported:
 * `trusted_networks` - (Optional) Trusted networks for this Service Edge Group. List of trusted network objects
 * `upgrade_day` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified day. Default value: `SUNDAY` List of valid days (i.e., Sunday, Monday)
 * `upgrade_time_in_secs` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600` Integer in seconds (i..e, 66600). The integer must be greater than or equal to 0 and less than `86400`, in `15` minute intervals
+* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 ## Import
 

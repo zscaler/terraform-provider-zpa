@@ -10,10 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/zpa"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/applicationsegmentpra"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/segmentgroup"
+	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
 func resourceApplicationSegmentPRA() *schema.Resource {
@@ -283,7 +283,7 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 
@@ -381,7 +381,7 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	if err := validateAppPorts(zClient, req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 

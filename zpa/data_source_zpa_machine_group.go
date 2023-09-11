@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/zpa/services/machinegroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/machinegroup"
 )
 
 func dataSourceMachineGroup() *schema.Resource {
@@ -84,6 +84,14 @@ func dataSourceMachineGroup() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"microtenant_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -99,18 +107,26 @@ func dataSourceMachineGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"microtenant_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func dataSourceMachineGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).machinegroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	var resp *machinegroup.MachineGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for machine group  %s\n", id)
-		res, _, err := zClient.machinegroup.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -119,7 +135,7 @@ func dataSourceMachineGroupRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for machine group name %s\n", name)
-		res, _, err := zClient.machinegroup.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -133,6 +149,8 @@ func dataSourceMachineGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("machines", flattenMachines(resp))
 
 	} else {
@@ -158,6 +176,8 @@ func flattenMachines(machineGroup *machinegroup.MachineGroup) []interface{} {
 			"modified_time":      machineItem.ModifiedTime,
 			"name":               machineItem.Name,
 			"signing_cert":       machineItem.SigningCert,
+			"microtenant_id":     machineItem.MicroTenantID,
+			"microtenant_name":   machineItem.MicroTenantName,
 		}
 	}
 
