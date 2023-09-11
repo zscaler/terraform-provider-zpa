@@ -40,23 +40,24 @@ func validateAndSetProfileNameID(d *schema.ResourceData) error {
 	return nil
 }
 
-func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client, microtenantID string) bool {
+func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client, microtenantID string) error {
 	for _, condition := range conditions {
-		if !validateOperands(condition.Operands, zClient, microtenantID) {
-			return false
+		if err := validateOperands(condition.Operands, zClient, microtenantID); err != nil {
+			return err
 		}
 	}
-	return true
+	return nil
 }
-func validateOperands(operands []policysetcontroller.Operands, zClient *Client, microtenantID string) bool {
+func validateOperands(operands []policysetcontroller.Operands, zClient *Client, microtenantID string) error {
 	for _, operand := range operands {
-		if !validateOperand(operand, zClient, microtenantID) {
-			return false
+		if err := validateOperand(operand, zClient, microtenantID); err != nil {
+			return err
 		}
 	}
-	return true
+	return nil
 }
-func validateOperand(operand policysetcontroller.Operands, zClient *Client, microtenantID string) bool {
+
+func validateOperand(operand policysetcontroller.Operands, zClient *Client, microtenantID string) error {
 	switch operand.ObjectType {
 	case "APP":
 		return customValidate(operand, []string{"id"}, "application segment ID", Getter(func(id string) error {
@@ -93,112 +94,95 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		}))
 	case "POSTURE":
 		if operand.LHS == "" {
-			lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, nil)
-			return false
+			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, nil)
 		}
 		_, _, err := zClient.postureprofile.GetByPostureUDID(operand.LHS)
 		if err != nil {
-			lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, err)
-			return false
+			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, err)
 		}
 		if !contains([]string{"true", "false"}, operand.RHS) {
-			rhsWarn(operand.ObjectType, "\"true\"/\"false\"", operand.RHS, nil)
-			return false
+			return rhsWarn(operand.ObjectType, "\"true\"/\"false\"", operand.RHS, nil)
 		}
-		return true
+		return nil
 	case "TRUSTED_NETWORK":
 		if operand.LHS == "" {
-			lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, nil)
-			return false
+			return lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, nil)
 		}
 		_, _, err := zClient.trustednetwork.GetByNetID(operand.LHS)
 		if err != nil {
-			lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, err)
-			return false
+			return lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, err)
 		}
 		if operand.RHS != "true" {
-			rhsWarn(operand.ObjectType, "\"true\"", operand.RHS, nil)
-			return false
+			return rhsWarn(operand.ObjectType, "\"true\"", operand.RHS, nil)
 		}
-		return true
+		return nil
 	case "PLATFORM":
 		if operand.LHS == "" {
-			lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, nil)
-			return false
+			return lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, nil)
 		}
 		_, _, err := zClient.platforms.GetAllPlatforms()
 		if err != nil {
-			lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, err)
-			return false
+			return lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, err)
 		}
 		if operand.RHS != "true" {
-			rhsWarn(operand.ObjectType, "\"true\"", operand.RHS, nil)
-			return false
+			return rhsWarn(operand.ObjectType, "\"true\"", operand.RHS, nil)
 		}
-		return true
+		return nil
 	case "SAML":
 		if operand.LHS == "" {
-			lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, nil)
-			return false
+			return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, nil)
 		}
 		_, _, err := zClient.samlattribute.Get(operand.LHS)
 		if err != nil {
-			lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, err)
-			return false
+			return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, err)
 		}
 		if operand.RHS == "" {
-			rhsWarn(operand.ObjectType, "SAML Attribute Value", operand.RHS, nil)
-			return false
+			return rhsWarn(operand.ObjectType, "SAML Attribute Value", operand.RHS, nil)
 		}
-		return true
+		return nil
 	case "SCIM":
 		if operand.IdpID == "" {
-			log.Printf("[WARN] when operand object type is %v Idp ID must be set\n", operand.ObjectType)
-			return false
+			return fmt.Errorf("[WARN] when operand object type is %v Idp ID must be set", operand.ObjectType)
 		}
 		if operand.LHS == "" {
-			lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, nil)
-			return false
+			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, nil)
 		}
 		scim, _, err := zClient.scimattributeheader.Get(operand.IdpID, operand.LHS)
 		if err != nil {
-			lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, err)
-			return false
+			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, err)
 		}
 		if operand.RHS == "" {
-			rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
-			return false
+			return rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
 		}
 		values, _ := zClient.scimattributeheader.SearchValues(scim.IdpID, scim.ID, operand.RHS)
 		if len(values) == 0 {
-			rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
-			return false
+			return rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
 
 		}
-		return true
+		return nil
 	case "SCIM_GROUP":
 		if operand.LHS == "" {
-			lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, nil)
-			return false
+			return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, nil)
 		}
 		_, _, err := zClient.idpcontroller.Get(operand.LHS)
 		if err != nil {
-			lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, err)
-			return false
+			return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, err)
 		}
 		if operand.RHS == "" {
-			rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, nil)
-			return false
+			return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, nil)
 		}
 		_, _, err = zClient.scimgroup.Get(operand.RHS)
 		if err != nil {
-			rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, err)
-			return false
+			return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, err)
 		}
-		return true
+		return nil
+	case "COUNTRY_CODE":
+		if operand.LHS == "" || !isValidAlpha2(operand.LHS) {
+			return lhsWarn(operand.ObjectType, "valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes", operand.LHS, nil)
+		}
+		return nil
 	default:
-		log.Printf("[WARN] invalid operand object type %s\n", operand.ObjectType)
-		return false
+		return fmt.Errorf("[WARN] invalid operand object type %s", operand.ObjectType)
 	}
 }
 
@@ -207,27 +191,24 @@ type Getter func(id string) error
 func (g Getter) Get(id string) error {
 	return g(id)
 }
-func customValidate(operand policysetcontroller.Operands, expectedLHS []string, expectedRHS string, clientRHS Getter) bool {
+func customValidate(operand policysetcontroller.Operands, expectedLHS []string, expectedRHS string, clientRHS Getter) error {
 	if operand.LHS == "" || !contains(expectedLHS, operand.LHS) {
-		lhsWarn(operand.ObjectType, expectedLHS, operand.LHS, nil)
-		return false
+		return lhsWarn(operand.ObjectType, expectedLHS, operand.LHS, nil)
 	}
 	if operand.RHS == "" {
-		rhsWarn(operand.ObjectType, expectedRHS, operand.RHS, nil)
-		return false
+		return rhsWarn(operand.ObjectType, expectedRHS, operand.RHS, nil)
 	}
 	err := clientRHS.Get(operand.RHS)
 	if err != nil {
-		rhsWarn(operand.ObjectType, expectedRHS, operand.RHS, err)
-		return false
+		return rhsWarn(operand.ObjectType, expectedRHS, operand.RHS, err)
 	}
-	return true
+	return nil
 }
-func rhsWarn(objType, expected, rhs interface{}, err error) {
-	log.Printf("[WARN] when operand object type is %v RHS must be %#v, value is \"%v\", %v\n", objType, expected, rhs, err)
+func rhsWarn(objType, expected, rhs interface{}, err error) error {
+	return fmt.Errorf("[WARN] when operand object type is %v RHS must be %#v, value is \"%v\", %v", objType, expected, rhs, err)
 }
-func lhsWarn(objType, expected, lhs interface{}, err error) {
-	log.Printf("[WARN] when operand object type is %v LHS must be %#v value is \"%v\", %v\n", objType, expected, lhs, err)
+func lhsWarn(objType, expected, lhs interface{}, err error) error {
+	return fmt.Errorf("[WARN] when operand object type is %v LHS must be %#v value is \"%v\", %v", objType, expected, lhs, err)
 }
 
 func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
@@ -409,12 +390,13 @@ func flattenPolicyRuleOperands(conditionOperand []policysetcontroller.Operands) 
 	conditionOperands := make([]interface{}, len(conditionOperand))
 	for i, operandItems := range conditionOperand {
 		conditionOperands[i] = map[string]interface{}{
-			"id":          operandItems.ID,
-			"idp_id":      operandItems.IdpID,
-			"lhs":         operandItems.LHS,
-			"object_type": operandItems.ObjectType,
-			"rhs":         operandItems.RHS,
-			"name":        operandItems.Name,
+			"id":             operandItems.ID,
+			"idp_id":         operandItems.IdpID,
+			"lhs":            operandItems.LHS,
+			"object_type":    operandItems.ObjectType,
+			"rhs":            operandItems.RHS,
+			"name":           operandItems.Name,
+			"microtenant_id": operandItems.MicroTenantID,
 		}
 	}
 

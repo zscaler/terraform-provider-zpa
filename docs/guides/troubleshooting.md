@@ -155,3 +155,10 @@ resource "zpa_application_segment" "this" {
   }
 }
 ```
+
+### Access Policy Operand Validation Error `zpa_policy_access_rule` Error: [WARN] when operand object type is COUNTRY_CODE LHS
+
+This type of error happens when the administrator fails to provide a valid attribute value within the conditions.operands block of an access policy.
+The below example, is an error displayed when using an invalid 2 letter `COUNTRY_CODE` wihin the policy.
+
+│ Error: [WARN] when operand object type is COUNTRY_CODE LHS must be "valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes" value is "00", <nil>
