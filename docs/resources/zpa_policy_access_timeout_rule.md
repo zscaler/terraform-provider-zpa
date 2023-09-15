@@ -10,7 +10,7 @@ description: |-
 
 The **zpa_policy_timeout_rule** resource creates a policy timeout rule in the Zscaler Private Access cloud.
 
-⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+  ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
 ## Example Usage
 
@@ -78,7 +78,7 @@ resource "zpa_policy_timeout_rule" "this"  {
 
 * `rule_order` - (Deprecated)
 
-    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
+    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
 * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
 

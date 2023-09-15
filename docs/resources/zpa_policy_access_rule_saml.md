@@ -10,7 +10,7 @@ description: |-
 
 The **zpa_policy_access_rule** resource creates and manages a policy access rule with SAML attribute conditions in the Zscaler Private Access cloud.
 
-⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of this resource for all ZPA policy types.
+  ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
 ## Example Usage
 
@@ -61,7 +61,8 @@ resource "zpa_policy_access_rule" "this" {
 * `policy_type` (Optional) Supported values: ``ACCESS_POLICY`` or ``GLOBAL_POLICY``
 * `rule_order` - (Deprecated)
 
-    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource ``zpa_policy_access_rule_reorder``
+  ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
+
 * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
