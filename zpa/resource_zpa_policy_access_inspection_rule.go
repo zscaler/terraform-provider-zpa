@@ -51,15 +51,15 @@ func resourcePolicyInspectionRule() *schema.Resource {
 
 func resourcePolicyInspectionRuleCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
 	req, err := expandCreatePolicyInspectionRule(d)
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy inspection rule with request\n%+v\n", req)
 
-	if ValidateConditions(req.Conditions, zClient, req.MicroTenantID) {
-		policysetcontroller, _, err := service.Create(req)
+	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
+		policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
 		if err != nil {
 			return err
 		}
@@ -67,19 +67,20 @@ func resourcePolicyInspectionRuleCreate(d *schema.ResourceData, m interface{}) e
 
 		return resourcePolicyInspectionRuleRead(d, m)
 	} else {
-		return fmt.Errorf("couldn't validate the zpa policy inspection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+		return err
 	}
 
 }
 
 func resourcePolicyInspectionRuleRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("INSPECTION_POLICY")
+	zClient := m.(*Client)
+
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("INSPECTION_POLICY")
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
-	resp, _, err := service.GetPolicyRule(globalPolicySet.ID, d.Id())
+	resp, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, d.Id())
 	if err != nil {
 		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
@@ -101,7 +102,6 @@ func resourcePolicyInspectionRuleRead(d *schema.ResourceData, m interface{}) err
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
-	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("zpn_inspection_profile_id", resp.ZpnInspectionProfileID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
@@ -110,8 +110,7 @@ func resourcePolicyInspectionRuleRead(d *schema.ResourceData, m interface{}) err
 
 func resourcePolicyInspectionRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("INSPECTION_POLICY")
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("INSPECTION_POLICY")
 	if err != nil {
 		return err
 	}
@@ -121,35 +120,35 @@ func resourcePolicyInspectionRuleUpdate(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return err
 	}
-	if ValidateConditions(req.Conditions, zClient, req.MicroTenantID) {
-		if _, _, err := service.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
+	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
+		if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
 			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 				d.SetId("")
 				return nil
 			}
 		}
 
-		if _, err := service.Update(globalPolicySet.ID, ruleID, req); err != nil {
+		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
 
 		return resourcePolicyInspectionRuleRead(d, m)
 	} else {
-		return fmt.Errorf("couldn't validate the zpa policy inspection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+		return err
 	}
 
 }
 
 func resourcePolicyInspectionRuleDelete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("INSPECTION_POLICY")
+	zClient := m.(*Client)
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("INSPECTION_POLICY")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Deleting policy inspection rule with id %v\n", d.Id())
 
-	if _, err := service.Delete(globalPolicySet.ID, d.Id()); err != nil {
+	if _, err := zClient.policysetcontroller.Delete(globalPolicySet.ID, d.Id()); err != nil {
 		return err
 	}
 
@@ -178,8 +177,8 @@ func expandCreatePolicyInspectionRule(d *schema.ResourceData) (*policysetcontrol
 		PolicySetID:            policySetID,
 		PolicyType:             d.Get("policy_type").(string),
 		Priority:               d.Get("priority").(string),
-		ZpnInspectionProfileID: d.Get("zpn_inspection_profile_id").(string),
 		MicroTenantID:          GetString(d.Get("microtenant_id")),
+		ZpnInspectionProfileID: d.Get("zpn_inspection_profile_id").(string),
 		Conditions:             conditions,
 	}, nil
 }

@@ -7,34 +7,10 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/fabiotavarespr/iso3166"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
-
-/*
-func ValidateStringFloatBetween(min, max float64) schema.SchemaValidateFunc {
-	return func(i interface{}, k string) (warnings []string, errors []error) {
-		str, ok := i.(string)
-		if !ok {
-			errors = append(errors, fmt.Errorf("expected type of %s to be string with value of float64", k))
-			return
-		}
-
-		v, err := strconv.ParseFloat(str, 64)
-		if err != nil {
-			errors = append(errors, fmt.Errorf("expected type of %s to be float64: %v", k, err))
-			return
-		}
-
-		if v < min || v > max {
-			errors = append(errors, fmt.Errorf("expected %s to be in the range (%f - %f), got %f", k, min, max, v))
-			return
-		}
-
-		return
-	}
-}
-*/
 
 func ValidateLatitude(val interface{}, key string) (warns []string, errs []error) {
 	v, _ := strconv.ParseFloat(val.(string), 64)
@@ -127,24 +103,6 @@ func convertToPortRange(portRangeLst []interface{}) []string {
 	return portRanges
 }
 
-/*
-	func convertToListString(obj interface{}) []string {
-		listI, ok := obj.([]interface{})
-		if ok && len(listI) > 0 {
-			list := make([]string, len(listI))
-			for i, e := range listI {
-				s, ok := e.(string)
-				if ok {
-					list[i] = e.(string)
-				} else {
-					log.Printf("[WARN] invalid type: %v\n", s)
-				}
-			}
-			return list
-		}
-		return []string{}
-	}
-*/
 func expandList(portRangeLst []interface{}) []string {
 	portRanges := make([]string, len(portRangeLst))
 	for i, port := range portRangeLst {
@@ -213,4 +171,10 @@ func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.N
 	}
 	return nil
 
+}
+
+// This function checks for ISO3166 Alpha2 Country codes
+// It's used within the access policy RHS validation
+func isValidAlpha2(code string) bool {
+	return iso3166.ExistsIso3166ByAlpha2Code(code)
 }

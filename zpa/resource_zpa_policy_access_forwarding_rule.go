@@ -53,17 +53,17 @@ func resourcePolicyForwardingRule() *schema.Resource {
 
 func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
 	req, err := expandCreatePolicyForwardingRule(d)
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
 
-	if !ValidateConditions(req.Conditions, zClient, req.MicroTenantID) {
-		return fmt.Errorf("couldn't validate the zpa policy access forwarding rule (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err != nil {
+		return err
 	}
-	policysetcontroller, _, err := service.Create(req)
+	policysetcontroller, _, err := zClient.policysetcontroller.Create(req)
 	if err != nil {
 		return err
 	}
@@ -73,13 +73,14 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("CLIENT_FORWARDING_POLICY")
+	zClient := m.(*Client)
+
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("CLIENT_FORWARDING_POLICY")
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
-	resp, _, err := service.GetPolicyRule(globalPolicySet.ID, d.Id())
+	resp, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, d.Id())
 	if err != nil {
 		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
@@ -111,8 +112,7 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 
 func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("CLIENT_FORWARDING_POLICY")
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("CLIENT_FORWARDING_POLICY")
 	if err != nil {
 		return err
 	}
@@ -122,35 +122,35 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return err
 	}
-	if ValidateConditions(req.Conditions, zClient, req.MicroTenantID) {
-		if _, _, err := service.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
+	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
+		if _, _, err := zClient.policysetcontroller.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
 			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 				d.SetId("")
 				return nil
 			}
 		}
 
-		if _, err := service.Update(globalPolicySet.ID, ruleID, req); err != nil {
+		if _, err := zClient.policysetcontroller.Update(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
 
 		return resourcePolicyForwardingRuleRead(d, m)
 	} else {
-		return fmt.Errorf("couldn't validate the zpa policy forwarding (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+		return err
 	}
 
 }
 
 func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("CLIENT_FORWARDING_POLICY")
+	zClient := m.(*Client)
+	globalPolicySet, _, err := zClient.policysetcontroller.GetByPolicyType("CLIENT_FORWARDING_POLICY")
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Deleting policy forwarding rule with id %v\n", d.Id())
 
-	if _, err := service.Delete(globalPolicySet.ID, d.Id()); err != nil {
+	if _, err := zClient.policysetcontroller.Delete(globalPolicySet.ID, d.Id()); err != nil {
 		return err
 	}
 
@@ -180,8 +180,8 @@ func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetcontrol
 		Operator:          d.Get("operator").(string),
 		PolicySetID:       policySetID,
 		PolicyType:        d.Get("policy_type").(string),
-		Priority:          d.Get("priority").(string),
 		MicroTenantID:     GetString(d.Get("microtenant_id")),
+		Priority:          d.Get("priority").(string),
 		Conditions:        conditions,
 	}, nil
 }
