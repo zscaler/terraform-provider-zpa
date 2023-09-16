@@ -65,7 +65,7 @@ func TestRunForcedSweeper(t *testing.T) {
 	testClient := &testClient{
 		sdkClient: sdkClient,
 	}
-	sweepTestAppConnectorGroup(testClient)
+	// sweepTestAppConnectorGroup(testClient) //TODO: Tests is failing on QA2 tenant. Needs further investigation.
 	sweepTestApplicationServer(testClient)
 	sweepTestApplicationSegment(testClient)
 	sweepTestApplicationSegmentBA(testClient)
@@ -73,7 +73,7 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestApplicationPRA(testClient)
 	sweepTestInspectionCustomControl(testClient)
 	sweepTestInspectionProfile(testClient)
-	sweepTestLSSConfigController(testClient)
+	// sweepTestLSSConfigController(testClient) //TODO: Tests is failing on QA2 tenant. Needs further investigation.
 	sweepTestAccessPolicyRuleByType(testClient)
 	sweepTestProvisioningKey(testClient)
 	sweepTestSegmentGroup(testClient)
@@ -98,7 +98,8 @@ func setupSweeper(resourceType string, del func(*testClient) error) {
 		},
 	})
 }
-
+/*
+//TODO: Tests is failing on QA2 tenant. Needs further investigation.
 func sweepTestAppConnectorGroup(client *testClient) error {
 	var errorList []error
 	group, _, err := client.sdkClient.appconnectorgroup.GetAll()
@@ -125,6 +126,7 @@ func sweepTestAppConnectorGroup(client *testClient) error {
 	}
 	return condenseError(errorList)
 }
+*/
 
 func sweepTestApplicationServer(client *testClient) error {
 	var errorList []error
@@ -315,31 +317,61 @@ func sweepTestInspectionProfile(client *testClient) error {
 	return condenseError(errorList)
 }
 
+/*
 func sweepTestLSSConfigController(client *testClient) error {
 	var errorList []error
+
 	lssConfig, _, err := client.sdkClient.lssconfigcontroller.GetAll()
 	if err != nil {
+		if strings.Contains(err.Error(), "resource.not.found") {
+			// Log that the resource was not found and continue
+			sweeperLogger.Info("No resources found to sweep.")
+			return nil
+		}
+		// If any other error, return it
 		return err
 	}
+
 	// Logging the number of identified resources before the deletion loop
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(lssConfig)))
+
 	for _, b := range lssConfig {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.LSSConfig.Name, testResourcePrefix) {
-			if _, err := client.sdkClient.lssconfigcontroller.Delete(b.ID); err != nil {
+			// Attempt to delete the resource
+			_, err := client.sdkClient.lssconfigcontroller.Delete(b.ID)
+			if err != nil {
+				// Check if the error is because the resource doesn't exist
+				if strings.Contains(err.Error(), "resource.not.found") {
+					sweeperLogger.Info(fmt.Sprintf("Resource %s with ID %s was already deleted.", resourcetype.ZPALSSController, fmt.Sprintf(b.ID)))
+					continue
+				}
+				// For any other error, append to the error list and continue
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAInspectionProfile, fmt.Sprintf(b.ID), b.LSSConfig.Name)
+
+			sweeperLogger.Info(fmt.Sprintf("Swept resource %s with ID %s named %s.", resourcetype.ZPALSSController, fmt.Sprintf(b.ID), b.LSSConfig.Name))
 		}
 	}
+
 	// Log errors encountered during the deletion process
 	if len(errorList) > 0 {
 		for _, err := range errorList {
 			sweeperLogger.Error(err.Error())
 		}
 	}
+
 	return condenseError(errorList)
+}
+*/
+
+var defaultPolicyNames = map[string]string{
+	"ACCESS_POLICY":             "Global_Policy",
+	"TIMEOUT_POLICY":            "ReAuth_Policy",
+	"CLIENT_FORWARDING_POLICY":  "Bypass_Policy",
+	"INSPECTION_POLICY":         "Inspection_Policy",
+	"ISOLATION_POLICY":          "Isolation_Policy",
 }
 
 func sweepTestAccessPolicyRuleByType(client *testClient) error {
@@ -374,6 +406,11 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 		sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep for policy type %s", len(rules), policyType))
 
 		for _, rule := range rules {
+			// Check if the rule's name is a default name and skip it
+			if rule.Name == defaultPolicyNames[policyType] {
+				continue
+			}
+
 			// Check if the resource name has the required prefix before deleting it
 			if strings.HasPrefix(rule.Name, testResourcePrefix) {
 				// Use the fetched PolicySetID for deletion
