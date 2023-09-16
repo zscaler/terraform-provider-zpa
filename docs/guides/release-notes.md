@@ -12,11 +12,11 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.0.0``
+``Last updated: v3.0.0-beta``
 
 ---
 
-## 3.0.0 (September, xx 2023)
+## 3.0.0-beta (September, xx 2023)
 
 ### Notes
 
@@ -50,6 +50,8 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
   ⚠️ **WARNING:**: Cloud Browser Isolation (CBI) is a licensed feature flag. Please contact Zscaler support or your local account team for details.
 
 - [PR #363](https://github.com/zscaler/terraform-provider-zpa/pull/363) - Added support for `COUNTRY_CODE` object type within the `zpa_policy_access_rule` resource. The provider validates the use of proper 2 letter country codes [ISO3166 By Alpha2Code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) - Issue [#361](https://github.com/zscaler/terraform-provider-zpa/issues/361)
+
+- [PR #366](https://github.com/zscaler/terraform-provider-zpa/pull/366) - Added ISO3166 Alpha2Code for ``country_code`` validation on `zpa_app_connector_groups` and `zpa_service_edge_group` resources
 
 ## 2.83.0-beta (September, 5 2023) - Beta
 
