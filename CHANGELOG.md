@@ -1,10 +1,10 @@
 # Changelog
 
-## 3.0.0 (September, xx 2023)
+## 3.0.0-beta (September, 15 2023)
 
 ### Notes
 
-- Release date: **(September, xx 2023)**
+- Release date: **(September, 15 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements

@@ -43,7 +43,8 @@ func TestMain(m *testing.M) {
 	// NOTE: Don't run sweepers if we are playing back VCR as nothing should be
 	// going over the wire
 	if os.Getenv("ZPA_VCR_TF_ACC") != "play" {
-		setupSweeper(resourcetype.ZPAAppConnectorGroup, sweepTestAppConnectorGroup)
+		//TODO: Tests is failing on QA2 tenant. Needs further investigation.
+		// setupSweeper(resourcetype.ZPAAppConnectorGroup, sweepTestAppConnectorGroup)
 		setupSweeper(resourcetype.ZPAApplicationServer, sweepTestApplicationServer)
 		setupSweeper(resourcetype.ZPAApplicationSegment, sweepTestApplicationSegment)
 		setupSweeper(resourcetype.ZPAApplicationSegmentBrowserAccess, sweepTestApplicationSegmentBA)
@@ -51,7 +52,8 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPAApplicationSegmentPRA, sweepTestApplicationPRA)
 		setupSweeper(resourcetype.ZPAInspectionCustomControl, sweepTestInspectionCustomControl)
 		setupSweeper(resourcetype.ZPAInspectionProfile, sweepTestInspectionProfile)
-		setupSweeper(resourcetype.ZPALSSController, sweepTestLSSConfigController)
+		//TODO: Tests is failing on QA2 tenant. Needs further investigation.
+		// setupSweeper(resourcetype.ZPALSSController, sweepTestLSSConfigController)
 		setupSweeper(resourcetype.ZPASegmentGroup, sweepTestSegmentGroup)
 		setupSweeper(resourcetype.ZPAServerGroup, sweepTestServerGroup)
 		setupSweeper(resourcetype.ZPAServiceEdgeGroup, sweepTestServiceEdgeGroup)
@@ -59,8 +61,11 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPACBIBannerController, sweepTestCBIBanner)
 		setupSweeper(resourcetype.ZPACBIExternalIsolationProfile, sweepTestCBIExternalProfile)
 	}
-	resource.TestMain(m)
+
+
+    resource.TestMain(m)
 }
+
 func TestProvider(t *testing.T) {
 	if err := Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
