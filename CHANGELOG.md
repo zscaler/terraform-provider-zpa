@@ -1,10 +1,10 @@
 # Changelog
 
-## 3.0.0-beta (September, 15 2023)
+## 3.0.0-beta (September, 18 2023)
 
 ### Notes
 
-- Release date: **(September, 15 2023)**
+- Release date: **(September, 18 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements
@@ -15,7 +15,7 @@
 
 ⚠️ **WARNING:**: The new attribute ``microtenant_id`` is optional. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-⚠️ **WARNING:**: This feature is in limited availability and requires additional license. To learn more, contact Zscaler Support or your local account team.
+⚠️ **WARNING:**: This feature is in limited availability and requires additional license. To learn more, contact your local account team.
 
 - [PR #356](https://github.com/zscaler/terraform-provider-zpa/pull/356) - Added support to the following new ZPA Cloud Browser Isolation resources and datasources:
 
@@ -31,7 +31,7 @@
   - `zpa_cloud_browser_isolation_region` - Cloud Browser Isolation Regions
   - `zpa_cloud_browser_isolation_zpa_profile` - Cloud Browser Isolation ZPA Profile
 
-  ⚠️ **WARNING:**: Cloud Browser Isolation (CBI) is a licensed feature flag. Please contact Zscaler support or your local account team for details.
+  ⚠️ **WARNING:**: Cloud Browser Isolation (CBI) is a licensed feature flag. Please contact your local account team for details.
 
 - [PR #363](https://github.com/zscaler/terraform-provider-zpa/pull/363) - Added support for `COUNTRY_CODE` object type within the `zpa_policy_access_rule` resource. The provider validates the use of proper 2 letter country codes [ISO3166 By Alpha2Code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) - Issue [#361](https://github.com/zscaler/terraform-provider-zpa/issues/361)
 

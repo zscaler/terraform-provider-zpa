@@ -14,7 +14,7 @@ Use the navigation on the left to read about the available resources.
 Support Disclaimer
 
 -------
-!> **Disclaimer:** This Terraform provider is community supported. Although this provider is supported by Zscaler employees, it is **NOT** supported by Zscaler support. Please open all enhancement requests and issues on [Github Issues](https://github.com/zscaler/terraform-provider-zpa/issues) for support.
+!> **Disclaimer:** Please refer to our [General Support Statement](guides/support.md) before proceeding with the use of this provider.
 
 ## Zenith Community - ZPA Terraform Provider Introduction
 
@@ -190,9 +190,9 @@ The following arguments are supported:
 
 ## Support
 
-This template/solution are released under an as-is, best effort, support
+This template/solution is released under an as-is, best effort, support
 policy. These scripts should be seen as community supported and Zscaler
-Business Development Team will contribute our expertise as and when possible.
+Technology Alliances Team will contribute our expertise as and when possible.
 We do not provide technical support or help in using or troubleshooting the components
 of the project through our normal support options such as Zscaler support teams,
 or ASC (Authorized Support Centers) partners and backline
