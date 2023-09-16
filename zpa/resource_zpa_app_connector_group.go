@@ -57,9 +57,10 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Computed: true,
 			},
 			"country_code": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateCountryCode,
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -131,6 +132,11 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Computed: true,
 			},
 			"pra_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"waf_disabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
@@ -239,6 +245,7 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
+	_ = d.Set("waf_disabled", resp.WAFDisabled)
 	return nil
 
 }
@@ -341,6 +348,7 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		UpgradeTimeInSecs:        d.Get("upgrade_time_in_secs").(string),
 		OverrideVersionProfile:   d.Get("override_version_profile").(bool),
 		PRAEnabled:               d.Get("pra_enabled").(bool),
+		WAFDisabled:              d.Get("waf_disabled").(bool),
 		MicroTenantID:            d.Get("microtenant_id").(string),
 		VersionProfileID:         d.Get("version_profile_id").(string),
 		VersionProfileName:       d.Get("version_profile_name").(string),

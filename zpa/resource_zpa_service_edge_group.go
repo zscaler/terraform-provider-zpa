@@ -58,6 +58,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validateCountryCode,
 			},
 			"description": {
 				Type:        schema.TypeString,
