@@ -178,3 +178,20 @@ func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.N
 func isValidAlpha2(code string) bool {
 	return iso3166.ExistsIso3166ByAlpha2Code(code)
 }
+
+func validateCountryCode(value interface{}, key string) ([]string, []error) {
+	var warnings []string
+	var errors []error
+
+	code, ok := value.(string)
+	if !ok {
+		errors = append(errors, fmt.Errorf("expected type of %s to be string", key))
+		return warnings, errors
+	}
+
+	if !iso3166.ExistsIso3166ByAlpha2Code(code) {
+		errors = append(errors, fmt.Errorf("'%s' is not a valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes", code))
+	}
+
+	return warnings, errors
+}

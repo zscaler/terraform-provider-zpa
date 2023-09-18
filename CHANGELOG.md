@@ -35,6 +35,8 @@
 
 - [PR #363](https://github.com/zscaler/terraform-provider-zpa/pull/363) - Added support for `COUNTRY_CODE` object type within the `zpa_policy_access_rule` resource. The provider validates the use of proper 2 letter country codes [ISO3166 By Alpha2Code](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) - Issue [#361](https://github.com/zscaler/terraform-provider-zpa/issues/361)
 
+- [PR #366](https://github.com/zscaler/terraform-provider-zpa/pull/366) - Added ISO3166 Alpha2Code for ``country_code`` validation on `zpa_app_connector_groups` and `zpa_service_edge_group` resources
+
 ## 2.82.4-beta (August, 18 2023) - Beta
 
 ### Notes
