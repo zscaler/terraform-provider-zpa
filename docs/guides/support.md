@@ -5,7 +5,7 @@ page_title: "Support Guide"
 # General Support Statement
 
 The ZPA Terraform provider is supported and maintained by the Zscaler Technology Alliances team, and we welcome questions on how to use the provider.
-Please, refer to our [troubleshooting guide](guides/troubleshooting.md) for guidance on typical problems.
+Please, refer to our [troubleshooting guide](troubleshooting.md) for guidance on typical problems.
 
 All bug reports and feature requests must be submitted via [GitHub issues](https://github.com/zscaler/terraform-provider-zpa/issues). When reporting bugs, please include the Terraform script that demonstrates the bug and the command output. Stack traces will also be helpful.
 
