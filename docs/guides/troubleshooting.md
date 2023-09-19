@@ -118,12 +118,14 @@ This kind of errors happens when the 32-bit version of ZPA Terraform provider is
 
 This kind of error happens when the administrator fails to configure the ZPA API credentials via one of the accepted methods such as environment variables, hard-coded method (which is discouraged) or via the `credentials.json` file.
 
+```sh
 │   with provider["registry.terraform.io/zscaler/zpa"],
 │   on zpa_app_connector_group.tf line 10, in provider "zpa":
 │   10: provider "zpa" {}
 │
 │ error:Could not open credentials file, needs to contain one json object with keys: zpa_client_id, zpa_client_secret, zpa_customer_id, and
-│ zpa_cloud. open /Users/wguilherme/.zpa/credentials.json: no such file or directory
+│ zpa_cloud. open /Users/<username>/.zpa/credentials.json: no such file or directory
+```
 
 ### Configuration drifts with `zpa_application_segment`
 
@@ -161,4 +163,6 @@ resource "zpa_application_segment" "this" {
 This type of error happens when the administrator fails to provide a valid attribute value within the conditions.operands block of an access policy.
 The below example, is an error displayed when using an invalid 2 letter `COUNTRY_CODE` wihin the policy.
 
+```sh
 │ Error: [WARN] when operand object type is COUNTRY_CODE LHS must be "valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes" value is "00", <nil>
+```
