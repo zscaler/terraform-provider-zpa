@@ -687,14 +687,33 @@ func GetString(v interface{}) string {
 	return fmt.Sprintf("%v", v)
 }
 
+var AllowedPolicyTypes = map[string]struct{}{
+	"ACCESS_POLICY":                        {},
+	"GLOBAL_POLICY":                        {},
+	"TIMEOUT_POLICY":                       {},
+	"REAUTH_POLICY":                        {},
+	"CLIENT_FORWARDING_POLICY":             {},
+	"BYPASS_POLICY":                        {},
+	"ISOLATION_POLICY":                     {},
+	"INSPECTION_POLICY":                    {},
+	"CREDENTIAL_POLICY":                    {},
+	"CAPABILITIES_POLICY":                  {},
+	"CLIENTLESS_SESSION_PROTECTION_POLICY": {},
+}
+
 func GetGlobalPolicySetByPolicyType(policysetcontroller policysetcontroller.Service, policyType string) (*policysetcontroller.PolicySet, error) {
+	// Check if the provided policy type is allowed
+	if _, ok := AllowedPolicyTypes[policyType]; !ok {
+		return nil, fmt.Errorf("invalid policy type: %s", policyType)
+	}
+
 	policySetsMutex.Lock()
 	defer policySetsMutex.Unlock()
 
 	if p, ok := policySets[policyType]; ok {
 		return &p, nil
 	}
-	globalPolicySet, _, err := policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(policyType)
 	if err != nil {
 		return nil, err
 	}

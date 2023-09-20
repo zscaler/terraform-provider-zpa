@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.0.1-beta (September, 20 2023)
+
+### Notes
+
+- Release date: **(September, 20 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #368](https://github.com/zscaler/terraform-provider-zpa/pull/368) - Added fix to resource `zpa_policy_access_rule_reorder` to support multiple policy types. The reorder operation is now supported for the following policy types:
+  - ``ACCESS_POLICY or GLOBAL_POLICY``
+  - ``TIMEOUT_POLICY or REAUTH_POLICY``
+  - ``BYPASS_POLICY or CLIENT_FORWARDING_POLICY``
+  - ``INSPECTION_POLICY``
+  - ``ISOLATION_POLICY``
+  - ``CREDENTIAL_POLICY``
+  - ``CAPABILITIES_POLICY``
+  - ``CLIENTLESS_SESSION_PROTECTION_POLICY``
+
 ## 3.0.0-beta (September, 18 2023)
 
 ### Notes

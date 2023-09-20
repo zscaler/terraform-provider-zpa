@@ -62,8 +62,7 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPACBIExternalIsolationProfile, sweepTestCBIExternalProfile)
 	}
 
-
-    resource.TestMain(m)
+	resource.TestMain(m)
 }
 
 func TestProvider(t *testing.T) {

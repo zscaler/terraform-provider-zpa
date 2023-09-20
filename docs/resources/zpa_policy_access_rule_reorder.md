@@ -109,12 +109,15 @@ resource "zpa_policy_access_rule_reorder" "access_policy_reorder" {
 ### Required
 
 * `name` - (Required) This is the name of the policy rule.
-* `policy_set_id` - (Required) Use [zpa_policy_type](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_policy_type) data source to retrieve the necessary policy Set ID ``policy_set_id``
 * `policy_type` (Required) - Supported values:
   * ``ACCESS_POLICY or GLOBAL_POLICY``
   * ``TIMEOUT_POLICY or REAUTH_POLICY``
   * ``BYPASS_POLICY or CLIENT_FORWARDING_POLICY``
   * ``INSPECTION_POLICY``
+  * ``ISOLATION_POLICY``
+  * ``CREDENTIAL_POLICY``
+  * ``CAPABILITIES_POLICY``
+  * ``CLIENTLESS_SESSION_PROTECTION_POLICY``
 
 ## Attributes Reference
 
