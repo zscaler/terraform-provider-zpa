@@ -14,21 +14,20 @@
 Terraform Provider for ☁️Zscaler Private Access☁️
 =========================================================================
 
-- Website: [https://www.terraform.io](https://registry.terraform.io/providers/zscaler/zpa/latest)
-- Documentation: https://help.zscaler.com/zpa
-- Zscaler Community: [Zscaler Community](https://community.zscaler.com/)
+- [Website](https://registry.terraform.io/providers/zscaler/zpa/latest)
+- [Documentation](https://help.zscaler.com/zpa)
+- [Zscaler Community](https://community.zscaler.com)
 
-Support Disclaimer
+## Support Disclaimer
 
--------
-!> **Disclaimer:** Please refer to our [General Support Statement](docs/guides//support.md) before proceeding with the use of this provider.
+-> **Disclaimer:** Please refer to our [General Support Statement](docs/guides/support.md) before proceeding with the use of this provider. You can also refer to our [troubleshooting guide](docs/guides/troubleshooting.md) for guidance on typical problems.
 
 Requirements
 ------------
 
--	Install [Terraform](https://www.terraform.io/downloads.html) 0.12.x/0.13.x/0.14.x/0.15.x (0.11.x or lower is incompatible)
--	Install [Go](https://golang.org/doc/install) 1.16+ (This will be used to build the provider plugin.)
--	Create a directory, go, follow this [doc](https://github.com/golang/go/wiki/SettingGOPATH) to edit ~/.bash_profile to setup the GOPATH environment variable)
+- Install [Terraform](https://www.terraform.io/downloads.html) 0.12.x/0.13.x/0.14.x/0.15.x (0.11.x or lower is incompatible)
+- Install [Go](https://golang.org/doc/install) 1.16+ (This will be used to build the provider plugin.)
+- Create a directory, go, follow this [doc](https://github.com/golang/go/wiki/SettingGOPATH) to edit ~/.bash_profile to setup the GOPATH environment variable)
 
 Building The Provider (Terraform v0.12+)
 ---------------------
@@ -36,12 +35,13 @@ Building The Provider (Terraform v0.12+)
 Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-zpa`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/terraform-providers
-$ cd $GOPATH/src/github.com/terraform-providers
-$ git clone https://github.com/terraform-providers/terraform-provider-zpa.git
+mkdir -p $GOPATH/src/github.com/terraform-providers
+cd $GOPATH/src/github.com/terraform-providers
+git clone https://github.com/terraform-providers/terraform-provider-zpa.git
 ```
 
 To clone on windows
+
 ```sh
 mkdir %GOPATH%\src\github.com\terraform-providers
 cd %GOPATH%\src\github.com\terraform-providers
@@ -51,12 +51,13 @@ git clone https://github.com/zscaler/terraform-provider-zpa.git
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-zpa
-$ make fmt
-$ make build
+cd $GOPATH/src/github.com/terraform-providers/terraform-provider-zpa
+make fmt
+make build
 ```
 
 To build on Windows
+
 ```sh
 cd %GOPATH%\src\github.com\terraform-providers\terraform-provider-zpa
 go fmt
@@ -67,20 +68,26 @@ Building The Provider (Terraform v0.13+)
 -----------------------
 
 ### MacOS / Linux
+
 Run the following command:
+
 ```sh
-$ make build13
+make build13
 ```
 
 ### Windows
+
 Run the following commands for cmd:
+
 ```sh
 cd %GOPATH%\src\github.com\terraform-providers\terraform-provider-zpa
 go fmt
 go install
 xcopy "%GOPATH%\bin\terraform-provider-zpa.exe" "%APPDATA%\terraform.d\plugins\zscaler.com\zpa\zpa\2.0.5\windows_amd64\" /Y
 ```
+
 Run the following commands if using powershell:
+
 ```sh
 cd "$env:GOPATH\src\github.com\terraform-providers\terraform-provider-zpa"
 go fmt
@@ -94,16 +101,19 @@ Using Zscaler Private Access Provider (Terraform v0.12+)
 -----------------------
 
 Activate the provider by adding the following to `~/.terraformrc` on Linux/Unix.
+
 ```sh
 providers {
   "zpa" = "$GOPATH/bin/terraform-provider-zpa"
 }
 ```
+
 For Windows, the file should be at '%APPDATA%\terraform.rc'. Do not change $GOPATH to %GOPATH%.
 
 In Windows, for terraform 0.11.8 and lower use the above text.
 
 In Windows, for terraform 0.11.9 and higher use the following at '%APPDATA%\terraform.rc'
+
 ```sh
 providers {
   "zpa" = "$GOPATH/bin/terraform-provider-zpa.exe"
@@ -134,7 +144,7 @@ Examples
 
 Visit [here](https://github.com/zscaler/terraform-provider-zpa/tree/master/docs) for the complete documentation for all resources on github.
 
-Examples [here] (https://github.com/zscaler/terraform-provider-zpa/tree/master/examples) for the complete list of examples on github.
+Examples [here] (<https://github.com/zscaler/terraform-provider-zpa/tree/master/examples>) for the complete list of examples on github.
 
 Issues
 =========
@@ -158,7 +168,7 @@ $ $GOPATH/bin/terraform-provider-zpa
 In order to test the provider, you can simply run `make test`.
 
 ```sh
-$ make test
+make test
 ```
 
 In order to run the full suite of Acceptance tests, run `make testacc`.
@@ -166,7 +176,7 @@ In order to run the full suite of Acceptance tests, run `make testacc`.
 *Note:* Acceptance tests create real resources, and often cost money to run.
 
 ```sh
-$ make testacc
+make testacc
 ```
 
 License
