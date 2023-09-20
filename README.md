@@ -19,8 +19,9 @@ Terraform Provider for ☁️Zscaler Private Access☁️
 - Zscaler Community: [Zscaler Community](https://community.zscaler.com/)
 
 Support Disclaimer
+
 -------
-!> **Disclaimer:** This Terraform provider is community supported. Although this provider is supported by Zscaler employees, it is **NOT** supported by Zscaler support. Please open all enhancement requests and issues on [Github Issues](https://github.com/zscaler/terraform-provider-zpa/issues) for support.
+!> **Disclaimer:** Please refer to our [General Support Statement](docs/guides//support.md) before proceeding with the use of this provider.
 
 Requirements
 ------------
