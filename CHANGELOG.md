@@ -9,7 +9,7 @@
 
 ### Fixes
 
-- [PR #368](https://github.com/zscaler/terraform-provider-zpa/pull/368) - Added fix to resource `zpa_policy_access_rule_reorder` to support multiple policy types. The reorder operation is now supported for the following policy types:
+- [PR #369](https://github.com/zscaler/terraform-provider-zpa/pull/369) - Added fix to resource `zpa_policy_access_rule_reorder` to support multiple policy types. The reorder operation is now supported for the following policy types:
   - ``ACCESS_POLICY or GLOBAL_POLICY``
   - ``TIMEOUT_POLICY or REAUTH_POLICY``
   - ``BYPASS_POLICY or CLIENT_FORWARDING_POLICY``
