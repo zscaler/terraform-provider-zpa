@@ -98,6 +98,7 @@ func setupSweeper(resourceType string, del func(*testClient) error) {
 		},
 	})
 }
+
 /*
 //TODO: Tests is failing on QA2 tenant. Needs further investigation.
 func sweepTestAppConnectorGroup(client *testClient) error {
@@ -367,11 +368,11 @@ func sweepTestLSSConfigController(client *testClient) error {
 */
 
 var defaultPolicyNames = map[string]string{
-	"ACCESS_POLICY":             "Global_Policy",
-	"TIMEOUT_POLICY":            "ReAuth_Policy",
-	"CLIENT_FORWARDING_POLICY":  "Bypass_Policy",
-	"INSPECTION_POLICY":         "Inspection_Policy",
-	"ISOLATION_POLICY":          "Isolation_Policy",
+	"ACCESS_POLICY":            "Global_Policy",
+	"TIMEOUT_POLICY":           "ReAuth_Policy",
+	"CLIENT_FORWARDING_POLICY": "Bypass_Policy",
+	"INSPECTION_POLICY":        "Inspection_Policy",
+	"ISOLATION_POLICY":         "Isolation_Policy",
 }
 
 func sweepTestAccessPolicyRuleByType(client *testClient) error {

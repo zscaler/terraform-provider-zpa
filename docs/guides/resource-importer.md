@@ -4,7 +4,10 @@ page_title: "Resource Importer"
 
 # Zscaler Terraformer Tool
 
-!> **Disclaimer:** Please refer to our [General Support Statement](support.md) before proceeding with the use of this provider.
+Support Disclaimer
+
+-------
+-> **Disclaimer:** Please refer to our [General Support Statement](support.md) before proceeding with the use of this provider. You can also refer to our [troubleshooting guide](troubleshooting.md) for guidance on typical problems.
 
 ## Overview
 
@@ -19,6 +22,7 @@ write the Terraform configuration to describe them.
 > NOTE: This tool has been developed and tested with Terraform v1.x.x only.
 
 [![Zscaler Terraformer Migration Tool](https://raw.githubusercontent.com/zscaler/zscaler-terraformer/master/images/zscaler_terraformer.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlDrCAI/video-zscaler-terraformer-migration-tool-launch)
+
 ## Usage
 
 ```bash
