@@ -77,8 +77,8 @@ resouce "zpa_application_segment" "app_segment" {
 ### Parallelism
 
 Terraform uses goroutines to speed up deployment, but the number of parallel
-operations it launches exceeds [what is recommended](https://help.zscaler.com/zpa/about-rate-limiting).
-When configuring ZPA Policies we recommend to limit the number of concurrent API calls to ONE. This limit ensures that there is no performance impact during the provisioning of large Terraform configurations.
+operations it launches may exceed [what is recommended](https://help.zscaler.com/zpa/about-rate-limiting).
+When configuring ZPA Policies we recommend to limit the number of concurrent API calls to **ONE**. This limit ensures that there is no performance impact during the provisioning of large Terraform configurations involving access policy creation.
 
 This recommendation applies to the following resources:
 
@@ -88,9 +88,7 @@ This recommendation applies to the following resources:
 - ``zpa_policy_forwarding_rule``
 - ``zpa_policy_isolation_rule``
 
-In order to accomplish this, make sure you set the
-[parallelism](https://www.terraform.io/cli/commands/apply#parallelism-n) value at or
-below this limit to prevent performance impacts.
+In order to accomplish this, we recommend setting the [parallelism](https://www.terraform.io/cli/commands/apply#parallelism-n) value at this limit to prevent performance impacts.
 
 ## Authentication
 
