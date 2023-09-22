@@ -1,10 +1,10 @@
 # Changelog
 
-## 3.0.1-beta (September, 20 2023)
+## 3.0.1-beta (September, 21 2023)
 
 ### Notes
 
-- Release date: **(September, 20 2023)**
+- Release date: **(September, 21 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Fixes
@@ -18,6 +18,8 @@
   - ``CREDENTIAL_POLICY``
   - ``CAPABILITIES_POLICY``
   - ``CLIENTLESS_SESSION_PROTECTION_POLICY``
+
+- [PR #371](https://github.com/zscaler/terraform-provider-zpa/pull/371) - Fixed ``object_type`` validation for all supported policy types.
 
 ## 3.0.0-beta (September, 18 2023)
 

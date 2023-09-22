@@ -34,11 +34,9 @@ func resourcePolicyIsolationRule() *schema.Resource {
 				},
 				"conditions": GetPolicyConditionsSchema([]string{
 					"APP",
+					"APP_GROUP",
 					"CLIENT_TYPE",
 					"EDGE_CONNECTOR_GROUP",
-					"POSTURE",
-					"MACHINE_GRP",
-					"TRUSTED_NETWORK",
 					"PLATFORM",
 					"IDP",
 					"SAML",
