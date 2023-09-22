@@ -67,8 +67,6 @@ func resourcePolicyAccessRule() *schema.Resource {
 					},
 				},
 				"conditions": GetPolicyConditionsSchema([]string{
-					"USER",
-					"USER_GROUP",
 					"APP",
 					"APP_GROUP",
 					"LOCATION",

@@ -36,7 +36,7 @@ func resourcePolicyInspectionRule() *schema.Resource {
 					"APP",
 					"APP_GROUP",
 					"CLIENT_TYPE",
-					"CLOUD_CONNECTOR_GROUP",
+					"EDGE_CONNECTOR_GROUP",
 					"IDP",
 					"POSTURE",
 					"SAML",
