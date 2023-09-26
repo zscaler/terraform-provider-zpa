@@ -12,9 +12,21 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.0.1-beta``
+``Last updated: v3.0.2``
 
 ---
+
+## 3.0.2 (September, 28 2023)
+
+### Notes
+
+- Release date: **(September, 28 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #372](https://github.com/zscaler/terraform-provider-zpa/pull/372) - Provider HTTP Header now includes enhanced ``User-Agent`` information for troubleshooting assistance.
+  - i.e ``User-Agent: (darwin arm64) Terraform/1.5.5 Provider/3.0.2 CustomerID/xxxxxxxxxxxxxxx``
 
 ## 3.0.1-beta (September, 21 2023)
 
