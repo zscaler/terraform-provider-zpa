@@ -19,7 +19,7 @@ var (
 )
 
 func init() {
-	testAccProvider = Provider()
+	testAccProvider = ZPAProvider()
 	testAccProviders = map[string]*schema.Provider{
 		"zpa": testAccProvider,
 	}
@@ -66,7 +66,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().InternalValidate(); err != nil {
+	if err := ZPAProvider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }

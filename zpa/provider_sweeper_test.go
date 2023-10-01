@@ -49,7 +49,7 @@ func TestRunForcedSweeper(t *testing.T) {
 		return
 	}
 
-	provider := Provider()
+	provider := ZPAProvider()
 	c := terraform.NewResourceConfigRaw(nil)
 	diag := provider.Configure(context.TODO(), c)
 	if diag.HasError() {
