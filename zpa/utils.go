@@ -7,7 +7,6 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/fabiotavarespr/iso3166"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
@@ -171,27 +170,4 @@ func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.N
 	}
 	return nil
 
-}
-
-// This function checks for ISO3166 Alpha2 Country codes
-// It's used within the access policy RHS validation
-func isValidAlpha2(code string) bool {
-	return iso3166.ExistsIso3166ByAlpha2Code(code)
-}
-
-func validateCountryCode(value interface{}, key string) ([]string, []error) {
-	var warnings []string
-	var errors []error
-
-	code, ok := value.(string)
-	if !ok {
-		errors = append(errors, fmt.Errorf("expected type of %s to be string", key))
-		return warnings, errors
-	}
-
-	if !iso3166.ExistsIso3166ByAlpha2Code(code) {
-		errors = append(errors, fmt.Errorf("'%s' is not a valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes", code))
-	}
-
-	return warnings, errors
 }

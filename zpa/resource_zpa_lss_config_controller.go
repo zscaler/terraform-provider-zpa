@@ -66,7 +66,27 @@ func getPolicyRuleResourceSchema() map[string]*schema.Schema {
 											"APP",
 											"APP_GROUP",
 											"CLIENT_TYPE",
+											"IDP",
+											"SCIM",
+											"SCIM_GROUP",
+											"SAML",
 										}, false),
+									},
+									"entry_values": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"rhs": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+												"lhs": {
+													Type:     schema.TypeString,
+													Optional: true,
+												},
+											},
+										},
 									},
 								},
 							},
@@ -165,6 +185,7 @@ func resourceLSSConfigController() *schema.Resource {
 							Optional:    true,
 							Description: "Filter for the LSS configuration. Format given by the following API to get status codes: /mgmtconfig/v2/admin/lssConfig/statusCodes",
 						},
+
 						"format": {
 							Type:        schema.TypeString,
 							Required:    true,
@@ -224,10 +245,71 @@ func resourceLSSConfigControllerCreate(d *schema.ResourceData, m interface{}) er
 	req := expandLSSResource(d)
 	log.Printf("[INFO] Creating zpa lss config controller with request\n%+v\n", req)
 
+	sourceLogType := d.Get("config.0.source_log_type").(string)
+
+	conditions := d.Get("policy_rule_resource.0.conditions").([]interface{})
+	for _, condition := range conditions {
+		conditionMap := condition.(map[string]interface{})
+		operandsInterface := conditionMap["operands"].([]interface{})
+
+		var operands []lssconfigcontroller.PolicyRuleResourceOperands
+		for _, operandInterface := range operandsInterface {
+			operandMap := operandInterface.(map[string]interface{})
+			objectType := operandMap["object_type"].(string)
+			valuesInterface := operandMap["values"].(*schema.Set).List()
+
+			var values []string
+			for _, valueInterface := range valuesInterface {
+				values = append(values, valueInterface.(string))
+			}
+
+			entryValuesInterface, exists := operandMap["entry_values"]
+			var entryValues []lssconfigcontroller.OperandsResourceLHSRHSValue
+			if exists && entryValuesInterface != nil {
+				for _, entryValueInterface := range entryValuesInterface.([]interface{}) {
+					entryValueMap := entryValueInterface.(map[string]interface{})
+					entryValue := lssconfigcontroller.OperandsResourceLHSRHSValue{
+						LHS: entryValueMap["lhs"].(string),
+						RHS: entryValueMap["rhs"].(string),
+					}
+					entryValues = append(entryValues, entryValue)
+				}
+			}
+
+			operand := lssconfigcontroller.PolicyRuleResourceOperands{
+				ObjectType:                  objectType,
+				Values:                      values,
+				OperandsResourceLHSRHSValue: &entryValues,
+			}
+			operands = append(operands, operand)
+		}
+
+		// Validate operand object types and values here
+		for _, operand := range operands {
+			err := validateLSSConfigControllerFilters(sourceLogType, operand.ObjectType, "", operand.Values, operands)
+			if err != nil {
+				return err // handle the error as appropriate
+			}
+		}
+	}
+
+	// Validate filters within the config block separately
+	if filterSet, exists := d.GetOk("config.0.filter"); exists {
+		for _, filter := range filterSet.(*schema.Set).List() {
+			filterStr := filter.(string)
+			// For filter validation, passing empty string as the objectType and nil for values and operands
+			err := validateLSSConfigControllerFilters(sourceLogType, "", filterStr, nil, nil)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	resp, _, err := zClient.lssconfigcontroller.Create(&req)
 	if err != nil {
 		return err
 	}
+
 	log.Printf("[INFO] Created lss config controller request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
@@ -263,14 +345,75 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) er
 	zClient := m.(*Client)
 
 	id := d.Id()
-	log.Printf("[INFO] Updating lss config controller ID: %v\n", id)
 	req := expandLSSResource(d)
+	log.Printf("[INFO] Updating zpa lss config controller with request\n%+v\n", req)
+
+	sourceLogType := d.Get("config.0.source_log_type").(string)
+
+	conditions := d.Get("policy_rule_resource.0.conditions").([]interface{})
+	for _, condition := range conditions {
+		conditionMap := condition.(map[string]interface{})
+		operandsInterface := conditionMap["operands"].([]interface{})
+
+		var operands []lssconfigcontroller.PolicyRuleResourceOperands
+		for _, operandInterface := range operandsInterface {
+			operandMap := operandInterface.(map[string]interface{})
+			objectType := operandMap["object_type"].(string)
+			valuesInterface := operandMap["values"].(*schema.Set).List()
+
+			var values []string
+			for _, valueInterface := range valuesInterface {
+				values = append(values, valueInterface.(string))
+			}
+
+			entryValuesInterface, exists := operandMap["entry_values"]
+			var entryValues []lssconfigcontroller.OperandsResourceLHSRHSValue
+			if exists && entryValuesInterface != nil {
+				for _, entryValueInterface := range entryValuesInterface.([]interface{}) {
+					entryValueMap := entryValueInterface.(map[string]interface{})
+					entryValue := lssconfigcontroller.OperandsResourceLHSRHSValue{
+						LHS: entryValueMap["lhs"].(string),
+						RHS: entryValueMap["rhs"].(string),
+					}
+					entryValues = append(entryValues, entryValue)
+				}
+			}
+
+			operand := lssconfigcontroller.PolicyRuleResourceOperands{
+				ObjectType:                  objectType,
+				Values:                      values,
+				OperandsResourceLHSRHSValue: &entryValues,
+			}
+			operands = append(operands, operand)
+		}
+
+		// Validate operand object types and values here
+		for _, operand := range operands {
+			err := validateLSSConfigControllerFilters(sourceLogType, operand.ObjectType, "", operand.Values, operands)
+			if err != nil {
+				return err // handle the error as appropriate
+			}
+		}
+	}
+
+	// Validate filters within the config block separately
+	if filterSet, exists := d.GetOk("config.0.filter"); exists {
+		for _, filter := range filterSet.(*schema.Set).List() {
+			filterStr := filter.(string)
+			// Pass empty string as objectType and nil for values and operands when validating filters
+			err := validateLSSConfigControllerFilters(sourceLogType, "", filterStr, nil, nil)
+			if err != nil {
+				return err
+			}
+		}
+	}
 
 	if _, _, err := zClient.lssconfigcontroller.Get(id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
+		return err
 	}
 
 	if _, err := zClient.lssconfigcontroller.Update(id, &req); err != nil {
@@ -325,18 +468,15 @@ func expandPolicyRuleResource(d *schema.ResourceData) (*lssconfigcontroller.Poli
 		Action:            polictSet["action"].(string),
 		ActionID:          polictSet["action_id"].(string),
 		CustomMsg:         polictSet["custom_msg"].(string),
-		DefaultRule:       polictSet["default_rule"].(bool),
 		Description:       polictSet["description"].(string),
 		ID:                polictSet["id"].(string),
 		Name:              polictSet["name"].(string),
 		Operator:          polictSet["operator"].(string),
 		PolicyType:        polictSet["policy_type"].(string),
 		Priority:          polictSet["priority"].(string),
-		ReauthDefaultRule: polictSet["reauth_default_rule"].(bool),
 		ReauthIdleTimeout: polictSet["reauth_idle_timeout"].(string),
 		ReauthTimeout:     polictSet["reauth_timeout"].(string),
 		RuleOrder:         polictSet["rule_order"].(string),
-		LssDefaultRule:    polictSet["lss_default_rule"].(bool),
 		Conditions:        conditions,
 	}, nil
 }
@@ -375,10 +515,30 @@ func expandPolicyRuleResourceOperandsList(ops interface{}) ([]lssconfigcontrolle
 		for _, operand := range operands {
 			operandSet, _ := operand.(map[string]interface{})
 			valuesSet := operandSet["values"].(*schema.Set)
+
+			// Expanding entryValues from schema
+			entryValuesInterface, exists := operandSet["entry_values"]
+			var entryValues []lssconfigcontroller.OperandsResourceLHSRHSValue
+			if exists && entryValuesInterface != nil {
+				for _, entryValueInterface := range entryValuesInterface.([]interface{}) {
+					entryValueMap := entryValueInterface.(map[string]interface{})
+					entryValue := lssconfigcontroller.OperandsResourceLHSRHSValue{
+						LHS: entryValueMap["lhs"].(string),
+						RHS: entryValueMap["rhs"].(string),
+					}
+					entryValues = append(entryValues, entryValue)
+				}
+			}
+
 			op := lssconfigcontroller.PolicyRuleResourceOperands{
 				Values:     SetToStringSlice(valuesSet),
 				ObjectType: operandSet["object_type"].(string),
 			}
+
+			if len(entryValues) > 0 {
+				op.OperandsResourceLHSRHSValue = &entryValues // Setting expanded entryValues only if it is not empty
+			}
+
 			operandsSets = append(operandsSets, op)
 		}
 		return operandsSets, nil
