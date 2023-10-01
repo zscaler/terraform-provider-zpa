@@ -26,6 +26,7 @@ func dataSourceLSSLogTypeFormats() *schema.Resource {
 					"zpn_trans_log",
 					"zpn_http_trans_log",
 					"zpn_waf_http_exchanges_log",
+					"zpn_sys_auth_log",
 				}, false),
 			},
 			"tsv": {

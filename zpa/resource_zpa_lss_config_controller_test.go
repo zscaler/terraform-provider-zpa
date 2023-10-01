@@ -135,6 +135,25 @@ data "zpa_lss_config_log_type_formats" "zpn_trans_log" {
 	log_type="zpn_trans_log"
 }
 
+// Retrieve the Policy Set ID from Policy Type SIEM_POLICY
+data "zpa_policy_type" "lss_siem_policy" {
+  policy_type = "SIEM_POLICY"
+}
+
+data "zpa_idp_controller" "this" {
+	name = "BD_Okta_Users"
+   }
+
+   # Retrieve the SCIM_GROUP ID(s)
+data "zpa_scim_groups" "engineering" {
+  name     = "Engineering"
+  idp_name = "BD_Okta_Users"
+}
+
+data "zpa_scim_groups" "sales" {
+  name     = "Sales"
+  idp_name = "BD_Okta_Users"
+}
 resource "%s" "%s" {
 	config {
 		name            = "tf-acc-test-%s"
@@ -149,39 +168,31 @@ resource "%s" "%s" {
 	policy_rule_resource {
 		name   = "policy_rule_resource-lss_auth_logs"
 		action = "ALLOW"
+		policy_set_id = data.zpa_policy_type.lss_siem_policy.id
 		conditions {
-		  negated  = false
-		  operator = "OR"
-		  operands {
-			object_type = "CLIENT_TYPE"
-			values      = ["zpn_client_type_exporter"]
+			negated  = false
+			operator = "OR"
+			operands {
+			  object_type = "CLIENT_TYPE"
+			  values      = ["zpn_client_type_exporter", "zpn_client_type_ip_anchoring", "zpn_client_type_zapp", "zpn_client_type_edge_connector", "zpn_client_type_machine_tunnel", "zpn_client_type_browser_isolation", "zpn_client_type_slogger", "zpn_client_type_zapp_partner", "zpn_client_type_branch_connector"]
+			}
 		  }
-		  operands {
-			object_type = "CLIENT_TYPE"
-			values      = ["zpn_client_type_ip_anchoring"]
-		  }
-		  operands {
-			object_type = "CLIENT_TYPE"
-			values      = ["zpn_client_type_zapp"]
-		  }
-		  operands {
-			object_type = "CLIENT_TYPE"
-			values      = ["zpn_client_type_edge_connector"]
-		  }
-		  operands {
-			object_type = "CLIENT_TYPE"
-			values      = ["zpn_client_type_machine_tunnel"]
-		  }
-		  operands {
-			object_type = "CLIENT_TYPE"
-			values      = ["zpn_client_type_browser_isolation"]
-		  }
-		  operands {
-			object_type = "CLIENT_TYPE"
-			values      = ["zpn_client_type_slogger"]
-		  }
+		conditions {
+		negated  = false
+		operator = "OR"
+		operands {
+			object_type = "SCIM_GROUP"
+			entry_values {
+			rhs = data.zpa_scim_groups.engineering.id
+			lhs = data.zpa_idp_controller.this.id
+			}
+			entry_values {
+			rhs = data.zpa_scim_groups.sales.id
+			lhs = data.zpa_idp_controller.this.id
+			}
 		}
-	  }
+		}
+	}
 	connector_groups {
 		id = [ "${%s.id}" ]
 	}

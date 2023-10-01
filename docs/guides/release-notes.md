@@ -16,12 +16,16 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 3.0.2 (September, 28 2023)
+## 3.0.2 (September, 30 2023)
 
 ### Notes
 
-- Release date: **(September, 28 2023)**
+- Release date: **(September, 30 2023)**
 - Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #374](https://github.com/zscaler/terraform-provider-zpa/pull/374) - Resource `zpa_lss_config_controller` now supports ability to configure granular access policies via the embbeded `policy_type` `SIEM_POLICY`.
 
 ### Fixes
 
