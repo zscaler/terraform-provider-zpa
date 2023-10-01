@@ -11,6 +11,11 @@
 
 - [PR #374](https://github.com/zscaler/terraform-provider-zpa/pull/374) - Resource `zpa_lss_config_controller` now supports ability to configure granular access policies via the embbeded `policy_type` `SIEM_POLICY`.
 
+### Fixes
+
+- [PR #372](https://github.com/zscaler/terraform-provider-zpa/pull/372) - Provider HTTP Header now includes enhanced ``User-Agent`` information for troubleshooting assistance.
+  - i.e ``User-Agent: (darwin arm64) Terraform/1.5.5 Provider/3.0.2 CustomerID/xxxxxxxxxxxxxxx``
+
 ## 3.0.1-beta (September, 21 2023)
 
 ### Notes
