@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common"
 )
 
 // Resource names, defined in place, used throughout the provider and tests
@@ -17,24 +18,27 @@ const (
 	zpaBrowserAccess = "zpa_application_segment_browser_access"
 )
 
-func Provider() *schema.Provider {
+func ZPAProvider() *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"zpa_client_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ZPA_CLIENT_ID", nil),
 				Description: "zpa client id",
 			},
 			"zpa_client_secret": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("ZPA_CLIENT_SECRET", nil),
 				Description: "zpa client secret",
 			},
 			"zpa_customer_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("ZPA_CUSTOMER_ID", nil),
 				Description: "zpa customer id",
 			},
 			"zpa_cloud": {
@@ -158,7 +162,7 @@ func zscalerConfigure(d *schema.ResourceData, terraformVersion string) (interfac
 		ClientSecret: d.Get("zpa_client_secret").(string),
 		CustomerID:   d.Get("zpa_customer_id").(string),
 		BaseURL:      d.Get("zpa_cloud").(string),
-		UserAgent:    fmt.Sprintf("(%s %s) Terraform/%s", runtime.GOOS, runtime.GOARCH, terraformVersion),
+		UserAgent:    fmt.Sprintf("(%s %s) Terraform/%s Provider/%s Customer/%s", runtime.GOOS, runtime.GOARCH, terraformVersion, common.Version(), d.Get("zpa_customer_id").(string)),
 	}
 
 	return config.Client()
