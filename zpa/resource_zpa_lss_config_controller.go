@@ -18,8 +18,7 @@ func getPolicyRuleResourceSchema() map[string]*schema.Schema {
 				Optional:    true,
 				Description: "  This is for providing the rule action.",
 				ValidateFunc: validation.StringInSlice([]string{
-					"ALLOW",
-					"DENY",
+					"LOG",
 				}, false),
 			},
 			"policy_set_id": {

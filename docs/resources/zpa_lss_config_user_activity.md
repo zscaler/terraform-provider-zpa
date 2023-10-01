@@ -73,7 +73,7 @@ resource "zpa_lss_config_controller" "lss_user_activity" {
   }
   policy_rule_resource {
     name          = "policy_rule_resource-lss_user_activity"
-    action        = "ALLOW"
+    action        = "LOG"
     policy_set_id = data.zpa_policy_type.lss_siem_policy.id
     conditions {
       negated  = false
@@ -157,7 +157,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `policy_rule_resource` - (Optional)
   * `name` - (Optional)
-  * `action` - (Optional)
+  * `action` - (Optional) - Supported Value(s) are: `LOG`
   * `audit_message` - (Optional)
   * `custom_msg` - (Optional)
     * `conditions` - (Optional) - This is for providing the set of conditions for the policy
