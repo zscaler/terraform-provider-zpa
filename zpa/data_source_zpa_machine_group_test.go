@@ -1,10 +1,17 @@
 package zpa
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+var machineGroupNames = []string{
+	"BD-MGR01", "BD-MGR02", "BD MGR 03", "BD  MGR  04", "BD   MGR   05",
+	"BD    MGR06", "BD  MGR 07", "BD  M GR   08", "BD   M   GR 09",
+}
 
 func TestAccDataSourceMachineGroup_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -12,29 +19,42 @@ func TestAccDataSourceMachineGroup_Basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDataSourceMachineGroup_basic,
+				Config: testAccCheckDataSourceMachineGroup_basic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceMachineGroupCheck("data.zpa_machine_group.bd_mgr01"),
-					testAccDataSourceMachineGroupCheck("data.zpa_machine_group.bd_mgr02"),
+					generateMachineGroupChecks()...,
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceMachineGroupCheck(name string) resource.TestCheckFunc {
-	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttrSet(name, "id"),
-		resource.TestCheckResourceAttrSet(name, "name"),
-	)
+func generateMachineGroupChecks() []resource.TestCheckFunc {
+	var checks []resource.TestCheckFunc
+	for _, name := range machineGroupNames {
+		resourceName := createValidResourceName(name)
+		checkName := fmt.Sprintf("data.zpa_machine_group.%s", resourceName)
+		checks = append(checks, resource.ComposeTestCheckFunc(
+			resource.TestCheckResourceAttrSet(checkName, "id"),
+			resource.TestCheckResourceAttrSet(checkName, "name"),
+		))
+	}
+	return checks
 }
 
-var testAccCheckDataSourceMachineGroup_basic = `
-data "zpa_machine_group" "bd_mgr01" {
-    name = "BD-MGR01"
+func testAccCheckDataSourceMachineGroup_basic() string {
+	var configs string
+	for _, name := range machineGroupNames {
+		resourceName := createValidResourceName(name)
+		configs += fmt.Sprintf(`
+data "zpa_machine_group" "%s" {
+    name = "%s"
+}
+`, resourceName, name)
+	}
+	return configs
 }
 
-data "zpa_machine_group" "bd_mgr02" {
-    name = "BD-MGR02"
+// createValidResourceName converts the given name to a valid Terraform resource name
+func createValidResourceName(name string) string {
+	return strings.ReplaceAll(name, " ", "_")
 }
-`
