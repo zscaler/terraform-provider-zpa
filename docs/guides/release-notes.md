@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.0.2``
+``Last updated: v3.0.3``
 
 ---
+
+## 3.0.3 (October, xx 2023)
+
+### Notes
+
+- Release date: **(October, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #375](https://github.com/zscaler/terraform-provider-zpa/pull/375) - Fixed drift issues in ``zpa_application_segment_pra`` and ``zpa_application_segment_inspection`` when setting up ``apps_config`` options.
 
 ## 3.0.2 (September, 30 2023)
 

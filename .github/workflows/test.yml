@@ -17,6 +17,7 @@ on:
 
   schedule:
     - cron: '0 13 * * 1-5' # UTC
+  workflow_dispatch:
 
 jobs:
   zpa-qa-tenant01:
