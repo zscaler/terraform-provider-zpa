@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
@@ -188,52 +189,41 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				}, false),
 			},
 			"common_apps_dto": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
-				Computed: true,
+				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
 							Type:     schema.TypeSet,
-							Computed: true,
 							Optional: true,
+							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"allow_options": {
+									"name": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"description": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
+									"enabled": {
 										Type:     schema.TypeBool,
-										Computed: true,
-										Optional: true,
-									},
-									"app_id": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-									},
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
 										Optional: true,
 									},
 									"app_types": {
 										Type:     schema.TypeSet,
-										Computed: true,
 										Optional: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-											ValidateFunc: validation.StringInSlice([]string{
-												"INSPECT",
-											}, false),
-										},
+										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
 									"application_port": {
 										Type:     schema.TypeString,
-										Computed: true,
 										Optional: true,
 									},
 									"application_protocol": {
 										Type:     schema.TypeString,
-										Computed: true,
 										Optional: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"HTTP",
@@ -242,58 +232,15 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 									},
 									"certificate_id": {
 										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-									},
-									"certificate_name": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-									},
-									"cname": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-									},
-									"description": {
-										Type:     schema.TypeString,
-										Computed: true,
 										Optional: true,
 									},
 									"domain": {
 										Type:     schema.TypeString,
-										Computed: true,
 										Optional: true,
-									},
-									"enabled": {
-										Type:     schema.TypeBool,
-										Computed: true,
-										Optional: true,
-									},
-									"hidden": {
-										Type:     schema.TypeBool,
-										Computed: true,
-										Optional: true,
-									},
-									"local_domain": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-									},
-									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-									},
-									"portal": {
-										Type:     schema.TypeBool,
-										Optional: true,
-										Computed: true,
 									},
 									"trust_untrusted_cert": {
 										Type:     schema.TypeBool,
 										Optional: true,
-										Computed: true,
 									},
 								},
 							},
@@ -330,7 +277,9 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interf
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
-
+	if err := validateProtocolAndCertID(d); err != nil {
+		return err
+	}
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the application segment")
@@ -361,7 +310,7 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 		return err
 	}
 
-	log.Printf("[INFO] Getting inspection application segment:\n%+v\n", resp)
+	log.Printf("[INFO] Getting sra application segment:\n%+v\n", resp)
 	d.SetId(resp.ID)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
@@ -376,18 +325,17 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
-	_ = d.Set("ip_anchored", resp.IPAnchored)
-	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
-	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
-	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
+	_ = d.Set("ip_anchored", resp.IPAnchored)
+	_ = d.Set("health_reporting", resp.HealthReporting)
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp.AppServerGroups))
 
-	if err := d.Set("common_apps_dto", flattenInspectionCommonAppsDto(resp.InspectionAppDto)); err != nil {
+	if err := d.Set("common_apps_dto", flattenInspectionCommonAppsDto(d, resp.InspectionAppDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
@@ -398,9 +346,7 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
-
 	return nil
-
 }
 
 func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
@@ -430,7 +376,9 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 		log.Println("[ERROR] Please provide a valid segment group for the inspection application segment")
 		return fmt.Errorf("please provide a valid segment group for the inspection application segment")
 	}
-
+	if err := validateProtocolAndCertID(d); err != nil {
+		return err
+	}
 	if _, _, err := zClient.applicationsegmentinspection.Get(id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
@@ -495,18 +443,18 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 		Description:               d.Get("description").(string),
 		HealthReporting:           d.Get("health_reporting").(string),
 		HealthCheckType:           d.Get("health_check_type").(string),
-		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
-		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		IPAnchored:                d.Get("ip_anchored").(bool),
 		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
+		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		DomainNames:               expandStringInSlice(d, "domain_names"),
-		TCPPortRanges:             expandList(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges:             expandList(d.Get("udp_port_ranges").([]interface{})),
+		TCPAppPortRange:           []common.NetworkPorts{},
+		UDPAppPortRange:           []common.NetworkPorts{},
 		AppServerGroups:           expandInspectionAppServerGroups(d),
 		CommonAppsDto:             expandInspectionCommonAppsDto(d),
 	}
@@ -560,11 +508,11 @@ func expandInspectionCommonAppsDto(d *schema.ResourceData) applicationsegmentins
 	if !ok {
 		return result
 	}
-	appsConfigList, ok := appsConfigInterface.([]interface{})
+	appsConfigList, ok := appsConfigInterface.(*schema.Set)
 	if !ok {
 		return result
 	}
-	for _, appconf := range appsConfigList {
+	for _, appconf := range appsConfigList.List() {
 		appConfMap, ok := appconf.(map[string]interface{})
 		if !ok {
 			return result
@@ -590,21 +538,14 @@ func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationse
 			}
 			appTypes := SetToStringSlice(appTypesSet)
 			commonAppConfigDto = append(commonAppConfigDto, applicationsegmentinspection.AppsConfig{
-				AllowOptions:        commonAppConfig["allow_options"].(bool),
-				AppID:               commonAppConfig["app_id"].(string),
-				ID:                  commonAppConfig["id"].(string),
+				Name:                commonAppConfig["name"].(string),
+				Description:         commonAppConfig["description"].(string),
+				Enabled:             commonAppConfig["enabled"].(bool),
 				ApplicationPort:     commonAppConfig["application_port"].(string),
 				ApplicationProtocol: commonAppConfig["application_protocol"].(string),
 				CertificateID:       commonAppConfig["certificate_id"].(string),
-				CertificateName:     commonAppConfig["certificate_name"].(string),
-				Cname:               commonAppConfig["cname"].(string),
-				Description:         commonAppConfig["description"].(string),
 				Domain:              commonAppConfig["domain"].(string),
-				Enabled:             commonAppConfig["enabled"].(bool),
-				Hidden:              commonAppConfig["hidden"].(bool),
-				LocalDomain:         commonAppConfig["local_domain"].(string),
-				Name:                commonAppConfig["name"].(string),
-				Portal:              commonAppConfig["portal"].(bool),
+				TrustUntrustedCert:  commonAppConfig["trust_untrusted_cert"].(bool),
 				AppTypes:            appTypes,
 			})
 		}
@@ -634,31 +575,55 @@ func expandInspectionAppServerGroups(d *schema.ResourceData) []applicationsegmen
 	return []applicationsegmentinspection.AppServerGroups{}
 }
 
-func flattenInspectionCommonAppsDto(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
+func flattenInspectionCommonAppsDto(d *schema.ResourceData, apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
 	commonApp := make([]interface{}, 1)
 	commonApp[0] = map[string]interface{}{
-		"apps_config": flattenInspectionAppsConfig(apps),
+		"apps_config": flattenInspectionAppsConfig(d, apps),
 	}
 	return commonApp
 }
 
-func flattenInspectionAppsConfig(appConfigs []applicationsegmentinspection.InspectionAppDto) []interface{} {
+func flattenInspectionAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentinspection.InspectionAppDto) []interface{} {
+	cApp := expandInspectionCommonAppsDto(d)
+
 	appConfig := make([]interface{}, len(appConfigs))
 	for i, val := range appConfigs {
+		appTypes := []string{}
+		for _, a := range cApp.AppsConfig {
+			if a.Name == val.Name {
+				appTypes = a.AppTypes
+			}
+		}
 		appConfig[i] = map[string]interface{}{
 			"name":                 val.Name,
-			"id":                   val.ID,
-			"app_id":               val.AppID,
-			"application_port":     val.ApplicationPort,
-			"application_protocol": val.ApplicationProtocol,
-			"certificate_id":       val.CertificateID,
-			"certificate_name":     val.CertificateName,
 			"description":          val.Description,
-			"domain":               val.Domain,
 			"enabled":              val.Enabled,
-			"hidden":               val.Hidden,
-			"portal":               val.Portal,
+			"domain":               val.Domain,
+			"application_port":     val.ApplicationPort,
+			"certificate_id":       val.CertificateID,
+			"application_protocol": val.ApplicationProtocol,
+			"trust_untrusted_cert": val.TrustUntrustedCert,
+			"app_types":            appTypes,
 		}
 	}
 	return appConfig
+}
+
+func validateProtocolAndCertID(d *schema.ResourceData) error {
+	commonAppsDto, ok := d.Get("common_apps_dto").([]interface{})
+	if !ok || len(commonAppsDto) == 0 {
+		return nil // or handle it as per your logic
+	}
+
+	appsConfig := commonAppsDto[0].(map[string]interface{})["apps_config"].(*schema.Set).List()
+	for _, config := range appsConfig {
+		appConfig := config.(map[string]interface{})
+		protocol := appConfig["application_protocol"].(string)
+		certID := appConfig["certificate_id"].(string)
+
+		if protocol == "HTTP" && certID != "" {
+			return fmt.Errorf("certificate ID should not be set when application protocol is HTTP")
+		}
+	}
+	return nil
 }

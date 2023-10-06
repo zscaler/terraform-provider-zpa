@@ -194,39 +194,46 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"common_apps_dto": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				// Computed: true,
+				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
-							Type: schema.TypeSet,
-							// Computed: true,
+							Type:     schema.TypeSet,
+							ForceNew: true,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
 										Type:     schema.TypeString,
 										Optional: true,
-										// Computed: true,
+										ForceNew: true,
+									},
+									"description": {
+										Type:     schema.TypeString,
+										Optional: true,
+										ForceNew: true,
 									},
 									"enabled": {
-										Type: schema.TypeBool,
-										// Computed: true,
+										Type:     schema.TypeBool,
+										ForceNew: true,
 										Optional: true,
 									},
 									"app_types": {
-										Type: schema.TypeSet,
-										// Computed: true,
+										Type:     schema.TypeSet,
 										Optional: true,
+										ForceNew: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
 									"application_port": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 									},
 									"application_protocol": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"RDP",
 											"SSH",
@@ -235,6 +242,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 									"connection_security": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"ANY",
 											"NLA",
@@ -247,6 +255,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 									"domain": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 									},
 								},
 							},
@@ -353,9 +362,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
-
 	return nil
-
 }
 
 func flattenPRAAppServerGroupsSimple(serverGroup []applicationsegmentpra.AppServerGroups) []interface{} {
@@ -550,6 +557,7 @@ func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.A
 			appTypes := SetToStringSlice(appTypesSet)
 			commonAppConfigDto = append(commonAppConfigDto, applicationsegmentpra.AppsConfig{
 				Name:                commonAppConfig["name"].(string),
+				Description:         commonAppConfig["description"].(string),
 				Enabled:             commonAppConfig["enabled"].(bool),
 				Domain:              commonAppConfig["domain"].(string),
 				ApplicationPort:     commonAppConfig["application_port"].(string),

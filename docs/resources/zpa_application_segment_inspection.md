@@ -59,7 +59,7 @@ The following arguments are supported:
     * `application_protocol` - (Required) Protocol for the Inspection Application Segment.. Supported values: `HTTP` and `HTTPS`
     * `application_port` - (Required) Port for the Inspection Application Segment.
     * `app_types` - (Required) Indicates the type of application as inspection. Supported value: `INSPECT`
-    * `certificate_id` - (string) - ID of the signing certificate. This field is required if the applicationProtocol is set to `HTTPS`. The certificateId is not supported if the applicationProtocol is set to `HTTP`.
+    * `certificate_id` - (string) - ID of the signing certificate. This field is required if the ``application_protocol`` is set to `HTTPS`. The ``certificate_id`` is **NOT** supported if the application_protocol is set to `HTTP`.
     * `enabled` - (Optional) Whether this application is enabled or not
 * `tcp_port_ranges` - (Required) TCP port ranges used to access the app.
 * `udp_port_ranges` - (Required) UDP port ranges used to access the app.
