@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -45,8 +46,14 @@ func ZPAProvider() *schema.Provider {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "Cloud to use PRODUCTION, ZPATWO, BETA, GOV, GOVUS, PREVIEW, DEV, QA, QA2",
-				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "ZPATWO", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}, true),
 				DefaultFunc:  schema.EnvDefaultFunc("ZPA_CLOUD", nil),
+				ValidateFunc: func(val any, key string) (warns []string, errs []error) {
+					v := val.(string)
+					if strings.HasPrefix(v, "https://") {
+						return
+					}
+					return validation.StringInSlice([]string{"PRODUCTION", "ZPATWO", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}, true)(val, key)
+				},
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
