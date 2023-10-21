@@ -46,7 +46,7 @@ func ZPAProvider() *schema.Provider {
 				Optional:     true,
 				Description:  "Cloud to use PRODUCTION, BETA, GOV, GOVUS, PREVIEW, DEV, QA, QA2",
 				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}, true),
-				Default:      "PRODUCTION",
+				DefaultFunc:  schema.EnvDefaultFunc("ZPA_CLOUD", nil),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
