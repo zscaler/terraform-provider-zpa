@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
@@ -170,4 +171,9 @@ func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.N
 	}
 	return nil
 
+}
+
+// createValidResourceName converts the given name to a valid Terraform resource name
+func createValidResourceName(name string) string {
+	return strings.ReplaceAll(name, " ", "_")
 }

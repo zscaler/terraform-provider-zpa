@@ -52,6 +52,12 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "version_profile_name", variable.ServiceEdgeVersionProfileName),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -138,7 +144,6 @@ resource "%s" "%s" {
 		resourcetype.ZPAServiceEdgeGroup,
 		generatedName,
 		generatedName,
-		// variable.ServiceEdgeResourceName,
 		description,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(enabled),

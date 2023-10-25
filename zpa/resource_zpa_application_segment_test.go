@@ -62,6 +62,12 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      appSegmentTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

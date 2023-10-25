@@ -48,6 +48,12 @@ func TestAccResourceServerGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(serverGroupTypeAndName, "app_connector_groups.#", "1"),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      serverGroupTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

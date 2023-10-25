@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
 )
 
-func TestAccResourceProvisioningKeyBasic(t *testing.T) {
+func TestAccResourceProvisioningKeyBasic_Connector(t *testing.T) {
 	var groups provisioningkey.ProvisioningKey
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
 
@@ -23,14 +23,14 @@ func TestAccResourceProvisioningKeyBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckProvisioningKeyDestroy,
+		CheckDestroy: testAccCheckProvisioningKeyDestroyAppConnector,
 		Steps: []resource.TestStep{
 
 			// Test App Connector Group Provisioning Key
 			{
 				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckProvisioningKeyExists(resourceTypeAndName, &groups),
+					testAccCheckProvisioningKeyAppConnectorExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ConnectorGroupType),
@@ -45,7 +45,7 @@ func TestAccResourceProvisioningKeyBasic(t *testing.T) {
 			{
 				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckProvisioningKeyExists(resourceTypeAndName, &groups),
+					testAccCheckProvisioningKeyAppConnectorExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ConnectorGroupType),
@@ -55,11 +55,17 @@ func TestAccResourceProvisioningKeyBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ProvisioningKeyEnabled)),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
 
-func testAccCheckProvisioningKeyDestroy(s *terraform.State) error {
+func testAccCheckProvisioningKeyDestroyAppConnector(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
@@ -81,7 +87,7 @@ func testAccCheckProvisioningKeyDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckProvisioningKeyExists(resource string, provisioningkey *provisioningkey.ProvisioningKey) resource.TestCheckFunc {
+func testAccCheckProvisioningKeyAppConnectorExists(resource string, provisioningkey *provisioningkey.ProvisioningKey) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
@@ -157,10 +163,105 @@ resource "%s" "%s" {
 	)
 }
 
-/*
+// Testing Provisioning Key for Service Edge Group
+func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
+	var groups provisioningkey.ProvisioningKey
+	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
+
+	serviceEdgeGroupTypeAndName, _, serviceEdgeGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServiceEdgeGroup)
+	serviceEdgeGroupHCL := testAccCheckServiceEdgeGroupConfigure(serviceEdgeGroupTypeAndName, serviceEdgeGroupGeneratedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckProvisioningKeyDestroyServiceEdgeGroup,
+		Steps: []resource.TestStep{
+
+			// Test Service Edge Group Provisioning Key
+			{
+				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckProvisioningKeyServiceEdgeGroupExists(resourceTypeAndName, &groups),
+					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ServiceEdgeGroupType),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", variable.ProvisioningKeyUsage),
+					resource.TestCheckResourceAttrSet(resourceTypeAndName, "enrollment_cert_id"),
+					resource.TestCheckResourceAttrSet(resourceTypeAndName, "zcomponent_id"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ProvisioningKeyEnabled)),
+				),
+			},
+
+			// Update Service Edge Group Provisioning Key
+			{
+				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckProvisioningKeyServiceEdgeGroupExists(resourceTypeAndName, &groups),
+					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ServiceEdgeGroupType),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", variable.ProvisioningKeyUsage),
+					resource.TestCheckResourceAttrSet(resourceTypeAndName, "enrollment_cert_id"),
+					resource.TestCheckResourceAttrSet(resourceTypeAndName, "zcomponent_id"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ProvisioningKeyEnabled)),
+				),
+			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccCheckProvisioningKeyDestroyServiceEdgeGroup(s *terraform.State) error {
+	apiClient := testAccProvider.Meta().(*Client)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != resourcetype.ZPAProvisioningKey {
+			continue
+		}
+
+		rule, _, err := apiClient.provisioningkey.GetByName(rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
+
+		if err == nil {
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
+		}
+
+		if rule != nil {
+			return fmt.Errorf("provisioning key with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
+	}
+
+	return nil
+}
+
+func testAccCheckProvisioningKeyServiceEdgeGroupExists(resource string, provisioningkey *provisioningkey.ProvisioningKey) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resource]
+		if !ok {
+			return fmt.Errorf("didn't find resource: %s", resource)
+		}
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no record ID is set")
+		}
+
+		apiClient := testAccProvider.Meta().(*Client)
+		receivedKey, _, err := apiClient.provisioningkey.GetByName(rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
+
+		if err != nil {
+			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
+		}
+		*provisioningkey = *receivedKey
+
+		return nil
+	}
+}
 func testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, name, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, provisioningKeyType string) string {
 	return fmt.Sprintf(`
-// app connector group resource
+// service edge group resource
 %s
 
 // provisioning key resource
@@ -185,20 +286,21 @@ data "%s" "%s" {
 func serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdgeGroupTypeAndName, provisioningKeyType string) string {
 	return fmt.Sprintf(`
 
-data "zpa_enrollment_cert" "service_edge" {
-    name = "Service Edge"
-}
+	data "zpa_enrollment_cert" "service_edge" {
+		name = "Service Edge"
+	}
 
-resource "%s" "%s" {
-	name                     = "tf-acc-test-%s"
-	association_type         = "%s"
-	enabled                  = "%s"
-	max_usage                = "%s"
-	zcomponent_id			 = "${%s.id}"
-	enrollment_cert_id       = data.zpa_enrollment_cert.service_edge.id
-	depends_on = [ data.zpa_enrollment_cert.service_edge, %s ]
-}
-`,
+	resource "%s" "%s" {
+		name                     = "tf-acc-test-%s"
+		association_type         = "%s"
+		enabled                  = "%s"
+		max_usage                = "%s"
+		zcomponent_id			 = "${%s.id}"
+		enrollment_cert_id       = data.zpa_enrollment_cert.service_edge.id
+		depends_on = [ data.zpa_enrollment_cert.service_edge, %s ]
+
+	}
+	`,
 		// resource variables
 		resourcetype.ZPAProvisioningKey,
 		generatedName,
@@ -210,4 +312,3 @@ resource "%s" "%s" {
 		serviceEdgeGroupTypeAndName,
 	)
 }
-*/

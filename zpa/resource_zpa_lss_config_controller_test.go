@@ -1,6 +1,5 @@
 package zpa
 
-//TODO: Tests is failing on QA2 tenant. Needs further investigation.
 import (
 	"fmt"
 	"strconv"
@@ -144,14 +143,14 @@ data "zpa_idp_controller" "this" {
 	name = "BD_Okta_Users"
    }
 
-   # Retrieve the SCIM_GROUP ID(s)
+# Retrieve the SCIM_GROUP ID(s)
 data "zpa_scim_groups" "engineering" {
   name     = "Engineering"
   idp_name = "BD_Okta_Users"
 }
 
-data "zpa_scim_groups" "sales" {
-  name     = "Sales"
+data "zpa_scim_groups" "finance" {
+  name     = "Finance"
   idp_name = "BD_Okta_Users"
 }
 resource "%s" "%s" {
@@ -167,7 +166,7 @@ resource "%s" "%s" {
 	}
 	policy_rule_resource {
 		name   = "policy_rule_resource-lss_auth_logs"
-		action = "ALLOW"
+		action = "LOG"
 		policy_set_id = data.zpa_policy_type.lss_siem_policy.id
 		conditions {
 			negated  = false
@@ -187,7 +186,7 @@ resource "%s" "%s" {
 			lhs = data.zpa_idp_controller.this.id
 			}
 			entry_values {
-			rhs = data.zpa_scim_groups.sales.id
+			rhs = data.zpa_scim_groups.finance.id
 			lhs = data.zpa_idp_controller.this.id
 			}
 		}

@@ -25,4 +25,5 @@ const (
 	ZPALSSController                   = "zpa_lss_config_controller"
 	ZPAInspectionCustomControl         = "zpa_inspection_custom_controls"
 	ZPAInspectionProfile               = "zpa_inspection_profile"
+	ZPAMicrotenant                     = "zpa_microtenant_controller"
 )

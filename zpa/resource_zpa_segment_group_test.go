@@ -34,13 +34,19 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
+				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescriptionUpdate, variable.SegmentGroupEnabledUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescription),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescriptionUpdate),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabledUpdate)),
 				),
+			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -121,7 +127,6 @@ resource "%s" "%s" {
 		resourcetype.ZPASegmentGroup,
 		generatedName,
 		generatedName,
-		// variable.SegmentGroupResourceName,
 		description,
 		strconv.FormatBool(enabled),
 	)

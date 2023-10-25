@@ -65,7 +65,7 @@ func TestRunForcedSweeper(t *testing.T) {
 	testClient := &testClient{
 		sdkClient: sdkClient,
 	}
-	// sweepTestAppConnectorGroup(testClient) //TODO: Tests is failing on QA2 tenant. Needs further investigation.
+	sweepTestAppConnectorGroup(testClient)
 	sweepTestApplicationServer(testClient)
 	sweepTestApplicationSegment(testClient)
 	sweepTestApplicationSegmentBA(testClient)
@@ -99,8 +99,7 @@ func setupSweeper(resourceType string, del func(*testClient) error) {
 	})
 }
 
-/*
-//TODO: Tests is failing on QA2 tenant. Needs further investigation.
+// TODO: Tests is failing on QA2 tenant. Needs further investigation.
 func sweepTestAppConnectorGroup(client *testClient) error {
 	var errorList []error
 	group, _, err := client.sdkClient.appconnectorgroup.GetAll()
@@ -127,7 +126,6 @@ func sweepTestAppConnectorGroup(client *testClient) error {
 	}
 	return condenseError(errorList)
 }
-*/
 
 func sweepTestApplicationServer(client *testClient) error {
 	var errorList []error

@@ -44,6 +44,12 @@ func TestAccResourceApplicationServerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

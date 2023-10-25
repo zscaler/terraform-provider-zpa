@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"strconv"
 	"testing"
@@ -41,9 +40,7 @@ func TestAccDataSourceApplicationSegmentInspection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(dataSourceTypeAndName, "tcp_port_ranges.#", "2"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
 }
-*/
