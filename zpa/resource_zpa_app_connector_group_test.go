@@ -38,17 +38,23 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
+				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescriptionUpdate, variable.AppConnectorEnabledUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckApp)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_assistant", strconv.FormatBool(variable.TCPQuickAckAssistant)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_read_assistant", strconv.FormatBool(variable.TCPQuickAckReadAssistant)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "use_in_dr_mode", strconv.FormatBool(variable.UseInDrMode)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescriptionUpdate),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabledUpdate)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckAppUpdate)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_assistant", strconv.FormatBool(variable.TCPQuickAckAssistantUpdate)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_read_assistant", strconv.FormatBool(variable.TCPQuickAckReadAssistantUpdate)),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "use_in_dr_mode", strconv.FormatBool(variable.UseInDrModeUpdate)),
 				),
+			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -88,7 +94,6 @@ func testAccCheckAppConnectorGroupExists(resource string, rule *appconnectorgrou
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedRule, _, err := apiClient.appconnectorgroup.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -143,7 +148,6 @@ resource "%s" "%s" {
 		resourcetype.ZPAAppConnectorGroup,
 		generatedName,
 		generatedName,
-		// variable.AppConnectorResourceName,
 		description,
 		strconv.FormatBool(enabled),
 	)

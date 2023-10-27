@@ -1,10 +1,15 @@
 package zpa
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+var enrollementCertNames = []string{
+	"Root", "Client", "Connector", "Service Edge",
+}
 
 func TestAccDataSourceEnrollmentCert_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -12,39 +17,37 @@ func TestAccDataSourceEnrollmentCert_Basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDataSourceEnrollmentCertConfig_basic,
+				Config: testAccCheckDataSourceEnrollmentCert_basic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.root"),
-					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.client"),
-					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.connector"),
-					testAccDataSourceEnrollmentCertCheck("data.zpa_enrollment_cert.service_edge"),
+					generateEnrollmentCertChecks()...,
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceEnrollmentCertCheck(name string) resource.TestCheckFunc {
-	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttrSet(name, "id"),
-		resource.TestCheckResourceAttrSet(name, "name"),
-	)
+func generateEnrollmentCertChecks() []resource.TestCheckFunc {
+	var checks []resource.TestCheckFunc
+	for _, name := range enrollementCertNames {
+		resourceName := createValidResourceName(name)
+		checkName := fmt.Sprintf("data.zpa_enrollment_cert.%s", resourceName)
+		checks = append(checks, resource.ComposeTestCheckFunc(
+			resource.TestCheckResourceAttrSet(checkName, "id"),
+			resource.TestCheckResourceAttrSet(checkName, "name"),
+		))
+	}
+	return checks
 }
 
-var testAccCheckDataSourceEnrollmentCertConfig_basic = `
-data "zpa_enrollment_cert" "root" {
-    name = "Root"
+func testAccCheckDataSourceEnrollmentCert_basic() string {
+	var configs string
+	for _, name := range enrollementCertNames {
+		resourceName := createValidResourceName(name)
+		configs += fmt.Sprintf(`
+data "zpa_enrollment_cert" "%s" {
+    name = "%s"
 }
-
-data "zpa_enrollment_cert" "client" {
-    name = "Client"
+`, resourceName, name)
+	}
+	return configs
 }
-
-data "zpa_enrollment_cert" "connector" {
-    name = "Connector"
-}
-
-data "zpa_enrollment_cert" "service_edge" {
-    name = "Service Edge"
-}
-`

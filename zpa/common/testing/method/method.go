@@ -11,5 +11,4 @@ func GenerateRandomSourcesTypeAndName(sourceType string) (string, string, string
 	resource := fmt.Sprintf("%s.%s", sourceType, name)
 	dataSource := fmt.Sprintf("data.%s.%s", sourceType, name)
 	return resource, dataSource, name
-
 }

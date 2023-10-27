@@ -12,6 +12,18 @@ const (
 	UseInDrMode                 = false
 )
 
+// App Connector Group Update
+const (
+	AppConnectorResourceNameUpdate    = "testAcc_app_connector_group"
+	AppConnectorDescriptionUpdate     = "this is update app connector group test"
+	AppConnectorEnabledUpdate         = true
+	AppConnectorOverrideProfileUpdate = true
+	TCPQuickAckAppUpdate              = true
+	TCPQuickAckAssistantUpdate        = true
+	TCPQuickAckReadAssistantUpdate    = true
+	UseInDrModeUpdate                 = false
+)
+
 // Service Edge Group
 const (
 	ServiceEdgeResourceName       = "testAcc_service_edge_group"
@@ -51,14 +63,26 @@ const (
 const (
 	ServerGroupResourceName     = "testAcc_server_group"
 	ServerGroupDescription      = "testAcc_server_group"
-	ServerGroupEnabled          = true
+	ServerGroupEnabled          = false
 	ServerGroupDynamicDiscovery = true
+)
+
+// Segment Group Update
+const (
+	ServerGroupDescriptionUpdate = "this update the server group test"
+	ServerGroupEnabledUpdate     = true
 )
 
 // Segment Group
 const (
 	SegmentGroupDescription = "testAcc_segment_group"
 	SegmentGroupEnabled     = true
+)
+
+// Segment Group Update
+const (
+	SegmentGroupDescriptionUpdate = "testAcc_segment_group"
+	SegmentGroupEnabledUpdate     = true
 )
 
 // Application Segment
@@ -120,4 +144,12 @@ const (
 // Inspection Custom Control
 const (
 	InspectionProfileDescription = "testAcc_access_rule"
+)
+
+// Microtenant
+const (
+	MicrotenantName              = "testAcc_microtenant_A"
+	MicrotenantDescription       = "testAcc_microtenant_A"
+	MicrotenantEnabled           = true
+	MicrotenantCriteriaAttribute = "AuthDomain"
 )

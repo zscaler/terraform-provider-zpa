@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"strconv"
@@ -45,7 +44,6 @@ func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
@@ -63,7 +61,6 @@ func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -79,7 +76,7 @@ func testAccCheckApplicationSegmentInspectionDestroy(s *terraform.State) error {
 
 		_, _, err := client.applicationsegmentinspection.GetByName(rs.Primary.Attributes["name"])
 		if err == nil {
-			return fmt.Errorf("Inspection Application Segment still exists")
+			return fmt.Errorf("Inspection Application Segment Inspection still exists")
 		}
 
 		return nil
@@ -91,10 +88,10 @@ func testAccCheckApplicationSegmentInspectionExists(resource string, segment *ap
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("Inspection Application Segment Not found: %s", resource)
+			return fmt.Errorf("Inspection Application Segment Inspection Not found: %s", resource)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Inspection Application Segment ID is set")
+			return fmt.Errorf("no Inspection Application Segment Inspection ID is set")
 		}
 		client := testAccProvider.Meta().(*Client)
 		resp, _, err := client.applicationsegmentinspection.GetByName(rs.Primary.Attributes["name"])
@@ -111,13 +108,13 @@ func testAccCheckApplicationSegmentInspectionExists(resource string, segment *ap
 	}
 }
 
-func testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool,rDomain string, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 // segment group resource
 %s
 
-// application segment resource
+// application segment inspection resource
 %s
 
 data "%s" "%s" {
@@ -152,25 +149,19 @@ resource "%s" "%s" {
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_keep_alive = "1"
-	tcp_port_range {
-		from = "4443"
-		to = "4443"
-	}
+	tcp_port_ranges  = ["443", "443"]
 	domain_names = ["sales.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	common_apps_dto {
 		apps_config {
-		  name                 = "%s.bd-hashicorp.com"
-		  domain               = "%s.bd-hashicorp.com"
+		  name                 = "sales.bd-hashicorp.com"
+		  domain               = "sales.bd-hashicorp.com"
 		  application_protocol = "HTTPS"
-		  application_port     = "4443"
+		  application_port     = "443"
 		  certificate_id       = data.zpa_ba_certificate.sales.id
 		  enabled = true
 		  app_types = ["INSPECT"]
 		}
-	}
-	server_groups {
-		id = []
 	}
 	depends_on = [ %s ]
 }
@@ -183,13 +174,7 @@ resource "%s" "%s" {
 		generatedName,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
-		// generatedName,
 		segmentGroupTypeAndName,
-		generatedName,
-		generatedName,
-		// serverGroupTypeAndName,
 		segmentGroupTypeAndName,
-		// serverGroupTypeAndName,
 	)
 }
-*/

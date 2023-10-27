@@ -69,7 +69,6 @@ func resourcePolicyInspectionRuleCreate(d *schema.ResourceData, m interface{}) e
 	} else {
 		return err
 	}
-
 }
 
 func resourcePolicyInspectionRuleRead(d *schema.ResourceData, m interface{}) error {
@@ -136,7 +135,6 @@ func resourcePolicyInspectionRuleUpdate(d *schema.ResourceData, m interface{}) e
 	} else {
 		return err
 	}
-
 }
 
 func resourcePolicyInspectionRuleDelete(d *schema.ResourceData, m interface{}) error {
@@ -153,7 +151,6 @@ func resourcePolicyInspectionRuleDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	return nil
-
 }
 
 func expandCreatePolicyInspectionRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {

@@ -83,7 +83,6 @@ func testAccCheckInspectionProfileExists(resource string, rule *inspection_profi
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedProfile, _, err := apiClient.inspection_profile.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

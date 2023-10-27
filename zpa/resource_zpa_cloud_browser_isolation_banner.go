@@ -94,7 +94,6 @@ func resourceCBIBannersCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(cbiBanner.ID)
 	return resourceCBIBannersRead(d, m)
-
 }
 
 func resourceCBIBannersRead(d *schema.ResourceData, m interface{}) error {

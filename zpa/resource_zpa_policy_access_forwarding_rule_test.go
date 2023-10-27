@@ -45,6 +45,12 @@ func TestAccPolicyForwardingRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "2"),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

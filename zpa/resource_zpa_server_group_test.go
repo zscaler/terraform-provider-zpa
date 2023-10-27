@@ -48,6 +48,12 @@ func TestAccResourceServerGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(serverGroupTypeAndName, "app_connector_groups.#", "1"),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      serverGroupTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -86,7 +92,6 @@ func testAccCheckServerGroupExists(resource string, rule *servergroup.ServerGrou
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedGroup, _, err := apiClient.servergroup.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

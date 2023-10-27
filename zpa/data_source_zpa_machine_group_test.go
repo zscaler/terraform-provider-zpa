@@ -2,7 +2,6 @@ package zpa
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -52,9 +51,4 @@ data "zpa_machine_group" "%s" {
 `, resourceName, name)
 	}
 	return configs
-}
-
-// createValidResourceName converts the given name to a valid Terraform resource name
-func createValidResourceName(name string) string {
-	return strings.ReplaceAll(name, " ", "_")
 }

@@ -49,6 +49,12 @@ func TestAccPolicyTimeoutRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

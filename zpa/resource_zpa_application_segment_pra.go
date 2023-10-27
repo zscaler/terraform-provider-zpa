@@ -448,7 +448,6 @@ func detachSraPortalsFromGroup(client *Client, segmentID, segmentGroupID string)
 	segGroup.Applications = adaptedApplications
 	_, err = client.segmentgroup.Update(segmentGroupID, segGroup)
 	return err
-
 }
 
 func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentpra.AppSegmentPRA {
@@ -642,7 +641,6 @@ func checkForPRAPortsOverlap(client *Client, app applicationsegmentpra.AppSegmen
 		}
 	}
 	return nil
-
 }
 
 func PRAPortOverlap(s1, s2 []string) (bool, []string, []string) {

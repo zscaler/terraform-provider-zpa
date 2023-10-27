@@ -93,7 +93,6 @@ func testAccCheckInspectionCustomControlsExists(resource string, rule *inspectio
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedControl, _, err := apiClient.inspection_custom_controls.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

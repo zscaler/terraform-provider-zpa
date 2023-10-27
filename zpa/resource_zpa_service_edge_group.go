@@ -235,7 +235,6 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
 	_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
 	return nil
-
 }
 
 func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error {

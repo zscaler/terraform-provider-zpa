@@ -14,8 +14,10 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
-var policySets = map[string]policysetcontroller.PolicySet{}
-var policySetsMutex sync.Mutex
+var (
+	policySets      = map[string]policysetcontroller.PolicySet{}
+	policySetsMutex sync.Mutex
+)
 
 // Common values shared between Service Edge Groups and App Connector Groups
 var versionProfileNameIDMapping map[string]string = map[string]string{
@@ -48,6 +50,7 @@ func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Cl
 	}
 	return nil
 }
+
 func validateOperands(operands []policysetcontroller.Operands, zClient *Client, microtenantID string) error {
 	for _, operand := range operands {
 		if err := validateOperand(operand, zClient, microtenantID); err != nil {
@@ -157,7 +160,6 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		values, _ := zClient.scimattributeheader.SearchValues(scim.IdpID, scim.ID, operand.RHS)
 		if len(values) == 0 {
 			return rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
-
 		}
 		return nil
 	case "SCIM_GROUP":
@@ -191,6 +193,7 @@ type Getter func(id string) error
 func (g Getter) Get(id string) error {
 	return g(id)
 }
+
 func customValidate(operand policysetcontroller.Operands, expectedLHS []string, expectedRHS string, clientRHS Getter) error {
 	if operand.LHS == "" || !contains(expectedLHS, operand.LHS) {
 		return lhsWarn(operand.ObjectType, expectedLHS, operand.LHS, nil)
@@ -204,9 +207,11 @@ func customValidate(operand policysetcontroller.Operands, expectedLHS []string, 
 	}
 	return nil
 }
+
 func rhsWarn(objType, expected, rhs interface{}, err error) error {
 	return fmt.Errorf("[WARN] when operand object type is %v RHS must be %#v, value is \"%v\", %v", objType, expected, rhs, err)
 }
+
 func lhsWarn(objType, expected, lhs interface{}, err error) error {
 	return fmt.Errorf("[WARN] when operand object type is %v LHS must be %#v value is \"%v\", %v", objType, expected, lhs, err)
 }

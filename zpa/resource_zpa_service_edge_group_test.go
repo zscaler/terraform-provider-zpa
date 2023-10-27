@@ -52,6 +52,12 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "version_profile_name", variable.ServiceEdgeVersionProfileName),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -90,7 +96,6 @@ func testAccCheckServiceEdgeGroupExists(resource string, group *serviceedgegroup
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedGroup, _, err := apiClient.serviceedgegroup.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -138,7 +143,6 @@ resource "%s" "%s" {
 		resourcetype.ZPAServiceEdgeGroup,
 		generatedName,
 		generatedName,
-		// variable.ServiceEdgeResourceName,
 		description,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(enabled),

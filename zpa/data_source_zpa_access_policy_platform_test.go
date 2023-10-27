@@ -12,10 +12,13 @@ func TestAccDataSourceAccessPolicyPlatforms_Basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: (testAccCheckDataSourceAccessPolicyPlatforms_basic),
+				Config: testAccCheckDataSourceAccessPolicyPlatforms_basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr(
-						"data.zpa_access_policy_platforms.this", ""),
+					resource.TestCheckResourceAttrSet("data.zpa_access_policy_platforms.this", "linux"),
+					resource.TestCheckResourceAttrSet("data.zpa_access_policy_platforms.this", "android"),
+					resource.TestCheckResourceAttrSet("data.zpa_access_policy_platforms.this", "windows"),
+					resource.TestCheckResourceAttrSet("data.zpa_access_policy_platforms.this", "ios"),
+					resource.TestCheckResourceAttrSet("data.zpa_access_policy_platforms.this", "mac"),
 				),
 			},
 		},

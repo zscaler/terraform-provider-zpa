@@ -89,7 +89,6 @@ type Client struct {
 }
 
 type Config struct {
-
 	// ZPA Client ID for API Client
 	ClientID string
 

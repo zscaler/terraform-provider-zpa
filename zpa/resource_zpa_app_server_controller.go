@@ -132,7 +132,6 @@ func resourceApplicationServerRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	return nil
-
 }
 
 func resourceApplicationServerUpdate(d *schema.ResourceData, m interface{}) error {

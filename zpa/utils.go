@@ -6,12 +6,13 @@ import (
 	"log"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
-func ValidateLatitude(val interface{}, key string) (warns []string, errs []error) {
+func ValidateLatitude(val interface{}, _ string) (warns []string, errs []error) {
 	v, _ := strconv.ParseFloat(val.(string), 64)
 	if v < -90 || v > 90 {
 		errs = append(errs, fmt.Errorf("latitude must be between -90 and 90"))
@@ -19,7 +20,7 @@ func ValidateLatitude(val interface{}, key string) (warns []string, errs []error
 	return
 }
 
-func ValidateLongitude(val interface{}, key string) (warns []string, errs []error) {
+func ValidateLongitude(val interface{}, _ string) (warns []string, errs []error) {
 	v, _ := strconv.ParseFloat(val.(string), 64)
 	if v < -180 || v > 180 {
 		errs = append(errs, fmt.Errorf("longitude must be between -180 and 180"))
@@ -27,7 +28,7 @@ func ValidateLongitude(val interface{}, key string) (warns []string, errs []erro
 	return
 }
 
-func DiffSuppressFuncCoordinate(k, old, new string, d *schema.ResourceData) bool {
+func DiffSuppressFuncCoordinate(_, old, new string, _ *schema.ResourceData) bool {
 	o, _ := strconv.ParseFloat(old, 64)
 	n, _ := strconv.ParseFloat(new, 64)
 	return math.Round(o*1000000)/1000000 == math.Round(n*1000000)/1000000
@@ -86,6 +87,7 @@ func MergeSchema(schemas ...map[string]*schema.Schema) map[string]*schema.Schema
 	}
 	return final
 }
+
 func convertPortsToListString(portRangeLst []common.NetworkPorts) []string {
 	portRanges := make([]string, len(portRangeLst)*2)
 	for i := range portRangeLst {
@@ -94,6 +96,7 @@ func convertPortsToListString(portRangeLst []common.NetworkPorts) []string {
 	}
 	return portRanges
 }
+
 func convertToPortRange(portRangeLst []interface{}) []string {
 	portRanges := make([]string, len(portRangeLst))
 	for i := range portRanges {
@@ -102,6 +105,7 @@ func convertToPortRange(portRangeLst []interface{}) []string {
 	return portRanges
 }
 
+/*
 func expandList(portRangeLst []interface{}) []string {
 	portRanges := make([]string, len(portRangeLst))
 	for i, port := range portRangeLst {
@@ -110,6 +114,7 @@ func expandList(portRangeLst []interface{}) []string {
 
 	return portRanges
 }
+*/
 
 func isSameSlice(s1, s2 []string) bool {
 	if len(s1) != len(s2) {
@@ -169,5 +174,9 @@ func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.N
 		}
 	}
 	return nil
+}
 
+// createValidResourceName converts the given name to a valid Terraform resource name
+func createValidResourceName(name string) string {
+	return strings.ReplaceAll(name, " ", "_")
 }

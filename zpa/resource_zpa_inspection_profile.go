@@ -267,7 +267,7 @@ func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) erro
 	if err := validateInspectionProfile(&req); err != nil {
 		return err
 	}
-	//injectPredefinedControls(zClient, &req)
+	// injectPredefinedControls(zClient, &req)
 	resp, _, err := zClient.inspection_profile.Create(req)
 	if err != nil {
 		return err
@@ -326,7 +326,6 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 	return nil
-
 }
 
 func flattenPredefinedControlsSimple(predControl []inspection_profile.CustomCommonControls) []interface{} {
@@ -374,7 +373,7 @@ func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) erro
 		}
 	}
 
-	//injectPredefinedControls(zClient, &req)
+	// injectPredefinedControls(zClient, &req)
 	if _, err := zClient.inspection_profile.Update(id, &req); err != nil {
 		return err
 	}

@@ -204,27 +204,33 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 									"name": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 									},
 									"description": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 									},
 									"enabled": {
 										Type:     schema.TypeBool,
 										Optional: true,
+										ForceNew: true,
 									},
 									"app_types": {
 										Type:     schema.TypeSet,
 										Optional: true,
+										ForceNew: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
 									"application_port": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 									},
 									"application_protocol": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"HTTP",
 											"HTTPS",
@@ -232,14 +238,17 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 									},
 									"certificate_id": {
 										Type:     schema.TypeString,
+										ForceNew: true,
 										Optional: true,
 									},
 									"domain": {
 										Type:     schema.TypeString,
+										ForceNew: true,
 										Optional: true,
 									},
 									"trust_untrusted_cert": {
 										Type:     schema.TypeBool,
+										ForceNew: true,
 										Optional: true,
 									},
 								},
@@ -350,15 +359,11 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 }
 
 func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroup))
+	ids := make([]interface{}, len(serverGroup))
 	for i, group := range serverGroup {
 		ids[i] = group.ID
 	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
+	return ids
 }
 
 func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interface{}) error {
@@ -430,13 +435,14 @@ func detachInspectionPortalsFromGroup(client *Client, segmentID, segmentGroupID 
 	segGroup.Applications = adaptedApplications
 	_, err = client.segmentgroup.Update(segmentGroupID, segGroup)
 	return err
-
 }
 
 func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
 	details := applicationsegmentinspection.AppSegmentInspection{
 		ID:                        d.Id(),
+		Name:                      d.Get("name").(string),
 		SegmentGroupID:            d.Get("segment_group_id").(string),
+		SegmentGroupName:          d.Get("segment_group_name").(string),
 		BypassType:                d.Get("bypass_type").(string),
 		ConfigSpace:               d.Get("config_space").(string),
 		ICMPAccessType:            d.Get("icmp_access_type").(string),
@@ -508,11 +514,11 @@ func expandInspectionCommonAppsDto(d *schema.ResourceData) applicationsegmentins
 	if !ok {
 		return result
 	}
-	appsConfigList, ok := appsConfigInterface.(*schema.Set)
+	appsConfigSet, ok := appsConfigInterface.(*schema.Set)
 	if !ok {
 		return result
 	}
-	for _, appconf := range appsConfigList.List() {
+	for _, appconf := range appsConfigSet.List() {
 		appConfMap, ok := appconf.(map[string]interface{})
 		if !ok {
 			return result
@@ -610,12 +616,12 @@ func flattenInspectionAppsConfig(d *schema.ResourceData, appConfigs []applicatio
 }
 
 func validateProtocolAndCertID(d *schema.ResourceData) error {
-	commonAppsDto, ok := d.Get("common_apps_dto").([]interface{})
-	if !ok || len(commonAppsDto) == 0 {
+	commonAppsDto, ok := d.GetOk("common_apps_dto")
+	if !ok || len(commonAppsDto.(*schema.Set).List()) == 0 {
 		return nil // or handle it as per your logic
 	}
 
-	appsConfig := commonAppsDto[0].(map[string]interface{})["apps_config"].(*schema.Set).List()
+	appsConfig := commonAppsDto.(*schema.Set).List()[0].(map[string]interface{})["apps_config"].(*schema.Set).List()
 	for _, config := range appsConfig {
 		appConfig := config.(map[string]interface{})
 		protocol := appConfig["application_protocol"].(string)

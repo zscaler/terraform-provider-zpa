@@ -193,7 +193,6 @@ func resourcePolicyAccessDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	return nil
-
 }
 
 func expandCreatePolicyRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {
@@ -264,7 +263,6 @@ func expandPolicysetControllerAppConnectorGroups(d *schema.ResourceData) []polic
 						ID: id.(string),
 					})
 				}
-
 			}
 		}
 		return appConnectorGroups

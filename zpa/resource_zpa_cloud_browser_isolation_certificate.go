@@ -67,7 +67,6 @@ func resourceCBICertificatesCreate(d *schema.ResourceData, m interface{}) error 
 
 	d.SetId(cbiCertificate.ID)
 	return resourceCBICertificatesRead(d, m)
-
 }
 
 func resourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error {

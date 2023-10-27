@@ -446,7 +446,6 @@ func expandInspectionCustomControlsRules(d *schema.ResourceData) []inspection_cu
 			for _, name := range ruleNamesSet.List() {
 				names = append(names, name.(string))
 			}
-
 		}
 		rules = append(rules, inspection_custom_controls.Rules{
 			Names:      names,
@@ -479,7 +478,6 @@ func expandCustomControlRuleConditions(conditionsObj interface{}) []inspection_c
 }
 
 func validateRules(customCtl inspection_custom_controls.InspectionCustomControl) error {
-
 	for _, rule := range customCtl.Rules {
 		if customCtl.Type == "RESPONSE" {
 			if rule.Type != "RESPONSE_HEADERS" && rule.Type != "RESPONSE_BODY" {

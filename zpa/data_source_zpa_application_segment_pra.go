@@ -140,6 +140,14 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"microtenant_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"portal": {
 							Type:     schema.TypeBool,
 							Computed: true,
@@ -244,7 +252,6 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 	}
 
 	return nil
-
 }
 
 func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerGroups) []interface{} {

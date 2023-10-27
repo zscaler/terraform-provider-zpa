@@ -62,6 +62,12 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "tcp_port_range.#", "1"),
 				),
 			},
+			// Import test
+			{
+				ResourceName:      browserAccessTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

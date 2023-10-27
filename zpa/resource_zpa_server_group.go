@@ -195,7 +195,6 @@ func resourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("servers", flattenServers(resp.Servers))
 
 	return nil
-
 }
 
 func flattenAppConnectorGroupsSimple(appConnectorGroups []servergroup.AppConnectorGroups) []interface{} {
@@ -209,6 +208,7 @@ func flattenAppConnectorGroupsSimple(appConnectorGroups []servergroup.AppConnect
 	result[0] = mapIds
 	return result
 }
+
 func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
@@ -220,6 +220,7 @@ func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []int
 	result[0] = mapIds
 	return result
 }
+
 func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	service := m.(*Client).servergroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	id := d.Id()
@@ -280,7 +281,6 @@ func detachServerGroupFromAllAccessPolicyRules(id string, policySetControllerSer
 }
 
 func detachServerGroupFromAllAppSegments(id string, applicationSegmentService *applicationsegment.Service) {
-
 	apps, _, err := applicationSegmentService.GetAll()
 	if err != nil {
 		return
@@ -371,7 +371,6 @@ func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 		result.Name = d.Get("name").(string)
 	}
 	return result
-
 }
 
 func expandAppConnectorGroups(d *schema.ResourceData) []servergroup.AppConnectorGroups {
