@@ -144,6 +144,14 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"microtenant_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},

@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"strconv"
@@ -45,7 +44,7 @@ func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
 				),
-				ExpectNonEmptyPlan: true,
+				// ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
@@ -63,7 +62,7 @@ func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
 				),
-				ExpectNonEmptyPlan: true,
+				// ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -111,7 +110,7 @@ func testAccCheckApplicationSegmentInspectionExists(resource string, segment *ap
 	}
 }
 
-func testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool,rDomain string, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 // segment group resource
@@ -152,18 +151,15 @@ resource "%s" "%s" {
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
 	tcp_keep_alive = "1"
-	tcp_port_range {
-		from = "4443"
-		to = "4443"
-	}
-	domain_names = ["sales.bd-hashicorp.com"]
+	tcp_port_ranges = ["443", "443"]
+	domain_names = ["sales.example.com"]
 	segment_group_id = "${%s.id}"
 	common_apps_dto {
 		apps_config {
-		  name                 = "%s.bd-hashicorp.com"
-		  domain               = "%s.bd-hashicorp.com"
+		  name                 = "%s.example.com"
+		  domain               = "%s.example.com"
 		  application_protocol = "HTTPS"
-		  application_port     = "4443"
+		  application_port     = "443"
 		  certificate_id       = data.zpa_ba_certificate.sales.id
 		  enabled = true
 		  app_types = ["INSPECT"]
@@ -192,4 +188,3 @@ resource "%s" "%s" {
 		// serverGroupTypeAndName,
 	)
 }
-*/

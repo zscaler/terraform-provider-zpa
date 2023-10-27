@@ -144,16 +144,12 @@ data "zpa_idp_controller" "this" {
 	name = "BD_Okta_Users"
    }
 
-   # Retrieve the SCIM_GROUP ID(s)
+# Retrieve the SCIM_GROUP ID(s)
 data "zpa_scim_groups" "engineering" {
   name     = "Engineering"
   idp_name = "BD_Okta_Users"
 }
 
-data "zpa_scim_groups" "sales" {
-  name     = "Sales"
-  idp_name = "BD_Okta_Users"
-}
 resource "%s" "%s" {
 	config {
 		name            = "tf-acc-test-%s"
@@ -184,10 +180,6 @@ resource "%s" "%s" {
 			object_type = "SCIM_GROUP"
 			entry_values {
 			rhs = data.zpa_scim_groups.engineering.id
-			lhs = data.zpa_idp_controller.this.id
-			}
-			entry_values {
-			rhs = data.zpa_scim_groups.sales.id
 			lhs = data.zpa_idp_controller.this.id
 			}
 		}
