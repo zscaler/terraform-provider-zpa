@@ -167,7 +167,7 @@ resource "%s" "%s" {
 	}
 	policy_rule_resource {
 		name   = "policy_rule_resource-lss_auth_logs"
-		action = "ALLOW"
+		action = "LOG"
 		policy_set_id = data.zpa_policy_type.lss_siem_policy.id
 		conditions {
 			negated  = false
