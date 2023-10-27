@@ -41,6 +41,7 @@ func ZPAProvider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ZPA_CUSTOMER_ID", nil),
 				Description: "zpa customer id",
 			},
+
 			"zpa_cloud": {
 				Type:         schema.TypeString,
 				Optional:     true,
