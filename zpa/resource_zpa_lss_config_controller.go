@@ -337,7 +337,6 @@ func resourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) erro
 	_ = d.Set("config", flattenLSSConfig(resp.LSSConfig))
 	_ = d.Set("connector_groups", flattenConnectorGroupsSimple(resp.ConnectorGroups))
 	return nil
-
 }
 
 func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) error {
@@ -448,6 +447,7 @@ func expandLSSResource(d *schema.ResourceData) lssconfigcontroller.LSSResource {
 	}
 	return req
 }
+
 func expandPolicyRuleResource(d *schema.ResourceData) (*lssconfigcontroller.PolicyRuleResource, error) {
 	policyObj, ok := d.GetOk("policy_rule_resource")
 	if !ok {

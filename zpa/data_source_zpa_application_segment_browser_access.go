@@ -246,5 +246,4 @@ func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m int
 	}
 
 	return nil
-
 }

@@ -253,7 +253,6 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interf
 	}
 
 	return nil
-
 }
 
 func flattenInspectionAppServerGroups(appServerGroup []applicationsegmentinspection.AppServerGroups) []interface{} {

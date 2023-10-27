@@ -140,7 +140,6 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 	} else {
 		return err
 	}
-
 }
 
 func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) error {
@@ -157,7 +156,6 @@ func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	return nil
-
 }
 
 func expandCreatePolicyForwardingRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {

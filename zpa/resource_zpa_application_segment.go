@@ -243,7 +243,6 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	service := m.(*Client).applicationsegment.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	resp, _, err := service.Get(d.Id())
-
 	if err != nil {
 		if err.(*client.ErrorResponse).IsObjectNotFound() {
 			log.Printf("[WARN] Removing application segment %s from state because it no longer exists in ZPA", d.Id())
@@ -290,6 +289,7 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 
 	return nil
 }
+
 func flattenAppServerGroupsSimple(serverGroups []applicationsegment.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})

@@ -248,6 +248,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 	}
 	return nil
 }
+
 func flattenAdminMeta(metaData *idpcontroller.AdminMetadata) []map[string]interface{} {
 	result := make([]map[string]interface{}, 1)
 	result[0] = make(map[string]interface{})

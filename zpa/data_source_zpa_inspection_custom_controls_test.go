@@ -16,7 +16,6 @@ func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInspectionCustomControlsDestroy,
 		Steps: []resource.TestStep{
-
 			{
 				Config: testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName),
 				Check: resource.ComposeTestCheckFunc(

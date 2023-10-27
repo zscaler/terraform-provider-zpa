@@ -88,7 +88,6 @@ func testAccCheckApplicationServerExists(resource string, server *appservercontr
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedServer, _, err := apiClient.appservercontroller.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

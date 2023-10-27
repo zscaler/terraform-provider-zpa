@@ -81,7 +81,6 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestServiceEdgeGroup(testClient)
 	sweepTestCBIBanner(testClient)
 	sweepTestCBIExternalProfile(testClient)
-
 }
 
 // Sets up sweeper to clean up dangling resources

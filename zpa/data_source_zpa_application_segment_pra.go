@@ -252,7 +252,6 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 	}
 
 	return nil
-
 }
 
 func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerGroups) []interface{} {

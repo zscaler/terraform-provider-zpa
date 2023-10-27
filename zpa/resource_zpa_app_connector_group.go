@@ -247,7 +247,6 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("waf_disabled", resp.WAFDisabled)
 	return nil
-
 }
 
 func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) error {

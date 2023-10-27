@@ -15,8 +15,10 @@ import (
 )
 
 // Global variables for state management
-var deceptionAccessPolicyRuleExist *bool // Pointer to check if deception rule exists.
-var m sync.Mutex                         // Mutex to ensure thread safety.
+var (
+	deceptionAccessPolicyRuleExist *bool      // Pointer to check if deception rule exists.
+	m                              sync.Mutex // Mutex to ensure thread safety.
+)
 
 // Validate the access policy rule's order.
 func validateAccessPolicyRuleOrder(order string, service policysetcontroller.Service) error {

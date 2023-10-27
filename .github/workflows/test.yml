@@ -1,14 +1,9 @@
 name: Test
 on:
   push:
-    branches:
-      - master
-      - develop
-      - beta
-      - alpha
-      - '[0-9]+.x'
-      - '[0-9]+.[0-9]+.x'
+    branches: [ master ]
   pull_request:
+    branches: [ master ]
 
   # For systems with an upstream API that could drift unexpectedly (like most SaaS systems, etc.),
   # we recommend testing at a regular interval not necessarily tied to code changes. This will

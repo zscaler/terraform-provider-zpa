@@ -53,6 +53,7 @@ func getLogType(d *schema.ResourceData) (string, bool) {
 	value, ok := val.(string)
 	return value, ok
 }
+
 func dataSourceLSSLogTypeFormatsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 	log.Printf("[INFO] Getting data for LSS Log Types Format set\n")

@@ -435,7 +435,6 @@ func detachInspectionPortalsFromGroup(client *Client, segmentID, segmentGroupID 
 	segGroup.Applications = adaptedApplications
 	_, err = client.segmentgroup.Update(segmentGroupID, segGroup)
 	return err
-
 }
 
 func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {

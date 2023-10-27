@@ -17,7 +17,6 @@ func TestAccDataSourceInspectionProfile_Basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInspectionProfileDestroy,
 		Steps: []resource.TestStep{
-
 			{
 				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
 				Check: resource.ComposeTestCheckFunc(

@@ -198,7 +198,6 @@ func resourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("provisioning_key", resp.ProvisioningKey)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	return nil
-
 }
 
 func resourceProvisioningKeyUpdate(d *schema.ResourceData, m interface{}) error {

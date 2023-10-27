@@ -96,7 +96,6 @@ func testAccCheckServiceEdgeGroupExists(resource string, group *serviceedgegroup
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedGroup, _, err := apiClient.serviceedgegroup.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

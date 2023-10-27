@@ -357,7 +357,6 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	}
 
 	return nil
-
 }
 
 func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m interface{}) error {
@@ -427,7 +426,6 @@ func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID stri
 	segGroup.Applications = adaptedApplications
 	_, err = client.segmentgroup.Update(segmentGroupID, segGroup)
 	return err
-
 }
 
 func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {

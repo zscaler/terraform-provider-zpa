@@ -66,7 +66,6 @@ func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, m interface{}) erro
 	} else {
 		return err
 	}
-
 }
 
 func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error {
@@ -136,7 +135,6 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	} else {
 		return err
 	}
-
 }
 
 func resourcePolicyTimeoutRuleDelete(d *schema.ResourceData, m interface{}) error {
@@ -153,7 +151,6 @@ func resourcePolicyTimeoutRuleDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	return nil
-
 }
 
 func expandCreatePolicyTimeoutRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {

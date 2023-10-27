@@ -354,6 +354,7 @@ func dataSourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
 
 	return nil
 }
+
 func flattenServerGroupApplications(applications []servergroup.Applications) []interface{} {
 	serverGroupApplications := make([]interface{}, len(applications))
 	for i, srvApplication := range applications {

@@ -163,6 +163,7 @@ var noFilterSupportLogTypes = map[string]string{
 	"zpn_ast_comprehensive_stats":     "App Connector Metrics",
 	"zpn_pbroker_comprehensive_stats": "Private Service Edge Metrics",
 }
+
 var supportedClientTypes = map[string]struct{}{
 	"zpn_client_type_exporter":          {},
 	"zpn_client_type_browser_isolation": {},

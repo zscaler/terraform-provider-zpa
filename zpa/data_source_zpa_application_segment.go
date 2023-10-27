@@ -239,7 +239,6 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) err
 	}
 
 	return nil
-
 }
 
 func flattenAppServerGroups(serverGroup *applicationsegment.ApplicationSegmentResource) []interface{} {

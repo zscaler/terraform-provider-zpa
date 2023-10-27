@@ -67,7 +67,6 @@ func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) er
 	} else {
 		return err
 	}
-
 }
 
 func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) error {
@@ -132,7 +131,6 @@ func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, m interface{}) er
 	} else {
 		return err
 	}
-
 }
 
 func resourcePolicyIsolationRuleDelete(d *schema.ResourceData, m interface{}) error {
@@ -149,7 +147,6 @@ func resourcePolicyIsolationRuleDelete(d *schema.ResourceData, m interface{}) er
 	}
 
 	return nil
-
 }
 
 func expandCreatePolicyIsolationRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {

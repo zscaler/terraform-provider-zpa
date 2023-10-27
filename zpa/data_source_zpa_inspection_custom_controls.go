@@ -182,6 +182,7 @@ func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{
 
 	return nil
 }
+
 func flattenInspectionCustomRules(rule []inspection_custom_controls.Rules) []interface{} {
 	rules := make([]interface{}, len(rule))
 	for i, rule := range rule {

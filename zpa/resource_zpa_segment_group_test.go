@@ -86,7 +86,6 @@ func testAccCheckSegmentGroupExists(resource string, group *segmentgroup.Segment
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedGroup, _, err := apiClient.segmentgroup.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

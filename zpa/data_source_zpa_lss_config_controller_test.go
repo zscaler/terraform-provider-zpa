@@ -1,6 +1,6 @@
 package zpa
 
-//TODO: Tests is failing on QA2 tenant. Needs further investigation.
+// TODO: Tests is failing on QA2 tenant. Needs further investigation.
 import (
 	"strconv"
 	"testing"

@@ -110,7 +110,6 @@ func resourceSegmentGroupCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(segmentgroup.ID)
 	return resourceSegmentGroupRead(d, m)
-
 }
 
 func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
@@ -151,6 +150,7 @@ func flattenSegmentGroupApplicationsSimple(segmentGroup *segmentgroup.SegmentGro
 
 	return segmentGroupApplications
 }
+
 func resourceSegmentGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 

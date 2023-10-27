@@ -43,7 +43,7 @@ func TestMain(m *testing.M) {
 	// NOTE: Don't run sweepers if we are playing back VCR as nothing should be
 	// going over the wire
 	if os.Getenv("ZPA_VCR_TF_ACC") != "play" {
-		//TODO: Tests is failing on QA2 tenant. Needs further investigation.
+		// TODO: Tests is failing on QA2 tenant. Needs further investigation.
 		// setupSweeper(resourcetype.ZPAAppConnectorGroup, sweepTestAppConnectorGroup)
 		setupSweeper(resourcetype.ZPAApplicationServer, sweepTestApplicationServer)
 		setupSweeper(resourcetype.ZPAApplicationSegment, sweepTestApplicationSegment)
@@ -52,7 +52,7 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPAApplicationSegmentPRA, sweepTestApplicationPRA)
 		setupSweeper(resourcetype.ZPAInspectionCustomControl, sweepTestInspectionCustomControl)
 		setupSweeper(resourcetype.ZPAInspectionProfile, sweepTestInspectionProfile)
-		//TODO: Tests is failing on QA2 tenant. Needs further investigation.
+		// TODO: Tests is failing on QA2 tenant. Needs further investigation.
 		// setupSweeper(resourcetype.ZPALSSController, sweepTestLSSConfigController)
 		setupSweeper(resourcetype.ZPASegmentGroup, sweepTestSegmentGroup)
 		setupSweeper(resourcetype.ZPAServerGroup, sweepTestServerGroup)

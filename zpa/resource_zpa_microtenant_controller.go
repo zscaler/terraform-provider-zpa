@@ -114,7 +114,6 @@ func resourceMicrotenantCreate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[DEBUG] Flattened User: %s", userList)
 	}
 	return resourceMicrotenantRead(d, m)
-
 }
 
 func resourceMicrotenantRead(d *schema.ResourceData, m interface{}) error {

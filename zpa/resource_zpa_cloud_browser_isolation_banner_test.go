@@ -90,7 +90,6 @@ func testAccCheckCBIBannerExists(resource string, banner *cbibannercontroller.CB
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedBanner, _, err := apiClient.cbibannercontroller.Get(rs.Primary.ID)
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

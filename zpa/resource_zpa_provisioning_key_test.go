@@ -25,7 +25,6 @@ func TestAccResourceProvisioningKeyBasic_Connector(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckProvisioningKeyDestroyAppConnector,
 		Steps: []resource.TestStep{
-
 			// Test App Connector Group Provisioning Key
 			{
 				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
@@ -99,7 +98,6 @@ func testAccCheckProvisioningKeyAppConnectorExists(resource string, provisioning
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedKey, _, err := apiClient.provisioningkey.GetByName(rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -176,7 +174,6 @@ func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckProvisioningKeyDestroyServiceEdgeGroup,
 		Steps: []resource.TestStep{
-
 			// Test Service Edge Group Provisioning Key
 			{
 				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType),
@@ -250,7 +247,6 @@ func testAccCheckProvisioningKeyServiceEdgeGroupExists(resource string, provisio
 
 		apiClient := testAccProvider.Meta().(*Client)
 		receivedKey, _, err := apiClient.provisioningkey.GetByName(rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
-
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -259,6 +255,7 @@ func testAccCheckProvisioningKeyServiceEdgeGroupExists(resource string, provisio
 		return nil
 	}
 }
+
 func testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, name, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, provisioningKeyType string) string {
 	return fmt.Sprintf(`
 // service edge group resource
