@@ -13,6 +13,7 @@
 - [PR #375](https://github.com/zscaler/terraform-provider-zpa/pull/375) - Upgrade to [Zscaler-SDK-GO v2.1.3](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v2.1.3). The upgrade allows searches for resources in which the name include 1 or more spaces.
 - [PR #380](https://github.com/zscaler/terraform-provider-zpa/pull/380) - Fixed provider authentication to accept `ZPA_CLOUD` via environment variables.
 - [PR #381](https://github.com/zscaler/terraform-provider-zpa/pull/381) - Included and fixed additional acceptance test cases for several resources and datasources
+- [PR #382](https://github.com/zscaler/terraform-provider-zpa/pull/382) - Added support to arbitrary clouds
 
 ## 3.0.2 (September, 30 2023)
 

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common"
 )
 
@@ -41,13 +41,31 @@ func ZPAProvider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ZPA_CUSTOMER_ID", nil),
 				Description: "zpa customer id",
 			},
-
 			"zpa_cloud": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  "Cloud to use PRODUCTION, BETA, GOV, GOVUS, PREVIEW, DEV, QA, QA2",
-				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}, true),
-				DefaultFunc:  schema.EnvDefaultFunc("ZPA_CLOUD", nil),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Cloud to use PRODUCTION, BETA, GOV, GOVUS, PREVIEW, DEV, QA, QA2",
+				DefaultFunc: schema.EnvDefaultFunc("ZPA_CLOUD", nil),
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					v := val.(string)
+					validClouds := []string{"PRODUCTION", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}
+
+					// If the cloud is in the valid list, return early
+					for _, cloud := range validClouds {
+						if v == cloud {
+							return
+						}
+					}
+
+					// If the cloud does not start with "https://" and is not in the valid list, it's considered arbitrary
+					if !strings.HasPrefix(v, "https://") {
+						// Append https:// for the user instead of returning an error
+						v = "https://" + v
+						warns = append(warns, fmt.Sprintf("Automatically prefixed 'https://' to %q", v))
+					}
+
+					return
+				},
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -134,6 +152,26 @@ func ZPAProvider() *schema.Provider {
 			// We can therefore assume that if it's missing it's 0.10 or 0.11
 			terraformVersion = "0.11+compatible"
 		}
+
+		// Fetch and modify the zpa_cloud value if needed.
+		zpaCloud := d.Get("zpa_cloud").(string)
+		// Check if the provided zpaCloud is in the list of validClouds.
+		validClouds := []string{"PRODUCTION", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}
+		isValidCloud := false
+		for _, cloud := range validClouds {
+			if zpaCloud == cloud {
+				isValidCloud = true
+				break
+			}
+		}
+
+		// If zpaCloud is not a valid cloud and doesn't start with "https://", prepend it.
+		if !isValidCloud && !strings.HasPrefix(zpaCloud, "https://") {
+			zpaCloud = "https://" + zpaCloud
+			d.Set("zpa_cloud", zpaCloud) // Update the ResourceData with modified value
+		}
+
+		// Continue with your existing logic.
 		r, err := zscalerConfigure(d, terraformVersion)
 		if err != nil {
 			return nil, diag.Diagnostics{
