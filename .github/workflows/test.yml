@@ -91,7 +91,7 @@ jobs:
     needs:
       - zpa-qa-tenant01
       - zpa-qa-tenant02
-      - zpa-preview-tenant01
+      # - zpa-preview-tenant01
 
   zpa-prod-tenant01:
     uses: ./.github/workflows/reuse-zpa-tests.yml
