@@ -107,5 +107,5 @@ jobs:
     needs:
       - zpa-qa-tenant01
       - zpa-qa-tenant02
-      - zpa-preview-tenant01
+      # - zpa-preview-tenant01
       - zpa-beta-tenant01
