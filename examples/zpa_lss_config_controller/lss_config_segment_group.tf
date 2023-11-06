@@ -12,7 +12,7 @@ resource "zpa_lss_config_controller" "example" {
   }
   policy_rule_resource {
     name   = "policy_rule_resource-example"
-    action = "ALLOW"
+    action = "LOG"
     conditions {
       negated  = false
       operator = "OR"

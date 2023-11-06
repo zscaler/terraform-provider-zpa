@@ -21,6 +21,7 @@ TESTARGS?=-test.v
 default: build
 
 dep: # Download required dependencies
+	go mod tidy
 
 docs:
 	go generate
@@ -53,6 +54,7 @@ else
 build13: DESTINATION=$(HOME)/.terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/3.0.4/$(GOOS)_$(GOARCH)
 endif
 build13: fmtcheck
+	go mod tidy && go mod vendor
 	@echo "==> Installing plugin to $(DESTINATION)"
 	@mkdir -p $(DESTINATION)
 	go build -o $(DESTINATION)/terraform-provider-zpa_v3.0.4
