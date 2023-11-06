@@ -41,7 +41,6 @@ func ZPAProvider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ZPA_CUSTOMER_ID", nil),
 				Description: "zpa customer id",
 			},
-
 			"zpa_cloud": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -158,13 +157,29 @@ func deprecateIncorrectNaming(d *schema.Resource, newResource string) *schema.Re
 
 func zscalerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
 	log.Printf("[INFO] Initializing ZPA client")
-	config := Config{
-		ClientID:     d.Get("zpa_client_id").(string),
-		ClientSecret: d.Get("zpa_client_secret").(string),
-		CustomerID:   d.Get("zpa_customer_id").(string),
-		BaseURL:      d.Get("zpa_cloud").(string),
-		UserAgent:    fmt.Sprintf("(%s %s) Terraform/%s Provider/%s Customer/%s", runtime.GOOS, runtime.GOARCH, terraformVersion, common.Version(), d.Get("zpa_customer_id").(string)),
+	clientID := d.Get("zpa_client_id").(string)
+	clientSecret := d.Get("zpa_client_secret").(string)
+	customerID := d.Get("zpa_customer_id").(string)
+
+	// Retrieve zpa_cloud; if not set, default to the production environment.
+	baseURL := d.Get("zpa_cloud").(string)
+	if baseURL == "" {
+		baseURL = "PRODUCTION" // Replace "PRODUCTION" with the actual URL or identifier of the production environment.
 	}
 
-	return config.Client()
+	config := Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		CustomerID:   customerID,
+		BaseURL:      baseURL,
+		UserAgent:    fmt.Sprintf("(%s %s) Terraform/%s Provider/%s Customer/%s", runtime.GOOS, runtime.GOARCH, terraformVersion, common.Version(), customerID),
+	}
+
+	client, err := config.Client()
+	if err != nil {
+		log.Printf("[ERROR] Error initializing ZPA client: %s", err)
+		return nil, err
+	}
+
+	return client, nil
 }

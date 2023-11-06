@@ -11,6 +11,7 @@
 
 - [PR #385](https://github.com/zscaler/terraform-provider-zpa/pull/385) - Fixed `microtenant_id` attribute for all access policy types.
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+- [PR #383](https://github.com/zscaler/terraform-provider-zpa/pull/383) - Fixed issues with hard-coded authentication within the provider block.
 
 ## 3.0.3 (October, 27 2023)
 
