@@ -12,9 +12,21 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.0.3``
+``Last updated: v3.0.4``
 
 ---
+
+## 3.0.4 (November, xx 2023)
+
+### Notes
+
+- Release date: **(November, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #385](https://github.com/zscaler/terraform-provider-zpa/pull/385) - Fixed `microtenant_id` attribute for all access policy types.
+  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 ## 3.0.3 (October, 27 2023)
 

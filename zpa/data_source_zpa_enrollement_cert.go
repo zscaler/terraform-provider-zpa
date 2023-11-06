@@ -101,18 +101,22 @@ func dataSourceEnrollmentCert() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func dataSourceEnrollmentCertRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+	service := m.(*Client).enrollmentcert.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	var resp *enrollmentcert.EnrollmentCert
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for signing certificate %s\n", id)
-		res, _, err := zClient.enrollmentcert.Get(id)
+		res, _, err := service.Get(id)
 		if err != nil {
 			return err
 		}
@@ -121,7 +125,7 @@ func dataSourceEnrollmentCertRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for signing certificate name %s\n", name)
-		res, _, err := zClient.enrollmentcert.GetByName(name)
+		res, _, err := service.GetByName(name)
 		if err != nil {
 			return err
 		}
@@ -150,6 +154,7 @@ func dataSourceEnrollmentCertRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("valid_to_in_epoch_sec", resp.ValidToInEpochSec)
 		_ = d.Set("zrsa_encrypted_private_key", resp.ZrsaEncryptedPrivateKey)
 		_ = d.Set("zrsa_encrypted_session_key", resp.ZrsaEncryptedSessionKey)
+		_ = d.Set("microtenant_id", resp.MicrotenantID)
 	} else {
 		return fmt.Errorf("couldn't find any signing certificate with name '%s' or id '%s'", name, id)
 	}
