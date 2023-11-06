@@ -82,7 +82,7 @@ resource "zpa_lss_config_controller" "lss_user_activity" {
   }
   policy_rule_resource {
     name          = "policy_rule_resource-lss_user_activity"
-    action        = "ALLOW"
+    action        = "LOG"
     policy_set_id = data.zpa_policy_type.lss_siem_policy.id
     conditions {
       negated  = false
