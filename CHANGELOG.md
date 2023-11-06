@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.4 (November, xx 2023)
+
+### Notes
+
+- Release date: **(November, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #383](https://github.com/zscaler/terraform-provider-zpa/pull/383) - Fixed issues with hard-coded authentication within the provider block.
+
 ## 3.0.3 (October, 27 2023)
 
 ### Notes
