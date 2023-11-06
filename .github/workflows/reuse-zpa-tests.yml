@@ -34,7 +34,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
         id: go
 
-      - uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: '>=0.13.x'
           terraform_wrapper: false
