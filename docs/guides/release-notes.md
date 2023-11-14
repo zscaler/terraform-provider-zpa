@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.0.4``
+``Last updated: v3.0.5``
 
 ---
+
+## 3.0.5 (November, xx 2023)
+
+### Notes
+
+- Release date: **(November, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #388](https://github.com/zscaler/terraform-provider-zpa/pull/388) - Updated provider to zscaler-sdk-go v2.1.6 to support ZPA SCIM Group SortOrder and SortBy search criteria option
 
 ## 3.0.4 (November, 6 2023)
 
