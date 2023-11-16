@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.5 (November, xx 2023)
+
+### Notes
+
+- Release date: **(November, xx 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #388](https://github.com/zscaler/terraform-provider-zpa/pull/388) - Updated provider to zscaler-sdk-go v2.1.6 to support ZPA SCIM Group SortOrder and SortBy search criteria option
+- [PR #389](https://github.com/zscaler/terraform-provider-zpa/pull/389) - Added support for new ZPA Access Policy Bulk Reorder Endpoint
+
 ## 3.0.4 (November, 6 2023)
 
 ### Notes
