@@ -16,11 +16,11 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 3.0.5 (November, xx 2023)
+## 3.0.5 (November, 17 2023)
 
 ### Notes
 
-- Release date: **(November, xx 2023)**
+- Release date: **(November, 17 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Enhacements
