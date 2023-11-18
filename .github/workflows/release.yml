@@ -35,11 +35,6 @@ jobs:
           go version
           echo $PATH
 
-      - name: Run Go Mod Commands
-        run: |
-          go mod tidy
-          go mod vendor
-
       - name: Import GPG key
         id: import_gpg
         uses: paultyng/ghaction-import-gpg@v2.1.0
