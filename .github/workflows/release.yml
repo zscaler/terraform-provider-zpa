@@ -30,11 +30,20 @@ jobs:
         with:
           go-version: 1.20
 
+      - name: Verify Go Environment
+        run: |
+          go version
+          echo $PATH
+
+      - name: Run Go Mod Commands
+        run: |
+          go mod tidy
+          go mod vendor
+
       - name: Import GPG key
         id: import_gpg
         uses: paultyng/ghaction-import-gpg@v2.1.0
         env:
-          # These secrets will need to be configured for the repository:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           PASSPHRASE: ${{ secrets.PASSPHRASE }}
 
@@ -42,8 +51,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v5.0.0
         with:
           version: latest
-          args: release --rm-dist
+          args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          # GitHub sets this automatically
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
