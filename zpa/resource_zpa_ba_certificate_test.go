@@ -27,8 +27,9 @@ func TestAccBaCertificate_basic(t *testing.T) {
 	privateKeyPEM := pemEncode(privateKey, "RSA PRIVATE KEY")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccBaCertificateDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBaCertificateConfig(certName, certPEM, privateKeyPEM),
@@ -95,6 +96,11 @@ func testAccCheckBaCertificateExists(n string) resource.TestCheckFunc {
 		// ...
 		return nil
 	}
+}
+
+func testAccBaCertificateDestroy(s *terraform.State) error {
+	// There's nothing to check for destroy as the activation can't be deleted
+	return nil
 }
 
 func testAccBaCertificateConfig(name, certPEM, privateKeyPEM string) string {
