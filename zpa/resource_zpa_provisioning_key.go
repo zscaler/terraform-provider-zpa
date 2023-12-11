@@ -109,7 +109,7 @@ func resourceProvisioningKey() *schema.Resource {
 			},
 			"provisioning_key": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Computed:    true,
 				Sensitive:   true,
 				Description: "read only field. Ignored in PUT/POST calls.",
 			},
