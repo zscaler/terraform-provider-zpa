@@ -60,6 +60,7 @@ func ZPAProvider() *schema.Provider {
 			"zpa_application_segment_pra":                  resourceApplicationSegmentPRA(),
 			"zpa_application_segment_inspection":           resourceApplicationSegmentInspection(),
 			"zpa_application_segment_browser_access":       resourceApplicationSegmentBrowserAccess(),
+			"zpa_ba_certificate":                           resourceBaCertificate(),
 			"zpa_cloud_browser_isolation_certificate":      resourceCBICertificates(),
 			"zpa_cloud_browser_isolation_external_profile": resourceCBIExternalProfile(),
 			"zpa_cloud_browser_isolation_banner":           resourceCBIBanners(),

@@ -1,11 +1,15 @@
 # Changelog
 
-## 3.1.0 (December, 10 2023)
+## 3.1.0 (December, 10 2023) - Unreleased
 
 ### Notes
 
 - Release date: **(December, 10 2023)**
 - Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #394](https://github.com/zscaler/terraform-provider-zpa/pull/394) - ✨ Added support for ZPA Certificate provisioning
 
 ### Fixes
 
