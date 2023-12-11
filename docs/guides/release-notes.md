@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.0.5``
+``Last updated: v3.1.0``
 
 ---
+
+## 3.1.0 (December, 10 2023)
+
+### Notes
+
+- Release date: **(December, 10 2023)**
+- Supported Terraform version: **v1.x**
+
+### Fixes
+
+- [PR #391](https://github.com/zscaler/terraform-provider-zpa/pull/391) - Removed `enrollment_cert_name` computed attribute from provisioning key resource
 
 ## 3.0.5 (November, 17 2023)
 

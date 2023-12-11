@@ -74,9 +74,9 @@ jobs:
       ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
       TF_ACC: ${{ secrets.TF_ACC }}
       ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
-    # needs:
-    #   - zpa-qa-tenant01
-    #   - zpa-qa-tenant02
+    needs:
+      - zpa-qa-tenant01
+      - zpa-qa-tenant02
       # - zpa-qa2-tenant01
 
   zpa-prod-tenant01:
@@ -90,8 +90,7 @@ jobs:
       ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
       TF_ACC: ${{ secrets.TF_ACC }}
       ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
-    # needs:
-    #   - zpa-qa-tenant01
-    #   - zpa-qa-tenant02
-      # - zpa-qa2-tenant01
-      # - zpa-beta-tenant01
+    needs:
+      - zpa-qa-tenant01
+      - zpa-qa-tenant02
+      - zpa-beta-tenant01

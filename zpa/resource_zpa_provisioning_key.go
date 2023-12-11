@@ -86,11 +86,6 @@ func resourceProvisioningKey() *schema.Resource {
 				Required:    true,
 				Description: "ID of the enrollment certificate that can be used for this provisioning key.",
 			},
-			"enrollment_cert_name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Read only property. Applicable only for GET calls, ignored in PUT/POST calls.",
-			},
 			"ui_config": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -189,7 +184,6 @@ func resourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("max_usage", resp.MaxUsage)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("enrollment_cert_id", resp.EnrollmentCertID)
-	_ = d.Set("enrollment_cert_name", resp.EnrollmentCertName)
 	_ = d.Set("ui_config", resp.UIConfig)
 	_ = d.Set("usage_count", resp.UsageCount)
 	_ = d.Set("zcomponent_id", resp.ZcomponentID)
@@ -248,7 +242,6 @@ func expandProvisioningKey(d *schema.ResourceData) provisioningkey.ProvisioningK
 		MaxUsage:              d.Get("max_usage").(string),
 		Name:                  d.Get("name").(string),
 		EnrollmentCertID:      d.Get("enrollment_cert_id").(string),
-		EnrollmentCertName:    d.Get("enrollment_cert_name").(string),
 		UIConfig:              d.Get("ui_config").(string),
 		UsageCount:            d.Get("usage_count").(string),
 		ZcomponentID:          d.Get("zcomponent_id").(string),
