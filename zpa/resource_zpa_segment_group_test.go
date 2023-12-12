@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,16 +18,19 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 	var segmentGroup segmentgroup.SegmentGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 
+	initialCertName := "tests-" + generatedName
+	updatedCertName := "updated-" + generatedName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSegmentGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
+				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, initialCertName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialCertName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
 				),
@@ -34,10 +38,10 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, variable.SegmentGroupDescriptionUpdate, variable.SegmentGroupEnabledUpdate),
+				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, updatedCertName, variable.SegmentGroupDescriptionUpdate, variable.SegmentGroupEnabledUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedCertName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescriptionUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabledUpdate)),
 				),
@@ -96,6 +100,36 @@ func testAccCheckSegmentGroupExists(resource string, group *segmentgroup.Segment
 }
 
 func testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
+	resourceName := strings.Split(resourceTypeAndName, ".")[1] // Extract the resource name
+
+	return fmt.Sprintf(`
+resource "%s" "%s" {
+	name = "tf-acc-test-%s"
+	description = "%s"
+	enabled = "%s"
+}
+
+data "%s" "%s" {
+  id = "${%s.%s.id}"
+}
+`,
+		// Resource type and name for the certificate
+		resourcetype.ZPASegmentGroup,
+		resourceName,
+		generatedName,
+		description,
+		strconv.FormatBool(enabled),
+
+		// Data source type and name
+		resourcetype.ZPASegmentGroup, resourceName,
+
+		// Reference to the resource
+		resourcetype.ZPASegmentGroup, resourceName,
+	)
+}
+
+/*
+func testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
 	return fmt.Sprintf(`
 // segment group resource
 %s
@@ -130,3 +164,4 @@ resource "%s" "%s" {
 		strconv.FormatBool(enabled),
 	)
 }
+*/

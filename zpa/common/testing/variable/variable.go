@@ -153,3 +153,9 @@ const (
 	MicrotenantEnabled           = true
 	MicrotenantCriteriaAttribute = "AuthDomain"
 )
+
+// Cloud Browser Isolation Certificate
+const (
+	CbiCertificateName       = "test"
+	CbiCertificateNameUpdate = "test-update"
+)

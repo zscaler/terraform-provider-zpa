@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,16 +18,19 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 	var groups appconnectorgroup.AppConnectorGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
 
+	initialName := "tests-" + generatedName
+	updatedName := "updated-" + generatedName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAppConnectorGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
+				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, initialName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckApp)),
@@ -38,10 +42,10 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, variable.AppConnectorDescriptionUpdate, variable.AppConnectorEnabledUpdate),
+				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, updatedName, variable.AppConnectorDescriptionUpdate, variable.AppConnectorEnabledUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescriptionUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabledUpdate)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckAppUpdate)),
@@ -104,6 +108,51 @@ func testAccCheckAppConnectorGroupExists(resource string, rule *appconnectorgrou
 }
 
 func testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
+	resourceName := strings.Split(resourceTypeAndName, ".")[1] // Extract the resource name
+
+	return fmt.Sprintf(`
+resource "%s" "%s" {
+	name                          = "tf-acc-test-%s"
+	description                   = "%s"
+	enabled                       = "%s"
+	country_code                  = "US"
+	city_country                  = "San Jose, US"
+	latitude                      = "37.3382082"
+	longitude                     = "-121.8863286"
+	location                      = "San Jose, CA, USA"
+	upgrade_day                   = "SUNDAY"
+	upgrade_time_in_secs          = "66600"
+	override_version_profile      = true
+	version_profile_id            = 0
+	dns_query_type                = "IPV4_IPV6"
+	tcp_quick_ack_app 			  = true
+	tcp_quick_ack_assistant 	  = true
+	tcp_quick_ack_read_assistant  = true
+	use_in_dr_mode 				  = false
+}
+
+data "%s" "%s" {
+  id = "${%s.%s.id}"
+}
+`,
+		// Resource type and name for the app connector group
+		resourcetype.ZPAAppConnectorGroup,
+		resourceName,
+		generatedName,
+		description,
+		strconv.FormatBool(enabled),
+
+		// Data source type and name
+		resourcetype.ZPAAppConnectorGroup,
+		resourceName,
+
+		// Reference to the resource
+		resourcetype.ZPAAppConnectorGroup, resourceName,
+	)
+}
+
+/*
+func testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
 	return fmt.Sprintf(`
 // app connector group resource
 %s
@@ -152,3 +201,4 @@ resource "%s" "%s" {
 		strconv.FormatBool(enabled),
 	)
 }
+*/

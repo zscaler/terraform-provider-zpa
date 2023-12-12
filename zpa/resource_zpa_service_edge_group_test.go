@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,16 +18,19 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 	var groups serviceedgegroup.ServiceEdgeGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServiceEdgeGroup)
 
+	initialName := "tests-" + generatedName
+	updatedName := "updated-" + generatedName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckServiceEdgeGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
+				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, initialName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceEdgeGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "is_public", strconv.FormatBool(variable.ServiceEdgeIsPublic)),
@@ -39,10 +43,10 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
+				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, updatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceEdgeGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "is_public", strconv.FormatBool(variable.ServiceEdgeIsPublic)),
@@ -106,6 +110,46 @@ func testAccCheckServiceEdgeGroupExists(resource string, group *serviceedgegroup
 }
 
 func testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
+	resourceName := strings.Split(resourceTypeAndName, ".")[1] // Extract the resource name
+
+	return fmt.Sprintf(`
+resource "%s" "%s" {
+	name                 = "tf-acc-test-%s"
+	description          = "%s"
+	enabled				 = "%s"
+	is_public			 = "%s"
+	upgrade_day          = "SUNDAY"
+	upgrade_time_in_secs = "66600"
+	latitude             = "37.3382082"
+	longitude            = "-121.8863286"
+	location             = "San Jose, CA, USA"
+	version_profile_name = "Default"
+}
+
+data "%s" "%s" {
+  id = "${%s.%s.id}"
+}
+`,
+		// Resource type and name for the certificate
+		// resource variables
+		resourcetype.ZPAServiceEdgeGroup,
+		resourceName,
+		generatedName,
+		description,
+		strconv.FormatBool(enabled),
+		strconv.FormatBool(enabled),
+
+		// Data source type and name
+		resourcetype.ZPAServiceEdgeGroup,
+		resourceName,
+
+		// Reference to the resource
+		resourcetype.ZPAServiceEdgeGroup, resourceName,
+	)
+}
+
+/*
+func testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
 	return fmt.Sprintf(`
 // service edge group resource
 %s
@@ -148,3 +192,4 @@ resource "%s" "%s" {
 		strconv.FormatBool(enabled),
 	)
 }
+*/

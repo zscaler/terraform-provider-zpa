@@ -13,12 +13,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 )
 
-func TestAccBaCertificate_basic(t *testing.T) {
-	_, _, certName := method.GenerateRandomSourcesTypeAndName("zpa_ba_certificate") // Random certificate name
-	cert, privateKey, err := generateSelfSignedCert(certName)
+func TestAccResourceBaCertificate_basic(t *testing.T) {
+	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPABACertificate) // Random certificate name
+	cert, privateKey, err := generateSelfSignedCert(generatedName)
 	if err != nil {
 		t.Fatalf("Error generating self-signed certificate: %v", err)
 	}
@@ -32,13 +33,13 @@ func TestAccBaCertificate_basic(t *testing.T) {
 		CheckDestroy: testAccBaCertificateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBaCertificateConfig(certName, certPEM, privateKeyPEM),
+				Config: testAccBaCertificateConfigure(generatedName, certPEM, privateKeyPEM),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBaCertificateExists("zpa_ba_certificate.this"),
+					testAccCheckBaCertificateExists(resourceTypeAndName),
 				),
 			},
 			{
-				ResourceName:            "zpa_ba_certificate.this",
+				ResourceName:            resourceTypeAndName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cert_blob"}, // Ignore cert_blob during import verification
@@ -92,26 +93,46 @@ func pemEncode(derBytes []byte, pemType string) string {
 
 func testAccCheckBaCertificateExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		// Implement check to verify if the certificate exists
-		// ...
+
 		return nil
 	}
 }
 
 func testAccBaCertificateDestroy(s *terraform.State) error {
-	// There's nothing to check for destroy as the activation can't be deleted
+	apiClient := testAccProvider.Meta().(*Client)
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != resourcetype.ZPABACertificate {
+			continue
+		}
+
+		baCertificate, _, err := apiClient.bacertificate.Get(rs.Primary.ID)
+
+		if err == nil {
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
+		}
+
+		if baCertificate != nil {
+			return fmt.Errorf("browser access certificate with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
+	}
+
 	return nil
 }
 
-func testAccBaCertificateConfig(name, certPEM, privateKeyPEM string) string {
+func testAccBaCertificateConfigure(generatedName, certPEM, privateKeyPEM string) string {
 	return fmt.Sprintf(`
-resource "zpa_ba_certificate" "this" {
-    name       = "test-%s"
+resource "zpa_ba_certificate" "%s" {
+    name       = "tf-acc-test-%s"
     cert_blob  = <<EOF
 %s
 %s
 EOF
     description = "Self-signed certificate for testing"
 }
-`, name, privateKeyPEM, certPEM)
+
+data "zpa_ba_certificate" "%s" {
+    id = zpa_ba_certificate.%s.id
+}
+`, generatedName, generatedName, privateKeyPEM, certPEM, generatedName, generatedName)
 }
