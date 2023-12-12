@@ -14,7 +14,8 @@ import (
 
 func TestAccPolicyAccessRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyAccessRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test-")
+	rName := acctest.RandomWithPrefix("tf-acc-test")
+	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
@@ -43,10 +44,10 @@ func TestAccPolicyAccessRuleBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc, appConnectorGroupHCL, appConnectorGroupTypeAndName, segmentGroupHCL, segmentGroupTypeAndName),
+				Config: testAccCheckPolicyAccessRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc, appConnectorGroupHCL, appConnectorGroupTypeAndName, segmentGroupHCL, segmentGroupTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyAccessRuleExists(resourceTypeAndName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),

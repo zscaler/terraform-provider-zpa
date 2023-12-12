@@ -3,6 +3,7 @@ package zpa
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,16 +18,19 @@ func TestAccResourceCBIBannersBasic(t *testing.T) {
 	var cbiBanner cbibannercontroller.CBIBannerController
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBIBannerController)
 
+	initialName := "tf-acc-test-" + generatedName
+	updatedName := "updated-" + generatedName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckCBIBannerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCBIBannerConfigure(resourceTypeAndName, generatedName, variable.PrimaryColor, variable.TextColor, variable.NotificationTitle, variable.NotificationText, variable.Banner, variable.Persist, variable.Logo),
+				Config: testAccCheckCBIBannerConfigure(resourceTypeAndName, initialName, variable.PrimaryColor, variable.TextColor, variable.NotificationTitle, variable.NotificationText, variable.Banner, variable.Persist, variable.Logo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCBIBannerExists(resourceTypeAndName, &cbiBanner),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "primary_color", variable.PrimaryColor),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "text_color", variable.TextColor),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "notification_title", variable.NotificationTitle),
@@ -39,10 +43,10 @@ func TestAccResourceCBIBannersBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckCBIBannerConfigure(resourceTypeAndName, generatedName, variable.PrimaryColor, variable.TextColor, variable.NotificationTitle, variable.NotificationText, variable.Banner, variable.Persist, variable.Logo),
+				Config: testAccCheckCBIBannerConfigure(resourceTypeAndName, updatedName, variable.PrimaryColor, variable.TextColor, variable.NotificationTitle, variable.NotificationText, variable.Banner, variable.Persist, variable.Logo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCBIBannerExists(resourceTypeAndName, &cbiBanner),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "primary_color", variable.PrimaryColor),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "text_color", variable.TextColor),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "notification_title", variable.NotificationTitle),
@@ -100,6 +104,46 @@ func testAccCheckCBIBannerExists(resource string, banner *cbibannercontroller.CB
 }
 
 func testAccCheckCBIBannerConfigure(resourceTypeAndName, generatedName, primaryColor, textColor, notificationTitle, NotificationText string, banner, persist bool, logo string) string {
+	resourceName := strings.Split(resourceTypeAndName, ".")[1] // Extract the resource name
+
+	return fmt.Sprintf(`
+resource "%s" "%s" {
+	name = "tf-acc-test-%s"
+	primary_color = "%s"
+	text_color = "%s"
+	notification_title = "%s"
+	notification_text = "%s"
+	banner = "%s"
+	persist = "%s"
+	logo = "%s"
+}
+
+data "%s" "%s" {
+  id = "${%s.%s.id}"
+}
+`,
+		// Resource type and name for the cbi banner
+		resourcetype.ZPACBIBannerController,
+		resourceName,
+		generatedName,
+		primaryColor,
+		textColor,
+		notificationTitle,
+		NotificationText,
+		strconv.FormatBool(banner),
+		strconv.FormatBool(persist),
+		logo,
+
+		// Data source type and name
+		resourcetype.ZPACBIBannerController, resourceName,
+
+		// Reference to the resource
+		resourcetype.ZPACBIBannerController, resourceName,
+	)
+}
+
+/*
+func testAccCheckCBIBannerConfigure(resourceTypeAndName, generatedName, primaryColor, textColor, notificationTitle, NotificationText string, banner, persist bool, logo string) string {
 	return fmt.Sprintf(`
 // cbi banner resource
 %s
@@ -144,3 +188,4 @@ resource "%s" "%s" {
 		logo,
 	)
 }
+*/

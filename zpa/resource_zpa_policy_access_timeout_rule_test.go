@@ -13,7 +13,8 @@ import (
 
 func TestAccPolicyTimeoutRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyTimeOutRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test-")
+	rName := acctest.RandomWithPrefix("tf-acc-test")
+	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
@@ -37,10 +38,10 @@ func TestAccPolicyTimeoutRuleBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckPolicyTimeoutRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc),
+				Config: testAccCheckPolicyTimeoutRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyTimeoutRuleExists(resourceTypeAndName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "RE_AUTH"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),

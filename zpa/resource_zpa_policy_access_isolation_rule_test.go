@@ -13,7 +13,8 @@ import (
 
 func TestAccPolicyIsolationRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyIsolationRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test-")
+	rName := acctest.RandomWithPrefix("tf-acc-test")
+	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
@@ -35,10 +36,10 @@ func TestAccPolicyIsolationRuleBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckPolicyIsolationRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc),
+				Config: testAccCheckPolicyIsolationRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyIsolationRuleExists(resourceTypeAndName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ISOLATE"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),

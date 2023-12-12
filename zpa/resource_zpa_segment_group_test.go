@@ -18,8 +18,8 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 	var segmentGroup segmentgroup.SegmentGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 
-	initialCertName := "tests-" + generatedName
-	updatedCertName := "updated-" + generatedName
+	initialName := "tf-acc-test-" + generatedName
+	updatedName := "updated-" + generatedName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -27,10 +27,10 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 		CheckDestroy: testAccCheckSegmentGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, initialCertName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
+				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, initialName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialCertName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
 				),
@@ -38,10 +38,10 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, updatedCertName, variable.SegmentGroupDescriptionUpdate, variable.SegmentGroupEnabledUpdate),
+				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, updatedName, variable.SegmentGroupDescriptionUpdate, variable.SegmentGroupEnabledUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedCertName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescriptionUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabledUpdate)),
 				),

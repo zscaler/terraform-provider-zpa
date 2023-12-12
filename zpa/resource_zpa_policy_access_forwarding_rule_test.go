@@ -13,7 +13,8 @@ import (
 
 func TestAccPolicyForwardingRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyForwardingRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test-")
+	rName := acctest.RandomWithPrefix("tf-acc-test")
+	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
@@ -35,10 +36,10 @@ func TestAccPolicyForwardingRuleBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckPolicyForwardingRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc),
+				Config: testAccCheckPolicyForwardingRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyForwardingRuleExists(resourceTypeAndName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "BYPASS"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),

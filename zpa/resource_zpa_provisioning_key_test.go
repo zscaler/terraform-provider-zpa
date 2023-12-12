@@ -20,6 +20,8 @@ func TestAccResourceProvisioningKeyBasic_Connector(t *testing.T) {
 	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
 	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
 
+	updatedName := "updated-tf-acc-test" + generatedName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -42,11 +44,11 @@ func TestAccResourceProvisioningKeyBasic_Connector(t *testing.T) {
 
 			// Update App Connector Group Provisioning Key
 			{
-				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
+				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, updatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProvisioningKeyAppConnectorExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ConnectorGroupType),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", variable.ProvisioningKeyUsage),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "enrollment_cert_id"),
@@ -166,6 +168,8 @@ func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
 	var groups provisioningkey.ProvisioningKey
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
 
+	updatedName := "updated-tf-acc-test" + generatedName
+
 	serviceEdgeGroupTypeAndName, _, serviceEdgeGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServiceEdgeGroup)
 	serviceEdgeGroupHCL := testAccCheckServiceEdgeGroupConfigure(serviceEdgeGroupTypeAndName, serviceEdgeGroupGeneratedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled)
 
@@ -191,11 +195,11 @@ func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
 
 			// Update Service Edge Group Provisioning Key
 			{
-				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType),
+				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, updatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProvisioningKeyServiceEdgeGroupExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ServiceEdgeGroupType),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", variable.ProvisioningKeyUsage),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "enrollment_cert_id"),
