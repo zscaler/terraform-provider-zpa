@@ -20,8 +20,6 @@ func TestAccResourceProvisioningKeyBasic_Connector(t *testing.T) {
 	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
 	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
 
-	updatedName := "updated-tf-acc-test" + generatedName
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -29,7 +27,7 @@ func TestAccResourceProvisioningKeyBasic_Connector(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Test App Connector Group Provisioning Key
 			{
-				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
+				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType, variable.ProvisioningKeyUsage),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProvisioningKeyAppConnectorExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
@@ -44,13 +42,13 @@ func TestAccResourceProvisioningKeyBasic_Connector(t *testing.T) {
 
 			// Update App Connector Group Provisioning Key
 			{
-				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, updatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
+				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType, variable.ProvisioningKeyUsageUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProvisioningKeyAppConnectorExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ConnectorGroupType),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", variable.ProvisioningKeyUsage),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", variable.ProvisioningKeyUsageUpdate),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "enrollment_cert_id"),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "zcomponent_id"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ProvisioningKeyEnabled)),
@@ -109,7 +107,7 @@ func testAccCheckProvisioningKeyAppConnectorExists(resource string, provisioning
 	}
 }
 
-func testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, name, appConnectorGroupHCL, appConnectorGroupTypeAndName, provisioningKeyType string) string {
+func testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, name, appConnectorGroupHCL, appConnectorGroupTypeAndName, provisioningKeyType, usage string) string {
 	return fmt.Sprintf(`
 // app connector group resource
 %s
@@ -124,7 +122,7 @@ data "%s" "%s" {
 `,
 		// resource variables
 		appConnectorGroupHCL,
-		appConnectorGroupProvisioningKeyResourceHCL(generatedName, name, appConnectorGroupTypeAndName, provisioningKeyType),
+		appConnectorGroupProvisioningKeyResourceHCL(generatedName, name, appConnectorGroupTypeAndName, provisioningKeyType, usage),
 
 		// data source variables
 		resourcetype.ZPAProvisioningKey,
@@ -133,7 +131,7 @@ data "%s" "%s" {
 	)
 }
 
-func appConnectorGroupProvisioningKeyResourceHCL(generatedName, name, appConnectorGroupTypeAndName, provisioningKeyType string) string {
+func appConnectorGroupProvisioningKeyResourceHCL(generatedName, name, appConnectorGroupTypeAndName, provisioningKeyType, usage string) string {
 	return fmt.Sprintf(`
 
 data "zpa_enrollment_cert" "connector" {
@@ -157,7 +155,7 @@ resource "%s" "%s" {
 		generatedName,
 		provisioningKeyType,
 		strconv.FormatBool(variable.ProvisioningKeyEnabled),
-		variable.ProvisioningKeyUsage,
+		usage,
 		appConnectorGroupTypeAndName,
 		appConnectorGroupTypeAndName,
 	)
@@ -167,8 +165,6 @@ resource "%s" "%s" {
 func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
 	var groups provisioningkey.ProvisioningKey
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
-
-	updatedName := "updated-tf-acc-test" + generatedName
 
 	serviceEdgeGroupTypeAndName, _, serviceEdgeGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServiceEdgeGroup)
 	serviceEdgeGroupHCL := testAccCheckServiceEdgeGroupConfigure(serviceEdgeGroupTypeAndName, serviceEdgeGroupGeneratedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled)
@@ -180,7 +176,7 @@ func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Test Service Edge Group Provisioning Key
 			{
-				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType),
+				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType, variable.ProvisioningKeyUsage),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProvisioningKeyServiceEdgeGroupExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
@@ -195,13 +191,13 @@ func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
 
 			// Update Service Edge Group Provisioning Key
 			{
-				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, updatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType),
+				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType, variable.ProvisioningKeyUsageUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckProvisioningKeyServiceEdgeGroupExists(resourceTypeAndName, &groups),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "id"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "association_type", variable.ServiceEdgeGroupType),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", variable.ProvisioningKeyUsage),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "max_usage", variable.ProvisioningKeyUsageUpdate),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "enrollment_cert_id"),
 					resource.TestCheckResourceAttrSet(resourceTypeAndName, "zcomponent_id"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ProvisioningKeyEnabled)),
@@ -260,7 +256,7 @@ func testAccCheckProvisioningKeyServiceEdgeGroupExists(resource string, provisio
 	}
 }
 
-func testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, name, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, provisioningKeyType string) string {
+func testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, name, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, provisioningKeyType, usage string) string {
 	return fmt.Sprintf(`
 // service edge group resource
 %s
@@ -275,7 +271,7 @@ data "%s" "%s" {
 `,
 		// resource variables
 		serviceEdgeGroupHCL,
-		serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdgeGroupTypeAndName, provisioningKeyType),
+		serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdgeGroupTypeAndName, provisioningKeyType, usage),
 
 		// data source variables
 		resourcetype.ZPAProvisioningKey,
@@ -284,7 +280,7 @@ data "%s" "%s" {
 	)
 }
 
-func serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdgeGroupTypeAndName, provisioningKeyType string) string {
+func serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdgeGroupTypeAndName, provisioningKeyType, usage string) string {
 	return fmt.Sprintf(`
 
 	data "zpa_enrollment_cert" "service_edge" {
@@ -308,7 +304,7 @@ func serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdge
 		generatedName,
 		provisioningKeyType,
 		strconv.FormatBool(variable.ProvisioningKeyEnabled),
-		variable.ProvisioningKeyUsage,
+		usage,
 		serviceEdgeGroupTypeAndName,
 		serviceEdgeGroupTypeAndName,
 	)

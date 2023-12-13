@@ -18,6 +18,8 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 	var appSegment applicationsegment.ApplicationSegmentResource
 	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegment)
 	rPort := acctest.RandIntRange(1000, 9999)
+	rDescription := acctest.RandomWithPrefix("tf-acc-test")
+	updatedDescription := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
 
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
@@ -31,11 +33,11 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, rDescription, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", "tf-acc-test-"+appSegmentGeneratedName),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", rDescription),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
@@ -48,11 +50,11 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, updatedDescription, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, rPort, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", "tf-acc-test-"+appSegmentGeneratedName),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "description", updatedDescription),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
@@ -100,20 +102,15 @@ func testAccCheckApplicationSegmentExists(resource string, segment *applications
 			return fmt.Errorf("no Application Segment ID is set")
 		}
 		client := testAccProvider.Meta().(*Client)
-		resp, _, err := client.applicationsegment.GetByName(rs.Primary.Attributes["name"])
+		receivedApp, _, err := client.applicationsegment.Get(rs.Primary.ID)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("name Not found in created attributes")
-		}
-		if resp.Description != rs.Primary.Attributes["description"] {
-			return fmt.Errorf("description Not found in created attributes")
-		}
+		*segment = *receivedApp
+
 		return nil
 	}
 }
-
 func testAccCheckApplicationSegmentConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
@@ -144,7 +141,7 @@ func getApplicationSegmentResourceHCL(generatedName, name, description, segmentG
 
 resource "%s" "%s" {
 	name = "tf-acc-test-%s"
-	description = "tf-acc-test-%s"
+	description = "%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
 	health_reporting = "ON_ACCESS"
@@ -165,7 +162,7 @@ resource "%s" "%s" {
 		resourcetype.ZPAApplicationSegment,
 		generatedName,
 		generatedName,
-		generatedName,
+		description,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
 		rPort,

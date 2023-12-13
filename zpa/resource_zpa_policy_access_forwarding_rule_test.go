@@ -11,7 +11,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 )
 
-func TestAccPolicyForwardingRuleBasic(t *testing.T) {
+func TestAccResourcePolicyForwardingRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyForwardingRule)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test

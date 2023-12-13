@@ -12,7 +12,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
 )
 
-func TestAccPolicyAccessRuleBasic(t *testing.T) {
+func TestAccResourcePolicyAccessRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyAccessRule)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test

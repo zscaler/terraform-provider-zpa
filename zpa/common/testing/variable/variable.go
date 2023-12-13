@@ -38,10 +38,11 @@ const (
 
 // Provisioning Key
 const (
-	ConnectorGroupType     = "CONNECTOR_GRP"
-	ServiceEdgeGroupType   = "SERVICE_EDGE_GRP"
-	ProvisioningKeyUsage   = "2"
-	ProvisioningKeyEnabled = true
+	ConnectorGroupType         = "CONNECTOR_GRP"
+	ServiceEdgeGroupType       = "SERVICE_EDGE_GRP"
+	ProvisioningKeyUsage       = "2"
+	ProvisioningKeyUsageUpdate = "10"
+	ProvisioningKeyEnabled     = true
 )
 
 // Customer Version Profile
@@ -87,11 +88,12 @@ const (
 
 // Application Segment
 const (
-	AppSegmentResourceName = "testAcc_app_segment"
-	AppSegmentDescription  = "testAcc_app_segment"
-	AppSegmentEnabled      = true
-	AppSegmentCnameEnabled = true
-	AppSegmentGroupID      = ""
+	AppSegmentResourceName      = "testAcc_app_segment"
+	AppSegmentDescription       = "testAcc_app_segment"
+	AppSegmentDescriptionUpdate = "tf-acc-test-updated"
+	AppSegmentEnabled           = true
+	AppSegmentCnameEnabled      = true
+	AppSegmentGroupID           = ""
 )
 
 // Browser Access Segment
@@ -133,17 +135,25 @@ const (
 	AccessRuleInspectionOrder       = 1
 )
 
-// Inspection Custom Control
+// Inspection Profile
 const (
-	InspectionCustomControlAction        = "PASS"
-	InspectionCustomControlDefaultAction = "PASS"
-	InspectionCustomControlSeverity      = "CRITICAL"
-	InspectionCustomControlType          = "RESPONSE"
+	InspectionProfileDescription       = "tf-acc-test"
+	InspectionProfileDescriptionUpdate = "tf-acc-test-updated"
+	InspectionProfileParanoia          = "1"
+	InspectionProfileParanoiaUpdate    = "2"
 )
 
 // Inspection Custom Control
 const (
-	InspectionProfileDescription = "testAcc_access_rule"
+	CustomControlDescription       = "tf-acc-test"
+	CustomControlDescriptionUpdate = "tf-acc-test-updated"
+	CustomControlParanoia          = "1"
+	CustomControlParanoiaUpdate    = "2"
+	CustomControlSeverity          = "INFO"
+	CustomControlSeverityUpdate    = "CRITICAL"
+	CustomControlControlType       = "RESPONSE"
+	CustomControlAction            = "BLOCK"
+	CustomControlActionUpdate      = "PASS"
 )
 
 // Microtenant

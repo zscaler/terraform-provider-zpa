@@ -11,7 +11,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 )
 
-func TestAccPolicyInspectionRuleBasic(t *testing.T) {
+func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyInspectionRule)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
