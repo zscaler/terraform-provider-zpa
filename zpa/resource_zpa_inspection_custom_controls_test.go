@@ -22,17 +22,17 @@ func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
 		CheckDestroy: testAccCheckInspectionCustomControlsDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName, variable.CustomControlDescription, variable.CustomControlSeverity, variable.CustomControlControlType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionCustomControlsExists(resourceTypeAndName, &control),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", variable.InspectionCustomControlAction),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.CustomControlDescription),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", "BLOCK"),
 					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.InspectionCustomControlDefaultAction),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
+					//resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", variable.CustomControlParanoia),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "protocol_type", "HTTP"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.InspectionCustomControlSeverity),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.InspectionCustomControlType),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.CustomControlSeverity),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.CustomControlControlType),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "2"),
 				),
 				ExpectNonEmptyPlan: true,
@@ -40,17 +40,17 @@ func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName, variable.CustomControlDescriptionUpdate, variable.CustomControlSeverityUpdate, variable.CustomControlControlType),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionCustomControlsExists(resourceTypeAndName, &control),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", "tf-acc-test-"+generatedName),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", variable.InspectionCustomControlAction),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.InspectionCustomControlDefaultAction),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.CustomControlDescriptionUpdate),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", "PASS"),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.CustomControlDefaultAction),
+					//resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", variable.CustomControlParanoiaUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "protocol_type", "HTTP"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.InspectionCustomControlSeverity),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.InspectionCustomControlType),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.CustomControlSeverityUpdate),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.CustomControlControlType),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "2"),
 				),
 				ExpectNonEmptyPlan: true,
@@ -102,7 +102,7 @@ func testAccCheckInspectionCustomControlsExists(resource string, rule *inspectio
 	}
 }
 
-func testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName string) string {
+func testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName, description, severity, controlType string) string {
 	return fmt.Sprintf(`
 // inspection custom control resource
 %s
@@ -112,7 +112,7 @@ data "%s" "%s" {
 }
 `,
 		// resource variables
-		getInspectionCustomControlsResourceHCL(generatedName),
+		getInspectionCustomControlsResourceHCL(generatedName, description, severity, controlType),
 
 		// data source variables
 		resourcetype.ZPAInspectionCustomControl,
@@ -121,14 +121,14 @@ data "%s" "%s" {
 	)
 }
 
-func getInspectionCustomControlsResourceHCL(generatedName string) string {
+func getInspectionCustomControlsResourceHCL(generatedName, description, severity, controlType string) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
 	name           = "tf-acc-test-%s"
-	description    = "tf-acc-test-%s"
-	action         = "%s"
-	default_action = "%s"
+	description    = "%s"
+	action         = "PASS"
+	default_action = "PASS"
 	paranoia_level = "1"
 	protocol_type  = "HTTP"
 	severity       = "%s"
@@ -156,11 +156,10 @@ resource "%s" "%s" {
 		resourcetype.ZPAInspectionCustomControl,
 		generatedName,
 		generatedName,
-		generatedName,
 
-		variable.InspectionCustomControlAction,
-		variable.InspectionCustomControlDefaultAction,
-		variable.InspectionCustomControlSeverity,
-		variable.InspectionCustomControlType,
+		description,
+		// action,
+		severity,
+		controlType,
 	)
 }

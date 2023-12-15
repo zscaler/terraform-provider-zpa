@@ -12,7 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
 )
 
-func TestAccResourceInspectionProfileBasic(t *testing.T) {
+func TestAccResourceInspectionProfile_Basic(t *testing.T) {
 	var profile inspection_profile.InspectionProfile
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionProfile)
 
@@ -22,12 +22,12 @@ func TestAccResourceInspectionProfileBasic(t *testing.T) {
 		CheckDestroy: testAccCheckInspectionProfileDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription, variable.InspectionProfileParanoia),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionProfileExists(resourceTypeAndName, &profile),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescription),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", variable.InspectionProfileParanoia),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
 				),
 				ExpectNonEmptyPlan: true,
@@ -35,12 +35,12 @@ func TestAccResourceInspectionProfileBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescriptionUpdate, variable.InspectionProfileParanoiaUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionProfileExists(resourceTypeAndName, &profile),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescription),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescriptionUpdate),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", variable.InspectionProfileParanoiaUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
 				),
 				ExpectNonEmptyPlan: true,
@@ -92,7 +92,7 @@ func testAccCheckInspectionProfileExists(resource string, rule *inspection_profi
 	}
 }
 
-func testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, description string) string {
+func testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, description, paranoia string) string {
 	return fmt.Sprintf(`
 // inspection profile resource
 %s
@@ -102,7 +102,7 @@ data "%s" "%s" {
 }
 `,
 		// resource variables
-		getInspectionProfileResourceHCL(generatedName, description),
+		getInspectionProfileResourceHCL(generatedName, description, paranoia),
 
 		// data source variables
 		resourcetype.ZPAInspectionProfile,
@@ -111,7 +111,7 @@ data "%s" "%s" {
 	)
 }
 
-func getInspectionProfileResourceHCL(generatedName, description string) string {
+func getInspectionProfileResourceHCL(generatedName, description, paranoia string) string {
 	return fmt.Sprintf(`
 
 data "zpa_inspection_all_predefined_controls" "default_predefined_controls" {
@@ -127,7 +127,7 @@ data "zpa_inspection_predefined_controls" "this" {
 resource "%s" "%s" {
 	name                          = "tf-acc-test-%s"
 	description                   = "%s"
-	paranoia_level                = "1"
+	paranoia_level                = "%s"
 
 	dynamic "predefined_controls" {
 		for_each = data.zpa_inspection_all_predefined_controls.default_predefined_controls.list
@@ -155,5 +155,6 @@ resource "%s" "%s" {
 		generatedName,
 		generatedName,
 		description,
+		paranoia,
 	)
 }

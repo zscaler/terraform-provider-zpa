@@ -75,7 +75,6 @@ func resourceBaCertificate() *schema.Resource {
 
 func resourceBaCertificateCreate(d *schema.ResourceData, m interface{}) error {
 	service := m.(*Client).bacertificate.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	// zClient := m.(*Client)
 
 	req := expandBaCertificate(d)
 	log.Printf("[INFO] Creating certificate with request\n%+v\n", req)

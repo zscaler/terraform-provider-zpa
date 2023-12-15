@@ -8,28 +8,24 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 )
 
-func TestAccDataSourceBaCertificate_Basic(t *testing.T) {
-	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPABACertificate)
+func TestAccDataSourceBaCertificates_Basic(t *testing.T) {
+	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBICertificate)
 
-	cert, privateKey, err := generateSelfSignedCert(generatedName)
+	certPEM, err := generateCBIRootCACert()
 	if err != nil {
-		t.Fatalf("Error generating self-signed certificate: %v", err)
+		t.Fatalf("Error generating root CA certificate: %v", err)
 	}
-
-	certPEM := pemEncode(cert, "CERTIFICATE")
-	privateKeyPEM := pemEncode(privateKey, "RSA PRIVATE KEY")
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccBaCertificateDestroy,
+		CheckDestroy: testAccCheckCBICertificateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBaCertificateConfigure(generatedName, certPEM, privateKeyPEM),
+				Config: testAccCheckCBICertificateConfigure(resourceTypeAndName, generatedName, string(certPEM)),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
-					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "description", resourceTypeAndName, "description"),
+					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "pem", resourceTypeAndName, "pem"),
 				),
 			},
 		},

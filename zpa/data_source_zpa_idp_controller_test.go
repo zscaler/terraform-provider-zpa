@@ -1,10 +1,15 @@
 package zpa
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+var idpNames = []string{
+	"BD_Okta_Admin", "BD_Okta_Users",
+}
 
 func TestAccDataSourceIdpController_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -12,29 +17,37 @@ func TestAccDataSourceIdpController_Basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDataSourceIdpController_basic,
+				Config: testAccCheckDataSourceIdpController_Basic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceIdpControllerCheck("data.zpa_idp_controller.bd_okta_admin"),
-					testAccDataSourceIdpControllerCheck("data.zpa_idp_controller.bd_okta_users"),
+					generateIdpControllerChecks()...,
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceIdpControllerCheck(name string) resource.TestCheckFunc {
-	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttrSet(name, "id"),
-		resource.TestCheckResourceAttrSet(name, "name"),
-	)
+func generateIdpControllerChecks() []resource.TestCheckFunc {
+	var checks []resource.TestCheckFunc
+	for _, name := range idpNames {
+		resourceName := createValidResourceName(name)
+		checkName := fmt.Sprintf("data.zpa_idp_controller.%s", resourceName)
+		checks = append(checks, resource.ComposeTestCheckFunc(
+			resource.TestCheckResourceAttrSet(checkName, "id"),
+			resource.TestCheckResourceAttrSet(checkName, "name"),
+		))
+	}
+	return checks
 }
 
-var testAccCheckDataSourceIdpController_basic = `
-data "zpa_idp_controller" "bd_okta_admin" {
-    name = "BD_Okta_Admin"
+func testAccCheckDataSourceIdpController_Basic() string {
+	var configs string
+	for _, name := range idpNames {
+		resourceName := createValidResourceName(name)
+		configs += fmt.Sprintf(`
+data "zpa_idp_controller" "%s" {
+    name = "%s"
 }
-
-data "zpa_idp_controller" "bd_okta_users" {
-    name = "BD_Okta_Users"
+`, resourceName, name)
+	}
+	return configs
 }
-`

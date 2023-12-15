@@ -61,11 +61,11 @@ jobs:
       - name: Run tests with retry
         uses: nick-invision/retry@v2
         with:
-          max_attempts: 3
-          timeout_minutes: 60  # Adjust as needed
+          max_attempts: 1
+          timeout_minutes: 30  # Adjust as needed
           command: |
             make sweep
-            go test -v -cover ./zpa -v -parallel 30 -timeout 60m
+            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
             make sweep
         env:
           ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
