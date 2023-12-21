@@ -34,7 +34,7 @@ resource "zpa_policy_access_rule" "this" {
   }
 
   conditions {
-     negated = false
+     negated = true
      operator = "OR"
     operands {
       object_type = "IDP"

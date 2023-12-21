@@ -1,15 +1,16 @@
 # Changelog
 
-## 3.1.0 (December, 10 2023) - Unreleased
+## 3.1.0 (January, 15 2023) - Unreleased
 
 ### Notes
 
-- Release date: **(December, 10 2023)**
+- Release date: **(January, 15 2023)**
 - Supported Terraform version: **v1.x**
 
 ### Enhacements
 
 - [PR #394](https://github.com/zscaler/terraform-provider-zpa/pull/394) - ✨ Added support for ZPA Certificate provisioning
+- [PR #405](https://github.com/zscaler/terraform-provider-zpa/pull/405) - ✨ Added support for ZPA Assistant Schedule feature to configures Auto Delete for the specified disconnected App Connectors.
 
 ### Fixes
 
