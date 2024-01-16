@@ -1,4 +1,4 @@
-name: Test
+name: CI
 on:
   push:
     branches: [ master ]
@@ -93,5 +93,4 @@ jobs:
     needs:
       - zpa-qa-tenant01
       - zpa-qa-tenant02
-      # - zpa-qa2-tenant01
       - zpa-beta-tenant01

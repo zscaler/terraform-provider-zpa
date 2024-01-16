@@ -18,7 +18,7 @@ func TestAccDataSourceInspectionProfile_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckInspectionProfileDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription, variable.InspectionProfileParanoia),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),

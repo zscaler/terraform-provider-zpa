@@ -22,7 +22,7 @@ func TestAccDataSourceProvisioningKey_Basic_AppConnectorGroup(t *testing.T) {
 		CheckDestroy: testAccCheckAppConnectorGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType),
+				Config: testAccCheckProvisioningKeyAppConnectorGroupConfigure(resourceTypeAndName, generatedName, generatedName, appConnectorGroupHCL, appConnectorGroupTypeAndName, variable.ConnectorGroupType, variable.ProvisioningKeyUsage),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
@@ -50,7 +50,7 @@ func TestAccDataSourceProvisioningKey_Basic_ServiceEdgeGroup(t *testing.T) {
 		CheckDestroy: testAccCheckServiceEdgeGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType),
+				Config: testAccCheckProvisioningKeyServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, generatedName, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName, variable.ServiceEdgeGroupType, variable.ProvisioningKeyUsage),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),

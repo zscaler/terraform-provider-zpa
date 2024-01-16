@@ -24,22 +24,20 @@ jobs:
     environment: ${{ inputs.environment }}
     strategy:
       matrix:
-        go-version: [1.19]
+        go-version: [1.20]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.go-version }}
-        id: go
-
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: '>=0.13.x'
-          terraform_wrapper: false
-      - name: Check out code into the Go module directory
+      - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.20"
+
+      - name: Setup Go Tools
+        run: make tools
 
       - name: Download Go Dependencies
         run: |
@@ -63,11 +61,11 @@ jobs:
       - name: Run tests with retry
         uses: nick-invision/retry@v2
         with:
-          max_attempts: 3
-          timeout_minutes: 60  # Adjust as needed
+          max_attempts: 1
+          timeout_minutes: 30  # Adjust as needed
           command: |
             make sweep
-            go test -v -cover ./zpa -v -parallel 30 -timeout 60m
+            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
             make sweep
         env:
           ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}

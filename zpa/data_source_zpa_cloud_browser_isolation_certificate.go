@@ -14,16 +14,16 @@ func dataSourceCBICertificates() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"pem": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Type:     schema.TypeString,
+				Computed: true,
+				// Sensitive: true,
 			},
 			"is_default": {
 				Type:     schema.TypeBool,

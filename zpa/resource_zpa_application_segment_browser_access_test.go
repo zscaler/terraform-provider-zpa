@@ -18,6 +18,8 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 	var browserAccess browseraccess.BrowserAccess
 	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentBrowserAccess)
 	rDomain := acctest.RandomWithPrefix("tf-acc-test")
+	rDescription := acctest.RandomWithPrefix("tf-acc-test")
+	updatedDescription := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
 
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
@@ -31,11 +33,11 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentBrowserAccessDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, rDescription, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
-					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", "tf-acc-test-"+browserAccessGeneratedName),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", rDescription),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessCnameEnabled)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "bypass_type", "NEVER"),
@@ -48,11 +50,11 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, browserAccessGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
+				Config: testAccCheckApplicationSegmentBrowserAccessConfigure(browserAccessTypeAndName, browserAccessGeneratedName, browserAccessGeneratedName, updatedDescription, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.BrowserAccessEnabled, rDomain, variable.BrowserAccessCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentBrowserAccessExists(browserAccessTypeAndName, &browserAccess),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "name", "tf-acc-test-"+browserAccessGeneratedName),
-					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", "tf-acc-test-"+browserAccessGeneratedName),
+					resource.TestCheckResourceAttr(browserAccessTypeAndName, "description", updatedDescription),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "enabled", strconv.FormatBool(variable.BrowserAccessEnabled)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.BrowserAccessCnameEnabled)),
 					resource.TestCheckResourceAttr(browserAccessTypeAndName, "bypass_type", "NEVER"),
@@ -149,7 +151,7 @@ data "zpa_ba_certificate" "jenkins" {
 
 resource "%s" "%s" {
 	name = "tf-acc-test-%s"
-	description = "tf-acc-test-%s"
+	description = "%s"
 	enabled = "%s"
 	is_cname_enabled = "%s"
 	select_connector_close_to_app = true
@@ -182,7 +184,7 @@ resource "%s" "%s" {
 		resourcetype.ZPAApplicationSegmentBrowserAccess,
 		generatedName,
 		generatedName,
-		generatedName,
+		description,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
 		port,

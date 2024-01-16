@@ -11,9 +11,10 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 )
 
-func TestAccPolicyInspectionRuleBasic(t *testing.T) {
+func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyInspectionRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test-")
+	rName := acctest.RandomWithPrefix("tf-acc-test")
+	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
@@ -36,10 +37,10 @@ func TestAccPolicyInspectionRuleBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc),
+				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyInspectionRuleExists(resourceTypeAndName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "INSPECT"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),

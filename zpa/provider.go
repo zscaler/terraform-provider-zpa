@@ -54,12 +54,14 @@ func ZPAProvider() *schema.Provider {
 			   terraform resource name: resource schema
 			   resource formation: provider-resourcename-subresource
 			*/
+			"zpa_app_connector_assistant_schedule":         resourceAppConnectorAssistantSchedule(),
 			"zpa_app_connector_group":                      resourceAppConnectorGroup(),
 			"zpa_application_server":                       resourceApplicationServer(),
 			"zpa_application_segment":                      resourceApplicationSegment(),
 			"zpa_application_segment_pra":                  resourceApplicationSegmentPRA(),
 			"zpa_application_segment_inspection":           resourceApplicationSegmentInspection(),
 			"zpa_application_segment_browser_access":       resourceApplicationSegmentBrowserAccess(),
+			"zpa_ba_certificate":                           resourceBaCertificate(),
 			"zpa_cloud_browser_isolation_certificate":      resourceCBICertificates(),
 			"zpa_cloud_browser_isolation_external_profile": resourceCBIExternalProfile(),
 			"zpa_cloud_browser_isolation_banner":           resourceCBIBanners(),
@@ -91,6 +93,7 @@ func ZPAProvider() *schema.Provider {
 			"zpa_segment_group":                            dataSourceSegmentGroup(),
 			"zpa_app_connector_group":                      dataSourceAppConnectorGroup(),
 			"zpa_app_connector_controller":                 dataSourceAppConnectorController(),
+			"zpa_app_connector_assistant_schedule":         dataSourceAppConnectorAssistantSchedule(),
 			"zpa_ba_certificate":                           dataSourceBaCertificate(),
 			"zpa_customer_version_profile":                 dataSourceCustomerVersionProfile(),
 			"zpa_cloud_connector_group":                    dataSourceCloudConnectorGroup(),

@@ -73,7 +73,7 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestApplicationPRA(testClient)
 	sweepTestInspectionCustomControl(testClient)
 	sweepTestInspectionProfile(testClient)
-	// sweepTestLSSConfigController(testClient) //TODO: Tests is failing on QA2 tenant. Needs further investigation.
+	sweepTestLSSConfigController(testClient) //TODO: Tests is failing on QA2 tenant. Needs further investigation.
 	sweepTestAccessPolicyRuleByType(testClient)
 	sweepTestProvisioningKey(testClient)
 	sweepTestSegmentGroup(testClient)
@@ -315,7 +315,6 @@ func sweepTestInspectionProfile(client *testClient) error {
 	return condenseError(errorList)
 }
 
-/*
 func sweepTestLSSConfigController(client *testClient) error {
 	var errorList []error
 
@@ -362,7 +361,6 @@ func sweepTestLSSConfigController(client *testClient) error {
 
 	return condenseError(errorList)
 }
-*/
 
 var defaultPolicyNames = map[string]string{
 	"ACCESS_POLICY":            "Global_Policy",
@@ -580,6 +578,60 @@ func sweepTestCBIExternalProfile(client *testClient) error {
 				continue
 			}
 			logSweptResource(resourcetype.ZPACBIExternalIsolationProfile, fmt.Sprintf(b.ID), b.Name)
+		}
+	}
+	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestCBICertificate(client *testClient) error {
+	var errorList []error
+	group, _, err := client.sdkClient.cbicertificatecontroller.GetAll()
+	if err != nil {
+		return err
+	}
+	// Logging the number of identified resources before the deletion loop
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
+	for _, b := range group {
+		// Check if the resource name has the required prefix before deleting it
+		if strings.HasPrefix(b.Name, testResourcePrefix) {
+			if _, err := client.sdkClient.cbicertificatecontroller.Delete(b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPACBICertificate, fmt.Sprintf(b.ID), b.Name)
+		}
+	}
+	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestBaCertificate(client *testClient) error {
+	var errorList []error
+	group, _, err := client.sdkClient.bacertificate.GetAll()
+	if err != nil {
+		return err
+	}
+	// Logging the number of identified resources before the deletion loop
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
+	for _, b := range group {
+		// Check if the resource name has the required prefix before deleting it
+		if strings.HasPrefix(b.Name, testResourcePrefix) {
+			if _, err := client.sdkClient.bacertificate.Delete(b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPABACertificate, fmt.Sprintf(b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process

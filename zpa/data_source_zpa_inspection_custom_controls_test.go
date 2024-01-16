@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
 )
 
 func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
@@ -17,7 +18,7 @@ func TestAccDataSourceInspectionCustomControls_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckInspectionCustomControlsDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName),
+				Config: testAccCheckInspectionCustomControlsConfigure(resourceTypeAndName, generatedName, variable.CustomControlDescriptionUpdate, variable.CustomControlSeverityUpdate, variable.CustomControlControlType),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "id", resourceTypeAndName, "id"),
 					resource.TestCheckResourceAttrPair(dataSourceTypeAndName, "name", resourceTypeAndName, "name"),
