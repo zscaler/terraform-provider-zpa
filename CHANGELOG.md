@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.1.0 (January, 15 2023) - Unreleased
+
+### Notes
+
+- Release date: **(January, 15 2023)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #394](https://github.com/zscaler/terraform-provider-zpa/pull/394) - ✨ Added support for ZPA Certificate provisioning
+- [PR #405](https://github.com/zscaler/terraform-provider-zpa/pull/405) - ✨ Added support for ZPA Assistant Schedule feature to configures Auto Delete for the specified disconnected App Connectors.
+- [PR #389](https://github.com/zscaler/terraform-provider-zpa/pull/389) - ✨ Added support to New ZPA Bulk Reorder Policy Rule
+
+### Fixes
+
+- [PR #391](https://github.com/zscaler/terraform-provider-zpa/pull/391) - Removed `enrollment_cert_name` computed attribute from provisioning key resource
+
 ## 3.0.5 (November, xx 2023)
 
 ### Notes
