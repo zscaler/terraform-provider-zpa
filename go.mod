@@ -1,17 +1,17 @@
 module github.com/zscaler/terraform-provider-zpa/v3
 
-go 1.20
+go 1.19
 
 require (
 	github.com/bflad/tfproviderlint v0.29.0
 	github.com/client9/misspell v0.3.4
 	github.com/fabiotavarespr/iso3166 v0.0.2
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
-	github.com/hashicorp/go-hclog v1.6.2
+	github.com/hashicorp/go-hclog v1.5.0
 	github.com/hashicorp/terraform-plugin-docs v0.16.0
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.31.0
-	github.com/zscaler/zscaler-sdk-go/v2 v2.3.5
+	github.com/zscaler/zscaler-sdk-go/v2 v2.3.6
 )
 
 require (
@@ -26,7 +26,7 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bflad/gopaniccheck v0.1.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
-	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect

@@ -11,21 +11,23 @@
 
 - [PR #394](https://github.com/zscaler/terraform-provider-zpa/pull/394) - ✨ Added support for ZPA Certificate provisioning
 - [PR #405](https://github.com/zscaler/terraform-provider-zpa/pull/405) - ✨ Added support for ZPA Assistant Schedule feature to configures Auto Delete for the specified disconnected App Connectors.
+- [PR #389](https://github.com/zscaler/terraform-provider-zpa/pull/389) - ✨ Added support to New ZPA Bulk Reorder Policy Rule
 
 ### Fixes
 
 - [PR #391](https://github.com/zscaler/terraform-provider-zpa/pull/391) - Removed `enrollment_cert_name` computed attribute from provisioning key resource
 
-## 3.0.5 (November, 17 2023)
+## 3.0.5 (November, xx 2023)
 
 ### Notes
 
-- Release date: **(November, 17 2023)**
+- Release date: **(November, xx 2023)**
 - Supported Terraform version: **v1.x**
 
-### Enhacements
+### Fixes
 
 - [PR #388](https://github.com/zscaler/terraform-provider-zpa/pull/388) - Updated provider to zscaler-sdk-go v2.1.6 to support ZPA SCIM Group SortOrder and SortBy search criteria option
+- [PR #389](https://github.com/zscaler/terraform-provider-zpa/pull/389) - Added support for new ZPA Access Policy Bulk Reorder Endpoint
 
 ## 3.0.4 (November, 6 2023)
 

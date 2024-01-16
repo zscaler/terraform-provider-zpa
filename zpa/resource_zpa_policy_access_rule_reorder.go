@@ -3,58 +3,13 @@ package zpa
 import (
 	"fmt"
 	"log"
-	"sort"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
-
-// Global variables for state management
-var (
-	deceptionAccessPolicyRuleExist *bool      // Pointer to check if deception rule exists.
-	m                              sync.Mutex // Mutex to ensure thread safety.
-)
-
-// Validate the access policy rule's order.
-func validateAccessPolicyRuleOrder(order string, service policysetcontroller.Service) error {
-	m.Lock()
-	defer m.Unlock()
-
-	// Check if we've already verified the existence of the Deception rule.
-	if deceptionAccessPolicyRuleExist == nil {
-		policy, _, err := service.GetByNameAndType("ACCESS_POLICY", "Zscaler Deception")
-		if err != nil || policy == nil {
-			f := false
-			deceptionAccessPolicyRuleExist = &f
-		} else {
-			t := true
-			deceptionAccessPolicyRuleExist = &t
-		}
-	}
-	// If Deception rule doesn't exist or the order is empty, no further checks needed.
-	if deceptionAccessPolicyRuleExist != nil && !*deceptionAccessPolicyRuleExist || order == "" {
-		return nil
-	}
-
-	if order == "" {
-		return nil
-	}
-	// Convert string order to integer.
-	o, err := strconv.Atoi(order)
-	if err != nil {
-		return nil
-	}
-	// If the Deception rule exists, order should start from 2.
-	if o == 1 {
-		return fmt.Errorf("policy Zscaler Deception exists, order must start from 2")
-	}
-	return nil
-}
 
 // Define the Terraform resource for reordering policy access rules.
 func resourcePolicyAccessRuleReorder() *schema.Resource {
@@ -68,15 +23,10 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"microtenant_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"rules": {
 				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of rules and their orders",
-				MaxItems:    2000,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -107,28 +57,16 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 	}
 }
 
-type RuleOrder struct {
-	ID            string
-	Order         int
-	OriginalOrder int
-}
-
 type RulesOrders struct {
-	PolicySetID string
-	PolicyType  string
-	Orders      []RuleOrder
+	PolicyType string
+	Orders     map[string]int
 }
 
 // Validate that no two rules have the same order.
 func validateRuleOrders(orders *RulesOrders) error {
-	// Sort rules by order.
-	sort.Slice(orders.Orders, func(i, j int) bool {
-		return orders.Orders[i].Order < orders.Orders[j].Order
-	})
-
 	// Check for orders <= 0
-	for _, rule := range orders.Orders {
-		if rule.Order <= 0 {
+	for _, order := range orders.Orders {
+		if order <= 0 {
 			return fmt.Errorf("order must be a positive integer greater than 0")
 		}
 	}
@@ -136,33 +74,15 @@ func validateRuleOrders(orders *RulesOrders) error {
 	if dupOrder, dupRuleIDs, ok := hasDuplicates(orders.Orders); ok {
 		return fmt.Errorf("duplicate order '%d' used by rules with IDs: %v", dupOrder, strings.Join(dupRuleIDs, ", "))
 	}
-	// Check for missing order numbers
-	missingOrders := findMissingOrders(orders.Orders)
-	exceededOrders := findExceededOrders(orders.Orders, len(orders.Orders))
-
-	errMsgs := make([]string, 0)
-
-	if len(missingOrders) > 0 {
-		errMsgs = append(errMsgs, fmt.Sprintf("missing rule order numbers: %v", missingOrders))
-	}
-
-	// Check if rule order numbers exceed the total number of rules available
-	if len(exceededOrders) > 0 {
-		errMsgs = append(errMsgs, fmt.Sprintf("rule orders (%v) exceed the total number of rules (%d)", exceededOrders, len(orders.Orders)))
-	}
-
-	if len(errMsgs) > 0 {
-		return fmt.Errorf(strings.Join(errMsgs, "; "))
-	}
 
 	return nil
 }
 
 // Check for duplicate order values.
-func hasDuplicates(rules []RuleOrder) (int, []string, bool) {
+func hasDuplicates(orders map[string]int) (int, []string, bool) {
 	ruleSet := make(map[int][]string)
-	for _, rule := range rules {
-		ruleSet[rule.Order] = append(ruleSet[rule.Order], rule.ID)
+	for id, order := range orders {
+		ruleSet[order] = append(ruleSet[order], id)
 	}
 
 	for order, ruleIDs := range ruleSet {
@@ -173,45 +93,11 @@ func hasDuplicates(rules []RuleOrder) (int, []string, bool) {
 	return 0, nil, false
 }
 
-// Function to find missing rule orders
-func findMissingOrders(rules []RuleOrder) []int {
-	var missingOrders []int
-	ruleSet := make(map[int]bool)
-	for _, rule := range rules {
-		ruleSet[rule.Order] = true
-	}
-
-	for i := 1; i <= len(rules); i++ {
-		if !ruleSet[i] {
-			missingOrders = append(missingOrders, i)
-		}
-	}
-
-	return missingOrders
-}
-
-// Function to check if rule order numbers exceed the total number of rules available
-func findExceededOrders(rules []RuleOrder, total int) []int {
-	var exceededOrders []int
-	for _, rule := range rules {
-		if rule.Order > total {
-			exceededOrders = append(exceededOrders, rule.Order)
-		}
-	}
-	return exceededOrders
-}
-
-func getRules(d *schema.ResourceData, service policysetcontroller.Service) (*RulesOrders, error) {
+func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
 	policyType := d.Get("policy_type").(string)
-	globalPolicySet, err := GetGlobalPolicySetByPolicyType(service, policyType)
-	if err != nil {
-		log.Printf("[ERROR] reordering rules failed getting global policy set '%s': %v\n", policyType, err)
-		return nil, err
-	}
 	orders := RulesOrders{
-		PolicySetID: globalPolicySet.ID,
-		PolicyType:  policyType,
-		Orders:      []RuleOrder{},
+		PolicyType: policyType,
+		Orders:     map[string]int{},
 	}
 	rulesSet, ok := d.Get("rules").(*schema.Set)
 	if ok && rulesSet != nil {
@@ -222,42 +108,36 @@ func getRules(d *schema.ResourceData, service policysetcontroller.Service) (*Rul
 			}
 			id := rule["id"].(string)
 			order, _ := strconv.Atoi(rule["order"].(string))
-			orders.Orders = append(orders.Orders, RuleOrder{
-				ID:    id,
-				Order: order,
-			})
+			orders.Orders[id] = order
 		}
 	}
-	sort.Slice(orders.Orders, func(i, j int) bool {
-		return orders.Orders[i].Order < orders.Orders[j].Order
-	})
 	return &orders, nil
 }
 
 func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	rulesOrders, err := getRules(d, *service)
+	zClient := m.(*Client)
+	rulesOrders, err := getRules(d, zClient)
 	if err != nil {
 		return err
 	}
-	rules, _, err := service.GetAllByType(rulesOrders.PolicyType)
+	rules, _, err := zClient.policysetcontroller.GetAllByType(rulesOrders.PolicyType)
 	if err != nil {
 		log.Printf("[ERROR] failed to get rules: %v\n", err)
 		return err
 	}
 	log.Printf("[INFO] reorder rules on read: %v\n", rulesOrders)
 	for _, r := range rules {
-		for i, r2 := range rulesOrders.Orders {
-			if r.ID == r2.ID {
-				rulesOrders.Orders[i].Order, _ = strconv.Atoi(r.RuleOrder)
+		for id := range rulesOrders.Orders {
+			if r.ID == id {
+				rulesOrders.Orders[id], _ = strconv.Atoi(r.RuleOrder)
 			}
 		}
 	}
 	rulesMap := []map[string]interface{}{}
-	for _, r := range rulesOrders.Orders {
+	for id, order := range rulesOrders.Orders {
 		rulesMap = append(rulesMap, map[string]interface{}{
-			"id":    r.ID,
-			"order": strconv.Itoa(r.Order),
+			"id":    id,
+			"order": strconv.Itoa(order),
 		})
 	}
 	_ = d.Set("rules", rulesMap)
@@ -266,9 +146,9 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) erro
 
 func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) error {
 	// Convert the interface to a client instance.
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
 	// Fetch and sort the rule orders from the provided data.
-	rules, err := getRules(d, *service)
+	rules, err := getRules(d, zClient)
 	if err != nil {
 		return err
 	}
@@ -277,90 +157,10 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		log.Printf("[ERROR] reordering rules failed: %v\n", err)
 		return err
 	}
-	d.SetId(rules.PolicySetID)
-	// Fetch the existing remote rules based on the policy type.
-	remoteRules, _, err := service.GetAllByType(rules.PolicyType)
+	d.SetId(rules.PolicyType)
+	_, err = zClient.policysetcontroller.BulkReorder(rules.PolicyType, rules.Orders)
 	if err != nil {
-		log.Printf("[ERROR] failed to get rules: %v\n", err)
-		return err
-	}
-	log.Printf("[INFO] reorder rules on update: %v\n", rules)
-	// Maps and slices for storing rule orders.
-	orders := map[int]RuleOrder{}
-	ordersList := []RuleOrder{}
-
-	// Iterate over the fetched rule orders to determine changes.
-	for _, r := range rules.Orders {
-		originalOrder := r.Order
-		for _, r2 := range remoteRules {
-			if r.ID == r2.ID {
-				if strconv.Itoa(r.Order) != r2.RuleOrder {
-					originalOrder, _ = strconv.Atoi(r2.RuleOrder)
-				}
-				break
-			}
-		}
-		o := RuleOrder{
-			ID:            r.ID,
-			Order:         r.Order,
-			OriginalOrder: originalOrder,
-		}
-		orders[r.Order] = o
-		ordersList = append(ordersList, o)
-	}
-	// Sort rules based on the order field.
-	sort.SliceStable(ordersList, func(i, j int) bool {
-		return ordersList[i].Order < ordersList[j].Order
-	})
-	// Re-check and re-order the rule set.
-	for _, r := range ordersList {
-		orderchanged := false
-		originalOrder := r.Order
-		found := false
-
-		// Check if there's a change in order for each rule against the remote set.
-		for _, r2 := range remoteRules {
-			if r.ID == r2.ID {
-				found = true
-				if strconv.Itoa(r.Order) != r2.RuleOrder {
-					orderchanged = true
-					originalOrder, _ = strconv.Atoi(r2.RuleOrder)
-				}
-			}
-		}
-		// If no match was found or order did not change, skip to the next iteration.
-		if !found || !orderchanged {
-			continue
-		}
-		// Check for special rules related to 'ACCESS_POLICY'.
-		if rules.PolicyType == "ACCESS_POLICY" {
-			if err := validateAccessPolicyRuleOrder(strconv.Itoa(r.Order), *service); err != nil {
-				log.Printf("[ERROR] reordering rule ID '%s' failed, order validation error: %v\n", r.ID, err)
-				continue
-			}
-		}
-		_, err := service.Reorder(rules.PolicySetID, r.ID, r.Order)
-		if err != nil {
-			log.Printf("[ERROR] reordering rule ID '%s' failed: %v\n", r.ID, err)
-		}
-		// avoid NO adjacent rules issue
-		// Handle potential ordering issue related to adjacency.
-		// if replacedByRule, ok := orders[r.OriginalOrder]; ok && replacedByRule.OriginalOrder == r.Order && r.Order != replacedByRule.Order+1 && r.Order != replacedByRule.Order-1 {
-		// 	continue
-		// }
-		// reconcile the remote rules copy
-		// Re-adjust the order of rules in the remote copy for consistency.
-		for i := range remoteRules {
-			if r.ID == remoteRules[i].ID {
-				continue
-			}
-			o, _ := strconv.Atoi(remoteRules[i].RuleOrder)
-			if originalOrder > r.Order && o >= r.Order && o < originalOrder {
-				remoteRules[i].RuleOrder = strconv.Itoa(o + 1)
-			} else if originalOrder < r.Order && o <= r.Order && o > originalOrder {
-				remoteRules[i].RuleOrder = strconv.Itoa(o - 1)
-			}
-		}
+		log.Printf("[ERROR] reordering rules failed: %v\n", err)
 	}
 	// Read the updated rule set.
 	return resourcePolicyAccessReorderRead(d, m)
