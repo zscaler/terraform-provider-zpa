@@ -63,129 +63,224 @@ func validateOperands(operands []policysetcontroller.Operands, zClient *Client, 
 func validateOperand(operand policysetcontroller.Operands, zClient *Client, microtenantID string) error {
 	switch operand.ObjectType {
 	case "APP":
-		return customValidate(operand, []string{"id"}, "application segment ID", Getter(func(id string) error {
-			_, _, err := zClient.applicationsegment.WithMicroTenant(microtenantID).Get(id)
-			return err
-		}))
+		// New validation: Check if 'Values' is a non-empty list of strings
+		if len(operand.Values) == 0 {
+			// If 'Values' is empty, then proceed to customValidate which expects LHS (ID)
+			return customValidate(operand, []string{"id"}, "application segment ID", Getter(func(id string) error {
+				_, _, err := zClient.applicationsegment.WithMicroTenant(microtenantID).Get(id)
+				return err
+			}))
+		}
 	case "APP_GROUP":
-		return customValidate(operand, []string{"id"}, "Segment Group ID", Getter(func(id string) error {
-			_, _, err := zClient.segmentgroup.WithMicroTenant(microtenantID).Get(id)
-			return err
-		}))
-
+		// New validation: Check if 'Values' is a non-empty list of strings
+		if len(operand.Values) == 0 {
+			// If 'Values' is empty, then proceed to customValidate which expects LHS (ID)
+			return customValidate(operand, []string{"id"}, "Segment Group ID", Getter(func(id string) error {
+				_, _, err := zClient.segmentgroup.WithMicroTenant(microtenantID).Get(id)
+				return err
+			}))
+		}
 	case "IDP":
-		return customValidate(operand, []string{"id"}, "IDP ID", Getter(func(id string) error {
-			_, _, err := zClient.idpcontroller.Get(id)
-			return err
-		}))
+		// New validation: Check if 'Values' is a non-empty list of strings
+		if len(operand.Values) == 0 {
+			// If 'Values' is empty, then proceed to customValidate which expects LHS (ID)
+			return customValidate(operand, []string{"id"}, "IDP ID", Getter(func(id string) error {
+				_, _, err := zClient.idpcontroller.Get(id)
+				return err
+			}))
+		}
 	case "EDGE_CONNECTOR_GROUP":
-		return customValidate(operand, []string{"id"}, "cloud connector group ID", Getter(func(id string) error {
-			_, _, err := zClient.cloudconnectorgroup.Get(id)
-			return err
-		}))
-	case "CLIENT_TYPE":
-		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' or 'zpn_client_type_exporter_noauth' or 'zpn_client_type_slogger' or 'zpn_client_type_branch_connector'", Getter(func(id string) error {
-			if id != "zpn_client_type_zapp" && id != "zpn_client_type_exporter" && id != "zpn_client_type_exporter_noauth" && id != "zpn_client_type_ip_anchoring" && id != "zpn_client_type_browser_isolation" && id != "zpn_client_type_machine_tunnel" && id != "zpn_client_type_edge_connector" && id != "zpn_client_type_slogger" && id != "zpn_client_type_branch_connector" && id != "zpn_client_type_zapp_partner" {
-				return fmt.Errorf("RHS values must be 'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_exporter_noauth' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' or 'zpn_client_type_slogger' or 'zpn_client_type_branch_connector' or 'zpn_client_type_zapp_partner 'when object type is CLIENT_TYPE")
+		// New validation: Check if 'Values' is a non-empty list of strings
+		if len(operand.Values) == 0 {
+			// If 'Values' is empty, then proceed to customValidate which expects LHS (ID)
+			return customValidate(operand, []string{"id"}, "cloud connector group ID", Getter(func(id string) error {
+				_, _, err := zClient.cloudconnectorgroup.Get(id)
+				return err
+			}))
+		}
+	case "LOCATION":
+		// Check if 'Values' is a non-empty list of strings
+		if len(operand.Values) == 0 {
+			// If 'Values' is empty, then proceed to customValidate for LHS (ID)
+			return customValidate(operand, []string{"id"}, "Location ID", Getter(func(id string) error {
+				return nil
+			}))
+		} else {
+			// If 'Values' is not empty, ensure all strings in 'Values' are non-empty
+			for _, value := range operand.Values {
+				if value == "" {
+					return fmt.Errorf("[WARN] when operand object type is LOCATION, 'values' must contain only non-empty strings, but an empty string was found")
+				}
 			}
-			return nil
-		}))
+		}
 	case "MACHINE_GRP":
-		return customValidate(operand, []string{"id"}, "machine group ID", Getter(func(id string) error {
-			_, _, err := zClient.machinegroup.WithMicroTenant(microtenantID).Get(id)
-			return err
-		}))
+		// New validation: Check if 'Values' is a non-empty list of strings
+		if len(operand.Values) == 0 {
+			// If 'Values' is empty, then proceed to customValidate which expects LHS (ID)
+			return customValidate(operand, []string{"id"}, "machine group ID", Getter(func(id string) error {
+				_, _, err := zClient.machinegroup.WithMicroTenant(microtenantID).Get(id)
+				return err
+			}))
+		} else {
+			// If 'Values' is not empty, ensure all strings in 'Values' are non-empty
+			for _, value := range operand.Values {
+				if value == "" {
+					return fmt.Errorf("[WARN] when operand object type is APP, 'values' must contain only non-empty strings, but an empty string was found")
+				}
+				// No need to call customValidate as 'Values' is being used
+			}
+		}
+
+	case "CLIENT_TYPE":
+		validClientTypes := []string{
+			"zpn_client_type_zapp", "zpn_client_type_exporter", "zpn_client_type_exporter_noauth",
+			"zpn_client_type_ip_anchoring", "zpn_client_type_browser_isolation",
+			"zpn_client_type_machine_tunnel", "zpn_client_type_edge_connector",
+			"zpn_client_type_slogger", "zpn_client_type_branch_connector",
+			"zpn_client_type_zapp_partner",
+		}
+
+		// New validation: Check if 'Values' is a non-empty list of strings
+		if len(operand.Values) == 0 {
+			return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' or 'zpn_client_type_exporter_noauth' or 'zpn_client_type_slogger' or 'zpn_client_type_branch_connector'", Getter(func(id string) error {
+				if !contains(validClientTypes, id) {
+					return fmt.Errorf("RHS values must be one of the predefined client types when object type is CLIENT_TYPE")
+				}
+				return nil
+			}))
+		} else {
+			for _, value := range operand.Values {
+				if value == "" || !contains(validClientTypes, value) {
+					return fmt.Errorf("[WARN] when operand object type is CLIENT_TYPE, 'values' must contain only valid client types, but an invalid type '%s' was found", value)
+				}
+			}
+		}
 	case "POSTURE":
-		if operand.LHS == "" {
-			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, nil)
+		for _, entry := range operand.EntryValues {
+			if entry.LHS == "" {
+				return lhsWarn(operand.ObjectType, "valid posture profile UDID", entry.LHS, nil)
+			}
+			_, _, err := zClient.postureprofile.GetByPostureUDID(entry.LHS)
+			if err != nil {
+				return lhsWarn(operand.ObjectType, "valid posture profile UDID", entry.LHS, err)
+			}
+			if !contains([]string{"true", "false"}, entry.RHS) {
+				return rhsWarn(operand.ObjectType, "\"true\"/\"false\"", entry.RHS, nil)
+			}
 		}
-		_, _, err := zClient.postureprofile.GetByPostureUDID(operand.LHS)
-		if err != nil {
-			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, err)
-		}
-		if !contains([]string{"true", "false"}, operand.RHS) {
-			return rhsWarn(operand.ObjectType, "\"true\"/\"false\"", operand.RHS, nil)
-		}
-		return nil
+
 	case "TRUSTED_NETWORK":
-		if operand.LHS == "" {
-			return lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, nil)
+		for _, entry := range operand.EntryValues {
+			if entry.LHS == "" {
+				return lhsWarn(operand.ObjectType, "valid trusted network ID", entry.LHS, nil)
+			}
+			_, _, err := zClient.trustednetwork.GetByNetID(entry.LHS)
+			if err != nil {
+				return lhsWarn(operand.ObjectType, "valid trusted network ID", entry.LHS, err)
+			}
+			if entry.RHS != "true" {
+				return rhsWarn(operand.ObjectType, "\"true\"", entry.RHS, nil)
+			}
 		}
-		_, _, err := zClient.trustednetwork.GetByNetID(operand.LHS)
-		if err != nil {
-			return lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, err)
-		}
-		if operand.RHS != "true" {
-			return rhsWarn(operand.ObjectType, "\"true\"", operand.RHS, nil)
-		}
-		return nil
 	case "PLATFORM":
-		if operand.LHS == "" {
-			return lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, nil)
+		validPlatforms := []string{"windows", "linux", "android", "ios", "mac"}
+		for _, entry := range operand.EntryValues {
+			if entry.LHS == "" || !contains(validPlatforms, entry.LHS) {
+				return lhsWarn(operand.ObjectType, "valid platform ID", entry.LHS, nil)
+			}
+			if !contains([]string{"true", "false"}, entry.RHS) {
+				return rhsWarn(operand.ObjectType, "\"true\"/\"false\"", entry.RHS, nil)
+			}
 		}
-		_, _, err := zClient.platforms.GetAllPlatforms()
-		if err != nil {
-			return lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, err)
-		}
-		if operand.RHS != "true" {
-			return rhsWarn(operand.ObjectType, "\"true\"", operand.RHS, nil)
-		}
-		return nil
-	case "SAML":
-		if operand.LHS == "" {
-			return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, nil)
-		}
-		_, _, err := zClient.samlattribute.Get(operand.LHS)
-		if err != nil {
-			return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, err)
-		}
-		if operand.RHS == "" {
-			return rhsWarn(operand.ObjectType, "SAML Attribute Value", operand.RHS, nil)
-		}
-		return nil
-	case "SCIM":
-		if operand.IdpID == "" {
-			return fmt.Errorf("[WARN] when operand object type is %v Idp ID must be set", operand.ObjectType)
-		}
-		if operand.LHS == "" {
-			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, nil)
-		}
-		scim, _, err := zClient.scimattributeheader.Get(operand.IdpID, operand.LHS)
-		if err != nil {
-			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, err)
-		}
-		if operand.RHS == "" {
-			return rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
-		}
-		values, _ := zClient.scimattributeheader.SearchValues(scim.IdpID, scim.ID, operand.RHS)
-		if len(values) == 0 {
-			return rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
-		}
-		return nil
-	case "SCIM_GROUP":
-		if operand.LHS == "" {
-			return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, nil)
-		}
-		_, _, err := zClient.idpcontroller.Get(operand.LHS)
-		if err != nil {
-			return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, err)
-		}
-		if operand.RHS == "" {
-			return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, nil)
-		}
-		_, _, err = zClient.scimgroup.Get(operand.RHS)
-		if err != nil {
-			return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, err)
-		}
-		return nil
 	case "COUNTRY_CODE":
-		if operand.LHS == "" || !isValidAlpha2(operand.LHS) {
-			return lhsWarn(operand.ObjectType, "valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes", operand.LHS, nil)
+		if len(operand.EntryValues) > 0 {
+			for _, entry := range operand.EntryValues {
+				if entry.LHS == "" || !isValidAlpha2(entry.LHS) {
+					return lhsWarn(operand.ObjectType, "valid ISO-3166 Alpha-2 country code", entry.LHS, nil)
+				}
+				if !contains([]string{"true", "false"}, entry.RHS) {
+					return rhsWarn(operand.ObjectType, "\"true\"/\"false\"", entry.RHS, nil)
+				}
+			}
+		} else {
+			// Existing COUNTRY_CODE validation logic
+			if operand.LHS == "" || !isValidAlpha2(operand.LHS) {
+				return lhsWarn(operand.ObjectType, "valid ISO-3166 Alpha-2 country code", operand.LHS, nil)
+			}
 		}
-		return nil
+	case "SAML":
+		if len(operand.EntryValues) > 0 {
+			for _, entry := range operand.EntryValues {
+				if entry.LHS == "" || entry.RHS == "" {
+					return fmt.Errorf("[WARN] when operand object type is SAML, both 'lhs' and 'rhs' must be non-empty")
+				}
+				// Additional validations for 'lhs' and 'rhs' can be added here if necessary
+			}
+		} else {
+			// Existing SAML validation logic
+			if operand.LHS == "" {
+				return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, nil)
+			}
+			_, _, err := zClient.samlattribute.Get(operand.LHS)
+			if err != nil {
+				return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, err)
+			}
+			if operand.RHS == "" {
+				return rhsWarn(operand.ObjectType, "SAML Attribute Value", operand.RHS, nil)
+			}
+		}
+
+	case "SCIM_GROUP", "SCIM":
+		if len(operand.EntryValues) > 0 {
+			for _, entry := range operand.EntryValues {
+				if entry.LHS == "" || entry.RHS == "" {
+					return fmt.Errorf("[WARN] when operand object type is %v, both 'lhs' and 'rhs' must be non-empty", operand.ObjectType)
+				}
+				// Additional validations for 'lhs' and 'rhs' can be added here if necessary
+			}
+		} else {
+			// Existing SCIM and SCIM_GROUP validation logic
+			if operand.ObjectType == "SCIM_GROUP" {
+				// SCIM_GROUP specific validation
+				if operand.LHS == "" {
+					return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, nil)
+				}
+				_, _, err := zClient.idpcontroller.Get(operand.LHS)
+				if err != nil {
+					return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, err)
+				}
+				if operand.RHS == "" {
+					return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, nil)
+				}
+				_, _, err = zClient.scimgroup.Get(operand.RHS)
+				if err != nil {
+					return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, err)
+				}
+			} else {
+				// SCIM specific validation
+				if operand.IdpID == "" {
+					return fmt.Errorf("[WARN] when operand object type is %v Idp ID must be set", operand.ObjectType)
+				}
+				if operand.LHS == "" {
+					return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, nil)
+				}
+				scim, _, err := zClient.scimattributeheader.Get(operand.IdpID, operand.LHS)
+				if err != nil {
+					return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, err)
+				}
+				if operand.RHS == "" {
+					return rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
+				}
+				values, _ := zClient.scimattributeheader.SearchValues(scim.IdpID, scim.ID, operand.RHS)
+				if len(values) == 0 {
+					return rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
+				}
+			}
+		}
 	default:
 		return fmt.Errorf("[WARN] invalid operand object type %s", operand.ObjectType)
 	}
+	return nil
 }
 
 type Getter func(id string) error
@@ -195,16 +290,36 @@ func (g Getter) Get(id string) error {
 }
 
 func customValidate(operand policysetcontroller.Operands, expectedLHS []string, expectedRHS string, clientRHS Getter) error {
-	if operand.LHS == "" || !contains(expectedLHS, operand.LHS) {
-		return lhsWarn(operand.ObjectType, expectedLHS, operand.LHS, nil)
+	// Skip custom validation if 'Values' is being used
+	if len(operand.Values) > 0 {
+		return nil
 	}
-	if operand.RHS == "" {
-		return rhsWarn(operand.ObjectType, expectedRHS, operand.RHS, nil)
+
+	// Validate traditional LHS/RHS if 'EntryValues' is not being used
+	if len(operand.EntryValues) == 0 {
+		if operand.LHS == "" || !contains(expectedLHS, operand.LHS) {
+			return lhsWarn(operand.ObjectType, expectedLHS, operand.LHS, nil)
+		}
+		if operand.RHS == "" {
+			return rhsWarn(operand.ObjectType, expectedRHS, operand.RHS, nil)
+		}
+		err := clientRHS.Get(operand.RHS)
+		if err != nil {
+			return rhsWarn(operand.ObjectType, expectedRHS, operand.RHS, err)
+		}
+	} else {
+		// Validate each EntryValue if 'EntryValues' is being used
+		for _, entryValue := range operand.EntryValues {
+			if entryValue.LHS == "" {
+				return lhsWarn(operand.ObjectType, "valid LHS", entryValue.LHS, nil)
+			}
+			if entryValue.RHS == "" {
+				return rhsWarn(operand.ObjectType, "valid RHS", entryValue.RHS, nil)
+			}
+			// Add additional validation logic for EntryValues here if necessary
+		}
 	}
-	err := clientRHS.Get(operand.RHS)
-	if err != nil {
-		return rhsWarn(operand.ObjectType, expectedRHS, operand.RHS, err)
-	}
+
 	return nil
 }
 
@@ -228,9 +343,10 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 					Computed: true,
 				},
 				"negated": {
-					Type:     schema.TypeBool,
-					Optional: true,
-					Computed: true,
+					Type:       schema.TypeBool,
+					Optional:   true,
+					Computed:   true,
+					Deprecated: "The `negated` field is now deprecated for all zpa access policy resources and will be removed in future provider versions",
 				},
 				"operator": {
 					Type:     schema.TypeString,
@@ -248,6 +364,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 				"operands": {
 					Type:        schema.TypeList,
 					Optional:    true,
+					Computed:    true,
 					Description: "This signifies the various policy criteria.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -267,7 +384,7 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 							},
 							"lhs": {
 								Type:        schema.TypeString,
-								Required:    true,
+								Optional:    true,
 								Description: "This signifies the key for the object type. String ID example: id ",
 							},
 							"rhs": {
@@ -282,20 +399,44 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 								Computed:    true,
 								Description: "This denotes the value for the given object type. Its value depends upon the key.",
 							},
-							"rhs_list": {
+							// "rhs_list": {
+							// 	Type:        schema.TypeSet,
+							// 	Optional:    true,
+							// 	Description: "This denotes a list of values for the given object type. The value depend upon the key. If rhs is defined this list will be ignored",
+							// 	Computed:    true,
+							// 	Elem: &schema.Schema{
+							// 		Type: schema.TypeString,
+							// 	},
+							// },
+							"values": {
 								Type:        schema.TypeSet,
-								Optional:    true,
-								Description: "This denotes a list of values for the given object type. The value depend upon the key. If rhs is defined this list will be ignored",
 								Computed:    true,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
+								Elem:        &schema.Schema{Type: schema.TypeString},
+								Description: "",
+								Optional:    true,
 							},
 							"object_type": {
 								Type:         schema.TypeString,
 								Required:     true,
 								Description:  "  This is for specifying the policy critiera.",
 								ValidateFunc: validation.StringInSlice(objectTypes, false),
+							},
+							"entry_values": {
+								Type:     schema.TypeList,
+								Optional: true,
+								Computed: true,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"rhs": {
+											Type:     schema.TypeString,
+											Optional: true,
+										},
+										"lhs": {
+											Type:     schema.TypeString,
+											Optional: true,
+										},
+									},
+								},
 							},
 						},
 					},
@@ -318,11 +459,15 @@ func ExpandPolicyConditions(d *schema.ResourceData) ([]policysetcontroller.Condi
 				if err != nil {
 					return nil, err
 				}
+				id, _ := conditionSet["id"].(string)
+				negated, _ := conditionSet["negated"].(bool)
+				operator, _ := conditionSet["operator"].(string)
+				microTenantID, _ := conditionSet["microtenant_id"].(string)
 				conditionSets = append(conditionSets, policysetcontroller.Conditions{
-					ID:            conditionSet["id"].(string),
-					Negated:       conditionSet["negated"].(bool),
-					Operator:      conditionSet["operator"].(string),
-					MicroTenantID: conditionSet["microtenant_id"].(string),
+					ID:            id,
+					Negated:       negated,
+					Operator:      operator,
+					MicroTenantID: microTenantID,
 					Operands:      operands,
 				})
 			}
@@ -342,33 +487,30 @@ func expandOperandsList(ops interface{}) ([]policysetcontroller.Operands, error)
 			operandSet, _ := operand.(map[string]interface{})
 			id, _ := operandSet["id"].(string)
 			IdpID, _ := operandSet["idp_id"].(string)
-			rhs, ok := operandSet["rhs"].(string)
+
+			// Extracting Values from TypeSet
+			var values []string
+			if valuesInterface, valuesOk := operandSet["values"].(*schema.Set); valuesOk && valuesInterface != nil {
+				for _, v := range valuesInterface.List() {
+					if strVal, ok := v.(string); ok {
+						values = append(values, strVal)
+					}
+				}
+			}
+
+			log.Printf("[DEBUG] Extracted values: %+v\n", values)
+
 			op := policysetcontroller.Operands{
 				ID:         id,
 				Name:       operandSet["name"].(string),
 				LHS:        operandSet["lhs"].(string),
 				ObjectType: operandSet["object_type"].(string),
 				IdpID:      IdpID,
-				RHS:        rhs,
+				Values:     values,
+				// Assuming other fields are handled similarly
 			}
-			if ok && rhs != "" {
-				if operandSet != nil {
-					operandsSets = append(operandsSets, op)
-				}
-			} else {
-				// try rhs_list
-				rhsList := SetToStringSlice(operandSet["rhs_list"].(*schema.Set))
-				if ok && len(rhsList) > 0 {
-					for _, e := range rhsList {
-						op.RHS = e
-						operandsSets = append(operandsSets, op)
-					}
-				} else {
-					log.Printf("[ERROR] No RHS is provided\n")
-					return nil, fmt.Errorf("no RHS is provided")
-				}
 
-			}
+			operandsSets = append(operandsSets, op)
 		}
 
 		return operandsSets, nil
@@ -394,6 +536,15 @@ func flattenPolicyConditions(conditions []policysetcontroller.Conditions) []inte
 func flattenPolicyRuleOperands(conditionOperand []policysetcontroller.Operands) []interface{} {
 	conditionOperands := make([]interface{}, len(conditionOperand))
 	for i, operandItems := range conditionOperand {
+		// Flatten EntryValues
+		flattenedEntryValues := make([]interface{}, len(operandItems.EntryValues))
+		for j, ev := range operandItems.EntryValues {
+			flattenedEntryValues[j] = map[string]interface{}{
+				"lhs": ev.LHS,
+				"rhs": ev.RHS,
+			}
+		}
+
 		conditionOperands[i] = map[string]interface{}{
 			"id":             operandItems.ID,
 			"idp_id":         operandItems.IdpID,
@@ -402,6 +553,8 @@ func flattenPolicyRuleOperands(conditionOperand []policysetcontroller.Operands) 
 			"rhs":            operandItems.RHS,
 			"name":           operandItems.Name,
 			"microtenant_id": operandItems.MicroTenantID,
+			"values":         operandItems.Values,
+			"entry_values":   flattenedEntryValues,
 		}
 	}
 
@@ -545,28 +698,6 @@ func flattenNetworkPorts(ports []common.NetworkPorts) []interface{} {
 	}
 	return portsObj
 }
-
-/*
-func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
-	var ports []common.NetworkPorts
-	if portsInterface, ok := d.GetOk(key); ok {
-		portSet, ok := portsInterface.(*schema.Set)
-		if !ok {
-			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
-			return ports
-		}
-		ports = make([]common.NetworkPorts, len(portSet.List()))
-		for i, val := range portSet.List() {
-			portItem := val.(map[string]interface{})
-			ports[i] = common.NetworkPorts{
-				From: portItem["from"].(string),
-				To:   portItem["to"].(string),
-			}
-		}
-	}
-	return ports
-}
-*/
 
 func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{

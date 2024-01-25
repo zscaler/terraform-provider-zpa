@@ -369,7 +369,7 @@ func detachAppsFromAllPolicyRules(id string, policySetControllerService *policys
 			rule.Conditions = []policysetcontroller.Conditions{}
 		}
 		if changed {
-			if _, err := policySetControllerService.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
+			if _, err := policySetControllerService.UpdateRuleV1(rule.PolicySetID, rule.ID, &rule); err != nil {
 				continue
 			}
 		}

@@ -100,7 +100,7 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err != nil {
 		return err
 	}
-	policysetcontroller, _, err := service.Create(req)
+	policysetcontroller, _, err := service.CreateRuleV2(req)
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	if _, err := service.Update(globalPolicySet.ID, ruleID, req); err != nil {
+	if _, err := service.UpdateRuleV2(globalPolicySet.ID, ruleID, req); err != nil {
 		return err
 	}
 

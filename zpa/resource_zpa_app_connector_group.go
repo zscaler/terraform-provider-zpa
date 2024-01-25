@@ -302,7 +302,7 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, pol
 		}
 		rule.AppConnectorGroups = ids
 		if changed {
-			if _, err := policySetControllerService.WithMicroTenant(GetString(d.Get("microtenant_id"))).Update(accessPolicySet.ID, rule.ID, &rule); err != nil {
+			if _, err := policySetControllerService.WithMicroTenant(GetString(d.Get("microtenant_id"))).UpdateRuleV1(accessPolicySet.ID, rule.ID, &rule); err != nil {
 				continue
 			}
 		}

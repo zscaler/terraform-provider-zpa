@@ -273,7 +273,7 @@ func detachServerGroupFromAllAccessPolicyRules(id string, policySetControllerSer
 		}
 		accessPolicyRule.AppServerGroups = ids
 		if changed {
-			if _, err := policySetControllerService.Update(accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
+			if _, err := policySetControllerService.UpdateRuleV1(accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
 				continue
 			}
 		}
