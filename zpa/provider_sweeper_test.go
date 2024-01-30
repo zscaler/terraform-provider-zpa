@@ -38,6 +38,7 @@ type testClient struct {
 }
 
 var testResourcePrefix = "tf-acc-test-"
+var updateResourcePrefix = "tf-updated-"
 
 func TestRunForcedSweeper(t *testing.T) {
 	if os.Getenv("ZPA_VCR_TF_ACC") != "" {
@@ -109,7 +110,7 @@ func sweepTestAppConnectorGroup(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.appconnectorgroup.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -136,7 +137,7 @@ func sweepTestApplicationServer(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(server)))
 	for _, b := range server {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.appservercontroller.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -163,7 +164,7 @@ func sweepTestApplicationSegment(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(appSegment)))
 	for _, b := range appSegment {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.applicationsegment.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -190,7 +191,7 @@ func sweepTestApplicationSegmentBA(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(appSegmentBA)))
 	for _, b := range appSegmentBA {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.browseraccess.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -217,7 +218,7 @@ func sweepTestApplicationInspection(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(appInspection)))
 	for _, b := range appInspection {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.applicationsegmentinspection.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -244,7 +245,7 @@ func sweepTestApplicationPRA(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(pra)))
 	for _, b := range pra {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.applicationsegmentpra.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -271,7 +272,7 @@ func sweepTestInspectionCustomControl(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(customControl)))
 	for _, b := range customControl {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.inspection_custom_controls.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -298,7 +299,7 @@ func sweepTestInspectionProfile(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(profile)))
 	for _, b := range profile {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.inspection_profile.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -334,7 +335,7 @@ func sweepTestLSSConfigController(client *testClient) error {
 
 	for _, b := range lssConfig {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.LSSConfig.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.LSSConfig.Name, testResourcePrefix) || strings.HasPrefix(b.LSSConfig.Name, updateResourcePrefix) {
 			// Attempt to delete the resource
 			_, err := client.sdkClient.lssconfigcontroller.Delete(b.ID)
 			if err != nil {
@@ -408,7 +409,7 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 			}
 
 			// Check if the resource name has the required prefix before deleting it
-			if strings.HasPrefix(rule.Name, testResourcePrefix) {
+			if strings.HasPrefix(rule.Name, testResourcePrefix) || strings.HasPrefix(rule.Name, updateResourcePrefix) {
 				// Use the fetched PolicySetID for deletion
 				if _, err := client.sdkClient.policysetcontroller.Delete(policySetID, rule.ID); err != nil {
 					errorList = append(errorList, err)
@@ -436,7 +437,7 @@ func sweepTestProvisioningKey(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(provisioningKey)))
 	for _, b := range provisioningKey {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			// Assuming 'AssociationType' is a field in the provisioningKey object
 			if _, err := client.sdkClient.provisioningkey.Delete(b.AssociationType, b.ID); err != nil {
 				errorList = append(errorList, err)
@@ -464,7 +465,7 @@ func sweepTestSegmentGroup(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.segmentgroup.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -491,7 +492,7 @@ func sweepTestServerGroup(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.servergroup.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -518,7 +519,7 @@ func sweepTestServiceEdgeGroup(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.serviceedgegroup.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -545,7 +546,7 @@ func sweepTestCBIBanner(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.cbibannercontroller.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -572,7 +573,7 @@ func sweepTestCBIExternalProfile(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.cbiprofilecontroller.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -599,7 +600,7 @@ func sweepTestCBICertificate(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.cbicertificatecontroller.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
@@ -626,7 +627,7 @@ func sweepTestBaCertificate(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			if _, err := client.sdkClient.bacertificate.Delete(b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue

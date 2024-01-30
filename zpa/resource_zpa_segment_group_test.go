@@ -19,7 +19,7 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 
 	initialName := "tf-acc-test-" + generatedName
-	updatedName := "updated-" + generatedName
+	updatedName := "tf-updated-" + generatedName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -30,7 +30,7 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, initialName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabled)),
 				),
@@ -41,7 +41,7 @@ func TestAccResourceSegmentGroupBasic(t *testing.T) {
 				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, updatedName, variable.SegmentGroupDescriptionUpdate, variable.SegmentGroupEnabledUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescriptionUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabledUpdate)),
 				),
@@ -104,7 +104,7 @@ func testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, descr
 
 	return fmt.Sprintf(`
 resource "%s" "%s" {
-	name = "tf-acc-test-%s"
+	name = "%s"
 	description = "%s"
 	enabled = "%s"
 }
@@ -127,41 +127,3 @@ data "%s" "%s" {
 		resourcetype.ZPASegmentGroup, resourceName,
 	)
 }
-
-/*
-func testAccCheckSegmentGroupConfigure(resourceTypeAndName, generatedName, description string, enabled bool) string {
-	return fmt.Sprintf(`
-// segment group resource
-%s
-
-data "%s" "%s" {
-  id = "${%s.id}"
-}
-`,
-		// resource variables
-		SegmentGroupResourceHCL(generatedName, description, enabled),
-
-		// data source variables
-		resourcetype.ZPASegmentGroup,
-		generatedName,
-		resourceTypeAndName,
-	)
-}
-
-func SegmentGroupResourceHCL(generatedName, description string, enabled bool) string {
-	return fmt.Sprintf(`
-resource "%s" "%s" {
-	name = "tf-acc-test-%s"
-	description = "%s"
-	enabled = "%s"
-}
-`,
-		// resource variables
-		resourcetype.ZPASegmentGroup,
-		generatedName,
-		generatedName,
-		description,
-		strconv.FormatBool(enabled),
-	)
-}
-*/

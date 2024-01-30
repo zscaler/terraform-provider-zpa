@@ -18,8 +18,8 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 	var groups appconnectorgroup.AppConnectorGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
 
-	initialName := "tests-" + generatedName
-	updatedName := "updated-" + generatedName
+	initialName := "tf-acc-test-" + generatedName
+	updatedName := "tf-updated-" + generatedName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -30,7 +30,7 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, initialName, variable.AppConnectorDescription, variable.AppConnectorEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckApp)),
@@ -45,7 +45,7 @@ func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
 				Config: testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, updatedName, variable.AppConnectorDescriptionUpdate, variable.AppConnectorEnabledUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAppConnectorGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppConnectorDescriptionUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppConnectorEnabledUpdate)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "tcp_quick_ack_app", strconv.FormatBool(variable.TCPQuickAckAppUpdate)),
@@ -112,7 +112,7 @@ func testAccCheckAppConnectorGroupConfigure(resourceTypeAndName, generatedName, 
 
 	return fmt.Sprintf(`
 resource "%s" "%s" {
-	name                          = "tf-acc-test-%s"
+	name                          = "%s"
 	description                   = "%s"
 	enabled                       = "%s"
 	country_code                  = "US"
