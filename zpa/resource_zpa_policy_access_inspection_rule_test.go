@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
 )
 
 func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
@@ -17,13 +18,16 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
+	inspectionProfileTypeAndName, _, inspectionProfileGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionProfile)
+	inspectionProfileHCL := testAccCheckInspectionProfileConfigure(inspectionProfileTypeAndName, inspectionProfileGeneratedName, variable.InspectionProfileDescription, variable.InspectionProfileParanoia)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckPolicyInspectionRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc),
+				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc, inspectionProfileHCL, inspectionProfileTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyInspectionRuleExists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
@@ -34,10 +38,15 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 				),
 				ExpectNonEmptyPlan: true,
 			},
-
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			// Update test
 			{
-				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc),
+				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc, inspectionProfileHCL, inspectionProfileTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyInspectionRuleExists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
@@ -47,6 +56,12 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 				ExpectNonEmptyPlan: true,
+			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -100,8 +115,11 @@ func testAccCheckPolicyInspectionRuleExists(resource string) resource.TestCheckF
 	}
 }
 
-func testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, rName, generatedName, desc string) string {
+func testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, rName, generatedName, desc, inspectionProfileHCL, inspectionProfileTypeAndName string) string {
 	return fmt.Sprintf(`
+
+// Inspection profile resource
+%s
 
 // policy access rule resource
 %s
@@ -111,7 +129,8 @@ data "%s" "%s" {
 }
 `,
 		// resource variables
-		getPolicyInspectionRuleHCL(rName, generatedName, desc),
+		inspectionProfileHCL,
+		getPolicyInspectionRuleHCL(rName, generatedName, desc, inspectionProfileTypeAndName),
 
 		// data source variables
 		resourcetype.ZPAPolicyType,
@@ -120,7 +139,7 @@ data "%s" "%s" {
 	)
 }
 
-func getPolicyInspectionRuleHCL(rName, generatedName, desc string) string {
+func getPolicyInspectionRuleHCL(rName, generatedName, desc, inspectionProfileTypeAndName string) string {
 	return fmt.Sprintf(`
 
 data "zpa_policy_type" "inspection_policy" {
@@ -133,7 +152,7 @@ resource "%s" "%s" {
 	action              		= "INSPECT"
 	operator      				= "AND"
 	policy_set_id 				= data.zpa_policy_type.inspection_policy.id
-	zpn_inspection_profile_id 	= zpa_inspection_profile.this.id
+	zpn_inspection_profile_id 	= "${%s.id}"
 	conditions {
 		negated  = false
 		operator = "OR"
@@ -143,41 +162,13 @@ resource "%s" "%s" {
 			rhs         = "zpn_client_type_exporter"
 			}
 		}
-	depends_on = [zpa_inspection_profile.this]
-}
-
-data "zpa_inspection_predefined_controls" "this" {
-	name = "Failed to parse request body"
-	version    = "OWASP_CRS/3.3.0"
-  }
-
-  data "zpa_inspection_all_predefined_controls" "default_predefined_controls" {
-	version    = "OWASP_CRS/3.3.0"
-	group_name = "Preprocessors"
-  }
-
-  resource "zpa_inspection_profile" "this" {
-	name                        = "tf-acc-test"
-	description                 = "tf-acc-test"
-	paranoia_level              = "2"
-	dynamic "predefined_controls" {
-	  for_each = data.zpa_inspection_all_predefined_controls.default_predefined_controls.list
-	  content {
-		id           = predefined_controls.value.id
-		action       = predefined_controls.value.action == "" ? predefined_controls.value.default_action : predefined_controls.value.action
-		action_value = predefined_controls.value.action_value
-	  }
 	}
-	predefined_controls {
-	  id     = data.zpa_inspection_predefined_controls.this.id
-	  action = "BLOCK"
-	}
-}
 `,
 		// resource variables
 		resourcetype.ZPAPolicyInspectionRule,
 		rName,
 		generatedName,
 		desc,
+		inspectionProfileTypeAndName,
 	)
 }
