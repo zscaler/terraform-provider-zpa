@@ -36,7 +36,7 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
-				ExpectNonEmptyPlan: true,
+				// ExpectNonEmptyPlan: true,
 			},
 			// Import test
 			{
@@ -55,7 +55,7 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
-				ExpectNonEmptyPlan: true,
+				// ExpectNonEmptyPlan: true,
 			},
 			// Import test
 			{
