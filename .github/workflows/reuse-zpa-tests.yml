@@ -59,7 +59,7 @@ jobs:
         run: make build
 
       - name: Run tests with retry
-        uses: nick-invision/retry@v2
+        uses: nick-invision/retry@v3
         with:
           max_attempts: 1
           timeout_minutes: 30  # Adjust as needed
