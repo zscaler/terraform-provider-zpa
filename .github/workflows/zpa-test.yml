@@ -1,0 +1,253 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # For systems with an upstream API that could drift unexpectedly (like most SaaS systems, etc.),
+  # we recommend testing at a regular interval not necessarily tied to code changes. This will
+  # ensure you are alerted to something breaking due to an API change, even if the code did not
+  # change.
+
+  schedule:
+    - cron: '0 13 * * 1-5' # UTC
+  workflow_dispatch:
+
+jobs:
+  zpa-qa1-tenants:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        goVersion: [1.20]
+        environment:
+          - ZPA_QA_TENANT01
+          - ZPA_QA_TENANT02
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.20"
+
+      - name: Setup Go Tools
+        run: make tools
+
+      - name: Download Go Dependencies
+        run: |
+          go mod tidy && go mod vendor
+
+      - name: Setup Go Tools
+        run: make tools
+
+      - name: Check Formatting
+        run: make fmtcheck
+
+      - name: Vet Code
+        run: make vet
+
+      - name: Lint Code
+        run: make lint
+
+      - name: Check Build
+        run: make build
+
+      - name: Run tests with retry
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 1
+          timeout_minutes: 30  # Adjust as needed
+          command: |
+            make sweep
+            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
+            make sweep
+        env:
+          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+          ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+          TF_ACC: ${{ secrets.TF_ACC }}
+          ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
+
+  zpa-qa2-tenants:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        goVersion: [1.20]
+        environment:
+          - ZPA_QA2_TENANT01
+          # - ZPA_QA2_TENANT02
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.20"
+
+      - name: Setup Go Tools
+        run: make tools
+
+      - name: Download Go Dependencies
+        run: |
+          go mod tidy && go mod vendor
+
+      - name: Setup Go Tools
+        run: make tools
+
+      - name: Check Formatting
+        run: make fmtcheck
+
+      - name: Vet Code
+        run: make vet
+
+      - name: Lint Code
+        run: make lint
+
+      - name: Check Build
+        run: make build
+
+      - name: Run tests with retry
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 1
+          timeout_minutes: 30  # Adjust as needed
+          command: |
+            make sweep
+            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
+            make sweep
+        env:
+          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+          ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+          TF_ACC: ${{ secrets.TF_ACC }}
+          ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
+
+  zpa-beta-tenants:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        goVersion: [1.20]
+        environment:
+          - ZPA_BETA_TENANT01
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.20"
+
+      - name: Setup Go Tools
+        run: make tools
+
+      - name: Download Go Dependencies
+        run: |
+          go mod tidy && go mod vendor
+
+      - name: Setup Go Tools
+        run: make tools
+
+      - name: Check Formatting
+        run: make fmtcheck
+
+      - name: Vet Code
+        run: make vet
+
+      - name: Lint Code
+        run: make lint
+
+      - name: Check Build
+        run: make build
+
+      - name: Run tests with retry
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 1
+          timeout_minutes: 30  # Adjust as needed
+          command: |
+            make sweep
+            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
+            make sweep
+        env:
+          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+          ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+          TF_ACC: ${{ secrets.TF_ACC }}
+          ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
+    needs:
+      - zpa-qa1-tenants
+      - zpa-qa2-tenants
+
+  zpa-prod-tenants:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        goVersion: [1.20]
+        environment:
+          - ZPA_PROD_TENANT01
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.20"
+
+      - name: Setup Go Tools
+        run: make tools
+
+      - name: Download Go Dependencies
+        run: |
+          go mod tidy && go mod vendor
+
+      - name: Setup Go Tools
+        run: make tools
+
+      - name: Check Formatting
+        run: make fmtcheck
+
+      - name: Vet Code
+        run: make vet
+
+      - name: Lint Code
+        run: make lint
+
+      - name: Check Build
+        run: make build
+
+      - name: Run tests with retry
+        uses: nick-fields/retry@v2
+        with:
+          max_attempts: 1
+          timeout_minutes: 30  # Adjust as needed
+          command: |
+            make sweep
+            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
+            make sweep
+        env:
+          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+          ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+          TF_ACC: ${{ secrets.TF_ACC }}
+          ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
+    needs:
+      - zpa-qa1-tenants
+      - zpa-qa2-tenants
+      - zpa-beta-tenants
