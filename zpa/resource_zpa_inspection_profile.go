@@ -200,22 +200,22 @@ func resourceInspectionProfile() *schema.Resource {
 					"SPECIFIC",
 				}, false),
 			},
-			"threatlabz_controls": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Description: "The ThreatLabZ predefined controls",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-					},
-				},
-			},
+			// "threatlabz_controls": {
+			// 	Type:        schema.TypeSet,
+			// 	Optional:    true,
+			// 	Description: "The ThreatLabZ predefined controls",
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"id": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Schema{
+			// 					Type: schema.TypeString,
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
 			// "websocket_controls": {
 			// 	Type:        schema.TypeSet,
 			// 	Optional:    true,
@@ -314,19 +314,19 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	// Flattening ThreatLabz Controls
-	threatLabzIDs := make([]string, len(resp.ThreatLabzControls))
-	for i, control := range resp.ThreatLabzControls {
-		threatLabzIDs[i] = control.ID
-	}
-	if err := d.Set("threatlabz_controls", flattenIDList(threatLabzIDs)); err != nil {
-		return err
-	}
+	// threatLabzIDs := make([]string, len(resp.ThreatLabzControls))
+	// for i, control := range resp.ThreatLabzControls {
+	// 	threatLabzIDs[i] = control.ID
+	// }
+	// if err := d.Set("threatlabz_controls", flattenIDList(threatLabzIDs)); err != nil {
+	// 	return err
+	// }
 
-	// Flattening WebSocket Controls
-	websocketIDs := make([]string, len(resp.WebSocketControls))
-	for i, control := range resp.WebSocketControls {
-		websocketIDs[i] = control.ID
-	}
+	// // Flattening WebSocket Controls
+	// websocketIDs := make([]string, len(resp.WebSocketControls))
+	// for i, control := range resp.WebSocketControls {
+	// 	websocketIDs[i] = control.ID
+	// }
 	// if err := d.Set("websocket_controls", flattenIDList(websocketIDs)); err != nil {
 	// 	return err
 	// }
@@ -422,7 +422,7 @@ func expandInspectionProfile(d *schema.ResourceData) inspection_profile.Inspecti
 		CustomControls:            expandCustomControls(d),
 		PredefinedControls:        expandPredefinedControls(d),
 		// WebSocketControls:         expandWebSocketControl(d),
-		ThreatLabzControls: expandThreatLabzControls(d),
+		// ThreatLabzControls: expandThreatLabzControls(d),
 	}
 	return inspection_profile
 }
@@ -506,6 +506,7 @@ func expandPredefinedControls(d *schema.ResourceData) []inspection_profile.Custo
 	return nil
 }
 
+/*
 func expandThreatLabzControls(d *schema.ResourceData) []inspection_profile.ThreatLabzControls {
 	threatLabzInterface, ok := d.GetOk("threatlabz_controls")
 	if ok {
@@ -528,7 +529,7 @@ func expandThreatLabzControls(d *schema.ResourceData) []inspection_profile.Threa
 	return []inspection_profile.ThreatLabzControls{}
 }
 
-/*
+
 	func expandWebSocketControl(d *schema.ResourceData) []inspection_profile.WebSocketControls {
 		websocketInterface, ok := d.GetOk("websocket_controls")
 		if ok {
@@ -550,7 +551,7 @@ func expandThreatLabzControls(d *schema.ResourceData) []inspection_profile.Threa
 
 		return []inspection_profile.WebSocketControls{}
 	}
-*/
+
 
 func flattenIDList(idList []string) *schema.Set {
 	set := schema.NewSet(schema.HashString, []interface{}{})
@@ -563,3 +564,4 @@ func flattenIDList(idList []string) *schema.Set {
 
 	return set
 }
+*/

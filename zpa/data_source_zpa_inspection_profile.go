@@ -406,22 +406,22 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 		}
 
 		// Flattening ThreatLabz Controls
-		threatLabzIDs := make([]string, len(resp.ThreatLabzControls))
-		for i, control := range resp.ThreatLabzControls {
-			threatLabzIDs[i] = control.ID
-		}
-		if err := d.Set("threatlabz_controls", flattenIDList(threatLabzIDs)); err != nil {
-			return err
-		}
+		// threatLabzIDs := make([]string, len(resp.ThreatLabzControls))
+		// for i, control := range resp.ThreatLabzControls {
+		// 	threatLabzIDs[i] = control.ID
+		// }
+		// if err := d.Set("threatlabz_controls", flattenIDList(threatLabzIDs)); err != nil {
+		// 	return err
+		// }
 
-		// Flattening WebSocket Controls
-		websocketIDs := make([]string, len(resp.WebSocketControls))
-		for i, control := range resp.WebSocketControls {
-			websocketIDs[i] = control.ID
-		}
-		if err := d.Set("websocket_controls", flattenIDList(websocketIDs)); err != nil {
-			return err
-		}
+		// // Flattening WebSocket Controls
+		// websocketIDs := make([]string, len(resp.WebSocketControls))
+		// for i, control := range resp.WebSocketControls {
+		// 	websocketIDs[i] = control.ID
+		// }
+		// if err := d.Set("websocket_controls", flattenIDList(websocketIDs)); err != nil {
+		// 	return err
+		// }
 	} else {
 		return fmt.Errorf("couldn't find any inspection profile with name '%s' or id '%s'", name, id)
 	}
