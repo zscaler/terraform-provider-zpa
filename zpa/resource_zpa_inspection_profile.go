@@ -216,23 +216,23 @@ func resourceInspectionProfile() *schema.Resource {
 					},
 				},
 			},
-			"websocket_controls": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
-				Description: "The WebSocket controls.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-					},
-				},
-			},
+			// "websocket_controls": {
+			// 	Type:        schema.TypeSet,
+			// 	Optional:    true,
+			// 	Computed:    true,
+			// 	Description: "The WebSocket controls.",
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"id": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Schema{
+			// 					Type: schema.TypeString,
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
 		},
 	}
 }
@@ -327,9 +327,9 @@ func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error 
 	for i, control := range resp.WebSocketControls {
 		websocketIDs[i] = control.ID
 	}
-	if err := d.Set("websocket_controls", flattenIDList(websocketIDs)); err != nil {
-		return err
-	}
+	// if err := d.Set("websocket_controls", flattenIDList(websocketIDs)); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
@@ -421,8 +421,8 @@ func expandInspectionProfile(d *schema.ResourceData) inspection_profile.Inspecti
 		ControlInfoResource:       expandControlsInfo(d),
 		CustomControls:            expandCustomControls(d),
 		PredefinedControls:        expandPredefinedControls(d),
-		WebSocketControls:         expandWebSocketControl(d),
-		ThreatLabzControls:        expandThreatLabzControls(d),
+		// WebSocketControls:         expandWebSocketControl(d),
+		ThreatLabzControls: expandThreatLabzControls(d),
 	}
 	return inspection_profile
 }
@@ -528,27 +528,29 @@ func expandThreatLabzControls(d *schema.ResourceData) []inspection_profile.Threa
 	return []inspection_profile.ThreatLabzControls{}
 }
 
-func expandWebSocketControl(d *schema.ResourceData) []inspection_profile.WebSocketControls {
-	websocketInterface, ok := d.GetOk("websocket_controls")
-	if ok {
-		websocketControl := websocketInterface.(*schema.Set)
-		log.Printf("[INFO] websocket control data: %+v\n", websocketControl)
-		var websocketControls []inspection_profile.WebSocketControls
-		for _, websocketControl := range websocketControl.List() {
-			websocketControl, _ := websocketControl.(map[string]interface{})
-			if websocketControl != nil {
-				for _, id := range websocketControl["id"].([]interface{}) {
-					websocketControls = append(websocketControls, inspection_profile.WebSocketControls{
-						ID: id.(string),
-					})
+/*
+	func expandWebSocketControl(d *schema.ResourceData) []inspection_profile.WebSocketControls {
+		websocketInterface, ok := d.GetOk("websocket_controls")
+		if ok {
+			websocketControl := websocketInterface.(*schema.Set)
+			log.Printf("[INFO] websocket control data: %+v\n", websocketControl)
+			var websocketControls []inspection_profile.WebSocketControls
+			for _, websocketControl := range websocketControl.List() {
+				websocketControl, _ := websocketControl.(map[string]interface{})
+				if websocketControl != nil {
+					for _, id := range websocketControl["id"].([]interface{}) {
+						websocketControls = append(websocketControls, inspection_profile.WebSocketControls{
+							ID: id.(string),
+						})
+					}
 				}
 			}
+			return websocketControls
 		}
-		return websocketControls
-	}
 
-	return []inspection_profile.WebSocketControls{}
-}
+		return []inspection_profile.WebSocketControls{}
+	}
+*/
 
 func flattenIDList(idList []string) *schema.Set {
 	set := schema.NewSet(schema.HashString, []interface{}{})
