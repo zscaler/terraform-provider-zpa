@@ -19,7 +19,7 @@ func TestAccResourceCBIBannersBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBIBannerController)
 
 	initialName := "tf-acc-test-" + generatedName
-	updatedName := "updated-" + generatedName
+	updatedName := "tf-updated-" + generatedName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -30,7 +30,7 @@ func TestAccResourceCBIBannersBasic(t *testing.T) {
 				Config: testAccCheckCBIBannerConfigure(resourceTypeAndName, initialName, variable.PrimaryColor, variable.TextColor, variable.NotificationTitle, variable.NotificationText, variable.Banner, variable.Persist, variable.Logo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCBIBannerExists(resourceTypeAndName, &cbiBanner),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "primary_color", variable.PrimaryColor),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "text_color", variable.TextColor),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "notification_title", variable.NotificationTitle),
@@ -46,7 +46,7 @@ func TestAccResourceCBIBannersBasic(t *testing.T) {
 				Config: testAccCheckCBIBannerConfigure(resourceTypeAndName, updatedName, variable.PrimaryColor, variable.TextColor, variable.NotificationTitle, variable.NotificationText, variable.Banner, variable.Persist, variable.Logo),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCBIBannerExists(resourceTypeAndName, &cbiBanner),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "primary_color", variable.PrimaryColor),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "text_color", variable.TextColor),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "notification_title", variable.NotificationTitle),
@@ -108,7 +108,7 @@ func testAccCheckCBIBannerConfigure(resourceTypeAndName, generatedName, primaryC
 
 	return fmt.Sprintf(`
 resource "%s" "%s" {
-	name = "tf-acc-test-%s"
+	name = "%s"
 	primary_color = "%s"
 	text_color = "%s"
 	notification_title = "%s"

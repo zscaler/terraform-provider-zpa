@@ -383,7 +383,6 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
-		_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("global_control_actions", resp.GlobalControlActions)
@@ -406,7 +405,21 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 			return err
 		}
 
-		if err := d.Set("web_socket_controls", flattenPredefinedControlsSimple(resp.WebSocketControls)); err != nil {
+		// Flattening ThreatLabz Controls
+		threatLabzIDs := make([]string, len(resp.ThreatLabzControls))
+		for i, control := range resp.ThreatLabzControls {
+			threatLabzIDs[i] = control.ID
+		}
+		if err := d.Set("threatlabz_controls", flattenIDList(threatLabzIDs)); err != nil {
+			return err
+		}
+
+		// Flattening WebSocket Controls
+		websocketIDs := make([]string, len(resp.WebSocketControls))
+		for i, control := range resp.WebSocketControls {
+			websocketIDs[i] = control.ID
+		}
+		if err := d.Set("websocket_controls", flattenIDList(websocketIDs)); err != nil {
 			return err
 		}
 	} else {

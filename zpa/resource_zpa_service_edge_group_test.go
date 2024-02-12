@@ -18,8 +18,8 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 	var groups serviceedgegroup.ServiceEdgeGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServiceEdgeGroup)
 
-	initialName := "tests-" + generatedName
-	updatedName := "updated-" + generatedName
+	initialName := "tf-acc-test-" + generatedName
+	updatedName := "tf-updated-" + generatedName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -30,7 +30,7 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, initialName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceEdgeGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "is_public", strconv.FormatBool(variable.ServiceEdgeIsPublic)),
@@ -46,7 +46,7 @@ func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
 				Config: testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, updatedName, variable.ServiceEdgeDescription, variable.ServiceEdgeEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceEdgeGroupExists(resourceTypeAndName, &groups),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.ServiceEdgeDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.ServiceEdgeEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "is_public", strconv.FormatBool(variable.ServiceEdgeIsPublic)),
@@ -114,7 +114,7 @@ func testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, d
 
 	return fmt.Sprintf(`
 resource "%s" "%s" {
-	name                 = "tf-acc-test-%s"
+	name                 = "%s"
 	description          = "%s"
 	enabled				 = "%s"
 	is_public			 = "%s"

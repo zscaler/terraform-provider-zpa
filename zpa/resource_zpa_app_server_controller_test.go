@@ -19,7 +19,7 @@ func TestAccResourceApplicationServerBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationServer)
 
 	initialName := "tf-acc-test-" + generatedName
-	updatedName := "updated-" + generatedName
+	updatedName := "tf-updated-" + generatedName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -30,7 +30,7 @@ func TestAccResourceApplicationServerBasic(t *testing.T) {
 				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, initialName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationServerExists(resourceTypeAndName, &servers),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+initialName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppServerDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "address", variable.AppServerAddress),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
@@ -42,7 +42,7 @@ func TestAccResourceApplicationServerBasic(t *testing.T) {
 				Config: testAccCheckApplicationServerConfigure(resourceTypeAndName, updatedName, variable.AppServerDescription, variable.AppServerAddress, variable.AppServerEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationServerExists(resourceTypeAndName, &servers),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+updatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.AppServerDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "address", variable.AppServerAddress),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppServerEnabled)),
@@ -105,7 +105,7 @@ func testAccCheckApplicationServerConfigure(resourceTypeAndName, generatedName, 
 	resourceName := strings.Split(resourceTypeAndName, ".")[1] // Extract the resource name
 	return fmt.Sprintf(`
 	resource "%s" "%s" {
-	name            = "tf-acc-test-%s"
+	name            = "%s"
 	description     = "%s"
 	address         = "%s"
 	enabled         = "%s"
