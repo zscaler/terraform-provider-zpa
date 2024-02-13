@@ -14,8 +14,8 @@ import (
 
 func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyInspectionRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test")
-	updatedRName := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
+	rName := acctest.RandomWithPrefix("tf-acc-test-")
+	updatedRName := acctest.RandomWithPrefix("tf-updated-") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	inspectionProfileTypeAndName, _, inspectionProfileGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionProfile)
@@ -36,7 +36,7 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
-				// ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true,
 			},
 			// Import test
 			{
@@ -55,7 +55,7 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
-				// ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true,
 			},
 			// Import test
 			{

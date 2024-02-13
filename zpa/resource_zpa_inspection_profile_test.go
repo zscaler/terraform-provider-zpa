@@ -2,6 +2,7 @@ package zpa
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -16,34 +17,37 @@ func TestAccResourceInspectionProfile_Basic(t *testing.T) {
 	var profile inspection_profile.InspectionProfile
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionProfile)
 
+	initialName := "tf-acc-test-" + generatedName
+	updatedName := "tf-updated-" + generatedName
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckInspectionProfileDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescription, variable.InspectionProfileParanoia),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, initialName, variable.InspectionProfileDescription, variable.InspectionProfileParanoia),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionProfileExists(resourceTypeAndName, &profile),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", variable.InspectionProfileParanoia),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
 				),
-				// ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
 			{
-				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, variable.InspectionProfileDescriptionUpdate, variable.InspectionProfileParanoiaUpdate),
+				Config: testAccCheckInspectionProfileConfigure(resourceTypeAndName, updatedName, variable.InspectionProfileDescriptionUpdate, variable.InspectionProfileParanoiaUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckInspectionProfileExists(resourceTypeAndName, &profile),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.InspectionProfileDescriptionUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", variable.InspectionProfileParanoiaUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "predefined_controls.#", "7"),
 				),
-				// ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -93,25 +97,8 @@ func testAccCheckInspectionProfileExists(resource string, rule *inspection_profi
 }
 
 func testAccCheckInspectionProfileConfigure(resourceTypeAndName, generatedName, description, paranoia string) string {
-	return fmt.Sprintf(`
-// inspection profile resource
-%s
+	resourceName := strings.Split(resourceTypeAndName, ".")[1] // Extract the resource name
 
-data "%s" "%s" {
-  id = "${%s.id}"
-}
-`,
-		// resource variables
-		getInspectionProfileResourceHCL(generatedName, description, paranoia),
-
-		// data source variables
-		resourcetype.ZPAInspectionProfile,
-		generatedName,
-		resourceTypeAndName,
-	)
-}
-
-func getInspectionProfileResourceHCL(generatedName, description, paranoia string) string {
 	return fmt.Sprintf(`
 
 data "zpa_inspection_all_predefined_controls" "default_predefined_controls" {
@@ -125,7 +112,7 @@ data "zpa_inspection_predefined_controls" "this" {
 }
 
 resource "%s" "%s" {
-	name                          = "tf-acc-test-%s"
+	name                          = "%s"
 	description                   = "%s"
 	paranoia_level                = "%s"
 
@@ -144,12 +131,22 @@ resource "%s" "%s" {
 		protocol_type = "HTTP"
 	}
 }
+
+data "%s" "%s" {
+	id = "${%s.%s.id}"
+  }
 `,
 		// resource variables
 		resourcetype.ZPAInspectionProfile,
-		generatedName,
+		resourceName,
 		generatedName,
 		description,
 		paranoia,
+
+		// Data source type and name
+		resourcetype.ZPAInspectionProfile, resourceName,
+
+		// Reference to the resource
+		resourcetype.ZPAInspectionProfile, resourceName,
 	)
 }

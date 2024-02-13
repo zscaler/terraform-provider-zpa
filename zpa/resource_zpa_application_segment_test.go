@@ -18,8 +18,8 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 	var appSegment applicationsegment.ApplicationSegmentResource
 	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegment)
 	rPort := acctest.RandIntRange(1000, 9999)
-	rDescription := acctest.RandomWithPrefix("tf-acc-test")
-	updatedDescription := acctest.RandomWithPrefix("tf-acc-test-updated") // New name for update test
+	rDescription := acctest.RandomWithPrefix("tf-acc-test-")
+	updatedDescription := acctest.RandomWithPrefix("tf-updated-") // New name for update test
 
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
