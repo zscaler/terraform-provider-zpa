@@ -144,13 +144,13 @@ data "zpa_idp_controller" "this" {
    }
 
 # Retrieve the SCIM_GROUP ID(s)
-data "zpa_scim_groups" "engineering" {
-  name     = "Engineering"
+data "zpa_scim_groups" "a000" {
+  name     = "A000"
   idp_name = "BD_Okta_Users"
 }
 
-data "zpa_scim_groups" "finance" {
-  name     = "Finance"
+data "zpa_scim_groups" "b000" {
+  name     = "B000"
   idp_name = "BD_Okta_Users"
 }
 resource "%s" "%s" {
@@ -173,7 +173,7 @@ resource "%s" "%s" {
 			operator = "OR"
 			operands {
 			  object_type = "CLIENT_TYPE"
-			  values      = ["zpn_client_type_exporter", "zpn_client_type_ip_anchoring", "zpn_client_type_zapp", "zpn_client_type_edge_connector", "zpn_client_type_machine_tunnel", "zpn_client_type_browser_isolation", "zpn_client_type_slogger", "zpn_client_type_zapp_partner", "zpn_client_type_branch_connector"]
+			  values      = ["zpn_client_type_exporter", "zpn_client_type_ip_anchoring", "zpn_client_type_zapp", "zpn_client_type_edge_connector", "zpn_client_type_machine_tunnel", "zpn_client_type_browser_isolation", "zpn_client_type_slogger", "zpn_client_type_branch_connector"]
 			}
 		  }
 		conditions {
@@ -182,11 +182,11 @@ resource "%s" "%s" {
 		operands {
 			object_type = "SCIM_GROUP"
 			entry_values {
-			rhs = data.zpa_scim_groups.engineering.id
+			rhs = data.zpa_scim_groups.a000.id
 			lhs = data.zpa_idp_controller.this.id
 			}
 			entry_values {
-			rhs = data.zpa_scim_groups.finance.id
+			rhs = data.zpa_scim_groups.b000.id
 			lhs = data.zpa_idp_controller.this.id
 			}
 		}

@@ -14,11 +14,11 @@ func TestAccDataSourceScimGroup_Basic(t *testing.T) {
 			{
 				Config: testAccCheckDataSourceScimGroupConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.engineering"),
-					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.contractors"),
-					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.marketing"),
-					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.finance"),
-					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.executives"),
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.a000"),
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.b000"),
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.c000"),
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.d000"),
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.e000"),
 				),
 			},
 		},
@@ -33,28 +33,28 @@ func testAccDataSourceScimGroupCheck(name string) resource.TestCheckFunc {
 }
 
 var testAccCheckDataSourceScimGroupConfig_basic = `
-data "zpa_scim_groups" "engineering" {
-    name = "Engineering"
+data "zpa_scim_groups" "a000" {
+    name = "A000"
 	idp_name = "BD_Okta_Users"
 }
 
-data "zpa_scim_groups" "contractors" {
-    name = "Contractors"
+data "zpa_scim_groups" "b000" {
+    name = "B000"
 	idp_name = "BD_Okta_Users"
 }
 
-data "zpa_scim_groups" "marketing" {
-    name = "Marketing"
+data "zpa_scim_groups" "c000" {
+    name = "C000"
 	idp_name = "BD_Okta_Users"
 }
 
-data "zpa_scim_groups" "finance" {
-    name = "Finance"
+data "zpa_scim_groups" "d000" {
+    name = "D000"
 	idp_name = "BD_Okta_Users"
 }
 
-data "zpa_scim_groups" "executives" {
-    name = "Executives"
+data "zpa_scim_groups" "e000" {
+    name = "E000"
 	idp_name = "BD_Okta_Users"
 }
 `
