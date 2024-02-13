@@ -73,6 +73,7 @@ func ZPAProvider() *schema.Provider {
 			"zpa_policy_timeout_rule":                      resourcePolicyTimeoutRule(),
 			"zpa_policy_forwarding_rule":                   resourcePolicyForwardingRule(),
 			"zpa_policy_isolation_rule":                    resourcePolicyIsolationRule(),
+			"zpa_policy_redirection_rule":                  resourcePolicyRedictionRule(),
 			"zpa_provisioning_key":                         resourceProvisioningKey(),
 			"zpa_service_edge_group":                       resourceServiceEdgeGroup(),
 			"zpa_lss_config_controller":                    resourceLSSConfigController(),

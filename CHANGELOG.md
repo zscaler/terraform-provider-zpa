@@ -1,10 +1,22 @@
 # Changelog
 
-## 3.1.0 (January, 17 2023)
+## 3.10.0 (February, 13 2024)
 
 ### Notes
 
-- Release date: **(January, 17 2023)**
+- Release date: **(February, 13 2024)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #418](https://github.com/zscaler/terraform-provider-zpa/pull/418) - ✨ Added support for ZPA Policy Access Redirection Rule
+  - **NOTE** This feature is in limited availability. Contact Zscaler Support to enable this feature for your organization.
+
+## 3.1.0 (January, 17 2024)
+
+### Notes
+
+- Release date: **(January, 17 2024)**
 - Supported Terraform version: **v1.x**
 
 ### Enhacements
