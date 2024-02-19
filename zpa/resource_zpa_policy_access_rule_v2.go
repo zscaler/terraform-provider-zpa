@@ -285,7 +285,7 @@ func resourcePolicyAccessV2Delete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func expandCreatePolicyRuleV2(d *schema.ResourceData) (*policysetcontrollerv2.PolicyRuleResource, error) {
+func expandCreatePolicyRuleV2(d *schema.ResourceData) (*policysetcontrollerv2.PolicyRule, error) {
 	policySetID, ok := d.Get("policy_set_id").(string)
 	if !ok {
 		log.Printf("[ERROR] policy_set_id is not set\n")
@@ -296,7 +296,7 @@ func expandCreatePolicyRuleV2(d *schema.ResourceData) (*policysetcontrollerv2.Po
 	if err != nil {
 		return nil, err
 	}
-	return &policysetcontrollerv2.PolicyRuleResource{
+	return &policysetcontrollerv2.PolicyRule{
 		ID:          d.Get("id").(string),
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
