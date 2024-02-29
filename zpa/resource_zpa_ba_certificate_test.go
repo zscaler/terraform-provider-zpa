@@ -93,6 +93,18 @@ func pemEncode(derBytes []byte, pemType string) string {
 
 func testAccCheckBaCertificateExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		// Find the resource in the state
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		// Assume you have an API client set up and it has a method to get a certificate by ID
+		apiClient := testAccProvider.Meta().(*Client)
+		_, _, err := apiClient.bacertificate.Get(rs.Primary.ID)
+		if err != nil {
+			return fmt.Errorf("error fetching certificate with resource ID [%s] from API: %s", rs.Primary.ID, err)
+		}
 
 		return nil
 	}

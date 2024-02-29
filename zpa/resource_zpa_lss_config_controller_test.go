@@ -15,7 +15,7 @@ import (
 )
 
 func TestAccResourceLSSConfigControllerBasic(t *testing.T) {
-	var lssConfig lssconfigcontroller.LSSConfig
+	var lssConfig lssconfigcontroller.LSSResource
 	lssControllerTypeAndName, _, lssControllerGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPALSSController)
 	rPort := acctest.RandIntRange(1000, 9999)
 	rIP, _ := acctest.RandIpAddress("192.168.100.0/25")
@@ -78,26 +78,22 @@ func testAccCheckLSSConfigControllerDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckLSSConfigControllerExists(resource string, lss *lssconfigcontroller.LSSConfig) resource.TestCheckFunc {
+func testAccCheckLSSConfigControllerExists(resource string, lss *lssconfigcontroller.LSSResource) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("lss config controller Not found: %s", resource)
+			return fmt.Errorf("Application Segment Not found: %s", resource)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no lss config controller ID is set")
+			return fmt.Errorf("no Application Segment ID is set")
 		}
-		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := apiClient.lssconfigcontroller.Get(rs.Primary.ID)
+		client := testAccProvider.Meta().(*Client)
+		receivedLss, _, err := client.lssconfigcontroller.Get(rs.Primary.ID)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}
-		if resp.LSSConfig.Name != rs.Primary.Attributes["config.0.name"] {
-			return fmt.Errorf("name Not found in created attributes")
-		}
-		if resp.LSSConfig.Description != rs.Primary.Attributes["config.0.description"] {
-			return fmt.Errorf("description Not found in created attributes")
-		}
+		*lss = *receivedLss
+
 		return nil
 	}
 }
@@ -202,8 +198,8 @@ resource "%s" "%s" {
 		// resource variables
 		resourcetype.ZPALSSController,
 		generatedName,
-		generatedName,
-		generatedName,
+		name,
+		description,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(tlsEnabled),
 		lssHost,

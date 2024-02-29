@@ -107,9 +107,8 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Description: "Description of the application.",
 			},
 			"domain_names": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
+				Type:        schema.TypeSet,
+				Required:    true,
 				Description: "List of domains and IPs.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -204,6 +203,10 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"app_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 									"name": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -469,7 +472,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id str
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
-		DomainNames:               expandStringInSlice(d, "domain_names"),
+		DomainNames:               SetToStringList(d, "domain_names"),
 		TCPAppPortRange:           []common.NetworkPorts{},
 		UDPAppPortRange:           []common.NetworkPorts{},
 		ServerGroups:              expandPRAAppServerGroups(d),
@@ -555,6 +558,7 @@ func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.A
 			}
 			appTypes := SetToStringSlice(appTypesSet)
 			commonAppConfigDto = append(commonAppConfigDto, applicationsegmentpra.AppsConfig{
+				AppID:               commonAppConfig["app_id"].(string),
 				Name:                commonAppConfig["name"].(string),
 				Description:         commonAppConfig["description"].(string),
 				Enabled:             commonAppConfig["enabled"].(bool),
@@ -612,6 +616,7 @@ func flattenAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentpr
 		}
 		appConfig[i] = map[string]interface{}{
 			"name":                 val.Name,
+			"app_id":               val.AppID,
 			"enabled":              val.Enabled,
 			"domain":               val.Domain,
 			"application_port":     val.ApplicationPort,
