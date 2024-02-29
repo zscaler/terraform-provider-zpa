@@ -152,7 +152,7 @@ resource "%s" "%s" {
 		// resource variables
 		resourcetype.ZPAProvisioningKey,
 		generatedName,
-		generatedName,
+		name,
 		provisioningKeyType,
 		strconv.FormatBool(variable.ProvisioningKeyEnabled),
 		usage,
@@ -301,7 +301,7 @@ func serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdge
 		// resource variables
 		resourcetype.ZPAProvisioningKey,
 		generatedName,
-		generatedName,
+		name,
 		provisioningKeyType,
 		strconv.FormatBool(variable.ProvisioningKeyEnabled),
 		usage,
