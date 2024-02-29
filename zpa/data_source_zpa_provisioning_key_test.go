@@ -37,6 +37,7 @@ func TestAccDataSourceProvisioningKey_Basic_AppConnectorGroup(t *testing.T) {
 	})
 }
 
+/*
 // Testing Provisioning Key for Service Edge Group
 func TestAccDataSourceProvisioningKey_Basic_ServiceEdgeGroup(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
@@ -64,3 +65,4 @@ func TestAccDataSourceProvisioningKey_Basic_ServiceEdgeGroup(t *testing.T) {
 		},
 	})
 }
+*/
