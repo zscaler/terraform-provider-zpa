@@ -1,10 +1,15 @@
 package zpa
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
+
+var networkNames = []string{
+	"BD-TrustedNetwork01", "BD-TrustedNetwork02", "BD-TrustedNetwork03", "BD Trusted Network 01",
+}
 
 func TestAccDataSourceTrustedNetwork_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -12,23 +17,37 @@ func TestAccDataSourceTrustedNetwork_Basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckDataSourceTrustedNetworkConfig_basic,
+				Config: testAccCheckDataSourceTrustedNetwork_basic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceTrustedNetworkCheck("data.zpa_trusted_network.trusted_network03"),
+					generateTrustedNetworkChecks()...,
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceTrustedNetworkCheck(name string) resource.TestCheckFunc {
-	return resource.ComposeTestCheckFunc(
-		resource.TestCheckResourceAttrSet(name, "id"),
-		resource.TestCheckResourceAttrSet(name, "name"),
-	)
+func generateTrustedNetworkChecks() []resource.TestCheckFunc {
+	var checks []resource.TestCheckFunc
+	for _, name := range networkNames {
+		resourceName := createValidResourceName(name)
+		checkName := fmt.Sprintf("data.zpa_trusted_network.%s", resourceName)
+		checks = append(checks, resource.ComposeTestCheckFunc(
+			resource.TestCheckResourceAttrSet(checkName, "id"),
+			resource.TestCheckResourceAttrSet(checkName, "name"),
+		))
+	}
+	return checks
 }
 
-var testAccCheckDataSourceTrustedNetworkConfig_basic = `
-data "zpa_trusted_network" "trusted_network03" {
-    name = "BD-TrustedNetwork03 (zscalertwo.net)"
-}`
+func testAccCheckDataSourceTrustedNetwork_basic() string {
+	var configs string
+	for _, name := range networkNames {
+		resourceName := createValidResourceName(name)
+		configs += fmt.Sprintf(`
+data "zpa_trusted_network" "%s" {
+    name = "%s"
+}
+`, resourceName, name)
+	}
+	return configs
+}
