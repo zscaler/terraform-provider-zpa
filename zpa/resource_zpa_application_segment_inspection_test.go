@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
@@ -18,12 +17,12 @@ func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
 	var appSegment applicationsegmentinspection.AppSegmentInspection
 	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentInspection)
 
-	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
-	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
+	// serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
+	// serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
 
 	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
-	rDomain := acctest.RandomWithPrefix("tf-acc-test")
+	// rDomain := acctest.RandomWithPrefix("tf-acc-test")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -31,7 +30,7 @@ func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentInspectionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentInspectionConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, rDomain, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentInspectionConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentInspectionExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
@@ -48,7 +47,7 @@ func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentInspectionConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, rDomain, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentInspectionConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentInspectionExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
@@ -85,30 +84,27 @@ func testAccCheckApplicationSegmentInspectionDestroy(s *terraform.State) error {
 }
 
 func testAccCheckApplicationSegmentInspectionExists(resource string, segment *applicationsegmentinspection.AppSegmentInspection) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resource]
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("Inspection Application Segment Inspection Not found: %s", resource)
+			return fmt.Errorf("didn't find resource: %s", resource)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Inspection Application Segment Inspection ID is set")
+			return fmt.Errorf("no record ID is set")
 		}
-		client := testAccProvider.Meta().(*Client)
-		resp, _, err := client.applicationsegmentinspection.GetByName(rs.Primary.Attributes["name"])
+
+		apiClient := testAccProvider.Meta().(*Client)
+		receivedSegment, _, err := apiClient.applicationsegmentinspection.Get(rs.Primary.ID)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("name Not found in created attributes")
-		}
-		if resp.Description != rs.Primary.Attributes["description"] {
-			return fmt.Errorf("description Not found in created attributes")
-		}
+		*segment = *receivedSegment
+
 		return nil
 	}
 }
 
-func testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentInspectionConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName string, enabled bool, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 // segment group resource
@@ -124,7 +120,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getApplicationSegmentInspectionResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, rDomain, cnameEnabled),
+		getApplicationSegmentInspectionResourceHCL(generatedName, name, description, segmentGroupTypeAndName, enabled, cnameEnabled),
 
 		// data source variables
 		resourcetype.ZPAApplicationSegmentInspection,
@@ -133,7 +129,7 @@ data "%s" "%s" {
 	)
 }
 
-func getApplicationSegmentInspectionResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled bool, rDomain string, cnameEnabled bool) string {
+func getApplicationSegmentInspectionResourceHCL(generatedName, name, description, segmentGroupTypeAndName string, enabled bool, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "sales" {
@@ -170,8 +166,8 @@ resource "%s" "%s" {
 		// resource variables
 		resourcetype.ZPAApplicationSegmentInspection,
 		generatedName,
-		generatedName,
-		generatedName,
+		name,
+		description,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
 		segmentGroupTypeAndName,

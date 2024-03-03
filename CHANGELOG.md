@@ -1,10 +1,21 @@
 # Changelog
 
-## 3.1.0 (January, 17 2023)
+## 3.1.1 (February, 28 2024)
 
 ### Notes
 
-- Release date: **(January, 17 2023)**
+- Release date: **(February, 28 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #423](https://github.com/zscaler/terraform-provider-zpa/pull/423) - Fixed drift issue within `zpa_application_segment_pra` resource
+
+## 3.1.0 (January, 17 2024)
+
+### Notes
+
+- Release date: **(January, 17 2024)**
 - Supported Terraform version: **v1.x**
 
 ### Enhacements

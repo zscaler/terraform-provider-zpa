@@ -14,11 +14,18 @@ func TestAccDataSourceScimGroup_Basic(t *testing.T) {
 			{
 				Config: testAccCheckDataSourceScimGroupConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
+<<<<<<< HEAD
 					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.a000"),
 					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.b000"),
 					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.c000"),
 					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.d000"),
 					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.e000"),
+=======
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.engineering"),
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.contractors"),
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.finance"),
+					testAccDataSourceScimGroupCheck("data.zpa_scim_groups.executives"),
+>>>>>>> master
 				),
 			},
 		},
@@ -43,6 +50,7 @@ data "zpa_scim_groups" "b000" {
 	idp_name = "BD_Okta_Users"
 }
 
+<<<<<<< HEAD
 data "zpa_scim_groups" "c000" {
     name = "C000"
 	idp_name = "BD_Okta_Users"
@@ -50,6 +58,10 @@ data "zpa_scim_groups" "c000" {
 
 data "zpa_scim_groups" "d000" {
     name = "D000"
+=======
+data "zpa_scim_groups" "finance" {
+    name = "Finance"
+>>>>>>> master
 	idp_name = "BD_Okta_Users"
 }
 

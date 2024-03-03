@@ -17,9 +17,6 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 	var appSegment applicationsegmentpra.AppSegmentPRA
 	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentPRA)
 
-	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
-	serverGroupHCL := testAccCheckServerGroupConfigure(serverGroupTypeAndName, serverGroupGeneratedName, "", "", "", "", variable.ServerGroupEnabled, variable.ServerGroupDynamicDiscovery)
-
 	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
 
@@ -29,7 +26,7 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 		CheckDestroy: testAccCheckApplicationSegmentPRADestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckApplicationSegmentPRAConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentPRAConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentPRAExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
@@ -46,7 +43,7 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckApplicationSegmentPRAConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
+				Config: testAccCheckApplicationSegmentPRAConfigure(appSegmentTypeAndName, appSegmentGeneratedName, appSegmentGeneratedName, appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, variable.AppSegmentEnabled, variable.AppSegmentCnameEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckApplicationSegmentPRAExists(appSegmentTypeAndName, &appSegment),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "name", "tf-acc-test-"+appSegmentGeneratedName),
@@ -60,6 +57,12 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
 				),
 			},
+			// Import test
+			// {
+			// 	ResourceName:      appSegmentTypeAndName,
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
 		},
 	})
 }
@@ -83,30 +86,27 @@ func testAccCheckApplicationSegmentPRADestroy(s *terraform.State) error {
 }
 
 func testAccCheckApplicationSegmentPRAExists(resource string, segment *applicationsegmentpra.AppSegmentPRA) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resource]
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
-			return fmt.Errorf("Application Segment PRA Not found: %s", resource)
+			return fmt.Errorf("didn't find resource: %s", resource)
 		}
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Application Segment PRA ID is set")
+			return fmt.Errorf("no record ID is set")
 		}
-		client := testAccProvider.Meta().(*Client)
-		resp, _, err := client.applicationsegmentpra.GetByName(rs.Primary.Attributes["name"])
+
+		apiClient := testAccProvider.Meta().(*Client)
+		receivedSegment, _, err := apiClient.applicationsegmentpra.Get(rs.Primary.ID)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
-		if resp.Name != rs.Primary.Attributes["name"] {
-			return fmt.Errorf("name Not found in created attributes")
-		}
-		if resp.Description != rs.Primary.Attributes["description"] {
-			return fmt.Errorf("description Not found in created attributes")
-		}
+		*segment = *receivedSegment
+
 		return nil
 	}
 }
 
-func testAccCheckApplicationSegmentPRAConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName, serverGroupHCL, serverGroupTypeAndName string, enabled bool, cnameEnabled bool) string {
+func testAccCheckApplicationSegmentPRAConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName string, enabled bool, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 // segment group resource
@@ -122,7 +122,7 @@ data "%s" "%s" {
 		// resource variables
 		segmentGroupHCL,
 		// serverGroupHCL,
-		getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName, enabled, cnameEnabled),
+		getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, enabled, cnameEnabled),
 
 		// data source variables
 		resourcetype.ZPAApplicationSegmentPRA,
@@ -131,7 +131,7 @@ data "%s" "%s" {
 	)
 }
 
-func getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName, serverGroupTypeAndName string, enabled bool, cnameEnabled bool) string {
+func getApplicationSegmentPRAResourceHCL(generatedName, name, description, segmentGroupTypeAndName string, enabled bool, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
@@ -171,19 +171,14 @@ resource "%s" "%s" {
 	depends_on = [ %s ]
 }
 `,
-
 		// resource variables
 		resourcetype.ZPAApplicationSegmentPRA,
 		generatedName,
-		generatedName,
-		generatedName,
+		name,
+		description,
 		strconv.FormatBool(enabled),
 		strconv.FormatBool(cnameEnabled),
-		// rPort,
-		// rPort,
 		segmentGroupTypeAndName,
-		// serverGroupTypeAndName,
 		segmentGroupTypeAndName,
-		// serverGroupTypeAndName,
 	)
 }

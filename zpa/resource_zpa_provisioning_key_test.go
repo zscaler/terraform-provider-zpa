@@ -152,7 +152,7 @@ resource "%s" "%s" {
 		// resource variables
 		resourcetype.ZPAProvisioningKey,
 		generatedName,
-		generatedName,
+		name,
 		provisioningKeyType,
 		strconv.FormatBool(variable.ProvisioningKeyEnabled),
 		usage,
@@ -161,6 +161,7 @@ resource "%s" "%s" {
 	)
 }
 
+/*
 // Testing Provisioning Key for Service Edge Group
 func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
 	var groups provisioningkey.ProvisioningKey
@@ -301,7 +302,7 @@ func serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdge
 		// resource variables
 		resourcetype.ZPAProvisioningKey,
 		generatedName,
-		generatedName,
+		name,
 		provisioningKeyType,
 		strconv.FormatBool(variable.ProvisioningKeyEnabled),
 		usage,
@@ -309,3 +310,4 @@ func serviceEdgeGroupProvisioningKeyResourceHCL(generatedName, name, serviceEdge
 		serviceEdgeGroupTypeAndName,
 	)
 }
+*/

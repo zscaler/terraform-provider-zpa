@@ -93,7 +93,7 @@ func hasDuplicates(orders map[string]int) (int, []string, bool) {
 	return 0, nil, false
 }
 
-func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
+func getRules(d *schema.ResourceData) (*RulesOrders, error) {
 	policyType := d.Get("policy_type").(string)
 	orders := RulesOrders{
 		PolicyType: policyType,
@@ -116,7 +116,7 @@ func getRules(d *schema.ResourceData, zClient *Client) (*RulesOrders, error) {
 
 func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	rulesOrders, err := getRules(d, zClient)
+	rulesOrders, err := getRules(d)
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 	// Convert the interface to a client instance.
 	zClient := m.(*Client)
 	// Fetch and sort the rule orders from the provided data.
-	rules, err := getRules(d, zClient)
+	rules, err := getRules(d)
 	if err != nil {
 		return err
 	}

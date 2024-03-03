@@ -68,8 +68,9 @@ The following arguments are supported:
 * `tcp_port_ranges` - (Required) TCP port ranges used to access the app.
 * `udp_port_ranges` - (Required) UDP port ranges used to access the app.
 
+!> **WARNING:** Removing PRA applications from the `common_apps_dto.apps_config` block will cause the provider to force a replacement of the application segment.
+
 -> **NOTE:**  TCP and UDP ports can also be defined using the following model:
--> **NOTE:** When removing TCP and/or UDP ports, parameter must be defined but set as empty due to current API behavior.
 
 * `tcp_port_range` - (Required) TCP port ranges used to access the app.
   * `from:`
