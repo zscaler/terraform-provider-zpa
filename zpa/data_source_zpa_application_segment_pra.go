@@ -267,8 +267,8 @@ func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerG
 }
 
 func flattenSRAApps(sraApp *applicationsegmentpra.AppSegmentPRA) []interface{} {
-	sraApps := make([]interface{}, len(sraApp.SRAAppsDto))
-	for i, val := range sraApp.SRAAppsDto {
+	sraApps := make([]interface{}, len(sraApp.PRAApps))
+	for i, val := range sraApp.PRAApps {
 		sraApps[i] = map[string]interface{}{
 			"id":                   val.ID,
 			"app_id":               val.AppID,

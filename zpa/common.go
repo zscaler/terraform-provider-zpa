@@ -681,17 +681,6 @@ func flattenInspectionRulesConditions(condition common.Rules) []interface{} {
 	return conditions
 }
 
-func GetString(v interface{}) string {
-	if v == nil {
-		return ""
-	}
-	str, ok := v.(string)
-	if ok {
-		return str
-	}
-	return fmt.Sprintf("%v", v)
-}
-
 var AllowedPolicyTypes = map[string]struct{}{
 	"ACCESS_POLICY":                        {},
 	"GLOBAL_POLICY":                        {},
