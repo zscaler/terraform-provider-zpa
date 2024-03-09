@@ -84,7 +84,6 @@ func ZPAProvider() *schema.Provider {
 			"zpa_pra_portal_controller":                    resourcePRAPortalController(),
 			"zpa_pra_credential_controller":                resourcePRACredentialController(),
 			"zpa_pra_console_controller":                   resourcePRAConsoleController(),
-			"zpa_pra_console_controller_bulk":              resourcePRAConsoleControllerBulkBulk(),
 
 			// The day I realized I was naming stuff wrong :'-(
 			"zpa_browser_access": deprecateIncorrectNaming(resourceApplicationSegmentBrowserAccess(), zpaBrowserAccess),

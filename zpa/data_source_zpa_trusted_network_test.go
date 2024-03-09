@@ -8,7 +8,10 @@ import (
 )
 
 var networkNames = []string{
-	"BD-TrustedNetwork01", "BD-TrustedNetwork02", "BD-TrustedNetwork03", "BD Trusted Network 01",
+	"BD Trusted Network 01",
+	"BD  TrustedNetwork  01",
+	"BD-TrustedNetwork03",
+	"BDTrustedNetwork",
 }
 
 func TestAccDataSourceTrustedNetwork_Basic(t *testing.T) {
