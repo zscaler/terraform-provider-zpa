@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.2.0 (March, xx 2024)
+
+### Notes
+
+- Release date: **(March, xx 2024)**
+- Supported Terraform version: **v1.x**
+
+### NEW - RESOURCES, DATA SOURCES, PROPERTIES, ATTRIBUTES:
+
+* New datasource: `zpa_pra_approval_controller` retrieve Privileged Remote Access Approval [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_approval_controller` manages Privileged Remote Access Approval [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New datasource: `zpa_pra_portal_controller` retrieve Privileged Remote Access Portal [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_portal_controller` manages Privileged Remote Access Portal [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New datasource: `zpa_pra_credential_controller` retrieve Privileged Remote Access Credential [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_credential_controller` manages Privileged Remote Access Credential [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New datasource: `zpa_pra_console_controller` retrieve Privileged Remote Access Console [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_console_controller` manages Privileged Remote Access Console [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_console_controller_bulk` manages Privileged Remote Access Console Bulk. The resource allows the creation of multiple PRA consoles simulteneously [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_policy_redirection_rule` manages redirection access policy [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+
 ## 3.1.1 (February, 28 2024)
 
 ### Notes

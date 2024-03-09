@@ -82,6 +82,10 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestServiceEdgeGroup(testClient)
 	sweepTestCBIBanner(testClient)
 	sweepTestCBIExternalProfile(testClient)
+	sweepTestPRACredentialController(testClient)
+	sweepTestPRAConsoleController(testClient)
+	sweepTestPRAPortalController(testClient)
+	sweepTestPRAPrivilegedApprovalController(testClient)
 }
 
 // Sets up sweeper to clean up dangling resources
@@ -635,6 +639,121 @@ func sweepTestBaCertificate(client *testClient) error {
 			logSweptResource(resourcetype.ZPABACertificate, fmt.Sprintf(b.ID), b.Name)
 		}
 	}
+	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestPRACredentialController(client *testClient) error {
+	var errorList []error
+	credential, _, err := client.sdkClient.pracredential.GetAll()
+	if err != nil {
+		return err
+	}
+	// Logging the number of identified resources before the deletion loop
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(credential)))
+	for _, b := range credential {
+		// Check if the resource name has the required prefix before deleting it
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
+			if _, err := client.sdkClient.pracredential.Delete(b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPAPRACredentialController, fmt.Sprintf(b.ID), b.Name)
+		}
+	}
+	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestPRAConsoleController(client *testClient) error {
+	var errorList []error
+	console, _, err := client.sdkClient.praconsole.GetAll()
+	if err != nil {
+		return err
+	}
+	// Logging the number of identified resources before the deletion loop
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(console)))
+	for _, b := range console {
+		// Check if the resource name has the required prefix before deleting it
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
+			if _, err := client.sdkClient.praconsole.Delete(b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPAPRAConsoleController, fmt.Sprintf(b.ID), b.Name)
+		}
+	}
+	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestPRAPortalController(client *testClient) error {
+	var errorList []error
+	portal, _, err := client.sdkClient.praportal.GetAll()
+	if err != nil {
+		return err
+	}
+	// Logging the number of identified resources before the deletion loop
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(portal)))
+	for _, b := range portal {
+		// Check if the resource name has the required prefix before deleting it
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
+			if _, err := client.sdkClient.praportal.Delete(b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPAPRAPortalController, fmt.Sprintf(b.ID), b.Name)
+		}
+	}
+	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestPRAPrivilegedApprovalController(client *testClient) error {
+	var errorList []error
+	// First, get all pra approval resources
+	approvals, _, err := client.sdkClient.praapproval.GetAll()
+	if err != nil {
+		return err
+	}
+	// Logging the number of identified resources before the deletion loop
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(approvals)))
+
+	for _, approval := range approvals {
+		// Iterate over email_ids of each resource to check for the "pra_user_" substring
+		for _, emailID := range approval.EmailIDs {
+			if strings.Contains(emailID, "pra_user_") {
+				// If the emailID contains "pra_user_", delete the resource
+				if _, err := client.sdkClient.praapproval.Delete(approval.ID); err != nil {
+					errorList = append(errorList, err)
+					continue
+				}
+				logSweptResource(resourcetype.ZPAPRAApprovalController, fmt.Sprintf(approval.ID), strings.Join(approval.EmailIDs, ", "))
+				break // Exit the loop after deletion to avoid multiple attempts
+			}
+		}
+	}
+
 	// Log errors encountered during the deletion process
 	if len(errorList) > 0 {
 		for _, err := range errorList {

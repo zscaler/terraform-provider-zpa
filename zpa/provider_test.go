@@ -62,6 +62,11 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPACBIBannerController, sweepTestCBIBanner)
 		setupSweeper(resourcetype.ZPACBIExternalIsolationProfile, sweepTestCBIExternalProfile)
 		setupSweeper(resourcetype.ZPACBICertificate, sweepTestCBICertificate)
+		setupSweeper(resourcetype.ZPAPRAConsoleController, sweepTestPRAConsoleController)
+		setupSweeper(resourcetype.ZPAPRACredentialController, sweepTestPRACredentialController)
+		setupSweeper(resourcetype.ZPAPRAPortalController, sweepTestPRAPortalController)
+		setupSweeper(resourcetype.ZPAPRAApprovalController, sweepTestPRAPrivilegedApprovalController)
+
 	}
 
 	resource.TestMain(m)

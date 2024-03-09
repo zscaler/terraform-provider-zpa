@@ -56,7 +56,7 @@ func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	log.Printf("[INFO] Creating zpa policy timeout rule with request\n%+v\n", req)
 	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
-		policysetcontroller, _, err := service.Create(req)
+		policysetcontroller, _, err := service.CreateRule(req)
 		if err != nil {
 			return err
 		}
@@ -127,7 +127,7 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 			}
 		}
 
-		if _, err := service.Update(globalPolicySet.ID, ruleID, req); err != nil {
+		if _, err := service.UpdateRule(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
 

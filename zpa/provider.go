@@ -73,12 +73,18 @@ func ZPAProvider() *schema.Provider {
 			"zpa_policy_timeout_rule":                      resourcePolicyTimeoutRule(),
 			"zpa_policy_forwarding_rule":                   resourcePolicyForwardingRule(),
 			"zpa_policy_isolation_rule":                    resourcePolicyIsolationRule(),
+			"zpa_policy_redirection_rule":                  resourcePolicyRedictionRule(),
 			"zpa_provisioning_key":                         resourceProvisioningKey(),
 			"zpa_service_edge_group":                       resourceServiceEdgeGroup(),
 			"zpa_lss_config_controller":                    resourceLSSConfigController(),
 			"zpa_inspection_custom_controls":               resourceInspectionCustomControls(),
 			"zpa_inspection_profile":                       resourceInspectionProfile(),
 			"zpa_microtenant_controller":                   resourceMicrotenantController(),
+			"zpa_pra_approval_controller":                  resourcePRAPrivilegedApprovalController(),
+			"zpa_pra_portal_controller":                    resourcePRAPortalController(),
+			"zpa_pra_credential_controller":                resourcePRACredentialController(),
+			"zpa_pra_console_controller":                   resourcePRAConsoleController(),
+			"zpa_pra_console_controller_bulk":              resourcePRAConsoleControllerBulkBulk(),
 
 			// The day I realized I was naming stuff wrong :'-(
 			"zpa_browser_access": deprecateIncorrectNaming(resourceApplicationSegmentBrowserAccess(), zpaBrowserAccess),
@@ -127,6 +133,10 @@ func ZPAProvider() *schema.Provider {
 			"zpa_inspection_custom_controls":               dataSourceInspectionCustomControls(),
 			"zpa_inspection_profile":                       dataSourceInspectionProfile(),
 			"zpa_microtenant_controller":                   dataSourceMicrotenantController(),
+			"zpa_pra_approval_controller":                  dataSourcePRAPrivilegedApprovalController(),
+			"zpa_pra_portal_controller":                    dataSourcePRAPortalController(),
+			"zpa_pra_credential_controller":                dataSourcePRACredentialController(),
+			"zpa_pra_console_controller":                   dataSourcePRAConsoleController(),
 		},
 	}
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {

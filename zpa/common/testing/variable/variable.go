@@ -169,3 +169,26 @@ const (
 	CbiCertificateName       = "test"
 	CbiCertificateNameUpdate = "test-update"
 )
+
+// Credential Controller
+const (
+	CredentialDescription       = "Credential Controller Test"
+	CredentialDescriptionUpdate = "Credential Controller Test Update"
+)
+
+// Credential Controller
+const (
+	PraPortalDescription       = "Portal Controller Test"
+	PraPortalDescriptionUpdate = "Portal Controller Test Update"
+	PraUserNotification        = "Created with Terraform"
+	PraPortalEnabled           = true
+	PraUserNotificationEnabled = true
+)
+
+// Console Controller
+const (
+	PraConsoleDescription       = "Console Controller Test"
+	PraConsoleDescriptionUpdate = "Console Controller Test Update"
+	PraConsoleEnabled           = true
+	PraIconText                 = "RDP Console"
+)

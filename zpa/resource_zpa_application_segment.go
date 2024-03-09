@@ -126,6 +126,15 @@ func resourceApplicationSegment() *schema.Resource {
 					"NONE",
 				}, false),
 			},
+			"match_style": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"EXCLUSIVE",
+					"INCLUSIVE",
+				}, false),
+			},
 			"health_reporting": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -267,6 +276,8 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
+	_ = d.Set("match_style", resp.MatchStyle)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
@@ -369,7 +380,7 @@ func detachAppsFromAllPolicyRules(id string, policySetControllerService *policys
 			rule.Conditions = []policysetcontroller.Conditions{}
 		}
 		if changed {
-			if _, err := policySetControllerService.Update(rule.PolicySetID, rule.ID, &rule); err != nil {
+			if _, err := policySetControllerService.UpdateRule(rule.PolicySetID, rule.ID, &rule); err != nil {
 				continue
 			}
 		}
@@ -402,6 +413,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, service *applicatio
 		Description:               d.Get("description").(string),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
+		MatchStyle:                d.Get("match_style").(string),
 		HealthReporting:           d.Get("health_reporting").(string),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),

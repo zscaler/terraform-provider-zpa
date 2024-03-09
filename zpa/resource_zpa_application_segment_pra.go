@@ -190,6 +190,15 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 					"0", "1",
 				}, false),
 			},
+			"match_style": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"EXCLUSIVE",
+					"INCLUSIVE",
+				}, false),
+			},
 			"common_apps_dto": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -203,6 +212,10 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 									"app_id": {
 										Type:     schema.TypeString,
 										Computed: true,
@@ -300,20 +313,27 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 	}
 
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
-	if req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provide a valid segment group for the application segment")
-		return fmt.Errorf("please provide a valid segment group for the application segment")
-	}
-
 	resp, _, err := zClient.applicationsegmentpra.Create(req)
 	if err != nil {
+		log.Printf("[ERROR] Failed to create application segment: %s", err)
 		return err
 	}
 
 	log.Printf("[INFO] Created application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceApplicationSegmentRead(d, m)
+	// Introduce a brief delay to allow the backend to fully process the creation
+	time.Sleep(5 * time.Second)
+
+	// Explicitly call GET using the ID to fetch the latest resource state
+	_, _, err = zClient.applicationsegmentpra.Get(resp.ID)
+	if err != nil {
+		log.Printf("[ERROR] Failed to fetch application segment after creation: %s", err)
+		return err
+	}
+
+	// Now, update Terraform state with the latest fetched details
+	return resourceApplicationSegmentPRARead(d, m)
 }
 
 func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
@@ -344,6 +364,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
+	_ = d.Set("match_style", resp.MatchStyle)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
@@ -354,7 +375,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) er
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenPRAAppServerGroupsSimple(resp.ServerGroups))
 
-	if err := d.Set("common_apps_dto", flattenCommonAppsDto(d, resp.SRAAppsDto)); err != nil {
+	if err := d.Set("common_apps_dto", flattenCommonAppsDto(d, resp.PRAApps)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
@@ -395,11 +416,6 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provide a valid segment group for the sra application segment")
-		return fmt.Errorf("please provide a valid segment group for the sra application segment")
-	}
-
 	if _, _, err := zClient.applicationsegmentpra.Get(id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
@@ -407,10 +423,23 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 		}
 	}
 
-	if _, err := zClient.applicationsegmentpra.Update(id, &req); err != nil {
+	// Perform the update
+	_, err := zClient.applicationsegmentpra.Update(id, &req)
+	if err != nil {
 		return err
 	}
 
+	// Introduce a brief delay to allow the backend to fully process the update
+	time.Sleep(5 * time.Second)
+
+	// Fetch the latest resource state after the update
+	_, _, err = zClient.applicationsegmentpra.Get(id)
+	if err != nil {
+		log.Printf("[ERROR] Failed to fetch application segment after update: %s", err)
+		return err
+	}
+
+	// Now, update Terraform state with the latest fetched details
 	return resourceApplicationSegmentPRARead(d, m)
 }
 
@@ -471,6 +500,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id str
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		MatchStyle:                d.Get("match_style").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		TCPAppPortRange:           []common.NetworkPorts{},
@@ -558,6 +588,7 @@ func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.A
 			}
 			appTypes := SetToStringSlice(appTypesSet)
 			commonAppConfigDto = append(commonAppConfigDto, applicationsegmentpra.AppsConfig{
+				ID:                  commonAppConfig["id"].(string),
 				AppID:               commonAppConfig["app_id"].(string),
 				Name:                commonAppConfig["name"].(string),
 				Description:         commonAppConfig["description"].(string),
@@ -595,7 +626,7 @@ func expandPRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.Ap
 	return []applicationsegmentpra.AppServerGroups{}
 }
 
-func flattenCommonAppsDto(d *schema.ResourceData, apps []applicationsegmentpra.SRAAppsDto) []interface{} {
+func flattenCommonAppsDto(d *schema.ResourceData, apps []applicationsegmentpra.PRAApps) []interface{} {
 	commonApp := make([]interface{}, 1)
 	commonApp[0] = map[string]interface{}{
 		"apps_config": flattenAppsConfig(d, apps),
@@ -603,7 +634,7 @@ func flattenCommonAppsDto(d *schema.ResourceData, apps []applicationsegmentpra.S
 	return commonApp
 }
 
-func flattenAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentpra.SRAAppsDto) []interface{} {
+func flattenAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentpra.PRAApps) []interface{} {
 	cApp := expandCommonAppsDto(d)
 
 	appConfig := make([]interface{}, len(appConfigs))
@@ -615,8 +646,8 @@ func flattenAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentpr
 			}
 		}
 		appConfig[i] = map[string]interface{}{
+			"id":                   val.ID,
 			"name":                 val.Name,
-			"app_id":               val.AppID,
 			"enabled":              val.Enabled,
 			"domain":               val.Domain,
 			"application_port":     val.ApplicationPort,
