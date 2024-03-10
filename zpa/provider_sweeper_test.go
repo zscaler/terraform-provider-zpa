@@ -368,11 +368,16 @@ func sweepTestLSSConfigController(client *testClient) error {
 }
 
 var defaultPolicyNames = map[string]string{
-	"ACCESS_POLICY":            "Global_Policy",
-	"TIMEOUT_POLICY":           "ReAuth_Policy",
-	"CLIENT_FORWARDING_POLICY": "Bypass_Policy",
-	"INSPECTION_POLICY":        "Inspection_Policy",
-	"ISOLATION_POLICY":         "Isolation_Policy",
+	"ACCESS_POLICY":                        "Global_Policy",
+	"TIMEOUT_POLICY":                       "ReAuth_Policy",
+	"CLIENT_FORWARDING_POLICY":             "Bypass_Policy",
+	"INSPECTION_POLICY":                    "Inspection_Policy",
+	"ISOLATION_POLICY":                     "Isolation_Policy",
+	"SIEM_POLICY":                          "Siem_Policy",
+	"CREDENTIAL_POLICY":                    "Credential_Policy",
+	"CAPABILITIES_POLICY":                  "Capabilities_Policy",
+	"CLIENTLESS_SESSION_PROTECTION_POLICY": "Clientless_Session_Protection_Policy",
+	"REDIRECTION_POLICY":                   "ReDirection_Policy",
 }
 
 func sweepTestAccessPolicyRuleByType(client *testClient) error {
