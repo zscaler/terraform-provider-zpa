@@ -65,7 +65,7 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err != nil {
 		return err
 	}
-	policysetcontroller, _, err := service.Create(req)
+	policysetcontroller, _, err := service.CreateRule(req)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 			}
 		}
 
-		if _, err := service.Update(globalPolicySet.ID, ruleID, req); err != nil {
+		if _, err := service.UpdateRule(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
 

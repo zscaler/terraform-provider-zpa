@@ -58,7 +58,7 @@ func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) er
 	}
 	log.Printf("[INFO] Creating zpa policy isolation rule with request\n%+v\n", req)
 	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
-		policysetcontroller, _, err := service.Create(req)
+		policysetcontroller, _, err := service.CreateRule(req)
 		if err != nil {
 			return err
 		}
@@ -125,7 +125,7 @@ func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, m interface{}) er
 			}
 		}
 
-		if _, err := service.Update(globalPolicySet.ID, ruleID, req); err != nil {
+		if _, err := service.UpdateRule(globalPolicySet.ID, ruleID, req); err != nil {
 			return err
 		}
 

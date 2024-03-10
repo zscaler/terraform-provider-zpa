@@ -62,6 +62,7 @@ func dataSourcePolicyType() *schema.Resource {
 					"CLIENT_FORWARDING_POLICY", "BYPASS_POLICY",
 					"ISOLATION_POLICY", "INSPECTION_POLICY",
 					"SIEM_POLICY", "CREDENTIAL_POLICY", "CAPABILITIES_POLICY",
+					"REDIRECTION_POLICY",
 				}, false),
 			},
 			"rules": {

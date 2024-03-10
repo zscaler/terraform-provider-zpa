@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: [1.20]
+        goVersion: [1.21]
         environment:
           - ZPA_QA_TENANT01
           - ZPA_QA_TENANT02
@@ -32,7 +32,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.20"
+          go-version: "1.21"
 
       - name: Setup Go Tools
         run: make tools
@@ -78,7 +78,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: [1.20]
+        goVersion: [1.21]
         environment:
           - ZPA_QA2_TENANT01
           # - ZPA_QA2_TENANT02
@@ -90,7 +90,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.20"
+          go-version: "1.21"
 
       - name: Setup Go Tools
         run: make tools
@@ -136,7 +136,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: [1.20]
+        goVersion: [1.21]
         environment:
           - ZPA_BETA_TENANT01
     environment: ${{ matrix.environment }}
@@ -147,7 +147,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.20"
+          go-version: "1.21"
 
       - name: Setup Go Tools
         run: make tools
@@ -196,7 +196,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: [1.20]
+        goVersion: [1.21]
         environment:
           - ZPA_PROD_TENANT01
     environment: ${{ matrix.environment }}
@@ -207,7 +207,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.20"
+          go-version: "1.21"
 
       - name: Setup Go Tools
         run: make tools

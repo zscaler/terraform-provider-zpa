@@ -180,3 +180,22 @@ func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.N
 func createValidResourceName(name string) string {
 	return strings.ReplaceAll(name, " ", "_")
 }
+
+func GetString(v interface{}) string {
+	if v == nil {
+		return ""
+	}
+	str, ok := v.(string)
+	if ok {
+		return str
+	}
+	return fmt.Sprintf("%v", v)
+}
+
+// Helper to safely extract bool values from map
+func GetBool(v interface{}) bool {
+	if b, ok := v.(bool); ok {
+		return b
+	}
+	return false
+}

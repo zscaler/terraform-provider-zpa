@@ -111,7 +111,11 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				Default:  "DEFAULT",
+				ValidateFunc: validation.StringInSlice([]string{
+					"DEFAULT",
+					"NONE",
+				}, false),
 			},
 			"passive_health_enabled": {
 				Type:     schema.TypeBool,
@@ -126,8 +130,22 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 			"health_reporting": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
+				Default:     "NONE",
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"NONE",
+					"ON_ACCESS",
+					"CONTINUOUS",
+				}, false),
+			},
+			"match_style": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"EXCLUSIVE",
+					"INCLUSIVE",
+				}, false),
 			},
 			"icmp_access_type": {
 				Type:     schema.TypeString,
@@ -330,6 +348,7 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("ip_anchored", resp.IPAnchored)
+	_ = d.Set("match_style", resp.MatchStyle)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
@@ -438,6 +457,7 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 		ConfigSpace:               d.Get("config_space").(string),
 		ICMPAccessType:            d.Get("icmp_access_type").(string),
 		Description:               d.Get("description").(string),
+		MatchStyle:                d.Get("match_style").(string),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
 		HealthReporting:           d.Get("health_reporting").(string),

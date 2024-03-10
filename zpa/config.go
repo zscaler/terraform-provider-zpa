@@ -31,7 +31,12 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/microtenants"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/platforms"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/postureprofile"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praapproval"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praconsole"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/pracredential"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praportal"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/samlattribute"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimattributeheader"
@@ -56,21 +61,32 @@ type Client struct {
 	applicationsegmentinspection   applicationsegmentinspection.Service
 	appservercontroller            appservercontroller.Service
 	bacertificate                  bacertificate.Service
+	browseraccess                  browseraccess.Service
+	cbiregions                     cbiregions.Service
+	cbiprofilecontroller           cbiprofilecontroller.Service
+	cbizpaprofile                  cbizpaprofile.Service
+	cbicertificatecontroller       cbicertificatecontroller.Service
+	cbibannercontroller            cbibannercontroller.Service
 	cloudconnectorgroup            cloudconnectorgroup.Service
 	customerversionprofile         customerversionprofile.Service
+	clienttypes                    clienttypes.Service
 	enrollmentcert                 enrollmentcert.Service
 	idpcontroller                  idpcontroller.Service
+	inspection_custom_controls     inspection_custom_controls.Service
+	inspection_predefined_controls inspection_predefined_controls.Service
+	inspection_profile             inspection_profile.Service
+	isolationprofile               isolationprofile.Service
 	lssconfigcontroller            lssconfigcontroller.Service
 	machinegroup                   machinegroup.Service
 	microtenants                   microtenants.Service
-	postureprofile                 postureprofile.Service
-	cbiregions                     cbiregions.Service
-	cbiprofilecontroller           cbiprofilecontroller.Service
-	cbicertificatecontroller       cbicertificatecontroller.Service
-	cbibannercontroller            cbibannercontroller.Service
-	isolationprofile               isolationprofile.Service
-	cbizpaprofile                  cbizpaprofile.Service
+	platforms                      platforms.Service
 	policysetcontroller            policysetcontroller.Service
+	policysetcontrollerv2          policysetcontrollerv2.Service
+	postureprofile                 postureprofile.Service
+	praapproval                    praapproval.Service
+	praconsole                     praconsole.Service
+	pracredential                  pracredential.Service
+	praportal                      praportal.Service
 	provisioningkey                provisioningkey.Service
 	samlattribute                  samlattribute.Service
 	scimgroup                      scimgroup.Service
@@ -80,12 +96,6 @@ type Client struct {
 	serviceedgegroup               serviceedgegroup.Service
 	serviceedgecontroller          serviceedgecontroller.Service
 	trustednetwork                 trustednetwork.Service
-	platforms                      platforms.Service
-	clienttypes                    clienttypes.Service
-	browseraccess                  browseraccess.Service
-	inspection_custom_controls     inspection_custom_controls.Service
-	inspection_predefined_controls inspection_predefined_controls.Service
-	inspection_profile             inspection_profile.Service
 }
 
 type Config struct {
@@ -119,21 +129,32 @@ func (c *Config) Client() (*Client, error) {
 		applicationsegmentinspection:   *applicationsegmentinspection.New(zpaClient),
 		appservercontroller:            *appservercontroller.New(zpaClient),
 		bacertificate:                  *bacertificate.New(zpaClient),
-		cloudconnectorgroup:            *cloudconnectorgroup.New(zpaClient),
-		customerversionprofile:         *customerversionprofile.New(zpaClient),
-		enrollmentcert:                 *enrollmentcert.New(zpaClient),
-		idpcontroller:                  *idpcontroller.New(zpaClient),
-		lssconfigcontroller:            *lssconfigcontroller.New(zpaClient),
-		machinegroup:                   *machinegroup.New(zpaClient),
-		microtenants:                   *microtenants.New(zpaClient),
-		postureprofile:                 *postureprofile.New(zpaClient),
+		browseraccess:                  *browseraccess.New(zpaClient),
 		cbiregions:                     *cbiregions.New(zpaClient),
 		cbiprofilecontroller:           *cbiprofilecontroller.New(zpaClient),
 		cbicertificatecontroller:       *cbicertificatecontroller.New(zpaClient),
 		cbibannercontroller:            *cbibannercontroller.New(zpaClient),
 		cbizpaprofile:                  *cbizpaprofile.New(zpaClient),
+		clienttypes:                    *clienttypes.New(zpaClient),
+		cloudconnectorgroup:            *cloudconnectorgroup.New(zpaClient),
+		customerversionprofile:         *customerversionprofile.New(zpaClient),
+		enrollmentcert:                 *enrollmentcert.New(zpaClient),
+		idpcontroller:                  *idpcontroller.New(zpaClient),
+		inspection_custom_controls:     *inspection_custom_controls.New(zpaClient),
+		inspection_predefined_controls: *inspection_predefined_controls.New(zpaClient),
+		inspection_profile:             *inspection_profile.New(zpaClient),
 		isolationprofile:               *isolationprofile.New(zpaClient),
+		lssconfigcontroller:            *lssconfigcontroller.New(zpaClient),
+		machinegroup:                   *machinegroup.New(zpaClient),
+		microtenants:                   *microtenants.New(zpaClient),
+		platforms:                      *platforms.New(zpaClient),
 		policysetcontroller:            *policysetcontroller.New(zpaClient),
+		policysetcontrollerv2:          *policysetcontrollerv2.New(zpaClient),
+		postureprofile:                 *postureprofile.New(zpaClient),
+		praapproval:                    *praapproval.New(zpaClient),
+		praconsole:                     *praconsole.New(zpaClient),
+		pracredential:                  *pracredential.New(zpaClient),
+		praportal:                      *praportal.New(zpaClient),
 		provisioningkey:                *provisioningkey.New(zpaClient),
 		samlattribute:                  *samlattribute.New(zpaClient),
 		scimgroup:                      *scimgroup.New(zpaClient),
@@ -143,12 +164,6 @@ func (c *Config) Client() (*Client, error) {
 		serviceedgegroup:               *serviceedgegroup.New(zpaClient),
 		serviceedgecontroller:          *serviceedgecontroller.New(zpaClient),
 		trustednetwork:                 *trustednetwork.New(zpaClient),
-		platforms:                      *platforms.New(zpaClient),
-		clienttypes:                    *clienttypes.New(zpaClient),
-		browseraccess:                  *browseraccess.New(zpaClient),
-		inspection_custom_controls:     *inspection_custom_controls.New(zpaClient),
-		inspection_predefined_controls: *inspection_predefined_controls.New(zpaClient),
-		inspection_profile:             *inspection_profile.New(zpaClient),
 	}
 
 	log.Println("[INFO] initialized ZPA client")
