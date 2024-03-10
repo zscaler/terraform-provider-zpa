@@ -389,6 +389,11 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 		"CLIENT_FORWARDING_POLICY",
 		"INSPECTION_POLICY",
 		"ISOLATION_POLICY",
+		"SIEM_POLICY",
+		"CREDENTIAL_POLICY",
+		"CAPABILITIES_POLICY",
+		"CLIENTLESS_SESSION_PROTECTION_POLICY",
+		"REDIRECTION_POLICY",
 	}
 
 	for _, policyType := range policyTypes {

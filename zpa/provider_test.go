@@ -53,7 +53,6 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPABACertificate, sweepTestBaCertificate)
 		setupSweeper(resourcetype.ZPAInspectionCustomControl, sweepTestInspectionCustomControl)
 		setupSweeper(resourcetype.ZPAInspectionProfile, sweepTestInspectionProfile)
-		// TODO: Tests is failing on QA2 tenant. Needs further investigation.
 		setupSweeper(resourcetype.ZPALSSController, sweepTestLSSConfigController)
 		setupSweeper(resourcetype.ZPASegmentGroup, sweepTestSegmentGroup)
 		setupSweeper(resourcetype.ZPAServerGroup, sweepTestServerGroup)

@@ -22,6 +22,7 @@ const (
 	ZPAPolicyForwardingRule            = "zpa_policy_forwarding_rule"
 	ZPAPolicyInspectionRule            = "zpa_policy_inspection_rule"
 	ZPAPolicyIsolationRule             = "zpa_policy_isolation_rule"
+	ZPAPolicyRedirectionRule           = "zpa_policy_redirection_rule"
 	ZPAPRAConsoleController            = "zpa_pra_console_controller"
 	ZPAPRAConsoleControllerBulk        = "zpa_pra_console_controller_bulk"
 	ZPAPRACredentialController         = "zpa_pra_credential_controller"
