@@ -17,8 +17,8 @@
 * New resource: `zpa_pra_credential_controller` manages Privileged Remote Access Credential [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
 * New datasource: `zpa_pra_console_controller` retrieve Privileged Remote Access Console [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
 * New resource: `zpa_pra_console_controller` manages Privileged Remote Access Console [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New resource: `zpa_pra_console_controller_bulk` manages Privileged Remote Access Console Bulk. The resource allows the creation of multiple PRA consoles simulteneously [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
 * New resource: `zpa_policy_redirection_rule` manages redirection access policy [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_policy_access_rule_v2` manages access policy rule via `v2` API endpoint [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/427)
 
 ## 3.1.1 (February, 28 2024)
 

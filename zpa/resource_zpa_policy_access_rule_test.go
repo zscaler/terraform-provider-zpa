@@ -16,7 +16,7 @@ func TestAccResourcePolicyAccessRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyAccessRule)
 	rName := acctest.RandomWithPrefix("tf-acc-test-")
 	updatedRName := acctest.RandomWithPrefix("tf-updated-") // New name for update test
-	randDesc := acctest.RandString(20)
+	randDesc := acctest.RandString(10)
 
 	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
 	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
