@@ -119,17 +119,33 @@ func dataSourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("cname", resp.CName)
 		_ = d.Set("cert_chain", resp.CertChain)
-		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("issued_by", resp.IssuedBy)
 		_ = d.Set("issued_to", resp.IssuedTo)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
-		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("san", resp.San)
 		_ = d.Set("serial_no", resp.SerialNo)
 		_ = d.Set("status", resp.Status)
-		_ = d.Set("valid_from_in_epochsec", resp.ValidFromInEpochSec)
-		_ = d.Set("valid_to_in_epochsec", resp.ValidToInEpochSec)
 		_ = d.Set("microtenant_id", resp.MicrotenantID)
+		epochAttributes := []struct {
+			key  string // The attribute name in the schema
+			time string // The epoch time string from the response
+		}{
+			{"creation_time", resp.CreationTime},
+			{"modified_time", resp.ModifiedTime},
+			{"valid_from_in_epochsec", resp.ValidFromInEpochSec},
+			{"valid_to_in_epochsec", resp.ValidToInEpochSec},
+		}
+
+		// Iterate over epoch attributes and convert them
+		for _, attr := range epochAttributes {
+			formattedTime, err := epochToRFC1123(attr.time, false) // Adjust the second parameter based on your format preference
+			if err != nil {
+				return fmt.Errorf("error formatting %s: %s", attr.key, err)
+			}
+			if err := d.Set(attr.key, formattedTime); err != nil {
+				return fmt.Errorf("error setting %s: %s", attr.key, err)
+			}
+		}
 	} else {
 		return fmt.Errorf("couldn't find any browser certificate with name '%s' or id '%s'", name, id)
 	}

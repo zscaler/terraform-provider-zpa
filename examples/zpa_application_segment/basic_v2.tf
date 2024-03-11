@@ -44,7 +44,6 @@ resource "zpa_segment_group" "crm_app_group" {
   name            = "CRM App group"
   description     = "CRM App group"
   enabled         = true
-  policy_migrated = true
 }
 
 // Retrieve App Connector Group

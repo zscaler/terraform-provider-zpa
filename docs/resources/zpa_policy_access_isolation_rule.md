@@ -35,7 +35,6 @@ resource "zpa_policy_isolation_rule" "this" {
   zpn_isolation_profile_id = data.zpa_isolation_profile.isolation_profile.id
 
   conditions {
-    negated = false
     operator = "OR"
     operands {
       object_type = "CLIENT_TYPE"
@@ -68,7 +67,6 @@ resource "zpa_policy_isolation_rule" "this" {
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 * `conditions` - (Optional)
-  * `negated` - (Optional) Supported values: ``true`` or ``false``
   * `operator` (Optional) Supported values: ``AND``, and ``OR``
   * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
 

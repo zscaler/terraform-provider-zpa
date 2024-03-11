@@ -18,6 +18,7 @@ const (
 	ZPACBIExternalIsolationProfile     = "zpa_cloud_browser_isolation_external_profile"
 	ZPAPolicyType                      = "zpa_policy_type"
 	ZPAPolicyAccessRule                = "zpa_policy_access_rule"
+	ZPAPolicyAccessRuleV2              = "zpa_policy_access_rule_v2"
 	ZPAPolicyTimeOutRule               = "zpa_policy_timeout_rule"
 	ZPAPolicyForwardingRule            = "zpa_policy_forwarding_rule"
 	ZPAPolicyInspectionRule            = "zpa_policy_inspection_rule"

@@ -227,11 +227,6 @@ func GetPolicyConditionsSchema(objectTypes []string) *schema.Schema {
 					Type:     schema.TypeString,
 					Computed: true,
 				},
-				"negated": {
-					Type:     schema.TypeBool,
-					Optional: true,
-					Computed: true,
-				},
 				"operator": {
 					Type:     schema.TypeString,
 					Required: true,
@@ -320,7 +315,6 @@ func ExpandPolicyConditions(d *schema.ResourceData) ([]policysetcontroller.Condi
 				}
 				conditionSets = append(conditionSets, policysetcontroller.Conditions{
 					ID:            conditionSet["id"].(string),
-					Negated:       conditionSet["negated"].(bool),
 					Operator:      conditionSet["operator"].(string),
 					MicroTenantID: conditionSet["microtenant_id"].(string),
 					Operands:      operands,
@@ -381,7 +375,6 @@ func flattenPolicyConditions(conditions []policysetcontroller.Conditions) []inte
 	for i, ruleConditionItems := range conditions {
 		ruleConditions[i] = map[string]interface{}{
 			"id":             ruleConditionItems.ID,
-			"negated":        ruleConditionItems.Negated,
 			"operator":       ruleConditionItems.Operator,
 			"microtenant_id": ruleConditionItems.MicroTenantID,
 			"operands":       flattenPolicyRuleOperands(ruleConditionItems.Operands),

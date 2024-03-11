@@ -212,7 +212,6 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId(resp.ID)
 		_ = d.Set("admin_sp_signing_cert_id", resp.AdminSpSigningCertID)
 		_ = d.Set("auto_provision", resp.AutoProvision)
-		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("disable_saml_based_policy", resp.DisableSamlBasedPolicy)
 		_ = d.Set("domain_list", resp.Domainlist)
@@ -225,7 +224,6 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("force_auth", resp.ForceAuth)
 		_ = d.Set("enable_arbitrary_auth_domains", resp.EnableArbitraryAuthDomains)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
-		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("reauth_on_user_update", resp.ReauthOnUserUpdate)
 		_ = d.Set("redirect_binding", resp.RedirectBinding)
@@ -242,7 +240,24 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		if resp.AdminMetadata != nil {
 			_ = d.Set("admin_metadata", flattenAdminMeta(resp.AdminMetadata))
 		}
+		epochAttributes := []struct {
+			key  string // The attribute name in the schema
+			time string // The epoch time string from the response
+		}{
+			{"creation_time", resp.CreationTime},
+			{"modified_time", resp.ModifiedTime},
+		}
 
+		// Iterate over epoch attributes and convert them
+		for _, attr := range epochAttributes {
+			formattedTime, err := epochToRFC1123(attr.time, false) // Adjust the second parameter based on your format preference
+			if err != nil {
+				return fmt.Errorf("error formatting %s: %s", attr.key, err)
+			}
+			if err := d.Set(attr.key, formattedTime); err != nil {
+				return fmt.Errorf("error setting %s: %s", attr.key, err)
+			}
+		}
 	} else {
 		return fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id)
 	}

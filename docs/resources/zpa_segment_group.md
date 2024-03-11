@@ -22,7 +22,6 @@ resource "zpa_segment_group" "test_segment_group" {
   name                   = "test1-segment-group"
   description            = "test1-segment-group"
   enabled                = true
-  tcp_keep_alive_enabled = "1"
 }
 ```
 
@@ -38,7 +37,6 @@ In addition to all arguments above, the following attributes are exported:
 
 * `description` (Optional) Description of the segment group.
 * `enabled` (Optional) Whether this segment group is enabled or not.
-* `tcp_keep_alive_enabled` (Deprecated)
 * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.

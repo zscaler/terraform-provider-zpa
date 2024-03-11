@@ -175,10 +175,6 @@ func dataSourcePolicyType() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"negated": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
 									"operator": {
 										Type:     schema.TypeString,
 										Computed: true,
@@ -317,7 +313,6 @@ func flattenRuleConditions(conditions policysetcontroller.PolicyRule) []interfac
 			"id":             ruleCondition.ID,
 			"modified_by":    ruleCondition.ModifiedBy,
 			"modified_time":  ruleCondition.ModifiedTime,
-			"negated":        ruleCondition.Negated,
 			"operator":       ruleCondition.Operator,
 			"microtenant_id": ruleCondition.MicroTenantID,
 			"operands":       flattenConditionOperands(ruleCondition),

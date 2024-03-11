@@ -154,7 +154,6 @@ resource "%s" "%s" {
 	policy_set_id 				= data.zpa_policy_type.inspection_policy.id
 	zpn_inspection_profile_id 	= "${%s.id}"
 	conditions {
-		negated  = false
 		operator = "OR"
 		operands {
 			object_type = "CLIENT_TYPE"

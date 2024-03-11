@@ -31,7 +31,6 @@ resource "zpa_policy_access_rule" "this" {
   policy_set_id = data.zpa_policy_type.access_policy.id
 
   conditions {
-    negated = false
     operator = "OR"
     operands {
       object_type = "TRUSTED_NETWORK"
@@ -63,7 +62,6 @@ resource "zpa_policy_access_rule" "this" {
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 * `conditions` - (Optional)
-  * `negated` - (Optional) Supported values: ``true`` or ``false``
   * `operator` (Optional) Supported values: ``AND``, and ``OR``
   * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
     * `object_type` (Optional) This is for specifying the policy critiera. For posture profile the supported value is:  `TRUSTED_NETWORK`

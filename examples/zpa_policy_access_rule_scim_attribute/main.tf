@@ -24,7 +24,6 @@ resource "zpa_policy_access_rule" "crwd_zpa_pre_zta" {
   operator      = "AND"
   policy_set_id = data.zpa_policy_type.access_policy.id
   conditions {
-    negated  = false
     operator = "OR"
     operands {
       object_type = "POSTURE"
@@ -33,7 +32,6 @@ resource "zpa_policy_access_rule" "crwd_zpa_pre_zta" {
     }
   }
   conditions {
-    negated  = false
     operator = "OR"
     operands {
       object_type = "SCIM"

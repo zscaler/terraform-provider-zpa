@@ -7,7 +7,6 @@ resource "zpa_policy_forwarding_rule" "crm_application_rule" {
   policy_set_id = data.zpa_policy_type.client_forwarding_policy.id
 
   conditions {
-    negated = false
     operator = "OR"
     operands {
       object_type = "APP"
@@ -16,7 +15,6 @@ resource "zpa_policy_forwarding_rule" "crm_application_rule" {
     }
   }
   conditions {
-     negated = false
      operator = "OR"
     operands {
       object_type = "SCIM_GROUP"

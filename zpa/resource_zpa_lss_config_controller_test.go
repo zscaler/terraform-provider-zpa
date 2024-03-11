@@ -165,7 +165,6 @@ resource "%s" "%s" {
 		action = "LOG"
 		policy_set_id = data.zpa_policy_type.lss_siem_policy.id
 		conditions {
-			negated  = false
 			operator = "OR"
 			operands {
 			  object_type = "CLIENT_TYPE"
@@ -173,7 +172,6 @@ resource "%s" "%s" {
 			}
 		  }
 		conditions {
-		negated  = false
 		operator = "OR"
 		operands {
 			object_type = "SCIM_GROUP"

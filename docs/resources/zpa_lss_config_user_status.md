@@ -60,7 +60,6 @@ resource "zpa_lss_config_controller" "lss_user_activity" {
     action        = "LOG"
     policy_set_id = data.zpa_policy_type.lss_siem_policy.id
     conditions {
-      negated  = false
       operator = "OR"
       operands {
         object_type = "CLIENT_TYPE"
@@ -68,7 +67,6 @@ resource "zpa_lss_config_controller" "lss_user_activity" {
       }
     }
     conditions {
-      negated  = false
       operator = "OR"
       operands {
         object_type = "SCIM_GROUP"
@@ -133,7 +131,6 @@ In addition to all arguments above, the following attributes are exported:
   * `audit_message` - (Optional)
   * `custom_msg` - (Optional)
     * `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `negated` - (Optional)
     * `operator` (Optional) - Supported values are: `AND` or `OR`
     * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
       * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `CLIENT_TYPE`
@@ -149,7 +146,6 @@ In addition to all arguments above, the following attributes are exported:
             - `zpn_client_type_zapp_partner - "Client Connector Partner"`
 
     * `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `negated` - (Optional)
     * `operator` (Optional) - Supported values are: `AND` or `OR`
     * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
       * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `SCIM`, `SCIM_GROUP`, `SAML`, `IDP`

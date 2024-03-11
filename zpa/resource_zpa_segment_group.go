@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
@@ -73,20 +72,6 @@ func resourceSegmentGroup() *schema.Resource {
 				Description: "Name of the app group.",
 				Required:    true,
 			},
-			"policy_migrated": {
-				Type:       schema.TypeBool,
-				Optional:   true,
-				Deprecated: "The `policy_migrated` field is now deprecated for the resource `zpa_segment_group`, please remove this attribute to prevent configuration drifts",
-			},
-			"tcp_keep_alive_enabled": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Default:    "1",
-				Deprecated: "The `tcp_keep_alive_enabled` field is now deprecated for the resource `zpa_segment_group`, please replace all uses of this within the `zpa_application_segment`resources with the attribute `tcp_keep_alive`",
-				ValidateFunc: validation.StringInSlice([]string{
-					"0", "1",
-				}, false),
-			},
 			"microtenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -131,8 +116,6 @@ func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("name", resp.Name)
-	_ = d.Set("policy_migrated", resp.PolicyMigrated)
-	_ = d.Set("tcp_keep_alive_enabled", resp.TcpKeepAliveEnabled)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	if err := d.Set("applications", flattenSegmentGroupApplicationsSimple(resp)); err != nil {
 		return fmt.Errorf("failed to read applications %s", err)
@@ -233,14 +216,12 @@ func resourceSegmentGroupDelete(d *schema.ResourceData, m interface{}) error {
 
 func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 	segmentGroup := segmentgroup.SegmentGroup{
-		ID:                  d.Id(),
-		Name:                d.Get("name").(string),
-		Description:         d.Get("description").(string),
-		Enabled:             d.Get("enabled").(bool),
-		PolicyMigrated:      d.Get("policy_migrated").(bool),
-		TcpKeepAliveEnabled: d.Get("tcp_keep_alive_enabled").(string),
-		MicroTenantID:       d.Get("microtenant_id").(string),
-		Applications:        expandSegmentGroupApplications(d.Get("applications").([]interface{})),
+		ID:            d.Id(),
+		Name:          d.Get("name").(string),
+		Description:   d.Get("description").(string),
+		Enabled:       d.Get("enabled").(bool),
+		MicroTenantID: d.Get("microtenant_id").(string),
+		Applications:  expandSegmentGroupApplications(d.Get("applications").([]interface{})),
 	}
 	return segmentGroup
 }

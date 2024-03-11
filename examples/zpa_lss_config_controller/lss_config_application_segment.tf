@@ -14,7 +14,6 @@ resource "zpa_lss_config_controller" "example" {
     name   = "policy_rule_resource-example"
     action = "LOG"
     conditions {
-      negated  = false
       operator = "OR"
       operands {
         object_type = "APP"

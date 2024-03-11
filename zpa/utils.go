@@ -7,6 +7,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
@@ -198,4 +199,17 @@ func GetBool(v interface{}) bool {
 		return b
 	}
 	return false
+}
+
+// Converts an epoch time (in seconds, represented as a string) to a human-readable format.
+func epochToRFC1123(epochStr string, useRFC1123Z bool) (string, error) {
+	epoch, err := strconv.ParseInt(epochStr, 10, 64)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse epoch time: %s", err)
+	}
+	t := time.Unix(epoch, 0) // Convert epoch to *time.Time, assuming epoch is in seconds.
+	if useRFC1123Z {
+		return t.Format(time.RFC1123Z), nil // Returns the time formatted using RFC1123Z layout.
+	}
+	return t.Format(time.RFC1123), nil // Returns the time formatted using RFC1123 layout.
 }

@@ -45,7 +45,6 @@ resource "zpa_lss_config_controller" "lss_user_activity" {
     action        = "LOG"
     policy_set_id = data.zpa_policy_type.lss_siem_policy.id
     conditions {
-      negated  = false
       operator = "OR"
       operands {
         object_type = "CLIENT_TYPE"
@@ -53,7 +52,6 @@ resource "zpa_lss_config_controller" "lss_user_activity" {
       }
     }
     conditions {
-      negated  = false
       operator = "OR"
       operands {
         object_type = "SCIM_GROUP"

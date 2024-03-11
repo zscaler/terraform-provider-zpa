@@ -2,5 +2,4 @@
    name = "Example"
    description = "Example"
    enabled = true
-   policy_migrated = true
  }

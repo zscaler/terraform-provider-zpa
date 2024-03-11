@@ -190,15 +190,6 @@ func dataSourceSegmentGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"policy_migrated": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"tcp_keep_alive_enabled": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"microtenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -243,8 +234,6 @@ func dataSourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
-		_ = d.Set("policy_migrated", resp.PolicyMigrated)
-		_ = d.Set("tcp_keep_alive_enabled", resp.TcpKeepAliveEnabled)
 		_ = d.Set("microtenant_id", resp.MicroTenantID)
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
 

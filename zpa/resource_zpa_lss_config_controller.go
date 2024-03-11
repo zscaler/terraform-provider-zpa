@@ -31,10 +31,6 @@ func getPolicyRuleResourceSchema() map[string]*schema.Schema {
 				Description: "This is for proviidng the set of conditions for the policy.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"negated": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
 						"operator": {
 							Type:     schema.TypeString,
 							Required: true,
@@ -494,7 +490,6 @@ func ExpandPolicyRuleResourceConditions(d map[string]interface{}) ([]lssconfigco
 					return nil, err
 				}
 				conditionSets = append(conditionSets, lssconfigcontroller.PolicyRuleResourceConditions{
-					Negated:  conditionSet["negated"].(bool),
 					Operator: conditionSet["operator"].(string),
 					Operands: &operands,
 				})

@@ -151,7 +151,6 @@ resource "%s" "%s" {
 	operator      		= "AND"
 	policy_set_id 		= data.zpa_policy_type.forwarding_policy.id
 	conditions {
-		negated  = false
 		operator = "OR"
 		operands {
 		  object_type = "POSTURE"
@@ -160,7 +159,6 @@ resource "%s" "%s" {
 		}
 	  }
 	  conditions {
-		negated  = false
 		operator = "OR"
 		operands {
 		  object_type = "SCIM_GROUP"
