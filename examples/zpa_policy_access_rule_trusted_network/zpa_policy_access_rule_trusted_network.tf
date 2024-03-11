@@ -18,7 +18,6 @@ resource "zpa_policy_access_rule" "corp_trusted_network" {
   operator = "AND"
   policy_set_id = data.zpa_policy_type.access_policy.id
   conditions {
-    negated = false
     operator = "OR"
     operands {
       object_type = "TRUSTED_NETWORK"

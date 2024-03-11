@@ -21,7 +21,7 @@ resource "zpa_server_group" "crm_servers" {
   enabled           = true
   dynamic_discovery = false
   app_connector_groups {
-    id = [data.zpa_app_connector_group.dc_connector_group.id]
+    id = [data.zpa_app_connector_group.this.id]
   }
   servers {
     id = [zpa_application_server.crm_app_server.id]
@@ -41,10 +41,9 @@ resource "zpa_segment_group" "crm_app_group" {
   name            = "CRM App group"
   description     = "CRM App group"
   enabled         = true
-  policy_migrated = true
 }
 
 // Retrieve App Connector Group
-data "zpa_app_connector_group" "dc_connector_group" {
-  name = "SGIO-Vancouver"
+data "zpa_app_connector_group" "this" {
+  name = "Example"
 }

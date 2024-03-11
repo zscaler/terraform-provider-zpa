@@ -173,7 +173,6 @@ resource "%s" "%s" {
 		id = ["${%s.id}"]
 	}
 	conditions {
-		negated  = false
 		operator = "OR"
 		operands {
 		  object_type = "APP_GROUP"

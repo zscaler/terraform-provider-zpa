@@ -15,7 +15,6 @@ resource "zpa_policy_isolation_rule" "this" {
   zpn_isolation_profile_id = data.zpa_isolation_profile.isolation_profile.id
 
   conditions {
-    negated = false
     operator = "OR"
     operands {
       object_type = "CLIENT_TYPE"

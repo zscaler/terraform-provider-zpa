@@ -9,16 +9,19 @@
 
 ### NEW - RESOURCES, DATA SOURCES, PROPERTIES, ATTRIBUTES:
 
-* New datasource: `zpa_pra_approval_controller` retrieve Privileged Remote Access Approval [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New resource: `zpa_pra_approval_controller` manages Privileged Remote Access Approval [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New datasource: `zpa_pra_portal_controller` retrieve Privileged Remote Access Portal [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New resource: `zpa_pra_portal_controller` manages Privileged Remote Access Portal [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New datasource: `zpa_pra_credential_controller` retrieve Privileged Remote Access Credential [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New resource: `zpa_pra_credential_controller` manages Privileged Remote Access Credential [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New datasource: `zpa_pra_console_controller` retrieve Privileged Remote Access Console [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New resource: `zpa_pra_console_controller` manages Privileged Remote Access Console [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New resource: `zpa_policy_redirection_rule` manages redirection access policy [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/425)
-* New resource: `zpa_policy_access_rule_v2` manages access policy rule via `v2` API endpoint [PR #425](https://github.com/zscaler/terraform-provider-zpa/pull/427)
+* New datasource: `zpa_pra_approval_controller` retrieve Privileged Remote Access Approval [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_approval_controller` manages Privileged Remote Access Approval [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New datasource: `zpa_pra_portal_controller` retrieve Privileged Remote Access Portal [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_portal_controller` manages Privileged Remote Access Portal [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New datasource: `zpa_pra_credential_controller` retrieve Privileged Remote Access Credential [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_credential_controller` manages Privileged Remote Access Credential [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New datasource: `zpa_pra_console_controller` retrieve Privileged Remote Access Console [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_pra_console_controller` manages Privileged Remote Access Console [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_policy_redirection_rule` manages redirection access policy [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/425)
+* New resource: `zpa_policy_access_rule_v2` manages access policy rule via `v2` API endpoint [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/427)
+* New attribute: `match_style` has been included in all application segment resource types [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/427). [Learn more](https://help.zscaler.com/zpa/using-app-segment-multimatch)
+* Deprecated attribute: The attributes `policy_migrated` and `tcp_keep_alive_enabled` are now deprecated for the resource `zpa_segment_group`. For the attribute `tcp_keep_alive_enabled` use the attribute `tcp_keep_alive` within the resource  `zpa_application_segment`", [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/428). 
+* Deprecated attribute: The attributes `negated` within all access policy rule resource types. [PR #428](https://github.com/zscaler/terraform-provider-zpa/pull/428). 
 
 ## 3.1.1 (February, 28 2024)
 

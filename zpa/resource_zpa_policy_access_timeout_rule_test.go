@@ -144,7 +144,6 @@ resource "%s" "%s" {
 	operator      		= "AND"
 	policy_set_id 		= data.zpa_policy_type.timeout_policy.id
 	conditions {
-		negated  = false
 		operator = "OR"
 		operands {
 		  object_type = "CLIENT_TYPE"

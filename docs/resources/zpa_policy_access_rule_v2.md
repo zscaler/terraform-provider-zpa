@@ -1,58 +1,130 @@
 ---
 subcategory: "Policy Set Controller"
 layout: "zscaler"
-page_title: "ZPA: policy_access_rule"
+page_title: "ZPA: policy_access_rule_v2"
 description: |-
-  Creates and manages ZPA Policy Access Rule.
+  Creates and manages ZPA Policy Access Rule via API v2 endpoints.
 ---
 
-# Resource: zpa_policy_access_rule
+# Resource: zpa_policy_access_rule_v2
 
-The **zpa_policy_access_rule** resource creates and manages policy access rule in the Zscaler Private Access cloud.
+The **zpa_policy_access_rule_v2** resource creates and manages policy access rule in the Zscaler Private Access cloud using a new v2 API endpoint.
+
+  ⚠️ **NOTE**: This resource is recommended if your configuration requires the association of more than 1000 resource criteria per rule.
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
 ## Example Usage
 
 ```hcl
-# Get Global Access Policy ID
-data "zpa_policy_type" "access_policy" {
-    policy_type = "ACCESS_POLICY"
+# Retrieve Policy Types
+data "zpa_policy_type" "this" {
+  policy_type = "ACCESS_POLICY"
 }
 
-# Get IdP ID
-data "zpa_idp_controller" "idp_name" {
- name = "IdP_Name"
+# Retrieve Identity Provider ID
+data "zpa_idp_controller" "this" {
+	name = "Idp_Name"
 }
 
-# Get SCIM Group attribute ID
-data "zpa_scim_groups" "engineering" {
-  name     = "Engineering"
-  idp_name = "IdP_Name"
+# Retrieve SAML Attribute ID
+data "zpa_saml_attribute" "email_user_sso" {
+    name = "Email_Users"
+    idp_name = "Idp_Name"
 }
 
-#Create Policy Access Rule
-resource "zpa_policy_access_rule" "this" {
-  name                          = "Example"
-  description                   = "Example"
-  action                        = "ALLOW"
-  operator                      = "AND"
-  policy_set_id                 = data.zpa_policy_type.access_policy.id
+# Retrieve SAML Attribute ID
+data "zpa_saml_attribute" "group_user" {
+    name = "GroupName_Users"
+    idp_name = "Idp_Name"
+}
+
+# Retrieve SCIM Group ID
+data "zpa_scim_groups" "a000" {
+    name = "A000"
+    idp_name = "Idp_Name"
+}
+
+# Retrieve SCIM Group ID
+data "zpa_scim_groups" "b000" {
+    name = "B000"
+    idp_name = "Idp_Name"
+}
+
+# Create Segment Group
+resource "zpa_segment_group" "this" {
+   name = "Example"
+   description = "Example"
+   enabled = true
+ }
+
+# Create Policy Access Rule V2
+resource "zpa_policy_access_rule_v2" "this" {
+  name          = "Example"
+  description   = "Example"
+  action        = "ALLOW"
+  operator      = "AND"
+  policy_set_id = data.zpa_policy_type.this.id
 
   conditions {
-    operator  = "OR"
+    operator = "OR"
     operands {
-      object_type = "APP"
-      lhs = "id"
-      rhs = zpa_application_segment.this.id
+      object_type = "APP_GROUP"
+      values      = [zpa_segment_group.this.id]
+    }
+  }
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "SAML"
+      entry_values {
+        rhs = "user1@acme.com"
+        lhs = data.zpa_saml_attribute.email_user_sso.id
+      }
+      entry_values {
+        rhs = "A000"
+        lhs = data.zpa_saml_attribute.group_user.id
+      }
+    }
+    operands {
+      object_type = "SCIM_GROUP"
+      entry_values {
+        rhs = data.zpa_scim_groups.a000.id
+        lhs = data.zpa_idp_controller.this.id
+      }
+      entry_values {
+        rhs = data.zpa_scim_groups.b000.id
+        lhs = data.zpa_idp_controller.this.id
+      }
     }
   }
   conditions {
     operator = "OR"
     operands {
-      object_type = "SCIM_GROUP"
-      lhs = data.zpa_idp_controller.idp_name.id
-      rhs = data.zpa_scim_groups.engineering.id
+      object_type = "PLATFORM"
+      entry_values {
+        rhs = "true"
+        lhs = "linux"
+      }
+      entry_values {
+        rhs = "true"
+        lhs = "android"
+      }
+    }
+  }
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "COUNTRY_CODE"
+      entry_values {
+        lhs = "CA"
+        rhs = "true"
+      }
+      entry_values {
+        lhs = "US"
+        rhs = "true"
+      }
     }
   }
 }
@@ -100,7 +172,7 @@ resource "zpa_policy_access_rule" "this" {
       * `zpn_client_type_zapp_partner`
       * `zpn_client_type_branch_connector`
 
-  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is not supported within the `operands` block when the `object_type` is set to `SAML`, `SCIM`, `SCIM_GROUP`, `IDP`, `POSTURE`, `TRUSTED_NETWORK` . ZPA automatically assumes the posture profile ID that belongs to the parent tenant.
+  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is not supported within the `operands` block when the `object_type` is set to `SAML`, `SCIM`, `SCIM_GROUP`, `IDP`, `POSTURE`, `TRUSTED_NETWORK`. ZPA automatically assumes the posture profile ID that belongs to the parent tenant.
 
 * `app_connector_groups`
   * `id` - (Optional) The ID of an app connector group resource
@@ -118,7 +190,7 @@ Policy access rule can be imported by using `<POLICY ACCESS RULE ID>` as the imp
 For example:
 
 ```shell
-terraform import zpa_policy_access_rule.example <policy_access_rule_id>
+terraform import zpa_policy_access_rule_v2.example <policy_access_rule_id>
 ```
 
 ## LHS and RHS Values

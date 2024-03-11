@@ -23,7 +23,6 @@ resource "zpa_policy_access_rule" "this" {
   policy_set_id = data.zpa_policy_type.access_policy.id
 
   conditions {
-    negated = false
     operator = "OR"
     operands {
       name =  "Example"
@@ -34,7 +33,6 @@ resource "zpa_policy_access_rule" "this" {
   }
 
   conditions {
-     negated = true
      operator = "OR"
     operands {
       object_type = "IDP"

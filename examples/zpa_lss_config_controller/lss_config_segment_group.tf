@@ -14,7 +14,6 @@ resource "zpa_lss_config_controller" "example" {
     name   = "policy_rule_resource-example"
     action = "LOG"
     conditions {
-      negated  = false
       operator = "OR"
       operands {
         object_type = "APP_GROUP"
@@ -32,7 +31,6 @@ resource "zpa_segment_group" "sg_lss_config" {
   name = "Segment Group LSS"
   description = "Segment Group LSS"
   enabled = true
-  policy_migrated = true
  }
 
 // Retrieve LSS Config Format

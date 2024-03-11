@@ -124,10 +124,6 @@ func dataSourceLSSConfigController() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"negated": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
 									"operator": {
 										Type:     schema.TypeString,
 										Computed: true,
@@ -382,7 +378,6 @@ func flattenLSSRuleConditions(conditions *lssconfigcontroller.PolicyRule) []inte
 			"id":            ruleCondition.ID,
 			"modifiedby":    ruleCondition.ModifiedBy,
 			"modified_time": ruleCondition.ModifiedTime,
-			"negated":       ruleCondition.Negated,
 			"operator":      ruleCondition.Operator,
 			"operands":      flattenLSSConditionOperands(ruleCondition),
 		}

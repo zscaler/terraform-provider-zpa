@@ -39,7 +39,6 @@ resource "zpa_policy_forwarding_rule" "this" {
   policy_set_id   = data.zpa_policy_type.client_forwarding_policy.id
 
   conditions {
-    negated   = false
     operator  = "OR"
     operands {
       object_type = "APP"
@@ -48,7 +47,6 @@ resource "zpa_policy_forwarding_rule" "this" {
     }
   }
   conditions {
-     negated = false
      operator = "OR"
     operands {
       object_type = "SCIM_GROUP"
@@ -98,7 +96,6 @@ resource "zpa_application_segment" "this" {
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 * `conditions` - (Optional)
-  * `negated` - (Optional) Supported values: ``true`` or ``false``
   * `operator` (Optional) Supported values: ``AND``, and ``OR``
   * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
 

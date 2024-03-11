@@ -25,7 +25,6 @@ resource "zpa_policy_timeout_rule" "crm_application_rule" {
   policy_set_id = data.zpa_global_policy_timeout.policyset.id
 
   conditions {
-    negated   = false
     operator  = "OR"
     operands {
       object_type = "APP_GROUP"
@@ -34,7 +33,6 @@ resource "zpa_policy_timeout_rule" "crm_application_rule" {
     }
   }
   conditions {
-     negated  = false
      operator = "OR"
     operands {
       object_type = "SCIM_GROUP"
