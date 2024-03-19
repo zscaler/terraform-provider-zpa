@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -144,6 +145,11 @@ func resourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}) 
 }
 
 func resourcePRACredentialControllerUpdate(d *schema.ResourceData, m interface{}) error {
+	if d.HasChange("credential_type") {
+		oldType, newType := d.GetChange("credential_type")
+		return fmt.Errorf("changing 'credential_type' from '%s' to '%s' is not allowed", oldType, newType)
+	}
+
 	service := m.(*Client).pracredential.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	id := d.Id()

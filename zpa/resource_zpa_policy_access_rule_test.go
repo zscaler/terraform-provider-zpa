@@ -14,15 +14,15 @@ import (
 
 func TestAccResourcePolicyAccessRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyAccessRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test-")
-	updatedRName := acctest.RandomWithPrefix("tf-updated-") // New name for update test
+	rName := acctest.RandomWithPrefix("tf-acc-test")
+	updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
 	randDesc := acctest.RandString(10)
 
 	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
-	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
+	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, "tf-acc-test-"+appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
 
 	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
-	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
+	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, "tf-acc-test-"+segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -144,10 +144,6 @@ data "%s" "%s" {
 func getPolicyAccessRuleHCL(rName, generatedName, desc, appConnectorGroupTypeAndName, segmentGroupTypeAndName string) string {
 	return fmt.Sprintf(`
 
-data "zpa_policy_type" "access_policy" {
-	policy_type = "ACCESS_POLICY"
-}
-
 data "zpa_scim_attribute_header" "givenName" {
     name = "name.givenName"
     idp_name = "BD_Okta_Users"
@@ -168,7 +164,6 @@ resource "%s" "%s" {
 	description   		= "%s"
 	action        		= "ALLOW"
 	operator      		= "AND"
-	policy_set_id 		= data.zpa_policy_type.access_policy.id
 	app_connector_groups {
 		id = ["${%s.id}"]
 	}

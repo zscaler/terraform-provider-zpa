@@ -1,12 +1,11 @@
 package zpa
 
 import (
-	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
@@ -49,43 +48,59 @@ func resourcePolicyIsolationRule() *schema.Resource {
 }
 
 func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	client := m.(*Client)
+	var policySetID string
+	var err error
 
-	req, err := expandCreatePolicyIsolationRule(d)
+	// Check if policy_set_id is provided by the user
+	if v, ok := d.GetOk("policy_set_id"); ok {
+		policySetID = v.(string)
+	} else {
+		// Fetch policy_set_id based on the policy_type
+		policySetID, err = fetchPolicySetIDByType(client, "ISOLATION_POLICY", GetString(d.Get("microtenant_id")))
+		if err != nil {
+			return err
+		}
+	}
+	req, err := expandCreatePolicyIsolationRule(d, policySetID)
 	if err != nil {
 		return err
 	}
 	log.Printf("[INFO] Creating zpa policy isolation rule with request\n%+v\n", req)
-	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
-		policysetcontroller, _, err := service.CreateRule(req)
-		if err != nil {
-			return err
-		}
-		d.SetId(policysetcontroller.ID)
-
-		return resourcePolicyIsolationRuleRead(d, m)
-	} else {
-		return fmt.Errorf("couldn't validate the zpa policy isolation (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+	if err := ValidateConditions(req.Conditions, client, GetString(d.Get("microtenant_id"))); err != nil {
+		return err
 	}
-}
 
-func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-
-	globalPolicySet, _, err := service.GetByPolicyType("ISOLATION_POLICY")
+	policysetcontroller, _, err := client.policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id"))).CreateRule(req)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
-	resp, _, err := service.GetPolicyRule(globalPolicySet.ID, d.Id())
+
+	d.SetId(policysetcontroller.ID)
+
+	return resourcePolicyIsolationRuleRead(d, m)
+
+}
+
+func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) error {
+	client := m.(*Client)
+	microTenantID := GetString(d.Get("microtenant_id"))
+
+	policySetID, err := fetchPolicySetIDByType(client, "ISOLATION_POLICY", microTenantID)
 	if err != nil {
-		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
+		return err
+	}
+
+	service := client.policysetcontroller.WithMicroTenant(microTenantID)
+	log.Printf("[INFO] Getting Policy Set Rule: policySetID:%s id: %s\n", policySetID, d.Id())
+	resp, respErr, err := service.GetPolicyRule(policySetID, d.Id())
+	if err != nil {
+		// Adjust this error handling to match how your client library exposes HTTP response details
+		if respErr != nil && (respErr.StatusCode == 404 || respErr.StatusCode == http.StatusNotFound) {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-
 		return err
 	}
 
@@ -105,58 +120,64 @@ func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("ISOLATION_POLICY")
-	if err != nil {
-		return err
+	client := m.(*Client)
+	var policySetID string
+	var err error
+
+	// Check if policy_set_id is provided by the user, otherwise fetch it
+	if v, ok := d.GetOk("policy_set_id"); ok {
+		policySetID = v.(string)
+	} else {
+		policySetID, err = fetchPolicySetIDByType(client, "ISOLATION_POLICY", GetString(d.Get("microtenant_id")))
+		if err != nil {
+			return err
+		}
 	}
 	ruleID := d.Id()
 	log.Printf("[INFO] Updating policy isolation rule ID: %v\n", ruleID)
-	req, err := expandCreatePolicyIsolationRule(d)
+	req, err := expandCreatePolicyIsolationRule(d, policySetID)
 	if err != nil {
 		return err
 	}
-	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
-		if _, _, err := service.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
-			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
-				d.SetId("")
-				return nil
-			}
-		}
-
-		if _, err := service.UpdateRule(globalPolicySet.ID, ruleID, req); err != nil {
-			return err
-		}
-
-		return resourcePolicyIsolationRuleRead(d, m)
-	} else {
-		return fmt.Errorf("couldn't validate the zpa policy isolation (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+	// Replace ValidatePolicyRuleConditions with ValidateConditions
+	if err := ValidateConditions(req.Conditions, client, GetString(d.Get("microtenant_id"))); err != nil {
+		return err
 	}
+
+	if _, err := client.policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id"))).UpdateRule(policySetID, ruleID, req); err != nil {
+		return err
+	}
+
+	return resourcePolicyIsolationRuleRead(d, m)
+
 }
 
 func resourcePolicyIsolationRuleDelete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("ISOLATION_POLICY")
-	if err != nil {
-		return err
+	client := m.(*Client)
+	var policySetID string
+	var err error
+
+	// Check if policy_set_id is provided by the user, otherwise fetch it based on policy_type
+	if v, ok := d.GetOk("policy_set_id"); ok {
+		policySetID = v.(string)
+	} else {
+		// Assuming "ISOLATION_POLICY" as policy type for demonstration
+		policySetID, err = fetchPolicySetIDByType(client, "ISOLATION_POLICY", GetString(d.Get("microtenant_id")))
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Printf("[INFO] Deleting policy isolation rule with id %v\n", d.Id())
 
-	if _, err := service.Delete(globalPolicySet.ID, d.Id()); err != nil {
+	if _, err := client.policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id"))).Delete(policySetID, d.Id()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func expandCreatePolicyIsolationRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {
-	policySetID, ok := d.Get("policy_set_id").(string)
-	if !ok {
-		return nil, fmt.Errorf("policy_set_id is not set")
-	}
-	log.Printf("[INFO] action_id:%v\n", d.Get("action_id"))
+func expandCreatePolicyIsolationRule(d *schema.ResourceData, policySetID string) (*policysetcontroller.PolicyRule, error) {
 	conditions, err := ExpandPolicyConditions(d)
 	if err != nil {
 		return nil, err
@@ -171,12 +192,12 @@ func expandCreatePolicyIsolationRule(d *schema.ResourceData) (*policysetcontroll
 		BypassDefaultRule:     d.Get("bypass_default_rule").(bool),
 		DefaultRule:           d.Get("default_rule").(bool),
 		Operator:              d.Get("operator").(string),
-		PolicySetID:           policySetID,
 		PolicyType:            d.Get("policy_type").(string),
 		ZpnCbiProfileID:       d.Get("zpn_cbi_profile_id").(string),
 		ZpnIsolationProfileID: d.Get("zpn_isolation_profile_id").(string),
 		Priority:              d.Get("priority").(string),
 		MicroTenantID:         GetString(d.Get("microtenant_id")),
 		Conditions:            conditions,
+		PolicySetID:           policySetID,
 	}, nil
 }

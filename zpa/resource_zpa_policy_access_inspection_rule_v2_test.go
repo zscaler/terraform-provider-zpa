@@ -12,8 +12,8 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
 )
 
-func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
-	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyInspectionRule)
+func TestAccResourcePolicyInspectionRuleV2Basic(t *testing.T) {
+	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyInspectionRuleV2)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
 	randDesc := acctest.RandString(20)
@@ -24,16 +24,15 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPolicyInspectionRuleDestroy,
+		CheckDestroy: testAccCheckPolicyInspectionRuleV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc, inspectionProfileHCL, inspectionProfileTypeAndName),
+				Config: testAccCheckPolicyInspectionRuleV2Configure(resourceTypeAndName, generatedName, rName, randDesc, inspectionProfileHCL, inspectionProfileTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPolicyInspectionRuleExists(resourceTypeAndName),
+					testAccCheckPolicyInspectionRuleV2Exists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "INSPECT"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 				ExpectNonEmptyPlan: true,
@@ -46,13 +45,12 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 			},
 			// Update test
 			{
-				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc, inspectionProfileHCL, inspectionProfileTypeAndName),
+				Config: testAccCheckPolicyInspectionRuleV2Configure(resourceTypeAndName, generatedName, updatedRName, randDesc, inspectionProfileHCL, inspectionProfileTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPolicyInspectionRuleExists(resourceTypeAndName),
+					testAccCheckPolicyInspectionRuleV2Exists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "INSPECT"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 				ExpectNonEmptyPlan: true,
@@ -67,18 +65,18 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 	})
 }
 
-func testAccCheckPolicyInspectionRuleDestroy(s *terraform.State) error {
+func testAccCheckPolicyInspectionRuleV2Destroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := apiClient.policysetcontroller.GetByPolicyType("INSPECTION_POLICY")
+	accessPolicy, _, err := apiClient.policysetcontrollerv2.GetByPolicyType("INSPECTION_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource INSPECTION_POLICY. Recevied error: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != resourcetype.ZPAPolicyInspectionRule {
+		if rs.Type != resourcetype.ZPAPolicyInspectionRuleV2 {
 			continue
 		}
 
-		rule, _, err := apiClient.policysetcontroller.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
+		rule, _, err := apiClient.policysetcontrollerv2.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -92,7 +90,7 @@ func testAccCheckPolicyInspectionRuleDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckPolicyInspectionRuleExists(resource string) resource.TestCheckFunc {
+func testAccCheckPolicyInspectionRuleV2Exists(resource string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
@@ -103,11 +101,11 @@ func testAccCheckPolicyInspectionRuleExists(resource string) resource.TestCheckF
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := apiClient.policysetcontroller.GetByPolicyType("INSPECTION_POLICY")
+		resp, _, err := apiClient.policysetcontrollerv2.GetByPolicyType("INSPECTION_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource INSPECTION_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = apiClient.policysetcontroller.GetPolicyRule(resp.ID, rs.Primary.ID)
+		_, _, err = apiClient.policysetcontrollerv2.GetPolicyRule(resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -115,7 +113,7 @@ func testAccCheckPolicyInspectionRuleExists(resource string) resource.TestCheckF
 	}
 }
 
-func testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, rName, generatedName, desc, inspectionProfileHCL, inspectionProfileTypeAndName string) string {
+func testAccCheckPolicyInspectionRuleV2Configure(resourceTypeAndName, rName, generatedName, desc, inspectionProfileHCL, inspectionProfileTypeAndName string) string {
 	return fmt.Sprintf(`
 
 // Inspection profile resource
@@ -130,7 +128,7 @@ data "%s" "%s" {
 `,
 		// resource variables
 		inspectionProfileHCL,
-		getPolicyInspectionRuleHCL(rName, generatedName, desc, inspectionProfileTypeAndName),
+		getPolicyInspectionRuleV2HCL(rName, generatedName, desc, inspectionProfileTypeAndName),
 
 		// data source variables
 		resourcetype.ZPAPolicyType,
@@ -139,27 +137,25 @@ data "%s" "%s" {
 	)
 }
 
-func getPolicyInspectionRuleHCL(rName, generatedName, desc, inspectionProfileTypeAndName string) string {
+func getPolicyInspectionRuleV2HCL(rName, generatedName, desc, inspectionProfileTypeAndName string) string {
 	return fmt.Sprintf(`
 
 resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
 	action              		= "INSPECT"
-	operator      				= "AND"
 	zpn_inspection_profile_id 	= "${%s.id}"
 	conditions {
 		operator = "OR"
 		operands {
-			object_type = "CLIENT_TYPE"
-			lhs         = "id"
-			rhs         = "zpn_client_type_exporter"
-			}
+		  object_type = "CLIENT_TYPE"
+		  values      = ["zpn_client_type_exporter"]
 		}
 	}
+}
 `,
 		// resource variables
-		resourcetype.ZPAPolicyInspectionRule,
+		resourcetype.ZPAPolicyInspectionRuleV2,
 		rName,
 		generatedName,
 		desc,

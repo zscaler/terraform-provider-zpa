@@ -213,3 +213,65 @@ func epochToRFC1123(epochStr string, useRFC1123Z bool) (string, error) {
 	}
 	return t.Format(time.RFC1123), nil // Returns the time formatted using RFC1123 layout.
 }
+
+// #######################################################################################
+// ######################Conversion function for Timeout Policy Rule######################
+// #######################################################################################
+func parseHumanReadableTimeout(input string) (int, error) {
+	var multiplier int
+	var value int
+	var unit string
+
+	// Handle special case for "Never" or "never"
+	if strings.ToLower(input) == "never" {
+		return -1, nil
+	}
+
+	_, err := fmt.Sscanf(input, "%d %s", &value, &unit)
+	if err != nil {
+		return 0, fmt.Errorf("error parsing timeout value: %v", err)
+	}
+
+	unit = strings.ToLower(unit)
+	switch unit {
+	case "minute", "minutes":
+		multiplier = 60
+	case "hour", "hours":
+		multiplier = 3600
+	case "day", "days":
+		multiplier = 86400
+	default:
+		return 0, fmt.Errorf("unsupported time unit: %s", unit)
+	}
+
+	return value * multiplier, nil
+}
+
+// Convert seconds into a human-readable format. This function assumes `seconds` is a string that can be parsed into an int.
+func secondsToHumanReadable(seconds string) string {
+	sec, err := strconv.Atoi(seconds)
+	if err != nil {
+		log.Printf("[ERROR] Failed to parse seconds: %v", err)
+		return ""
+	}
+
+	days := sec / 86400
+	hours := (sec % 86400) / 3600
+	minutes := (sec % 3600) / 60
+
+	if days > 0 {
+		return fmt.Sprintf("%d %s", days, pluralize(days, "Day", "Days"))
+	} else if hours > 0 {
+		return fmt.Sprintf("%d %s", hours, pluralize(hours, "Hour", "Hours"))
+	} else if minutes > 0 {
+		return fmt.Sprintf("%d %s", minutes, pluralize(minutes, "Minute", "Minutes"))
+	}
+	return fmt.Sprintf("%d %s", sec, pluralize(sec, "Second", "Seconds"))
+}
+
+func pluralize(count int, singular, plural string) string {
+	if count == 1 {
+		return singular
+	}
+	return plural
+}

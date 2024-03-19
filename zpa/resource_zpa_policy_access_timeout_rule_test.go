@@ -13,8 +13,8 @@ import (
 
 func TestAccResourcePolicyTimeoutRuleBasic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyTimeOutRule)
-	rName := acctest.RandomWithPrefix("tf-acc-test-")
-	updatedRName := acctest.RandomWithPrefix("tf-updated-") // New name for update test
+	rName := acctest.RandomWithPrefix("tf-acc-test")
+	updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{
@@ -131,10 +131,6 @@ data "%s" "%s" {
 func getPolicyTimeoutRuleHCL(rName, generatedName, desc string) string {
 	return fmt.Sprintf(`
 
-data "zpa_policy_type" "timeout_policy" {
-	policy_type = "TIMEOUT_POLICY"
-}
-
 resource "%s" "%s" {
 	name          		= "%s"
 	description   		= "%s"
@@ -142,7 +138,6 @@ resource "%s" "%s" {
 	reauth_idle_timeout = "600"
 	reauth_timeout      = "172800"
 	operator      		= "AND"
-	policy_set_id 		= data.zpa_policy_type.timeout_policy.id
 	conditions {
 		operator = "OR"
 		operands {
