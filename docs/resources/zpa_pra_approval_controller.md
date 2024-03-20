@@ -90,7 +90,7 @@ resource "zpa_pra_approval_controller" "this" {
 
 ### Required
 
-* `email_ids` - (Required) The name of the privileged portal.
+* `email_ids` - (Required) The email_id associated with the privileged approval.
     ~> **NOTE**: Although the attribute `email_ids` is a list of strings, the ZPA API only supports a single email address.
 * `start_time` - (Required) The set start time in either `RFC1123Z` i.e `"Mon, 02 Jan 2006 15:04:05 -0700"` or `RFC1123` i.e `"Mon, 02 Jan 2006 15:04:05 MST"` format that the user has access to the Privileged Remote Access portal. 
     ~> **NOTE**: The approval `start_time` cannot be more than 1 hour in the past.
