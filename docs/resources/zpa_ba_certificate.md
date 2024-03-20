@@ -6,7 +6,7 @@ description: |-
   Adds a certificate with a private key in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_ba_certificate
+# Resource: zpa_ba_certificate
 
 Use the **zpa_ba_certificate** creates a browser access certificate with a private key in the Zscaler Private Access cloud. This resource is required when creating a browser access application segment resource.
 
@@ -46,3 +46,25 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `description` - (string) - The description of the certificate.
+
+## Import
+
+This resource does not support importing.
+
+## Let's Encrypt Certbot
+
+This example demonstrates generatoring a domain certificate with letsencrypt
+certbot https://letsencrypt.org/getting-started/
+
+```
+$ certbot certonly --manual --preferred-challenges dns --key-type rsa -d [DOMAIN]
+```
+
+Use letsencrypt's certbot to generate domain certificates in RSA output mode.
+The generator's output corresponds to `zpa_ba_certificate` fields in the
+following manner.
+
+Zscaler Field          | Certbot file
+--------------------|--------------
+`certblob`          | `cert.pem`
+`certblob`          | `privkey.pem`

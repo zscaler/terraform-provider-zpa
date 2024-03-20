@@ -44,8 +44,8 @@ func ZPAProvider() *schema.Provider {
 			"zpa_cloud": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "Cloud to use PRODUCTION, BETA, GOV, GOVUS, PREVIEW, DEV, QA, QA2",
-				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}, true),
+				Description:  "Cloud to use PRODUCTION, ZPATWO, BETA, GOV, GOVUS, PREVIEW, DEV, QA, QA2",
+				ValidateFunc: validation.StringInSlice([]string{"PRODUCTION", "ZPATWO", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}, true),
 				DefaultFunc:  schema.EnvDefaultFunc("ZPA_CLOUD", nil),
 			},
 		},
@@ -75,6 +75,12 @@ func ZPAProvider() *schema.Provider {
 			"zpa_policy_isolation_rule":                    resourcePolicyIsolationRule(),
 			"zpa_policy_redirection_rule":                  resourcePolicyRedictionRule(),
 			"zpa_policy_access_rule_v2":                    resourcePolicyAccessRuleV2(),
+			"zpa_policy_isolation_rule_v2":                 resourcePolicyIsolationRuleV2(),
+			"zpa_policy_inspection_rule_v2":                resourcePolicyInspectionRuleV2(),
+			"zpa_policy_forwarding_rule_v2":                resourcePolicyForwardingRuleV2(),
+			"zpa_policy_timeout_rule_v2":                   resourcePolicyTimeoutRuleV2(),
+			"zpa_policy_credential_rule":                   resourcePolicyCredentialAccessRule(),
+			"zpa_policy_capabilities_rule":                 resourcePolicyCapabilitiesAccessRule(),
 			"zpa_provisioning_key":                         resourceProvisioningKey(),
 			"zpa_service_edge_group":                       resourceServiceEdgeGroup(),
 			"zpa_lss_config_controller":                    resourceLSSConfigController(),
@@ -195,4 +201,8 @@ func zscalerConfigure(d *schema.ResourceData, terraformVersion string) (interfac
 	}
 
 	return client, nil
+}
+
+func resourceFuncNoOp(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics {
+	return nil
 }

@@ -647,6 +647,7 @@ func flattenAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentpr
 		}
 		appConfig[i] = map[string]interface{}{
 			"id":                   val.ID,
+			"app_id":               val.AppID,
 			"name":                 val.Name,
 			"enabled":              val.Enabled,
 			"domain":               val.Domain,

@@ -63,6 +63,8 @@ resource "zpa_policy_timeout_rule" "this"  {
 
 * `name` - (Required) This is the name of the policy rule.
 * `policy_set_id` - (Required) Use [zpa_policy_type](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_policy_type) data source to retrieve the necessary policy Set ID ``policy_set_id``
+    ~> **NOTE** As of v3.2.0 the ``policy_set_id`` attribute is now optional, and will be automatically determined based on the policy type being configured. The attribute is being kept for backwards compatibility, but can be safely removed from existing configurations.
+
 * `reauth_timeout` (Required) This denotes the authentication timeout. Provides the timeout value in seconds. -1 value denotes Never.
 * `reauth_idle_timeout` (Required) This denotes the idle connection timeout. Provides the timeout value in seconds. -1 value denotes Default.
 

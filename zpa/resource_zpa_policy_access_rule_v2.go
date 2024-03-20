@@ -1,13 +1,11 @@
 package zpa
 
 import (
-	"fmt"
 	"log"
-	"strings"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
 )
 
@@ -57,7 +55,6 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 			},
 			"policy_set_id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"custom_msg": {
@@ -189,9 +186,19 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 }
 
 func resourcePolicyAccessV2Create(d *schema.ResourceData, m interface{}) error {
-	// zClient := m.(*Client)
-	service := m.(*Client).policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	req, err := expandCreatePolicyRuleV2(d)
+	client := m.(*Client)
+	service := client.policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
+	// Automatically determining policy_set_id for "ACCESS_POLICY"
+	policySetID, err := fetchPolicySetIDByType(client, "ACCESS_POLICY", GetString(d.Get("microtenant_id")))
+	if err != nil {
+		return err
+	}
+
+	// Setting the policy_set_id for further use
+	d.Set("policy_set_id", policySetID)
+
+	req, err := expandCreatePolicyRuleV2(d, policySetID)
 	if err != nil {
 		return err
 	}
@@ -211,15 +218,19 @@ func resourcePolicyAccessV2Create(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePolicyAccessV2Read(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
+	client := m.(*Client)
+	microTenantID := GetString(d.Get("microtenant_id"))
+
+	policySetID, err := fetchPolicySetIDByType(client, "ACCESS_POLICY", microTenantID)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
-	resp, _, err := service.GetPolicyRule(globalPolicySet.ID, d.Id())
+	service := client.policysetcontrollerv2.WithMicroTenant(microTenantID)
+	log.Printf("[INFO] Getting Policy Set Rule: policySetID:%s id: %s\n", policySetID, d.Id())
+	resp, respErr, err := service.GetPolicyRule(policySetID, d.Id())
 	if err != nil {
-		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
+		// Adjust this error handling to match how your client library exposes HTTP response details
+		if respErr != nil && (respErr.StatusCode == 404 || respErr.StatusCode == http.StatusNotFound) {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
@@ -227,8 +238,6 @@ func resourcePolicyAccessV2Read(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	// Assuming you have a function to convert v1 response to v2 request format if necessary
-	// If your data is already in the v2 format, you may not need this conversion
 	v2PolicyRule := policysetcontrollerv2.ConvertV1ResponseToV2Request(*resp)
 
 	// Set Terraform state
@@ -238,7 +247,7 @@ func resourcePolicyAccessV2Read(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("description", v2PolicyRule.Description)
 	_ = d.Set("action", v2PolicyRule.Action)
 	_ = d.Set("operator", v2PolicyRule.Operator)
-	_ = d.Set("policy_set_id", v2PolicyRule.PolicySetID)
+	_ = d.Set("policy_set_id", policySetID) // Here, you're setting it based on fetched ID
 	_ = d.Set("custom_msg", v2PolicyRule.CustomMsg)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
 	_ = d.Set("app_server_groups", flattenPolicyRuleServerGroupsV2(resp.AppServerGroups))
@@ -248,15 +257,21 @@ func resourcePolicyAccessV2Read(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePolicyAccessV2Update(d *schema.ResourceData, m interface{}) error {
-	// zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
+	client := m.(*Client)
+	service := client.policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
+	// Automatically determining policy_set_id for "ACCESS_POLICY"
+	policySetID, err := fetchPolicySetIDByType(client, "ACCESS_POLICY", GetString(d.Get("microtenant_id")))
 	if err != nil {
 		return err
 	}
+
+	// Setting the policy_set_id for further use
+	d.Set("policy_set_id", policySetID)
+
 	ruleID := d.Id()
-	log.Printf("[INFO] Updating policy rule ID: %v\n", ruleID)
-	req, err := expandCreatePolicyRuleV2(d)
+	log.Printf("[INFO] Updating access policy rule ID: %v\n", ruleID)
+	req, err := expandCreatePolicyRuleV2(d, policySetID)
 	if err != nil {
 		return err
 	}
@@ -264,14 +279,17 @@ func resourcePolicyAccessV2Update(d *schema.ResourceData, m interface{}) error {
 	if err := ValidatePolicyRuleConditions(d); err != nil {
 		return err
 	}
-	if _, _, err := service.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	// Checking the current state of the rule to handle cases where it might have been deleted outside Terraform
+	_, respErr, err := service.GetPolicyRule(policySetID, ruleID)
+	if err != nil {
+		if respErr != nil && (respErr.StatusCode == http.StatusNotFound) {
 			d.SetId("")
 			return nil
 		}
+		return err
 	}
-	serviceUpdate := m.(*Client).policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	if _, err := serviceUpdate.UpdateRule(globalPolicySet.ID, ruleID, req); err != nil {
+	_, err = service.UpdateRule(policySetID, ruleID, req)
+	if err != nil {
 		return err
 	}
 
@@ -279,125 +297,44 @@ func resourcePolicyAccessV2Update(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePolicyAccessV2Delete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
+	client := m.(*Client)
+	microTenantID := GetString(d.Get("microtenant_id"))
+
+	// Assume "ACCESS_POLICY" is the policy type for this resource. Adjust as needed.
+	policySetID, err := fetchPolicySetIDByType(client, "ACCESS_POLICY", microTenantID)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
+	log.Printf("[INFO] Deleting access policy set rule with id %v\n", d.Id())
 
-	if _, err := service.Delete(globalPolicySet.ID, d.Id()); err != nil {
+	service := client.policysetcontrollerv2.WithMicroTenant(microTenantID)
+	if _, err := service.Delete(policySetID, d.Id()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func expandCreatePolicyRuleV2(d *schema.ResourceData) (*policysetcontrollerv2.PolicyRule, error) {
-	policySetID, ok := d.Get("policy_set_id").(string)
-	if !ok {
-		log.Printf("[ERROR] policy_set_id is not set\n")
-		return nil, fmt.Errorf("policy_set_id is not set")
-	}
-	log.Printf("[INFO] action_id:%v\n", d.Get("action_id"))
+func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
+
 	conditions, err := ExpandPolicyConditionsV2(d)
 	if err != nil {
 		return nil, err
 	}
+
 	return &policysetcontrollerv2.PolicyRule{
-		ID:          d.Get("id").(string),
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
-		Action:      d.Get("action").(string),
-		CustomMsg:   d.Get("custom_msg").(string),
-		Operator:    d.Get("operator").(string),
-		PolicySetID: policySetID,
-		// MicroTenantID:      d.Get("microtenant_id").(string),
+		ID:                 d.Get("id").(string),
+		Name:               d.Get("name").(string),
+		Description:        d.Get("description").(string),
+		Action:             d.Get("action").(string),
+		CustomMsg:          d.Get("custom_msg").(string),
+		Operator:           d.Get("operator").(string),
+		PolicySetID:        policySetID,
 		Conditions:         conditions,
 		AppServerGroups:    expandPolicySetControllerAppServerGroupsV2(d),
 		AppConnectorGroups: expandPolicysetControllerAppConnectorGroupsV2(d),
 	}, nil
-}
-
-func ExpandPolicyConditionsV2(d *schema.ResourceData) ([]policysetcontrollerv2.PolicyRuleResourceConditions, error) {
-	conditionInterface, ok := d.GetOk("conditions")
-	if ok {
-		conditions := conditionInterface.([]interface{})
-		log.Printf("[INFO] conditions data: %+v\n", conditions)
-		var conditionSets []policysetcontrollerv2.PolicyRuleResourceConditions
-		for _, condition := range conditions {
-			conditionSet, _ := condition.(map[string]interface{})
-			if conditionSet != nil {
-				operands, err := expandOperandsListV2(conditionSet["operands"])
-				if err != nil {
-					return nil, err
-				}
-				conditionSets = append(conditionSets, policysetcontrollerv2.PolicyRuleResourceConditions{
-					ID:       conditionSet["id"].(string),
-					Operator: conditionSet["operator"].(string),
-					Operands: operands,
-				})
-			}
-		}
-		return conditionSets, nil
-	}
-
-	return []policysetcontrollerv2.PolicyRuleResourceConditions{}, nil
-}
-
-func expandOperandsListV2(ops interface{}) ([]policysetcontrollerv2.PolicyRuleResourceOperands, error) {
-	if ops != nil {
-		operands := ops.([]interface{})
-		log.Printf("[INFO] operands data: %+v\n", operands)
-		var operandsSets []policysetcontrollerv2.PolicyRuleResourceOperands
-		for _, operand := range operands {
-			operandSet, _ := operand.(map[string]interface{})
-			id, _ := operandSet["id"].(string)
-			IdpID, _ := operandSet["idp_id"].(string)
-
-			// Extracting Values from TypeSet
-			var values []string
-			if valuesInterface, valuesOk := operandSet["values"].(*schema.Set); valuesOk && valuesInterface != nil {
-				for _, v := range valuesInterface.List() {
-					if strVal, ok := v.(string); ok {
-						values = append(values, strVal)
-					}
-				}
-			}
-
-			// Extracting EntryValues
-			var entryValues []policysetcontrollerv2.OperandsResourceLHSRHSValue
-			if entryValuesInterface, ok := operandSet["entry_values"].([]interface{}); ok {
-				for _, ev := range entryValuesInterface {
-					entryValueMap, _ := ev.(map[string]interface{})
-					lhs, _ := entryValueMap["lhs"].(string)
-					rhs, _ := entryValueMap["rhs"].(string)
-
-					entryValues = append(entryValues, policysetcontrollerv2.OperandsResourceLHSRHSValue{
-						LHS: lhs,
-						RHS: rhs,
-					})
-				}
-			}
-
-			log.Printf("[DEBUG] Extracted values: %+v\n", values)
-			log.Printf("[DEBUG] Extracted entryValues: %+v\n", entryValues)
-
-			op := policysetcontrollerv2.PolicyRuleResourceOperands{
-				ID:                id,
-				ObjectType:        operandSet["object_type"].(string),
-				IDPID:             IdpID,
-				Values:            values,
-				EntryValuesLHSRHS: entryValues,
-			}
-
-			operandsSets = append(operandsSets, op)
-		}
-
-		return operandsSets, nil
-	}
-	return []policysetcontrollerv2.PolicyRuleResourceOperands{}, nil
 }
 
 func expandPolicySetControllerAppServerGroupsV2(d *schema.ResourceData) []policysetcontrollerv2.AppServerGroups {
@@ -442,268 +379,6 @@ func expandPolicysetControllerAppConnectorGroupsV2(d *schema.ResourceData) []pol
 	}
 
 	return []policysetcontrollerv2.AppConnectorGroups{}
-}
-
-// ValidatePolicyRuleConditions ensures that the necessary values are provided for specific object types.
-func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
-	conditions, ok := d.GetOk("conditions")
-	if !ok {
-		// If conditions are not provided, there's nothing to validate
-		return nil
-	}
-
-	validClientTypes := []string{
-		"zpn_client_type_zapp",
-		"zpn_client_type_exporter",
-		"zpn_client_type_ip_anchoring",
-		"zpn_client_type_browser_isolation",
-		"zpn_client_type_machine_tunnel",
-		"zpn_client_type_edge_connector",
-		"zpn_client_type_exporter_noauth",
-		"zpn_client_type_slogger",
-		"zpn_client_type_branch_connector",
-	}
-
-	validPlatformTypes := []string{"mac", "linux", "ios", "windows", "android"}
-
-	conditionList := conditions.([]interface{})
-	for _, condition := range conditionList {
-		conditionMap := condition.(map[string]interface{})
-		operands, ok := conditionMap["operands"].([]interface{})
-		if !ok {
-			// No operands to validate
-			continue
-		}
-
-		for _, operand := range operands {
-			operandMap := operand.(map[string]interface{})
-			objectType := operandMap["object_type"].(string)
-			valuesSet, valuesPresent := operandMap["values"].(*schema.Set)
-
-			switch objectType {
-			case "APP":
-				if !valuesPresent || valuesSet.Len() == 0 {
-					return fmt.Errorf("an Application Segment ID must be provided when object_type = APP")
-				}
-			case "APP_GROUP":
-				if !valuesPresent || valuesSet.Len() == 0 {
-					return fmt.Errorf("a Segment Group ID must be provided when object_type = APP_GROUP")
-				}
-			case "MACHINE_GRP":
-				if !valuesPresent || valuesSet.Len() == 0 {
-					return fmt.Errorf("a Machine Group ID must be provided when object_type = MACHINE_GRP")
-				}
-			case "LOCATION":
-				if !valuesPresent || valuesSet.Len() == 0 {
-					return fmt.Errorf("a Location ID must be provided when object_type = LOCATION")
-				}
-			case "EDGE_CONNECTOR_GROUP":
-				if !valuesPresent || valuesSet.Len() == 0 {
-					return fmt.Errorf("a Edge Connector Group ID must be provided when object_type = EDGE_CONNECTOR_GROUP")
-				}
-			case "BRANCH_CONNECTOR_GROUP":
-				if !valuesPresent || valuesSet.Len() == 0 {
-					return fmt.Errorf("a Branch Connector Group ID must be provided when object_type = BRANCH_CONNECTOR_GROUP")
-				}
-			case "CLIENT_TYPE":
-				if !valuesPresent || valuesSet.Len() == 0 {
-					return fmt.Errorf("please provide one of the valid Client Types: %v", validClientTypes)
-				}
-				for _, v := range valuesSet.List() {
-					value := v.(string)
-					if !contains(validClientTypes, value) {
-						return fmt.Errorf("invalid Client Type '%s'. Please provide one of the valid Client Types: %v", value, validClientTypes)
-					}
-				}
-			case "PLATFORM":
-				entryValues, ok := operandMap["entry_values"].([]interface{})
-				if !ok || len(entryValues) == 0 {
-					return fmt.Errorf("please provide one of the valid platform types: %v", validPlatformTypes)
-				}
-				for _, ev := range entryValues {
-					evMap := ev.(map[string]interface{})
-					lhs, lhsOk := evMap["lhs"].(string)
-					rhs, rhsOk := evMap["rhs"].(string)
-					if !lhsOk || !contains(validPlatformTypes, lhs) {
-						return fmt.Errorf("please provide one of the valid platform types: %v", validPlatformTypes)
-					}
-					if !rhsOk || rhs != "true" {
-						return fmt.Errorf("rhs value must be 'true' for PLATFORM object_type")
-					}
-				}
-			case "POSTURE":
-				entryValues, ok := operandMap["entry_values"].([]interface{})
-				if !ok || len(entryValues) == 0 {
-					return fmt.Errorf("please provide a valid Posture UDID")
-				}
-				for _, ev := range entryValues {
-					evMap := ev.(map[string]interface{})
-					lhs, lhsOk := evMap["lhs"].(string)
-					rhs, rhsOk := evMap["rhs"].(string)
-					if !lhsOk || !contains(validPlatformTypes, lhs) {
-						return fmt.Errorf("please provide a valid Posture UDID")
-					}
-					if !rhsOk || (rhs != "true" && rhs != "false") {
-						return fmt.Errorf("rhs value must be 'true' or 'false' for POSTURE object_type")
-					}
-				}
-			case "TRUSTED_NETWORK":
-				entryValues, ok := operandMap["entry_values"].([]interface{})
-				if !ok || len(entryValues) == 0 {
-					return fmt.Errorf("please provide a valid Network ID")
-				}
-				for _, ev := range entryValues {
-					evMap := ev.(map[string]interface{})
-					lhs, lhsOk := evMap["lhs"].(string)
-					rhs, rhsOk := evMap["rhs"].(string)
-					if !lhsOk || !contains(validPlatformTypes, lhs) {
-						return fmt.Errorf("please provide a valid Network ID")
-					}
-					if !rhsOk || (rhs != "true" && rhs != "false") {
-						return fmt.Errorf("rhs value must be 'true' or 'false' for TRUSTED_NETWORK object_type")
-					}
-				}
-			case "COUNTRY_CODE":
-				entryValues, ok := operandMap["entry_values"].([]interface{})
-				if !ok || len(entryValues) == 0 {
-					return fmt.Errorf("please provide a valid country code in 'entry_values'")
-				}
-
-				var invalidCodes []string
-				for _, ev := range entryValues {
-					evMap := ev.(map[string]interface{})
-					lhs, lhsOk := evMap["lhs"].(string)
-					rhs, rhsOk := evMap["rhs"].(string)
-
-					// Validate 'lhs' as a country code
-					if lhsOk {
-						_, errors := validateCountryCode(lhs, "lhs")
-						if len(errors) > 0 {
-							// Collect invalid country codes instead of returning immediately
-							invalidCodes = append(invalidCodes, lhs)
-						}
-					} else {
-						return fmt.Errorf("a valid ISO-3166 Alpha-2 country code must be provided in 'lhs'")
-					}
-
-					// Ensure 'rhs' is "true"
-					if !rhsOk || rhs != "true" {
-						return fmt.Errorf("rhs value must be 'true' for COUNTRY_CODE object_type")
-					}
-				}
-
-				// If there are any invalid country codes, return an aggregated error message
-				if len(invalidCodes) > 0 {
-					return fmt.Errorf("'%s' is not a valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes", strings.Join(invalidCodes, "', '"))
-				}
-			case "SAML":
-				entryValues, ok := operandMap["entry_values"].([]interface{})
-				if !ok || len(entryValues) == 0 {
-					return fmt.Errorf("entry_values must be provided for SAML object_type")
-				}
-				for _, ev := range entryValues {
-					evMap := ev.(map[string]interface{})
-					lhs, lhsOk := evMap["lhs"].(string)
-					rhs := evMap["rhs"].(string) // Directly accessing the value, assuming zero value (empty string) is not valid
-
-					if !lhsOk || lhs == "" {
-						return fmt.Errorf("LHS must be a valid SAML attribute ID and cannot be empty for SAML object_type")
-					}
-					if rhs == "" {
-						return fmt.Errorf("RHS must be a valid string i.e email adddress, department, group etc and cannot be empty for SAML object_type")
-					}
-				}
-			case "SCIM":
-				entryValues, ok := operandMap["entry_values"].([]interface{})
-				if !ok || len(entryValues) == 0 {
-					return fmt.Errorf("entry_values must be provided for SCIM object_type")
-				}
-				for _, ev := range entryValues {
-					evMap := ev.(map[string]interface{})
-					lhs, lhsOk := evMap["lhs"].(string)
-					rhs := evMap["rhs"].(string) // Directly accessing the value, assuming zero value (empty string) is not valid
-
-					if !lhsOk || lhs == "" {
-						return fmt.Errorf("LHS must be a valid IdP ID and cannot be empty for SCIM object_type")
-					}
-					if rhs == "" {
-						return fmt.Errorf("RHS must be a valid string i.e email adddress, department, group etc and cannot be empty for SCIM object_type")
-					}
-				}
-			case "SCIM_GROUP":
-				entryValues, ok := operandMap["entry_values"].([]interface{})
-				if !ok || len(entryValues) == 0 {
-					return fmt.Errorf("entry_values must be provided for SCIM_GROUP object_type")
-				}
-				for _, ev := range entryValues {
-					evMap := ev.(map[string]interface{})
-					lhs, lhsOk := evMap["lhs"].(string)
-					rhs := evMap["rhs"].(string) // Directly accessing the value, assuming zero value (empty string) is not valid
-
-					if !lhsOk || lhs == "" {
-						return fmt.Errorf("LHS must be a valid IdP ID and cannot be empty for SCIM_GROUP object_type")
-					}
-					if rhs == "" {
-						return fmt.Errorf("RHS must be a valid scim group ID and cannot be empty for SCIM_GROUP object_type")
-					}
-				}
-			}
-
-		}
-	}
-	return nil
-}
-
-// flattenConditions flattens the conditions part of the policy rule into a format suitable for Terraform schema.
-func flattenConditionsV2(conditions []policysetcontrollerv2.PolicyRuleResourceConditions) []interface{} {
-	if conditions == nil {
-		return nil
-	}
-
-	c := make([]interface{}, len(conditions)) // Simplified slice initialization
-	for i, condition := range conditions {
-		condMap := make(map[string]interface{})
-		condMap["operator"] = condition.Operator
-		condMap["operands"] = flattenOperandsV2(condition.Operands)
-		c[i] = condMap
-	}
-	return c
-}
-
-// flattenOperands flattens the operands part of the conditions into a format suitable for Terraform schema.
-func flattenOperandsV2(operands []policysetcontrollerv2.PolicyRuleResourceOperands) []interface{} {
-	if operands == nil {
-		return nil
-	}
-
-	o := make([]interface{}, len(operands)) // Simplified slice initialization
-	for i, operand := range operands {
-		operandMap := make(map[string]interface{})
-		operandMap["object_type"] = operand.ObjectType
-
-		if len(operand.Values) > 0 {
-			operandMap["values"] = operand.Values
-		} else {
-			operandMap["values"] = []interface{}{} // Ensure "values" key exists with an empty slice if no values are present.
-		}
-
-		entryValues := make([]interface{}, len(operand.EntryValuesLHSRHS))
-		for j, entryValue := range operand.EntryValuesLHSRHS {
-			entryValues[j] = map[string]interface{}{
-				"lhs": entryValue.LHS,
-				"rhs": entryValue.RHS,
-			}
-		}
-
-		if len(entryValues) > 0 {
-			operandMap["entry_values"] = entryValues
-		} else {
-			operandMap["entry_values"] = []interface{}{} // Ensure "entry_values" key exists with an empty slice if no entry values are present.
-		}
-
-		o[i] = operandMap
-	}
-	return o
 }
 
 func flattenPolicyRuleServerGroupsV2(appServerGroup []policysetcontrollerv2.AppServerGroups) []interface{} {

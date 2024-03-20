@@ -37,19 +37,19 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `cert_chain` - (string)
+* `cert_chain` - (string) The certificate chain.
 * `certificate` - (string) The certificate text is in PEM format.
-* `cname` - (string)
-* `creation_time` - (string)
-* `description` - (string)
-* `issued_by` - (string)
-* `issued_to` - (string)
-* `modified_time` - (string)
-* `modifiedby` - (string)
-* `san` - (string)
-* `serial_no` - (string)
-* `status` - (string)
-* `valid_from_in_epochsec` - (string)
-* `valid_to_in_epochsec` - (string)
+* `cname` - (string) The canonical name (CNAME DNS records) of the certificate.
+* `creation_time` - (string) The time the resource is created.
+* `description` - (string) The description of the certificate.
+* `issued_by` - (string) The unique identifier the certificate is issued by.
+* `issued_to` - (string) The unique identifier the certificate is issued to.
+* `modified_time` - (string) The time the certificate is modified.
+* `modifiedby` - (string) The unique identifier of the tenant who modified the certificate.
+* `san` - (string)  Subject Alternative Name field of the certificate
+* `serial_no` - (string) The serial number of the certificate.
+* `status` - (string) The status of the certificate.
+* `valid_from_in_epochsec` - (string) The start date of the certificate.
+* `valid_to_in_epochsec` - (string) The expiration date of the certificate.
 
 :warning: Notice that certificate and public_keys are omitted from the output.

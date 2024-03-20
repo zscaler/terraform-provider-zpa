@@ -49,6 +49,7 @@ func resourcePRAPrivilegedApprovalController() *schema.Resource {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
+				MaxItems:    1,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "The email address of the user that you are assigning the privileged approval to",
 			},

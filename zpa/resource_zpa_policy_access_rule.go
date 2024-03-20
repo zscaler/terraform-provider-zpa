@@ -1,12 +1,11 @@
 package zpa
 
 import (
-	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
@@ -89,41 +88,63 @@ func resourcePolicyAccessRule() *schema.Resource {
 }
 
 func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	req, err := expandCreatePolicyRule(d)
-	if err != nil {
-		return err
-	}
-	log.Printf("[INFO] Creating zpa policy rule with request\n%+v\n", req)
+	client := m.(*Client)
+	var policySetID string
+	var err error
 
-	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err != nil {
-		return err
+	// Check if policy_set_id is provided by the user
+	if v, ok := d.GetOk("policy_set_id"); ok {
+		policySetID = v.(string)
+	} else {
+		// Fetch policy_set_id based on the policy_type
+		policySetID, err = fetchPolicySetIDByType(client, "ACCESS_POLICY", GetString(d.Get("microtenant_id")))
+		if err != nil {
+			return err
+		}
 	}
-	policysetcontroller, _, err := service.CreateRule(req)
+
+	// Preparing the request body with the obtained or provided policySetID
+	req, err := expandCreatePolicyRule(d, policySetID) // Ensure this function now accepts policySetID as a parameter
 	if err != nil {
 		return err
 	}
+
+	log.Printf("[INFO] Creating ZPA policy access rule with request\n%+v\n", req)
+
+	if err := ValidateConditions(req.Conditions, client, GetString(d.Get("microtenant_id"))); err != nil {
+		return err
+	}
+
+	// Make API call to create the policy access rule
+	policysetcontroller, _, err := client.policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id"))).CreateRule(req)
+	if err != nil {
+		return err
+	}
+
 	d.SetId(policysetcontroller.ID)
 
 	return resourcePolicyAccessRead(d, m)
 }
 
 func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
+	client := m.(*Client)
+	microTenantID := GetString(d.Get("microtenant_id"))
+
+	policySetID, err := fetchPolicySetIDByType(client, "ACCESS_POLICY", microTenantID)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
-	resp, _, err := service.GetPolicyRule(globalPolicySet.ID, d.Id())
+
+	service := client.policysetcontroller.WithMicroTenant(microTenantID)
+	log.Printf("[INFO] Getting Policy Set Rule: policySetID:%s id: %s\n", policySetID, d.Id())
+	resp, respErr, err := service.GetPolicyRule(policySetID, d.Id())
 	if err != nil {
-		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
+		// Adjust this error handling to match how your client library exposes HTTP response details
+		if respErr != nil && (respErr.StatusCode == 404 || respErr.StatusCode == http.StatusNotFound) {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-
 		return err
 	}
 
@@ -136,11 +157,11 @@ func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("custom_msg", resp.CustomMsg)
 	_ = d.Set("default_rule", resp.DefaultRule)
 	_ = d.Set("operator", resp.Operator)
-	_ = d.Set("policy_set_id", resp.PolicySetID)
-	_ = d.Set("policy_type", resp.PolicyType)
+	_ = d.Set("policy_set_id", policySetID)
+	_ = d.Set("policy_type", "ACCESS_POLICY")
 	_ = d.Set("priority", resp.Priority)
 	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
-	_ = d.Set("microtenant_id", resp.MicroTenantID)
+	_ = d.Set("microtenant_id", microTenantID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 	_ = d.Set("app_server_groups", flattenPolicyRuleServerGroups(resp.AppServerGroups))
 	_ = d.Set("app_connector_groups", flattenPolicyRuleAppConnectorGroups(resp.AppConnectorGroups))
@@ -149,30 +170,32 @@ func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
-	if err != nil {
-		return err
-	}
-	ruleID := d.Id()
-	log.Printf("[INFO] Updating policy rule ID: %v\n", ruleID)
-	req, err := expandCreatePolicyRule(d)
-	if err != nil {
-		return err
-	}
+	client := m.(*Client)
+	var policySetID string
+	var err error
 
-	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err != nil {
-		return err
-	}
-	if _, _, err := service.GetPolicyRule(globalPolicySet.ID, ruleID); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
-			d.SetId("")
-			return nil
+	// Check if policy_set_id is provided by the user, otherwise fetch it
+	if v, ok := d.GetOk("policy_set_id"); ok {
+		policySetID = v.(string)
+	} else {
+		policySetID, err = fetchPolicySetIDByType(client, "ACCESS_POLICY", GetString(d.Get("microtenant_id")))
+		if err != nil {
+			return err
 		}
 	}
 
-	if _, err := service.UpdateRule(globalPolicySet.ID, ruleID, req); err != nil {
+	ruleID := d.Id()
+	req, err := expandCreatePolicyRule(d, policySetID) // Ensure expandCreatePolicyRule now accepts policySetID
+	if err != nil {
+		return err
+	}
+
+	// Replace ValidatePolicyRuleConditions with ValidateConditions
+	if err := ValidateConditions(req.Conditions, client, GetString(d.Get("microtenant_id"))); err != nil {
+		return err
+	}
+
+	if _, err := client.policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id"))).UpdateRule(policySetID, ruleID, req); err != nil {
 		return err
 	}
 
@@ -180,27 +203,33 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePolicyAccessDelete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := service.GetByPolicyType("ACCESS_POLICY")
-	if err != nil {
-		return err
+	client := m.(*Client)
+	var policySetID string
+	var err error
+
+	// Check if policy_set_id is provided by the user, otherwise fetch it based on policy_type
+	if v, ok := d.GetOk("policy_set_id"); ok {
+		policySetID = v.(string)
+	} else {
+		// Assuming "ACCESS_POLICY" as policy type for demonstration
+		policySetID, err = fetchPolicySetIDByType(client, "ACCESS_POLICY", GetString(d.Get("microtenant_id")))
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
 
-	if _, err := service.Delete(globalPolicySet.ID, d.Id()); err != nil {
+	// Now using the potentially fetched policySetID in the delete call
+	if _, err := client.policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id"))).Delete(policySetID, d.Id()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func expandCreatePolicyRule(d *schema.ResourceData) (*policysetcontroller.PolicyRule, error) {
-	policySetID, ok := d.Get("policy_set_id").(string)
-	if !ok {
-		log.Printf("[ERROR] policy_set_id is not set\n")
-		return nil, fmt.Errorf("policy_set_id is not set")
-	}
+func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontroller.PolicyRule, error) {
+
 	log.Printf("[INFO] action_id:%v\n", d.Get("action_id"))
 	conditions, err := ExpandPolicyConditions(d)
 	if err != nil {

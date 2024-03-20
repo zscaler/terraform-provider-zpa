@@ -138,9 +138,9 @@ terraform plan
 **Windows Powershell:**
 
 ```powershell
-env:ZPA_CLIENT_ID      = 'xxxxxxxxxxxxxxxx'
-env:ZPA_CLIENT_SECRET  = 'xxxxxxxxxxxxxxxx'
-env:ZPA_CUSTOMER_ID    = 'xxxxxxxxxxxxxxxx'
+$env:ZPA_CLIENT_ID='xxxxxxxxxxxxxxxx'
+$env:ZPA_CLIENT_SECRET='xxxxxxxxxxxxxxxx'
+$env:ZPA_CUSTOMER_ID='xxxxxxxxxxxxxxxx'
 terraform plan
 ```
 

@@ -177,6 +177,8 @@ The following arguments are supported:
 * `ip_anchored` - (Optional) Supported values: `true`, `false`
 * `is_cname_enabled` - (Optional) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
 * `inspect_traffic_with_zia` - (Optional) - (Optional) Supported values: `true`, `false`
+* `match_style` (Optional) Indicates if Multimatch is enabled for the application segment. If enabled (INCLUSIVE), the request allows traffic to match multiple applications. If disabled (EXCLUSIVE), the request allows traffic to match a single application. A domain can only be INCLUSIVE or EXCLUSIVE, and any application segment can only contain inclusive or exclusive domains.
+Supported values: `EXCLUSIVE`, `INCLUSIVE`. [Learn More](https://help.zscaler.com/zpa/using-app-segment-multimatch)
 * `tcp_keep_alive` (Optional) Supported values: ``1`` for Enabled and ``0`` for Disabled
 * `passive_health_enabled` - (Optional) Supported values: `true`, `false`
 

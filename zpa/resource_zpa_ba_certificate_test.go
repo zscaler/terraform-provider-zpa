@@ -38,12 +38,6 @@ func TestAccResourceBaCertificate_basic(t *testing.T) {
 					testAccCheckBaCertificateExists(resourceTypeAndName),
 				),
 			},
-			{
-				ResourceName:            resourceTypeAndName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cert_blob"}, // Ignore cert_blob during import verification
-			},
 		},
 	})
 }

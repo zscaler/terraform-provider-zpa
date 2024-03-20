@@ -11,8 +11,8 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 )
 
-func TestAccResourcePolicyIsolationRuleBasic(t *testing.T) {
-	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyIsolationRule)
+func TestAccResourcePolicyIsolationRuleV2Basic(t *testing.T) {
+	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyIsolationRuleV2)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
 	randDesc := acctest.RandString(20)
@@ -20,29 +20,27 @@ func TestAccResourcePolicyIsolationRuleBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckPolicyIsolationRuleDestroy,
+		CheckDestroy: testAccCheckPolicyIsolationRuleV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPolicyIsolationRuleConfigure(resourceTypeAndName, generatedName, rName, randDesc),
+				Config: testAccCheckPolicyIsolationRuleV2Configure(resourceTypeAndName, generatedName, rName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPolicyIsolationRuleExists(resourceTypeAndName),
+					testAccCheckPolicyIsolationRuleV2Exists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ISOLATE"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 			},
 
 			// Update test
 			{
-				Config: testAccCheckPolicyIsolationRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc),
+				Config: testAccCheckPolicyIsolationRuleV2Configure(resourceTypeAndName, generatedName, updatedRName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckPolicyIsolationRuleExists(resourceTypeAndName),
+					testAccCheckPolicyIsolationRuleV2Exists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ISOLATE"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 			},
@@ -56,18 +54,18 @@ func TestAccResourcePolicyIsolationRuleBasic(t *testing.T) {
 	})
 }
 
-func testAccCheckPolicyIsolationRuleDestroy(s *terraform.State) error {
+func testAccCheckPolicyIsolationRuleV2Destroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := apiClient.policysetcontroller.GetByPolicyType("ISOLATION_POLICY")
+	accessPolicy, _, err := apiClient.policysetcontrollerv2.GetByPolicyType("ISOLATION_POLICY")
 	if err != nil {
-		return fmt.Errorf("failed fetching resource ISOLATION_POLICY. Received error: %s", err)
+		return fmt.Errorf("failed fetching resource ISOLATION_POLICY. Recevied error: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != resourcetype.ZPAPolicyIsolationRule {
+		if rs.Type != resourcetype.ZPAPolicyIsolationRuleV2 {
 			continue
 		}
 
-		rule, _, err := apiClient.policysetcontroller.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
+		rule, _, err := apiClient.policysetcontrollerv2.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -81,7 +79,7 @@ func testAccCheckPolicyIsolationRuleDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckPolicyIsolationRuleExists(resource string) resource.TestCheckFunc {
+func testAccCheckPolicyIsolationRuleV2Exists(resource string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
@@ -92,11 +90,11 @@ func testAccCheckPolicyIsolationRuleExists(resource string) resource.TestCheckFu
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := apiClient.policysetcontroller.GetByPolicyType("ISOLATION_POLICY")
+		resp, _, err := apiClient.policysetcontrollerv2.GetByPolicyType("ISOLATION_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource ISOLATION_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = apiClient.policysetcontroller.GetPolicyRule(resp.ID, rs.Primary.ID)
+		_, _, err = apiClient.policysetcontrollerv2.GetPolicyRule(resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -104,7 +102,7 @@ func testAccCheckPolicyIsolationRuleExists(resource string) resource.TestCheckFu
 	}
 }
 
-func testAccCheckPolicyIsolationRuleConfigure(resourceTypeAndName, rName, generatedName, desc string) string {
+func testAccCheckPolicyIsolationRuleV2Configure(resourceTypeAndName, rName, generatedName, desc string) string {
 	return fmt.Sprintf(`
 
 // policy access rule resource
@@ -115,7 +113,7 @@ data "%s" "%s" {
 }
 `,
 		// resource variables
-		getPolicyIsolationRuleHCL(rName, generatedName, desc),
+		getPolicyIsolationRuleV2HCL(rName, generatedName, desc),
 
 		// data source variables
 		resourcetype.ZPAPolicyType,
@@ -124,32 +122,28 @@ data "%s" "%s" {
 	)
 }
 
-func getPolicyIsolationRuleHCL(rName, generatedName, desc string) string {
+func getPolicyIsolationRuleV2HCL(rName, generatedName, desc string) string {
 	return fmt.Sprintf(`
 
-
-data "zpa_isolation_profile" "bd_sa_profile1" {
+data "zpa_isolation_profile" "this" {
 	name = "BD_SA_Profile1"
 }
 resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
 	action              		= "ISOLATE"
-	operator      				= "AND"
-	zpn_isolation_profile_id 	= data.zpa_isolation_profile.bd_sa_profile1.id
+	zpn_isolation_profile_id 	= data.zpa_isolation_profile.this.id
 	conditions {
 		operator = "OR"
 		operands {
-			object_type = "CLIENT_TYPE"
-			lhs         = "id"
-			rhs         = "zpn_client_type_exporter"
-			}
+		  object_type = "CLIENT_TYPE"
+		  values      = ["zpn_client_type_exporter"]
 		}
+	}
 }
-
 `,
 		// resource variables
-		resourcetype.ZPAPolicyIsolationRule,
+		resourcetype.ZPAPolicyIsolationRuleV2,
 		rName,
 		generatedName,
 		desc,

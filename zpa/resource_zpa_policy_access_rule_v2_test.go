@@ -143,10 +143,6 @@ data "%s" "%s" {
 func getPolicyAccessRuleV2HCL(rName, generatedName, desc, segmentGroupTypeAndName string) string {
 	return fmt.Sprintf(`
 
-data "zpa_policy_type" "this" {
-	policy_type = "ACCESS_POLICY"
-}
-
 data "zpa_idp_controller" "this" {
 	name = "BD_Okta_Users"
 }
@@ -176,7 +172,6 @@ resource "%s" "%s" {
 	description   		= "%s"
 	action        		= "ALLOW"
 	operator      		= "AND"
-	policy_set_id 		= data.zpa_policy_type.this.id
 	conditions {
 		operator = "OR"
 		operands {
