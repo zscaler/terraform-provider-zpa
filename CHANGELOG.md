@@ -1,10 +1,10 @@
 # Changelog
 
-## 3.2.0 (March, xx 2024)
+## 3.2.0 (March, 27 2024)
 
 ### Notes
 
-- Release date: **(March, xx 2024)**
+- Release date: **(March, 27 2024)**
 - Supported Terraform version: **v1.x**
 
 ### NEW - RESOURCES, DATA SOURCES, PROPERTIES, ATTRIBUTES:
@@ -31,7 +31,7 @@
   
     ⚠️ **WARNING:**: Notice that any Access Policy `v2` is a new resource and uses a different HCL format structure. If you decide to migrate to the new v2 resources, notice that this is considered a breaking change and must be done carefully. This warning only applies for those with existing `v1` Access Policy HCL format structure.
 
-[PR #433](https://github.com/zscaler/terraform-provider-zpa/pull/433)
+[PR #434](https://github.com/zscaler/terraform-provider-zpa/pull/434)
 * New resource: `zpa_emergency_access_user` manages Emergency Access Users 
 
 ### NEW PROPERTIES

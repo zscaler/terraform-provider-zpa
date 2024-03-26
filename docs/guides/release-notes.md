@@ -16,11 +16,11 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 3.2.0 (March, xx 2024)
+## 3.2.0 (March, 27 2024)
 
 ### Notes
 
-- Release date: **(March, xx 2024)**
+- Release date: **(March, 27 2024)**
 - Supported Terraform version: **v1.x**
 
 ### NEW - RESOURCES, DATA SOURCES, PROPERTIES, ATTRIBUTES:
@@ -45,6 +45,9 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
   - `zpa_policy_capabilities_rule` manages access policy capabilities rule via `v2` API endpoint [PR #432](https://github.com/zscaler/terraform-provider-zpa/pull/432)
   
     ⚠️ **WARNING:**: Notice that any Access Policy `v2` is a new resource and uses a different HCL format structure. If you decide to migrate to the new v2 resources, notice that this is considered a breaking change and must be done carefully. This warning only applies for those with existing `v1` Access Policy HCL format structure.
+
+[PR #434](https://github.com/zscaler/terraform-provider-zpa/pull/434)
+* New resource: `zpa_emergency_access_user` manages Emergency Access Users 
 
 ### NEW PROPERTIES
 * New Properties: The resource `zpa_ba_certificate` now displays the attributes `valid_from_in_epochsec` and `valid_to_in_epochsec` in human readable `RFC1123` format
