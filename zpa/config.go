@@ -21,6 +21,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/isolationprofile"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/customerversionprofile"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/emergencyaccess"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/enrollmentcert"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/idpcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
@@ -70,6 +71,7 @@ type Client struct {
 	cloudconnectorgroup            cloudconnectorgroup.Service
 	customerversionprofile         customerversionprofile.Service
 	clienttypes                    clienttypes.Service
+	emergencyaccess                emergencyaccess.Service
 	enrollmentcert                 enrollmentcert.Service
 	idpcontroller                  idpcontroller.Service
 	inspection_custom_controls     inspection_custom_controls.Service
@@ -138,6 +140,7 @@ func (c *Config) Client() (*Client, error) {
 		clienttypes:                    *clienttypes.New(zpaClient),
 		cloudconnectorgroup:            *cloudconnectorgroup.New(zpaClient),
 		customerversionprofile:         *customerversionprofile.New(zpaClient),
+		emergencyaccess:                *emergencyaccess.New(zpaClient),
 		enrollmentcert:                 *enrollmentcert.New(zpaClient),
 		idpcontroller:                  *idpcontroller.New(zpaClient),
 		inspection_custom_controls:     *inspection_custom_controls.New(zpaClient),
