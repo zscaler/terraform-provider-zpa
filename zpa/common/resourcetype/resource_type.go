@@ -16,6 +16,7 @@ const (
 	ZPACBIBannerController             = "zpa_cloud_browser_isolation_banner"
 	ZPACBICertificate                  = "zpa_cloud_browser_isolation_certificate"
 	ZPACBIExternalIsolationProfile     = "zpa_cloud_browser_isolation_external_profile"
+	ZPAEmergencyAccess                 = "zpa_emergency_access_user"
 	ZPAPolicyType                      = "zpa_policy_type"
 	ZPAPolicyAccessRule                = "zpa_policy_access_rule"
 	ZPAPolicyAccessRuleV2              = "zpa_policy_access_rule_v2"

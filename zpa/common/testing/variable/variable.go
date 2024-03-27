@@ -192,3 +192,10 @@ const (
 	PraConsoleEnabled           = true
 	PraIconText                 = "RDP Console"
 )
+
+// Console Controller
+const (
+	EmgFirstName = "User"
+	EmgLastName  = "Test01"
+	EmgUserID    = "usertest02"
+)

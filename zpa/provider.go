@@ -65,6 +65,7 @@ func ZPAProvider() *schema.Provider {
 			"zpa_cloud_browser_isolation_certificate":      resourceCBICertificates(),
 			"zpa_cloud_browser_isolation_external_profile": resourceCBIExternalProfile(),
 			"zpa_cloud_browser_isolation_banner":           resourceCBIBanners(),
+			"zpa_emergency_access_user":                    resourceEmergencyAccess(),
 			"zpa_segment_group":                            resourceSegmentGroup(),
 			"zpa_server_group":                             resourceServerGroup(),
 			"zpa_policy_access_rule_reorder":               resourcePolicyAccessRuleReorder(),

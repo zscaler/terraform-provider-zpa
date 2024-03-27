@@ -40,14 +40,14 @@ provider "zpa" {
   zpa_customer_id       = "xxxxxxxxxxxxxxxx"
 }
 
-resouce "zpa_application_segment" "app_segment" {
+resouce "zpa_application_segment" "this" {
   # ...
 }
 ```
 
 ## Example Usage ZPA Beta, GOV, GOVUS, Preview, and Dev Cloud
 
-For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `GOV`, `GOVUS`, or `PREVIEW` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=GOVUS`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
+For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `ZPATWO`, `GOV`, `GOVUS`, or `PREVIEW` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=ZPATWO`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=GOVUS`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
 
 ```hcl
 # Configure ZPA provider source and version
