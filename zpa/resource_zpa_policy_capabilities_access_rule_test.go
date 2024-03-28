@@ -130,16 +130,6 @@ data "zpa_idp_controller" "this" {
 	name = "BD_Okta_Users"
 }
 
-data "zpa_saml_attribute" "email_user_sso" {
-    name = "Email_BD_Okta_Users"
-    idp_name = "BD_Okta_Users"
-}
-
-data "zpa_saml_attribute" "group_user" {
-    name = "GroupName_BD_Okta_Users"
-    idp_name = "BD_Okta_Users"
-}
-
 data "zpa_scim_groups" "a000" {
     name = "A000"
     idp_name = "BD_Okta_Users"
@@ -154,27 +144,16 @@ resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
 	action              		= "CHECK_CAPABILITIES"
-    privileged_capabilities {
-        file_upload = true
-        file_download = true
-        inspect_file_upload = true
-        clipboard_copy = true
-        clipboard_paste = true
-        record_session = true
-    }
-	conditions {
+	privileged_capabilities {
+		clipboard_copy        = true
+		clipboard_paste       = true
+		file_upload           = true
+		file_download         = true
+		inspect_file_upload   = true
+		inspect_file_download = true
+	  }
+	  conditions {
 		operator = "OR"
-		operands {
-		  object_type = "SAML"
-		  entry_values {
-			lhs = data.zpa_saml_attribute.email_user_sso.id
-			rhs = "user1@acme.com"
-		  }
-		  entry_values {
-			lhs = data.zpa_saml_attribute.group_user.id
-			rhs = "Engineering"
-		  }
-		}
 		operands {
 		  object_type = "SCIM_GROUP"
 		  entry_values {
