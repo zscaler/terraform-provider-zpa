@@ -167,7 +167,7 @@ resource "%s" "%s" {
 		operands {
 			object_type = "SAML"
 			entry_values {
-			  rhs = "wguilherme@securitygeek.io"
+			  rhs = "user1@acme.com"
 			  lhs = data.zpa_saml_attribute.email_user_sso.id
 			}
 			entry_values {
