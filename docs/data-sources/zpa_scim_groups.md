@@ -1,18 +1,24 @@
 ---
+page_title: "zpa_scim_groups Data Source - terraform-provider-zpa"
 subcategory: "SCIM Groups"
 layout: "zscaler"
 page_title: "ZPA: scim_groups"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-scim-groups
+  API documentation https://help.zscaler.com/zpa/obtaining-scim-group-details-using-api
   Get information about SCIM Group from an Identity Provider (IdP) in the Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_scim_groups
+# zpa_scim_groups (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-scim-groups)
+* [API documentation](https://help.zscaler.com/zpa/obtaining-scim-group-details-using-api)
 
 Use the **zpa_scim_groups** data source to get information about a SCIM Group from an Identity Provider (IdP). This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA SCIM Groups Data Source
 data "zpa_scim_groups" "engineering" {
     name = "Engineering"
@@ -20,14 +26,16 @@ data "zpa_scim_groups" "engineering" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) Name. The name of the scim group to be exported.
 * `idp_name` - (Required) Name. The name of the IdP where the scim group must be exported from.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

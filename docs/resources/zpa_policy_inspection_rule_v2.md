@@ -1,12 +1,16 @@
 ---
-subcategory: "Policy Set Controller"
-layout: "zscaler"
-page_title: "ZPA: policy_inspection_rule_v2"
+page_title: "zpa_policy_inspection_rule_v2 Resource - terraform-provider-zpa"
+subcategory: "Policy Set Controller V2"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-security-policy
+  API documentation https://help.zscaler.com/zpa/configuring-appprotection-policies-using-api
   Creates and manages ZPA Policy Access Inspection Rule via API v2 endpoints.
 ---
 
-# Resource: zpa_policy_inspection_rule_v2
+# zpa_policy_inspection_rule_v2 (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-security-policy)
+* [API documentation](https://help.zscaler.com/zpa/configuring-appprotection-policies-using-api)
 
 The **zpa_policy_inspection_rule_v2** resource creates and manages policy access inspection rule in the Zscaler Private Access cloud using a new v2 API endpoint.
 
@@ -16,7 +20,7 @@ The **zpa_policy_inspection_rule_v2** resource creates and manages policy access
 
 ## Example Usage
 
-```hcl
+```terraform
 data "zpa_inspection_predefined_controls" "this" {
   name    = "Failed to parse request body"
   version = "OWASP_CRS/3.3.0"
@@ -117,51 +121,56 @@ resource "zpa_policy_inspection_rule_v2" "this" {
 }
 ```
 
+## Schema
+
 ### Required
 
-* `name` - (Required) This is the name of the policy rule.
-* `action` (Optional) This is for providing the rule action. Supported values: ``INSPECT`` and ``BYPASS_INSPECT``.
+- `name` - (String) This is the name of the policy rule.
+- `action` (String) This is for providing the rule action. Supported values: ``INSPECT`` and ``BYPASS_INSPECT``.
+- `zpn_inspection_profile_id` (String) An inspection profile is required if the `action` is set to `INSPECT`
 
-## Attributes Reference
+### Optional
 
-* `description` (Optional) This is the description of the access policy rule.
-* `rule_order` - (Deprecated)
+- `description` (String) This is the description of the access policy rule.
+- `rule_order` (String, Deprecated)
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
-* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+- `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-* `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `operator` (Optional) - Supported values are: `AND` or `OR`
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
-        * `object_type` (Optional) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`
-        * `values` (Optional) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
+- `conditions` (Block Set) 
+Specifies the set of conditions for the policy rule.
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
+        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`
+        - `values` (List of Strings) The list of values for the specified object type (e.g., application segment ID and/or segment group ID)
 
-* `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `operator` (Optional) - Supported values are: `AND` or `OR`
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy criteria. Supported values: `PLATFORM`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  Supported values: `android`, `ios`, `linux`, `mac`, `windows`
-            * `rhs` - (Optional) - Supported values: `"true"` or `"false"`
+- `conditions` (Block Set) 
+Specifies the set of conditions for the policy rule.
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `PLATFORM`
+        - `entry_values` (Block Set) 
+            - `lhs` - (String) -  Supported values: `android`, `ios`, `linux`, `mac`, `windows`
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
-* `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `operator` (Optional) - Supported values are: `AND` or `OR`
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy criteria. Supported values: `POSTURE`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  The Posture Profile `posture_udid` value.
-            * `rhs` - (Optional) - Supported values: `"true"` or `"false"`
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `POSTURE`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The Posture Profile `posture_udid` value.
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
-* `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `operator` (Optional) - Supported values are: `AND` or `OR`
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy criteria. Supported values: `TRUSTED_NETWORK`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  The Trusted Network `network_id` value.
-            * `rhs` - (Optional) - Supported values: `"true"` or `"false"`
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `TRUSTED_NETWORK`
+        - `entry_values` (Block Set)
+            - `lhs` (String) -  The Trusted Network `network_id` value.
+            - `rhs` (String) - Supported values: `"true"` or `"false"`
 
 ## Import
 

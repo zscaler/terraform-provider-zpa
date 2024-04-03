@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_service_edge_group Data Source - terraform-provider-zpa"
 subcategory: "Service Edge Group"
-layout: "zscaler"
-page_title: "ZPA: service_edge_group"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-zpa-private-service-edge-groups
+  API documentation https://help.zscaler.com/zpa/configuring-zpa-private-service-edge-groups-using-api
   Get information about ZPA Service Edge Group in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_service_edge_group
+# zpa_service_edge_group (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-zpa-private-service-edge-groups)
+* [API documentation](https://help.zscaler.com/zpa/configuring-zpa-private-service-edge-groups-using-api)
 
 Use the **zpa_service_edge_group** data source to get information about a service edge group in the Zscaler Private Access cloud. This data source can then be referenced in an App Connector Group. This data source can then be referenced in the following resources:
 
@@ -16,28 +20,30 @@ Use the **zpa_service_edge_group** data source to get information about a servic
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Service Edge Group Data Source by name
 data "zpa_service_edge_group" "foo" {
   name = "DataCenter"
 }
 ```
 
-```hcl
+```terraform
 # ZPA Service Edge Group Data Source by ID
 data "zpa_service_edge_group" "foo" {
   id = "123456789"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the service edge group to be exported.
 * `id` - (Optional) The ID of the service edge group to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

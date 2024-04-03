@@ -1,35 +1,38 @@
 ---
+page_title: "zpa_pra_approval_controller Data Source - terraform-provider-zpa"
 subcategory: "Privileged Remote Access"
-layout: "zscaler"
-page_title: "ZPA): pra_approval_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-approvals
+  API documentation https://help.zscaler.com/zpa/configuring-privileged-approvals-using-api
   Get information about ZPA privileged remote access approval in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_pra_approval_controller
+# zpa_pra_approval_controller (Data Source)
 
 Use the **zpa_pra_approval_controller** data source to get information about a privileged remote access approval created in the Zscaler Private Access cloud.
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA PRA Portal Data Source
 data "zpa_pra_approval_controller" "this" {
  email_ids = "jdoe@example.com"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `email_ids` - (Required) The name of the privileged remote access portal to be exported.
-* `id` - (Optional) The ID of the privileged remote access portal to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (Optional) The ID of the privileged remote access portal to be exported.
 * `start_time` - (string) The set start time in either `RFC1123Z` i.e `"Mon, 02 Jan 2006 15:04:05 -0700"` or `RFC1123` i.e `"Mon, 02 Jan 2006 15:04:05 MST"` format that the user has access to the Privileged Remote Access portal. 
     ~> **NOTE**: The approval `start_time` cannot be more than 1 hour in the past.
 * `end_time` - (string)  The set end time in either `RFC1123Z` i.e `"Mon, 02 Jan 2006 15:04:05 -0700"` or `RFC1123` i.e `"Mon, 02 Jan 2006 15:04:05 MST"` format that the user has access to the Privileged Remote Access portal.

@@ -1,18 +1,22 @@
 ---
+page_title: "zpa_pra_console_controller Resource - terraform-provider-zpa"
 subcategory: "Privileged Remote Access"
-layout: "zscaler"
-page_title: "ZPA): pra_console_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-consoles
+  API documentation https://help.zscaler.com/zpa/configuring-privileged-consoles-using-api
   Creates and manages ZPA privileged remote access console
 ---
 
-# Resource: zpa_pra_console_controller
+# zpa_pra_console_controller (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-privileged-consoles)
+* [API documentation](https://help.zscaler.com/zpa/configuring-privileged-consoles-using-api)
 
 The **zpa_pra_console_controller** resource creates a privileged remote access console in the Zscaler Private Access cloud. This resource can then be referenced in an privileged access policy resource and a privileged access portal.
 
 ## Example Usage
 
-```hcl
+```terraform
 # Creates Privileged Remote Access Application Segment"
 resource "zpa_application_segment_pra" "this" {
   name             = "Example"
@@ -79,25 +83,30 @@ resource "zpa_pra_console_controller" "ssh_pra" {
     id = [zpa_pra_portal_controller.this.id]
   }
 }
-
 ```
 
-## Attributes Reference
+## Schema
 
 ### Required
 
-* `name` - (Required) The name of the privileged console.
-* `description` - (Required) The description of the privileged console.
-* `pra_application` - The Privileged Remote Access application segment resource
+The following arguments are supported:
+
+- `name` - (String) The name of the privileged console.
+
+- `pra_application` (Block Set, Max: 1) The Privileged Remote Access application segment resource
     - `id` - (String) The unique identifier of the Privileged Remote Access-enabled application.
     ~> **NOTE** This is the ID for each `apps_config` block within `common_apps_dto`
-* `pra_portals` - The Privileged Remote Access Portal resource
-    - `id` - (List) The unique identifier of the privileged portal.
-## Attribute Reference
+- `pra_portals` (Block Set) The Privileged Remote Access Portal resource
+    - `id` - (List of Strings) The unique identifier of the privileged portal.
+
+### Optional
 
 In addition to all arguments above, the following attributes are exported:
 
-* `microtenant_id` (Optional) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as 0 when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
+- `description` - (String) The description of the privileged console.
+- `enabled` - (Boolean) Whether or not the privileged console is enabled.
+- `icon_text` - (String) The privileged console icon. The icon image is converted to base64 encoded text format.
+- `microtenant_id` (String) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

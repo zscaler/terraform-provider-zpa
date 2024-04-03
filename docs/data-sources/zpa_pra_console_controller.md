@@ -1,19 +1,23 @@
 ---
+page_title: "zpa_pra_console_controller Data Source - terraform-provider-zpa"
 subcategory: "Privileged Remote Access"
-layout: "zscaler"
-page_title: "ZPA): pra_console_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-consoles
+  API documentation https://help.zscaler.com/zpa/configuring-privileged-consoles-using-api
   Get information about ZPA privileged remote access console in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_pra_console_controller
+# zpa_pra_console_controller (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-privileged-consoles)
+* [API documentation](https://help.zscaler.com/zpa/configuring-privileged-consoles-using-api)
 
 The **zpa_pra_console_controller** data source gets information about a privileged remote access console created in the Zscaler Private Access cloud.
 This resource can then be referenced in an privileged access policy credential and a privileged access portal resource.
 
 ## Example Usage
 
-```hcl
+```terraform
 # Retrieve PRA Console by Name
 resource "zpa_pra_console_controller" "this" {
   name        = "PRA_Console"
@@ -25,17 +29,17 @@ resource "zpa_pra_console_controller" "this" {
 }
 ```
 
-## Attributes Reference
+## Schema
 
 ### Required
 
 * `name` - (Required) The name of the privileged console.
-* `id` - (Optional) The ID of the privileged console.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (Optional) The ID of the privileged console.
 * `description` - (Required) The description of the privileged console.
 * `pra_application` - The Privileged Remote Access application segment resource
     - `id` - (String) The unique identifier of the Privileged Remote Access-enabled application.

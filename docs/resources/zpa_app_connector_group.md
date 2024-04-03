@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_app_connector_group Resource - terraform-provider-zpa"
 subcategory: "App Connector Group"
-layout: "zscaler"
-page_title: "ZPA: app_connector_group"
 description: |-
-  Creates and manages ZPA App Connector Groups.
+  Official documentation https://help.zscaler.com/zpa/about-connector-groups
+  API documentation https://help.zscaler.com/zpa/configuring-app-connector-groups-using-api
+  Creates and manages ZPA App Connector Groups
 ---
 
-# Resource: zpa_app_connector_group
+# zpa_app_connector_group (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-connector-groups)
+* [API documentation](https://help.zscaler.com/zpa/configuring-app-connector-groups-using-api)
 
 The **zpa_app_connector_group** resource creates a and manages app connector groups in the Zscaler Private Access (ZPA) cloud. This resource can then be associated with the following resources: server groups, log receivers and access policies.
 
@@ -16,7 +20,7 @@ The **zpa_app_connector_group** resource creates a and manages app connector gro
 
 ## Example Usage
 
-```hcl
+```terraform
 # Create a App Connector Group
 resource "zpa_app_connector_group" "example" {
   name                          = "Example"
@@ -36,45 +40,40 @@ resource "zpa_app_connector_group" "example" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
-* `name` - (Required) Name of the App Connector Group.
-* `description` (Optional) Description of the App Connector Group.
-* `enabled` - (Optional) Whether this App Connector Group is enabled or not. Default value: `true`. Supported values: `true`, `false`
-* `latitude` - (Required) Latitude of the App Connector Group. Integer or decimal. With values in the range of `-90` to `90`
-* `longitude` - (Required) Longitude of the App Connector Group. Integer or decimal. With values in the range of `-180` to `180`
-* `location` - (Required) Location of the App Connector Group. i.e ``"San Jose, CA, USA"``
-* `city_country` - (Optional) Whether Double Encryption is enabled or disabled for the app. i.e ``"San Jose, US"``
-* `upgrade_day` - (Optional) App Connectors in this group will attempt to update to a newer version of the software during this specified day i.e ``SUNDAY``
-* `upgrade_time_in_secs` - (Optional) App Connectors in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600`. Integer in seconds (i.e., `-66600`). The integer should be greater than or equal to `0` and less than `86400`, in `15` minute intervals
-* `override_version_profile` - (Optional) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
-* `version_profile_id` - (Optional) ID of the version profile. To learn more, see Version Profile Use Cases. Supported values are:
-  * ``0`` = ``Default``
-  * ``1`` = ``Previous Default``
-  * ``2`` = ``New Release``
-* `version_profile_name` - (Optional)
-  * ``Default`` = ``0``
-  * ``Previous Default`` = ``1``
-  * ``New Release`` = ``2``
-* `version_profile_visibility_scope` - (Optional)
-* `country_code` - (Optional) i.e ``"US"``, ``"CA"``
-* `dns_query_type` - (Optional) Supported values are:
-  * ``IPV4``, ``IPV6``, ``IPV4_IPV6``
-* `tcp_quick_ack_app` - (Optional) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
-* `tcp_quick_ack_assistant` - (Optional) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
-* `tcp_quick_ack_read_assistant` - (Optional) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
-* `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
-* `pra_enabled` - (Optional) Supported values: `true`, `false`
-* `waf_disabled` - (Optional) Supported values: `true`, `false`
-* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+- `name` - (String) Name of the App Connector Group.
+- `enabled` - (Boolean) Whether this App Connector Group is enabled or not. Default value: `true`. Supported values: `true`, `false`
+- `latitude` - (String) Latitude of the App Connector Group. Integer or decimal. With values in the range of `-90` to `90`
+- `longitude` - (String) Longitude of the App Connector Group. Integer or decimal. With values in the range of `-180` to `180`
+- `location` - (String) Location of the App Connector Group. i.e ``"San Jose, CA, USA"``
+- `city_country` - (String) Whether Double Encryption is enabled or disabled for the app. i.e ``"San Jose, US"``
+- `country_code` - (String) Provide a 2 letter [ISO3166 Alpha2 Country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). i.e ``"US"``, ``"CA"``
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-## Attributes Reference
+### Optional
 
-* `id` - The ID of the Group Role Assignment.
+- `description` (String) Description of the App Connector Group.
+- `upgrade_day` - (String) App Connectors in this group will attempt to update to a newer version of the software during this specified day i.e ``SUNDAY``
+- `upgrade_time_in_secs` - (String) App Connectors in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600`. Integer in seconds (i.e., `-66600`). The integer should be greater than or equal to `0` and less than `86400`, in `15` minute intervals
+- `override_version_profile` - (Boolean) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
+- `version_profile_id` - (String) The unique identifier of the version profile. Supported values are:
+  - ``0`` = ``Default``
+  - ``1`` = ``Previous Default``
+  - ``2`` = ``New Release``
+- `dns_query_type` - (String) Whether IPv4, IPv6, or both, are enabled for DNS resolution of all applications in the App Connector Group. Supported values are: ``IPV4``, ``IPV6``, or``IPV4_IPV6``
+- `tcp_quick_ack_app` - (Boolean) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
+- `tcp_quick_ack_assistant` - (Boolean) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
+- `tcp_quick_ack_read_assistant` - (Boolean) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
+- `use_in_dr_mode` - (Boolean) Whether or not the App Connector Group is designated for disaster recovery. Supported values: `true`, `false`
+- `pra_enabled` - (Boolean) Whether or not Privileged Remote Access is enabled on the App Connector Group. Supported values: `true`, `false`
+- `waf_disabled` - (Boolean) Whether or not AppProtection is disabled for the App Connector Group. Supported values: `true`, `false`
+- `microtenant_id` (String) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
 
 ## Import
 

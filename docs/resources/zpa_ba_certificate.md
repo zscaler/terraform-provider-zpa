@@ -1,25 +1,29 @@
 ---
+page_title: "zpa_ba_certificate Resource - terraform-provider-zpa"
 subcategory: "Browser Access Certificate"
-layout: "zscaler"
-page_title: "ZPA: ba_certificate"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-web-server-certificates
+  API documentation https://help.zscaler.com/zpa/configuring-certificates-using-api
   Adds a certificate with a private key in Zscaler Private Access cloud.
 ---
 
-# Resource: zpa_ba_certificate
+# zpa_ba_certificate (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-web-server-certificates)
+* [API documentation](https://help.zscaler.com/zpa/configuring-certificates-using-api)
 
 Use the **zpa_ba_certificate** creates a browser access certificate with a private key in the Zscaler Private Access cloud. This resource is required when creating a browser access application segment resource.
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Browser Access Data Source
 data "zpa_ba_certificate" "foo" {
   name = "example.acme.com"
 }
 ```
 
-```hcl
+```terraform
 # ZPA Browser Access resource
 resource "zpa_ba_certificate" "this" {
     name = "server.example.com"
@@ -34,18 +38,20 @@ EAYDVQQHDAlWYW5jb3V2ZXIxFTATBgNVBAoMDEJELUhhc2hpQ29ycDEVMBMGA1UE
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the browser access certificate to be created.
-* `cert_blob` - (Required) The content of the certificate in PEM format.
+- `name` - (Required) The name of the browser access certificate to be created.
+- `cert_blob` - (Required) The content of the certificate in PEM format.
 
-## Attribute Reference
+### Optional
 
 In addition to all arguments above, the following attributes are exported:
 
-* `description` - (string) - The description of the certificate.
+- `description` - (string) - The description of the certificate.
 
 ## Import
 

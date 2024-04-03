@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_cloud_connector_group Data Source - terraform-provider-zpa"
 subcategory: "Cloud Connector Group"
-layout: "zscaler"
-page_title: "ZPA: cloud_connector_group"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-web-server-certificates
+  API documentation https://help.zscaler.com/zpa/obtaining-cloud-connector-group-details-using-api
   Get information about ZPA Cloud Connector Group in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_cloud_connector_group
+# zpa_cloud_connector_group (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-web-server-certificates)
+* [API documentation](https://help.zscaler.com/zpa/obtaining-cloud-connector-group-details-using-api)
 
 Use the **zpa_cloud_connector_group** data source to get information about a cloud connector group created from the Zscaler Private Access cloud. This data source can then be referenced within an Access Policy rule
 
@@ -14,31 +18,33 @@ Use the **zpa_cloud_connector_group** data source to get information about a clo
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Cloud Connector Group Data Source
 data "zpa_cloud_connector_group" "foo" {
   name = "AWS-Cloud"
 }
 ```
 
-```hcl
+```terraform
 # ZPA Cloud Connector Group Data Source
 data "zpa_cloud_connector_group" "foo" {
   id = "1234567890"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
-* `name` - (Required) This field defines the name of the cloud connector group.
-* `id` - (Optional) This field defines the id of the cloud connector group.
+* `name` - (String) This field defines the name of the cloud connector group.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (string) This field defines the id of the cloud connector group.
 * `description` (string) - This field defines the description of the cloud connector group.
 * `enabled` (bool) - This field defines the status of the cloud connector group.
 * `creation_time` (string) - Only applicable for a GET request. Ignored in PUT/POST/DELETE requests.

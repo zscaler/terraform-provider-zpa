@@ -1,18 +1,22 @@
 ---
+page_title: "zpa_pra_credential_controller Resource - terraform-provider-zpa"
 subcategory: "Privileged Remote Access"
-layout: "zscaler"
-page_title: "ZPA): pra_credential_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-credentials
+  API documentation https://help.zscaler.com/zpa/configuring-privileged-credentials-using-api
   Creates and manages ZPA privileged remote access credential
 ---
 
-# Resource: zpa_pra_credential_controller
+# zpa_pra_credential_controller (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-privileged-credentials)
+* [API documentation](https://help.zscaler.com/zpa/configuring-privileged-credentials-using-api)
 
 The **zpa_pra_credential_controller** resource creates a privileged remote access credential in the Zscaler Private Access cloud. This resource can then be referenced in an privileged access policy resource.
 
 ## Example Usage
 
-```hcl
+```terraform
 # Creates Credential of Type "USERNAME_PASSWORD"
 resource "zpa_pra_credential_controller" "this" {
     name = "John Doe"
@@ -24,7 +28,7 @@ resource "zpa_pra_credential_controller" "this" {
 }
 ```
 
-```hcl
+```terraform
 # Creates Credential of Type "SSH_KEY"
 resource "zpa_pra_credential_controller" "this" {
     name = "John Doe"
@@ -41,27 +45,29 @@ KjldVtViVwqCTXZZOjHnmEIMn+XKU3sEYlqDKLp6TByIsBlITKd3Ju8qMBNwXcfi
 }
 ```
 
-## Attributes Reference
+## Schema
 
 ### Required
 
-* `name` - (Required) The name of the privileged credential.
-* `domain` - (Required) The description of the privileged credential.
-* `credential_type` - (Required) The protocol type that was designated for that particular privileged credential. The protocol type options are SSH, RDP, and VNC. Each protocol type has its own credential requirements. The supported values are:
+The following arguments are supported:
+
+- `name` - (String) The name of the privileged credential.
+- `domain` - (String) The description of the privileged credential.
+- `credential_type` - (String) The protocol type that was designated for that particular privileged credential. The protocol type options are SSH, RDP, and VNC. Each protocol type has its own credential requirements. The supported values are:
     - ``USERNAME_PASSWORD``
     - ``SSH_KEY``
     - ``PASSWORD``
 
 ⚠️ **WARNING:**: The resource `credential_type` and associated attributes cannot be updated once created.
 
-* `user_domain` - (Required) - The domain name associated with the username. You can also include the domain name as part of the username. The domain name only needs to be specified with logging in to an RDP console that is connected to an Active Directory Domain.
-* `username` - (Required) - The username for the login you want to use for the privileged credential.
+- `user_domain` - (String) - The domain name associated with the username. You can also include the domain name as part of the username. The domain name only needs to be specified with logging in to an RDP console that is connected to an Active Directory Domain.
+- `username` - (String) - The username for the login you want to use for the privileged credential.
 
-## Attribute Reference
+### Optional
 
 In addition to all arguments above, the following attributes are exported:
 
-* `microtenant_id` (Optional) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as 0 when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
+- `microtenant_id` (Optional) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as 0 when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

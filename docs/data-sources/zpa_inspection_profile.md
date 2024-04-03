@@ -1,32 +1,38 @@
 ---
-subcategory: "Inspection"
-layout: "zscaler"
-page_title: "ZPA: inspection_profile"
+page_title: "zpa_inspection_profile Data Source - terraform-provider-zpa"
+subcategory: "AppProtection"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-browser-protection-profiles
+  API documentation https://help.zscaler.com/zpa/configuring-appprotection-profiles-using-api
   Get information about an Inspection Profile in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_inspection_profile
+# zpa_inspection_profile (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-browser-protection-profiles)
+* [API documentation](https://help.zscaler.com/zpa/configuring-appprotection-profiles-using-api)
 
 Use the **zpa_inspection_profile** data source to get information about an inspection profile in the Zscaler Private Access cloud. This resource can then be referenced in an inspection custom control resource.
 
 ## Example Usage
 
-```hcl
+```terraform
 data "zpa_inspection_profile" "this" {
   name = "Example"
 }
 ```
 
-## Argument Reference
+## Schema
 
-* `name` - (Required) This field defines the name of the inspection profile.
-* `id` - (Optional) This field defines the id of the inspection profile.
+### Required
 
-## Attribute Reference
+* `name` - (String) This field defines the name of the inspection profile.
+
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (Optional) This field defines the id of the inspection profile.
 * `description` - (string) Description of the inspection profile.
 * `paranoia_level` - (string) OWASP Predefined Paranoia Level. Range: [1-4], inclusive
 * `predefined_controls` - (string) The predefined controls

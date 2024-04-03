@@ -46,11 +46,11 @@ func TestAccResourcePolicyCapabilitiesAccessRuleBasic(t *testing.T) {
 				),
 			},
 			// Import test
-			// {
-			// 	ResourceName:      resourceTypeAndName,
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -140,6 +140,16 @@ data "zpa_scim_groups" "b000" {
     idp_name = "BD_Okta_Users"
 }
 
+data "zpa_saml_attribute" "email_user_sso" {
+	name     = "Email_BD_Okta_Users"
+	idp_name = "BD_Okta_Users"
+}
+  
+  data "zpa_saml_attribute" "group_user" {
+	name     = "GroupName_BD_Okta_Users"
+	idp_name = "BD_Okta_Users"
+}
+
 resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
@@ -154,6 +164,17 @@ resource "%s" "%s" {
 	  }
 	  conditions {
 		operator = "OR"
+		operands {
+			object_type = "SAML"
+			entry_values {
+			  rhs = "wguilherme@securitygeek.io"
+			  lhs = data.zpa_saml_attribute.email_user_sso.id
+			}
+			entry_values {
+			  rhs = "A000"
+			  lhs = data.zpa_saml_attribute.group_user.id
+			}
+		  }
 		operands {
 		  object_type = "SCIM_GROUP"
 		  entry_values {

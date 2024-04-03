@@ -1,35 +1,41 @@
 ---
+page_title: "zpa_service_edge_controller Data Source - terraform-provider-zpa"
 subcategory: "Service Edge Controller"
-layout: "zscaler"
-page_title: "ZPA: service_edge_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-zpa-private-service-edges
+  API documentation https://help.zscaler.com/zpa/managing-zpa-private-service-edges-using-api
   Get information about Service Edge Controller in Zscaler Private Access cloud.
 ---
 
 # Data Source: zpa_service_edge_controller
 
+* [Official documentation](https://help.zscaler.com/zpa/about-zpa-private-service-edges)
+* [API documentation](https://help.zscaler.com/zpa/managing-zpa-private-service-edges-using-api)
+
 Use the **zpa_service_edge_controller** data source to get information about a service edge controller in the Zscaler Private Access cloud. This data source can then be referenced in a Service Edge Group and Provisioning Key.
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Service Edge Controller Data Source
 data "zpa_service_edge_controller" "example" {
   name = "On-Prem-PSE"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the service edge controller to be exported.
-* `id` - (Optional) The ID of the service edge controllerto be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (Optional) The ID of the service edge controllerto be exported.
 * `enabled` - (bool) Whether this Service Edge Controller is enabled or not. Default value: `true`. Supported values: `true`, `false`
 * `description` (string) - Description of the App Connector.
 * `app_connector_group_name` (Computed) - Expected values: UNKNOWN/ZPN_STATUS_AUTHENTICATED(1)/ZPN_STATUS_DISCONNECTED

@@ -1,18 +1,22 @@
 ---
+page_title: "zpa_service_edge_group Resource - terraform-provider-zpa"
 subcategory: "Service Edge Group"
-layout: "zscaler"
-page_title: "ZPA: service_edge_group"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-zpa-private-service-edge-groups
+  API documentation https://help.zscaler.com/zpa/configuring-zpa-private-service-edge-groups-using-api
   Creates and manages ZPA Service Edge Group details.
 ---
 
-# Resource: zpa_service_edge_group
+# zpa_service_edge_group (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-zpa-private-service-edge-groups)
+* [API documentation](https://help.zscaler.com/zpa/configuring-zpa-private-service-edge-groups-using-api)
 
 The **zpa_service_edge_group** resource creates a service edge group in the Zscaler Private Access cloud. This resource can then be referenced in a service edge connector.
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Service Edge Group resource - Trusted Network
 resource "zpa_service_edge_group" "service_edge_group_sjc" {
   name                 = "Service Edge Group San Jose"
@@ -31,7 +35,7 @@ resource "zpa_service_edge_group" "service_edge_group_sjc" {
 }
 ```
 
-```hcl
+```terraform
 # ZPA Service Edge Group resource - No Trusted Network
 resource "zpa_service_edge_group" "service_edge_group_nyc" {
   name                 = "Service Edge Group New York"
@@ -47,34 +51,38 @@ resource "zpa_service_edge_group" "service_edge_group_nyc" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
-* `name` - (Required) Name of the Service Edge Group.
-* `latitude` - (Required) Latitude for the Service Edge Group. Integer or decimal with values in the range of `-90` to `90`
-* `longitude` - (Required) Longitude for the Service Edge Group. Integer or decimal with values in the range of `-180` to `180`
-* `location` - (Required) Location for the Service Edge Group.
-* `description` - (Optional) Description of the Service Edge Group.
-* `enabled` - (Optional) Whether this Service Edge Group is enabled or not. Default value: `true` Supported values: `true`, `false`
-* `city_country` - (Optional) This field controls dynamic discovery of the servers.
-* `country_code` - (Optional) This field is an array of app-connector-id only.
-* `is_public` - (Optional) Enable or disable public access for the Service Edge Group. Default value: `false` Supported values: `true`, `false`
+- `name` - (String) Name of the Service Edge Group.
+- `latitude` - (String) Latitude for the Service Edge Group. Integer or decimal with values in the range of `-90` to `90`
+- `longitude` - (String) Longitude for the Service Edge Group. Integer or decimal with values in the range of `-180` to `180`
+- `location` - (String) Location of the App Connector Group. i.e ``"San Jose, CA, USA"``
+- `city_country` - (String) Whether Double Encryption is enabled or disabled for the app. i.e ``"San Jose, US"``
+- `country_code` - (String) Provide a 2 letter [ISO3166 Alpha2 Country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). i.e ``"US"``, ``"CA"``
 
-* `override_version_profile` - (Optional) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
-* `version_profile_id` - (Optional) ID of the version profile. To learn more, see Version Profile Use Cases. Supported values are:
-  * ``0`` = ``Default``
-  * ``1`` = ``Previous Default``
-  * ``2`` = ``New Release``
-* `version_profile_name` - (Optional)
-  * ``Default`` = ``0``
-  * ``Previous Default`` = ``1``
-  * ``New Release`` = ``2``
-* `service_edges` - (Optional)
-* `trusted_networks` - (Optional) Trusted networks for this Service Edge Group. List of trusted network objects
-* `upgrade_day` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified day. Default value: `SUNDAY` List of valid days (i.e., Sunday, Monday)
-* `upgrade_time_in_secs` - (Optional) Service Edges in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600` Integer in seconds (i..e, 66600). The integer must be greater than or equal to 0 and less than `86400`, in `15` minute intervals
-* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+### Optional
+
+In addition to all arguments above, the following attributes are exported:
+
+- `enabled` - (Boolean) Whether this Service Edge Group is enabled or not. Default value: `true` Supported values: `true`, `false`
+- `description` - (String) Description of the Service Edge Group.
+- `is_public` - (String) Enable or disable public access for the Service Edge Group. Default value: `false` Supported values: `true`, `false`
+- `override_version_profile` - (Boolean) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
+- `version_profile_id` - (String) ID of the version profile. To learn more, see Version Profile Use Cases. Supported values are:
+  - ``0`` = ``Default``
+  - ``1`` = ``Previous Default``
+  - ``2`` = ``New Release``
+- `service_edges` - (Block Set) The list of ZPA Private Service Edges in the ZPA Private Service Edge Group.
+    - `id` - (List of Strings) The unique identifier of the ZPA Private Service Edge.
+- `trusted_networks` - (Block Set) Trusted networks for this Service Edge Group. List of trusted network objects
+    - `id` - (List of Strings) The unique identifier of the trusted network.
+- `upgrade_day` - (Strings) Service Edges in this group will attempt to update to a newer version of the software during this specified day. Default value: `SUNDAY` List of valid days (i.e., Sunday, Monday)
+- `upgrade_time_in_secs` - (Strings) Service Edges in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600` Integer in seconds (i..e, 66600). The integer must be greater than or equal to 0 and less than `86400`, in `15` minute intervals
+- `microtenant_id` (Strings) The ID of the microtenant the resource is to be associated with.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

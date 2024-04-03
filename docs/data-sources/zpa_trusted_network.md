@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_trusted_network Data Source - terraform-provider-zpa"
 subcategory: "Trusted Network"
-layout: "zscaler"
-page_title: "ZPA: trusted_network"
 description: |-
+  Official documentation https://help.zscaler.com/client-connector/about-trusted-networks
+  API documentation https://help.zscaler.com/zpa/obtaining-trusted-network-details-using-api
   Get information about Trusted Network in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_trusted_network
+# zpa_trusted_network (Data Source)
+
+* [Official documentation](https://help.zscaler.com/client-connector/about-trusted-networks)
+* [API documentation](https://help.zscaler.com/zpa/obtaining-trusted-network-details-using-api)
 
 The **zpa_trusted_network** data source to get information about a trusted network created in the Zscaler Private Access Mobile Portal. This data source can then be referenced within the following resources:
 
@@ -18,7 +22,7 @@ The **zpa_trusted_network** data source to get information about a trusted netwo
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Trusted Network Data Source
 data "zpa_trusted_network" "example" {
  name = "trusted_network_name"
@@ -28,7 +32,7 @@ data "zpa_trusted_network" "example" {
 
 -> **NOTE** To query trusted network that are associated with a specific Zscaler cloud, it is required to append the cloud name to the name of the trusted network as the below example:
 
-```hcl
+```terraform
 # ZPA Posture Profile Data Source
 data "zpa_trusted_network" "example1" {
  name = "Corporate-Network (zscalertwo.net)"
@@ -39,17 +43,20 @@ output "zpa_trusted_network" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the posture profile to be exported.
-* `id` - (Optional) The ID of the posture profile to be exported.
 
-## Attribute Reference
+
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (Optional) The ID of the posture profile to be exported.
 * `creation_time` - (string)
 * `domain` - (string)
 * `master_customer_id` - (string)

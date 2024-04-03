@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_app_connector_assistant_schedule Data Source - terraform-provider-zpa"
 subcategory: "App Connector Controller"
-layout: "zscaler"
-page_title: "ZPA: app_connector_assistant_schedule"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/deleting-disconnected-app-connectors
+  documentation https://help.zscaler.com/zpa/configuring-auto-delete-disconnected-app-connectors-using-api
   Get information about ZPA App Connector Assistant Schedule in Zscaler Private Access cloud.
 ---
 
-# Data Source: app_connector_assistant_schedule
+# zpa_app_connector_assistant_schedule (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/deleting-disconnected-app-connectors)
+* [API documentation](https://help.zscaler.com/zpa/configuring-auto-delete-disconnected-app-connectors-using-api)
 
 Use the **zpa_app_connector_assistant_schedule** data source to get information about Auto Delete frequency of the App Connector for the specified customer in the Zscaler Private Access cloud.
 
@@ -14,7 +18,7 @@ Use the **zpa_app_connector_assistant_schedule** data source to get information 
 
 ## Example Usage
 
-```hcl
+```terraform
 // Retrieve All Assistant Schedules
 data "zpa_app_connector_assistant_schedule" "this" {}
 
@@ -29,14 +33,16 @@ data "zpa_app_connector_assistant_schedule" "this" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
-* `id` - (Required) The unique identifier for the App Connector auto deletion configuration for a customer. This field is only required for the PUT request to update the frequency of the App Connector Settings.
-* `customer_id` - (Optional) The unique identifier of the ZPA tenant.
+* `id` - (Number) The unique identifier for the App Connector auto deletion configuration for a customer. This field is only required for the PUT request to update the frequency of the App Connector Settings.
+* `customer_id` - (Number) The unique identifier of the ZPA tenant.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

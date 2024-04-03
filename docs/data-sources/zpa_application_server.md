@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_application_server Data Source - terraform-provider-zpa"
 subcategory: "Application Server"
-layout: "zscaler"
-page_title: "ZPA: application_server"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-servers
+  API documentation https://help.zscaler.com/zpa/configuring-servers-using-api
   Get information about ZPA Application Server in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_application_server
+# zpa_application_server (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-servers)
+* [API documentation](https://help.zscaler.com/zpa/configuring-servers-using-api)
 
 Use the **zpa_application_server** data source to get information about an application server created in the Zscaler Private Access cloud. This data source must be used in the following circumstances:
 
@@ -18,28 +22,30 @@ Use the **zpa_application_server** data source to get information about an appli
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Application Server Data Source by Name
 data "zpa_application_server" "example" {
  name = "server.example.com"
 }
 ```
 
-```hcl
+```terraform
 # ZPA Application Server Data Source by ID
 data "zpa_application_server" "example" {
  id = "1234567890"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) This field defines the name of the server.
 * `id` - (Optional) This field defines the id of the application server.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

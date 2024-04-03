@@ -440,7 +440,7 @@ When executing the test, the following steps are taken for each `TestStep`:
    responsible for configuring the resource under test, and any dependencies it
    may have. For example, to test the `zpa_app_connector_group` resource, a valid configuration with the requisite fields is required. This results in configuration which looks like this:
 
-   ```hcl
+   ```terraform
    resource "zpa_app_connector_group" "test" {
        name        = "testAcc_app_connector_group"
        description = "testing"

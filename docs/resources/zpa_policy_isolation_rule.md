@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_policy_isolation_rule Resource - terraform-provider-zpa"
 subcategory: "Policy Set Controller"
-layout: "zscaler"
-page_title: "ZPA: policy_isolation_rule"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-isolation-policy
+  API documentation https://help.zscaler.com/zpa/configuring-isolation-policies-using-api
   Creates and manages ZPA Policy Access Isolation Rule.
 ---
 
-# Resource: zpa_policy_isolation_rule
+# zpa_policy_isolation_rule (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-isolation-policy)
+* [API documentation](https://help.zscaler.com/zpa/configuring-isolation-policies-using-api)
 
 The **zpa_policy_isolation_rule** resource creates a policy isolation access rule in the Zscaler Private Access cloud.
 
@@ -14,12 +18,7 @@ The **zpa_policy_isolation_rule** resource creates a policy isolation access rul
 
 ## Example Usage
 
-```hcl
-# Get Isolation Policy ID
-data "zpa_policy_type" "isolation_policy" {
-    policy_type = "ISOLATION_POLICY"
-}
-
+```terraform
 # Get Isolation Profile ID
 data "zpa_isolation_profile" "isolation_profile" {
     name = "zpa_isolation_profile"
@@ -31,7 +30,6 @@ resource "zpa_policy_isolation_rule" "this" {
   description                   = "Example_Isolation_Policy"
   action                        = "ISOLATE"
   operator = "AND"
-  policy_set_id = data.zpa_policy_type.isolation_policy.id
   zpn_isolation_profile_id = data.zpa_isolation_profile.isolation_profile.id
 
   conditions {
@@ -45,44 +43,44 @@ resource "zpa_policy_isolation_rule" "this" {
 }
 ```
 
+## Schema
+
 ### Required
 
-* `name` - (Required) This is the name of the forwarding policy rule.
-* `policy_set_id` - (Required) Use [zpa_policy_type](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_policy_type) data source to retrieve the necessary policy Set ID ``policy_set_id``
-    ~> **NOTE** As of v3.2.0 the ``policy_set_id`` attribute is now optional, and will be automatically determined based on the policy type being configured. The attribute is being kept for backwards compatibility, but can be safely removed from existing configurations.
-    
-* `zpn_isolation_profile_id` - (Required) Use [zpa_isolation_profile](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_isolation_profile) data source to retrieve the necessary Isolation profile ID ``zpn_isolation_profile_id``
-
-## Attributes Reference
-
-* `action` - (Optional) This is for providing the rule action.
+- `name` (String) This is the name of the forwarding policy rule.
+- `action` (String) This is for providing the rule action.
   * The supported actions for a policy isolation rule are: ``BYPASS_ISOLATE``, or ``ISOLATE``
-* `description` - (Optional) This is the description of the access policy rule.
-* `operator` (Optional) Supported values: ``AND``, ``OR``
-* `policy_type` (Optional) Supported values: ``ISOLATION_POLICY``
-* `rule_order` - (Deprecated)
+- `zpn_isolation_profile_id` (String) Use [zpa_isolation_profile](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_isolation_profile) data source to retrieve the necessary Isolation profile ID ``zpn_isolation_profile_id``
+
+### Optional
+
+- `policy_set_id` - (String) Use [zpa_policy_type](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_policy_type) data source to retrieve the necessary policy Set ID ``policy_set_id``
+    ~> **NOTE** As of v3.2.0 the ``policy_set_id`` attribute is now optional, and will be automatically determined based on the policy type being configured. The attribute is being kept for backwards compatibility, but can be safely removed from existing configurations.
+- `description` - (String) This is the description of the access policy rule.
+- `operator` (String) Supported values: ``AND``, ``OR``
+- `rule_order` (String, Deprecated)
 
     ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
-* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+- `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-* `conditions` - (Optional)
-  * `operator` (Optional) Supported values: ``AND``, and ``OR``
-  * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+- `conditions` (Block Set)
+Specifies the set of conditions for the policy rule.
+  - `operator` (String) Supported values: ``AND``, and ``OR``
+  - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-  * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
-    * `name` (Optional)
-    * `lhs` (Optional) LHS must always carry the string value ``id`` or the attribute ID of the resource being associated with the rule.
-    * `rhs` (Optional) RHS is either the ID attribute of a resource or fixed string value. Refer to the chart below for further details.
-    * `idp_id` (Optional)
-    * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `APP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
-    * `CLIENT_TYPE` (Optional) - The below options are the only ones supported in a timeout policy rule.
-      * ``zpn_client_type_exporter`` "Web Browser"
-    * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+  - `operands` (Block Set) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
+    - `lhs` (String) LHS must always carry the string value ``id`` or the attribute ID of the resource being associated with the rule.
+    - `rhs` (String) RHS is either the ID attribute of a resource or fixed string value. Refer to the chart below for further details.
+    - `idp_id` (String)
+    - `object_type` (String) This is for specifying the policy critiera. Supported values: `APP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
+    - `CLIENT_TYPE` (String) - The below options are the only ones supported in a timeout policy rule.
+      - ``zpn_client_type_exporter`` "Web Browser"
+    - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
     ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

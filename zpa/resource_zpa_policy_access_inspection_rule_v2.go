@@ -16,7 +16,7 @@ func resourcePolicyInspectionRuleV2() *schema.Resource {
 		Update: resourcePolicyInspectionRuleV2Update,
 		Delete: resourcePolicyInspectionRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: importPolicyStateContextFunc([]string{"INSPECTION_POLICY"}),
+			StateContext: importPolicyStateContextFuncV2([]string{"INSPECTION_POLICY"}),
 		},
 
 		Schema: map[string]*schema.Schema{

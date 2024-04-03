@@ -1,37 +1,42 @@
 ---
-subcategory: "Inspection"
-layout: "zscaler"
-page_title: "ZPA: zpa_inspection"
+page_title: "zpa_inspection_custom_controls Data Source - terraform-provider-zpa"
+subcategory: "AppProtection"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-custom-controls/API documentation https://help.zscaler.com/zpa/configuring-appprotection-controls-using-api
   Get information about an Inspection Custom Control in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_inspection_custom_controls
+# zpa_inspection_custom_controls (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-custom-controls)
+* [API documentation](https://help.zscaler.com/zpa/configuring-appprotection-controls-using-api)
 
 Use the **zpa_inspection_custom_controls** data source to get information about an inspection custom control. This data source can be associated with an inspection profile.
 
 ## Example Usage
 
-```hcl
+```terraform
 data "zpa_inspection_custom_controls" "example" {
     name = "ZPA_Inspection_Custom_Control"
 }
 ```
 
-```hcl
+```terraform
 data "zpa_inspection_custom_controls" "example" {
     id = "1234567890"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the predefined control.
 * `version` - (Required) The version of the predefined control, the default is: `OWASP_CRS/3.3.0`
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

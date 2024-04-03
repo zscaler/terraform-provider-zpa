@@ -1,38 +1,44 @@
 ---
+page_title: "zpa_application_segment_pra Data Source - terraform-provider-zpa"
 subcategory: "Application Segment"
-layout: "zscaler"
-page_title: "ZPA: application_segment"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-remote-access-applications
+  API documentation https://help.zscaler.com/zpa/configuring-application-segments-using-api
   Get information about ZPA Application Segment for Privileged Remote Access.
 ---
 
-# Data Source: zpa_application_segment_pra
+# zpa_application_segment_pra (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-privileged-remote-access-applications)
+* [API documentation](https://help.zscaler.com/zpa/configuring-application-segments-using-api)
 
 Use the **zpa_application_segment_pra** data source to get information about an application segment for Privileged Remote Access in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule, access policy timeout rule, access policy client forwarding rule and inspection policy. This resource supports Privileged Remote Access for both `RDP` and `SSH`.
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Application Segment Data Source
 data "zpa_application_segment_pra" "this" {
   name = "PRA_Example"
 }
 ```
 
-```hcl
+```terraform
 # ZPA Application Segment Data Source
 data "zpa_application_segment_pra" "this" {
   id = "123456789"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the PRA Application Segment to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

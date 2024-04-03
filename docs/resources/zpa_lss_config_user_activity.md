@@ -1,18 +1,21 @@
 ---
+page_title: "zpa_lss_config_controller Resource - terraform-provider-zpa"
 subcategory: "Log Streaming (LSS)"
-layout: "zscaler"
-page_title: "ZPA: lss_config_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-log-streaming-service/API documentation https://help.zscaler.com/zpa/configuring-log-streaming-service-configurations-using-api
   Creates and manages ZPA LSS Configuration for User Activity.
 ---
 
-# Resource: zpa_lss_config_controller
+# zpa_lss_config_controller (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-log-streaming-service)
+* [API documentation](https://help.zscaler.com/zpa/configuring-log-streaming-service-configurations-using-api)
 
 The **zpa_lss_config_controller** resource creates and manages Log Streaming Service (LSS) in the Zscaler Private Access cloud for User Activity `zpn_trans_log`.
 
 ## Example 1 - LSS User Activity - Usage
 
-```hcl
+```terraform
 # Retrieve the Log Type Format
 data "zpa_lss_config_log_type_formats" "zpn_trans_log" {
   log_type = "zpn_trans_log"
@@ -114,11 +117,11 @@ resource "zpa_lss_config_controller" "lss_user_activity" {
 }
 ```
 
-## Argument Reference
-
-The following arguments are supported:
+## Schema
 
 ### Required
+
+The following arguments are supported:
 
 * `config` - (Required)
   * `name` - (Required)
@@ -129,7 +132,7 @@ The following arguments are supported:
   * `connector_groups` - (Required)
         - `id` - (Required) - App Connector Group ID(s) where logs will be forwarded to.
 
-## Attribute Reference
+### Optional
 
 In addition to all arguments above, the following attributes are exported:
 

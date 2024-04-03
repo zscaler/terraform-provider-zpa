@@ -16,7 +16,7 @@ func resourcePolicyIsolationRuleV2() *schema.Resource {
 		Update: resourcePolicyIsolationRuleV2Update,
 		Delete: resourcePolicyIsolationRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: importPolicyStateContextFunc([]string{"ISOLATION_POLICY", "BYPASS_POLICY"}),
+			StateContext: importPolicyStateContextFuncV2([]string{"ISOLATION_POLICY"}),
 		},
 
 		Schema: map[string]*schema.Schema{

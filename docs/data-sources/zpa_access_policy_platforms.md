@@ -1,12 +1,11 @@
 ---
+page_title: "zpa_access_policy_platforms Data Source - terraform-provider-zpa"
 subcategory: "Policy Set Controller"
-layout: "zscaler"
-page_title: "ZPA: access_policy_platforms"
 description: |-
   Get information about all platforms for the specified customer.
 ---
 
-# Data Source: zpa_access_policy_platforms
+# zpa_access_policy_platforms (Data Source)
 
 Use the **zpa_access_policy_platforms** data source to get information about all platforms for the specified customer in the Zscaler Private Access cloud. This data source can be optionally used when defining the following policy types:
     - ``zpa_policy_access_rule``
@@ -21,12 +20,14 @@ The ``object_type`` attribute must be defined as "PLATFORM" in the policy operan
 
 ## Example Usage
 
-```hcl
+```terraform
 data "zpa_access_policy_platforms" "this" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Read-Only
 
 The following values are returned:
 

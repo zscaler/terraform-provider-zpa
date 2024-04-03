@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 // Define the Terraform resource for reordering policy access rules.
@@ -22,6 +23,20 @@ func resourcePolicyAccessRuleReorder() *schema.Resource {
 			"policy_type": {
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"ACCESS_POLICY",
+					"GLOBAL_POLICY",
+					"CAPABILITIES_POLICY",
+					"BYPASS_POLICY",
+					"CLIENT_FORWARDING_POLICY",
+					"CREDENTIAL_POLICY",
+					"ISOLATION_POLICY",
+					"INSPECTION_POLICY",
+					"REDIRECTION_POLICY",
+					"REAUTH_POLICY",
+					"TIMEOUT_POLICY",
+					"CLIENTLESS_SESSION_PROTECTION_POLICY",
+				}, false),
 			},
 			"rules": {
 				Type:        schema.TypeSet,

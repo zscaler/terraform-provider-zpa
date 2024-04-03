@@ -1,12 +1,18 @@
 ---
+page_title: "zpa_policy_access_rule Data Source - terraform-provider-zpa"
 subcategory: "Policy Set Controller"
 layout: "zscaler"
 page_title: "ZPA: policy_type"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-access-policy
+  API documentation https://help.zscaler.com/zpa/configuring-access-policies-using-api
   Get information about Policy Set ID in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_policy_type
+# zpa_policy_type (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-access-policy)
+* [API documentation](https://help.zscaler.com/zpa/configuring-access-policies-using-api)
 
 Use the **zpa_policy_type** data source to get information about an a ``policy_set_id`` and ``policy_type``. This data source is required when creating:
 
@@ -24,7 +30,7 @@ Use the **zpa_policy_type** data source to get information about an a ``policy_s
 
 ## Example Usage
 
-```hcl
+```terraform
 # Get information for "ACCESS_POLICY" ID
 data "zpa_policy_type" "access_policy" {
     policy_type = "ACCESS_POLICY"
@@ -35,7 +41,7 @@ output "zpa_policy_type_access_policy" {
 }
 ```
 
-```hcl
+```terraform
 # Get information for "GLOBAL_POLICY" ID
 data "zpa_policy_type" "global_policy" {
     policy_type = "GLOBAL_POLICY"
@@ -46,7 +52,7 @@ output "zpa_policy_type_access_policy" {
 }
 ```
 
-```hcl
+```terraform
 # Get information for "TIMEOUT_POLICY" ID
 data "zpa_policy_type" "timeout_policy" {
     policy_type = "TIMEOUT_POLICY"
@@ -57,7 +63,7 @@ output "zpa_policy_type_timeout_policy" {
 }
 ```
 
-```hcl
+```terraform
 # Get information for "REAUTH_POLICY" ID
 data "zpa_policy_type" "reauth_policy" {
     policy_type = "REAUTH_POLICY"
@@ -68,7 +74,7 @@ output "zpa_policy_type_reauth_policy" {
 }
 ```
 
-```hcl
+```terraform
 # Get information for "CLIENT_FORWARDING_POLICY" ID
 data "zpa_policy_type" "client_forwarding_policy" {
     policy_type = "CLIENT_FORWARDING_POLICY"
@@ -79,7 +85,7 @@ output "zpa_policy_type_client_forwarding_policy" {
 }
 ```
 
-```hcl
+```terraform
 # Get information for "INSPECTION_POLICY" ID
 data "zpa_policy_type" "inspection_policy" {
     policy_type = "INSPECTION_POLICY"
@@ -90,14 +96,16 @@ output "zpa_policy_type_inspection_policy" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `policy_type` - (Optional) The value for differentiating the policy types.
 * `policy_set_id` - (Required) The ID of the global policy set.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_microtenant_controller Data Source - terraform-provider-zpa"
 subcategory: "Microtenant Controller"
-layout: "zscaler"
-page_title: "ZPA): microtenant_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-microtenants
+  API documentation https://help.zscaler.com/zpa/configuring-microtenants-using-api
   Get information about Microtenants in Zscaler Private Access cloud.
 ---
 
-# Resource: zpa_microtenant_controller
+# zpa_microtenant_controller (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-microtenants)
+* [API documentation](https://help.zscaler.com/zpa/configuring-microtenants-using-api)
 
 The **zpa_microtenant_controller** data source to get information about a machine group created in the Zscaler Private Access cloud. This data source allows administrators to retrieve a specific microtenant ID, which can be passed to other supported resources via the `microtenant_id` attribute.
 
@@ -14,20 +18,20 @@ The **zpa_microtenant_controller** data source to get information about a machin
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Microtenant Controller Data Source
 data "zpa_microtenant_controller" "this" {
   name = "Microtenant_A"
 }
 ```
 
-## Attributes Reference
+## Schema
 
 ### Required
 
 * `name` - (Required) Name of the microtenant controller.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

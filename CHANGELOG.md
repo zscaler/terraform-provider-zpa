@@ -1,10 +1,10 @@
 # Changelog
 
-## 3.2.0 (March, 27 2024)
+## 3.2.0 (April, 3 2024)
 
 ### Notes
 
-- Release date: **(March, 27 2024)**
+- Release date: **(April, 3 2024)**
 - Supported Terraform version: **v1.x**
 
 ### NEW - RESOURCES, DATA SOURCES, PROPERTIES, ATTRIBUTES:
@@ -827,7 +827,7 @@ Fixed authentication issue when specifying zpa_cloud="PRODUCTION"
 The Terraform Provider for Zscaler Private Access (ZPA) is now officially hosted under Zscaler's GitHub account and published in the Terraform Registry. For more details, visit the Zscaler Community Article [Here](https://community.zscaler.com/t/zpa-and-zia-terraform-providers-now-verified/16675)
 Administrators who used previous versions of the provider, and followed instructions to install the binary as a custom provider, must update their provider block as such:
 
-```hcl
+```terraform
 terraform {
   required_providers {
     zpa = {
@@ -861,7 +861,7 @@ provider "zpa" {}
 The Terraform Provider for Zscaler Private Access (ZPA) is now officially hosted under Zscaler's GitHub account and published in the Terraform Registry. For more details, visit the Zscaler Community Article [Here](https://community.zscaler.com/t/zpa-and-zia-terraform-providers-now-verified/16675)
 Administrators who used previous versions of the provider, and followed instructions to install the binary as a custom provider, must update their provider block as such:
 
-```hcl
+```terraform
 terraform {
   required_providers {
     zpa = {

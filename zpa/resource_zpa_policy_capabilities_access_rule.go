@@ -16,7 +16,7 @@ func resourcePolicyCapabilitiesAccessRule() *schema.Resource {
 		Update: resourcePolicyCapabilitiesAccessRuleUpdate,
 		Delete: resourcePolicyCapabilitiesAccessRuleDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: importPolicyStateContextFunc([]string{"CAPABILITIES_POLICY"}),
+			StateContext: importPolicyStateContextFuncV2([]string{"CAPABILITIES_POLICY"}),
 		},
 
 		Schema: map[string]*schema.Schema{

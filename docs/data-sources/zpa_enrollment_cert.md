@@ -1,18 +1,22 @@
 ---
+page_title: "zpa_enrollment_cert Data Source - terraform-provider-zpa"
 subcategory: "Enrollment Certificate"
-layout: "zscaler"
-page_title: "ZPA: enrollment_cert"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-enrollment-ca-certificates
+  API documentation https://help.zscaler.com/zpa/obtaining-enrollment-certificate-details-using-api
   Get information about all configured enrollment certificate details.
 ---
 
-# Data Source: zpa_enrollment_cert
+# zpa_enrollment_cert (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-enrollment-ca-certificates)
+* [API documentation](https://help.zscaler.com/zpa/obtaining-enrollment-certificate-details-using-api)
 
 Use the **zpa_enrollment_cert** data source to get information about all configured enrollment certificate details created in the Zscaler Private Access cloud. This data source is required when creating provisioning key resources.
 
 ## Example Usage
 
-```hcl
+```terraform
 data "zpa_enrollment_cert" "root" {
     name = "Root"
 }
@@ -34,17 +38,19 @@ data "zpa_enrollment_cert" "isolation_client" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the enrollment certificate to be exported.
-* `id` - (Optional) The id of the enrollment certificate to be exported.
+* `name` - (String) The name of the enrollment certificate to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (String) The id of the enrollment certificate to be exported.
 * `allow_signing` - (bool)
 * `cname` - (string)
 * `certificate` - (string) The certificate text is in PEM format.
@@ -67,4 +73,4 @@ In addition to all arguments above, the following attributes are exported:
 * `valid_from_in_epoch_sec` - (string)
 * `valid_to_in_epochsec` - (string)
 
-:warning: Notice that certificate, public and private key information are omitted from the output.
+~> **Warning**: Notice that certificate, public and private key information are omitted from the output.

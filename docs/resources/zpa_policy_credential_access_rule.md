@@ -1,12 +1,16 @@
 ---
-subcategory: "Policy Set Controller"
-layout: "zscaler"
-page_title: "ZPA: policy_credential_rule"
+page_title: "zpa_policy_credential_rule Resource - terraform-provider-zpa"
+subcategory: "Policy Set Controller V2"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-capabilities-policy
+  API documentation https://help.zscaler.com/zpa/configuring-privileged-policies-using-api
   Creates and manages ZPA Policy Credential Access Rule.
 ---
 
-# Resource: zpa_policy_credential_rule
+# zpa_policy_credential_rule (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-privileged-capabilities-policy)
+* [API documentation](https://help.zscaler.com/zpa/configuring-privileged-policies-using-api)
 
 The **zpa_policy_credential_rule** resource creates a policy credential rule in the Zscaler Private Access cloud.
 
@@ -14,7 +18,7 @@ The **zpa_policy_credential_rule** resource creates a policy credential rule in 
 
 ## Example Usage
 
-```hcl
+```terraform
 resource "zpa_application_segment_pra" "this" {
   name             = "Example"
   description      = "Example"
@@ -179,49 +183,50 @@ resource "zpa_policy_credential_rule" "this" {
 }
 ```
 
+## Schema
+
 ### Required
 
-* `name` - (Required) This is the name of the policy rule.
-* `action` (Optional) This is for providing the rule action. Supported value: ``INJECT_CREDENTIALS``
-* `rule_order` - (Deprecated)
-
-  ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
-* `credential` - The Privileged Remote Access application segment resource
+- `name` - (String) This is the name of the policy rule.
+- `action` (String) This is for providing the rule action. Supported value: ``INJECT_CREDENTIALS``
+- `credential` - The Privileged Remote Access application segment resource
     - `id` - (String) The unique identifier of the privileged credential.
     
-## Attributes Reference
+### Optional
 
-* `description` (Optional) This is the description of the access policy rule.
+- `description` (String) This is the description of the access policy rule.
+- `rule_order` (String, Deprecated)
 
-* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+  ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
+- `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-* `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `operator` (Optional) - Supported values are: `AND` or `OR`
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
-        * `object_type` (Optional) The object type of the operand. Supported values: `CONSOLE`
-        * `values` (Optional) The list of values for the specified object type (e.g., PRA Console IDs).
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
+        - `object_type` (String) The object type of the operand. Supported values: `CONSOLE`
+        - `values` (List of Strings) The list of values for the specified object type (e.g., PRA Console IDs).
 
   ⚠️ **WARNING:**: The first condition block specifying the `object_type` / `CONSOLE` is mandatory. This block refers to the `zpa_pra_console_controller` resource.
 
-* `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `operator` (Optional) - Supported values are: `AND` or `OR`
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy criteria. Supported values: `SAML`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
-            * `rhs` - (Optional) - The SAML attribute string i.e Group name, Department Name, Email address etc.
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  The Identity Provider (IdP) ID
-            * `rhs` - (Optional) - The SCIM Group unique identified (ID)
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `SCIM`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
-            * `rhs` - (Optional) - 	The SCIM Attribute value to match
+- `conditions` (Block Set)  - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
+            - `rhs` - (String) - The SAML attribute string i.e Group name, Department Name, Email address etc.
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`
+        - `entry_values` (Block Set) 
+            - `lhs` - (String) -  The Identity Provider (IdP) ID
+            - `rhs` - (String) - The SCIM Group unique identified (ID)
+    - `operands` (Block Set)  - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
+            - `rhs` - (String) - 	The SCIM Attribute value to match
 
 ## Import
 

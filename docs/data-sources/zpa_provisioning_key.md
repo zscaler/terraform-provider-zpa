@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_provisioning_key Resource - terraform-provider-zpa"
 subcategory: "Provisioning Key"
-layout: "zscaler"
-page_title: "ZPA: provisioning_key"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-connector-provisioning-keys
+  API documentation https://help.zscaler.com/zpa/configuring-provisioning-keys-using-api
   Get information about Provisioning Key in Zscaler Private Access cloud.
 ---
 
 # Data Source: zpa_provisioning_key
+
+* [Official documentation](https://help.zscaler.com/zpa/about-connector-provisioning-keys)
+* [API documentation](https://help.zscaler.com/zpa/configuring-provisioning-keys-using-api)
 
 Use the **zpa_provisioning_key** data source to get information about a provisioning key in the Zscaler Private Access portal or via API. This data source can be referenced in the following ZPA resources:
 
@@ -21,7 +25,7 @@ Use the **zpa_provisioning_key** data source to get information about a provisio
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Provisioning Key for "CONNECTOR_GRP"
 data "zpa_provisioning_key" "example" {
  name = "Provisioning_Key"
@@ -29,7 +33,7 @@ data "zpa_provisioning_key" "example" {
 }
 ```
 
-```hcl
+```terraform
 # ZPA Provisioning Key for "SERVICE_EDGE_GRP"
 data "zpa_provisioning_key" "example" {
  name = "Provisioning_Key"
@@ -37,7 +41,9 @@ data "zpa_provisioning_key" "example" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
@@ -45,7 +51,7 @@ The following arguments are supported:
 * `association_type` (Required) Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are `CONNECTOR_GRP` and `SERVICE_EDGE_GRP`
 * `id` - (Optional) The ID of the provisioning key to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

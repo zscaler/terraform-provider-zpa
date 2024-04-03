@@ -16,7 +16,7 @@ func resourcePolicyForwardingRuleV2() *schema.Resource {
 		Update: resourcePolicyForwardingRuleV2Update,
 		Delete: resourcePolicyForwardingRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: importPolicyStateContextFunc([]string{"CLIENT_FORWARDING_POLICY", "BYPASS_POLICY"}),
+			StateContext: importPolicyStateContextFuncV2([]string{"CLIENT_FORWARDING_POLICY", "BYPASS_POLICY"}),
 		},
 
 		Schema: map[string]*schema.Schema{

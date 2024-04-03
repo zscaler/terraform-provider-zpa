@@ -1,42 +1,48 @@
 ---
+page_title: "zpa_lss_config_controller Data Source - terraform-provider-zpa"
 subcategory: "Log Streaming (LSS)"
-layout: "zscaler"
-page_title: "ZPA: lss_config_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-log-streaming-service/
+  API documentation https://help.zscaler.com/zpa/configuring-log-streaming-service-configurations-using-api
   Get information about Log Streaming (LSS) configuration Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_lss_config_controller
+# zpa_lss_config_controller (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-log-streaming-service)
+* [API documentation](https://help.zscaler.com/zpa/configuring-log-streaming-service-configurations-using-api)
 
 Use the **zpa_lss_config_controller** data source to get information about a Log Streaming (LSS) configuration resource created in the Zscaler Private Access.
 
 ## Example Usage
 
-```hcl
+```terraform
 # Retrieve Log Streaming Information by Name
 data "zpa_lss_config_controller" "example" {
   name = "testAcc-lss-server"
 }
 ```
 
-```hcl
+```terraform
 # Retrieve Log Streaming Information by ID
 data "zpa_lss_config_controller" "example" {
   id = "1234567890"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) This field defines the name of the log streaming resource.
-* `id` - (Optional) This field defines the name of the log streaming resource.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (Optional) This field defines the name of the log streaming resource.
 * `config` - (Computed)
   * `audit_message` - (string)
   * `creation_time` - (string)

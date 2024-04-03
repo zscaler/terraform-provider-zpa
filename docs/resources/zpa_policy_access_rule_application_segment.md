@@ -1,30 +1,28 @@
 ---
+page_title: "zpa_policy_access_rule Resource - terraform-provider-zpa"
 subcategory: "Policy Set Controller"
-layout: "zscaler"
-page_title: "ZPA: policy_access_rule"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-access-policy
+  API documentation https://help.zscaler.com/zpa/configuring-access-policies-using-api
   Creates and manages ZPA Policy Access Rule with Application Segment conditions.
 ---
 
-# Resource: zpa_policy_access_rule
+# zpa_policy_access_rule (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-access-policy)
+* [API documentation](https://help.zscaler.com/zpa/configuring-access-policies-using-api)
 
 The **zpa_policy_access_rule** resource creates and manages a policy access rule with Application Segment conditions in the Zscaler Private Access cloud.
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
 ## Example Usage
-
-```hcl
-data "zpa_policy_type" "access_policy" {
-  policy_type = "ACCESS_POLICY"
-}
-
+```terraform
 resource "zpa_policy_access_rule" "this" {
   name                          = "Example"
   description                   = "Example"
   action                        = "ALLOW"
   operator                      = "AND"
-  policy_set_id                 = data.zpa_policy_type.access_policy.id
 
   conditions {
     operator = "OR"
@@ -75,46 +73,48 @@ resource "zpa_server_group" "this" {
 }
 ```
 
+## Schema
+
 ### Required
 
-* `name` - (Required) This is the name of the policy rule.
-* `policy_set_id` - (Required) Use [zpa_policy_type](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_policy_type) data source to retrieve the necessary policy Set ID ``policy_set_id``
+* `name` (Required) This is the name of the policy rule.
 
-## Attributes Reference
+### Optional
 
-* `action` (Optional) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``
-* `custom_msg` (String) This is for providing a customer message for the user.
-* `description` (String) This is the description of the access policy rule.
-* `operator` (Optional) Supported values: ``AND``, ``OR``
-* `policy_type` (Optional) Supported values: ``ACCESS_POLICY`` or ``GLOBAL_POLICY``
-* `rule_order` - (Deprecated)
+* `policy_set_id` - (String) Use [zpa_policy_type](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_policy_type) data source to retrieve the necessary policy Set ID ``policy_set_id``
+    ~> **NOTE** As of v3.2.0 the ``policy_set_id`` attribute is now optional, and will be automatically determined based on the policy type being configured. The attribute is being kept for backwards compatibility, but can be safely removed from existing configurations.`zpa_policy_type` [PR #432](https://github.com/zscaler/terraform-provider-zpa/pull/432) 
+- `action` (String) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``
+- `custom_msg` (String) This is for providing a customer message for the user.
+- `description` (String) This is the description of the access policy rule.
+- `operator` (String) Supported values: ``AND``, ``OR``
+- `rule_order` (String, Deprecated)
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
-* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+- `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-* `conditions` - (Optional)
-  * `operator` (Optional) Supported values: ``AND``, and ``OR``
-  * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+- `conditions` (Block Set)
+  * `operator` (String) Supported values: ``AND``, and ``OR``
+  * `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-  * `operands` (Optional) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
-    * `name` (Optional)
-    * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `APP`. Use [zpa_application_segment](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment) resource or data source to associate or retrieve the Application Segment ``id`` attribute .
-    * `lhs` (Optional) LHS must always carry the string value ``id``.
-    * `rhs` (Optional) This is the ``id`` value of the application segment resource.
-    * `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+- `operands` (Block Set) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
+    * `name` (String)
+    * `object_type` (String) This is for specifying the policy critiera. Supported values: `APP`. Use [zpa_application_segment](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment) resource or data source to associate or retrieve the Application Segment ``id`` attribute .
+    * `lhs` (String) LHS must always carry the string value ``id``.
+    * `rhs` (String) This is the ``id`` value of the application segment resource.
+    * `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
     ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-* `app_connector_groups`
-  * `id` - (Optional) The ID of an app connector group resource
+- `app_connector_groups` (Block Set)
+  * `id` (String) The ID of an app connector group resource
 
-* `app_server_groups`
-  * `id` - (Optional) The ID of a server group resource
+- `app_server_groups` (Block Set)
+  * `id` (String) The ID of a server group resource
 
 ## Import
 

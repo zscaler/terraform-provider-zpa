@@ -55,7 +55,7 @@ registry.terraform.io/hashicorp/zpa
 
 If you notice below error, it might be due to the fact that [required_providers](https://www.terraform.io/docs/language/providers/requirements.html#requiring-providers) block is not defined in *every module*, that uses ZPA Terraform Provider. Create `versions.tf` file with the following contents:
 
-```hcl
+```terraform
 # versions.tf
 terraform {
   required_providers {
@@ -138,7 +138,7 @@ To prevent that you have 2 options:
 
 For example
 
-```hcl
+```terraform
 resource "zpa_application_segment" "this" {
   name              = var.name
   description       = var.description

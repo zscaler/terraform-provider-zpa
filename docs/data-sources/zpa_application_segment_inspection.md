@@ -1,39 +1,42 @@
 ---
+page_title: "zpa_application_segment_inspection Data Source - terraform-provider-zpa"
 subcategory: "Application Segment"
-layout: "zscaler"
-page_title: "ZPA: application_segment"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-appprotection-applications
+  API documentation https://help.zscaler.com/zpa/configuring-application-segments-using-api
   Get information about ZPA Application Segment for Inspection.
 ---
 
-# Data Source: zpa_application_segment_inspection
+# zpa_application_segment_inspection (Data Source)
 
 Use the **zpa_application_segment_inspection** data source to get information about an inspection application segment in the Zscaler Private Access cloud. This resource can then be referenced in a ZPA access inspection policy. This resource supports ZPA Inspection for both `HTTP` and `HTTPS`.
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Inspection Application Segment Data Source
 data "zpa_application_segment_inspection" "this" {
   name = "ZPA_Inspection_Example"
 }
 ```
 
-```hcl
+```terraform
 # ZPA Inspection Application Segment Data Source
 data "zpa_application_segment_inspection" "this" {
   id = "123456789"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the Inspection Application Segment to be exported.
 * `id` - (Optional) The ID of the Inspection Application Segment to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
