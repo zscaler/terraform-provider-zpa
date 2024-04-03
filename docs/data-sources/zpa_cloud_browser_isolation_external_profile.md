@@ -1,31 +1,35 @@
 ---
+page_title: "zpa_cloud_browser_isolation_external_profile Data Source - terraform-provider-zpa"
 subcategory: "Cloud Browser Isolation"
-layout: "zscaler"
-page_title: "ZPA: cloud_browser_isolation_external_profile"
 description: |-
+  Official documentation https://help.zscaler.com/isolation/about-custom-root-certificates-cloud-browser-isolation
   Get information about Cloud Browser Isolation External Profile.
 ---
 
-# Data Source: zpa_cloud_browser_isolation_external_profile
+# zpa_cloud_browser_isolation_external_profile (Data Source)
+
+* [Official documentation](https://help.zscaler.com/isolation/about-custom-root-certificates-cloud-browser-isolation)
 
 Use the **zpa_cloud_browser_isolation_external_profile** data source to get information about Cloud Browser Isolation external profile. This data source information can then be used in as part of `zpa_policy_isolation_rule` when the `action` attribute is set to `ISOLATE`.
 
 ## Example Usage
 
-```hcl
+```terraform
 # Retrieve CBI External Profile
 data "zpa_cloud_browser_isolation_external_profile" "this" {
     name = "Example"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the CBI banner to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 

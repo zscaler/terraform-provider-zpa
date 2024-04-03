@@ -23,7 +23,7 @@ Use the navigation on the left to read about the available resources.
 
 For customers running this provider in their production tenant, the variable `ZPA_CLOUD` is optional. If provided, it must be followed by the value `PRODUCTION`.
 
-```hcl
+```terraform
 # Configure ZPA provider source and version
 terraform {
   required_providers {
@@ -49,7 +49,7 @@ resouce "zpa_application_segment" "this" {
 
 For customers who want to use this provider with ZPA Beta, Gov, Preview, and Dev Cloud, the following variable credentials `zpa_cloud` followed by the value `BETA`, `ZPATWO`, `GOV`, `GOVUS`, or `PREVIEW` values or via environment variable `ZPA_CLOUD=BETA`, `ZPA_CLOUD=ZPATWO`, `ZPA_CLOUD=GOV`, `ZPA_CLOUD=GOVUS`, `ZPA_CLOUD=PREVIEW`, `ZPA_CLOUD=DEV`are required.
 
-```hcl
+```terraform
 # Configure ZPA provider source and version
 terraform {
   required_providers {
@@ -122,7 +122,7 @@ You can provide credentials via the `ZPA_CLIENT_ID`, `ZPA_CLIENT_SECRET`, `ZPA_C
 
 ~> **NOTE** `ZPA_MICROTENANT_ID` environment variable is an optional parameter when provisioning resources within a ZPA microtenant
 
-```hcl
+```terraform
 provider "zpa" {}
 ```
 
@@ -154,7 +154,7 @@ this location.
 
 Usage:
 
-```hcl
+```terraform
 provider "zpa" {}
 ```
 

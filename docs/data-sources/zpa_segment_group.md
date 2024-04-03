@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_segment_group Data Source - terraform-provider-zpa"
 subcategory: "Segment Group"
-layout: "zscaler"
-page_title: "ZPA: segment_group"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-segment-groups
+  API documentation https://help.zscaler.com/zpa/configuring-segment-groups-using-api
   Get information about Segment Groups in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_segment_group
+# zpa_segment_group (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-segment-groups)
+* [API documentation](https://help.zscaler.com/zpa/configuring-segment-groups-using-api)
 
 Use the **zpa_segment_group** data source to get information about a machine group created in the Zscaler Private Access cloud. This data source can then be referenced in an application segment or Access Policy rule.
 
@@ -16,24 +20,26 @@ Use the **zpa_segment_group** data source to get information about a machine gro
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Server Group Data Source
 data "zpa_segment_group" "example" {
  name = "segment_group_name"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the segment group to be exported.
-* `id` - (Optional) The ID of the segment group to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (Optional) The ID of the segment group to be exported.
 * `config_space` - (string)
 * `creation_time` - (string)
 * `description` - (string)

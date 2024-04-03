@@ -128,7 +128,7 @@ Using Zscaler Private Access Provider (Terraform v0.13+)
 For Terraform v0.13+, to use a locally built version of a provider you must add the following snippet to every module
 that you want to use the provider in.
 
-```hcl
+```terraform
 terraform {
   required_providers {
     zpa = {

@@ -16,7 +16,7 @@ func resourcePolicyCredentialAccessRule() *schema.Resource {
 		Update: resourcePolicyCredentialAccessRuleUpdate,
 		Delete: resourcePolicyCredentialAccessRuleDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: importPolicyStateContextFunc([]string{"CREDENTIAL_POLICY"}),
+			StateContext: importPolicyStateContextFuncV2([]string{"CREDENTIAL_POLICY"}),
 		},
 
 		Schema: map[string]*schema.Schema{

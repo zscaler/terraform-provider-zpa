@@ -19,7 +19,7 @@ func resourcePolicyTimeoutRuleV2() *schema.Resource {
 		Update: resourcePolicyTimeoutRuleV2Update,
 		Delete: resourcePolicyTimeoutRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: importPolicyStateContextFunc([]string{"TIMEOUT_POLICY", "REAUTH_POLICY"}),
+			StateContext: importPolicyStateContextFuncV2([]string{"TIMEOUT_POLICY", "REAUTH_POLICY"}),
 		},
 
 		Schema: map[string]*schema.Schema{

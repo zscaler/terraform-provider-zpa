@@ -611,6 +611,29 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 	}
 }
 
+func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
+	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		service := m.(*Client).policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
+		id := d.Id()
+		_, parseIDErr := strconv.ParseInt(id, 10, 64)
+		if parseIDErr == nil {
+			// assume if the passed value is an int
+			_ = d.Set("id", id)
+		} else {
+			resp, _, err := service.GetByNameAndTypes(types, id)
+			if err == nil {
+				d.SetId(resp.ID)
+				_ = d.Set("id", resp.ID)
+			} else {
+				return []*schema.ResourceData{d}, err
+			}
+
+		}
+		return []*schema.ResourceData{d}, nil
+	}
+}
+
 func dataInspectionRulesSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,

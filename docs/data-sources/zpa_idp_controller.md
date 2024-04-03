@@ -1,48 +1,56 @@
 ---
+page_title: "zpa_idp_controller Data Source - terraform-provider-zpa"
 subcategory: "Identity Provider"
-layout: "zscaler"
-page_title: "ZPA: idp_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/identity-management
+  API documentation https://help.zscaler.com/zpa/obtaining-idp-configuration-details-using-api
   Get information about an Identity Provider in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_idp_controller
+# zpa_idp_controller (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/identity-management)
+* [API documentation](https://help.zscaler.com/zpa/obtaining-idp-configuration-details-using-api)
 
 Use the **zpa_idp_controller** data source to get information about an Identity Provider created in the Zscaler Private Access cloud. This data source is required when creating:
 
-1. Access policy Rules
-2. Access policy timeout rules
-3. Access policy forwarding rules
-4. Access policy inspection rules
-5. Access policy isolation rules
+* Access policy Rules
+* Access policy timeout rules
+* Access policy forwarding rules
+* Access policy inspection rules
+* Access policy isolation rules
+* Access policy privileged credentials rules
+* Access policy privileged capabilities rules
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA IdP Controller Data Source
 data "zpa_idp_controller" "example" {
  name = "idp_name"
 }
 ```
 
-```hcl
+```terraform
 # ZPA IdP Controller Data Source
 data "zpa_idp_controller" "example" {
  id = "1234567890"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the Identity Provider (IdP) to be exported.
-* `id` - (Optional) The name of the Identity Provider (IdP) to be exported.
+* `name` - (String) The name of the Identity Provider (IdP) to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (String) The name of the Identity Provider (IdP) to be exported.
 * `auto_provision` (string)
 * `creation_time` (string)
 * `description` (string)

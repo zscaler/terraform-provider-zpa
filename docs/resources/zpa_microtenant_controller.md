@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_microtenant_controller Resource - terraform-provider-zpa"
 subcategory: "Microtenant Controller"
-layout: "zscaler"
-page_title: "ZPA): microtenant_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-microtenants/
+  API documentation https://help.zscaler.com/zpa/configuring-microtenants-using-api
   Creates and manages ZPA Microtenant resources
 ---
 
-# Resource: zpa_microtenant_controller
+# zpa_microtenant_controller (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-microtenants)
+* [API documentation](https://help.zscaler.com/zpa/configuring-microtenants-using-api)
 
 The **zpa_microtenant_controller** resource creates a microtenant controller in the Zscaler Private Access cloud. This resource allows organizations to delegate responsibilities of admins directly to the acquired or merged company admins so that they can manage their configurations independently
 
@@ -14,7 +18,7 @@ The **zpa_microtenant_controller** resource creates a microtenant controller in 
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Microtenant Controller resource
 resource "zpa_microtenant_controller" "this" {
   name = "Microtenant_A"
@@ -35,7 +39,7 @@ output "zpa_microtenant_controller1" {
 }
 ```
 
-## Attributes Reference
+## Schema
 
 ### Required
 
@@ -43,7 +47,7 @@ output "zpa_microtenant_controller1" {
 * `criteria_attribute` - (Required) Type of authentication criteria for the microtenant
 * `criteria_attribute_values` - (Required) The domain associated with the respective microtenant controller resource
 
-## Attribute Reference
+### Optional
 
 In addition to all arguments above, the following attributes are exported:
 

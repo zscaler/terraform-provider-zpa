@@ -1,18 +1,22 @@
 ---
+page_title: "zpa_pra_portal_controller Resource - terraform-provider-zpa"
 subcategory: "Privileged Remote Access"
-layout: "zscaler"
-page_title: "ZPA): pra_portal_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-portals
+  API documentation https://help.zscaler.com/zpa/configuring-privileged-portals-using-api
   Creates and manages ZPA privileged remote access portal
 ---
 
-# Resource: zpa_pra_portal_controller
+# zpa_pra_portal_controller (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-privileged-portals)
+* [API documentation](https://help.zscaler.com/zpa/configuring-privileged-portals-using-api)
 
 The **zpa_pra_portal_controller** resource creates a privileged remote access portal in the Zscaler Private Access cloud. This resource can then be referenced in an privileged remote access console resource.
 
 ## Example Usage
 
-```hcl
+```terraform
 # Retrieves Browser Access Certificate
 data "zpa_ba_certificate" "this" {
  name = "portal.acme.com"
@@ -29,22 +33,25 @@ resource "zpa_pra_portal_controller" "this" {
 }
 ```
 
-## Attributes Reference
+## Schema
 
 ### Required
 
-* `name` - (Required) The name of the privileged portal.
-* `domain` - (Required) The domain of the privileged portal.
-* `certificate_id` - (Required) The unique identifier of the certificate.
-## Attribute Reference
+The following arguments are supported:
+
+- `name` - (String) The name of the privileged portal.
+- `domain` - (String) The domain of the privileged portal.
+- `certificate_id` - (String) The unique identifier of the certificate.
+
+### Optional
 
 In addition to all arguments above, the following attributes are exported:
 
-* `description` (Optional) The description of the privileged portal.
-* `enabled` (Optional) Whether or not the privileged portal is enabled.
-* `user_notification` (Optional) The notification message displayed in the banner of the privileged portallink, if enabled.
-* `user_notification_enabled` (Optional) Indicates if the Notification Banner is enabled (true) or disabled (false).
-* `microtenant_id` (Optional) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as 0 when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
+- `description` (String) The description of the privileged portal.
+- `enabled` (Boolean) Whether or not the privileged portal is enabled.
+- `user_notification` (Optional) The notification message displayed in the banner of the privileged portallink, if enabled.
+- `user_notification_enabled` (Boolean) Indicates if the Notification Banner is enabled (true) or disabled (false).
+- `microtenant_id` (String) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as 0 when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

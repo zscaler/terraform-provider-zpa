@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_segment_group Resource - terraform-provider-zpa"
 subcategory: "Segment Group"
-layout: "zscaler"
-page_title: "ZPA): segment_group"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-segment-groups
+  API documentation https://help.zscaler.com/zpa/configuring-segment-groups-using-api
   Creates and manages ZPA Segment Group resource
 ---
 
-# Resource: zpa_segment_group
+# zpa_segment_group (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-segment-groups)
+* [API documentation](https://help.zscaler.com/zpa/configuring-segment-groups-using-api)
 
 The **zpa_segment_group** resource creates a segment group in the Zscaler Private Access cloud. This resource can then be referenced in an access policy rule or application segment resource.
 
@@ -16,7 +20,7 @@ The **zpa_segment_group** resource creates a segment group in the Zscaler Privat
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA Segment Group resource
 resource "zpa_segment_group" "test_segment_group" {
   name                   = "test1-segment-group"
@@ -25,19 +29,21 @@ resource "zpa_segment_group" "test_segment_group" {
 }
 ```
 
-## Attributes Reference
+## Schema
 
 ### Required
 
-* `name` - (Required) Name of the segment group.
+The following arguments are supported:
 
-## Attribute Reference
+* `name` - (String) Name of the segment group.
+
+### Optional
 
 In addition to all arguments above, the following attributes are exported:
 
-* `description` (Optional) Description of the segment group.
+* `description` (String) Description of the segment group.
 * `enabled` (Optional) Whether this segment group is enabled or not.
-* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+* `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

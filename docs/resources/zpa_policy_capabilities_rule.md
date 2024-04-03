@@ -1,12 +1,16 @@
 ---
-subcategory: "Policy Set Controller"
-layout: "zscaler"
-page_title: "ZPA: policy_capabilities_rule"
+page_title: "zpa_policy_capabilities_rule Resource - terraform-provider-zpa"
+subcategory: "Policy Set Controller V2"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-capabilities-policy
+  API documentation https://help.zscaler.com/zpa/configuring-privileged-policies-using-api
   Creates and manages ZPA Policy Capabilities Rule.
 ---
 
-# Resource: zpa_policy_capabilities_rule
+# zpa_policy_capabilities_rule (Resource)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-privileged-capabilities-policy)
+* [API documentation](https://help.zscaler.com/zpa/configuring-privileged-policies-using-api)
 
 The **zpa_policy_capabilities_rule** resource creates a policy capabilities rule in the Zscaler Private Access cloud.
 
@@ -14,7 +18,7 @@ The **zpa_policy_capabilities_rule** resource creates a policy capabilities rule
 
 ## Example Usage
 
-```hcl
+```terraform
 data "zpa_idp_controller" "this" {
 	name = "IdP_Users"
 }
@@ -79,55 +83,56 @@ resource "zpa_policy_capabilities_rule" "this" {
 }
 ```
 
+## Schema
+
 ### Required
 
-* `name` (Required) This is the name of the policy rule.
-* `action` (Required) This is for providing the rule action. Supported value: ``CHECK_CAPABILITIES``
-* `rule_order` - (Deprecated)
+- `name` (String) This is the name of the policy rule.
+- `action` (Required) This is for providing the rule action. Supported value: ``CHECK_CAPABILITIES``
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
-* `privileged_capabilities` (Required) The Privileged Remote Access application segment resource
-    - `clipboard_copy` - (Bool) Indicates the PRA Clipboard Copy function. Supported values: `true` or `false`
-    - `clipboard_paste` - (Bool) Indicates the PRA Clipboard Paste function. Supported values: `true` or `false`
-    - `file_download` - (Bool) Indicates the PRA File Transfer capabilities that enables the File Download function. Supported values: `true` or `false`
-    - `file_upload` - (Bool) Indicates the PRA File Transfer capabilities that enables the File Upload function. Supported values: `true` or `false`
-    - `inspect_file_download` - (Bool) Inspects the file via ZIA sandbox (if you have set up the ZIA cloud and the Integrations settings) and downloads the file following the inspection. Supported values: `true` or `false`
-    - `inspect_file_upload` - (Bool) Inspects the file via ZIA sandbox (if you have set up the ZIA cloud and the Integrations settings) and uploads the file following the inspection. Supported values: `true` or `false`
-    - `monitor_session` - (Bool) Indicates the PRA Monitoring Capabilities to enable the PRA Session Monitoring function. Supported values: `true` or `false`
-    - `record_session` - (Bool) Indicates the PRA Session Recording capabilities to enable PRA Session Recording. Supported values: `true` or `false`
-    - `share_session` - (Bool) Indicates the PRA Session Control and Monitoring capabilities to enable PRA Session Monitoring. Supported values: `true` or `false`
+- `privileged_capabilities` (Required) The Privileged Remote Access application segment resource
+    - `clipboard_copy` - (Boolean) Indicates the PRA Clipboard Copy function. Supported values: `true` or `false`
+    - `clipboard_paste` - (Boolean) Indicates the PRA Clipboard Paste function. Supported values: `true` or `false`
+    - `file_download` - (Boolean) Indicates the PRA File Transfer capabilities that enables the File Download function. Supported values: `true` or `false`
+    - `file_upload` - (Boolean) Indicates the PRA File Transfer capabilities that enables the File Upload function. Supported values: `true` or `false`
+    - `inspect_file_download` - (Boolean) Inspects the file via ZIA sandbox (if you have set up the ZIA cloud and the Integrations settings) and downloads the file following the inspection. Supported values: `true` or `false`
+    - `inspect_file_upload` - (Boolean) Inspects the file via ZIA sandbox (if you have set up the ZIA cloud and the Integrations settings) and uploads the file following the inspection. Supported values: `true` or `false`
+    - `monitor_session` - (Boolean) Indicates the PRA Monitoring Capabilities to enable the PRA Session Monitoring function. Supported values: `true` or `false`
+    - `record_session` - (Boolean) Indicates the PRA Session Recording capabilities to enable PRA Session Recording. Supported values: `true` or `false`
+    - `share_session` - (Boolean) Indicates the PRA Session Control and Monitoring capabilities to enable PRA Session Monitoring. Supported values: `true` or `false`
 
-## Attributes Reference
+### Optional
 
-* `description` (Optional) This is the description of the access policy rule.
-
-* `microtenant_id` (Optional) The ID of the microtenant the resource is to be associated with.
+- `description` (String) This is the description of the access policy rule.
+- `rule_order` (String, Deprecated)
+- `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-* `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `operator` (Optional) - Supported values are: `AND` or `OR`
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
-        * `object_type` (Optional) The object type of the operand. Supported values: `APP` for application segments and `APP_GROUP` for segment groups
-        * `values` (Optional) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
+        - `object_type` (String) The object type of the operand. Supported values: `APP` for application segments and `APP_GROUP` for segment groups
+        - `values` (List of Strings) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
 
-* `conditions` - (Optional) - This is for providing the set of conditions for the policy
-    * `operator` (Optional) - Supported values are: `AND` or `OR`
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy criteria. Supported values: `SAML`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
-            * `rhs` - (Optional) - The SAML attribute string i.e Group name, Department Name, Email address etc.
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  The Identity Provider (IdP) ID
-            * `rhs` - (Optional) - The SCIM Group unique identified (ID)
-    * `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        * `object_type` (Optional) This is for specifying the policy critiera. Supported values: `SCIM`
-        * `entry_values` (Optional)
-            * `lhs` - (Optional) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
-            * `rhs` - (Optional) - 	The SCIM Attribute value to match
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
+            - `rhs` - (String) - The SAML attribute string i.e Group name, Department Name, Email address etc.
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The Identity Provider (IdP) ID
+            - `rhs` - (String) - The SCIM Group unique identified (ID)
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
+            - `rhs` - (String) - 	The SCIM Attribute value to match
 
 ## Import
 

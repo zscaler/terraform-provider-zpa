@@ -1,12 +1,16 @@
 ---
+page_title: "zpa_access_policy_client_types Data Source - terraform-provider-zpa"
 subcategory: "Policy Set Controller"
-layout: "zscaler"
-page_title: "ZPA: access_policy_client_types"
 description: |-
+  Official documentation https://help.zscaler.com/zpa
+  documentation https://help.zscaler.com/zpa/configuring-access-policies-using-api#getClientTypes
   Get information about all client types for the specified customer.
 ---
 
-# Data Source: zpa_access_policy_client_types
+# zpa_access_policy_client_types (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa)
+* [API documentation](https://help.zscaler.com/zpa/configuring-access-policies-using-api#getClientTypes)
 
 Use the **zpa_access_policy_client_types** data source to get information about all client types for the specified customer in the Zscaler Private Access cloud. This data source can be optionally used when defining the following policy types:
     - ``zpa_policy_access_rule``
@@ -23,12 +27,14 @@ The ``object_type`` attribute must be defined as "CLIENT_TYPE" in the policy ope
 
 ## Example Usage
 
-```hcl
+```terraform
 data "zpa_access_policy_client_types" "this" {
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Read-Only
 
 The following values are returned:
 

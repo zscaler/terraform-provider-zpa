@@ -1,32 +1,33 @@
 ---
+page_title: "zpa_cloud_browser_isolation_zpa_profile Data Source - terraform-provider-zpa"
 subcategory: "Cloud Browser Isolation"
-layout: "zscaler"
-page_title: "ZPA: cloud_browser_isolation_zpa_profile"
 description: |-
   Get information about an Isolation Profile in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_cloud_browser_isolation_zpa_profile
+# zpa_cloud_browser_isolation_zpa_profile (Data Source)
 
 Use the **zpa_cloud_browser_isolation_zpa_profile** data source to get information about an isolation profile in the Zscaler Private Access cloud. This data source is required when configuring an isolation policy rule resource
 
 ## Example Usage
 
-```hcl
+```terraform
 data "zpa_cloud_browser_isolation_zpa_profile" "this" {
     name = "ZPA_Profile"
 }
 ```
 
-## Argument Reference
+## Schema
 
-* `name` - (Required) This field defines the name of the isolation profile.
-* `id` - (Optional) This field defines the id of the isolation profile.
+### Required
 
-## Attribute Reference
+* `name` - (String) This field defines the name of the isolation profile.
+
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (String) This field defines the id of the isolation profile.
 * `description` - (string)
 * `enabled` - (string)
 * `cbi_tenant_id` - (string)

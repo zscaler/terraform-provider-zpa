@@ -1,35 +1,41 @@
 ---
+page_title: "zpa_pra_portal_controller Data Source - terraform-provider-zpa"
 subcategory: "Privileged Remote Access"
-layout: "zscaler"
-page_title: "ZPA): pra_portal_controller"
 description: |-
+  Official documentation https://help.zscaler.com/zpa/about-privileged-portals
+  API documentation https://help.zscaler.com/zpa/configuring-privileged-portals-using-api
   Get information about ZPA privileged remote access portal in Zscaler Private Access cloud.
 ---
 
-# Data Source: zpa_pra_portal_controller
+# zpa_pra_portal_controller (Data Source)
+
+* [Official documentation](https://help.zscaler.com/zpa/about-privileged-portals)
+* [API documentation](https://help.zscaler.com/zpa/configuring-privileged-portals-using-api)
 
 Use the **zpa_pra_portal_controller** data source to get information about a privileged remote access portal created in the Zscaler Private Access cloud. This data source can then be referenced in an privileged remote access console resource.
 
 ## Example Usage
 
-```hcl
+```terraform
 # ZPA PRA Portal Data Source
 data "zpa_pra_portal_controller" "this" {
  name = "Example"
 }
 ```
 
-## Argument Reference
+## Schema
+
+### Required
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the privileged remote access portal to be exported.
-* `id` - (Optional) The ID of the privileged remote access portal to be exported.
+* `name` - (String) The name of the privileged remote access portal to be exported.
 
-## Attribute Reference
+### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - (Optional) The ID of the privileged remote access portal to be exported.
 * `description` - (string)
 * `enabled` (bool) Whether or not the privileged portal is enabled.
 * `certificate_id` - (string) The unique identifier of the certificate.
