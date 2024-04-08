@@ -220,7 +220,8 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 						},
 						"certificate_id": {
 							Type:        schema.TypeString,
-							Required:    true,
+							ForceNew:    true,
+							Optional:    true,
 							Description: "ID of the BA certificate.",
 						},
 						"cname": {
