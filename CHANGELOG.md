@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.1.1 (April, 8 2024)
+## 3.2.1 (April, 8 2024)
 
 ### Notes
 

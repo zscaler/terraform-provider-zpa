@@ -16,7 +16,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 3.1.1 (April, 8 2024)
+## 3.2.1 (April, 8 2024)
 
 ### Notes
 
