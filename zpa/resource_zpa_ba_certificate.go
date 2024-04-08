@@ -4,13 +4,14 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
 )
 
 func resourceBaCertificate() *schema.Resource {
 	return &schema.Resource{
 		Create:        resourceBaCertificateCreate,
-		ReadContext:   resourceFuncNoOp,
+		Read:          resourceBaCertificateRead,
 		UpdateContext: resourceFuncNoOp,
 		Delete:        resourceBaCertificateDelete,
 		Importer:      nil,
@@ -65,6 +66,29 @@ func resourceBaCertificateCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Created certificate request. ID: %v\n", baCertificate)
 
 	d.SetId(baCertificate.ID)
+	return nil
+}
+
+func resourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
+	zClient := m.(*Client)
+
+	resp, _, err := zClient.bacertificate.Get(d.Id())
+	if err != nil {
+		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+			log.Printf("[WARN] Removing ba certificate %s from state because it no longer exists in ZPA", d.Id())
+			d.SetId("")
+			return nil
+		}
+
+		return err
+	}
+
+	log.Printf("[INFO] Getting ba certificate:\n%+v\n", resp)
+	d.SetId(resp.ID)
+	_ = d.Set("name", resp.Name)
+	_ = d.Set("description", resp.Description)
+	_ = d.Set("certificate", resp.Certificate)
+	_ = d.Set("microtenant_id", resp.MicrotenantID)
 	return nil
 }
 

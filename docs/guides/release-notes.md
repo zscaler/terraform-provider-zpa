@@ -12,9 +12,22 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.2.0``
+``Last updated: v3.2.1``
 
 ---
+
+## 3.1.1 (April, 8 2024)
+
+### Notes
+
+- Release date: **(April, 8  2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #442](https://github.com/zscaler/terraform-provider-zpa/pull/442) - Fixed `zpa_ba_certificate` resource and aligned with `zpa_application_segment_browser_access` `certificate_id` attribute. 
+
+  !> **WARNING:** Notice that updating the ``cert_blob`` attribute in the `zpa_ba_certificate` will trigger a full replacement of both the certificate and the `zpa_application_segment_browser_access`  along with any access policy the application segment may be associated with.
 
 ## 3.2.0 (April, 3 2024)
 

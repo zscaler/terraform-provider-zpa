@@ -119,6 +119,8 @@ func dataSourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("cname", resp.CName)
 		_ = d.Set("cert_chain", resp.CertChain)
+		_ = d.Set("certificate", resp.Certificate)
+		_ = d.Set("public_key", resp.PublicKey)
 		_ = d.Set("issued_by", resp.IssuedBy)
 		_ = d.Set("issued_to", resp.IssuedTo)
 		_ = d.Set("modifiedby", resp.ModifiedBy)
