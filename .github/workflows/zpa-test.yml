@@ -11,7 +11,7 @@ on:
   # change.
 
   schedule:
-    - cron: '0 13 * * 1-5' # UTC
+    - cron: '0 12 * * 1-5' # UTC
   workflow_dispatch:
 
 jobs:
@@ -26,13 +26,28 @@ jobs:
           - ZPA_QA_TENANT02
     environment: ${{ matrix.environment }}
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+              token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: ${{ matrix.goVersion }}
+
+      - name: Clean existing Go modules
+        run: go clean -modcache
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Setup Go Tools
         run: make tools
@@ -84,13 +99,28 @@ jobs:
           # - ZPA_QA2_TENANT02
     environment: ${{ matrix.environment }}
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+              token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: ${{ matrix.goVersion }}
+
+      - name: Clean existing Go modules
+        run: go clean -modcache
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Setup Go Tools
         run: make tools
@@ -141,13 +171,28 @@ jobs:
           - ZPA_BETA_TENANT01
     environment: ${{ matrix.environment }}
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+              token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: ${{ matrix.goVersion }}
+
+      - name: Clean existing Go modules
+        run: go clean -modcache
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Setup Go Tools
         run: make tools
@@ -201,13 +246,28 @@ jobs:
           - ZPA_PROD_TENANT01
     environment: ${{ matrix.environment }}
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+              token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: ${{ matrix.goVersion }}
+
+      - name: Clean existing Go modules
+        run: go clean -modcache
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
       - name: Setup Go Tools
         run: make tools
