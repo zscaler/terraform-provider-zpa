@@ -120,10 +120,12 @@ resource "%s" "%s" {
 	is_public			 = "%s"
 	upgrade_day          = "SUNDAY"
 	upgrade_time_in_secs = "66600"
-	latitude             = "37.3382082"
-	longitude            = "-121.8863286"
+	country_code         = "US"
+	city_country         = "San Jose, US"
+	latitude             = "37.33874"
+	longitude            = "-121.8852525"
 	location             = "San Jose, CA, USA"
-	version_profile_name = "Default"
+	version_profile_id   = 0
 }
 
 data "%s" "%s" {

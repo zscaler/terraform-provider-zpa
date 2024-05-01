@@ -30,8 +30,8 @@ const (
 	ServiceEdgeDescription        = "testAcc_service_edge_group"
 	ServiceEdgeEnabled            = true
 	ServiceEdgeIsPublic           = true
-	ServiceEdgeLatitude           = "37.3382082"
-	ServiceEdgeLongitude          = "-121.8863286"
+	ServiceEdgeLatitude           = "37.33874"
+	ServiceEdgeLongitude          = "-121.8852525"
 	ServiceEdgeLocation           = "San Jose, CA, USA"
 	ServiceEdgeVersionProfileName = "Default"
 )

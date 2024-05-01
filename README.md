@@ -1,5 +1,8 @@
-[![Test](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/test.yml)
-[![Release](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml/badge.svg?branch=master)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml)
+[![Release](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/zscaler/terraform-provider-zpa)](https://github.com/zscaler/terraform-provider-zpa/v2/blob/master/.go-version)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zscaler/terraform-provider-zpa)](https://goreportcard.com/report/github.com/zscaler/terraform-provider-zpa)
+[![codecov](https://codecov.io/gh/zscaler/terraform-provider-zpa/graph/badge.svg?token=7YX2V2LV8H)](https://codecov.io/gh/zscaler/terraform-provider-zpa)
+[![License](https://img.shields.io/github/license/zscaler/terraform-provider-zpa?color=blue)](https://github.com/zscaler/terraform-provider-zpa/v2/blob/master/LICENSE)
 [![Zscaler Community](https://img.shields.io/badge/zscaler-community-blue)](https://community.zscaler.com/)
 [![Slack](https://img.shields.io/badge/Join%20Our%20Community-Slack-blue)](https://forms.gle/3iMJvVmJDvmUy36q9)
 
