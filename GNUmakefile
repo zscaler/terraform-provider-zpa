@@ -45,6 +45,12 @@ test:
 testacc:
 	TF_ACC=1 go test $(TEST) $(TESTARGS) $(TEST_FILTER) -timeout 120m
 
+test\:integration\:zpa:
+	@echo "$(COLOR_ZSCALER)Running zpa integration tests...$(COLOR_NONE)"
+	go test -v -race -cover -coverprofile=coverage.out -covermode=atomic ./zpa -parallel 20 -timeout 60m
+	go tool cover -html=coverage.out -o coverage.html
+
+
 build13: GOOS=$(shell go env GOOS)
 build13: GOARCH=$(shell go env GOARCH)
 ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
@@ -56,10 +62,6 @@ build13: fmtcheck
 	@echo "==> Installing plugin to $(DESTINATION)"
 	@mkdir -p $(DESTINATION)
 	go build -o $(DESTINATION)/terraform-provider-zpa_v3.2.1
-
-coverage: test
-	@echo "✓ Opening coverage for unit tests ..."
-	@go tool cover -html=coverage.txt
 
 vet:
 	@echo "==> Checking source code against go vet and staticcheck"

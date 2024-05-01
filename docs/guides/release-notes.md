@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.2.1``
+``Last updated: v3.2.2``
 
 ---
+
+## 3.2.2 (May, xx 2024)
+
+### Notes
+
+- Release date: **(May, xx 2024)**
+- Supported Terraform version: **v1.x**
+
+### Internal Changes
+
+- [PR #449](https://github.com/zscaler/terraform-provider-zpa/pull/449) - Added `CodeCov` Support to GitHub Workflow 
 
 ## 3.2.1 (April, 8 2024)
 

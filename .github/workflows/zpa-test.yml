@@ -78,7 +78,7 @@ jobs:
           timeout_minutes: 30  # Adjust as needed
           command: |
             make sweep
-            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
+            make test:integration:zpa
             make sweep
         env:
           ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
@@ -87,6 +87,13 @@ jobs:
           ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
           TF_ACC: ${{ secrets.TF_ACC }}
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
+
+      - name: Publish test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.out 
+          fail_ci_if_error: true
 
   zpa-qa2-tenants:
     runs-on: ubuntu-latest
@@ -151,7 +158,7 @@ jobs:
           timeout_minutes: 30  # Adjust as needed
           command: |
             make sweep
-            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
+            make test:integration:zpa
             make sweep
         env:
           ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
@@ -161,7 +168,15 @@ jobs:
           TF_ACC: ${{ secrets.TF_ACC }}
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
+      - name: Publish test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.out 
+          fail_ci_if_error: true
+
   zpa-beta-tenants:
+    needs: [zpa-qa1-tenants, zpa-qa2-tenants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -223,7 +238,7 @@ jobs:
           timeout_minutes: 30  # Adjust as needed
           command: |
             make sweep
-            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
+            make test:integration:zpa
             make sweep
         env:
           ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
@@ -232,11 +247,16 @@ jobs:
           ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
           TF_ACC: ${{ secrets.TF_ACC }}
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
-    needs:
-      - zpa-qa1-tenants
-      - zpa-qa2-tenants
+
+      - name: Publish test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.out 
+          fail_ci_if_error: true
 
   zpa-prod-tenants:
+    needs: [zpa-qa1-tenants, zpa-qa2-tenants, zpa-beta-tenants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -298,7 +318,7 @@ jobs:
           timeout_minutes: 30  # Adjust as needed
           command: |
             make sweep
-            go test -v -cover ./zpa -v -parallel 20 -timeout 60m
+            make test:integration:zpa
             make sweep
         env:
           ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
@@ -307,7 +327,10 @@ jobs:
           ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
           TF_ACC: ${{ secrets.TF_ACC }}
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
-    needs:
-      - zpa-qa1-tenants
-      - zpa-qa2-tenants
-      - zpa-beta-tenants
+
+      - name: Publish test coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.out 
+          fail_ci_if_error: true

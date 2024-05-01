@@ -55,3 +55,5 @@ local_test/
 local_test/*
 acceptance_test.yml
 .VSCodeCounter
+coverage.out
+coverage.html
