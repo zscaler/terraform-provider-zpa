@@ -141,16 +141,12 @@ func testAccCheckPolicyAccessReorderDestroy(s *terraform.State) error {
 
 func testAccPolicyAccessRuleReorderConfig(randName string) string {
 	return fmt.Sprintf(`
-data "zpa_policy_type" "access_policy" {
-    policy_type = "ACCESS_POLICY"
-}
 
 resource "zpa_policy_access_rule" "rule1" {
     name          = "%s-rule1"
     description   = "%s-desc1"
     action        = "ALLOW"
     operator      = "AND"
-    policy_set_id = data.zpa_policy_type.access_policy.id
 
     lifecycle {
         create_before_destroy = true
@@ -162,7 +158,6 @@ resource "zpa_policy_access_rule" "rule2" {
     description   = "%s-desc2"
     action        = "ALLOW"
     operator      = "AND"
-    policy_set_id = data.zpa_policy_type.access_policy.id
     depends_on    = [zpa_policy_access_rule.rule1]
 
     lifecycle {

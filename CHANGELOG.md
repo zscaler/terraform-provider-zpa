@@ -1,15 +1,20 @@
 # Changelog
 
-## 3.2.2 (May, xx 2024)
+## 3.2.11 (May, 3 2024)
 
 ### Notes
 
-- Release date: **(May, xx 2024)**
+- Release date: **(May, 3 2024)**
 - Supported Terraform version: **v1.x**
 
 ### Internal Changes
 
 - [PR #449](https://github.com/zscaler/terraform-provider-zpa/pull/449) - Added `CodeCov` Support to GitHub Workflow 
+
+### Bug Fixes
+- [PR #450](https://github.com/zscaler/terraform-provider-zpa/pull/450) - Implemented additional validation within the resource `zpa_policy_access_rule_reorder` to ensure it accounts for the potential existence of the `Zscaler Deception` rule. [Zscaler API Documentation](https://help.zscaler.com/zpa/configuring-access-policies-using-api#:~:text=Updating%20the%20rule,configured%20using%20Deception.) for further details.
+
+⚠️ **WARNING:**: This change does not affect existing rule configurations, and is only applicable for tenants with the Zscaler Deception rule configured. If your tenant have this rule configured, please refer to the [provider documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule_reorder) for further examples on how you can address potential drift issues due to rule order missmatch. [Issue #445](https://github.com/zscaler/terraform-provider-zpa/issues/445)
 
 ## 3.2.1 (April, 8 2024)
 

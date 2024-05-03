@@ -12,20 +12,23 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.2.2``
+``Last updated: v3.2.11``
 
 ---
 
-## 3.2.2 (May, xx 2024)
+## 3.2.11 (May, 3 2024)
 
 ### Notes
 
-- Release date: **(May, xx 2024)**
+- Release date: **(May, 3 2024)**
 - Supported Terraform version: **v1.x**
 
 ### Internal Changes
 
 - [PR #449](https://github.com/zscaler/terraform-provider-zpa/pull/449) - Added `CodeCov` Support to GitHub Workflow 
+
+### Bug Fixes
+- [PR #450](https://github.com/zscaler/terraform-provider-zpa/pull/450) - Implemented additional validation within the resource `zpa_policy_access_rule_reorder` to ensure it accounts for the potential existence of the `Zscaler Deception` rule. [Zscaler API Documentation](https://help.zscaler.com/zpa/configuring-access-policies-using-api#:~:text=Updating%20the%20rule,configured%20using%20Deception.) for further details.
 
 ## 3.2.1 (April, 8 2024)
 
