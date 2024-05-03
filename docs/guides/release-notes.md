@@ -30,6 +30,19 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 ### Bug Fixes
 - [PR #450](https://github.com/zscaler/terraform-provider-zpa/pull/450) - Implemented additional validation within the resource `zpa_policy_access_rule_reorder` to ensure it accounts for the potential existence of the `Zscaler Deception` rule. [Zscaler API Documentation](https://help.zscaler.com/zpa/configuring-access-policies-using-api#:~:text=Updating%20the%20rule,configured%20using%20Deception.) for further details.
 
+⚠️ **WARNING:**: This change does not affect existing rule configurations, and is only applicable for tenants with the Zscaler Deception rule configured. If your tenant have this rule configured, please refer to the [provider documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule_reorder) for further examples on how you can address potential drift issues due to rule order missmatch. [Issue #445](https://github.com/zscaler/terraform-provider-zpa/issues/445)
+
+### ENHACEMENTS
+- [PR #450](https://github.com/zscaler/terraform-provider-zpa/pull/450) - The resource `zpa_service_edge_group` now supports the following new attributes:
+  * `grace_distance_enabled`: Allows ZPA Private Service Edge Groups within the specified distance to be prioritized over a closer ZPA Public Service Edge.
+  * `grace_distance_value`: Indicates the maximum distance in miles or kilometers to ZPA Private Service Edge groups that would override a ZPA Public Service Edge.
+  * `grace_distance_value_unit`: Indicates the grace distance unit of measure in miles or kilometers. This value is only required if `grace_distance_enabled` is set to true. Support values are: `MILES` and `KMS`
+
+### Documentation
+- [PR #450](https://github.com/zscaler/terraform-provider-zpa/pull/450) - Updated documentation for `zpa_policy_access_rule_reorder` by removing deprecated `policy_set_id` attribute from the resource. Only the `policy_type` is required.
+### Documentation
+- [PR #450](https://github.com/zscaler/terraform-provider-zpa/pull/450) - Updated documentation for `zpa_service_edge_group` by including detailed description of the new attributes: `grace_distance_enabled`, `grace_distance_value`, `grace_distance_value_unit`.
+
 ## 3.2.1 (April, 8 2024)
 
 ### Notes

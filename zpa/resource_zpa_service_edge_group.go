@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -176,6 +177,43 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"grace_distance_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "If enabled, allows ZPA Private Service Edge Groups within the specified distance to be prioritized over a closer ZPA Public Service Edge.",
+			},
+			"grace_distance_value": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"grace_distance_enabled", "grace_distance_value_unit"},
+				Description:  "Indicates the maximum distance in miles or kilometers to ZPA Private Service Edge groups that would override a ZPA Public Service Edge",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// Normalize the old and new values by converting them to float64 and formatting them as strings with one decimal place
+					oldVal, errOld := strconv.ParseFloat(old, 64)
+					if errOld != nil {
+						return false // If the old value can't be parsed as float, don't suppress the diff
+					}
+					newVal, errNew := strconv.ParseFloat(new, 64)
+					if errNew != nil {
+						return false // If the new value can't be parsed as float, don't suppress the diff
+					}
+					// Return true if the normalized old and new values are equal
+					return fmt.Sprintf("%.1f", oldVal) == fmt.Sprintf("%.1f", newVal)
+				},
+			},
+
+			"grace_distance_value_unit": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"grace_distance_enabled", "grace_distance_value"},
+				Description:  "Indicates the grace distance unit of measure in miles or kilometers. This value is only required if grace_distance_value is set to true",
+				ValidateFunc: validation.StringInSlice([]string{
+					"MILES", "KMS",
+				}, false),
+			},
 		},
 	}
 }
@@ -231,6 +269,9 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
+	_ = d.Set("grace_distance_enabled", resp.GraceDistanceEnabled)
+	_ = d.Set("grace_distance_value", resp.GraceDistanceValue)
+	_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
 	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
 	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
 	_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
@@ -294,6 +335,9 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		VersionProfileVisibilityScope: d.Get("version_profile_visibility_scope").(string),
 		OverrideVersionProfile:        d.Get("override_version_profile").(bool),
 		MicroTenantID:                 d.Get("microtenant_id").(string),
+		GraceDistanceEnabled:          d.Get("grace_distance_enabled").(bool),
+		GraceDistanceValue:            d.Get("grace_distance_value").(string),
+		GraceDistanceValueUnit:        d.Get("grace_distance_value_unit").(string),
 		ServiceEdges:                  expandServiceEdges(d),
 		TrustedNetworks:               expandTrustedNetworks(d),
 	}

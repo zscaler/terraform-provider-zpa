@@ -54,6 +54,10 @@ In addition to all arguments above, the following attributes are exported:
 * `creation_time` - (string)
 * `geo_location_id` - (string)
 * `is_public` - (string)
+* `grace_distance_enabled`: Allows ZPA Private Service Edge Groups within the specified distance to be prioritized over a closer ZPA Public Service Edge.
+* `grace_distance_value`: Indicates the maximum distance in miles or kilometers to ZPA Private Service Edge groups that would override a ZPA Public Service Edge.
+* `grace_distance_value_unit`: Indicates the grace distance unit of measure in miles or kilometers. This value is only required if `grace_distance_enabled` is set to true. Support values are: `MILES` and `KMS`
+
 * `latitude` - (string) Latitude of the Service Edge Group. Integer or decimal. With values in the range of `-90` to `90`
 * `longitude` - (string) Longitude of the Service Edge Group.Integer or decimal. With values in the range of `-180` to `180`
 * `location` - (string) Location of the Service Edge Group.
