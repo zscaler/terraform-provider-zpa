@@ -114,18 +114,21 @@ func testAccCheckServiceEdgeGroupConfigure(resourceTypeAndName, generatedName, d
 
 	return fmt.Sprintf(`
 resource "%s" "%s" {
-	name                 = "%s"
-	description          = "%s"
-	enabled				 = "%s"
-	is_public			 = "%s"
-	upgrade_day          = "SUNDAY"
-	upgrade_time_in_secs = "66600"
-	country_code         = "US"
-	city_country         = "San Jose, US"
-	latitude             = "37.33874"
-	longitude            = "-121.8852525"
-	location             = "San Jose, CA, USA"
-	version_profile_id   = 0
+	name                      = "%s"
+	description               = "%s"
+	enabled				      = "%s"
+	is_public			      = "%s"
+	upgrade_day               = "SUNDAY"
+	upgrade_time_in_secs      = "66600"
+	country_code              = "US"
+	city_country              = "San Jose, US"
+	latitude                  = "37.33874"
+	longitude                 = "-121.8852525"
+	location                  = "San Jose, CA, USA"
+	version_profile_id        = 0
+	grace_distance_enabled    = true
+	grace_distance_value      = "10"
+	grace_distance_value_unit = "KMS"
 }
 
 data "%s" "%s" {
