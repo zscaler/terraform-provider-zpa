@@ -362,6 +362,21 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Computed:    true,
 				Description: "ID of the version profile. To learn more",
 			},
+			"grace_distance_enabled": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "If enabled, allows ZPA Private Service Edge Groups within the specified distance to be prioritized over a closer ZPA Public Service Edge.",
+			},
+			"grace_distance_value": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Indicates the maximum distance in miles or kilometers to ZPA Private Service Edge groups that would override a ZPA Public Service Edge",
+			},
+			"grace_distance_value_unit": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Indicates the grace distance unit of measure in miles or kilometers. This value is only required if grace_distance_value is set to true",
+			},
 		},
 	}
 }
@@ -409,6 +424,9 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
 		_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
+		_ = d.Set("grace_distance_enabled", resp.GraceDistanceEnabled)
+		_ = d.Set("grace_distance_value", resp.GraceDistanceValue)
+		_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
 		_ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
 		_ = d.Set("service_edges", flattenServiceEdges(resp.ServiceEdges))
 

@@ -71,6 +71,11 @@ In addition to all arguments above, the following attributes are exported:
 - `enabled` - (Boolean) Whether this Service Edge Group is enabled or not. Default value: `true` Supported values: `true`, `false`
 - `description` - (String) Description of the Service Edge Group.
 - `is_public` - (String) Enable or disable public access for the Service Edge Group. Default value: `false` Supported values: `true`, `false`
+
+- `grace_distance_enabled`: Allows ZPA Private Service Edge Groups within the specified distance to be prioritized over a closer ZPA Public Service Edge.
+- `grace_distance_value`: Indicates the maximum distance in miles or kilometers to ZPA Private Service Edge groups that would override a ZPA Public Service Edge.
+- `grace_distance_value_unit`: Indicates the grace distance unit of measure in miles or kilometers. This value is only required if `grace_distance_enabled` is set to true. Support values are: `MILES` and `KMS`
+
 - `override_version_profile` - (Boolean) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
 - `version_profile_id` - (String) ID of the version profile. To learn more, see Version Profile Use Cases. Supported values are:
   - ``0`` = ``Default``

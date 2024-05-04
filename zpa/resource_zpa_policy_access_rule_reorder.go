@@ -131,53 +131,98 @@ func getRules(d *schema.ResourceData) (*RulesOrders, error) {
 
 func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	rulesOrders, err := getRules(d)
-	if err != nil {
-		return err
-	}
-	rules, _, err := zClient.policysetcontroller.GetAllByType(rulesOrders.PolicyType)
+	policyType := d.Get("policy_type").(string)
+
+	currentRules, _, err := zClient.policysetcontroller.GetAllByType(policyType)
 	if err != nil {
 		log.Printf("[ERROR] failed to get rules: %v\n", err)
+		d.SetId("")
 		return err
 	}
-	log.Printf("[INFO] reorder rules on read: %v\n", rulesOrders)
-	for _, r := range rules {
-		for id := range rulesOrders.Orders {
-			if r.ID == id {
-				rulesOrders.Orders[id], _ = strconv.Atoi(r.RuleOrder)
-			}
+
+	configuredRules, err := getRules(d)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[INFO] reorder rules on read: %v\n", configuredRules)
+
+	currentOrderMap := make(map[string]int)
+	for _, rule := range currentRules {
+		if order, err := strconv.Atoi(rule.RuleOrder); err == nil {
+			currentOrderMap[rule.ID] = order
 		}
 	}
+
+	for id := range configuredRules.Orders {
+		if currentOrder, exists := currentOrderMap[id]; exists {
+			configuredRules.Orders[id] = currentOrder
+		}
+	}
+
 	rulesMap := []map[string]interface{}{}
-	for id, order := range rulesOrders.Orders {
+	for id, order := range configuredRules.Orders {
 		rulesMap = append(rulesMap, map[string]interface{}{
 			"id":    id,
 			"order": strconv.Itoa(order),
 		})
 	}
-	_ = d.Set("rules", rulesMap)
+
+	if err := d.Set("rules", rulesMap); err != nil {
+		return err
+	}
+
+	d.SetId(fmt.Sprintf("%s-%s", policyType, "reorder"))
+
 	return nil
 }
 
 func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) error {
-	// Convert the interface to a client instance.
 	zClient := m.(*Client)
-	// Fetch and sort the rule orders from the provided data.
-	rules, err := getRules(d)
+
+	existingRules, _, err := zClient.policysetcontroller.GetAllByType(d.Get("policy_type").(string))
+	if err != nil {
+		log.Printf("[ERROR] Failed to get existing rules: %v\n", err)
+		return err
+	}
+
+	deceptionAtOne := false
+	deceptionID := ""
+	for _, rule := range existingRules {
+		if rule.Name == "Zscaler Deception" && rule.RuleOrder == "1" {
+			deceptionAtOne = true
+			deceptionID = rule.ID
+			break
+		}
+	}
+
+	userDefinedRules, err := getRules(d)
 	if err != nil {
 		return err
 	}
-	// Validate the fetched rule orders.
-	if err := validateRuleOrders(rules); err != nil {
-		log.Printf("[ERROR] reordering rules failed: %v\n", err)
+
+	if err := validateRuleOrders(userDefinedRules); err != nil {
+		log.Printf("[ERROR] Reordering rules failed: %v\n", err)
 		return err
 	}
-	d.SetId(rules.PolicyType)
-	_, err = zClient.policysetcontroller.BulkReorder(rules.PolicyType, rules.Orders)
-	if err != nil {
-		log.Printf("[ERROR] reordering rules failed: %v\n", err)
+
+	ruleIdToOrder := make(map[string]int)
+	baseOrder := 1
+	if deceptionAtOne {
+		ruleIdToOrder[deceptionID] = 1
+		baseOrder = 2
 	}
-	// Read the updated rule set.
+
+	for id, order := range userDefinedRules.Orders {
+		ruleIdToOrder[id] = order + baseOrder - 1
+	}
+
+	if _, err := zClient.policysetcontroller.BulkReorder(d.Get("policy_type").(string), ruleIdToOrder); err != nil {
+		log.Printf("[ERROR] Bulk reordering rules failed: %v", err)
+		return err
+	}
+
+	d.SetId(fmt.Sprintf("%s-%s", d.Get("policy_type").(string), "reorder"))
 	return resourcePolicyAccessReorderRead(d, m)
 }
 
