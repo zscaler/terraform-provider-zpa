@@ -30,15 +30,6 @@ func dataSourceCBIRegionsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	var resp *cbiregions.CBIRegions
-	id, ok := d.Get("id").(string)
-	if ok && id != "" {
-		log.Printf("[INFO] Getting data for cbi regions %s\n", id)
-		res, _, err := zClient.cbiregions.Get(id)
-		if err != nil {
-			return err
-		}
-		resp = res
-	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for cbi regions name %s\n", name)
@@ -48,12 +39,13 @@ func dataSourceCBIRegionsRead(d *schema.ResourceData, m interface{}) error {
 		}
 		resp = res
 	}
+
 	if resp != nil {
 		d.SetId(resp.ID)
 		_ = d.Set("name", resp.Name)
 
 	} else {
-		return fmt.Errorf("couldn't find any cbi regions with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any cbi regions with name '%s'", name)
 	}
 
 	return nil

@@ -20,7 +20,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 		Delete: resourceServiceEdgeGroupDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+				service := m.(*Client).serviceedgegroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)

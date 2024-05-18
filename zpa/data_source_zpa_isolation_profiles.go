@@ -60,17 +60,8 @@ func dataSourceIsolationProfileRead(d *schema.ResourceData, m interface{}) error
 	zClient := m.(*Client)
 
 	var resp *isolationprofile.IsolationProfile
-	id, ok := d.Get("id").(string)
-	if ok && id != "" {
-		log.Printf("[INFO] Getting data for isolation profile %s\n", id)
-		res, _, err := zClient.isolationprofile.Get(id)
-		if err != nil {
-			return err
-		}
-		resp = res
-	}
 	name, ok := d.Get("name").(string)
-	if id == "" && ok && name != "" {
+	if ok && name != "" {
 		log.Printf("[INFO] Getting data for isolation profile name %s\n", name)
 		res, _, err := zClient.isolationprofile.GetByName(name)
 		if err != nil {
@@ -78,6 +69,7 @@ func dataSourceIsolationProfileRead(d *schema.ResourceData, m interface{}) error
 		}
 		resp = res
 	}
+
 	if resp != nil {
 		d.SetId(resp.ID)
 		_ = d.Set("name", resp.Name)
@@ -89,9 +81,8 @@ func dataSourceIsolationProfileRead(d *schema.ResourceData, m interface{}) error
 		_ = d.Set("isolation_profile_id", resp.IsolationProfileID)
 		_ = d.Set("isolation_tenant_id", resp.IsolationTenantID)
 		_ = d.Set("isolation_url", resp.IsolationURL)
-
 	} else {
-		return fmt.Errorf("couldn't find any isolation profile with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any isolation profile with name '%s'", name)
 	}
 
 	return nil
