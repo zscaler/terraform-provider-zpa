@@ -176,7 +176,6 @@ func resourcePolicyInspectionRuleDelete(d *schema.ResourceData, m interface{}) e
 }
 
 func expandCreatePolicyInspectionRule(d *schema.ResourceData, policySetID string) (*policysetcontroller.PolicyRule, error) {
-
 	conditions, err := ExpandPolicyConditions(d)
 	if err != nil {
 		return nil, err

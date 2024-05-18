@@ -103,7 +103,6 @@ func resourcePRAPortalControllerCreate(d *schema.ResourceData, m interface{}) er
 
 	d.SetId(praPortal.ID)
 	return resourcePRAPortalControllerRead(d, m)
-
 }
 
 func resourcePRAPortalControllerRead(d *schema.ResourceData, m interface{}) error {

@@ -282,7 +282,6 @@ func expandPRAPrivilegedApproval(d *schema.ResourceData) praapproval.PrivilegedA
 		WorkingHours: expandWorkingHours(d),
 	}
 	return result
-
 }
 
 func expandPRAApplications(d *schema.ResourceData) []praapproval.Applications {

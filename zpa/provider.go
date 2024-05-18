@@ -43,10 +43,10 @@ func ZPAProvider() *schema.Provider {
 				Description: "zpa customer id",
 			},
 			"zpa_cloud": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  "Cloud to use PRODUCTION, ZPATWO, BETA, GOV, GOVUS, PREVIEW, DEV, QA, QA2",
-				DefaultFunc:  schema.EnvDefaultFunc("ZPA_CLOUD", nil),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Cloud to use PRODUCTION, ZPATWO, BETA, GOV, GOVUS, PREVIEW, DEV, QA, QA2",
+				DefaultFunc: schema.EnvDefaultFunc("ZPA_CLOUD", nil),
 				ValidateFunc: func(val any, key string) (warns []string, errs []error) {
 					v := val.(string)
 					if strings.HasPrefix(v, "https://") {

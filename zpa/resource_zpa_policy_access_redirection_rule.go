@@ -137,7 +137,6 @@ func resourcePolicyRedictionRuleRead(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourcePolicyRedictionRuleUpdate(d *schema.ResourceData, m interface{}) error {
-
 	// Validate the "action" and "service_edge_groups" attributes
 	if err := validatePolicyRedirectionRuleAction(d); err != nil {
 		return err

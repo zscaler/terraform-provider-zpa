@@ -117,7 +117,6 @@ func resourcePRACredentialControllerCreate(d *schema.ResourceData, m interface{}
 
 	d.SetId(credController.ID)
 	return resourcePRACredentialControllerRead(d, m)
-
 }
 
 func resourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}) error {

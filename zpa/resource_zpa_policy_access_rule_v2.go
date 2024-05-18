@@ -92,7 +92,7 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 									"values": {
 										Type:     schema.TypeSet,
 										Optional: true,
-										//Computed:    true,
+										// Computed:    true,
 										Description: "This denotes a list of values for the given object type. The value depend upon the key. If rhs is defined this list will be ignored",
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -135,7 +135,7 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 												"lhs": {
 													Type:     schema.TypeString,
 													Optional: true,
-													//Computed: true,
+													// Computed: true,
 												},
 											},
 										},
@@ -317,7 +317,6 @@ func resourcePolicyAccessV2Delete(d *schema.ResourceData, m interface{}) error {
 }
 
 func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
-
 	conditions, err := ExpandPolicyConditionsV2(d)
 	if err != nil {
 		return nil, err

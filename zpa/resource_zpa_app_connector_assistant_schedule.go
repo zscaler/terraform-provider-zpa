@@ -148,7 +148,6 @@ func resourceAppConnectorAssistantScheduleUpdate(d *schema.ResourceData, m inter
 }
 
 func resourceAppConnectorAssistantScheduleDelete(d *schema.ResourceData, m interface{}) error {
-
 	return nil
 }
 

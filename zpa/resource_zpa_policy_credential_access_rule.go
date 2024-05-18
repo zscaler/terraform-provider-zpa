@@ -278,7 +278,6 @@ func flattenCredential(credential *policysetcontrollerv2.Credential) []interface
 }
 
 func expandCredentialPolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
-
 	conditions, err := ExpandPolicyConditionsV2(d)
 	if err != nil {
 		return nil, err

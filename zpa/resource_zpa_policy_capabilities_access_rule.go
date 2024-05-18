@@ -352,7 +352,6 @@ func flattenPrivilegedCapabilities(capabilities policysetcontrollerv2.Privileged
 }
 
 func expandPrivilegedCapabilitiesRule(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
-
 	conditions, err := ExpandPolicyConditionsV2(d)
 	if err != nil {
 		return nil, err

@@ -108,6 +108,7 @@ func testAccCheckApplicationSegmentExists(resource string, segment *applications
 		return nil
 	}
 }
+
 func testAccCheckApplicationSegmentConfigure(resourceTypeAndName, generatedName, name, description, segmentGroupHCL, segmentGroupTypeAndName string, rPort int, enabled, cnameEnabled bool) string {
 	return fmt.Sprintf(`
 

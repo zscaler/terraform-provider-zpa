@@ -14,7 +14,7 @@ import (
 func TestAccResourcePolicyTimeoutRuleV2Basic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyTimeOutRuleV2)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
-	//updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
+	// updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	resource.Test(t, resource.TestCase{

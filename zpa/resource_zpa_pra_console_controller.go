@@ -122,7 +122,6 @@ func resourcePRAConsoleControllerCreate(d *schema.ResourceData, m interface{}) e
 
 	d.SetId(praConsole.ID)
 	return resourcePRAConsoleControllerRead(d, m)
-
 }
 
 func resourcePRAConsoleControllerRead(d *schema.ResourceData, m interface{}) error {
@@ -201,7 +200,6 @@ func expandPRAConsole(d *schema.ResourceData) praconsole.PRAConsole {
 		result.PRAApplication = *application // TODO: Need to fix pointer to PRAApplication Struct
 	}
 	return result
-
 }
 
 func expandPRAApplication(d *schema.ResourceData) *praconsole.PRAApplication {

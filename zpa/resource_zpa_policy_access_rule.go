@@ -229,7 +229,6 @@ func resourcePolicyAccessDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontroller.PolicyRule, error) {
-
 	log.Printf("[INFO] action_id:%v\n", d.Get("action_id"))
 	conditions, err := ExpandPolicyConditions(d)
 	if err != nil {

@@ -37,8 +37,10 @@ type testClient struct {
 	sdkClient *Client
 }
 
-var testResourcePrefix = "tf-acc-test-"
-var updateResourcePrefix = "tf-updated-"
+var (
+	testResourcePrefix   = "tf-acc-test-"
+	updateResourcePrefix = "tf-updated-"
+)
 
 func TestRunForcedSweeper(t *testing.T) {
 	if os.Getenv("ZPA_VCR_TF_ACC") != "" {
@@ -74,7 +76,7 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestApplicationPRA(testClient)
 	sweepTestInspectionCustomControl(testClient)
 	sweepTestInspectionProfile(testClient)
-	sweepTestLSSConfigController(testClient) //TODO: Tests is failing on QA2 tenant. Needs further investigation.
+	sweepTestLSSConfigController(testClient) // TODO: Tests is failing on QA2 tenant. Needs further investigation.
 	sweepTestAccessPolicyRuleByType(testClient)
 	sweepTestProvisioningKey(testClient)
 	sweepTestSegmentGroup(testClient)

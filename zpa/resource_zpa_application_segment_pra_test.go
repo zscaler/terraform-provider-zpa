@@ -57,7 +57,7 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
 				),
 			},
-			//Import test
+			// Import test
 			// {
 			// 	ResourceName:      appSegmentTypeAndName,
 			// 	ImportState:       true,
