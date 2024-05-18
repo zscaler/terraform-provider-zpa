@@ -139,19 +139,9 @@ func dataSourceCustomerVersionProfile() *schema.Resource {
 
 func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-
 	var resp *customerversionprofile.CustomerVersionProfile
-	id, ok := d.Get("id").(string)
-	if ok && id != "" {
-		log.Printf("[INFO] Getting data for customer version profile %s\n", id)
-		res, _, err := zClient.customerversionprofile.Get(id)
-		if err != nil {
-			return err
-		}
-		resp = res
-	}
 	name, ok := d.Get("name").(string)
-	if id == "" && ok && name != "" {
+	if ok && name != "" {
 		log.Printf("[INFO] Getting data for customer version profile name %s\n", name)
 		res, _, err := zClient.customerversionprofile.GetByName(name)
 		if err != nil {
@@ -159,6 +149,7 @@ func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, m interface{})
 		}
 		resp = res
 	}
+
 	if resp != nil {
 		d.SetId(resp.ID)
 		_ = d.Set("creation_time", resp.CreationTime)
@@ -181,7 +172,7 @@ func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, m interface{})
 			return fmt.Errorf("failed to read versions %s", err)
 		}
 	} else {
-		return fmt.Errorf("couldn't find any customer version profile with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any customer version profilee with name '%s'", name)
 	}
 
 	return nil

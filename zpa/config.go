@@ -7,6 +7,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbytype"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
@@ -60,6 +61,7 @@ type Client struct {
 	applicationsegment             applicationsegment.Service
 	applicationsegmentpra          applicationsegmentpra.Service
 	applicationsegmentinspection   applicationsegmentinspection.Service
+	applicationsegmentbytype       applicationsegmentbytype.Service
 	appservercontroller            appservercontroller.Service
 	bacertificate                  bacertificate.Service
 	browseraccess                  browseraccess.Service
@@ -129,6 +131,7 @@ func (c *Config) Client() (*Client, error) {
 		applicationsegment:             *applicationsegment.New(zpaClient),
 		applicationsegmentpra:          *applicationsegmentpra.New(zpaClient),
 		applicationsegmentinspection:   *applicationsegmentinspection.New(zpaClient),
+		applicationsegmentbytype:       *applicationsegmentbytype.New(zpaClient),
 		appservercontroller:            *appservercontroller.New(zpaClient),
 		bacertificate:                  *bacertificate.New(zpaClient),
 		browseraccess:                  *browseraccess.New(zpaClient),
