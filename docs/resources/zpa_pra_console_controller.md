@@ -41,6 +41,12 @@ resource "zpa_application_segment_pra" "this" {
   }
 }
 
+data "zpa_application_segment_by_type" "this" {
+    application_type = "SECURE_REMOTE_ACCESS"
+    name = "rdp_pra"
+    depends_on = [zpa_application_segment_pra.this]
+}
+
 # Creates Segment Group for Application Segment"
 resource "zpa_segment_group" "this" {
   name        = "Example"
@@ -64,20 +70,13 @@ resource "zpa_pra_portal_controller" "this1" {
   user_notification_enabled = true
 }
 
-locals {
-  pra_application_ids = {
-    for app_dto in flatten([for common_apps in zpa_application_segment_pra.this.common_apps_dto : common_apps.apps_config]) :
-    app_dto.name => app_dto.id
-  }
-  pra_application_id_rdp_pra = lookup(local.pra_application_ids, "rdp_pra", "")
-}
 
 resource "zpa_pra_console_controller" "ssh_pra" {
   name        = "ssh_console"
   description = "Created with Terraform"
   enabled     = true
   pra_application {
-    id = local.pra_application_id_rdp_pra
+    id = data.zpa_application_segment_by_type.this.id
   }
   pra_portals {
     id = [zpa_pra_portal_controller.this.id]

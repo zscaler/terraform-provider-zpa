@@ -12,9 +12,25 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.3.1``
+``Last updated: v3.3.2``
 
 ---
+
+## 3.3.2 (May, 18 2024)
+
+### Notes
+
+- Release date: **(May, 18 2024)**
+- Supported Terraform version: **v1.x**
+
+### ENHACEMENTS
+- [PR #455](https://github.com/zscaler/terraform-provider-zpa/pull/455) Added new data source `zpa_application_segment_by_type`. The data source allows for querying of application segments by type. The ``application_type`` attribute supports the following values: `BROWSER_ACCESS`, `INSPECT`, and `SECURE_REMOTE_ACCESS`
+
+### Bug Fixes
+- [PR #455](https://github.com/zscaler/terraform-provider-zpa/pull/455) Fixed resource `zpa_service_edge_group` due to misconfiguration in the importing function.
+
+### Internal Changes
+- [PR #454](https://github.com/zscaler/terraform-provider-zpa/pull/454) - Added Support to arbitrary clouds for testing purposes
 
 ## 3.3.1 (May, 18 2024)
 
