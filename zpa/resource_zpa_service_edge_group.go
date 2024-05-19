@@ -270,6 +270,7 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
+	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
 	log.Printf("[DEBUG] Set grace_distance_enabled to: %v", resp.GraceDistanceEnabled)
 	_ = d.Set("grace_distance_enabled", resp.GraceDistanceEnabled)
 	if resp.GraceDistanceEnabled {
