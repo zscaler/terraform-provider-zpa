@@ -169,6 +169,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			},
 			"version_profile_visibility_scope": {
 				Type:        schema.TypeString,
+				Optional:    true,
 				Computed:    true,
 				Description: "ID of the version profile.",
 			},
@@ -269,10 +270,12 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
+	log.Printf("[DEBUG] Set grace_distance_enabled to: %v", resp.GraceDistanceEnabled)
 	_ = d.Set("grace_distance_enabled", resp.GraceDistanceEnabled)
-	_ = d.Set("grace_distance_value", resp.GraceDistanceValue)
-	_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
-	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
+	if resp.GraceDistanceEnabled {
+		_ = d.Set("grace_distance_value", resp.GraceDistanceValue)
+		_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
+	}
 	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
 	_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
 	return nil
