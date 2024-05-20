@@ -60,17 +60,9 @@ func dataSourceCBIZPAProfilesRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
 
 	var resp *cbizpaprofile.ZPAProfiles
-	id, ok := d.Get("id").(string)
-	if ok && id != "" {
-		log.Printf("[INFO] Getting data for cbi zpa profile %s\n", id)
-		res, _, err := zClient.cbizpaprofile.Get(id)
-		if err != nil {
-			return err
-		}
-		resp = res
-	}
+
 	name, ok := d.Get("name").(string)
-	if id == "" && ok && name != "" {
+	if ok && name != "" {
 		log.Printf("[INFO] Getting data for cbi zpa profile name %s\n", name)
 		res, _, err := zClient.cbizpaprofile.GetByName(name)
 		if err != nil {
@@ -91,7 +83,7 @@ func dataSourceCBIZPAProfilesRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("cbi_url", resp.CBIURL)
 
 	} else {
-		return fmt.Errorf("couldn't find any cbi zpa profile with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any cbi zpa profile with name '%s'", name)
 	}
 
 	return nil
