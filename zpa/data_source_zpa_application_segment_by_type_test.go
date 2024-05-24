@@ -105,8 +105,8 @@ resource "zpa_application_segment_browser_access" "this" {
 
     clientless_apps {
         name                  = "%s-app"
-		enabled               = true
-		domain                = "tests-%s.example.com"
+		    enabled               = true
+		    domain                = "tests-%s.example.com"
         application_protocol  = "HTTPS"
         application_port      = "4445"
         certificate_id        = data.zpa_ba_certificate.jenkins.id

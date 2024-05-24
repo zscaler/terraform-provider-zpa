@@ -47,9 +47,9 @@ testacc:
 
 test\:integration\:zpa:
 	@echo "$(COLOR_ZSCALER)Running zpa integration tests...$(COLOR_NONE)"
-	go test -v -race -cover -coverprofile=coverage.out -covermode=atomic ./zpa -parallel 20 -timeout 60m
-	go tool cover -html=coverage.out -o coverage.html
-
+	go test -v -race -cover -coverprofile=zpacoverage.out -covermode=atomic ./zpa -parallel 1 -timeout 60m
+	go tool cover -html=zpacoverage.out -o zpacoverage.html
+	go tool cover -func zpacoverage.out | grep total:
 
 build13: GOOS=$(shell go env GOOS)
 build13: GOARCH=$(shell go env GOARCH)

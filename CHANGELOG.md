@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.3.22 (May, 24 2024)
+
+### Notes
+
+- Release date: **(May, 24 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #459](https://github.com/zscaler/terraform-provider-zpa/pull/459) Fixed panic issue with attribute `trusted_networks` within the resource `zpa_service_edge_group`.
+
 ## 3.3.21 (May, 18 2024)
 
 ### Notes
