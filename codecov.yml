@@ -7,6 +7,11 @@ coverage:
     project: yes
     patch: yes
     changes: yes
+    zpa:
+      target: 75%
+      flags:
+        - zpa
+
 comment:
   layout: "reach, diff, flags, files"
   behavior: default
@@ -15,3 +20,29 @@ comment:
   require_head: yes       # [yes :: must have a head report to post]
   branches:
     - master
+
+flags:
+  zpa:
+    paths:
+      - zpa/**/*.go
+    carryforward: true
+
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - type: project
+        target: auto
+        threshold: 1%
+      - type: patch
+        target: 75%
+  individual_flags:
+    - name: zpa
+      paths:
+        - zpa/**/*.go
+      carryforward: true
+      statuses:
+        - type: project
+          target: 75%
+        - type: patch
+          target: 100%
