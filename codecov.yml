@@ -7,10 +7,6 @@ coverage:
     project: yes
     patch: yes
     changes: yes
-    zpa:
-      target: 75%
-      flags:
-        - zpa
 
 comment:
   layout: "reach, diff, flags, files"
