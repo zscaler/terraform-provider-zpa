@@ -4,9 +4,16 @@ ignore:
 
 coverage:
   status:
-    project: yes
-    patch: yes
-    changes: yes
+    project:
+      default:
+        target: 85% #overall project / repo coverage
+
+    patch:
+      service:
+        target: 60%
+        threshold: 30%
+        flags:
+          - zpaprovider
 
 comment:
   layout: "reach, diff, flags, files"
@@ -18,27 +25,10 @@ comment:
     - master
 
 flags:
-  zpa:
-    paths:
-      - zpa/**/*.go
-    carryforward: true
-
-flag_management:
-  default_rules:
-    carryforward: true
-    statuses:
-      - type: project
-        target: auto
-        threshold: 1%
-      - type: patch
-        target: 75%
-  individual_flags:
-    - name: zpa
-      paths:
-        - zpa/**/*.go
+  zpaprovider:
       carryforward: true
-      statuses:
-        - type: project
-          target: 75%
-        - type: patch
-          target: 100%
+      paths:
+        - zpa/*.go
+
+github_checks:
+  annotations: true
