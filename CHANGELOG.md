@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.3.23 (May, 31 2024)
+
+### Notes
+
+- Release date: **(May, 31 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+Upgraded to Zscaler SDK GO v2.5.31 to address new ZPA error handling to retry on new `400` and `409` error format message:
+
+```json
+  "id" : "api.concurrent.access.error",
+  "reason" : "Unable to modify the resource due to concurrent change requests. Try again"
+```
+
 ## 3.3.22 (May, 24 2024)
 
 ### Notes
