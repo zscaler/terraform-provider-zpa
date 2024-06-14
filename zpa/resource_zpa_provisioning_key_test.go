@@ -72,7 +72,7 @@ func testAccCheckProvisioningKeyDestroyAppConnector(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.provisioningkey.GetByName(rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
+		rule, _, err := provisioningkey.GetByName(apiClient.ProvisioningKey, rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -86,7 +86,7 @@ func testAccCheckProvisioningKeyDestroyAppConnector(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckProvisioningKeyAppConnectorExists(resource string, provisioningkey *provisioningkey.ProvisioningKey) resource.TestCheckFunc {
+func testAccCheckProvisioningKeyAppConnectorExists(resource string, provisioningKey *provisioningkey.ProvisioningKey) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
@@ -97,11 +97,11 @@ func testAccCheckProvisioningKeyAppConnectorExists(resource string, provisioning
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedKey, _, err := apiClient.provisioningkey.GetByName(rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
+		receivedKey, _, err := provisioningkey.GetByName(apiClient.ProvisioningKey, rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
 		if err != nil {
-			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
+			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}
-		*provisioningkey = *receivedKey
+		*provisioningKey = *receivedKey
 
 		return nil
 	}

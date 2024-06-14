@@ -1,16 +1,39 @@
 package zpa
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/go-hclog"
+	"context"
+
+	hclog "github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praapproval"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praconsole"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/pracredential"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praportal"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
 )
 
 var (
@@ -68,26 +91,28 @@ func TestRunForcedSweeper(t *testing.T) {
 	testClient := &testClient{
 		sdkClient: sdkClient,
 	}
-	sweepTestAppConnectorGroup(testClient)
-	sweepTestApplicationServer(testClient)
-	sweepTestApplicationSegment(testClient)
-	sweepTestApplicationSegmentBA(testClient)
-	sweepTestApplicationInspection(testClient)
-	sweepTestApplicationPRA(testClient)
-	sweepTestInspectionCustomControl(testClient)
-	sweepTestInspectionProfile(testClient)
-	sweepTestLSSConfigController(testClient) // TODO: Tests is failing on QA2 tenant. Needs further investigation.
-	sweepTestAccessPolicyRuleByType(testClient)
-	sweepTestProvisioningKey(testClient)
-	sweepTestSegmentGroup(testClient)
-	sweepTestServerGroup(testClient)
-	sweepTestServiceEdgeGroup(testClient)
-	sweepTestCBIBanner(testClient)
-	sweepTestCBIExternalProfile(testClient)
-	sweepTestPRACredentialController(testClient)
-	sweepTestPRAConsoleController(testClient)
-	sweepTestPRAPortalController(testClient)
-	sweepTestPRAPrivilegedApprovalController(testClient)
+	if *sweepFlag == "global" {
+		sweepTestAppConnectorGroup(testClient)
+		sweepTestApplicationServer(testClient)
+		sweepTestApplicationSegment(testClient)
+		sweepTestApplicationSegmentBA(testClient)
+		sweepTestApplicationInspection(testClient)
+		sweepTestApplicationPRA(testClient)
+		sweepTestInspectionCustomControl(testClient)
+		sweepTestInspectionProfile(testClient)
+		sweepTestLSSConfigController(testClient) // TODO: Tests is failing on QA2 tenant. Needs further investigation.
+		sweepTestAccessPolicyRuleByType(testClient)
+		sweepTestProvisioningKey(testClient)
+		sweepTestSegmentGroup(testClient)
+		sweepTestServerGroup(testClient)
+		sweepTestServiceEdgeGroup(testClient)
+		sweepTestCBIBanner(testClient)
+		sweepTestCBIExternalProfile(testClient)
+		sweepTestPRACredentialController(testClient)
+		sweepTestPRAConsoleController(testClient)
+		sweepTestPRAPortalController(testClient)
+		sweepTestPRAPrivilegedApprovalController(testClient)
+	}
 }
 
 // Sets up sweeper to clean up dangling resources
@@ -108,7 +133,7 @@ func setupSweeper(resourceType string, del func(*testClient) error) {
 // TODO: Tests is failing on QA2 tenant. Needs further investigation.
 func sweepTestAppConnectorGroup(client *testClient) error {
 	var errorList []error
-	group, _, err := client.sdkClient.appconnectorgroup.GetAll()
+	group, _, err := appconnectorgroup.GetAll(client.sdkClient.AppConnectorGroup)
 	if err != nil {
 		return err
 	}
@@ -117,7 +142,7 @@ func sweepTestAppConnectorGroup(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.appconnectorgroup.Delete(b.ID); err != nil {
+			if _, err := appconnectorgroup.Delete(client.sdkClient.AppConnectorGroup, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -135,7 +160,7 @@ func sweepTestAppConnectorGroup(client *testClient) error {
 
 func sweepTestApplicationServer(client *testClient) error {
 	var errorList []error
-	server, _, err := client.sdkClient.appservercontroller.GetAll()
+	server, _, err := appservercontroller.GetAll(client.sdkClient.AppServerController)
 	if err != nil {
 		return err
 	}
@@ -144,7 +169,7 @@ func sweepTestApplicationServer(client *testClient) error {
 	for _, b := range server {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.appservercontroller.Delete(b.ID); err != nil {
+			if _, err := appservercontroller.Delete(client.sdkClient.AppServerController, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -162,7 +187,7 @@ func sweepTestApplicationServer(client *testClient) error {
 
 func sweepTestApplicationSegment(client *testClient) error {
 	var errorList []error
-	appSegment, _, err := client.sdkClient.applicationsegment.GetAll()
+	appSegment, _, err := applicationsegment.GetAll(client.sdkClient.ApplicationSegment)
 	if err != nil {
 		return err
 	}
@@ -171,7 +196,7 @@ func sweepTestApplicationSegment(client *testClient) error {
 	for _, b := range appSegment {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.applicationsegment.Delete(b.ID); err != nil {
+			if _, err := applicationsegment.Delete(client.sdkClient.ApplicationSegment, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -189,7 +214,7 @@ func sweepTestApplicationSegment(client *testClient) error {
 
 func sweepTestApplicationSegmentBA(client *testClient) error {
 	var errorList []error
-	appSegmentBA, _, err := client.sdkClient.browseraccess.GetAll()
+	appSegmentBA, _, err := browseraccess.GetAll(client.sdkClient.BrowserAccess)
 	if err != nil {
 		return err
 	}
@@ -198,7 +223,7 @@ func sweepTestApplicationSegmentBA(client *testClient) error {
 	for _, b := range appSegmentBA {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.browseraccess.Delete(b.ID); err != nil {
+			if _, err := browseraccess.Delete(client.sdkClient.BrowserAccess, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -216,7 +241,7 @@ func sweepTestApplicationSegmentBA(client *testClient) error {
 
 func sweepTestApplicationInspection(client *testClient) error {
 	var errorList []error
-	appInspection, _, err := client.sdkClient.applicationsegmentinspection.GetAll()
+	appInspection, _, err := applicationsegmentinspection.GetAll(client.sdkClient.ApplicationSegmentInspection)
 	if err != nil {
 		return err
 	}
@@ -225,7 +250,7 @@ func sweepTestApplicationInspection(client *testClient) error {
 	for _, b := range appInspection {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.applicationsegmentinspection.Delete(b.ID); err != nil {
+			if _, err := applicationsegmentinspection.Delete(client.sdkClient.ApplicationSegmentInspection, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -243,7 +268,7 @@ func sweepTestApplicationInspection(client *testClient) error {
 
 func sweepTestApplicationPRA(client *testClient) error {
 	var errorList []error
-	pra, _, err := client.sdkClient.applicationsegmentpra.GetAll()
+	pra, _, err := applicationsegmentpra.GetAll(client.sdkClient.ApplicationSegmentPRA)
 	if err != nil {
 		return err
 	}
@@ -252,7 +277,7 @@ func sweepTestApplicationPRA(client *testClient) error {
 	for _, b := range pra {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.applicationsegmentpra.Delete(b.ID); err != nil {
+			if _, err := applicationsegmentpra.Delete(client.sdkClient.ApplicationSegmentPRA, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -270,7 +295,7 @@ func sweepTestApplicationPRA(client *testClient) error {
 
 func sweepTestInspectionCustomControl(client *testClient) error {
 	var errorList []error
-	customControl, _, err := client.sdkClient.inspection_custom_controls.GetAll()
+	customControl, _, err := inspection_custom_controls.GetAll(client.sdkClient.InspectionCustomControls)
 	if err != nil {
 		return err
 	}
@@ -279,7 +304,7 @@ func sweepTestInspectionCustomControl(client *testClient) error {
 	for _, b := range customControl {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.inspection_custom_controls.Delete(b.ID); err != nil {
+			if _, err := inspection_custom_controls.Delete(client.sdkClient.InspectionCustomControls, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -297,7 +322,7 @@ func sweepTestInspectionCustomControl(client *testClient) error {
 
 func sweepTestInspectionProfile(client *testClient) error {
 	var errorList []error
-	profile, _, err := client.sdkClient.inspection_profile.GetAll()
+	profile, _, err := inspection_profile.GetAll(client.sdkClient.InspectionProfile)
 	if err != nil {
 		return err
 	}
@@ -306,7 +331,7 @@ func sweepTestInspectionProfile(client *testClient) error {
 	for _, b := range profile {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.inspection_profile.Delete(b.ID); err != nil {
+			if _, err := inspection_profile.Delete(client.sdkClient.InspectionProfile, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -325,7 +350,7 @@ func sweepTestInspectionProfile(client *testClient) error {
 func sweepTestLSSConfigController(client *testClient) error {
 	var errorList []error
 
-	lssConfig, _, err := client.sdkClient.lssconfigcontroller.GetAll()
+	lssConfig, _, err := lssconfigcontroller.GetAll(client.sdkClient.LSSConfigController)
 	if err != nil {
 		if strings.Contains(err.Error(), "resource.not.found") {
 			// Log that the resource was not found and continue
@@ -343,7 +368,7 @@ func sweepTestLSSConfigController(client *testClient) error {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.LSSConfig.Name, testResourcePrefix) || strings.HasPrefix(b.LSSConfig.Name, updateResourcePrefix) {
 			// Attempt to delete the resource
-			_, err := client.sdkClient.lssconfigcontroller.Delete(b.ID)
+			_, err := lssconfigcontroller.Delete(client.sdkClient.LSSConfigController, b.ID)
 			if err != nil {
 				// Check if the error is because the resource doesn't exist
 				if strings.Contains(err.Error(), "resource.not.found") {
@@ -400,7 +425,7 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 
 	for _, policyType := range policyTypes {
 		// Fetch the PolicySet details for the current policy type to get the PolicySetID
-		policySet, _, err := client.sdkClient.policysetcontroller.GetByPolicyType(policyType)
+		policySet, _, err := policysetcontroller.GetByPolicyType(client.sdkClient.PolicySetController, policyType)
 		if err != nil {
 			// If we fail to get a PolicySetID for a specific policy type, append the error and continue to the next type
 			errorList = append(errorList, fmt.Errorf("Failed to get PolicySetID for policy type %s: %v", policyType, err))
@@ -409,7 +434,7 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 		policySetID := policySet.ID
 
 		// Fetch all rules for the current policy type
-		rules, _, err := client.sdkClient.policysetcontroller.GetAllByType(policyType)
+		rules, _, err := policysetcontroller.GetAllByType(client.sdkClient.PolicySetController, policyType)
 		if err != nil {
 			// If we fail to fetch rules for a specific policy type, append the error and continue to the next type
 			errorList = append(errorList, fmt.Errorf("Failed to get rules for policy type %s: %v", policyType, err))
@@ -427,7 +452,7 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 			// Check if the resource name has the required prefix before deleting it
 			if strings.HasPrefix(rule.Name, testResourcePrefix) || strings.HasPrefix(rule.Name, updateResourcePrefix) {
 				// Use the fetched PolicySetID for deletion
-				if _, err := client.sdkClient.policysetcontroller.Delete(policySetID, rule.ID); err != nil {
+				if _, err := policysetcontroller.Delete(client.sdkClient.PolicySetController, policySetID, rule.ID); err != nil {
 					errorList = append(errorList, err)
 					continue
 				}
@@ -445,7 +470,7 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 
 func sweepTestProvisioningKey(client *testClient) error {
 	var errorList []error
-	provisioningKey, err := client.sdkClient.provisioningkey.GetAll()
+	provisioningKey, err := provisioningkey.GetAll(client.sdkClient.ProvisioningKey)
 	if err != nil {
 		return err
 	}
@@ -455,7 +480,7 @@ func sweepTestProvisioningKey(client *testClient) error {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			// Assuming 'AssociationType' is a field in the provisioningKey object
-			if _, err := client.sdkClient.provisioningkey.Delete(b.AssociationType, b.ID); err != nil {
+			if _, err := provisioningkey.Delete(client.sdkClient.ProvisioningKey, b.AssociationType, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -473,7 +498,7 @@ func sweepTestProvisioningKey(client *testClient) error {
 
 func sweepTestSegmentGroup(client *testClient) error {
 	var errorList []error
-	group, _, err := client.sdkClient.segmentgroup.GetAll()
+	group, _, err := segmentgroup.GetAll(client.sdkClient.SegmentGroup)
 	if err != nil {
 		return err
 	}
@@ -482,7 +507,7 @@ func sweepTestSegmentGroup(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.segmentgroup.Delete(b.ID); err != nil {
+			if _, err := segmentgroup.Delete(client.sdkClient.SegmentGroup, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -500,7 +525,7 @@ func sweepTestSegmentGroup(client *testClient) error {
 
 func sweepTestServerGroup(client *testClient) error {
 	var errorList []error
-	group, _, err := client.sdkClient.servergroup.GetAll()
+	group, _, err := servergroup.GetAll(client.sdkClient.ServerGroup)
 	if err != nil {
 		return err
 	}
@@ -509,7 +534,7 @@ func sweepTestServerGroup(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.servergroup.Delete(b.ID); err != nil {
+			if _, err := servergroup.Delete(client.sdkClient.ServerGroup, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -527,7 +552,7 @@ func sweepTestServerGroup(client *testClient) error {
 
 func sweepTestServiceEdgeGroup(client *testClient) error {
 	var errorList []error
-	group, _, err := client.sdkClient.serviceedgegroup.GetAll()
+	group, _, err := serviceedgegroup.GetAll(client.sdkClient.ServiceEdgeGroup)
 	if err != nil {
 		return err
 	}
@@ -536,7 +561,7 @@ func sweepTestServiceEdgeGroup(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.serviceedgegroup.Delete(b.ID); err != nil {
+			if _, err := serviceedgegroup.Delete(client.sdkClient.ServiceEdgeGroup, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -554,7 +579,7 @@ func sweepTestServiceEdgeGroup(client *testClient) error {
 
 func sweepTestCBIBanner(client *testClient) error {
 	var errorList []error
-	group, _, err := client.sdkClient.cbibannercontroller.GetAll()
+	group, _, err := cbibannercontroller.GetAll(client.sdkClient.CBIBannerController)
 	if err != nil {
 		return err
 	}
@@ -563,7 +588,7 @@ func sweepTestCBIBanner(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.cbibannercontroller.Delete(b.ID); err != nil {
+			if _, err := cbibannercontroller.Delete(client.sdkClient.CBIBannerController, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -581,7 +606,7 @@ func sweepTestCBIBanner(client *testClient) error {
 
 func sweepTestCBIExternalProfile(client *testClient) error {
 	var errorList []error
-	group, _, err := client.sdkClient.cbiprofilecontroller.GetAll()
+	group, _, err := cbiprofilecontroller.GetAll(client.sdkClient.CBIProfileController)
 	if err != nil {
 		return err
 	}
@@ -590,7 +615,7 @@ func sweepTestCBIExternalProfile(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.cbiprofilecontroller.Delete(b.ID); err != nil {
+			if _, err := cbiprofilecontroller.Delete(client.sdkClient.CBIProfileController, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -608,7 +633,7 @@ func sweepTestCBIExternalProfile(client *testClient) error {
 
 func sweepTestCBICertificate(client *testClient) error {
 	var errorList []error
-	group, _, err := client.sdkClient.cbicertificatecontroller.GetAll()
+	group, _, err := cbicertificatecontroller.GetAll(client.sdkClient.CBICertificateController)
 	if err != nil {
 		return err
 	}
@@ -617,7 +642,7 @@ func sweepTestCBICertificate(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.cbicertificatecontroller.Delete(b.ID); err != nil {
+			if _, err := cbicertificatecontroller.Delete(client.sdkClient.CBICertificateController, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -635,7 +660,7 @@ func sweepTestCBICertificate(client *testClient) error {
 
 func sweepTestBaCertificate(client *testClient) error {
 	var errorList []error
-	group, _, err := client.sdkClient.bacertificate.GetAll()
+	group, _, err := bacertificate.GetAll(client.sdkClient.BACertificate)
 	if err != nil {
 		return err
 	}
@@ -644,7 +669,7 @@ func sweepTestBaCertificate(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.bacertificate.Delete(b.ID); err != nil {
+			if _, err := bacertificate.Delete(client.sdkClient.BACertificate, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -662,7 +687,7 @@ func sweepTestBaCertificate(client *testClient) error {
 
 func sweepTestPRACredentialController(client *testClient) error {
 	var errorList []error
-	credential, _, err := client.sdkClient.pracredential.GetAll()
+	credential, _, err := pracredential.GetAll(client.sdkClient.PRACredential)
 	if err != nil {
 		return err
 	}
@@ -671,7 +696,7 @@ func sweepTestPRACredentialController(client *testClient) error {
 	for _, b := range credential {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.pracredential.Delete(b.ID); err != nil {
+			if _, err := pracredential.Delete(client.sdkClient.PRACredential, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -689,7 +714,7 @@ func sweepTestPRACredentialController(client *testClient) error {
 
 func sweepTestPRAConsoleController(client *testClient) error {
 	var errorList []error
-	console, _, err := client.sdkClient.praconsole.GetAll()
+	console, _, err := praconsole.GetAll(client.sdkClient.PRAConsole)
 	if err != nil {
 		return err
 	}
@@ -698,7 +723,7 @@ func sweepTestPRAConsoleController(client *testClient) error {
 	for _, b := range console {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.praconsole.Delete(b.ID); err != nil {
+			if _, err := praconsole.Delete(client.sdkClient.PRAConsole, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -716,7 +741,7 @@ func sweepTestPRAConsoleController(client *testClient) error {
 
 func sweepTestPRAPortalController(client *testClient) error {
 	var errorList []error
-	portal, _, err := client.sdkClient.praportal.GetAll()
+	portal, _, err := praportal.GetAll(client.sdkClient.PRAPortal)
 	if err != nil {
 		return err
 	}
@@ -725,7 +750,7 @@ func sweepTestPRAPortalController(client *testClient) error {
 	for _, b := range portal {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := client.sdkClient.praportal.Delete(b.ID); err != nil {
+			if _, err := praportal.Delete(client.sdkClient.PRAPortal, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
@@ -744,7 +769,7 @@ func sweepTestPRAPortalController(client *testClient) error {
 func sweepTestPRAPrivilegedApprovalController(client *testClient) error {
 	var errorList []error
 	// First, get all pra approval resources
-	approvals, _, err := client.sdkClient.praapproval.GetAll()
+	approvals, _, err := praapproval.GetAll(client.sdkClient.PRAApproval)
 	if err != nil {
 		return err
 	}
@@ -756,7 +781,7 @@ func sweepTestPRAPrivilegedApprovalController(client *testClient) error {
 		for _, emailID := range approval.EmailIDs {
 			if strings.Contains(emailID, "pra_user_") {
 				// If the emailID contains "pra_user_", delete the resource
-				if _, err := client.sdkClient.praapproval.Delete(approval.ID); err != nil {
+				if _, err := praapproval.Delete(client.sdkClient.PRAApproval, approval.ID); err != nil {
 					errorList = append(errorList, err)
 					continue
 				}

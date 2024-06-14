@@ -74,7 +74,7 @@ func testAccCheckServiceEdgeGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		group, _, err := apiClient.serviceedgegroup.Get(rs.Primary.ID)
+		group, _, err := serviceedgegroup.Get(apiClient.ServiceEdgeGroup, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -99,7 +99,7 @@ func testAccCheckServiceEdgeGroupExists(resource string, group *serviceedgegroup
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedGroup, _, err := apiClient.serviceedgegroup.Get(rs.Primary.ID)
+		receivedGroup, _, err := serviceedgegroup.Get(apiClient.ServiceEdgeGroup, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

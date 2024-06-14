@@ -5,12 +5,12 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorschedule"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgeschedule"
 )
 
-func dataSourceAppConnectorAssistantSchedule() *schema.Resource {
+func dataSourceServiceEdgeAssistantSchedule() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAppConnectorAssistantScheduleRead,
+		Read: dataSourceServiceEdgeRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -40,11 +40,11 @@ func dataSourceAppConnectorAssistantSchedule() *schema.Resource {
 	}
 }
 
-func dataSourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceServiceEdgeRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	service := zClient.AppConnectorSchedule
+	service := zClient.ServiceEdgeSchedule
 
-	var resp *appconnectorschedule.AssistantSchedule
+	var resp *serviceedgeschedule.AssistantSchedule
 	var err error
 
 	id, idOk := d.GetOk("id")
@@ -52,19 +52,19 @@ func dataSourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, m inter
 
 	if idOk && id != "" {
 		log.Printf("[INFO] Getting data for app connector assistant schedule %s\n", id)
-		resp, _, err = appconnectorschedule.GetSchedule(service)
+		resp, _, err = serviceedgeschedule.GetSchedule(service)
 		if err != nil {
 			return err
 		}
 	} else if customerIDOk && customerID != "" {
 		log.Printf("[INFO] Getting data for app connector name %s\n", customerID)
-		resp, _, err = appconnectorschedule.GetSchedule(service)
+		resp, _, err = serviceedgeschedule.GetSchedule(service)
 		if err != nil {
 			return err
 		}
 	} else {
 		log.Printf("[INFO] No specific ID or customer ID provided, fetching default schedule")
-		resp, _, err = appconnectorschedule.GetSchedule(service)
+		resp, _, err = serviceedgeschedule.GetSchedule(service)
 		if err != nil {
 			return err
 		}

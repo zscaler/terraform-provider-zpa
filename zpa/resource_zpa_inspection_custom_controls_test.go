@@ -67,7 +67,7 @@ func testAccCheckInspectionCustomControlsDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.inspection_custom_controls.Get(rs.Primary.ID)
+		rule, _, err := inspection_custom_controls.Get(apiClient.InspectionCustomControls, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -92,7 +92,7 @@ func testAccCheckInspectionCustomControlsExists(resource string, rule *inspectio
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedControl, _, err := apiClient.inspection_custom_controls.Get(rs.Primary.ID)
+		receivedControl, _, err := inspection_custom_controls.Get(apiClient.InspectionCustomControls, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

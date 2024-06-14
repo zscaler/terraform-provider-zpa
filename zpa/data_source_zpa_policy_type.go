@@ -238,15 +238,17 @@ func dataSourcePolicyType() *schema.Resource {
 }
 
 func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PolicySetController
+
 	log.Printf("[INFO] Getting data for policy type\n")
 	var resp *policysetcontroller.PolicySet
 	var err error
 	policyType, policyTypeIsSet := d.GetOk("policy_type")
 	if policyTypeIsSet {
-		resp, _, err = service.GetByPolicyType(policyType.(string))
+		resp, _, err = policysetcontroller.GetByPolicyType(service, policyType.(string))
 	} else {
-		resp, _, err = service.GetByPolicyType("GLOBAL_POLICY")
+		resp, _, err = policysetcontroller.GetByPolicyType(service, "GLOBAL_POLICY")
 	}
 	if err != nil {
 		return err

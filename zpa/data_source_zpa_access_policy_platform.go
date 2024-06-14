@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/platforms"
 )
 
 func dataSourceAccessPolicyPlatforms() *schema.Resource {
@@ -38,9 +39,11 @@ func dataSourceAccessPolicyPlatforms() *schema.Resource {
 
 func dataSourceAccessPolicyPlatformsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.Platforms
+
 	log.Printf("[INFO] Getting data for all platforms set\n")
 
-	resp, _, err := zClient.platforms.GetAllPlatforms()
+	resp, _, err := platforms.GetAllPlatforms(service)
 	if err != nil {
 		return err
 	}

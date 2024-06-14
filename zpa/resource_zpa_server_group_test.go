@@ -66,7 +66,7 @@ func testAccCheckServerGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.servergroup.Get(rs.Primary.ID)
+		rule, _, err := servergroup.Get(apiClient.ServerGroup, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -91,7 +91,7 @@ func testAccCheckServerGroupExists(resource string, rule *servergroup.ServerGrou
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedGroup, _, err := apiClient.servergroup.Get(rs.Primary.ID)
+		receivedGroup, _, err := servergroup.Get(apiClient.ServerGroup, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

@@ -46,11 +46,17 @@ func resourceEmergencyAccess() *schema.Resource {
 
 func resourceEmergencyAccessCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.EmergencyAccess
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	req := expandEmergencyAccess(d)
 	log.Printf("[INFO] Creating emergency access user with request\n%+v\n", req)
 
-	emgAccess, _, err := zClient.emergencyaccess.Create(&req)
+	emgAccess, _, err := emergencyaccess.Create(service, &req)
 	if err != nil {
 		return err
 	}
@@ -62,8 +68,14 @@ func resourceEmergencyAccessCreate(d *schema.ResourceData, m interface{}) error 
 
 func resourceEmergencyAccessRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.EmergencyAccess
 
-	resp, _, err := zClient.emergencyaccess.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := emergencyaccess.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing emergency access user %s from state because it no longer exists in ZPA", d.Id())
@@ -84,19 +96,25 @@ func resourceEmergencyAccessRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceEmergencyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.EmergencyAccess
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	id := d.Id()
 	log.Printf("[INFO] Updating emergency access user ID: %v\n", id)
 	req := expandEmergencyAccess(d)
 
-	if _, _, err := zClient.emergencyaccess.Get(id); err != nil {
+	if _, _, err := emergencyaccess.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.emergencyaccess.Update(id, &req); err != nil {
+	if _, err := emergencyaccess.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -105,10 +123,16 @@ func resourceEmergencyAccessUpdate(d *schema.ResourceData, m interface{}) error 
 
 func resourceEmergencyAccessDeactivated(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.EmergencyAccess
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	log.Printf("[INFO] Deactivated Emergency Access User ID: %v\n", d.Id())
 
-	if _, err := zClient.emergencyaccess.Deactivate(d.Id()); err != nil {
+	if _, err := emergencyaccess.Deactivate(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

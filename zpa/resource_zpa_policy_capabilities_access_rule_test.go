@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
 )
 
 func TestAccResourcePolicyCapabilitiesAccessRuleBasic(t *testing.T) {
@@ -57,7 +58,7 @@ func TestAccResourcePolicyCapabilitiesAccessRuleBasic(t *testing.T) {
 
 func testAccCheckPolicyCapabilitiesAccessRuleDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := apiClient.policysetcontrollerv2.GetByPolicyType("CAPABILITIES_POLICY")
+	accessPolicy, _, err := policysetcontrollerv2.GetByPolicyType(apiClient.PolicySetControllerV2, "CAPABILITIES_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource CAPABILITIES_POLICY. Received error: %s", err)
 	}
@@ -66,7 +67,7 @@ func testAccCheckPolicyCapabilitiesAccessRuleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.policysetcontrollerv2.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
+		rule, _, err := policysetcontrollerv2.GetPolicyRule(apiClient.PolicySetControllerV2, accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -91,11 +92,11 @@ func testAccCheckPolicyCapabilitiesAccessRuleExists(resource string) resource.Te
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := apiClient.policysetcontrollerv2.GetByPolicyType("CAPABILITIES_POLICY")
+		resp, _, err := policysetcontrollerv2.GetByPolicyType(apiClient.PolicySetControllerV2, "CAPABILITIES_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource CAPABILITIES_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = apiClient.policysetcontrollerv2.GetPolicyRule(resp.ID, rs.Primary.ID)
+		_, _, err = policysetcontrollerv2.GetPolicyRule(apiClient.PolicySetControllerV2, resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

@@ -170,12 +170,19 @@ func dataSourceAppConnectorController() *schema.Resource {
 }
 
 func dataSourceAppConnectorControllerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appconnectorcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppConnectorController
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	var resp *appconnectorcontroller.AppConnector
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for app connector  %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := appconnectorcontroller.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -184,7 +191,7 @@ func dataSourceAppConnectorControllerRead(d *schema.ResourceData, m interface{})
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for app connector name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := appconnectorcontroller.GetByName(service, name)
 		if err != nil {
 			return err
 		}

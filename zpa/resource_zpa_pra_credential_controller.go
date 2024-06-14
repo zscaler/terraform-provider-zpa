@@ -19,7 +19,13 @@ func resourcePRACredentialController() *schema.Resource {
 		Delete: resourcePRACredentialControllerDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				service := m.(*Client).pracredential.WithMicroTenant(GetString(d.Get("microtenant_id")))
+				client := m.(*Client)
+				service := client.PRACredential
+
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -27,7 +33,7 @@ func resourcePRACredentialController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := service.GetByName(id)
+					resp, _, err := pracredential.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -103,12 +109,18 @@ func resourcePRACredentialController() *schema.Resource {
 }
 
 func resourcePRACredentialControllerCreate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).pracredential.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRACredential
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	req := expandPRACredentialController(d)
 	log.Printf("[INFO] Creating credential controller with request\n%+v\n", req)
 
-	credController, _, err := service.Create(&req)
+	credController, _, err := pracredential.Create(service, &req)
 	if err != nil {
 		return err
 	}
@@ -120,9 +132,15 @@ func resourcePRACredentialControllerCreate(d *schema.ResourceData, m interface{}
 }
 
 func resourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).pracredential.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRACredential
 
-	resp, _, err := service.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := pracredential.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing credential controller %s from state because it no longer exists in ZPA", d.Id())
@@ -149,20 +167,21 @@ func resourcePRACredentialControllerUpdate(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("changing 'credential_type' from '%s' to '%s' is not allowed", oldType, newType)
 	}
 
-	service := m.(*Client).pracredential.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRAApproval.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	id := d.Id()
 	log.Printf("[INFO] Updating credential controller ID: %v\n", id)
 	req := expandPRACredentialController(d)
 
-	if _, _, err := service.Get(id); err != nil {
+	if _, _, err := pracredential.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := service.Update(id, &req); err != nil {
+	if _, err := pracredential.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -170,11 +189,17 @@ func resourcePRACredentialControllerUpdate(d *schema.ResourceData, m interface{}
 }
 
 func resourcePRACredentialControllerDelete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).pracredential.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRACredential
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	log.Printf("[INFO] Deleting credential controller ID: %v\n", d.Id())
 
-	if _, err := service.Delete(d.Id()); err != nil {
+	if _, err := pracredential.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

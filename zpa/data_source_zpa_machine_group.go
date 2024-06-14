@@ -120,13 +120,19 @@ func dataSourceMachineGroup() *schema.Resource {
 }
 
 func dataSourceMachineGroupRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).machinegroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.MachineGroup
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	var resp *machinegroup.MachineGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for machine group  %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := machinegroup.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -135,7 +141,7 @@ func dataSourceMachineGroupRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for machine group name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := machinegroup.GetByName(service, name)
 		if err != nil {
 			return err
 		}

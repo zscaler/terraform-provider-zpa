@@ -110,13 +110,18 @@ func dataSourceEnrollmentCert() *schema.Resource {
 }
 
 func dataSourceEnrollmentCertRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).enrollmentcert.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.EnrollmentCert
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	var resp *enrollmentcert.EnrollmentCert
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for signing certificate %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := enrollmentcert.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -125,7 +130,7 @@ func dataSourceEnrollmentCertRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for signing certificate name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := enrollmentcert.GetByName(service, name)
 		if err != nil {
 			return err
 		}

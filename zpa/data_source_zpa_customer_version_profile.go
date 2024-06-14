@@ -139,11 +139,13 @@ func dataSourceCustomerVersionProfile() *schema.Resource {
 
 func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CustomerVersionProfile
+
 	var resp *customerversionprofile.CustomerVersionProfile
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for customer version profile name %s\n", name)
-		res, _, err := zClient.customerversionprofile.GetByName(name)
+		res, _, err := customerversionprofile.GetByName(service, name)
 		if err != nil {
 			return err
 		}

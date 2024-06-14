@@ -114,7 +114,14 @@ func dataSourceProvisioningKey() *schema.Resource {
 }
 
 func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).provisioningkey.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.ProvisioningKey
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	associationType, ok := getAssociationType(d)
 	if !ok {
 		return fmt.Errorf("associationType is required")
@@ -123,7 +130,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data provisioning key %s\n", id)
-		res, _, err := service.Get(associationType, id)
+		res, _, err := provisioningkey.Get(service, associationType, id)
 		if err != nil {
 			return err
 		}
@@ -132,7 +139,7 @@ func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error 
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for provisioning key name %s\n", name)
-		res, _, err := service.GetByName(associationType, name)
+		res, _, err := provisioningkey.GetByName(service, associationType, name)
 		if err != nil {
 			return err
 		}

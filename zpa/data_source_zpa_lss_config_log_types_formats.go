@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 )
 
 func dataSourceLSSLogTypeFormats() *schema.Resource {
@@ -56,12 +57,14 @@ func getLogType(d *schema.ResourceData) (string, bool) {
 
 func dataSourceLSSLogTypeFormatsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.LSSConfigController
+
 	log.Printf("[INFO] Getting data for LSS Log Types Format set\n")
 	logType, ok := getLogType(d)
 	if !ok {
 		return fmt.Errorf("[ERROR] log type is required")
 	}
-	resp, _, err := zClient.lssconfigcontroller.GetFormats(logType)
+	resp, _, err := lssconfigcontroller.GetFormats(service, logType)
 	if err != nil {
 		return err
 	}

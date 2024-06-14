@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 )
 
 func dataSourceLSSClientTypes() *schema.Resource {
@@ -42,9 +43,11 @@ func dataSourceLSSClientTypes() *schema.Resource {
 
 func dataSourceLSSClientTypesRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.LSSConfigController
+
 	log.Printf("[INFO] Getting data for global policy set\n")
 
-	resp, _, err := zClient.lssconfigcontroller.GetClientTypes()
+	resp, _, err := lssconfigcontroller.GetClientTypes(service)
 	if err != nil {
 		return err
 	}

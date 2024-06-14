@@ -383,12 +383,13 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 
 func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.ServiceEdgeGroup
 
 	var resp *serviceedgegroup.ServiceEdgeGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for service edge group %s\n", id)
-		res, _, err := zClient.serviceedgegroup.Get(id)
+		res, _, err := serviceedgegroup.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -397,7 +398,7 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for service edge group name %s\n", name)
-		res, _, err := zClient.serviceedgegroup.GetByName(name)
+		res, _, err := serviceedgegroup.GetByName(service, name)
 		if err != nil {
 			return err
 		}

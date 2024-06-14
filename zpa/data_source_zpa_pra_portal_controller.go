@@ -92,13 +92,18 @@ func dataSourcePRAPortalController() *schema.Resource {
 }
 
 func dataSourcePRAPortalControllerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).praportal.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRAPortal
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	var resp *praportal.PRAPortal
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for pra portal controller %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := praportal.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -107,7 +112,7 @@ func dataSourcePRAPortalControllerRead(d *schema.ResourceData, m interface{}) er
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for pra portal controller name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := praportal.GetByName(service, name)
 		if err != nil {
 			return err
 		}

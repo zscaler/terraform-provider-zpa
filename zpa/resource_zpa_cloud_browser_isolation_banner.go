@@ -18,6 +18,7 @@ func resourceCBIBanners() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
+				service := zClient.CBIBannerController
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -25,7 +26,7 @@ func resourceCBIBanners() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.cbibannercontroller.GetByName(id)
+					resp, _, err := cbibannercontroller.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -82,11 +83,12 @@ func resourceCBIBanners() *schema.Resource {
 
 func resourceCBIBannersCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIBannerController
 
 	req := expandCBIBanner(d)
 	log.Printf("[INFO] Creating cbi banner with request\n%+v\n", req)
 
-	cbiBanner, _, err := zClient.cbibannercontroller.Create(&req)
+	cbiBanner, _, err := cbibannercontroller.Create(service, &req)
 	if err != nil {
 		return err
 	}
@@ -98,8 +100,9 @@ func resourceCBIBannersCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceCBIBannersRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIBannerController
 
-	resp, _, err := zClient.cbibannercontroller.Get(d.Id())
+	resp, _, err := cbibannercontroller.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing cbi certificate %s from state because it no longer exists in ZPA", d.Id())
@@ -125,19 +128,20 @@ func resourceCBIBannersRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceCBIBannersUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIBannerController
 
 	id := d.Id()
 	log.Printf("[INFO] Updating cbi certificate ID: %v\n", id)
 	req := expandCBIBanner(d)
 
-	if _, _, err := zClient.cbibannercontroller.Get(id); err != nil {
+	if _, _, err := cbibannercontroller.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.cbibannercontroller.Update(id, &req); err != nil {
+	if _, err := cbibannercontroller.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -146,10 +150,11 @@ func resourceCBIBannersUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceCBIBannersDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIBannerController
 
 	log.Printf("[INFO] Deleting cbi banner ID: %v\n", d.Id())
 
-	if _, err := zClient.cbibannercontroller.Delete(d.Id()); err != nil {
+	if _, err := cbibannercontroller.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

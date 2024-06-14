@@ -77,13 +77,18 @@ func dataSourcePRACredentialController() *schema.Resource {
 }
 
 func dataSourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).pracredential.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRACredential
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	var resp *pracredential.Credential
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for credential controller %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := pracredential.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -92,7 +97,7 @@ func dataSourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for credential controller name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := pracredential.GetByName(service, name)
 		if err != nil {
 			return err
 		}

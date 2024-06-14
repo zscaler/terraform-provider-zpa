@@ -325,13 +325,14 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 }
 
 func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppConnectorGroup
 
 	var resp *appconnectorgroup.AppConnectorGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for app connector group  %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := appconnectorgroup.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -340,7 +341,7 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for app connector group name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := appconnectorgroup.GetByName(service, name)
 		if err != nil {
 			return err
 		}

@@ -58,12 +58,13 @@ func dataSourcePostureProfile() *schema.Resource {
 
 func dataSourcePostureProfileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.PostureProfile
 
 	var resp *postureprofile.PostureProfile
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for posture profile %s\n", id)
-		res, _, err := zClient.postureprofile.Get(id)
+		res, _, err := postureprofile.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -72,7 +73,7 @@ func dataSourcePostureProfileRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for posture profile name %s\n", name)
-		res, _, err := zClient.postureprofile.GetByName(name)
+		res, _, err := postureprofile.GetByName(service, name)
 		if err != nil {
 			return err
 		}

@@ -112,12 +112,13 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 
 func dataSourceCloudConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CloudConnectorGroup
 
 	var resp *cloudconnectorgroup.CloudConnectorGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for cloud connector group  %s\n", id)
-		res, _, err := zClient.cloudconnectorgroup.Get(id)
+		res, _, err := cloudconnectorgroup.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -126,7 +127,7 @@ func dataSourceCloudConnectorGroupRead(d *schema.ResourceData, m interface{}) er
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for cloud connector group name %s\n", name)
-		res, _, err := zClient.cloudconnectorgroup.GetByName(name)
+		res, _, err := cloudconnectorgroup.GetByName(service, name)
 		if err != nil {
 			return err
 		}

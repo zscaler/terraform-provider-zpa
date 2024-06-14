@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
 func ValidateLatitude(val interface{}, _ string) (warns []string, errs []error) {
@@ -274,4 +275,24 @@ func pluralize(count int, singular, plural string) string {
 		return singular
 	}
 	return plural
+}
+
+func detachSegmentGroup(client *Client, segmentID, segmentGroupID string) error {
+	log.Printf("[INFO] Detaching application segment  %s from segment group: %s\n", segmentID, segmentGroupID)
+	service := client.SegmentGroup
+
+	segGroup, _, err := segmentgroup.Get(service, segmentGroupID)
+	if err != nil {
+		log.Printf("[error] Error while getting segment group id: %s", segmentGroupID)
+		return err
+	}
+	adaptedApplications := []segmentgroup.Application{}
+	for _, app := range segGroup.Applications {
+		if app.ID != segmentID {
+			adaptedApplications = append(adaptedApplications, app)
+		}
+	}
+	segGroup.Applications = adaptedApplications
+	_, err = segmentgroup.Update(service, segmentGroupID, segGroup)
+	return err
 }

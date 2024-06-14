@@ -110,12 +110,13 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 
 func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionPredefinedControls
 
 	var resp *inspection_predefined_controls.PredefinedControls
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for predefined controls %s\n", id)
-		res, _, err := zClient.inspection_predefined_controls.Get(id)
+		res, _, err := inspection_predefined_controls.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -128,7 +129,7 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interf
 			return fmt.Errorf("when the name is set, version must be set as well")
 		}
 		log.Printf("[INFO] Getting data for predefined controls name %s\n", name)
-		res, _, err := zClient.inspection_predefined_controls.GetByName(name, version)
+		res, _, err := inspection_predefined_controls.GetByName(service, name, version)
 		if err != nil {
 			return err
 		}

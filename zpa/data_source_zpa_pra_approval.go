@@ -120,13 +120,18 @@ func dataSourcePRAPrivilegedApprovalController() *schema.Resource {
 }
 
 func dataSourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).praapproval.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRAApproval
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	var resp *praapproval.PrivilegedApproval
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for pra approval controller %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := praapproval.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -135,7 +140,7 @@ func dataSourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, m int
 	emailID, ok := d.Get("email_ids").(string)
 	if id == "" && ok && emailID != "" {
 		log.Printf("[INFO] Getting data for pra approval email ID %s\n", emailID)
-		res, _, err := service.GetByEmailID(emailID)
+		res, _, err := praapproval.GetByEmailID(service, emailID)
 		if err != nil {
 			return err
 		}

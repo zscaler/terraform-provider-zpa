@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
 func resourceApplicationSegmentBrowserAccess() *schema.Resource {
@@ -21,7 +21,13 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 		Delete: resourceApplicationSegmentBrowserAccessDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+				client := m.(*Client)
+				service := client.AppServerController
+
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -29,7 +35,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.browseraccess.GetByName(id)
+					resp, _, err := browseraccess.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -296,6 +302,12 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 
 func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.BrowserAccess
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	req := expandBrowserAccess(d, zClient, "")
 
@@ -310,7 +322,7 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m int
 		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
 
-	browseraccess, _, err := zClient.browseraccess.Create(req)
+	browseraccess, _, err := browseraccess.Create(service, req)
 	if err != nil {
 		return err
 	}
@@ -323,8 +335,14 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m int
 
 func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.BrowserAccess
 
-	resp, _, err := zClient.browseraccess.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := browseraccess.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing browser access %s from state because it no longer exists in ZPA", d.Id())
@@ -381,6 +399,12 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 
 func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.BrowserAccess
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	id := d.Id()
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
@@ -395,14 +419,14 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m int
 		return fmt.Errorf("please provide a valid segment group for the browser access application segment")
 	}
 
-	if _, _, err := zClient.browseraccess.Get(id); err != nil {
+	if _, _, err := browseraccess.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.browseraccess.Update(id, &req); err != nil {
+	if _, err := browseraccess.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -411,28 +435,38 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m int
 
 func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.BrowserAccess
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	id := d.Id()
 	segmentGroupID, ok := d.GetOk("segment_group_id")
 	if ok && segmentGroupID != nil {
 		gID, ok := segmentGroupID.(string)
 		if ok && gID != "" {
 			// detach it from segment group first
-			if err := detachBrowserAccessFromGroup(zClient, id, gID); err != nil {
+			if err := detachSegmentGroup(zClient, id, gID); err != nil {
 				return err
 			}
 		}
 	}
 	log.Printf("[INFO] Deleting browser access application with id %v\n", id)
-	if _, err := zClient.browseraccess.Delete(id); err != nil {
+	if _, err := browseraccess.Delete(service, id); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+/*
 func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID string) error {
-	log.Printf("[INFO] Detaching browser access  %s from segment group: %s\n", segmentID, segmentGroupID)
-	segGroup, _, err := client.segmentgroup.Get(segmentGroupID)
+	log.Printf("[INFO] Detaching browser access %s from segment group: %s\n", segmentID, segmentGroupID)
+	service := client.SegmentGroup
+
+	segGroup, _, err := segmentgroup.Get(service, segmentGroupID)
 	if err != nil {
 		log.Printf("[error] Error while getting segment group id: %s", segmentGroupID)
 		return err
@@ -444,9 +478,10 @@ func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID stri
 		}
 	}
 	segGroup.Applications = adaptedApplications
-	_, err = client.segmentgroup.Update(segmentGroupID, segGroup)
+	_, err = segmentgroup.Update(service, segmentGroupID, segGroup)
 	return err
 }
+*/
 
 func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
 	details := browseraccess.BrowserAccess{
@@ -478,7 +513,13 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if zClient != nil && id != "" {
-		resource, _, err := zClient.applicationsegment.Get(id)
+		microTenantID := GetString(d.Get("microtenant_id"))
+		service := zClient.ApplicationSegment
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		resource, _, err := applicationsegment.Get(service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
 			remoteUDPAppPortRanges = resource.UDPPortRanges

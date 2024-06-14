@@ -70,7 +70,7 @@ func testAccCheckPRAPortalControllerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		group, _, err := apiClient.praportal.Get(rs.Primary.ID)
+		group, _, err := praportal.Get(apiClient.PRAPortal, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -95,7 +95,7 @@ func testAccCheckPRAPortalControllerExists(resource string, portal *praportal.PR
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedPortal, _, err := apiClient.praportal.Get(rs.Primary.ID)
+		receivedPortal, _, err := praportal.Get(apiClient.PRAPortal, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

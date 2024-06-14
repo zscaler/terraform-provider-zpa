@@ -90,13 +90,18 @@ func dataSourceBaCertificate() *schema.Resource {
 }
 
 func dataSourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).bacertificate.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.BACertificate
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	var resp *bacertificate.BaCertificate
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for browser certificate %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := bacertificate.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -106,7 +111,7 @@ func dataSourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for browser certificate name %s\n", name)
-		res, _, err := service.GetIssuedByName(name)
+		res, _, err := bacertificate.GetIssuedByName(service, name)
 		if err != nil {
 			return err
 		}

@@ -13,7 +13,6 @@ import (
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
 func resourceApplicationSegmentPRA() *schema.Resource {
@@ -24,7 +23,8 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 		Delete: resourceApplicationSegmentPRADelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+				client := m.(*Client)
+				service := client.ApplicationSegmentPRA
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -32,7 +32,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 					// assume if the passed value is an int
 					d.Set("id", id)
 				} else {
-					resp, _, err := zClient.applicationsegmentpra.GetByName(id)
+					resp, _, err := applicationsegmentpra.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						d.Set("id", resp.ID)
@@ -302,6 +302,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 
 func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.ApplicationSegmentPRA
 
 	req := expandSRAApplicationSegment(d, zClient, "")
 	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
@@ -313,7 +314,7 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 	}
 
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
-	resp, _, err := zClient.applicationsegmentpra.Create(req)
+	resp, _, err := applicationsegmentpra.Create(service, req)
 	if err != nil {
 		log.Printf("[ERROR] Failed to create application segment: %s", err)
 		return err
@@ -326,7 +327,7 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 	time.Sleep(5 * time.Second)
 
 	// Explicitly call GET using the ID to fetch the latest resource state
-	_, _, err = zClient.applicationsegmentpra.Get(resp.ID)
+	_, _, err = applicationsegmentpra.Get(service, resp.ID)
 	if err != nil {
 		log.Printf("[ERROR] Failed to fetch application segment after creation: %s", err)
 		return err
@@ -338,8 +339,9 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 
 func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.ApplicationSegmentPRA
 
-	resp, _, err := zClient.applicationsegmentpra.Get(d.Id())
+	resp, _, err := applicationsegmentpra.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing sra application segment %s from state because it no longer exists in ZPA", d.Id())
@@ -403,6 +405,7 @@ func flattenPRAAppServerGroupsSimple(serverGroup []applicationsegmentpra.AppServ
 
 func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.ApplicationSegmentPRA
 
 	id := d.Id()
 	log.Printf("[INFO] Updating pra application segment ID: %v\n", id)
@@ -416,7 +419,7 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
-	if _, _, err := zClient.applicationsegmentpra.Get(id); err != nil {
+	if _, _, err := applicationsegmentpra.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
@@ -424,7 +427,7 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 	}
 
 	// Perform the update
-	_, err := zClient.applicationsegmentpra.Update(id, &req)
+	_, err := applicationsegmentpra.Update(service, id, &req)
 	if err != nil {
 		return err
 	}
@@ -433,7 +436,7 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 	time.Sleep(5 * time.Second)
 
 	// Fetch the latest resource state after the update
-	_, _, err = zClient.applicationsegmentpra.Get(id)
+	_, _, err = applicationsegmentpra.Get(service, id)
 	if err != nil {
 		log.Printf("[ERROR] Failed to fetch application segment after update: %s", err)
 		return err
@@ -445,25 +448,28 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 
 func resourceApplicationSegmentPRADelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.ApplicationSegmentPRA
+
 	id := d.Id()
 	segmentGroupID, ok := d.GetOk("segment_group_id")
 	if ok && segmentGroupID != nil {
 		gID, ok := segmentGroupID.(string)
 		if ok && gID != "" {
 			// detach it from segment group first
-			if err := detachSraPortalsFromGroup(zClient, id, gID); err != nil {
+			if err := detachSegmentGroup(zClient, id, gID); err != nil {
 				return err
 			}
 		}
 	}
 	log.Printf("[INFO] Deleting sra application segment with id %v\n", id)
-	if _, err := zClient.applicationsegmentpra.Delete(id); err != nil {
+	if _, err := applicationsegmentpra.Delete(service, id); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+/*
 func detachSraPortalsFromGroup(client *Client, segmentID, segmentGroupID string) error {
 	log.Printf("[INFO] Detaching pra application segment  %s from segment group: %s\n", segmentID, segmentGroupID)
 	segGroup, _, err := client.segmentgroup.Get(segmentGroupID)
@@ -481,6 +487,7 @@ func detachSraPortalsFromGroup(client *Client, segmentID, segmentGroupID string)
 	_, err = client.segmentgroup.Update(segmentGroupID, segGroup)
 	return err
 }
+*/
 
 func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentpra.AppSegmentPRA {
 	details := applicationsegmentpra.AppSegmentPRA{
@@ -520,7 +527,13 @@ func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id str
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if zClient != nil && id != "" {
-		resource, _, err := zClient.applicationsegment.Get(id)
+		microTenantID := GetString(d.Get("microtenant_id"))
+		service := zClient.ApplicationSegmentInspection
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		resource, _, err := applicationsegmentpra.Get(service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
 			remoteUDPAppPortRanges = resource.UDPPortRanges
@@ -662,16 +675,24 @@ func flattenAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentpr
 
 func checkForPRAPortsOverlap(client *Client, app applicationsegmentpra.AppSegmentPRA) error {
 	time.Sleep(time.Second * time.Duration(rand.Intn(5)))
-	apps, _, err := client.browseraccess.GetAll()
+
+	microTenantID := app.MicroTenantID
+	service := client.ApplicationSegmentPRA
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	apps, _, err := applicationsegmentpra.GetAll(service)
 	if err != nil {
 		return err
 	}
 	for _, app2 := range apps {
 		if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found && app2.ID != app.ID && app2.Name != app.Name {
-			// check for udp ports
+			// check for TCP ports
 			if overlap, o1, o2 := PRAPortOverlap(app.TCPPortRanges, app2.TCPPortRanges); overlap {
 				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
 			}
+			// check for UDP ports
 			if overlap, o1, o2 := PRAPortOverlap(app.UDPPortRanges, app2.UDPPortRanges); overlap {
 				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
 			}

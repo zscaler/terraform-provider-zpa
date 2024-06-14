@@ -21,6 +21,7 @@ func resourceInspectionProfile() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
+				service := zClient.InspectionProfile
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -28,7 +29,7 @@ func resourceInspectionProfile() *schema.Resource {
 					// assume if the passed value is an int
 					d.Set("profile_id", id)
 				} else {
-					resp, _, err := zClient.inspection_profile.GetByName(id)
+					resp, _, err := inspection_profile.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						d.Set("profile_id", resp.ID)
@@ -253,6 +254,7 @@ func validateInspectionProfile(profile *inspection_profile.InspectionProfile) er
 
 func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionProfile
 
 	req := expandInspectionProfile(d)
 	log.Printf("[INFO] Creating inspection profile with request\n%+v\n", req)
@@ -260,7 +262,7 @@ func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 	// injectPredefinedControls(zClient, &req)
-	resp, _, err := zClient.inspection_profile.Create(req)
+	resp, _, err := inspection_profile.Create(service, req)
 	if err != nil {
 		return err
 	}
@@ -268,19 +270,20 @@ func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) erro
 
 	d.SetId(resp.ID)
 	if v, ok := d.GetOk("associate_all_controls"); ok && v.(bool) {
-		p, _, err := zClient.inspection_profile.Get(resp.ID)
+		p, _, err := inspection_profile.Get(service, resp.ID)
 		if err != nil {
 			return err
 		}
-		zClient.inspection_profile.PutAssociate(resp.ID, p)
+		inspection_profile.PutAssociate(service, resp.ID, p)
 	}
 	return resourceInspectionProfileRead(d, m)
 }
 
 func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionProfile
 
-	resp, _, err := zClient.inspection_profile.Get(d.Id())
+	resp, _, err := inspection_profile.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing inspection profile %s from state because it no longer exists in ZPA", d.Id())
@@ -367,6 +370,7 @@ func flattenCustomControlsSimple(customControl []inspection_profile.InspectionCu
 
 func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionProfile
 
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection profile ID: %v\n", id)
@@ -375,7 +379,7 @@ func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-	if _, _, err := zClient.inspection_profile.Get(id); err != nil {
+	if _, _, err := inspection_profile.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
@@ -383,25 +387,26 @@ func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	// injectPredefinedControls(zClient, &req)
-	if _, err := zClient.inspection_profile.Update(id, &req); err != nil {
+	if _, err := inspection_profile.Update(service, id, &req); err != nil {
 		return err
 	}
 	if v, ok := d.GetOk("associate_all_controls"); ok && v.(bool) {
-		p, _, err := zClient.inspection_profile.Get(req.ID)
+		p, _, err := inspection_profile.Get(service, req.ID)
 		if err != nil {
 			return err
 		}
-		zClient.inspection_profile.PutAssociate(req.ID, p)
+		inspection_profile.PutAssociate(service, req.ID, p)
 	}
 	return resourceInspectionProfileRead(d, m)
 }
 
 func resourceInspectionProfileDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionProfile
 
 	log.Printf("[INFO] Deleting inspection profile ID: %v\n", d.Id())
 
-	if _, err := zClient.inspection_profile.Delete(d.Id()); err != nil {
+	if _, err := inspection_profile.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

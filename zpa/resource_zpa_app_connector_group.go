@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
@@ -20,7 +21,13 @@ func resourceAppConnectorGroup() *schema.Resource {
 		Delete: resourceAppConnectorGroupDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+				client := m.(*Client)
+				service := client.AppConnectorGroup
+
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -28,14 +35,13 @@ func resourceAppConnectorGroup() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := service.GetByName(id)
+					resp, _, err := appconnectorgroup.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
 					} else {
 						return []*schema.ResourceData{d}, err
 					}
-
 				}
 				return []*schema.ResourceData{d}, nil
 			},
@@ -187,7 +193,13 @@ func resourceAppConnectorGroup() *schema.Resource {
 }
 
 func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppConnectorGroup
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	if err := validateAndSetProfileNameID(d); err != nil {
 		return err
@@ -199,7 +211,7 @@ func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-	resp, _, err := service.Create(req)
+	resp, _, err := appconnectorgroup.Create(service, req)
 	if err != nil {
 		return err
 	}
@@ -210,20 +222,25 @@ func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppConnectorGroup
 
-	resp, _, err := service.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := appconnectorgroup.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing app connector group %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-
 		return err
 	}
 
-	log.Printf("[INFO] Getting application server:\n%+v\n", resp)
+	log.Printf("[INFO] Getting app connector group:\n%+v\n", resp)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("city_country", resp.CityCountry)
 	_ = d.Set("country_code", resp.CountryCode)
@@ -250,7 +267,13 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppConnectorGroup
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	if err := validateAndSetProfileNameID(d); err != nil {
 		return err
@@ -263,28 +286,28 @@ func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-	if _, _, err := service.Get(id); err != nil {
+	if _, _, err := appconnectorgroup.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := service.Update(id, &req); err != nil {
+	if _, err := appconnectorgroup.Update(service, id, &req); err != nil {
 		return err
 	}
 
 	return resourceAppConnectorGroupRead(d, m)
 }
 
-func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, policySetControllerService *policysetcontroller.Service) {
+func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, policySetControllerService *services.Service) {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
-	accessPolicySet, _, err := policySetControllerService.GetByPolicyType("ACCESS_POLICY")
+	accessPolicySet, _, err := policysetcontroller.GetByPolicyType(policySetControllerService, "ACCESS_POLICY")
 	if err != nil {
 		return
 	}
-	rules, _, err := policySetControllerService.GetAllByType("ACCESS_POLICY")
+	rules, _, err := policysetcontroller.GetAllByType(policySetControllerService, "ACCESS_POLICY")
 	if err != nil {
 		return
 	}
@@ -302,7 +325,8 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, pol
 		}
 		rule.AppConnectorGroups = ids
 		if changed {
-			if _, err := policySetControllerService.WithMicroTenant(GetString(d.Get("microtenant_id"))).UpdateRule(accessPolicySet.ID, rule.ID, &rule); err != nil {
+			microTenantID := GetString(d.Get("microtenant_id"))
+			if _, err := policysetcontroller.UpdateRule(policySetControllerService.WithMicroTenant(microTenantID), accessPolicySet.ID, rule.ID, &rule); err != nil {
 				continue
 			}
 		}
@@ -311,18 +335,41 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, pol
 
 func resourceAppConnectorGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	policySetControllerService := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	service := zClient.appconnectorgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	log.Printf("[INFO] Deleting app connector groupID: %v\n", d.Id())
+	policySetControllerService := zClient.PolicySetController
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		policySetControllerService = policySetControllerService.WithMicroTenant(microTenantID)
+	}
+
+	service := zClient.AppConnectorGroup
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	log.Printf("[INFO] Deleting app connector group ID: %v\n", d.Id())
 
 	// detach app connector group from all access policy rules
 	detachAppConnectorGroupFromAllAccessPolicyRules(d, policySetControllerService)
 
-	if _, err := service.Delete(d.Id()); err != nil {
+	if _, err := appconnectorgroup.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
 	log.Printf("[INFO] app connector group deleted")
+	return nil
+}
+
+func validateTCPQuickAck(tcp appconnectorgroup.AppConnectorGroup) error {
+	if tcp.TCPQuickAckApp != tcp.TCPQuickAckAssistant {
+		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
+	}
+	if tcp.TCPQuickAckApp != tcp.TCPQuickAckReadAssistant {
+		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
+	}
+	if tcp.TCPQuickAckAssistant != tcp.TCPQuickAckReadAssistant {
+		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
+	}
 	return nil
 }
 
@@ -353,17 +400,4 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		VersionProfileName:       d.Get("version_profile_name").(string),
 	}
 	return appConnectorGroup
-}
-
-func validateTCPQuickAck(tcp appconnectorgroup.AppConnectorGroup) error {
-	if tcp.TCPQuickAckApp != tcp.TCPQuickAckAssistant {
-		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
-	}
-	if tcp.TCPQuickAckApp != tcp.TCPQuickAckReadAssistant {
-		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
-	}
-	if tcp.TCPQuickAckAssistant != tcp.TCPQuickAckReadAssistant {
-		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
-	}
-	return nil
 }

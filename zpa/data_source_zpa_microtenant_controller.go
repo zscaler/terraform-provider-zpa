@@ -211,12 +211,13 @@ func dataSourceMicrotenantController() *schema.Resource {
 
 func dataSourceMicrotenantControllerRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.MicroTenants
 
 	var resp *microtenants.MicroTenant
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for microtenant %s\n", id)
-		res, _, err := zClient.microtenants.Get(id)
+		res, _, err := microtenants.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -226,7 +227,7 @@ func dataSourceMicrotenantControllerRead(d *schema.ResourceData, m interface{}) 
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for microtenant name %s\n", name)
-		res, _, err := zClient.microtenants.GetByName(name)
+		res, _, err := microtenants.GetByName(service, name)
 		if err != nil {
 			return err
 		}

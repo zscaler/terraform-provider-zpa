@@ -54,12 +54,13 @@ func dataSourceCBIBanners() *schema.Resource {
 
 func dataSourceCBIBannersRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIBannerController
 
 	var resp *cbibannercontroller.CBIBannerController
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for cbi banner %s\n", id)
-		res, _, err := zClient.cbibannercontroller.Get(id)
+		res, _, err := cbibannercontroller.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -68,7 +69,7 @@ func dataSourceCBIBannersRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data cbi banner name %s\n", name)
-		res, _, err := zClient.cbibannercontroller.GetByName(name)
+		res, _, err := cbibannercontroller.GetByName(service, name)
 		if err != nil {
 			return err
 		}

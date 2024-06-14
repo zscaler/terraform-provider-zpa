@@ -361,12 +361,13 @@ func dataSourceInspectionProfile() *schema.Resource {
 
 func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionProfile
 
 	var resp *inspection_profile.InspectionProfile
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for inspection profile  %s\n", id)
-		res, _, err := zClient.inspection_profile.Get(id)
+		res, _, err := inspection_profile.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -375,7 +376,7 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) erro
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for inspection profile name %s\n", name)
-		res, _, err := zClient.inspection_profile.GetByName(name)
+		res, _, err := inspection_profile.GetByName(service, name)
 		if err != nil {
 			return err
 		}

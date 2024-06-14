@@ -68,7 +68,7 @@ func testAccCheckCBIBannerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		banner, _, err := apiClient.cbibannercontroller.Get(rs.Primary.ID)
+		banner, _, err := cbibannercontroller.Get(apiClient.CBIBannerController, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -93,7 +93,7 @@ func testAccCheckCBIBannerExists(resource string, banner *cbibannercontroller.CB
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedBanner, _, err := apiClient.cbibannercontroller.Get(rs.Primary.ID)
+		receivedBanner, _, err := cbibannercontroller.Get(apiClient.CBIBannerController, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

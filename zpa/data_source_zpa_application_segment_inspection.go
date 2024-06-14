@@ -187,13 +187,19 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 }
 
 func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).applicationsegmentinspection.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.ApplicationSegmentInspection
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	var resp *applicationsegmentinspection.AppSegmentInspection
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for inspection application segment %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := applicationsegmentinspection.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -202,7 +208,7 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interf
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for inspection application segment name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := applicationsegmentinspection.GetByName(service, name)
 		if err != nil {
 			return err
 		}

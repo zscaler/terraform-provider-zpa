@@ -54,12 +54,18 @@ func resourceBaCertificate() *schema.Resource {
 }
 
 func resourceBaCertificateCreate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).bacertificate.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.BACertificate
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	req := expandBaCertificate(d)
 	log.Printf("[INFO] Creating certificate with request\n%+v\n", req)
 
-	baCertificate, _, err := service.Create(req)
+	baCertificate, _, err := bacertificate.Create(service, req)
 	if err != nil {
 		return err
 	}
@@ -71,8 +77,14 @@ func resourceBaCertificateCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.BACertificate
 
-	resp, _, err := zClient.bacertificate.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := bacertificate.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing ba certificate %s from state because it no longer exists in ZPA", d.Id())
@@ -93,11 +105,17 @@ func resourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceBaCertificateDelete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).bacertificate.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.BACertificate
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	log.Printf("[INFO] Deleting certificate ID: %v\n", d.Id())
 
-	if _, err := service.Delete(d.Id()); err != nil {
+	if _, err := bacertificate.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

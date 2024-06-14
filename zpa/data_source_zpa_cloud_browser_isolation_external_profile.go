@@ -103,12 +103,13 @@ func dataSourceCBIExternalProfile() *schema.Resource {
 
 func dataSourceCBIExternalProfileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIProfileController
 
 	var resp *cbiprofilecontroller.IsolationProfile
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for cbi external profile %s\n", id)
-		res, _, err := zClient.cbiprofilecontroller.Get(id)
+		res, _, err := cbiprofilecontroller.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -117,7 +118,7 @@ func dataSourceCBIExternalProfileRead(d *schema.ResourceData, m interface{}) err
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for cbi external profile name %s\n", name)
-		res, _, err := zClient.cbiprofilecontroller.GetByName(name)
+		res, _, err := cbiprofilecontroller.GetByName(service, name)
 		if err != nil {
 			return err
 		}

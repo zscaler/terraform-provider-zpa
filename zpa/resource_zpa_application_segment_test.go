@@ -72,14 +72,14 @@ func TestAccResourceApplicationSegmentBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationSegmentDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPAApplicationSegment {
 			continue
 		}
 
-		_, _, err := client.applicationsegment.GetByName(rs.Primary.Attributes["name"])
+		_, _, err := applicationsegment.GetByName(apiClient.ApplicationSegment, rs.Primary.Attributes["name"])
 		if err == nil {
 			return fmt.Errorf("Application Segment still exists")
 		}
@@ -98,8 +98,8 @@ func testAccCheckApplicationSegmentExists(resource string, segment *applications
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no Application Segment ID is set")
 		}
-		client := testAccProvider.Meta().(*Client)
-		receivedApp, _, err := client.applicationsegment.Get(rs.Primary.ID)
+		apiClient := testAccProvider.Meta().(*Client)
+		receivedApp, _, err := applicationsegment.Get(apiClient.ApplicationSegment, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
@@ -69,7 +70,7 @@ func TestAccResourcePolicyInspectionRuleBasic(t *testing.T) {
 
 func testAccCheckPolicyInspectionRuleDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := apiClient.policysetcontroller.GetByPolicyType("INSPECTION_POLICY")
+	accessPolicy, _, err := policysetcontroller.GetByPolicyType(apiClient.PolicySetController, "INSPECTION_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource INSPECTION_POLICY. Recevied error: %s", err)
 	}
@@ -78,7 +79,7 @@ func testAccCheckPolicyInspectionRuleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.policysetcontroller.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
+		rule, _, err := policysetcontroller.GetPolicyRule(apiClient.PolicySetController, accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -103,11 +104,11 @@ func testAccCheckPolicyInspectionRuleExists(resource string) resource.TestCheckF
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := apiClient.policysetcontroller.GetByPolicyType("INSPECTION_POLICY")
+		resp, _, err := policysetcontroller.GetByPolicyType(apiClient.PolicySetController, "INSPECTION_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource INSPECTION_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = apiClient.policysetcontroller.GetPolicyRule(resp.ID, rs.Primary.ID)
+		_, _, err = policysetcontroller.GetPolicyRule(apiClient.PolicySetController, resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
