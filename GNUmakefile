@@ -35,8 +35,8 @@ clean-all:
 	go clean -cache -testcache -modcache ./...
 
 sweep:
-    @echo "WARNING: This will destroy infrastructure. Use only in development accounts."
-    go test $(TEST) -sweep=$(SWEEP) $(SWEEPARGS)
+	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	go test $(TEST) -sweep=$(SWEEP) $(SWEEPARGS)
 
 test:
 	echo $(TEST) | \
@@ -101,7 +101,7 @@ lint:
 	@$(TFPROVIDERLINT) \
 		-c 1 \
 		-AT001 \
-    -R004 \
+        -R004 \
 		-S001 \
 		-S002 \
 		-S003 \
@@ -144,4 +144,6 @@ ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))
 	git clone https://$(WEBSITE_REPO) $(GOPATH)/src/$(WEBSITE_REPO)
 endif
 	@$(MAKE) -C $(GOPATH)/src/$(WEBSITE_REPO) website-provider-test PROVIDER_PATH=$(shell pwd) PROVIDER_NAME=$(PKG_NAME)
+
 .PHONY: build test testacc vet fmt fmtcheck errcheck tools vendor-status test-compile website-lint website website-test
+

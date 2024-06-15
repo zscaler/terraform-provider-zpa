@@ -1,14 +1,13 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
 	"testing"
 
-	"context"
-
-	hclog "github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
@@ -91,28 +90,26 @@ func TestRunForcedSweeper(t *testing.T) {
 	testClient := &testClient{
 		sdkClient: sdkClient,
 	}
-	if *sweepFlag == "global" {
-		sweepTestAppConnectorGroup(testClient)
-		sweepTestApplicationServer(testClient)
-		sweepTestApplicationSegment(testClient)
-		sweepTestApplicationSegmentBA(testClient)
-		sweepTestApplicationInspection(testClient)
-		sweepTestApplicationPRA(testClient)
-		sweepTestInspectionCustomControl(testClient)
-		sweepTestInspectionProfile(testClient)
-		sweepTestLSSConfigController(testClient) // TODO: Tests is failing on QA2 tenant. Needs further investigation.
-		sweepTestAccessPolicyRuleByType(testClient)
-		sweepTestProvisioningKey(testClient)
-		sweepTestSegmentGroup(testClient)
-		sweepTestServerGroup(testClient)
-		sweepTestServiceEdgeGroup(testClient)
-		sweepTestCBIBanner(testClient)
-		sweepTestCBIExternalProfile(testClient)
-		sweepTestPRACredentialController(testClient)
-		sweepTestPRAConsoleController(testClient)
-		sweepTestPRAPortalController(testClient)
-		sweepTestPRAPrivilegedApprovalController(testClient)
-	}
+	sweepTestAppConnectorGroup(testClient)
+	sweepTestApplicationServer(testClient)
+	sweepTestApplicationSegment(testClient)
+	sweepTestApplicationSegmentBA(testClient)
+	sweepTestApplicationInspection(testClient)
+	sweepTestApplicationPRA(testClient)
+	sweepTestInspectionCustomControl(testClient)
+	sweepTestInspectionProfile(testClient)
+	sweepTestLSSConfigController(testClient) // TODO: Tests is failing on QA2 tenant. Needs further investigation.
+	sweepTestAccessPolicyRuleByType(testClient)
+	sweepTestProvisioningKey(testClient)
+	sweepTestSegmentGroup(testClient)
+	sweepTestServerGroup(testClient)
+	sweepTestServiceEdgeGroup(testClient)
+	sweepTestCBIBanner(testClient)
+	sweepTestCBIExternalProfile(testClient)
+	sweepTestPRACredentialController(testClient)
+	sweepTestPRAConsoleController(testClient)
+	sweepTestPRAPortalController(testClient)
+	sweepTestPRAPrivilegedApprovalController(testClient)
 }
 
 // Sets up sweeper to clean up dangling resources

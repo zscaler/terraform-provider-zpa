@@ -2,7 +2,6 @@ package zpa
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"testing"
@@ -17,7 +16,6 @@ var (
 	testAccProvider          *schema.Provider
 	testAccProviders         map[string]*schema.Provider
 	testAccProviderFactories map[string]func() (*schema.Provider, error)
-	sweepFlag                = flag.String("sweep", "", "a flag to control sweeper behavior")
 )
 
 func init() {
@@ -36,8 +34,6 @@ func init() {
 // TestMain overridden main testing function. Package level BeforeAll and AfterAll.
 // It also delineates between acceptance tests and unit tests
 func TestMain(m *testing.M) {
-	flag.Parse()
-
 	// TF_VAR_hostname allows the real hostname to be scripted into the config tests
 	// see examples/okta_resource_set/basic.tf
 	os.Setenv("TF_VAR_hostname", fmt.Sprintf("%s.%s.%s.%s", os.Getenv("ZPA_CLIENT_ID"), os.Getenv("ZPA_CLIENT_SECRET"), os.Getenv("ZPA_CUSTOMER_ID"), os.Getenv("ZPA_CLOUD")))
@@ -46,8 +42,9 @@ func TestMain(m *testing.M) {
 	// resources.
 	// NOTE: Don't run sweepers if we are playing back VCR as nothing should be
 	// going over the wire
-	if os.Getenv("ZPA_VCR_TF_ACC") != "play" && *sweepFlag != "" {
-		setupSweeper(resourcetype.ZPAAppConnectorGroup, sweepTestAppConnectorGroup)
+	if os.Getenv("ZPA_VCR_TF_ACC") != "play" {
+		// TODO: Tests is failing on QA2 tenant. Needs further investigation.
+		// setupSweeper(resourcetype.ZPAAppConnectorGroup, sweepTestAppConnectorGroup)
 		setupSweeper(resourcetype.ZPAApplicationServer, sweepTestApplicationServer)
 		setupSweeper(resourcetype.ZPAApplicationSegment, sweepTestApplicationSegment)
 		setupSweeper(resourcetype.ZPAApplicationSegmentBrowserAccess, sweepTestApplicationSegmentBA)
@@ -68,6 +65,7 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPAPRACredentialController, sweepTestPRACredentialController)
 		setupSweeper(resourcetype.ZPAPRAPortalController, sweepTestPRAPortalController)
 		setupSweeper(resourcetype.ZPAPRAApprovalController, sweepTestPRAPrivilegedApprovalController)
+
 	}
 
 	resource.TestMain(m)

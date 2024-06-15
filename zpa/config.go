@@ -8,6 +8,11 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimgroup"
 )
 
+func init() {
+	// remove timestamp from Zscaler provider logger, use the timestamp from the default terraform logger
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+}
+
 type Client struct {
 	AppConnectorGroup            *services.Service
 	AppConnectorController       *services.Service
