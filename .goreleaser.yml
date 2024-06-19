@@ -61,5 +61,3 @@ release:
   #   owner: zscaler
   #   name: terraform-provider-zpa
   draft: true
-changelog:
-  skip: true
