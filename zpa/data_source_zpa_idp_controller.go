@@ -187,12 +187,13 @@ func dataSourceIdpController() *schema.Resource {
 
 func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.IDPController
 
 	var resp *idpcontroller.IdpController
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for idp controller %s\n", id)
-		res, _, err := zClient.idpcontroller.Get(id)
+		res, _, err := idpcontroller.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -202,7 +203,7 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for idp controller name %s\n", name)
-		res, _, err := zClient.idpcontroller.GetByName(name)
+		res, _, err := idpcontroller.GetByName(service, name)
 		if err != nil {
 			return err
 		}

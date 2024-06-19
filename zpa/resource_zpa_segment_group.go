@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
@@ -19,7 +20,13 @@ func resourceSegmentGroup() *schema.Resource {
 		Delete: resourceSegmentGroupDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+				client := m.(*Client)
+				service := client.SegmentGroup
+
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -27,7 +34,7 @@ func resourceSegmentGroup() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := service.GetByName(id)
+					resp, _, err := segmentgroup.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -82,12 +89,18 @@ func resourceSegmentGroup() *schema.Resource {
 }
 
 func resourceSegmentGroupCreate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.SegmentGroup
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	req := expandSegmentGroup(d)
 	log.Printf("[INFO] Creating segment group with request\n%+v\n", req)
 
-	segmentgroup, _, err := service.Create(&req)
+	segmentgroup, _, err := segmentgroup.Create(service, &req)
 	if err != nil {
 		return err
 	}
@@ -98,9 +111,15 @@ func resourceSegmentGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.SegmentGroup
 
-	resp, _, err := service.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := segmentgroup.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing segment group %s from state because it no longer exists in ZPA", d.Id())
@@ -135,37 +154,45 @@ func flattenSegmentGroupApplicationsSimple(segmentGroup *segmentgroup.SegmentGro
 }
 
 func resourceSegmentGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.SegmentGroup
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	id := d.Id()
 	log.Printf("[INFO] Updating segment group ID: %v\n", id)
 	req := expandSegmentGroup(d)
 
-	if _, _, err := service.Get(id); err != nil {
+	if _, _, err := segmentgroup.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := service.Update(id, &req); err != nil {
+	if _, err := segmentgroup.Update(service, id, &req); err != nil {
 		return err
 	}
 
 	return resourceSegmentGroupRead(d, m)
 }
 
-func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService *policysetcontroller.Service) {
+func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService *services.Service) {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
+
 	var rules []policysetcontroller.PolicyRule
 	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
+
 	for _, t := range types {
-		policySet, _, err := policySetControllerService.GetByPolicyType(t)
+		policySet, _, err := policysetcontroller.GetByPolicyType(policySetControllerService, t)
 		if err != nil {
 			continue
 		}
-		r, _, err := policySetControllerService.GetAllByType(t)
+		r, _, err := policysetcontroller.GetAllByType(policySetControllerService, t)
 		if err != nil {
 			continue
 		}
@@ -174,6 +201,7 @@ func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService 
 			rules = append(rules, rule)
 		}
 	}
+
 	for _, rule := range rules {
 		changed := false
 		for i, condition := range rule.Conditions {
@@ -191,7 +219,7 @@ func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService 
 			rule.Conditions = []policysetcontroller.Conditions{}
 		}
 		if changed {
-			if _, err := policySetControllerService.UpdateRule(rule.PolicySetID, rule.ID, &rule); err != nil {
+			if _, err := policysetcontroller.UpdateRule(policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
 				continue
 			}
 		}
@@ -200,13 +228,15 @@ func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService 
 
 func resourceSegmentGroupDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	policySetControllerService := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	service := zClient.segmentgroup.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	microTenantID := GetString(d.Get("microtenant_id"))
+	policySetControllerService := zClient.PolicySetController.WithMicroTenant(microTenantID)
+	service := zClient.SegmentGroup.WithMicroTenant(microTenantID)
+
 	log.Printf("[INFO] Deleting segment group ID: %v\n", d.Id())
 
 	detachSegmentGroupFromAllPolicyRules(d.Id(), policySetControllerService)
 
-	if _, err := service.Delete(d.Id()); err != nil {
+	if _, err := segmentgroup.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

@@ -220,12 +220,17 @@ func dataSourceServiceEdgeController() *schema.Resource {
 
 func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.ServiceEdgeController
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	var resp *serviceedgecontroller.ServiceEdgeController
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for service edge controller %s\n", id)
-		res, _, err := zClient.serviceedgecontroller.Get(id)
+		res, _, err := serviceedgecontroller.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -234,7 +239,7 @@ func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, m interface{}) 
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for service edge controller name %s\n", name)
-		res, _, err := zClient.serviceedgecontroller.GetByName(name)
+		res, _, err := serviceedgecontroller.GetByName(service, name)
 		if err != nil {
 			return err
 		}

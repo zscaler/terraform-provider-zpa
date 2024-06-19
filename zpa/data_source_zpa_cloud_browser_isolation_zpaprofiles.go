@@ -58,13 +58,14 @@ func dataSourceCBIZPAProfiles() *schema.Resource {
 
 func dataSourceCBIZPAProfilesRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIZpaProfile
 
 	var resp *cbizpaprofile.ZPAProfiles
 
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for cbi zpa profile name %s\n", name)
-		res, _, err := zClient.cbizpaprofile.GetByName(name)
+		res, _, err := cbizpaprofile.GetByName(service, name)
 		if err != nil {
 			return err
 		}

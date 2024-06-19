@@ -111,7 +111,7 @@ func testAccCheckCBICertificateExists(resource string, certificate *cbicertifica
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedCertificate, _, err := apiClient.cbicertificatecontroller.Get(rs.Primary.ID)
+		receivedCertificate, _, err := cbicertificatecontroller.Get(apiClient.CBICertificateController, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -129,7 +129,7 @@ func testAccCheckCBICertificateDestroy(s *terraform.State) error {
 			continue
 		}
 
-		cbiCertificate, _, err := apiClient.cbicertificatecontroller.Get(rs.Primary.ID)
+		cbiCertificate, _, err := cbicertificatecontroller.Get(apiClient.CBICertificateController, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)

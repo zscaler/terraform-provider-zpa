@@ -72,7 +72,13 @@ func testAccCheckAppConnectorGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.appconnectorgroup.Get(rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.AppConnectorGroup
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		rule, _, err := appconnectorgroup.Get(service, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -97,9 +103,15 @@ func testAccCheckAppConnectorGroupExists(resource string, rule *appconnectorgrou
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedRule, _, err := apiClient.appconnectorgroup.Get(rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.AppConnectorGroup
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedRule, _, err := appconnectorgroup.Get(service, rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
+			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}
 		*rule = *receivedRule
 

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbytype"
 )
 
 func dataSourceApplicationSegmentByType() *schema.Resource {
@@ -76,8 +77,13 @@ func dataSourceApplicationSegmentByType() *schema.Resource {
 }
 
 func dataSourceApplicationSegmentByTypeRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*Client)
-	service := client.applicationsegmentbytype.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.ApplicationSegmentByType
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	applicationType := d.Get("application_type").(string)
 	if applicationType != "BROWSER_ACCESS" && applicationType != "SECURE_REMOTE_ACCESS" && applicationType != "INSPECT" {
@@ -91,7 +97,7 @@ func dataSourceApplicationSegmentByTypeRead(d *schema.ResourceData, m interface{
 	}
 
 	// Call the SDK function
-	resp, _, err := service.GetByApplicationType(name, applicationType, true)
+	resp, _, err := applicationsegmentbytype.GetByApplicationType(service, name, applicationType, true)
 	if err != nil {
 		return err
 	}

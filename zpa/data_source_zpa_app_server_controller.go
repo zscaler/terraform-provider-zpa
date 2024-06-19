@@ -66,13 +66,19 @@ func dataSourceApplicationServer() *schema.Resource {
 }
 
 func dataSourceApplicationServerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appservercontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppServerController
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	var resp *appservercontroller.ApplicationServer
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for application server  %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := appservercontroller.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -81,7 +87,7 @@ func dataSourceApplicationServerRead(d *schema.ResourceData, m interface{}) erro
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for application server name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := appservercontroller.GetByName(service, name)
 		if err != nil {
 			return err
 		}

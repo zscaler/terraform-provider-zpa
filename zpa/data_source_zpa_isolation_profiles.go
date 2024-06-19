@@ -58,12 +58,13 @@ func dataSourceIsolationProfile() *schema.Resource {
 
 func dataSourceIsolationProfileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.IsolationProfile
 
 	var resp *isolationprofile.IsolationProfile
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for isolation profile name %s\n", name)
-		res, _, err := zClient.isolationprofile.GetByName(name)
+		res, _, err := isolationprofile.GetByName(service, name)
 		if err != nil {
 			return err
 		}

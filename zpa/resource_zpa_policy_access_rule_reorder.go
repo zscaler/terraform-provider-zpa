@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 // Define the Terraform resource for reordering policy access rules.
@@ -131,9 +132,16 @@ func getRules(d *schema.ResourceData) (*RulesOrders, error) {
 
 func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.PolicySetController
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	policyType := d.Get("policy_type").(string)
 
-	currentRules, _, err := zClient.policysetcontroller.GetAllByType(policyType)
+	currentRules, _, err := policysetcontroller.GetAllByType(service, policyType)
 	if err != nil {
 		log.Printf("[ERROR] failed to get rules: %v\n", err)
 		d.SetId("")
@@ -179,8 +187,14 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) erro
 
 func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.PolicySetController
 
-	existingRules, _, err := zClient.policysetcontroller.GetAllByType(d.Get("policy_type").(string))
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	existingRules, _, err := policysetcontroller.GetAllByType(service, d.Get("policy_type").(string))
 	if err != nil {
 		log.Printf("[ERROR] Failed to get existing rules: %v\n", err)
 		return err
@@ -217,7 +231,7 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 		ruleIdToOrder[id] = order + baseOrder - 1
 	}
 
-	if _, err := zClient.policysetcontroller.BulkReorder(d.Get("policy_type").(string), ruleIdToOrder); err != nil {
+	if _, err := policysetcontroller.BulkReorder(service, d.Get("policy_type").(string), ruleIdToOrder); err != nil {
 		log.Printf("[ERROR] Bulk reordering rules failed: %v", err)
 		return err
 	}

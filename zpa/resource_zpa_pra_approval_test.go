@@ -65,7 +65,7 @@ func testAccCheckPRAPrivilegedApprovalDestroy(s *terraform.State) error {
 			continue
 		}
 
-		group, _, err := apiClient.praapproval.Get(rs.Primary.ID)
+		group, _, err := praapproval.Get(apiClient.PRAApproval, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -90,7 +90,7 @@ func testAccCheckPRAPrivilegedApprovalExists(resource string, approval *praappro
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedApproval, _, err := apiClient.praapproval.Get(rs.Primary.ID)
+		receivedApproval, _, err := praapproval.Get(apiClient.PRAApproval, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

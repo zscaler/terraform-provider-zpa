@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 )
 
 func dataSourceLSSStatusCodes() *schema.Resource {
@@ -61,9 +62,11 @@ func toMapString(v map[string]interface{}) map[string]string {
 
 func dataSourceLSSStatusCodesRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.LSSConfigController
+
 	log.Printf("[INFO] Getting data for LSS Status Codes set\n")
 
-	resp, _, err := zClient.lssconfigcontroller.GetStatusCodes()
+	resp, _, err := lssconfigcontroller.GetStatusCodes(service)
 	if err != nil {
 		return err
 	}

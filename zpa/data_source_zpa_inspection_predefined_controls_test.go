@@ -48,11 +48,6 @@ data "zpa_inspection_predefined_controls" "control03" {
     version = "OWASP_CRS/3.3.0"
 }
 
-data "zpa_inspection_predefined_controls" "control04" {
-    name = "Attempted multipart/form-data bypass"
-    version = "OWASP_CRS/3.3.0"
-}
-
 data "zpa_inspection_predefined_controls" "control05" {
     name = "GET or HEAD Request with Body Content"
     version = "OWASP_CRS/3.3.0"

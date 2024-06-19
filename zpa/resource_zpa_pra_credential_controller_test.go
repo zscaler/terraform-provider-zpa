@@ -77,7 +77,7 @@ func testAccCheckPRACredentialControllerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		group, _, err := apiClient.pracredential.Get(rs.Primary.ID)
+		group, _, err := pracredential.Get(apiClient.PRACredential, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -102,7 +102,7 @@ func testAccCheckPRACredentialControllerExists(resource string, credential *prac
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedCredential, _, err := apiClient.pracredential.Get(rs.Primary.ID)
+		receivedCredential, _, err := pracredential.Get(apiClient.PRACredential, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

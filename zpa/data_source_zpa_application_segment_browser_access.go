@@ -188,11 +188,18 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 
 func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.BrowserAccess
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	var resp *browseraccess.BrowserAccess
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for browser access application %s\n", id)
-		res, _, err := zClient.browseraccess.Get(id)
+		res, _, err := browseraccess.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -201,7 +208,7 @@ func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m int
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for browser access application name %s\n", name)
-		res, _, err := zClient.browseraccess.GetByName(name)
+		res, _, err := browseraccess.GetByName(service, name)
 		if err != nil {
 			return err
 		}

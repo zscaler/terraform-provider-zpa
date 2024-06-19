@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
 )
 
@@ -18,7 +19,13 @@ func resourceApplicationServer() *schema.Resource {
 		Delete: resourceApplicationServerDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client).appservercontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+				client := m.(*Client)
+				service := client.AppServerController
+
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -26,7 +33,7 @@ func resourceApplicationServer() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.GetByName(id)
+					resp, _, err := appservercontroller.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -94,12 +101,18 @@ func resourceApplicationServer() *schema.Resource {
 }
 
 func resourceApplicationServerCreate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appservercontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppServerController
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	req := expandCreateAppServerRequest(d)
 	log.Printf("[INFO] Creating zpa application server with request\n%+v\n", req)
 
-	resp, _, err := service.Create(req)
+	resp, _, err := appservercontroller.Create(service, req)
 	if err != nil {
 		return err
 	}
@@ -110,9 +123,15 @@ func resourceApplicationServerCreate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceApplicationServerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appservercontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppServerController
 
-	resp, _, err := service.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := appservercontroller.Get(service, d.Id())
 	if err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing application server %s from state because it no longer exists in ZPA", d.Id())
@@ -135,21 +154,26 @@ func resourceApplicationServerRead(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceApplicationServerUpdate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appservercontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppServerController
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	log.Println("An updated occurred")
 
 	if d.HasChange("app_server_group_ids") || d.HasChange("name") || d.HasChange("description") || d.HasChange("address") || d.HasChange("enabled") {
 		log.Println("The AppServerGroupID, name, description or address has been changed")
 
-		if _, _, err := service.Get(d.Id()); err != nil {
+		if _, _, err := appservercontroller.Get(service, d.Id()); err != nil {
 			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 				d.SetId("")
 				return nil
 			}
 		}
 
-		if _, err := service.Update(d.Id(), appservercontroller.ApplicationServer{
+		if _, err := appservercontroller.Update(service, d.Id(), appservercontroller.ApplicationServer{
 			AppServerGroupIds: SetToStringSlice(d.Get("app_server_group_ids").(*schema.Set)),
 			Name:              d.Get("name").(string),
 			Description:       d.Get("description").(string),
@@ -165,8 +189,13 @@ func resourceApplicationServerUpdate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceApplicationServerDelete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).appservercontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.AppServerController
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	log.Printf("[INFO] Deleting application server ID: %v\n", d.Id())
 
 	err := removeServerFromGroup(service, d.Id())
@@ -174,7 +203,7 @@ func resourceApplicationServerDelete(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-	if _, err = service.Delete(d.Id()); err != nil {
+	if _, err = appservercontroller.Delete(service, d.Id()); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
@@ -185,10 +214,10 @@ func resourceApplicationServerDelete(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func removeServerFromGroup(service *appservercontroller.Service, serverID string) error {
+func removeServerFromGroup(service *services.Service, serverID string) error {
 	// Remove the reference to this server from server groups.
 
-	resp, _, err := service.Get(serverID)
+	resp, _, err := appservercontroller.Get(service, serverID)
 	if err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			return nil
@@ -201,7 +230,7 @@ func removeServerFromGroup(service *appservercontroller.Service, serverID string
 		resp.AppServerGroupIds = make([]string, 0)
 
 		log.Printf("[INFO] Updating server group ID: %s", serverID)
-		_, err = service.Update(serverID, *resp)
+		_, err = appservercontroller.Update(service, serverID, *resp)
 		if err != nil {
 			log.Printf("[ERROR] Failed to update application server ID: %s", serverID)
 			return err

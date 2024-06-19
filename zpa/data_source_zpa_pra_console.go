@@ -103,13 +103,18 @@ func dataSourcePRAConsoleController() *schema.Resource {
 }
 
 func dataSourcePRAConsoleControllerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).praconsole.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRAConsole
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	var resp *praconsole.PRAConsole
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for pra console controller %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := praconsole.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -118,7 +123,7 @@ func dataSourcePRAConsoleControllerRead(d *schema.ResourceData, m interface{}) e
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for sra console controller name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := praconsole.GetByName(service, name)
 		if err != nil {
 			return err
 		}

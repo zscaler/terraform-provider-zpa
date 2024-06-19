@@ -21,6 +21,7 @@ func resourceInspectionCustomControls() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
+				service := zClient.InspectionCustomControls
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -28,7 +29,7 @@ func resourceInspectionCustomControls() *schema.Resource {
 					// assume if the passed value is an int
 					d.Set("custom_id", id)
 				} else {
-					resp, _, err := zClient.inspection_custom_controls.GetByName(id)
+					resp, _, err := inspection_custom_controls.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						d.Set("custom_id", resp.ID)
@@ -251,30 +252,40 @@ func resourceInspectionCustomControls() *schema.Resource {
 	}
 }
 
-func updateInspectionProfile(zClient *Client, customControlId string, req *inspection_custom_controls.InspectionCustomControl) {
-	obj, _, err := zClient.inspection_custom_controls.Get(customControlId)
-	if err == nil {
-		for _, i := range req.AssociatedInspectionProfileNames {
-			profile, _, err := zClient.inspection_profile.Get(i.ID)
-			if err != nil {
-				continue
-			}
-			zClient.inspection_profile.Patch(profile.ID, &inspection_profile.InspectionProfile{
-				CustomControls: []inspection_profile.InspectionCustomControl{
-					{
-						ID:          obj.ID,
-						Action:      req.Action,
-						ActionValue: req.ActionValue,
-					},
+func updateInspectionProfile(zClient *Client, customControlID string, req *inspection_custom_controls.InspectionCustomControl) {
+	obj, _, err := inspection_custom_controls.Get(zClient.InspectionCustomControls, customControlID)
+	if err != nil {
+		log.Printf("[ERROR] Error fetching inspection custom control: %s", err)
+		return
+	}
+
+	for _, profileName := range req.AssociatedInspectionProfileNames {
+		profile, _, err := inspection_profile.Get(zClient.InspectionProfile, profileName.ID)
+		if err != nil {
+			log.Printf("[ERROR] Error fetching inspection profile: %s", err)
+			continue
+		}
+
+		updateProfile := &inspection_profile.InspectionProfile{
+			CustomControls: []inspection_profile.InspectionCustomControl{
+				{
+					ID:          obj.ID,
+					Action:      req.Action,
+					ActionValue: req.ActionValue,
 				},
-				PredefinedControls: profile.PredefinedControls,
-			})
+			},
+			PredefinedControls: profile.PredefinedControls,
+		}
+
+		if _, err := inspection_profile.Patch(zClient.InspectionProfile, profile.ID, updateProfile); err != nil {
+			log.Printf("[ERROR] Error patching inspection profile: %s", err)
 		}
 	}
 }
 
 func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionCustomControls
 
 	req := expandInspectionCustomControls(d)
 	log.Printf("[INFO] Creating custom inspection control with request\n%+v\n", req)
@@ -284,7 +295,7 @@ func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{
 	if err := validateRules(req); err != nil {
 		return err
 	}
-	resp, _, err := zClient.inspection_custom_controls.Create(req)
+	resp, _, err := inspection_custom_controls.Create(service, req)
 	if err != nil {
 		return err
 	}
@@ -297,8 +308,9 @@ func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{
 
 func resourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionCustomControls
 
-	resp, _, err := zClient.inspection_custom_controls.Get(d.Id())
+	resp, _, err := inspection_custom_controls.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing custom inspection control %s from state because it no longer exists in ZPA", d.Id())
@@ -330,6 +342,7 @@ func resourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{})
 
 func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionCustomControls
 
 	id := d.Id()
 	log.Printf("[INFO] Updating custom inspection control ID: %v\n", id)
@@ -338,14 +351,14 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 		return err
 	}
 
-	if _, _, err := zClient.inspection_custom_controls.Get(id); err != nil {
+	if _, _, err := inspection_custom_controls.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.inspection_custom_controls.Update(id, &req); err != nil {
+	if _, err := inspection_custom_controls.Update(service, id, &req); err != nil {
 		return err
 	}
 	updateInspectionProfile(zClient, id, &req)
@@ -354,15 +367,16 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 
 func resourceInspectionCustomControlsDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionCustomControls
 
 	log.Printf("[INFO] Deleting custom inspection control ID: %v\n", d.Id())
 	// First de-associate it from all inspection profiles
-	c, _, err := zClient.inspection_custom_controls.Get(d.Id())
+	c, _, err := inspection_custom_controls.Get(service, d.Id())
 	if err != nil {
 		return err
 	}
 	for _, inspectionProfile := range c.AssociatedInspectionProfileNames {
-		inspectionProfileRemote, _, err := zClient.inspection_profile.Get(inspectionProfile.ID)
+		inspectionProfileRemote, _, err := inspection_profile.Get(service, inspectionProfile.ID)
 		if err != nil {
 			continue
 		}
@@ -375,9 +389,9 @@ func resourceInspectionCustomControlsDelete(d *schema.ResourceData, m interface{
 			new = append(new, tmp)
 		}
 		inspectionProfileRemote.CustomControls = new
-		zClient.inspection_profile.Update(inspectionProfile.ID, inspectionProfileRemote)
+		inspection_profile.Update(service, inspectionProfile.ID, inspectionProfileRemote)
 	}
-	if _, err := zClient.inspection_custom_controls.Delete(d.Id()); err != nil {
+	if _, err := inspection_custom_controls.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

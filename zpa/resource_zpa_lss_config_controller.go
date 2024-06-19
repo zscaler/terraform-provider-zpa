@@ -102,6 +102,7 @@ func resourceLSSConfigController() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
+				service := zClient.LSSConfigController
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -109,7 +110,7 @@ func resourceLSSConfigController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.lssconfigcontroller.GetByName(id)
+					resp, _, err := lssconfigcontroller.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -236,6 +237,7 @@ func resourceLSSConfigController() *schema.Resource {
 
 func resourceLSSConfigControllerCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.LSSConfigController
 
 	req := expandLSSResource(d)
 	log.Printf("[INFO] Creating zpa lss config controller with request\n%+v\n", req)
@@ -300,7 +302,7 @@ func resourceLSSConfigControllerCreate(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	resp, _, err := zClient.lssconfigcontroller.Create(&req)
+	resp, _, err := lssconfigcontroller.Create(service, &req)
 	if err != nil {
 		return err
 	}
@@ -313,8 +315,9 @@ func resourceLSSConfigControllerCreate(d *schema.ResourceData, m interface{}) er
 
 func resourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.LSSConfigController
 
-	resp, _, err := zClient.lssconfigcontroller.Get(d.Id())
+	resp, _, err := lssconfigcontroller.Get(service, d.Id())
 	if err != nil {
 		if err.(*client.ErrorResponse).IsObjectNotFound() {
 			log.Printf("[WARN] Removing lss config controller %s from state because it no longer exists in ZPA", d.Id())
@@ -337,6 +340,7 @@ func resourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) erro
 
 func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.LSSConfigController
 
 	id := d.Id()
 	req := expandLSSResource(d)
@@ -402,7 +406,7 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) er
 		}
 	}
 
-	if _, _, err := zClient.lssconfigcontroller.Get(id); err != nil {
+	if _, _, err := lssconfigcontroller.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
@@ -410,7 +414,7 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) er
 		return err
 	}
 
-	if _, err := zClient.lssconfigcontroller.Update(id, &req); err != nil {
+	if _, err := lssconfigcontroller.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -419,10 +423,11 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) er
 
 func resourceLSSConfigControllerDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.LSSConfigController
 
 	log.Printf("[INFO] Deleting lss config controller ID: %v\n", d.Id())
 
-	if _, err := zClient.lssconfigcontroller.Delete(d.Id()); err != nil {
+	if _, err := lssconfigcontroller.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

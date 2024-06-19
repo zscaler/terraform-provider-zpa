@@ -61,7 +61,7 @@ func testAccCheckInspectionProfileDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.inspection_profile.Get(rs.Primary.ID)
+		rule, _, err := inspection_profile.Get(apiClient.InspectionProfile, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -86,7 +86,7 @@ func testAccCheckInspectionProfileExists(resource string, rule *inspection_profi
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedProfile, _, err := apiClient.inspection_profile.Get(rs.Primary.ID)
+		receivedProfile, _, err := inspection_profile.Get(apiClient.InspectionProfile, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

@@ -132,12 +132,13 @@ func dataSourceInspectionCustomControls() *schema.Resource {
 
 func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionCustomControls
 
 	var resp *inspection_custom_controls.InspectionCustomControl
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for custom inspection control %s\n", id)
-		res, _, err := zClient.inspection_custom_controls.Get(id)
+		res, _, err := inspection_custom_controls.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -146,7 +147,7 @@ func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for custom inspection control name %s\n", name)
-		res, _, err := zClient.inspection_custom_controls.GetByName(name)
+		res, _, err := inspection_custom_controls.GetByName(service, name)
 		if err != nil {
 			return err
 		}

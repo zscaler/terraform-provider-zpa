@@ -10,6 +10,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 func TestAccResourcePolicyAccessRuleBasic(t *testing.T) {
@@ -67,7 +68,7 @@ func TestAccResourcePolicyAccessRuleBasic(t *testing.T) {
 
 func testAccCheckPolicyAccessRuleDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := apiClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+	accessPolicy, _, err := policysetcontroller.GetByPolicyType(apiClient.PolicySetController, "ACCESS_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource ACCESS_POLICY. Recevied error: %s", err)
 	}
@@ -76,7 +77,7 @@ func testAccCheckPolicyAccessRuleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.policysetcontroller.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
+		rule, _, err := policysetcontroller.GetPolicyRule(apiClient.PolicySetController, accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -101,11 +102,11 @@ func testAccCheckPolicyAccessRuleExists(resource string) resource.TestCheckFunc 
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := apiClient.policysetcontroller.GetByPolicyType("ACCESS_POLICY")
+		resp, _, err := policysetcontroller.GetByPolicyType(apiClient.PolicySetController, "ACCESS_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource ACCESS_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = apiClient.policysetcontroller.GetPolicyRule(resp.ID, rs.Primary.ID)
+		_, _, err = policysetcontroller.GetPolicyRule(apiClient.PolicySetController, resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

@@ -10,6 +10,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
 )
 
 func TestAccResourcePolicyInspectionRuleV2Basic(t *testing.T) {
@@ -67,7 +68,7 @@ func TestAccResourcePolicyInspectionRuleV2Basic(t *testing.T) {
 
 func testAccCheckPolicyInspectionRuleV2Destroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := apiClient.policysetcontrollerv2.GetByPolicyType("INSPECTION_POLICY")
+	accessPolicy, _, err := policysetcontrollerv2.GetByPolicyType(apiClient.PolicySetControllerV2, "INSPECTION_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource INSPECTION_POLICY. Recevied error: %s", err)
 	}
@@ -76,7 +77,7 @@ func testAccCheckPolicyInspectionRuleV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.policysetcontrollerv2.GetPolicyRule(accessPolicy.ID, rs.Primary.ID)
+		rule, _, err := policysetcontrollerv2.GetPolicyRule(apiClient.PolicySetControllerV2, accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -101,11 +102,11 @@ func testAccCheckPolicyInspectionRuleV2Exists(resource string) resource.TestChec
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := apiClient.policysetcontrollerv2.GetByPolicyType("INSPECTION_POLICY")
+		resp, _, err := policysetcontrollerv2.GetByPolicyType(apiClient.PolicySetControllerV2, "INSPECTION_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource INSPECTION_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = apiClient.policysetcontrollerv2.GetPolicyRule(resp.ID, rs.Primary.ID)
+		_, _, err = policysetcontrollerv2.GetPolicyRule(apiClient.PolicySetControllerV2, resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

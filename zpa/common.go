@@ -11,9 +11,19 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/machinegroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/platforms"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/postureprofile"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/samlattribute"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimattributeheader"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/trustednetwork"
 )
 
 var (
@@ -66,23 +76,23 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 	switch operand.ObjectType {
 	case "APP":
 		return customValidate(operand, []string{"id"}, "application segment ID", Getter(func(id string) error {
-			_, _, err := zClient.applicationsegment.WithMicroTenant(microtenantID).Get(id)
+			_, _, err := applicationsegment.Get(zClient.ApplicationSegment.WithMicroTenant(microtenantID), id)
 			return err
 		}))
 	case "APP_GROUP":
 		return customValidate(operand, []string{"id"}, "Segment Group ID", Getter(func(id string) error {
-			_, _, err := zClient.segmentgroup.WithMicroTenant(microtenantID).Get(id)
+			_, _, err := segmentgroup.Get(zClient.SegmentGroup.WithMicroTenant(microtenantID), id)
 			return err
 		}))
 
 	case "IDP":
 		return customValidate(operand, []string{"id"}, "IDP ID", Getter(func(id string) error {
-			_, _, err := zClient.idpcontroller.Get(id)
+			_, _, err := idpcontroller.Get(zClient.IDPController, id)
 			return err
 		}))
 	case "EDGE_CONNECTOR_GROUP":
 		return customValidate(operand, []string{"id"}, "cloud connector group ID", Getter(func(id string) error {
-			_, _, err := zClient.cloudconnectorgroup.Get(id)
+			_, _, err := cloudconnectorgroup.Get(zClient.CloudConnectorGroup, id)
 			return err
 		}))
 	case "CLIENT_TYPE":
@@ -94,14 +104,14 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		}))
 	case "MACHINE_GRP":
 		return customValidate(operand, []string{"id"}, "machine group ID", Getter(func(id string) error {
-			_, _, err := zClient.machinegroup.WithMicroTenant(microtenantID).Get(id)
+			_, _, err := machinegroup.Get(zClient.MachineGroup.WithMicroTenant(microtenantID), id)
 			return err
 		}))
 	case "POSTURE":
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, nil)
 		}
-		_, _, err := zClient.postureprofile.GetByPostureUDID(operand.LHS)
+		_, _, err := postureprofile.GetByPostureUDID(zClient.PostureProfile, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, err)
 		}
@@ -113,7 +123,7 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, nil)
 		}
-		_, _, err := zClient.trustednetwork.GetByNetID(operand.LHS)
+		_, _, err := trustednetwork.GetByNetID(zClient.TrustedNetwork, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, err)
 		}
@@ -125,7 +135,7 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, nil)
 		}
-		_, _, err := zClient.platforms.GetAllPlatforms()
+		_, _, err := platforms.GetAllPlatforms(zClient.Platforms)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, err)
 		}
@@ -137,7 +147,7 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, nil)
 		}
-		_, _, err := zClient.samlattribute.Get(operand.LHS)
+		_, _, err := samlattribute.Get(zClient.SAMLAttribute, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, err)
 		}
@@ -152,14 +162,14 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, nil)
 		}
-		scim, _, err := zClient.scimattributeheader.Get(operand.IdpID, operand.LHS)
+		scim, _, err := scimattributeheader.Get(zClient.ScimAttributeHeader, operand.IdpID, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, err)
 		}
 		if operand.RHS == "" {
 			return rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
 		}
-		values, _ := zClient.scimattributeheader.SearchValues(scim.IdpID, scim.ID, operand.RHS)
+		values, _ := scimattributeheader.SearchValues(zClient.ScimAttributeHeader, scim.IdpID, scim.ID, operand.RHS)
 		if len(values) == 0 {
 			return rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
 		}
@@ -168,14 +178,14 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, nil)
 		}
-		_, _, err := zClient.idpcontroller.Get(operand.LHS)
+		_, _, err := idpcontroller.Get(zClient.IDPController, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, err)
 		}
 		if operand.RHS == "" {
 			return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, nil)
 		}
-		_, _, err = zClient.scimgroup.Get(operand.RHS)
+		_, _, err = zClient.ScimGroup.Get(operand.RHS)
 		if err != nil {
 			return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, err)
 		}
@@ -588,9 +598,39 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	}
 }
 
+/*
+	func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
+		return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+			service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
+			id := d.Id()
+			_, parseIDErr := strconv.ParseInt(id, 10, 64)
+			if parseIDErr == nil {
+				// assume if the passed value is an int
+				_ = d.Set("id", id)
+			} else {
+				resp, _, err := service.GetByNameAndTypes(types, id)
+				if err == nil {
+					d.SetId(resp.ID)
+					_ = d.Set("id", resp.ID)
+				} else {
+					return []*schema.ResourceData{d}, err
+				}
+
+			}
+			return []*schema.ResourceData{d}, nil
+		}
+	}
+*/
 func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-		service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
+		client := m.(*Client)
+		service := client.PolicySetController
+
+		microTenantID := GetString(d.Get("microtenant_id"))
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
 
 		id := d.Id()
 		_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -598,22 +638,51 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 			// assume if the passed value is an int
 			_ = d.Set("id", id)
 		} else {
-			resp, _, err := service.GetByNameAndTypes(types, id)
+			resp, _, err := policysetcontroller.GetByNameAndTypes(service, types, id)
 			if err == nil {
 				d.SetId(resp.ID)
 				_ = d.Set("id", resp.ID)
 			} else {
 				return []*schema.ResourceData{d}, err
 			}
-
 		}
 		return []*schema.ResourceData{d}, nil
 	}
 }
 
+/*
+	func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
+		return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+			service := m.(*Client).policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
+			id := d.Id()
+			_, parseIDErr := strconv.ParseInt(id, 10, 64)
+			if parseIDErr == nil {
+				// assume if the passed value is an int
+				_ = d.Set("id", id)
+			} else {
+				resp, _, err := service.GetByNameAndTypes(types, id)
+				if err == nil {
+					d.SetId(resp.ID)
+					_ = d.Set("id", resp.ID)
+				} else {
+					return []*schema.ResourceData{d}, err
+				}
+
+			}
+			return []*schema.ResourceData{d}, nil
+		}
+	}
+*/
 func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
 	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-		service := m.(*Client).policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
+		client := m.(*Client)
+		service := client.PolicySetControllerV2
+
+		microTenantID := GetString(d.Get("microtenant_id"))
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
 
 		id := d.Id()
 		_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -621,14 +690,13 @@ func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
 			// assume if the passed value is an int
 			_ = d.Set("id", id)
 		} else {
-			resp, _, err := service.GetByNameAndTypes(types, id)
+			resp, _, err := policysetcontrollerv2.GetByNameAndTypes(service, types, id)
 			if err == nil {
 				d.SetId(resp.ID)
 				_ = d.Set("id", resp.ID)
 			} else {
 				return []*schema.ResourceData{d}, err
 			}
-
 		}
 		return []*schema.ResourceData{d}, nil
 	}
@@ -711,9 +779,11 @@ var AllowedPolicyTypes = map[string]struct{}{
 	"CREDENTIAL_POLICY":                    {},
 	"CAPABILITIES_POLICY":                  {},
 	"CLIENTLESS_SESSION_PROTECTION_POLICY": {},
+	"REDIRECTION_POLICY":                   {},
 }
 
-func GetGlobalPolicySetByPolicyType(policysetcontroller policysetcontroller.Service, policyType string) (*policysetcontroller.PolicySet, error) {
+/*
+func GetGlobalPolicySetByPolicyType(policysetcontroller services.Service, policyType string) (*policysetcontroller.PolicySet, error) {
 	// Check if the provided policy type is allowed
 	if _, ok := AllowedPolicyTypes[policyType]; !ok {
 		return nil, fmt.Errorf("invalid policy type: %s", policyType)
@@ -726,6 +796,29 @@ func GetGlobalPolicySetByPolicyType(policysetcontroller policysetcontroller.Serv
 		return &p, nil
 	}
 	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(policyType)
+	if err != nil {
+		return nil, err
+	}
+	policySets[policyType] = *globalPolicySet
+	return globalPolicySet, nil
+}
+*/
+
+func GetGlobalPolicySetByPolicyType(client *Client, policyType string) (*policysetcontroller.PolicySet, error) {
+	// Check if the provided policy type is allowed
+	if _, ok := AllowedPolicyTypes[policyType]; !ok {
+		return nil, fmt.Errorf("invalid policy type: %s", policyType)
+	}
+
+	policySetsMutex.Lock()
+	defer policySetsMutex.Unlock()
+
+	if p, ok := policySets[policyType]; ok {
+		return &p, nil
+	}
+
+	service := client.PolicySetController
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, policyType)
 	if err != nil {
 		return nil, err
 	}
@@ -1080,6 +1173,7 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 	return nil
 }
 
+/*
 func fetchPolicySetIDByType(client *Client, policyType string, microTenantID string) (string, error) {
 	service := client.policysetcontrollerv2.WithMicroTenant(microTenantID)
 	globalPolicySet, _, err := service.GetByPolicyType(policyType)
@@ -1087,4 +1181,74 @@ func fetchPolicySetIDByType(client *Client, policyType string, microTenantID str
 		return "", fmt.Errorf("failed to fetch policy set ID for type '%s': %v", policyType, err)
 	}
 	return globalPolicySet.ID, nil
+}
+*/
+
+func fetchPolicySetIDByType(client *Client, policyType string, microTenantID string) (string, error) {
+	service := client.PolicySetControllerV2
+
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, policyType)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch policy set ID for type '%s': %v", policyType, err)
+	}
+	return globalPolicySet.ID, nil
+}
+
+// ConvertV1ResponseToV2Request converts a PolicyRuleResource (API v1 response) to a PolicyRule (API v2 request) with aggregated values.
+func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleResource) policysetcontrollerv2.PolicyRule {
+	v2Request := policysetcontrollerv2.PolicyRule{
+		ID:                    v1Response.ID,
+		Name:                  v1Response.Name,
+		Description:           v1Response.Description,
+		Action:                v1Response.Action,
+		PolicySetID:           v1Response.PolicySetID,
+		Operator:              v1Response.Operator,
+		CustomMsg:             v1Response.CustomMsg,
+		ZpnIsolationProfileID: v1Response.ZpnIsolationProfileID,
+		Conditions:            make([]policysetcontrollerv2.PolicyRuleResourceConditions, 0),
+	}
+
+	for _, condition := range v1Response.Conditions {
+		newCondition := policysetcontrollerv2.PolicyRuleResourceConditions{
+			Operator: condition.Operator,
+			Operands: make([]policysetcontrollerv2.PolicyRuleResourceOperands, 0),
+		}
+
+		// Use a map to aggregate RHS values by ObjectType
+		operandMap := make(map[string][]string)
+		entryValuesMap := make(map[string][]policysetcontrollerv2.OperandsResourceLHSRHSValue)
+
+		for _, operand := range condition.Operands {
+			switch operand.ObjectType {
+			case "APP", "APP_GROUP", "CONSOLE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE":
+				operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
+			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE":
+				entryValuesMap[operand.ObjectType] = append(entryValuesMap[operand.ObjectType], policysetcontrollerv2.OperandsResourceLHSRHSValue{
+					LHS: operand.LHS,
+					RHS: operand.RHS,
+				})
+			}
+		}
+
+		// Create operand blocks from the aggregated data
+		for objectType, values := range operandMap {
+			newCondition.Operands = append(newCondition.Operands, policysetcontrollerv2.PolicyRuleResourceOperands{
+				ObjectType: objectType,
+				Values:     values,
+			})
+		}
+
+		for objectType, entryValues := range entryValuesMap {
+			newCondition.Operands = append(newCondition.Operands, policysetcontrollerv2.PolicyRuleResourceOperands{
+				ObjectType:        objectType,
+				EntryValuesLHSRHS: entryValues,
+			})
+		}
+		v2Request.Conditions = append(v2Request.Conditions, newCondition)
+	}
+	return v2Request
 }

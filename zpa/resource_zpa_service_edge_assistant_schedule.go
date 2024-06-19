@@ -9,15 +9,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorschedule"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgeschedule"
 )
 
-func resourceAppConnectorAssistantSchedule() *schema.Resource {
+func resourceServiceEdgeAssistantSchedule() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourceAppConnectorAssistantScheduleCreate,
-		Read:     resourceAppConnectorAssistantScheduleRead,
-		Update:   resourceAppConnectorAssistantScheduleUpdate,
-		Delete:   resourceAppConnectorAssistantScheduleDelete,
+		Create:   resourceServiceEdgeAssistantScheduleCreate,
+		Read:     resourceServiceEdgeAssistantScheduleRead,
+		Update:   resourceServiceEdgeAssistantScheduleUpdate,
+		Delete:   resourceServiceEdgeAssistantScheduleDelete,
 		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
@@ -62,17 +62,17 @@ func resourceAppConnectorAssistantSchedule() *schema.Resource {
 	}
 }
 
-func resourceAppConnectorAssistantScheduleCreate(d *schema.ResourceData, m interface{}) error {
+func resourceServiceEdgeAssistantScheduleCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	service := zClient.AppConnectorSchedule
+	service := zClient.ServiceEdgeSchedule
 
-	req, err := expandAssistantSchedule(d)
+	req, err := expandServiceEdgeAssistantSchedule(d)
 	if err != nil {
 		return err
 	}
 
 	// Use = instead of := because err is already declared
-	_, _, err = appconnectorschedule.CreateSchedule(service, req)
+	_, _, err = serviceedgeschedule.CreateSchedule(service, req)
 	if err != nil {
 		// Assuming err.Error() returns a string representation of the error
 		errStr := err.Error()
@@ -82,7 +82,7 @@ func resourceAppConnectorAssistantScheduleCreate(d *schema.ResourceData, m inter
 			log.Printf("[INFO] Resource already exists. Updating instead.")
 
 			// Get the current state of the resource
-			resp, _, err := appconnectorschedule.GetSchedule(service)
+			resp, _, err := serviceedgeschedule.GetSchedule(service)
 			if err != nil {
 				return fmt.Errorf("failed to retrieve existing resource for update: %v", err)
 			}
@@ -91,24 +91,24 @@ func resourceAppConnectorAssistantScheduleCreate(d *schema.ResourceData, m inter
 			d.SetId(resp.ID)
 
 			// Proceed to update the resource
-			return resourceAppConnectorAssistantScheduleUpdate(d, m)
+			return resourceServiceEdgeAssistantScheduleUpdate(d, m)
 		}
 		return err
 	}
-	log.Printf("[INFO] Created app connector assistant schedule request. ID: %v\n", req.ID)
+	log.Printf("[INFO] Created service edge assistant schedule request. ID: %v\n", req.ID)
 	d.SetId(req.ID)
 
-	return resourceAppConnectorAssistantScheduleRead(d, m)
+	return resourceServiceEdgeAssistantScheduleRead(d, m)
 }
 
-func resourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, m interface{}) error {
+func resourceServiceEdgeAssistantScheduleRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	service := zClient.AppConnectorSchedule
+	service := zClient.ServiceEdgeSchedule
 
-	resp, _, err := appconnectorschedule.GetSchedule(service)
+	resp, _, err := serviceedgeschedule.GetSchedule(service)
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
-			log.Printf("[WARN] Removing app connector assistant schedule %s from state because it no longer exists in ZPA", d.Id())
+			log.Printf("[WARN] Removing service edge assistant schedule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
@@ -125,46 +125,46 @@ func resourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, m interfa
 	return nil
 }
 
-func resourceAppConnectorAssistantScheduleUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceServiceEdgeAssistantScheduleUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
-	service := zClient.AppConnectorSchedule
+	service := zClient.ServiceEdgeSchedule
 
 	id := d.Id()
-	log.Printf("[INFO] Updating app connector group ID: %v\n", id)
-	req, err := expandAssistantSchedule(d)
+	log.Printf("[INFO] Updating service edge ID: %v\n", id)
+	req, err := expandServiceEdgeAssistantSchedule(d)
 	if err != nil {
 		return err
 	}
 
-	if _, _, err := appconnectorschedule.GetSchedule(service); err != nil {
+	if _, _, err := serviceedgeschedule.GetSchedule(service); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := appconnectorschedule.UpdateSchedule(service, id, &req); err != nil {
+	if _, err := serviceedgeschedule.UpdateSchedule(service, id, &req); err != nil {
 		return err
 	}
 
-	return resourceAppConnectorAssistantScheduleRead(d, m)
+	return resourceServiceEdgeAssistantScheduleRead(d, m)
 }
 
-func resourceAppConnectorAssistantScheduleDelete(d *schema.ResourceData, m interface{}) error {
+func resourceServiceEdgeAssistantScheduleDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func expandAssistantSchedule(d *schema.ResourceData) (appconnectorschedule.AssistantSchedule, error) {
+func expandServiceEdgeAssistantSchedule(d *schema.ResourceData) (serviceedgeschedule.AssistantSchedule, error) {
 	var customerID string
 	if id, exists := d.GetOk("customer_id"); exists {
 		customerID = id.(string)
 	} else if id := os.Getenv("ZPA_CUSTOMER_ID"); id != "" {
 		customerID = id
 	} else {
-		return appconnectorschedule.AssistantSchedule{}, fmt.Errorf("customer_id must be provided either in the HCL or as an environment variable ZPA_CUSTOMER_ID")
+		return serviceedgeschedule.AssistantSchedule{}, fmt.Errorf("customer_id must be provided either in the HCL or as an environment variable ZPA_CUSTOMER_ID")
 	}
 
-	scheduler := appconnectorschedule.AssistantSchedule{
+	scheduler := serviceedgeschedule.AssistantSchedule{
 		ID:                d.Get("id").(string),
 		CustomerID:        customerID, // Now guaranteed to be non-empty
 		Enabled:           d.Get("enabled").(bool),

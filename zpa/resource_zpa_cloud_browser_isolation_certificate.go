@@ -18,6 +18,12 @@ func resourceCBICertificates() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
+				service := zClient.CBICertificateController
+
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -25,7 +31,7 @@ func resourceCBICertificates() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.cbicertificatecontroller.GetByName(id)
+					resp, _, err := cbicertificatecontroller.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -55,11 +61,17 @@ func resourceCBICertificates() *schema.Resource {
 
 func resourceCBICertificatesCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBICertificateController
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	req := expandCBICertificate(d)
 	log.Printf("[INFO] Creating cbi certificate with request\n%+v\n", req)
 
-	cbiCertificate, _, err := zClient.cbicertificatecontroller.Create(&req)
+	cbiCertificate, _, err := cbicertificatecontroller.Create(service, &req)
 	if err != nil {
 		return err
 	}
@@ -71,8 +83,14 @@ func resourceCBICertificatesCreate(d *schema.ResourceData, m interface{}) error 
 
 func resourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBICertificateController
 
-	resp, _, err := zClient.cbicertificatecontroller.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := cbicertificatecontroller.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing cbi certificate %s from state because it no longer exists in ZPA", d.Id())
@@ -93,19 +111,25 @@ func resourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceCBICertificatesUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBICertificateController
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	id := d.Id()
 	log.Printf("[INFO] Updating cbi certificate ID: %v\n", id)
 	req := expandCBICertificate(d)
 
-	if _, _, err := zClient.cbicertificatecontroller.Get(id); err != nil {
+	if _, _, err := cbicertificatecontroller.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.cbicertificatecontroller.Update(id, &req); err != nil {
+	if _, err := cbicertificatecontroller.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -114,10 +138,16 @@ func resourceCBICertificatesUpdate(d *schema.ResourceData, m interface{}) error 
 
 func resourceCBICertificatesDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBICertificateController
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	log.Printf("[INFO] Deleting cbi certificate ID: %v\n", d.Id())
 
-	if _, err := zClient.cbicertificatecontroller.Delete(d.Id()); err != nil {
+	if _, err := cbicertificatecontroller.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

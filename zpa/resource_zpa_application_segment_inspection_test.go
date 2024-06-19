@@ -68,14 +68,14 @@ func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationSegmentInspectionDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPAApplicationSegmentInspection {
 			continue
 		}
 
-		_, _, err := client.applicationsegmentinspection.GetByName(rs.Primary.Attributes["name"])
+		_, _, err := applicationsegmentinspection.GetByName(apiClient.ApplicationSegmentInspection, rs.Primary.Attributes["name"])
 		if err == nil {
 			return fmt.Errorf("Inspection Application Segment Inspection still exists")
 		}
@@ -96,7 +96,7 @@ func testAccCheckApplicationSegmentInspectionExists(resource string, segment *ap
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedSegment, _, err := apiClient.applicationsegmentinspection.Get(rs.Primary.ID)
+		receivedSegment, _, err := applicationsegmentinspection.Get(apiClient.ApplicationSegmentInspection, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

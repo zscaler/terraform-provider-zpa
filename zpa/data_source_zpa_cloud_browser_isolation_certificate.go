@@ -35,12 +35,13 @@ func dataSourceCBICertificates() *schema.Resource {
 
 func dataSourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBICertificateController
 
 	var resp *cbicertificatecontroller.CBICertificate
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for cbi certificate %s\n", id)
-		res, _, err := zClient.cbicertificatecontroller.Get(id)
+		res, _, err := cbicertificatecontroller.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -49,7 +50,7 @@ func dataSourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error 
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data cbi certificate name %s\n", name)
-		res, _, err := zClient.cbicertificatecontroller.GetByName(name)
+		res, _, err := cbicertificatecontroller.GetByName(service, name)
 		if err != nil {
 			return err
 		}

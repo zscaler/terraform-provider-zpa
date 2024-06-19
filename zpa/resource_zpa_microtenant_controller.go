@@ -18,6 +18,7 @@ func resourceMicrotenantController() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
+				service := zClient.MicroTenants
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -25,7 +26,7 @@ func resourceMicrotenantController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.microtenants.GetByName(id)
+					resp, _, err := microtenants.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -97,11 +98,12 @@ func resourceMicrotenantController() *schema.Resource {
 
 func resourceMicrotenantCreate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.MicroTenants
 
 	req := expandMicroTenant(d)
 	log.Printf("[INFO] Creating microtenant with request\n%+v\n", req)
 
-	microTenant, _, err := zClient.microtenants.Create(req)
+	microTenant, _, err := microtenants.Create(service, req)
 	if err != nil {
 		return err
 	}
@@ -118,8 +120,9 @@ func resourceMicrotenantCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceMicrotenantRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.MicroTenants
 
-	resp, _, err := zClient.microtenants.Get(d.Id())
+	resp, _, err := microtenants.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing microtenant %s from state because it no longer exists in ZPA", d.Id())
@@ -150,19 +153,20 @@ func resourceMicrotenantRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceMicrotenantUpdate(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.MicroTenants
 
 	id := d.Id()
 	log.Printf("[INFO] Updating microtenant ID: %v\n", id)
 	req := expandMicroTenant(d)
 
-	if _, _, err := zClient.microtenants.Get(id); err != nil {
+	if _, _, err := microtenants.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.microtenants.Update(id, &req); err != nil {
+	if _, err := microtenants.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -171,10 +175,11 @@ func resourceMicrotenantUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceMicrotenantDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.MicroTenants
 
 	log.Printf("[INFO] Deleting microtenant ID: %v\n", d.Id())
 
-	if _, err := zClient.microtenants.Delete(d.Id()); err != nil {
+	if _, err := microtenants.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

@@ -37,9 +37,10 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5.1.0
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
+          distribution: goreleaser
+          version: '~> v2'
           args: release --clean  # Changed --rm-dist to --clean as per the deprecation notice
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}

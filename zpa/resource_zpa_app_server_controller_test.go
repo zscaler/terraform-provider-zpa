@@ -66,7 +66,7 @@ func testAccCheckApplicationServerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := apiClient.appservercontroller.Get(rs.Primary.ID)
+		rule, _, err := appservercontroller.Get(apiClient.AppServerController, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -91,7 +91,7 @@ func testAccCheckApplicationServerExists(resource string, server *appservercontr
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedServer, _, err := apiClient.appservercontroller.Get(rs.Primary.ID)
+		receivedServer, _, err := appservercontroller.Get(apiClient.AppServerController, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

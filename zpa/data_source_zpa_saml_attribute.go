@@ -57,6 +57,7 @@ func dataSourceSamlAttribute() *schema.Resource {
 
 func dataSourceSamlAttributeRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.SAMLAttribute
 
 	var resp *samlattribute.SamlAttribute
 	idpId, okidpId := d.Get("idp_id").(string)
@@ -68,14 +69,14 @@ func dataSourceSamlAttributeRead(d *schema.ResourceData, m interface{}) error {
 	var idpResp *idpcontroller.IdpController
 	// getting Idp controller by id or name
 	if idpId != "" {
-		resp, _, err := zClient.idpcontroller.Get(idpId)
+		resp, _, err := idpcontroller.Get(service, idpId)
 		if err != nil || resp == nil {
 			log.Printf("[INFO] couldn't find idp by id: %s\n", idpId)
 			return err
 		}
 		idpResp = resp
 	} else {
-		resp, _, err := zClient.idpcontroller.GetByName(idpName)
+		resp, _, err := idpcontroller.GetByName(service, idpName)
 		if err != nil || resp == nil {
 			log.Printf("[INFO] couldn't find idp by name: %s\n", idpName)
 			return err
@@ -85,7 +86,7 @@ func dataSourceSamlAttributeRead(d *schema.ResourceData, m interface{}) error {
 	// getting scim attribute header by id or name
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
-		res, _, err := zClient.samlattribute.Get(idpResp.ID)
+		res, _, err := samlattribute.Get(service, idpResp.ID)
 		if err != nil {
 			return err
 		}
@@ -93,7 +94,7 @@ func dataSourceSamlAttributeRead(d *schema.ResourceData, m interface{}) error {
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
-		res, _, err := zClient.samlattribute.GetByName(name)
+		res, _, err := samlattribute.GetByName(service, name)
 		if err != nil {
 			return err
 		}

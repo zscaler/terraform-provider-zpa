@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praconsole"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praportal"
 )
@@ -19,7 +20,13 @@ func resourcePRAPortalController() *schema.Resource {
 		Delete: resourcePRAPortalControllerDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				service := m.(*Client).praportal.WithMicroTenant(GetString(d.Get("microtenant_id")))
+				client := m.(*Client)
+				service := client.PRAPortal
+
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -27,7 +34,7 @@ func resourcePRAPortalController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := service.GetByName(id)
+					resp, _, err := praportal.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -90,12 +97,18 @@ func resourcePRAPortalController() *schema.Resource {
 }
 
 func resourcePRAPortalControllerCreate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).praportal.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRAPortal
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	req := expandPRAPortalController(d)
 	log.Printf("[INFO] Creating pra portal controller with request\n%+v\n", req)
 
-	praPortal, _, err := service.Create(&req)
+	praPortal, _, err := praportal.Create(service, &req)
 	if err != nil {
 		return err
 	}
@@ -106,9 +119,15 @@ func resourcePRAPortalControllerCreate(d *schema.ResourceData, m interface{}) er
 }
 
 func resourcePRAPortalControllerRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).praportal.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRAPortal
 
-	resp, _, err := service.Get(d.Id())
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	resp, _, err := praportal.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing pra portal controller %s from state because it no longer exists in ZPA", d.Id())
@@ -133,20 +152,26 @@ func resourcePRAPortalControllerRead(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourcePRAPortalControllerUpdate(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).praportal.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.PRAPortal
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	id := d.Id()
 	log.Printf("[INFO] Updating pra portal controller ID: %v\n", id)
 	req := expandPRAPortalController(d)
 
-	if _, _, err := service.Get(id); err != nil {
+	if _, _, err := praportal.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := service.Update(id, &req); err != nil {
+	if _, err := praportal.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -158,15 +183,15 @@ func resourcePRAPortalControllerDelete(d *schema.ResourceData, m interface{}) er
 	portalID := d.Id()
 
 	// Detach the portal from any consoles before attempting to delete it.
-	consoleService := client.praconsole.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	consoleService := client.PRAConsole.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	if err := detachAndCleanUpPRAPortals(portalID, consoleService); err != nil {
 		return fmt.Errorf("error detaching PRAPortal with ID %s from PRAConsoleControllers: %s", portalID, err)
 	}
 
 	// Proceed with deletion of the portal after successful detachment.
-	service := client.praportal.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	service := client.PRAPortal.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	log.Printf("[INFO] Deleting PRA Portal Controller with ID: %s", portalID)
-	if _, err := service.Delete(portalID); err != nil {
+	if _, err := praportal.Delete(service, portalID); err != nil {
 		return fmt.Errorf("error deleting PRA Portal Controller with ID %s: %s", portalID, err)
 	}
 
@@ -191,9 +216,9 @@ func expandPRAPortalController(d *schema.ResourceData) praportal.PRAPortal {
 }
 
 // Detach and optionally delete PRAPortalControllers from PRAConsoleControllers.
-func detachAndCleanUpPRAPortals(portalID string, consoleService *praconsole.Service) error {
+func detachAndCleanUpPRAPortals(portalID string, consoleService *services.Service) error {
 	// Fetch all PRAConsoleControllers
-	consoles, _, err := consoleService.GetAll()
+	consoles, _, err := praconsole.GetAll(consoleService)
 	if err != nil {
 		return fmt.Errorf("failed to list all PRAConsoleControllers: %s", err)
 	}
@@ -220,7 +245,7 @@ func detachAndCleanUpPRAPortals(portalID string, consoleService *praconsole.Serv
 
 			if len(updatedPortals) == 0 {
 				// Delete the console if it no longer contains any portals
-				_, err = consoleService.Delete(console.ID)
+				_, err = praconsole.Delete(consoleService, console.ID)
 				if err != nil {
 					return fmt.Errorf("failed to delete PRAConsoleController with ID %s: %s", console.ID, err)
 				}
@@ -228,7 +253,7 @@ func detachAndCleanUpPRAPortals(portalID string, consoleService *praconsole.Serv
 			} else {
 				// Update the console with the remaining portals
 				console.PRAPortals = updatedPortals
-				_, err = consoleService.Update(console.ID, &console)
+				_, err = praconsole.Update(consoleService, console.ID, &console)
 				if err != nil {
 					return fmt.Errorf("failed to update PRAConsoleController with ID %s: %s", console.ID, err)
 				}

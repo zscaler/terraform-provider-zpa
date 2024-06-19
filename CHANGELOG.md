@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.3.24 (June, 14 2024)
+
+### Notes
+
+- Release date: **(June, 14 2024)**
+- Supported Terraform version: **v1.x**
+
+### Internal Changes
+- [PR #464](https://github.com/zscaler/terraform-provider-zpa/pull/464) Upgraded to [Zscaler-SDK-GO](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v2.61.0). The upgrade supports easier ZPA API Client instantiation for existing and new resources.
+- [PR #464](https://github.com/zscaler/terraform-provider-zpa/pull/464) Upgraded ``releaser.yml`` to [GoReleaser v6](https://github.com/goreleaser/goreleaser-action/releases/tag/v6.0.0)
+
+
 ## 3.3.23 (May, 31 2024)
 
 ### Notes

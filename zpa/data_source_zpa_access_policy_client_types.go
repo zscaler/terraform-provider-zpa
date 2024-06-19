@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/clienttypes"
 )
 
 func dataSourceAccessPolicyClientTypes() *schema.Resource {
@@ -54,9 +55,11 @@ func dataSourceAccessPolicyClientTypes() *schema.Resource {
 
 func dataSourceAccessPolicyClientTypesRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.ClientTypes
+
 	log.Printf("[INFO] Getting data for all client types set\n")
 
-	resp, _, err := zClient.clienttypes.GetAllClientTypes()
+	resp, _, err := clienttypes.GetAllClientTypes(service)
 	if err != nil {
 		return err
 	}

@@ -191,12 +191,14 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 }
 
 func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).applicationsegmentpra.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	zClient := m.(*Client)
+	service := zClient.ApplicationSegmentPRA
+
 	var resp *applicationsegmentpra.AppSegmentPRA
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for sra application %s\n", id)
-		res, _, err := service.Get(id)
+		res, _, err := applicationsegmentpra.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -205,7 +207,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) 
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for sra application name %s\n", name)
-		res, _, err := service.GetByName(name)
+		res, _, err := applicationsegmentpra.GetByName(service, name)
 		if err != nil {
 			return err
 		}

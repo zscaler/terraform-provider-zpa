@@ -93,6 +93,7 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 
 func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.ScimAttributeHeader
 
 	var resp *scimattributeheader.ScimAttributeHeader
 	idpId, okidpId := d.Get("idp_id").(string)
@@ -104,14 +105,14 @@ func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, m interface{}) er
 	var idpResp *idpcontroller.IdpController
 	// getting Idp controller by id or name
 	if idpId != "" {
-		resp, _, err := zClient.idpcontroller.Get(idpId)
+		resp, _, err := idpcontroller.Get(service, idpId)
 		if err != nil || resp == nil {
 			log.Printf("[INFO] couldn't find idp by id: %s\n", idpId)
 			return err
 		}
 		idpResp = resp
 	} else {
-		resp, _, err := zClient.idpcontroller.GetByName(idpName)
+		resp, _, err := idpcontroller.GetByName(service, idpName)
 		if err != nil || resp == nil {
 			log.Printf("[INFO] couldn't find idp by name: %s\n", idpName)
 			return err
@@ -121,7 +122,7 @@ func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, m interface{}) er
 	// getting scim attribute header by id or name
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
-		res, _, err := zClient.scimattributeheader.Get(idpResp.ID, id)
+		res, _, err := scimattributeheader.Get(service, idpResp.ID, id)
 		if err != nil {
 			return err
 		}
@@ -129,14 +130,14 @@ func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, m interface{}) er
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
-		res, _, err := zClient.scimattributeheader.GetByName(name, idpResp.ID)
+		res, _, err := scimattributeheader.GetByName(service, name, idpResp.ID)
 		if err != nil {
 			return err
 		}
 		resp = res
 	}
 	if resp != nil {
-		values, _ := zClient.scimattributeheader.GetValues(resp.IdpID, resp.ID)
+		values, _ := scimattributeheader.GetValues(service, resp.IdpID, resp.ID)
 		d.SetId(resp.ID)
 		_ = d.Set("canonical_values", resp.CanonicalValues)
 		_ = d.Set("case_sensitive", resp.CaseSensitive)

@@ -59,14 +59,14 @@ func TestAccResourceLSSConfigControllerBasic(t *testing.T) {
 }
 
 func testAccCheckLSSConfigControllerDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPALSSController {
 			continue
 		}
 
-		lss, _, err := client.lssconfigcontroller.Get(rs.Primary.ID)
+		lss, _, err := lssconfigcontroller.Get(apiClient.LSSConfigController, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("id %s still exists", rs.Primary.ID)
 		}
@@ -87,8 +87,8 @@ func testAccCheckLSSConfigControllerExists(resource string, lss *lssconfigcontro
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no Application Segment ID is set")
 		}
-		client := testAccProvider.Meta().(*Client)
-		receivedLss, _, err := client.lssconfigcontroller.Get(rs.Primary.ID)
+		apiClient := testAccProvider.Meta().(*Client)
+		receivedLss, _, err := lssconfigcontroller.Get(apiClient.LSSConfigController, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}

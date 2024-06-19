@@ -50,12 +50,17 @@ func dataSourceTrustedNetwork() *schema.Resource {
 
 func dataSourceTrustedNetworkRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.TrustedNetwork
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	var resp *trustednetwork.TrustedNetwork
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for trusted network %s\n", id)
-		res, _, err := zClient.trustednetwork.Get(id)
+		res, _, err := trustednetwork.Get(service, id)
 		if err != nil {
 			return err
 		}
@@ -65,7 +70,7 @@ func dataSourceTrustedNetworkRead(d *schema.ResourceData, m interface{}) error {
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for trusted network name %s\n", name)
-		res, _, err := zClient.trustednetwork.GetByName(name)
+		res, _, err := trustednetwork.GetByName(service, name)
 		if err != nil {
 			return err
 		}

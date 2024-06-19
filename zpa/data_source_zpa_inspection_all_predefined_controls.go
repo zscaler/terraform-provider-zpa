@@ -123,6 +123,8 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 
 func dataSourceInspectionAllPredefinedControlsRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.InspectionPredefinedControls
+
 	version, versionSet := d.Get("version").(string)
 	if !versionSet || version == "" {
 		return fmt.Errorf("when the name is set, version must be set as well")
@@ -131,9 +133,9 @@ func dataSourceInspectionAllPredefinedControlsRead(d *schema.ResourceData, m int
 	var err error
 	groupName, groupNameSet := d.Get("group_name").(string)
 	if groupNameSet && groupName != "" {
-		list, err = zClient.inspection_predefined_controls.GetAllByGroup(version, groupName)
+		list, err = inspection_predefined_controls.GetAllByGroup(service, version, groupName)
 	} else {
-		list, err = zClient.inspection_predefined_controls.GetAll(version)
+		list, err = inspection_predefined_controls.GetAll(service, version)
 	}
 	if err != nil {
 		return err

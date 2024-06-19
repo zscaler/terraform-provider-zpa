@@ -4,50 +4,8 @@ import (
 	"log"
 
 	gozscaler "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbytype"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/clienttypes"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiregions"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbizpaprofile"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/isolationprofile"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/customerversionprofile"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/emergencyaccess"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/enrollmentcert"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/idpcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_predefined_controls"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/machinegroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/microtenants"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/platforms"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/postureprofile"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praapproval"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praconsole"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/pracredential"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praportal"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/samlattribute"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimattributeheader"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgecontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/trustednetwork"
 )
 
 func init() {
@@ -56,67 +14,60 @@ func init() {
 }
 
 type Client struct {
-	appconnectorgroup              appconnectorgroup.Service
-	appconnectorcontroller         appconnectorcontroller.Service
-	applicationsegment             applicationsegment.Service
-	applicationsegmentpra          applicationsegmentpra.Service
-	applicationsegmentinspection   applicationsegmentinspection.Service
-	applicationsegmentbytype       applicationsegmentbytype.Service
-	appservercontroller            appservercontroller.Service
-	bacertificate                  bacertificate.Service
-	browseraccess                  browseraccess.Service
-	cbiregions                     cbiregions.Service
-	cbiprofilecontroller           cbiprofilecontroller.Service
-	cbizpaprofile                  cbizpaprofile.Service
-	cbicertificatecontroller       cbicertificatecontroller.Service
-	cbibannercontroller            cbibannercontroller.Service
-	cloudconnectorgroup            cloudconnectorgroup.Service
-	customerversionprofile         customerversionprofile.Service
-	clienttypes                    clienttypes.Service
-	emergencyaccess                emergencyaccess.Service
-	enrollmentcert                 enrollmentcert.Service
-	idpcontroller                  idpcontroller.Service
-	inspection_custom_controls     inspection_custom_controls.Service
-	inspection_predefined_controls inspection_predefined_controls.Service
-	inspection_profile             inspection_profile.Service
-	isolationprofile               isolationprofile.Service
-	lssconfigcontroller            lssconfigcontroller.Service
-	machinegroup                   machinegroup.Service
-	microtenants                   microtenants.Service
-	platforms                      platforms.Service
-	policysetcontroller            policysetcontroller.Service
-	policysetcontrollerv2          policysetcontrollerv2.Service
-	postureprofile                 postureprofile.Service
-	praapproval                    praapproval.Service
-	praconsole                     praconsole.Service
-	pracredential                  pracredential.Service
-	praportal                      praportal.Service
-	provisioningkey                provisioningkey.Service
-	samlattribute                  samlattribute.Service
-	scimgroup                      scimgroup.Service
-	scimattributeheader            scimattributeheader.Service
-	segmentgroup                   segmentgroup.Service
-	servergroup                    servergroup.Service
-	serviceedgegroup               serviceedgegroup.Service
-	serviceedgecontroller          serviceedgecontroller.Service
-	trustednetwork                 trustednetwork.Service
+	AppConnectorGroup            *services.Service
+	AppConnectorController       *services.Service
+	AppConnectorSchedule         *services.Service
+	ApplicationSegment           *services.Service
+	ApplicationSegmentPRA        *services.Service
+	ApplicationSegmentInspection *services.Service
+	ApplicationSegmentByType     *services.Service
+	AppServerController          *services.Service
+	BACertificate                *services.Service
+	BrowserAccess                *services.Service
+	CBIRegions                   *services.Service
+	CBIProfileController         *services.Service
+	CBIZpaProfile                *services.Service
+	CBICertificateController     *services.Service
+	CBIBannerController          *services.Service
+	CloudConnectorGroup          *services.Service
+	CustomerVersionProfile       *services.Service
+	ClientTypes                  *services.Service
+	EmergencyAccess              *services.Service
+	EnrollmentCert               *services.Service
+	IDPController                *services.Service
+	InspectionCustomControls     *services.Service
+	InspectionPredefinedControls *services.Service
+	InspectionProfile            *services.Service
+	IsolationProfile             *services.Service
+	LSSConfigController          *services.Service
+	MachineGroup                 *services.Service
+	MicroTenants                 *services.Service
+	Platforms                    *services.Service
+	PolicySetController          *services.Service
+	PolicySetControllerV2        *services.Service
+	PostureProfile               *services.Service
+	PRAApproval                  *services.Service
+	PRAConsole                   *services.Service
+	PRACredential                *services.Service
+	PRAPortal                    *services.Service
+	ProvisioningKey              *services.Service
+	SAMLAttribute                *services.Service
+	ScimGroup                    *scimgroup.Service
+	ScimAttributeHeader          *services.Service
+	SegmentGroup                 *services.Service
+	ServerGroup                  *services.Service
+	ServiceEdgeGroup             *services.Service
+	ServiceEdgeSchedule          *services.Service
+	ServiceEdgeController        *services.Service
+	TrustedNetwork               *services.Service
 }
 
 type Config struct {
-	// ZPA Client ID for API Client
-	ClientID string
-
-	// ZPA Client Secret for API Client
+	ClientID     string
 	ClientSecret string
-
-	// ZPA Customer ID for API Client
-	CustomerID string
-
-	// ZPA Base URL for API Client
-	BaseURL string
-
-	// UserAgent for API Client
-	UserAgent string
+	CustomerID   string
+	BaseURL      string
+	UserAgent    string
 }
 
 func (c *Config) Client() (*Client, error) {
@@ -125,51 +76,54 @@ func (c *Config) Client() (*Client, error) {
 		return nil, err
 	}
 	zpaClient := gozscaler.NewClient(config)
+
 	client := &Client{
-		appconnectorgroup:              *appconnectorgroup.New(zpaClient),
-		appconnectorcontroller:         *appconnectorcontroller.New(zpaClient),
-		applicationsegment:             *applicationsegment.New(zpaClient),
-		applicationsegmentpra:          *applicationsegmentpra.New(zpaClient),
-		applicationsegmentinspection:   *applicationsegmentinspection.New(zpaClient),
-		applicationsegmentbytype:       *applicationsegmentbytype.New(zpaClient),
-		appservercontroller:            *appservercontroller.New(zpaClient),
-		bacertificate:                  *bacertificate.New(zpaClient),
-		browseraccess:                  *browseraccess.New(zpaClient),
-		cbiregions:                     *cbiregions.New(zpaClient),
-		cbiprofilecontroller:           *cbiprofilecontroller.New(zpaClient),
-		cbicertificatecontroller:       *cbicertificatecontroller.New(zpaClient),
-		cbibannercontroller:            *cbibannercontroller.New(zpaClient),
-		cbizpaprofile:                  *cbizpaprofile.New(zpaClient),
-		clienttypes:                    *clienttypes.New(zpaClient),
-		cloudconnectorgroup:            *cloudconnectorgroup.New(zpaClient),
-		customerversionprofile:         *customerversionprofile.New(zpaClient),
-		emergencyaccess:                *emergencyaccess.New(zpaClient),
-		enrollmentcert:                 *enrollmentcert.New(zpaClient),
-		idpcontroller:                  *idpcontroller.New(zpaClient),
-		inspection_custom_controls:     *inspection_custom_controls.New(zpaClient),
-		inspection_predefined_controls: *inspection_predefined_controls.New(zpaClient),
-		inspection_profile:             *inspection_profile.New(zpaClient),
-		isolationprofile:               *isolationprofile.New(zpaClient),
-		lssconfigcontroller:            *lssconfigcontroller.New(zpaClient),
-		machinegroup:                   *machinegroup.New(zpaClient),
-		microtenants:                   *microtenants.New(zpaClient),
-		platforms:                      *platforms.New(zpaClient),
-		policysetcontroller:            *policysetcontroller.New(zpaClient),
-		policysetcontrollerv2:          *policysetcontrollerv2.New(zpaClient),
-		postureprofile:                 *postureprofile.New(zpaClient),
-		praapproval:                    *praapproval.New(zpaClient),
-		praconsole:                     *praconsole.New(zpaClient),
-		pracredential:                  *pracredential.New(zpaClient),
-		praportal:                      *praportal.New(zpaClient),
-		provisioningkey:                *provisioningkey.New(zpaClient),
-		samlattribute:                  *samlattribute.New(zpaClient),
-		scimgroup:                      *scimgroup.New(zpaClient),
-		scimattributeheader:            *scimattributeheader.New(zpaClient),
-		segmentgroup:                   *segmentgroup.New(zpaClient),
-		servergroup:                    *servergroup.New(zpaClient),
-		serviceedgegroup:               *serviceedgegroup.New(zpaClient),
-		serviceedgecontroller:          *serviceedgecontroller.New(zpaClient),
-		trustednetwork:                 *trustednetwork.New(zpaClient),
+		AppConnectorGroup:            services.New(zpaClient),
+		AppConnectorController:       services.New(zpaClient),
+		AppConnectorSchedule:         services.New(zpaClient),
+		ApplicationSegment:           services.New(zpaClient),
+		ApplicationSegmentPRA:        services.New(zpaClient),
+		ApplicationSegmentInspection: services.New(zpaClient),
+		ApplicationSegmentByType:     services.New(zpaClient),
+		AppServerController:          services.New(zpaClient),
+		BACertificate:                services.New(zpaClient),
+		BrowserAccess:                services.New(zpaClient),
+		CBIRegions:                   services.New(zpaClient),
+		CBIProfileController:         services.New(zpaClient),
+		CBIZpaProfile:                services.New(zpaClient),
+		CBICertificateController:     services.New(zpaClient),
+		CBIBannerController:          services.New(zpaClient),
+		CloudConnectorGroup:          services.New(zpaClient),
+		CustomerVersionProfile:       services.New(zpaClient),
+		ClientTypes:                  services.New(zpaClient),
+		EmergencyAccess:              services.New(zpaClient),
+		EnrollmentCert:               services.New(zpaClient),
+		IDPController:                services.New(zpaClient),
+		InspectionCustomControls:     services.New(zpaClient),
+		InspectionPredefinedControls: services.New(zpaClient),
+		InspectionProfile:            services.New(zpaClient),
+		IsolationProfile:             services.New(zpaClient),
+		LSSConfigController:          services.New(zpaClient),
+		MachineGroup:                 services.New(zpaClient),
+		MicroTenants:                 services.New(zpaClient),
+		Platforms:                    services.New(zpaClient),
+		PolicySetController:          services.New(zpaClient), // Correct initialization
+		PolicySetControllerV2:        services.New(zpaClient), // Correct initialization
+		PostureProfile:               services.New(zpaClient),
+		PRAApproval:                  services.New(zpaClient),
+		PRAConsole:                   services.New(zpaClient),
+		PRACredential:                services.New(zpaClient),
+		PRAPortal:                    services.New(zpaClient),
+		ProvisioningKey:              services.New(zpaClient),
+		SAMLAttribute:                services.New(zpaClient),
+		ScimGroup:                    scimgroup.New(zpaClient),
+		ScimAttributeHeader:          services.New(zpaClient),
+		SegmentGroup:                 services.New(zpaClient),
+		ServerGroup:                  services.New(zpaClient),
+		ServiceEdgeGroup:             services.New(zpaClient),
+		ServiceEdgeSchedule:          services.New(zpaClient),
+		ServiceEdgeController:        services.New(zpaClient),
+		TrustedNetwork:               services.New(zpaClient),
 	}
 
 	log.Println("[INFO] initialized ZPA client")

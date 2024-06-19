@@ -70,7 +70,7 @@ func testAccCheckPRAConsoleControllerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		console, _, err := apiClient.praconsole.Get(rs.Primary.ID)
+		console, _, err := praconsole.Get(apiClient.PRAConsole, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -95,7 +95,7 @@ func testAccCheckPRAConsoleControllerExists(resource string, console *praconsole
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedConsole, _, err := apiClient.praconsole.Get(rs.Primary.ID)
+		receivedConsole, _, err := praconsole.Get(apiClient.PRAConsole, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

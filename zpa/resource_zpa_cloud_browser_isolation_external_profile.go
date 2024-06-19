@@ -20,6 +20,7 @@ func resourceCBIExternalProfile() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 				zClient := m.(*Client)
+				service := zClient.CBIProfileController
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -27,7 +28,7 @@ func resourceCBIExternalProfile() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := zClient.cbiprofilecontroller.GetByName(id)
+					resp, _, err := cbiprofilecontroller.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -141,13 +142,14 @@ func resourceCBIExternalProfileCreate(d *schema.ResourceData, m interface{}) err
 	}
 
 	zClient := m.(*Client)
+	service := zClient.CBIProfileController
 
 	req := expandCBIExternalProfile(d)
 	req.Regions = nil
 	req.Certificates = nil
 	req.Banner = nil
 	log.Printf("[INFO] Creating cbi external profile with request\n%+v\n", req)
-	cbiProfile, _, err := zClient.cbiprofilecontroller.Create(&req)
+	cbiProfile, _, err := cbiprofilecontroller.Create(service, &req)
 	if err != nil {
 		return err
 	}
@@ -159,8 +161,9 @@ func resourceCBIExternalProfileCreate(d *schema.ResourceData, m interface{}) err
 
 func resourceCBIExternalProfileRead(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIProfileController
 
-	resp, _, err := zClient.cbiprofilecontroller.Get(d.Id())
+	resp, _, err := cbiprofilecontroller.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing cbi profile %s from state because it no longer exists in ZPA", d.Id())
@@ -211,19 +214,20 @@ func resourceCBIExternalProfileUpdate(d *schema.ResourceData, m interface{}) err
 	}
 
 	zClient := m.(*Client)
+	service := zClient.CBIProfileController
 
 	id := d.Id()
 	log.Printf("[INFO] Updating cbi profile ID: %v\n", id)
 	req := expandCBIExternalProfile(d)
 
-	if _, _, err := zClient.cbiprofilecontroller.Get(id); err != nil {
+	if _, _, err := cbiprofilecontroller.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := zClient.cbiprofilecontroller.Update(id, &req); err != nil {
+	if _, err := cbiprofilecontroller.Update(service, id, &req); err != nil {
 		return err
 	}
 
@@ -232,10 +236,11 @@ func resourceCBIExternalProfileUpdate(d *schema.ResourceData, m interface{}) err
 
 func resourceCBIExternalProfileDelete(d *schema.ResourceData, m interface{}) error {
 	zClient := m.(*Client)
+	service := zClient.CBIProfileController
 
 	log.Printf("[INFO] Deleting cbi profile ID: %v\n", d.Id())
 
-	if _, err := zClient.cbiprofilecontroller.Delete(d.Id()); err != nil {
+	if _, err := cbiprofilecontroller.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")

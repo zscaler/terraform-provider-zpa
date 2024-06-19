@@ -72,14 +72,14 @@ func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
 }
 
 func testAccCheckApplicationSegmentBrowserAccessDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
+	apiClient := testAccProvider.Meta().(*Client)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPAApplicationSegmentBrowserAccess {
 			continue
 		}
 
-		_, _, err := client.browseraccess.GetByName(rs.Primary.Attributes["name"])
+		_, _, err := browseraccess.GetByName(apiClient.BrowserAccess, rs.Primary.Attributes["name"])
 		if err == nil {
 			return fmt.Errorf("Broser Access still exists")
 		}
@@ -100,7 +100,7 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedSegment, _, err := apiClient.browseraccess.Get(rs.Primary.ID)
+		receivedSegment, _, err := browseraccess.Get(apiClient.BrowserAccess, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
