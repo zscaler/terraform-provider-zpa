@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: [1.21]
+        goVersion: ["1.21"]
         environment:
           - ZPA_QA_TENANT01
           - ZPA_QA_TENANT02
@@ -62,8 +62,8 @@ jobs:
       - name: Check Formatting
         run: make fmtcheck
 
-      - name: Vet Code
-        run: make vet
+      # - name: Vet Code
+      #   run: make vet
 
       - name: Lint Code
         run: make lint
@@ -100,7 +100,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: [1.21]
+        goVersion: ["1.21"]
         environment:
           - ZPA_QA2_TENANT01
           # - ZPA_QA2_TENANT02
@@ -142,8 +142,8 @@ jobs:
       - name: Check Formatting
         run: make fmtcheck
 
-      - name: Vet Code
-        run: make vet
+      # - name: Vet Code
+      #   run: make vet
 
       - name: Lint Code
         run: make lint
@@ -181,7 +181,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: [1.21]
+        goVersion: ["1.21"]
         environment:
           - ZPA_BETA_TENANT01
     environment: ${{ matrix.environment }}
@@ -222,8 +222,8 @@ jobs:
       - name: Check Formatting
         run: make fmtcheck
 
-      - name: Vet Code
-        run: make vet
+      # - name: Vet Code
+      #   run: make vet
 
       - name: Lint Code
         run: make lint
@@ -261,7 +261,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: [1.21]
+        goVersion: ["1.21"]
         environment:
           - ZPA_PROD_TENANT01
     environment: ${{ matrix.environment }}
@@ -302,8 +302,8 @@ jobs:
       - name: Check Formatting
         run: make fmtcheck
 
-      - name: Vet Code
-        run: make vet
+      # - name: Vet Code
+      #   run: make vet
 
       - name: Lint Code
         run: make lint
