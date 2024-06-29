@@ -284,7 +284,6 @@ func flattenPolicySetRules(policySetRules *policysetcontroller.PolicySet) []inte
 			"custom_msg":                  ruleItem.CustomMsg,
 			"description":                 ruleItem.Description,
 			"id":                          ruleItem.ID,
-			"isolation_default_rule":      ruleItem.IsolationDefaultRule,
 			"modified_by":                 ruleItem.ModifiedBy,
 			"modified_time":               ruleItem.ModifiedTime,
 			"operator":                    ruleItem.Operator,
