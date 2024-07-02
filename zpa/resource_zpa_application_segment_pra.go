@@ -89,7 +89,6 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Description: "UDP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-
 			"config_space": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -385,6 +384,11 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 	zClient := m.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	id := d.Id()
 	log.Printf("[INFO] Updating pra application segment ID: %v\n", id)
 	req := expandSRAApplicationSegment(d, zClient, id)
@@ -439,7 +443,7 @@ func resourceApplicationSegmentPRADelete(d *schema.ResourceData, m interface{}) 
 			}
 		}
 	}
-	log.Printf("[INFO] Deleting sra application segment with id %v\n", id)
+	log.Printf("[INFO] Deleting pra application segment with id %v\n", id)
 	if _, err := applicationsegmentpra.Delete(service, id); err != nil {
 		return err
 	}

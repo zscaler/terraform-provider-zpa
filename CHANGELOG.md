@@ -1,16 +1,20 @@
 # Changelog
 
-## 3.3.30 (June, 2 2024)
+## 3.3.25 (July, 2 2024)
 
 ### Notes
 
-- Release date: **(June, 14 2024)**
+- Release date: **(July, 2 2024)**
 - Supported Terraform version: **v1.x**
 
 ### Deprecations
 - [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) The following attributes are not deprecated:
   - ``zpa_application_segment_browser_access``: `cname`, `hidden`, `local_name`, `path`
   - ``zpa_application_segment_pra``: `cname`, `segment_group_name`
+
+### Bug Fixes
+- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_application_segment_inspection` drift issues within `common_apps_dto` and `tcp_port_range`
+
 
 ## 3.3.24 (June, 14 2024)
 
