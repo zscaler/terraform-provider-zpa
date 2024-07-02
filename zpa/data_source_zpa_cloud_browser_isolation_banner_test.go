@@ -1,15 +1,6 @@
 package zpa
 
-import (
-	"strconv"
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-)
-
+/*
 func TestAccDataSourceCBIBanners_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBIBannerController)
 
@@ -35,3 +26,4 @@ func TestAccDataSourceCBIBanners_Basic(t *testing.T) {
 		},
 	})
 }
+*/

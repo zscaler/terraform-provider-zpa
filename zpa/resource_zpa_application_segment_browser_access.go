@@ -230,11 +230,12 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Optional:    true,
 							Description: "ID of the BA certificate.",
 						},
-						"cname": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
+						// "cname": {
+						// 	Type:       schema.TypeString,
+						// 	Computed:   true,
+						// 	Optional:   true,
+						// 	Deprecated: "The `cname` field is now deprecated, you can safely remove this attribute from your configuration",
+						// },
 						"description": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -249,27 +250,27 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"hidden": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
+						// "hidden": {
+						// 	Type:     schema.TypeBool,
+						// 	Optional: true,
+						// 	Computed: true,
+						// },
 						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"local_domain": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
+						// "local_domain": {
+						// 	Type:     schema.TypeString,
+						// 	Computed: true,
+						// },
 						"name": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"path": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
+						// "path": {
+						// 	Type:     schema.TypeString,
+						// 	Computed: true,
+						// },
 						"trust_untrusted_cert": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -461,28 +462,6 @@ func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, m int
 	return nil
 }
 
-/*
-func detachBrowserAccessFromGroup(client *Client, segmentID, segmentGroupID string) error {
-	log.Printf("[INFO] Detaching browser access %s from segment group: %s\n", segmentID, segmentGroupID)
-	service := client.SegmentGroup
-
-	segGroup, _, err := segmentgroup.Get(service, segmentGroupID)
-	if err != nil {
-		log.Printf("[error] Error while getting segment group id: %s", segmentGroupID)
-		return err
-	}
-	adaptedApplications := []segmentgroup.Application{}
-	for _, app := range segGroup.Applications {
-		if app.ID != segmentID {
-			adaptedApplications = append(adaptedApplications, app)
-		}
-	}
-	segGroup.Applications = adaptedApplications
-	_, err = segmentgroup.Update(service, segmentGroupID, segGroup)
-	return err
-}
-*/
-
 func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
 	details := browseraccess.BrowserAccess{
 		ID:                        d.Id(),
@@ -576,15 +555,15 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 					ApplicationPort:     clientlessApp["application_port"].(string),
 					ApplicationProtocol: clientlessApp["application_protocol"].(string),
 					CertificateID:       clientlessApp["certificate_id"].(string),
-					Cname:               clientlessApp["cname"].(string),
-					Description:         clientlessApp["description"].(string),
-					Domain:              clientlessApp["domain"].(string),
-					Enabled:             clientlessApp["enabled"].(bool),
-					Hidden:              clientlessApp["hidden"].(bool),
-					LocalDomain:         clientlessApp["local_domain"].(string),
-					Name:                clientlessApp["name"].(string),
-					Path:                clientlessApp["path"].(string),
-					TrustUntrustedCert:  clientlessApp["trust_untrusted_cert"].(bool),
+					// Cname:               clientlessApp["cname"].(string),
+					Description: clientlessApp["description"].(string),
+					Domain:      clientlessApp["domain"].(string),
+					Enabled:     clientlessApp["enabled"].(bool),
+					// Hidden:              clientlessApp["hidden"].(bool),
+					// LocalDomain:        clientlessApp["local_domain"].(string),
+					Name: clientlessApp["name"].(string),
+					// Path:               clientlessApp["path"].(string),
+					TrustUntrustedCert: clientlessApp["trust_untrusted_cert"].(bool),
 				})
 			}
 		}
@@ -624,15 +603,15 @@ func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []inter
 			"application_port":     clientlessApp.ApplicationPort,
 			"application_protocol": clientlessApp.ApplicationProtocol,
 			"certificate_id":       clientlessApp.CertificateID,
-			"cname":                clientlessApp.Cname,
-			"description":          clientlessApp.Description,
-			"domain":               clientlessApp.Domain,
-			"enabled":              clientlessApp.Enabled,
-			"hidden":               clientlessApp.Hidden,
-			"id":                   clientlessApp.ID,
-			"local_domain":         clientlessApp.LocalDomain,
-			"name":                 clientlessApp.Name,
-			"path":                 clientlessApp.Path,
+			// "cname":                clientlessApp.Cname,
+			"description": clientlessApp.Description,
+			"domain":      clientlessApp.Domain,
+			"enabled":     clientlessApp.Enabled,
+			// "hidden":               clientlessApp.Hidden,
+			"id": clientlessApp.ID,
+			// "local_domain":         clientlessApp.LocalDomain,
+			"name": clientlessApp.Name,
+			// "path":                 clientlessApp.Path,
 			"trust_untrusted_cert": clientlessApp.TrustUntrustedCert,
 		}
 	}
