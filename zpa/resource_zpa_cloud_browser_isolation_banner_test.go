@@ -1,6 +1,19 @@
 package zpa
 
-/*
+import (
+	"fmt"
+	"strconv"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
+)
+
 func TestAccResourceCBIBannersBasic(t *testing.T) {
 	var cbiBanner cbibannercontroller.CBIBannerController
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBIBannerController)
@@ -128,4 +141,3 @@ data "%s" "%s" {
 		resourcetype.ZPACBIBannerController, resourceName,
 	)
 }
-*/

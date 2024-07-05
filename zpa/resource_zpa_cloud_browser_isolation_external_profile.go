@@ -58,47 +58,126 @@ func resourceCBIExternalProfile() *schema.Resource {
 			},
 			"region_ids": {
 				Type:        schema.TypeSet,
-				Computed:    true,
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: "This field defines the list of server groups IDs.",
+				Description: "This field defines the list of region IDs.",
 			},
 			"certificate_ids": {
 				Type:        schema.TypeSet,
-				Computed:    true,
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: "This field defines the list of server groups IDs.",
+				Description: "This field defines the list of certificate IDs.",
 			},
 			"user_experience": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"session_persistence": {
+						"zgpu": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
+						},
+						"forward_to_zia": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"organization_id": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+									"cloud_name": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+									"pac_file_url": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+								},
+							},
 						},
 						"browser_in_browser": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
+						},
+						"persist_isolation_bar": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"translate": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"session_persistence": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"debug_mode": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"allowed": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"file_password": {
+							Type:      schema.TypeString,
+							Optional:  true,
+							Sensitive: true,
 						},
 					},
 				},
 			},
 			"security_controls": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"copy_paste": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"none",
 								"all",
 							}, false),
 						},
+						"upload_download": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"none",
+								"all",
+								"upstream",
+							}, false),
+						},
+
 						"document_viewer": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -109,14 +188,6 @@ func resourceCBIExternalProfile() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"upload_download": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"none",
-								"all",
-							}, false),
-						},
 						"allow_printing": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -126,6 +197,67 @@ func resourceCBIExternalProfile() *schema.Resource {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Computed: true,
+						},
+						"deep_link": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"applications": {
+										Type:     schema.TypeSet,
+										Optional: true,
+										Computed: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+								},
+							},
+						},
+						"flattened_pdf": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+						},
+						"watermark": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"show_user_id": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"show_timestamp": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"show_message": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Computed: true,
+									},
+									"message": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+									},
+								},
+							},
 						},
 					},
 				},
@@ -203,6 +335,13 @@ func resourceCBIExternalProfileRead(d *schema.ResourceData, m interface{}) error
 	if resp.UserExperience != nil {
 		_ = d.Set("user_experience", flattenUserExperience(resp.UserExperience))
 	}
+	log.Printf("[INFO] Setting debug_mode: %+v\n", resp.DebugMode)
+
+	if resp.DebugMode != nil {
+		log.Printf("[INFO] Setting debug_mode: %+v\n", resp.DebugMode)
+		_ = d.Set("debug_mode", flattenDebugMode(resp.DebugMode))
+	}
+
 	return nil
 }
 
@@ -261,6 +400,7 @@ func expandCBIExternalProfile(d *schema.ResourceData) cbiprofilecontroller.Isola
 		CertificateIDs:   SetToStringSlice(d.Get("certificate_ids").(*schema.Set)),
 		UserExperience:   expandCBIUserExperience(d),
 		SecurityControls: expandCBISecurityControls(d),
+		DebugMode:        expandCBIDebugMode(d),
 	}
 	profile := expandCBIUserExperience(d)
 	if profile != nil {
@@ -280,19 +420,29 @@ func expandCBIUserExperience(d *schema.ResourceData) *cbiprofilecontroller.UserE
 	if !ok {
 		return nil
 	}
-	profiles, ok := profileObj.(*schema.Set)
-	if !ok {
-		return nil
-	}
-	if len(profiles.List()) > 0 {
-		profileObj := profiles.List()[0]
-		profile, ok := profileObj.(map[string]interface{})
-		if !ok {
-			return nil
+	profiles := profileObj.([]interface{})
+	if len(profiles) > 0 {
+		profile := profiles[0].(map[string]interface{})
+
+		forwardToZiaObj, forwardToZiaExists := profile["forward_to_zia"].([]interface{})
+		var forwardToZia *cbiprofilecontroller.ForwardToZia
+		if forwardToZiaExists && len(forwardToZiaObj) > 0 {
+			forwardToZiaData := forwardToZiaObj[0].(map[string]interface{})
+			forwardToZia = &cbiprofilecontroller.ForwardToZia{
+				Enabled:        forwardToZiaData["enabled"].(bool),
+				OrganizationID: forwardToZiaData["organization_id"].(string),
+				CloudName:      forwardToZiaData["cloud_name"].(string),
+				PacFileUrl:     forwardToZiaData["pac_file_url"].(string),
+			}
 		}
+
 		return &cbiprofilecontroller.UserExperience{
-			SessionPersistence: profile["session_persistence"].(bool),
-			BrowserInBrowser:   profile["browser_in_browser"].(bool),
+			ZGPU:                profile["zgpu"].(bool),
+			ForwardToZia:        forwardToZia,
+			BrowserInBrowser:    profile["browser_in_browser"].(bool),
+			PersistIsolationBar: profile["persist_isolation_bar"].(bool),
+			Translate:           profile["translate"].(bool),
+			SessionPersistence:  profile["session_persistence"].(bool),
 		}
 	}
 	return nil
@@ -303,23 +453,60 @@ func expandCBISecurityControls(d *schema.ResourceData) *cbiprofilecontroller.Sec
 	if !ok {
 		return nil
 	}
-	profiles, ok := profileObj.(*schema.Set)
+	profiles := profileObj.([]interface{})
+	if len(profiles) > 0 {
+		profile := profiles[0].(map[string]interface{})
+
+		deepLinkObj, deepLinkExists := profile["deep_link"].([]interface{})
+		var deepLink *cbiprofilecontroller.DeepLink
+		if deepLinkExists && len(deepLinkObj) > 0 {
+			deepLinkData := deepLinkObj[0].(map[string]interface{})
+			deepLink = &cbiprofilecontroller.DeepLink{
+				Enabled:      deepLinkData["enabled"].(bool),
+				Applications: SetToStringSlice(deepLinkData["applications"].(*schema.Set)),
+			}
+		}
+
+		watermarkObj, watermarkExists := profile["watermark"].([]interface{})
+		var watermark *cbiprofilecontroller.Watermark
+		if watermarkExists && len(watermarkObj) > 0 {
+			watermarkData := watermarkObj[0].(map[string]interface{})
+			watermark = &cbiprofilecontroller.Watermark{
+				Enabled:       watermarkData["enabled"].(bool),
+				ShowUserID:    watermarkData["show_user_id"].(bool),
+				ShowTimestamp: watermarkData["show_timestamp"].(bool),
+				ShowMessage:   watermarkData["show_message"].(bool),
+				Message:       watermarkData["message"].(string),
+			}
+		}
+
+		return &cbiprofilecontroller.SecurityControls{
+			CopyPaste:          profile["copy_paste"].(string),
+			UploadDownload:     profile["upload_download"].(string),
+			DocumentViewer:     profile["document_viewer"].(bool),
+			LocalRender:        profile["local_render"].(bool),
+			AllowPrinting:      profile["allow_printing"].(bool),
+			RestrictKeystrokes: profile["restrict_keystrokes"].(bool),
+			DeepLink:           deepLink,
+			FlattenedPdf:       profile["flattened_pdf"].(bool),
+			Watermark:          watermark,
+		}
+	}
+	return nil
+}
+
+func expandCBIDebugMode(d *schema.ResourceData) *cbiprofilecontroller.DebugMode {
+	profileObj, ok := d.GetOk("debug_mode")
 	if !ok {
 		return nil
 	}
-	if len(profiles.List()) > 0 {
-		profileObj := profiles.List()[0]
-		profile, ok := profileObj.(map[string]interface{})
-		if !ok {
-			return nil
-		}
-		return &cbiprofilecontroller.SecurityControls{
-			CopyPaste:          profile["copy_paste"].(string),
-			DocumentViewer:     profile["document_viewer"].(bool),
-			LocalRender:        profile["local_render"].(bool),
-			UploadDownload:     profile["upload_download"].(string),
-			AllowPrinting:      profile["allow_printing"].(bool),
-			RestrictKeystrokes: profile["restrict_keystrokes"].(bool),
+	profiles := profileObj.([]interface{})
+	if len(profiles) > 0 {
+		profile := profiles[0].(map[string]interface{})
+
+		return &cbiprofilecontroller.DebugMode{
+			Allowed:      profile["allowed"].(bool),
+			FilePassword: profile["file_password"].(string),
 		}
 	}
 	return nil

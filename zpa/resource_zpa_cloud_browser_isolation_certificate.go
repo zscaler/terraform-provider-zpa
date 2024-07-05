@@ -20,11 +20,6 @@ func resourceCBICertificates() *schema.Resource {
 				zClient := m.(*Client)
 				service := zClient.CBICertificateController
 
-				microTenantID := GetString(d.Get("microtenant_id"))
-				if microTenantID != "" {
-					service = service.WithMicroTenant(microTenantID)
-				}
-
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
 				if parseIDErr == nil {

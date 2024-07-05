@@ -2,7 +2,7 @@ resource "zpa_app_connector_group" "example" {
   name                          = "Example"
   description                   = "Example"
   enabled                       = true
-  city_country                  = "California, US"
+  city_country                  = "San Jose, US"
   country_code                  = "US"
   latitude                      = "37.3382082"
   longitude                     = "-121.8863286"

@@ -1,10 +1,10 @@
 # Changelog
 
-## 3.3.25 (July, 2 2024)
+## 3.3.25 (July, xx 2024)
 
 ### Notes
 
-- Release date: **(July, 2 2024)**
+- Release date: **(July, xx 2024)**
 - Supported Terraform version: **v1.x**
 
 ### Deprecations
@@ -15,6 +15,40 @@
 ### Bug Fixes
 - [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_application_segment_inspection` drift issues within `common_apps_dto` and `tcp_port_range`
 
+### Enhancements
+- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Added new attributes to `zpa_cloud_browser_isolation_external_profile`:
+  - `flattened_pdf` - Enable to allow downloading of flattened files from isolation container to your local computer.
+
+    **NOTE** `flattened_pdf` must be set to `false` when `upload_download` is set to `all`
+- `security_controls` - The CBI security controls enabled for the profile
+  - `copy_paste:` - Enable or disable copy & paste for local computer to isolation. Supported values are: `none` or `all`
+  - `document_viewer:` - Enable or disable to view Microsoft Office files in isolation.
+  - `local_render:` - Enables non-isolated hyperlinks to be opened on the user's native browser.
+  - `upload_download` - Enable or disable file transfer from local computer to isolation. Supported values are: `none`, `all`, `upstream`
+
+    **NOTE** `upload_download` must be set to `none` or `upstream` when `flattened_pdf` is set to `true`
+
+  - `deep_link:` - Enter applications that are allowed to launch outside of the Isolation session
+    - `enabled:` - Enable or disable to view Microsoft Office files in isolation.
+    - `applications:` - List of deep link applications
+
+  - `watermark:` - Enable to display a custom watermark on isolated web pages.
+    - `enabled:` - Enable to display a custom watermark on isolated web pages.
+    - `show_user_id:` - Display the user ID on watermark isolated web pages.
+    - `show_timestamp:` - Display the timestamp on watermark isolated web pages.
+    - `show_message:` - Enable custom message on watermark isolated web pages.
+    - `message:` - Display custom message on watermark isolated web pages.
+
+- `user_experience` - The CBI security controls enabled for the profile
+  - `forward_to_zia:` - Enable to forward non-ZPA Internet traffic via ZIA.
+    - `enabled:` - Enable to forward non-ZPA Internet traffic via ZIA.
+    - `organization_id:` - Use the ZIA organization ID from the Company Profile section.
+    - `cloud_name:` - The ZIA cloud name on which the organization exists i.e `zscalertwo`
+    - `pac_file_url:` - Enable to have the PAC file be configured on the Isolated browser to forward traffic via ZIA.
+
+- `debug_mode`- Enable to allow starting isolation sessions in debug mode to collect troubleshooting information.
+  - `allowed:` - Enable to allow starting isolation sessions in debug mode to collect troubleshooting information.
+  - `file_password:` - Set an optional password to debug files when this mode is enabled.
 
 ## 3.3.24 (June, 14 2024)
 
