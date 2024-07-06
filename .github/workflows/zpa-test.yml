@@ -248,20 +248,13 @@ jobs:
           TF_ACC: ${{ secrets.TF_ACC }}
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
-      # - name: Publish test coverage
-      #   uses: codecov/codecov-action@v4
-      #   with:
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-      #     file: ./coverage.out 
-      #     fail_ci_if_error: true
-
   zpa-prod-tenants:
-    needs: [zpa-beta-tenants]
+    # needs: [zpa-beta-tenants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        goVersion: ["1.21"]
+        goVersion: ["1.22"]
         environment:
           - ZPA_PROD_TENANT01
     environment: ${{ matrix.environment }}

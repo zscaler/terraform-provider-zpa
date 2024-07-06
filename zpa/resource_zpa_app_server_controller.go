@@ -18,8 +18,8 @@ func resourceApplicationServer() *schema.Resource {
 		Update: resourceApplicationServerUpdate,
 		Delete: resourceApplicationServerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.AppServerController
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -100,8 +100,8 @@ func resourceApplicationServer() *schema.Resource {
 	}
 }
 
-func resourceApplicationServerCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationServerCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppServerController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -119,11 +119,11 @@ func resourceApplicationServerCreate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] Created application server request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceApplicationServerRead(d, m)
+	return resourceApplicationServerRead(d, meta)
 }
 
-func resourceApplicationServerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationServerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppServerController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -153,17 +153,17 @@ func resourceApplicationServerRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-func resourceApplicationServerUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationServerUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppServerController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
-	log.Println("An updated occurred")
+	log.Println("An update occurred")
 
-	if d.HasChange("app_server_group_ids") || d.HasChange("name") || d.HasChange("description") || d.HasChange("address") || d.HasChange("enabled") {
+	if d.HasChanges("app_server_group_ids", "name", "description", "address", "enabled") {
 		log.Println("The AppServerGroupID, name, description or address has been changed")
 
 		if _, _, err := appservercontroller.Get(service, d.Id()); err != nil {
@@ -188,8 +188,8 @@ func resourceApplicationServerUpdate(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourceApplicationServerDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationServerDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppServerController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

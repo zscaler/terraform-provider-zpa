@@ -19,8 +19,8 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 		Update: resourceApplicationSegmentInspectionUpdate,
 		Delete: resourceApplicationSegmentInspectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.ApplicationSegmentInspection
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -200,7 +200,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"common_apps_dto": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
@@ -282,8 +281,8 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -313,11 +312,11 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interf
 	log.Printf("[INFO] Created inspection application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceApplicationSegmentInspectionRead(d, m)
+	return resourceApplicationSegmentInspectionRead(d, meta)
 }
 
-func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -386,8 +385,8 @@ func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinsp
 	return result
 }
 
-func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -421,11 +420,11 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	return resourceApplicationSegmentInspectionRead(d, m)
+	return resourceApplicationSegmentInspectionRead(d, meta)
 }
 
-func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))

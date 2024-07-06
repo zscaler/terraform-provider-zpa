@@ -121,8 +121,8 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionAllPredefinedControlsRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceInspectionAllPredefinedControlsRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionPredefinedControls
 
 	version, versionSet := d.Get("version").(string)

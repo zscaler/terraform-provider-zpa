@@ -16,8 +16,8 @@ func resourceCBICertificates() *schema.Resource {
 		Update: resourceCBICertificatesUpdate,
 		Delete: resourceCBICertificatesDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
 				service := zClient.CBICertificateController
 
 				id := d.Id()
@@ -26,7 +26,7 @@ func resourceCBICertificates() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := cbicertificatecontroller.GetByName(service, id)
+					resp, _, err := cbicertificatecontroller.GetByNameOrID(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -54,8 +54,8 @@ func resourceCBICertificates() *schema.Resource {
 	}
 }
 
-func resourceCBICertificatesCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBICertificatesCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBICertificateController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -73,11 +73,11 @@ func resourceCBICertificatesCreate(d *schema.ResourceData, m interface{}) error 
 	log.Printf("[INFO] Created cbi certificate request. ID: %v\n", cbiCertificate)
 
 	d.SetId(cbiCertificate.ID)
-	return resourceCBICertificatesRead(d, m)
+	return resourceCBICertificatesRead(d, meta)
 }
 
-func resourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBICertificatesRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBICertificateController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -104,8 +104,8 @@ func resourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceCBICertificatesUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBICertificatesUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBICertificateController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -128,11 +128,11 @@ func resourceCBICertificatesUpdate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	return resourceCBICertificatesRead(d, m)
+	return resourceCBICertificatesRead(d, meta)
 }
 
-func resourceCBICertificatesDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBICertificatesDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBICertificateController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

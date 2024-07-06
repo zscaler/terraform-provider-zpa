@@ -19,7 +19,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
 )
 
-func TestAccResourceCBICertificate_basic(t *testing.T) {
+func TestAccResourceCBICertificate_Basic(t *testing.T) {
 	var cbiCertificate cbicertificatecontroller.CBICertificate
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBICertificate)
 
@@ -49,6 +49,15 @@ func TestAccResourceCBICertificate_basic(t *testing.T) {
 					testAccCheckCBICertificateExists(resourceTypeAndName, &cbiCertificate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedCertName),
 				),
+			},
+			// Import test by ID
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return cbiCertificate.ID, nil
+				},
 			},
 		},
 	})

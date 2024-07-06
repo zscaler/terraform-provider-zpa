@@ -109,8 +109,8 @@ func dataSourceEnrollmentCert() *schema.Resource {
 	}
 }
 
-func dataSourceEnrollmentCertRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceEnrollmentCertRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.EnrollmentCert
 
 	microTenantID := GetString(d.Get("microtenant_id"))

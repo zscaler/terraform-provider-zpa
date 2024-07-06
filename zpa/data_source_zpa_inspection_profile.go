@@ -359,8 +359,8 @@ func dataSourceInspectionProfile() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionProfile
 
 	var resp *inspection_profile.InspectionProfile

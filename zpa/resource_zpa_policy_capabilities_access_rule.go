@@ -181,8 +181,8 @@ func resourcePolicyCapabilitiesAccessRule() *schema.Resource {
 	}
 }
 
-func resourcePolicyCapabilitiesAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyCapabilitiesAccessRuleCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -215,11 +215,11 @@ func resourcePolicyCapabilitiesAccessRuleCreate(d *schema.ResourceData, m interf
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyCapabilitiesAccessRuleRead(d, m)
+	return resourcePolicyCapabilitiesAccessRuleRead(d, meta)
 }
 
-func resourcePolicyCapabilitiesAccessRuleRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyCapabilitiesAccessRuleRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -259,8 +259,8 @@ func resourcePolicyCapabilitiesAccessRuleRead(d *schema.ResourceData, m interfac
 	return nil
 }
 
-func resourcePolicyCapabilitiesAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyCapabilitiesAccessRuleUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -302,11 +302,11 @@ func resourcePolicyCapabilitiesAccessRuleUpdate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	return resourcePolicyCapabilitiesAccessRuleRead(d, m)
+	return resourcePolicyCapabilitiesAccessRuleRead(d, meta)
 }
 
-func resourcePolicyCapabilitiesAccessRuleDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyCapabilitiesAccessRuleDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	// Assume "CAPABILITIES_POLICY" is the policy type for this resource. Adjust as needed.

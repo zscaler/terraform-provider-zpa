@@ -301,8 +301,8 @@ func dataSourceServerGroup() *schema.Resource {
 	}
 }
 
-func dataSourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceServerGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServerGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))

@@ -169,8 +169,8 @@ func dataSourceAppConnectorController() *schema.Resource {
 	}
 }
 
-func dataSourceAppConnectorControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceAppConnectorControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

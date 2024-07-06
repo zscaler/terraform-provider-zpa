@@ -40,8 +40,8 @@ func dataSourceAppConnectorAssistantSchedule() *schema.Resource {
 	}
 }
 
-func dataSourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorSchedule
 
 	var resp *appconnectorschedule.AssistantSchedule

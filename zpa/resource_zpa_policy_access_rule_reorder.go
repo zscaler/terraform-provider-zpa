@@ -130,8 +130,8 @@ func getRules(d *schema.ResourceData) (*RulesOrders, error) {
 	return &orders, nil
 }
 
-func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessReorderRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -185,8 +185,8 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -237,9 +237,9 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, m interface{}) er
 	}
 
 	d.SetId(fmt.Sprintf("%s-%s", d.Get("policy_type").(string), "reorder"))
-	return resourcePolicyAccessReorderRead(d, m)
+	return resourcePolicyAccessReorderRead(d, meta)
 }
 
-func resourcePolicyAccessReorderDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePolicyAccessReorderDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }

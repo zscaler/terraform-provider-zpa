@@ -119,8 +119,8 @@ func dataSourceMachineGroup() *schema.Resource {
 	}
 }
 
-func dataSourceMachineGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceMachineGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.MachineGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))

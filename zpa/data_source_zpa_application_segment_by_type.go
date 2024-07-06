@@ -76,8 +76,8 @@ func dataSourceApplicationSegmentByType() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationSegmentByTypeRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceApplicationSegmentByTypeRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentByType
 
 	microTenantID := GetString(d.Get("microtenant_id"))

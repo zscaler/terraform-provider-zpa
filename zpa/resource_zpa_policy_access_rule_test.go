@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
-func TestAccResourcePolicyAccessRuleBasic(t *testing.T) {
+func TestAccResourcePolicyAccessRule_Basic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyAccessRule)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test

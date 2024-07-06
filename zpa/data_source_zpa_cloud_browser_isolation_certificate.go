@@ -33,8 +33,8 @@ func dataSourceCBICertificates() *schema.Resource {
 	}
 }
 
-func dataSourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceCBICertificatesRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBICertificateController
 
 	var resp *cbicertificatecontroller.CBICertificate

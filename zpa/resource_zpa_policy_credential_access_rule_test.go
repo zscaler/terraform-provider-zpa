@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
 )
 
-func TestAccResourcePolicyCredentialAccessRuleBasic(t *testing.T) {
+func TestAccResourcePolicyCredentialAccessRule_Basic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyCredentialRule)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	randDesc := acctest.RandString(20)

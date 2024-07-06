@@ -19,8 +19,8 @@ func resourceInspectionProfile() *schema.Resource {
 		Update: resourceInspectionProfileUpdate,
 		Delete: resourceInspectionProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
 				service := zClient.InspectionProfile
 
 				id := d.Id()
@@ -252,8 +252,8 @@ func validateInspectionProfile(profile *inspection_profile.InspectionProfile) er
 	return nil
 }
 
-func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceInspectionProfileCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionProfile
 
 	req := expandInspectionProfile(d)
@@ -276,11 +276,11 @@ func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) erro
 		}
 		inspection_profile.PutAssociate(service, resp.ID, p)
 	}
-	return resourceInspectionProfileRead(d, m)
+	return resourceInspectionProfileRead(d, meta)
 }
 
-func resourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionProfile
 
 	resp, _, err := inspection_profile.Get(service, d.Id())
@@ -368,8 +368,8 @@ func flattenCustomControlsSimple(customControl []inspection_profile.InspectionCu
 	return customControls
 }
 
-func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceInspectionProfileUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionProfile
 
 	id := d.Id()
@@ -397,11 +397,11 @@ func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) erro
 		}
 		inspection_profile.PutAssociate(service, req.ID, p)
 	}
-	return resourceInspectionProfileRead(d, m)
+	return resourceInspectionProfileRead(d, meta)
 }
 
-func resourceInspectionProfileDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceInspectionProfileDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionProfile
 
 	log.Printf("[INFO] Deleting inspection profile ID: %v\n", d.Id())

@@ -26,8 +26,8 @@ func dataSourceCBIRegions() *schema.Resource {
 	}
 }
 
-func dataSourceCBIRegionsRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceCBIRegionsRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBIRegions
 
 	var resp *cbiregions.CBIRegions

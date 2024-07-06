@@ -130,8 +130,8 @@ func dataSourceInspectionCustomControls() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionCustomControls
 
 	var resp *inspection_custom_controls.InspectionCustomControl

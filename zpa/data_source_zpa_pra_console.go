@@ -102,8 +102,8 @@ func dataSourcePRAConsoleController() *schema.Resource {
 	}
 }
 
-func dataSourcePRAConsoleControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourcePRAConsoleControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAConsole
 
 	microTenantID := GetString(d.Get("microtenant_id"))

@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
 )
 
-func TestAccResourceProvisioningKeyBasic_Connector(t *testing.T) {
+func TestAccResourceProvisioningKeyConnector_Basic(t *testing.T) {
 	var groups provisioningkey.ProvisioningKey
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
 
@@ -163,7 +163,7 @@ resource "%s" "%s" {
 
 /*
 // Testing Provisioning Key for Service Edge Group
-func TestAccResourceProvisioningKeyBasic_ServiceEdgeGroup(t *testing.T) {
+func TestAccResourceProvisioningKeyServiceEdgeGroup_Basic(t *testing.T) {
 	var groups provisioningkey.ProvisioningKey
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
 

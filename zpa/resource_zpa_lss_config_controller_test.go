@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 )
 
-func TestAccResourceLSSConfigControllerBasic(t *testing.T) {
+func TestAccResourceLSSConfigController_Basic(t *testing.T) {
 	var lssConfig lssconfigcontroller.LSSResource
 	lssControllerTypeAndName, _, lssControllerGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPALSSController)
 	rPort := acctest.RandIntRange(1000, 9999)

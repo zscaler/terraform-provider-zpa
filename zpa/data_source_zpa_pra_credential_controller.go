@@ -76,8 +76,8 @@ func dataSourcePRACredentialController() *schema.Resource {
 	}
 }
 
-func dataSourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourcePRACredentialControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRACredential
 
 	microTenantID := GetString(d.Get("microtenant_id"))

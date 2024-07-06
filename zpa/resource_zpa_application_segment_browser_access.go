@@ -20,8 +20,8 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 		Update: resourceApplicationSegmentBrowserAccessUpdate,
 		Delete: resourceApplicationSegmentBrowserAccessDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.AppServerController
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -301,8 +301,8 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BrowserAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -331,11 +331,11 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, m int
 	log.Printf("[INFO] Created browser access request. ID: %v\n", browseraccess.ID)
 	d.SetId(browseraccess.ID)
 
-	return resourceApplicationSegmentBrowserAccessRead(d, m)
+	return resourceApplicationSegmentBrowserAccessRead(d, meta)
 }
 
-func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BrowserAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -398,8 +398,8 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BrowserAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -431,11 +431,11 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, m int
 		return err
 	}
 
-	return resourceApplicationSegmentBrowserAccessRead(d, m)
+	return resourceApplicationSegmentBrowserAccessRead(d, meta)
 }
 
-func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BrowserAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))

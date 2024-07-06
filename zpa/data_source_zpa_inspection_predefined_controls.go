@@ -108,8 +108,8 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionPredefinedControls
 
 	var resp *inspection_predefined_controls.PredefinedControls

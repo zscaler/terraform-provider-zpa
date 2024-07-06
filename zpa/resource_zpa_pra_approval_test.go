@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praapproval"
 )
 
-func TestAccResourcePRAPrivilegedApprovalControllerBasic(t *testing.T) {
+func TestAccResourcePRAPrivilegedApprovalController_Basic(t *testing.T) {
 	var praApproval praapproval.PrivilegedApproval
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPRAApprovalController)
 

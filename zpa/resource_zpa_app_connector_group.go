@@ -20,8 +20,8 @@ func resourceAppConnectorGroup() *schema.Resource {
 		Update: resourceAppConnectorGroupUpdate,
 		Delete: resourceAppConnectorGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.AppConnectorGroup
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -192,8 +192,8 @@ func resourceAppConnectorGroup() *schema.Resource {
 	}
 }
 
-func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceAppConnectorGroupCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -218,11 +218,11 @@ func resourceAppConnectorGroupCreate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] Created app connector group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceAppConnectorGroupRead(d, m)
+	return resourceAppConnectorGroupRead(d, meta)
 }
 
-func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceAppConnectorGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -266,8 +266,8 @@ func resourceAppConnectorGroupRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceAppConnectorGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -297,7 +297,7 @@ func resourceAppConnectorGroupUpdate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-	return resourceAppConnectorGroupRead(d, m)
+	return resourceAppConnectorGroupRead(d, meta)
 }
 
 func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, policySetControllerService *services.Service) {
@@ -333,8 +333,8 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, pol
 	}
 }
 
-func resourceAppConnectorGroupDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceAppConnectorGroupDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	policySetControllerService := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

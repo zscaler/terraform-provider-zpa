@@ -24,8 +24,8 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 		Update: resourceApplicationSegmentPRAUpdate,
 		Delete: resourceApplicationSegmentPRADelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.ApplicationSegmentPRA
 
 				id := d.Id()
@@ -201,7 +201,6 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"common_apps_dto": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
@@ -278,8 +277,8 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentPRACreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
 	req := expandSRAApplicationSegment(d, zClient, "")
@@ -302,6 +301,7 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 	d.SetId(resp.ID)
 
 	// Introduce a brief delay to allow the backend to fully process the creation
+	//lintignore:R018
 	time.Sleep(5 * time.Second)
 
 	// Explicitly call GET using the ID to fetch the latest resource state
@@ -312,11 +312,11 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, m interface{}) 
 	}
 
 	// Now, update Terraform state with the latest fetched details
-	return resourceApplicationSegmentPRARead(d, m)
+	return resourceApplicationSegmentPRARead(d, meta)
 }
 
-func resourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
 	resp, _, err := applicationsegmentpra.Get(service, d.Id())
@@ -380,8 +380,8 @@ func flattenPRAAppServerGroupsSimple(serverGroup []applicationsegmentpra.AppServ
 	return result
 }
 
-func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -415,6 +415,7 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 	}
 
 	// Introduce a brief delay to allow the backend to fully process the update
+	//lintignore:R018
 	time.Sleep(5 * time.Second)
 
 	// Fetch the latest resource state after the update
@@ -425,11 +426,11 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, m interface{}) 
 	}
 
 	// Now, update Terraform state with the latest fetched details
-	return resourceApplicationSegmentPRARead(d, m)
+	return resourceApplicationSegmentPRARead(d, meta)
 }
 
-func resourceApplicationSegmentPRADelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentPRADelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
 	id := d.Id()
@@ -620,6 +621,7 @@ func flattenCommonAppsDto(apps []applicationsegmentpra.PRAApps) []interface{} {
 }
 
 func checkForPRAPortsOverlap(client *Client, app applicationsegmentpra.AppSegmentPRA) error {
+	//lintignore:R018
 	time.Sleep(time.Second * time.Duration(rand.Intn(5)))
 
 	microTenantID := app.MicroTenantID

@@ -77,13 +77,13 @@ func validatePolicyRedirectionRuleAction(d *schema.ResourceData) error {
 	return nil
 }
 
-func resourcePolicyRedictionRuleCreate(d *schema.ResourceData, m interface{}) error {
+func resourcePolicyRedictionRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	// Validate the "action" and "service_edge_groups" attributes
 	if err := validatePolicyRedirectionRuleAction(d); err != nil {
 		return err
 	}
 
-	zClient := m.(*Client)
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	req, err := expandCreatePolicyRedirectionRule(d)
@@ -98,14 +98,14 @@ func resourcePolicyRedictionRuleCreate(d *schema.ResourceData, m interface{}) er
 		}
 		d.SetId(policysetcontroller.ID)
 
-		return resourcePolicyRedictionRuleRead(d, m)
+		return resourcePolicyRedictionRuleRead(d, meta)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy redirection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
 }
 
-func resourcePolicyRedictionRuleRead(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
+func resourcePolicyRedictionRuleRead(d *schema.ResourceData, meta interface{}) error {
+	service := meta.(*Client).PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, "REDIRECTION_POLICY")
 	if err != nil {
@@ -136,13 +136,13 @@ func resourcePolicyRedictionRuleRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourcePolicyRedictionRuleUpdate(d *schema.ResourceData, m interface{}) error {
+func resourcePolicyRedictionRuleUpdate(d *schema.ResourceData, meta interface{}) error {
 	// Validate the "action" and "service_edge_groups" attributes
 	if err := validatePolicyRedirectionRuleAction(d); err != nil {
 		return err
 	}
 
-	zClient := m.(*Client)
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, "REDIRECTION_POLICY")
 	if err != nil {
@@ -166,14 +166,14 @@ func resourcePolicyRedictionRuleUpdate(d *schema.ResourceData, m interface{}) er
 			return err
 		}
 
-		return resourcePolicyRedictionRuleRead(d, m)
+		return resourcePolicyRedictionRuleRead(d, meta)
 	} else {
 		return fmt.Errorf("couldn't validate the zpa policy redirection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
 	}
 }
 
-func resourcePolicyRedictionRuleDelete(d *schema.ResourceData, m interface{}) error {
-	service := m.(*Client).PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
+func resourcePolicyRedictionRuleDelete(d *schema.ResourceData, meta interface{}) error {
+	service := meta.(*Client).PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, "REDIRECTION_POLICY")
 	if err != nil {
 		return err

@@ -119,8 +119,8 @@ func dataSourcePRAPrivilegedApprovalController() *schema.Resource {
 	}
 }
 
-func dataSourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAApproval
 
 	microTenantID := GetString(d.Get("microtenant_id"))

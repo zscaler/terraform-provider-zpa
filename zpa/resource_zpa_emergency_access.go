@@ -44,8 +44,8 @@ func resourceEmergencyAccess() *schema.Resource {
 	}
 }
 
-func resourceEmergencyAccessCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceEmergencyAccessCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.EmergencyAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -63,11 +63,11 @@ func resourceEmergencyAccessCreate(d *schema.ResourceData, m interface{}) error 
 	log.Printf("[INFO] Created emergency access user request. ID: %v\n", emgAccess)
 
 	d.SetId(emgAccess.UserID)
-	return resourceEmergencyAccessRead(d, m)
+	return resourceEmergencyAccessRead(d, meta)
 }
 
-func resourceEmergencyAccessRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceEmergencyAccessRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.EmergencyAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -94,8 +94,8 @@ func resourceEmergencyAccessRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceEmergencyAccessUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceEmergencyAccessUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.EmergencyAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -118,11 +118,11 @@ func resourceEmergencyAccessUpdate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	return resourceEmergencyAccessRead(d, m)
+	return resourceEmergencyAccessRead(d, meta)
 }
 
-func resourceEmergencyAccessDeactivated(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceEmergencyAccessDeactivated(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.EmergencyAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))

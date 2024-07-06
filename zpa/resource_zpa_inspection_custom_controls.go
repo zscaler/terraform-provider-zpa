@@ -19,8 +19,8 @@ func resourceInspectionCustomControls() *schema.Resource {
 		Update: resourceInspectionCustomControlsUpdate,
 		Delete: resourceInspectionCustomControlsDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
 				service := zClient.InspectionCustomControls
 
 				id := d.Id()
@@ -283,8 +283,8 @@ func updateInspectionProfile(zClient *Client, customControlID string, req *inspe
 	}
 }
 
-func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceInspectionCustomControlsCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionCustomControls
 
 	req := expandInspectionCustomControls(d)
@@ -303,11 +303,11 @@ func resourceInspectionCustomControlsCreate(d *schema.ResourceData, m interface{
 
 	d.SetId(resp.ID)
 	updateInspectionProfile(zClient, resp.ID, &req)
-	return resourceInspectionCustomControlsRead(d, m)
+	return resourceInspectionCustomControlsRead(d, meta)
 }
 
-func resourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceInspectionCustomControlsRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionCustomControls
 
 	resp, _, err := inspection_custom_controls.Get(service, d.Id())
@@ -340,8 +340,8 @@ func resourceInspectionCustomControlsRead(d *schema.ResourceData, m interface{})
 	return nil
 }
 
-func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionCustomControls
 
 	id := d.Id()
@@ -362,11 +362,11 @@ func resourceInspectionCustomControlsUpdate(d *schema.ResourceData, m interface{
 		return err
 	}
 	updateInspectionProfile(zClient, id, &req)
-	return resourceInspectionCustomControlsRead(d, m)
+	return resourceInspectionCustomControlsRead(d, meta)
 }
 
-func resourceInspectionCustomControlsDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceInspectionCustomControlsDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionCustomControls
 
 	log.Printf("[INFO] Deleting custom inspection control ID: %v\n", d.Id())

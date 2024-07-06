@@ -185,8 +185,8 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 	}
 }
 
-func resourcePolicyAccessV2Create(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessV2Create(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -219,11 +219,11 @@ func resourcePolicyAccessV2Create(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId(policysetcontrollerv2.ID)
 
-	return resourcePolicyAccessV2Read(d, m)
+	return resourcePolicyAccessV2Read(d, meta)
 }
 
-func resourcePolicyAccessV2Read(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessV2Read(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -265,8 +265,8 @@ func resourcePolicyAccessV2Read(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourcePolicyAccessV2Update(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessV2Update(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -307,11 +307,11 @@ func resourcePolicyAccessV2Update(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourcePolicyAccessV2Read(d, m)
+	return resourcePolicyAccessV2Read(d, meta)
 }
 
-func resourcePolicyAccessV2Delete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessV2Delete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	// Assume "ACCESS_POLICY" is the policy type for this resource. Adjust as needed.

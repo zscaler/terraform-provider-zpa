@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
-func TestAccResourceSegmentGroupBasic(t *testing.T) {
+func TestAccResourceSegmentGroup_Basic(t *testing.T) {
 	var segmentGroup segmentgroup.SegmentGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 

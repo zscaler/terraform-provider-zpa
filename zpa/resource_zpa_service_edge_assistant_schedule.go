@@ -62,8 +62,8 @@ func resourceServiceEdgeAssistantSchedule() *schema.Resource {
 	}
 }
 
-func resourceServiceEdgeAssistantScheduleCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServiceEdgeAssistantScheduleCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeSchedule
 
 	req, err := expandServiceEdgeAssistantSchedule(d)
@@ -91,18 +91,18 @@ func resourceServiceEdgeAssistantScheduleCreate(d *schema.ResourceData, m interf
 			d.SetId(resp.ID)
 
 			// Proceed to update the resource
-			return resourceServiceEdgeAssistantScheduleUpdate(d, m)
+			return resourceServiceEdgeAssistantScheduleUpdate(d, meta)
 		}
 		return err
 	}
 	log.Printf("[INFO] Created service edge assistant schedule request. ID: %v\n", req.ID)
 	d.SetId(req.ID)
 
-	return resourceServiceEdgeAssistantScheduleRead(d, m)
+	return resourceServiceEdgeAssistantScheduleRead(d, meta)
 }
 
-func resourceServiceEdgeAssistantScheduleRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServiceEdgeAssistantScheduleRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeSchedule
 
 	resp, _, err := serviceedgeschedule.GetSchedule(service)
@@ -125,8 +125,8 @@ func resourceServiceEdgeAssistantScheduleRead(d *schema.ResourceData, m interfac
 	return nil
 }
 
-func resourceServiceEdgeAssistantScheduleUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServiceEdgeAssistantScheduleUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeSchedule
 
 	id := d.Id()
@@ -147,10 +147,10 @@ func resourceServiceEdgeAssistantScheduleUpdate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	return resourceServiceEdgeAssistantScheduleRead(d, m)
+	return resourceServiceEdgeAssistantScheduleRead(d, meta)
 }
 
-func resourceServiceEdgeAssistantScheduleDelete(d *schema.ResourceData, m interface{}) error {
+func resourceServiceEdgeAssistantScheduleDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 

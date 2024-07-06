@@ -136,8 +136,8 @@ func resourcePolicyForwardingRuleV2() *schema.Resource {
 	}
 }
 
-func resourcePolicyForwardingRuleV2Create(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyForwardingRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -170,11 +170,11 @@ func resourcePolicyForwardingRuleV2Create(d *schema.ResourceData, m interface{})
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyForwardingRuleV2Read(d, m)
+	return resourcePolicyForwardingRuleV2Read(d, meta)
 }
 
-func resourcePolicyForwardingRuleV2Read(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyForwardingRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -211,8 +211,8 @@ func resourcePolicyForwardingRuleV2Read(d *schema.ResourceData, m interface{}) e
 	return nil
 }
 
-func resourcePolicyForwardingRuleV2Update(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyForwardingRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -254,11 +254,11 @@ func resourcePolicyForwardingRuleV2Update(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	return resourcePolicyForwardingRuleV2Read(d, m)
+	return resourcePolicyForwardingRuleV2Read(d, meta)
 }
 
-func resourcePolicyForwardingRuleV2Delete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyForwardingRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	// Assume "CLIENT_FORWARDING_POLICY" is the policy type for this resource. Adjust as needed.

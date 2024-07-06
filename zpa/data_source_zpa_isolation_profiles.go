@@ -56,8 +56,8 @@ func dataSourceIsolationProfile() *schema.Resource {
 	}
 }
 
-func dataSourceIsolationProfileRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceIsolationProfileRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.IsolationProfile
 
 	var resp *isolationprofile.IsolationProfile

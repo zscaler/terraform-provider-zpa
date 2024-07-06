@@ -237,8 +237,8 @@ func dataSourcePolicyType() *schema.Resource {
 	}
 }
 
-func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourcePolicyTypeRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	log.Printf("[INFO] Getting data for policy type\n")

@@ -65,8 +65,8 @@ func dataSourceApplicationServer() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationServerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceApplicationServerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppServerController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

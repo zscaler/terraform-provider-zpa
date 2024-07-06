@@ -149,25 +149,25 @@ func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
 }
 
 // Helper function to expand the new format
-func expandNetworkPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
-	var ports []common.NetworkPorts
-	if portsInterface, ok := d.GetOk(key); ok {
-		portSet, ok := portsInterface.(*schema.Set)
-		if !ok {
-			log.Printf("[ERROR] conversion failed, %s", key)
-			return []common.NetworkPorts{}
-		}
-		ports = make([]common.NetworkPorts, len(portSet.List()))
-		for i, val := range portSet.List() {
-			portItem := val.(map[string]interface{})
-			ports[i] = common.NetworkPorts{
-				From: portItem["from"].(string),
-				To:   portItem["to"].(string),
-			}
-		}
-	}
-	return ports
-}
+// func expandNetworkPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
+// 	var ports []common.NetworkPorts
+// 	if portsInterface, ok := d.GetOk(key); ok {
+// 		portSet, ok := portsInterface.(*schema.Set)
+// 		if !ok {
+// 			log.Printf("[ERROR] conversion failed, %s", key)
+// 			return []common.NetworkPorts{}
+// 		}
+// 		ports = make([]common.NetworkPorts, len(portSet.List()))
+// 		for i, val := range portSet.List() {
+// 			portItem := val.(map[string]interface{})
+// 			ports[i] = common.NetworkPorts{
+// 				From: portItem["from"].(string),
+// 				To:   portItem["to"].(string),
+// 			}
+// 		}
+// 	}
+// 	return ports
+// }
 
 func sliceHasCommon(s1, s2 []string) (bool, string) {
 	for _, i1 := range s1 {

@@ -47,8 +47,8 @@ func resourcePolicyIsolationRule() *schema.Resource {
 	}
 }
 
-func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -85,11 +85,11 @@ func resourcePolicyIsolationRuleCreate(d *schema.ResourceData, m interface{}) er
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyIsolationRuleRead(d, m)
+	return resourcePolicyIsolationRuleRead(d, meta)
 }
 
-func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyIsolationRuleRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	policySetID, err := fetchPolicySetIDByType(zClient, "ISOLATION_POLICY", microTenantID)
@@ -129,8 +129,8 @@ func resourcePolicyIsolationRuleRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -165,11 +165,11 @@ func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, m interface{}) er
 		return err
 	}
 
-	return resourcePolicyIsolationRuleRead(d, m)
+	return resourcePolicyIsolationRuleRead(d, meta)
 }
 
-func resourcePolicyIsolationRuleDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyIsolationRuleDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

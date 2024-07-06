@@ -89,8 +89,8 @@ func dataSourceBaCertificate() *schema.Resource {
 	}
 }
 
-func dataSourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceBaCertificateRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BACertificate
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -133,26 +133,40 @@ func dataSourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("serial_no", resp.SerialNo)
 		_ = d.Set("status", resp.Status)
 		_ = d.Set("microtenant_id", resp.MicrotenantID)
-		epochAttributes := []struct {
-			key  string // The attribute name in the schema
-			time string // The epoch time string from the response
-		}{
-			{"creation_time", resp.CreationTime},
-			{"modified_time", resp.ModifiedTime},
-			{"valid_from_in_epochsec", resp.ValidFromInEpochSec},
-			{"valid_to_in_epochsec", resp.ValidToInEpochSec},
+
+		// Convert and set epoch attributes
+		creationTime, err := epochToRFC1123(resp.CreationTime, false)
+		if err != nil {
+			return fmt.Errorf("error formatting creation_time: %s", err)
+		}
+		if err := d.Set("creation_time", creationTime); err != nil {
+			return fmt.Errorf("error setting creation_time: %s", err)
 		}
 
-		// Iterate over epoch attributes and convert them
-		for _, attr := range epochAttributes {
-			formattedTime, err := epochToRFC1123(attr.time, false) // Adjust the second parameter based on your format preference
-			if err != nil {
-				return fmt.Errorf("error formatting %s: %s", attr.key, err)
-			}
-			if err := d.Set(attr.key, formattedTime); err != nil {
-				return fmt.Errorf("error setting %s: %s", attr.key, err)
-			}
+		modifiedTime, err := epochToRFC1123(resp.ModifiedTime, false)
+		if err != nil {
+			return fmt.Errorf("error formatting modified_time: %s", err)
 		}
+		if err := d.Set("modified_time", modifiedTime); err != nil {
+			return fmt.Errorf("error setting modified_time: %s", err)
+		}
+
+		validFromInEpochSec, err := epochToRFC1123(resp.ValidFromInEpochSec, false)
+		if err != nil {
+			return fmt.Errorf("error formatting valid_from_in_epochsec: %s", err)
+		}
+		if err := d.Set("valid_from_in_epochsec", validFromInEpochSec); err != nil {
+			return fmt.Errorf("error setting valid_from_in_epochsec: %s", err)
+		}
+
+		validToInEpochSec, err := epochToRFC1123(resp.ValidToInEpochSec, false)
+		if err != nil {
+			return fmt.Errorf("error formatting valid_to_in_epochsec: %s", err)
+		}
+		if err := d.Set("valid_to_in_epochsec", validToInEpochSec); err != nil {
+			return fmt.Errorf("error setting valid_to_in_epochsec: %s", err)
+		}
+
 	} else {
 		return fmt.Errorf("couldn't find any browser certificate with name '%s' or id '%s'", name, id)
 	}

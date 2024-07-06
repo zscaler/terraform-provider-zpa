@@ -3,7 +3,6 @@ package zpa
 import (
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -18,24 +17,17 @@ func resourceCBIExternalProfile() *schema.Resource {
 		Update: resourceCBIExternalProfileUpdate,
 		Delete: resourceCBIExternalProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
 				service := zClient.CBIProfileController
 
 				id := d.Id()
-				_, parseIDErr := strconv.ParseInt(id, 10, 64)
-				if parseIDErr == nil {
-					// assume if the passed value is an int
-					_ = d.Set("id", id)
-				} else {
-					resp, _, err := cbiprofilecontroller.GetByName(service, id)
-					if err == nil {
-						d.SetId(resp.ID)
-						_ = d.Set("id", resp.ID)
-					} else {
-						return []*schema.ResourceData{d}, err
-					}
+				resp, _, err := cbiprofilecontroller.GetByNameOrID(service, id)
+				if err != nil {
+					return nil, err
 				}
+				d.SetId(resp.ID)
+				_ = d.Set("id", resp.ID)
 				return []*schema.ResourceData{d}, nil
 			},
 		},
@@ -145,9 +137,8 @@ func resourceCBIExternalProfile() *schema.Resource {
 							Computed: true,
 						},
 						"file_password": {
-							Type:      schema.TypeString,
-							Optional:  true,
-							Sensitive: true,
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
@@ -266,14 +257,14 @@ func resourceCBIExternalProfile() *schema.Resource {
 	}
 }
 
-func resourceCBIExternalProfileCreate(d *schema.ResourceData, m interface{}) error {
+func resourceCBIExternalProfileCreate(d *schema.ResourceData, meta interface{}) error {
 	// Validate the region_ids length
 	regionIds := d.Get("region_ids").(*schema.Set).List()
 	if len(regionIds) < 2 {
 		return fmt.Errorf("expected region_ids to contain at least 2 items, got %d", len(regionIds))
 	}
 
-	zClient := m.(*Client)
+	zClient := meta.(*Client)
 	service := zClient.CBIProfileController
 
 	req := expandCBIExternalProfile(d)
@@ -288,11 +279,11 @@ func resourceCBIExternalProfileCreate(d *schema.ResourceData, m interface{}) err
 	log.Printf("[INFO] Created cbi external profile request. ID: %v\n", cbiProfile)
 
 	d.SetId(cbiProfile.ID)
-	return resourceCBIExternalProfileRead(d, m)
+	return resourceCBIExternalProfileRead(d, meta)
 }
 
-func resourceCBIExternalProfileRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBIExternalProfileRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBIProfileController
 
 	resp, _, err := cbiprofilecontroller.Get(service, d.Id())
@@ -345,14 +336,14 @@ func resourceCBIExternalProfileRead(d *schema.ResourceData, m interface{}) error
 	return nil
 }
 
-func resourceCBIExternalProfileUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceCBIExternalProfileUpdate(d *schema.ResourceData, meta interface{}) error {
 	// Validate the region_ids length
 	regionIds := d.Get("region_ids").(*schema.Set).List()
 	if len(regionIds) < 2 {
 		return fmt.Errorf("expected region_ids to contain at least 2 items, got %d", len(regionIds))
 	}
 
-	zClient := m.(*Client)
+	zClient := meta.(*Client)
 	service := zClient.CBIProfileController
 
 	id := d.Id()
@@ -370,11 +361,11 @@ func resourceCBIExternalProfileUpdate(d *schema.ResourceData, m interface{}) err
 		return err
 	}
 
-	return resourceCBIExternalProfileRead(d, m)
+	return resourceCBIExternalProfileRead(d, meta)
 }
 
-func resourceCBIExternalProfileDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBIExternalProfileDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBIProfileController
 
 	log.Printf("[INFO] Deleting cbi profile ID: %v\n", d.Id())

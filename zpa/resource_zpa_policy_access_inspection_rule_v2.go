@@ -137,8 +137,8 @@ func resourcePolicyInspectionRuleV2() *schema.Resource {
 	}
 }
 
-func resourcePolicyInspectionRuleV2Create(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyInspectionRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -171,11 +171,11 @@ func resourcePolicyInspectionRuleV2Create(d *schema.ResourceData, m interface{})
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyInspectionRuleV2Read(d, m)
+	return resourcePolicyInspectionRuleV2Read(d, meta)
 }
 
-func resourcePolicyInspectionRuleV2Read(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyInspectionRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -213,8 +213,8 @@ func resourcePolicyInspectionRuleV2Read(d *schema.ResourceData, m interface{}) e
 	return nil
 }
 
-func resourcePolicyInspectionRuleV2Update(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyInspectionRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -256,11 +256,11 @@ func resourcePolicyInspectionRuleV2Update(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	return resourcePolicyInspectionRuleV2Read(d, m)
+	return resourcePolicyInspectionRuleV2Read(d, meta)
 }
 
-func resourcePolicyInspectionRuleV2Delete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyInspectionRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	// Assume "INSPECTION_POLICY" is the policy type for this resource. Adjust as needed.

@@ -53,8 +53,8 @@ func dataSourceAccessPolicyClientTypes() *schema.Resource {
 	}
 }
 
-func dataSourceAccessPolicyClientTypesRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceAccessPolicyClientTypesRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ClientTypes
 
 	log.Printf("[INFO] Getting data for all client types set\n")

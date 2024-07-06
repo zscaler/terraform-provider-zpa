@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
 )
 
-func TestAccResourceApplicationSegmentInspectionBasic(t *testing.T) {
+func TestAccResourceApplicationSegmentInspection_Basic(t *testing.T) {
 	var appSegment applicationsegmentinspection.AppSegmentInspection
 	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentInspection)
 

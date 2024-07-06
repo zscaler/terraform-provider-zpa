@@ -12,7 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
 )
 
-func TestAccResourceCBIExternalProfileBasic(t *testing.T) {
+func TestAccResourceCBIExternalProfile_Basic(t *testing.T) {
 	var cbiIsolationProfile cbiprofilecontroller.IsolationProfile
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBIExternalIsolationProfile)
 
@@ -42,6 +42,15 @@ func TestAccResourceCBIExternalProfileBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "user_experience.#", "1"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "security_controls.#", "1"),
 				),
+			},
+			// Import test by ID
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return cbiIsolationProfile.ID, nil
+				},
 			},
 		},
 	})

@@ -270,8 +270,8 @@ func dataSourceLSSConfigController() *schema.Resource {
 	}
 }
 
-func dataSourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceLSSConfigControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.LSSConfigController
 
 	var resp *lssconfigcontroller.LSSResource

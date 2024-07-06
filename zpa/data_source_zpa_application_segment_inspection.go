@@ -186,8 +186,8 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))

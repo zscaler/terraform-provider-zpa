@@ -19,8 +19,8 @@ func resourcePRAPortalController() *schema.Resource {
 		Update: resourcePRAPortalControllerUpdate,
 		Delete: resourcePRAPortalControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.PRAPortal
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -96,8 +96,8 @@ func resourcePRAPortalController() *schema.Resource {
 	}
 }
 
-func resourcePRAPortalControllerCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAPortalControllerCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAPortal
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -115,11 +115,11 @@ func resourcePRAPortalControllerCreate(d *schema.ResourceData, m interface{}) er
 	log.Printf("[INFO] Created pra portal controller request. ID: %v\n", praPortal)
 
 	d.SetId(praPortal.ID)
-	return resourcePRAPortalControllerRead(d, m)
+	return resourcePRAPortalControllerRead(d, meta)
 }
 
-func resourcePRAPortalControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAPortalControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAPortal
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -151,8 +151,8 @@ func resourcePRAPortalControllerRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourcePRAPortalControllerUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAPortalControllerUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAPortal
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -175,11 +175,11 @@ func resourcePRAPortalControllerUpdate(d *schema.ResourceData, m interface{}) er
 		return err
 	}
 
-	return resourcePRAPortalControllerRead(d, m)
+	return resourcePRAPortalControllerRead(d, meta)
 }
 
-func resourcePRAPortalControllerDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*Client)
+func resourcePRAPortalControllerDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*Client)
 	portalID := d.Id()
 
 	// Detach the portal from any consoles before attempting to delete it.

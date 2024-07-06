@@ -600,7 +600,7 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 
 /*
 	func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
-		return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 			service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 			id := d.Id()
@@ -623,8 +623,8 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	}
 */
 func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
-	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-		client := m.(*Client)
+	return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+		client := meta.(*Client)
 		service := client.PolicySetController
 
 		microTenantID := GetString(d.Get("microtenant_id"))
@@ -652,7 +652,7 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 
 /*
 	func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
-		return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 			service := m.(*Client).policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 			id := d.Id()
@@ -675,8 +675,8 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 	}
 */
 func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
-	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-		client := m.(*Client)
+	return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+		client := meta.(*Client)
 		service := client.PolicySetControllerV2
 
 		microTenantID := GetString(d.Get("microtenant_id"))

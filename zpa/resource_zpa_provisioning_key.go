@@ -18,8 +18,8 @@ func resourceProvisioningKey() *schema.Resource {
 		Update: resourceProvisioningKeyUpdate,
 		Delete: resourceProvisioningKeyDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.ProvisioningKey
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -148,8 +148,8 @@ func getAssociationType(d *schema.ResourceData) (string, bool) {
 	return value, ok
 }
 
-func resourceProvisioningKeyCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceProvisioningKeyCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ProvisioningKey
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -171,11 +171,11 @@ func resourceProvisioningKeyCreate(d *schema.ResourceData, m interface{}) error 
 	log.Printf("[INFO] Created provisining key  request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceProvisioningKeyRead(d, m)
+	return resourceProvisioningKeyRead(d, meta)
 }
 
-func resourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceProvisioningKeyRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ProvisioningKey
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -215,8 +215,8 @@ func resourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceProvisioningKeyUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceProvisioningKeyUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ProvisioningKey
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -242,11 +242,11 @@ func resourceProvisioningKeyUpdate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	return resourceProvisioningKeyRead(d, m)
+	return resourceProvisioningKeyRead(d, meta)
 }
 
-func resourceProvisioningKeyDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceProvisioningKeyDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ProvisioningKey
 
 	microTenantID := GetString(d.Get("microtenant_id"))

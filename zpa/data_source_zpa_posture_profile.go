@@ -56,8 +56,8 @@ func dataSourcePostureProfile() *schema.Resource {
 	}
 }
 
-func dataSourcePostureProfileRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourcePostureProfileRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PostureProfile
 
 	var resp *postureprofile.PostureProfile

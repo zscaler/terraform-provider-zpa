@@ -19,8 +19,8 @@ func resourceServiceEdgeGroup() *schema.Resource {
 		Update: resourceServiceEdgeGroupUpdate,
 		Delete: resourceServiceEdgeGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.ServiceEdgeGroup
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -225,8 +225,8 @@ func resourceServiceEdgeGroup() *schema.Resource {
 	}
 }
 
-func resourceServiceEdgeGroupCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServiceEdgeGroupCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -247,11 +247,11 @@ func resourceServiceEdgeGroupCreate(d *schema.ResourceData, m interface{}) error
 	log.Printf("[INFO] Created service edge group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceServiceEdgeGroupRead(d, m)
+	return resourceServiceEdgeGroupRead(d, meta)
 }
 
-func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServiceEdgeGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -300,8 +300,8 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -327,11 +327,11 @@ func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
-	return resourceServiceEdgeGroupRead(d, m)
+	return resourceServiceEdgeGroupRead(d, meta)
 }
 
-func resourceServiceEdgeGroupDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServiceEdgeGroupDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))

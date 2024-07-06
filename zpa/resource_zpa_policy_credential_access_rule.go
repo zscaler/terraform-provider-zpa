@@ -138,8 +138,8 @@ func resourcePolicyCredentialAccessRule() *schema.Resource {
 	}
 }
 
-func resourcePolicyCredentialAccessRuleCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyCredentialAccessRuleCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -173,11 +173,11 @@ func resourcePolicyCredentialAccessRuleCreate(d *schema.ResourceData, m interfac
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyCredentialAccessRuleRead(d, m)
+	return resourcePolicyCredentialAccessRuleRead(d, meta)
 }
 
-func resourcePolicyCredentialAccessRuleRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyCredentialAccessRuleRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -216,8 +216,8 @@ func resourcePolicyCredentialAccessRuleRead(d *schema.ResourceData, m interface{
 	return nil
 }
 
-func resourcePolicyCredentialAccessRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyCredentialAccessRuleUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -254,11 +254,11 @@ func resourcePolicyCredentialAccessRuleUpdate(d *schema.ResourceData, m interfac
 	if _, err := policysetcontrollerv2.UpdateRule(service, policySetID, ruleID, req); err != nil {
 		return err
 	}
-	return resourcePolicyCredentialAccessRuleRead(d, m)
+	return resourcePolicyCredentialAccessRuleRead(d, meta)
 }
 
-func resourcePolicyCredentialAccessRuleDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyCredentialAccessRuleDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	policySetID, err := fetchPolicySetIDByType(zClient, "CREDENTIAL_POLICY", microTenantID)

@@ -12,7 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
 )
 
-func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
+func TestAccResourceInspectionCustomControls_Basic(t *testing.T) {
 	var control inspection_custom_controls.InspectionCustomControl
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionCustomControl)
 

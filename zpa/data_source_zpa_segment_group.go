@@ -202,8 +202,8 @@ func dataSourceSegmentGroup() *schema.Resource {
 	}
 }
 
-func dataSourceSegmentGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceSegmentGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.SegmentGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
