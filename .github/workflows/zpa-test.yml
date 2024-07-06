@@ -181,7 +181,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: ["1.21"]
+        goVersion: ["1.22"]
         environment:
           - ZPA_BETA_TENANT01
     environment: ${{ matrix.environment }}
@@ -249,7 +249,7 @@ jobs:
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
   zpa-prod-tenants:
-    # needs: [zpa-beta-tenants]
+    needs: [zpa-beta-tenants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
