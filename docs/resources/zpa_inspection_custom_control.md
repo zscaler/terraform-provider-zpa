@@ -13,24 +13,77 @@ description: |-
 
 The **zpa_inspection_custom_controls** resource creates an inspection custom control. This resource can then be referenced in an inspection profile resource.
 
-## Example Usage
+## Example - Inspection Custom Control - PASS Action
 
 ```terraform
-data "zpa_inspection_profile" "this" {
-  name = "Example"
-}
-
 resource "zpa_inspection_custom_controls" "this" {
   name           = "Example"
   description    = "Example"
-  action         = "PASS"
   default_action = "PASS"
   paranoia_level = "1"
   severity       = "CRITICAL"
   type = "RESPONSE"
-  associated_inspection_profile_names {
-    id = [data.zpa_inspection_profile.this.id]
+  rules {
+    names = ["this"]
+    type  = "RESPONSE_HEADERS"
+    conditions {
+      lhs = "SIZE"
+      op  = "GE"
+      rhs = "1000"
+    }
   }
+  rules {
+    type  = "RESPONSE_BODY"
+    conditions {
+      lhs = "SIZE"
+      op  = "GE"
+      rhs = "1000"
+    }
+  }
+}
+```
+
+## Example - Inspection Custom Control - BLOCK Action
+
+```terraform
+resource "zpa_inspection_custom_controls" "this" {
+  name           = "Example"
+  description    = "Example"
+  default_action = "BLOCK"
+  paranoia_level = "1"
+  severity       = "CRITICAL"
+  type = "RESPONSE"
+  rules {
+    names = ["this"]
+    type  = "RESPONSE_HEADERS"
+    conditions {
+      lhs = "SIZE"
+      op  = "GE"
+      rhs = "1000"
+    }
+  }
+  rules {
+    type  = "RESPONSE_BODY"
+    conditions {
+      lhs = "SIZE"
+      op  = "GE"
+      rhs = "1000"
+    }
+  }
+}
+```
+
+## Example - Inspection Custom Control - REDIRECT Action
+
+```terraform
+resource "zpa_inspection_custom_controls" "this" {
+  name                      = "Example"
+  description               = "Example"
+  default_action            = "REDIRECT"
+  default_action_value      = "https://test.com"
+  paranoia_level            = "1"
+  severity                  = "CRITICAL"
+  type = "RESPONSE"
   rules {
     names = ["this"]
     type  = "RESPONSE_HEADERS"
@@ -59,8 +112,6 @@ The following arguments are supported:
 
 - `name` - (Required) The name of the predefined control.
 - `version` - (Required) The version of the predefined control, the default is: `OWASP_CRS/3.3.0`
-- `action` - (Required) The performed action. Supported values: `PASS`, `BLOCK` and `REDIRECT`
-- `action_value` - (Required) Denotes the action
 - `name` - (Required) Name of the custom control
 - `paranoia_level` - (Required) OWASP Predefined Paranoia Level.
 - `protocol_type` - (string) Returned values: `HTTP`, `HTTPS`, `FTP`, `RDP`, `SSH`, `WEBSOCKET`
@@ -77,9 +128,6 @@ The following arguments are supported:
 ### Optional
 
 - `description` - (Optional) Description of the custom control
-- `associated_inspection_profile_names` - (Optional) Name of the inspection profile
-  - `id`- (Optional)
-  - `name`- (Optional)
 - `control_rule_json` (Optional) The control rule in JSON format that has the conditions and type of control for the inspection control
 - `control_type` - (string) Returned values: `WEBSOCKET_PREDEFINED`, `WEBSOCKET_CUSTOM`, `ZSCALER`, `CUSTOM`, `PREDEFINED`
 - `default_action` - (Required) The performed action. Supported values: `PASS`, `BLOCK` and `REDIRECT`

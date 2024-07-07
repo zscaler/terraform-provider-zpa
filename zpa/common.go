@@ -1173,17 +1173,6 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 	return nil
 }
 
-/*
-func fetchPolicySetIDByType(client *Client, policyType string, microTenantID string) (string, error) {
-	service := client.policysetcontrollerv2.WithMicroTenant(microTenantID)
-	globalPolicySet, _, err := service.GetByPolicyType(policyType)
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch policy set ID for type '%s': %v", policyType, err)
-	}
-	return globalPolicySet.ID, nil
-}
-*/
-
 func fetchPolicySetIDByType(client *Client, policyType string, microTenantID string) (string, error) {
 	service := client.PolicySetControllerV2
 
@@ -1253,46 +1242,7 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 	return v2Request
 }
 
-/*
-// Partially working code for rollback if needed
-func expandPredefinedControls(d *schema.ResourceData, service *services.Service) []common.CustomCommonControls {
-	var predefinedControls []common.CustomCommonControls
-	if v, ok := d.GetOk("predefined_controls"); ok {
-		predefinedControlsSet := v.(*schema.Set)
-		for _, v := range predefinedControlsSet.List() {
-			controlMap := v.(map[string]interface{})
-			control := common.CustomCommonControls{
-				ID:     controlMap["id"].(string),
-				Action: controlMap["action"].(string),
-			}
-			predefinedControls = append(predefinedControls, control)
-		}
-	}
-
-	// Ensure the "Preprocessors" control group is included
-	preprocessorsControls, err := inspection_predefined_controls.GetAllByGroup(service, d.Get("predefined_controls_version").(string), "Preprocessors")
-	if err == nil && len(preprocessorsControls) > 0 {
-		for _, preprocessorControl := range preprocessorsControls {
-			found := false
-			for _, control := range predefinedControls {
-				if control.ID == preprocessorControl.ID {
-					found = true
-					break
-				}
-			}
-			if !found {
-				predefinedControls = append(predefinedControls, common.CustomCommonControls{
-					ID:     preprocessorControl.ID,
-					Action: preprocessorControl.Action,
-				})
-			}
-		}
-	}
-
-	return predefinedControls
-}
-*/
-
+// ////////// Dedicated Functions used by the ZPA Inspection Profile ////////////
 func expandPredefinedControls(d *schema.ResourceData) []common.CustomCommonControls {
 	if v, ok := d.GetOk("predefined_controls"); ok {
 		predefinedControlsSet := v.(*schema.Set)
@@ -1302,17 +1252,10 @@ func expandPredefinedControls(d *schema.ResourceData) []common.CustomCommonContr
 			controlMap := v.(map[string]interface{})
 
 			control := common.CustomCommonControls{
-				ID:     controlMap["id"].(string),
-				Action: controlMap["action"].(string),
-				// ControlType:  controlMap["control_type"].(string),
-				// ProtocolType: controlMap["protocol_type"].(string),
+				ID:          controlMap["id"].(string),
+				Action:      controlMap["action"].(string),
+				ActionValue: controlMap["action_value"].(string),
 			}
-
-			// Only add action_value if it's set in the schema
-			// if actionValue, ok := controlMap["action_value"].(string); ok && actionValue != "" {
-			// 	control.ActionValue = actionValue
-			// }
-
 			predefinedControls = append(predefinedControls, control)
 		}
 
@@ -1330,7 +1273,6 @@ func flattenAssociatedInspectionProfileNames(associatedInspectionProfileNames []
 			"name": val.Name,
 		}
 	}
-
 	return rule
 }
 
@@ -1344,9 +1286,9 @@ func flattenPredefinedControlsSimple(predControl []common.CustomCommonControls) 
 		controlMap := make(map[string]interface{})
 		controlMap["id"] = control.ID
 		controlMap["action"] = control.Action
+		controlMap["action_value"] = control.Action
 		predControls[i] = controlMap
 	}
-
 	return predControls
 }
 
@@ -1373,6 +1315,5 @@ func flattenPredefinedControls(predControl []common.CustomCommonControls) []inte
 			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(predControl.AssociatedInspectionProfileNames),
 		}
 	}
-
 	return predControls
 }

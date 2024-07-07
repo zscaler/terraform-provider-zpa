@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
 )
@@ -108,7 +109,7 @@ func resourceInspectionCustomControls() *schema.Resource {
 			},
 			"default_action": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The performed action",
 				ValidateFunc: validation.StringInSlice([]string{
 					"PASS",
@@ -269,9 +270,11 @@ func updateInspectionProfile(zClient *Client, customControlID string, req *inspe
 		updateProfile := &inspection_profile.InspectionProfile{
 			CustomControls: []inspection_profile.InspectionCustomControl{
 				{
-					ID:          obj.ID,
-					Action:      req.Action,
-					ActionValue: req.ActionValue,
+					ID:                 obj.ID,
+					Action:             req.Action,
+					ActionValue:        req.ActionValue,
+					DefaultAction:      req.DefaultAction,
+					DefaultActionValue: req.DefaultActionValue,
 				},
 			},
 			PredefinedControls: profile.PredefinedControls,
@@ -420,17 +423,17 @@ func expandInspectionCustomControls(d *schema.ResourceData) inspection_custom_co
 	return custom_control
 }
 
-func expandAssociatedInspectionProfileNames(d *schema.ResourceData) []inspection_custom_controls.AssociatedProfileNames {
+func expandAssociatedInspectionProfileNames(d *schema.ResourceData) []common.AssociatedProfileNames {
 	inspectionProfileInterface, ok := d.GetOk("associated_inspection_profile_names")
 	if ok {
 		inspectionProfile := inspectionProfileInterface.(*schema.Set)
 		log.Printf("[INFO] associated inspection profile names data: %+v\n", inspectionProfile)
-		var inspectionProfiles []inspection_custom_controls.AssociatedProfileNames
+		var inspectionProfiles []common.AssociatedProfileNames
 		for _, inspectionProfile := range inspectionProfile.List() {
 			inspectionProfile, ok := inspectionProfile.(map[string]interface{})
 			if ok {
 				for _, id := range inspectionProfile["id"].(*schema.Set).List() {
-					inspectionProfiles = append(inspectionProfiles, inspection_custom_controls.AssociatedProfileNames{
+					inspectionProfiles = append(inspectionProfiles, common.AssociatedProfileNames{
 						ID: id.(string),
 					})
 				}
@@ -439,7 +442,7 @@ func expandAssociatedInspectionProfileNames(d *schema.ResourceData) []inspection
 		return inspectionProfiles
 	}
 
-	return []inspection_custom_controls.AssociatedProfileNames{}
+	return []common.AssociatedProfileNames{}
 }
 
 func expandInspectionCustomControlsRules(d *schema.ResourceData) []inspection_custom_controls.Rules {

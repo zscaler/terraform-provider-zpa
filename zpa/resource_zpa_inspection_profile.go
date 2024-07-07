@@ -60,6 +60,11 @@ func resourceInspectionProfile() *schema.Resource {
 				Optional:    true,
 				Description: "",
 			},
+			"override_action": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
 			"associate_all_controls": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -121,6 +126,96 @@ func resourceInspectionProfile() *schema.Resource {
 				Description: "The actions of the predefined, custom, or override controls",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			// "global_control_actions_obj": {
+			// 	Type:        schema.TypeList,
+			// 	Optional:    true,
+			// 	MaxItems:    1,
+			// 	Description: "The actions object for the predefined, custom, or override controls",
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"predefined": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"action": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 						"action_value": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"custom": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"action": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 						"action_value": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"websocket": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"action": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 						"action_value": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"threatlabz": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"action": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 						"action_value": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"api": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"action": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 						"action_value": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// },
 			"incarnation_number": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -141,6 +236,52 @@ func resourceInspectionProfile() *schema.Resource {
 							Optional: true,
 						},
 						"action": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"action_value": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"threat_labz_controls": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The ThreatLabZ predefined controls",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"action": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"action_value": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"websocket_controls": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The WebSocket predefined controls",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"action": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"action_value": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
@@ -249,6 +390,19 @@ func resourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) err
 	if err := d.Set("predefined_controls", flattenPredefinedControlsSimple(resp.PredefinedControls)); err != nil {
 		return fmt.Errorf("error setting predefined_controls: %s", err)
 	}
+
+	if resp.WebSocketControls != nil {
+		if err := d.Set("websocket_controls", flattenWebSocketControls(resp.WebSocketControls)); err != nil {
+			return fmt.Errorf("error setting websocket_controls: %s", err)
+		}
+	}
+
+	if resp.ThreatLabzControls != nil {
+		if err := d.Set("threat_labz_controls", flattenThreatLabzControls(resp.ThreatLabzControls)); err != nil {
+			return fmt.Errorf("error setting threat_labz_controls: %s", err)
+		}
+	}
+
 	return nil
 }
 
@@ -300,17 +454,20 @@ func resourceInspectionProfileDelete(d *schema.ResourceData, meta interface{}) e
 
 func expandInspectionProfile(d *schema.ResourceData) inspection_profile.InspectionProfile {
 	inspection_profile := inspection_profile.InspectionProfile{
-		ID:                        d.Id(),
-		Name:                      d.Get("name").(string),
-		Description:               d.Get("description").(string),
-		APIProfile:                d.Get("api_profile").(bool),
-		GlobalControlActions:      SetToStringList(d, "global_control_actions"),
+		ID:                   d.Id(),
+		Name:                 d.Get("name").(string),
+		Description:          d.Get("description").(string),
+		APIProfile:           d.Get("api_profile").(bool),
+		GlobalControlActions: SetToStringList(d, "global_control_actions"),
+		// GlobalControlActionsObj:   expandGlobalControlActionsObj(d),
 		IncarnationNumber:         d.Get("incarnation_number").(string),
 		ParanoiaLevel:             d.Get("paranoia_level").(string),
 		PredefinedControlsVersion: d.Get("predefined_controls_version").(string),
 		ControlInfoResource:       expandControlsInfo(d),
 		CustomControls:            expandCustomControls(d),
 		PredefinedControls:        expandPredefinedControls(d),
+		ThreatLabzControls:        expandThreatLabzControls(d),
+		WebSocketControls:         expandWebSocketControls(d),
 	}
 
 	if inspection_profile.PredefinedControlsVersion == "" {
@@ -369,6 +526,34 @@ func expandCustomControls(d *schema.ResourceData) []inspection_profile.Inspectio
 	return []inspection_profile.InspectionCustomControl{}
 }
 
+func expandThreatLabzControls(d *schema.ResourceData) []inspection_profile.ThreatLabzControls {
+	controlsData := d.Get("threat_labz_controls").([]interface{})
+	var controls []inspection_profile.ThreatLabzControls
+	for _, item := range controlsData {
+		controlMap := item.(map[string]interface{})
+		controls = append(controls, inspection_profile.ThreatLabzControls{
+			ID:          controlMap["id"].(string),
+			Action:      controlMap["action"].(string),
+			ActionValue: controlMap["action_value"].(string),
+		})
+	}
+	return controls
+}
+
+func expandWebSocketControls(d *schema.ResourceData) []inspection_profile.WebSocketControls {
+	controlsData := d.Get("websocket_controls").([]interface{})
+	var controls []inspection_profile.WebSocketControls
+	for _, item := range controlsData {
+		controlMap := item.(map[string]interface{})
+		controls = append(controls, inspection_profile.WebSocketControls{
+			ID:          controlMap["id"].(string),
+			Action:      controlMap["action"].(string),
+			ActionValue: controlMap["action_value"].(string),
+		})
+	}
+	return controls
+}
+
 func flattenCustomControlsSimple(customControl []inspection_profile.InspectionCustomControl) []interface{} {
 	customControls := make([]interface{}, len(customControl))
 	for i, custom := range customControl {
@@ -380,4 +565,28 @@ func flattenCustomControlsSimple(customControl []inspection_profile.InspectionCu
 	}
 
 	return customControls
+}
+
+func flattenThreatLabzControls(controls []inspection_profile.ThreatLabzControls) []interface{} {
+	var controlsData []interface{}
+	for _, control := range controls {
+		controlMap := make(map[string]interface{})
+		controlMap["id"] = control.ID
+		controlMap["action"] = control.Action
+		controlMap["action_value"] = control.ActionValue
+		controlsData = append(controlsData, controlMap)
+	}
+	return controlsData
+}
+
+func flattenWebSocketControls(webSocketControls []inspection_profile.WebSocketControls) []interface{} {
+	var controlsData []interface{}
+	for _, webSocketControl := range webSocketControls {
+		controlMap := make(map[string]interface{})
+		controlMap["id"] = webSocketControl.ID
+		controlMap["action"] = webSocketControl.Action
+		controlMap["action_value"] = webSocketControl.ActionValue
+		controlsData = append(controlsData, controlMap)
+	}
+	return controlsData
 }

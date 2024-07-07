@@ -120,6 +120,70 @@ resource "zpa_inspection_profile" "example" {
 }
 ```
 
+## Example Usage Using with ThreatLabz and Dynamic Blocks
+
+```terraform
+locals {
+  group_names = {
+    default_predefined_controls = "preprocessors" // Mandatory and must always be included
+  }
+}
+
+# Retrieve all IDs and Actions for the preprocessors Control
+data "zpa_inspection_all_predefined_controls" "all" {
+  for_each = local.group_names
+  group_name = each.value
+}
+
+# Combine the data source results into a single list
+locals {
+  combined_predefined_controls = flatten([
+    for ds in data.zpa_inspection_all_predefined_controls.all : ds.list
+  ])
+}
+
+locals {
+  threat_labz_controls = [
+    {
+      id     = "1"
+      action = "PASS"
+    },
+    {
+      id     = "2"
+      action = "PASS"
+    },
+    {
+      id     = "3"
+      action = "PASS"
+    }
+  ]
+}
+
+resource "zpa_inspection_profile" "example" {
+  name               = "ThreatLabz_Inspection_Profile"
+  description        = "ThreatLabz Inspection Profile"
+  paranoia_level     = "2"
+  incarnation_number = "6"
+  zs_defined_control_choice = "ALL"
+  
+  dynamic "predefined_controls" {
+    for_each = local.combined_predefined_controls
+    content {
+      id     = predefined_controls.value.id
+      action = predefined_controls.value.action == "" ? predefined_controls.value.default_action : predefined_controls.value.action
+    }
+  }
+
+  dynamic "threat_labz_controls" {
+    for_each = local.threat_labz_controls
+    content {
+      id     = threat_labz_controls.value.id
+      action = threat_labz_controls.value.action
+    }
+  }
+}
+```
+
 ## Schema
 
 ### Required
@@ -164,6 +228,11 @@ The following arguments are supported:
   - `count` - (Optional) Control information counts `Long`
 
 - `web_socket_controls` - (string)
+  - `id` - (string) ID of the predefined control
+  - `action` - (string) The action of the predefined control. Supported values: `PASS`, `BLOCK` and `REDIRECT`
+  - `action_value` - (string) Value for the predefined controls action. This field is only required if the action is set to REDIRECT. This field is only required if the action is set to `REDIRECT`.
+
+- `threat_labz_controls` - (string)
   - `id` - (string) ID of the predefined control
   - `action` - (string) The action of the predefined control. Supported values: `PASS`, `BLOCK` and `REDIRECT`
   - `action_value` - (string) Value for the predefined controls action. This field is only required if the action is set to REDIRECT. This field is only required if the action is set to `REDIRECT`.
