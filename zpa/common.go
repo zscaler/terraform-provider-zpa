@@ -1252,3 +1252,127 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 	}
 	return v2Request
 }
+
+/*
+// Partially working code for rollback if needed
+func expandPredefinedControls(d *schema.ResourceData, service *services.Service) []common.CustomCommonControls {
+	var predefinedControls []common.CustomCommonControls
+	if v, ok := d.GetOk("predefined_controls"); ok {
+		predefinedControlsSet := v.(*schema.Set)
+		for _, v := range predefinedControlsSet.List() {
+			controlMap := v.(map[string]interface{})
+			control := common.CustomCommonControls{
+				ID:     controlMap["id"].(string),
+				Action: controlMap["action"].(string),
+			}
+			predefinedControls = append(predefinedControls, control)
+		}
+	}
+
+	// Ensure the "Preprocessors" control group is included
+	preprocessorsControls, err := inspection_predefined_controls.GetAllByGroup(service, d.Get("predefined_controls_version").(string), "Preprocessors")
+	if err == nil && len(preprocessorsControls) > 0 {
+		for _, preprocessorControl := range preprocessorsControls {
+			found := false
+			for _, control := range predefinedControls {
+				if control.ID == preprocessorControl.ID {
+					found = true
+					break
+				}
+			}
+			if !found {
+				predefinedControls = append(predefinedControls, common.CustomCommonControls{
+					ID:     preprocessorControl.ID,
+					Action: preprocessorControl.Action,
+				})
+			}
+		}
+	}
+
+	return predefinedControls
+}
+*/
+
+func expandPredefinedControls(d *schema.ResourceData) []common.CustomCommonControls {
+	if v, ok := d.GetOk("predefined_controls"); ok {
+		predefinedControlsSet := v.(*schema.Set)
+		var predefinedControls []common.CustomCommonControls
+
+		for _, v := range predefinedControlsSet.List() {
+			controlMap := v.(map[string]interface{})
+
+			control := common.CustomCommonControls{
+				ID:     controlMap["id"].(string),
+				Action: controlMap["action"].(string),
+				// ControlType:  controlMap["control_type"].(string),
+				// ProtocolType: controlMap["protocol_type"].(string),
+			}
+
+			// Only add action_value if it's set in the schema
+			// if actionValue, ok := controlMap["action_value"].(string); ok && actionValue != "" {
+			// 	control.ActionValue = actionValue
+			// }
+
+			predefinedControls = append(predefinedControls, control)
+		}
+
+		return predefinedControls
+	}
+
+	return nil
+}
+
+func flattenAssociatedInspectionProfileNames(associatedInspectionProfileNames []common.AssociatedProfileNames) []interface{} {
+	rule := make([]interface{}, len(associatedInspectionProfileNames))
+	for i, val := range associatedInspectionProfileNames {
+		rule[i] = map[string]interface{}{
+			"id":   val.ID,
+			"name": val.Name,
+		}
+	}
+
+	return rule
+}
+
+func flattenPredefinedControlsSimple(predControl []common.CustomCommonControls) []interface{} {
+	if len(predControl) == 0 {
+		return nil
+	}
+
+	predControls := make([]interface{}, len(predControl))
+	for i, control := range predControl {
+		controlMap := make(map[string]interface{})
+		controlMap["id"] = control.ID
+		controlMap["action"] = control.Action
+		predControls[i] = controlMap
+	}
+
+	return predControls
+}
+
+func flattenPredefinedControls(predControl []common.CustomCommonControls) []interface{} {
+	predControls := make([]interface{}, len(predControl))
+	for i, predControl := range predControl {
+		predControls[i] = map[string]interface{}{
+			"id":                                  predControl.ID,
+			"action":                              predControl.Action,
+			"action_value":                        predControl.ActionValue,
+			"attachment":                          predControl.Attachment,
+			"control_group":                       predControl.ControlGroup,
+			"control_number":                      predControl.ControlNumber,
+			"creation_time":                       predControl.CreationTime,
+			"default_action":                      predControl.DefaultAction,
+			"default_action_value":                predControl.DefaultActionValue,
+			"description":                         predControl.Description,
+			"modified_by":                         predControl.ModifiedBy,
+			"modified_time":                       predControl.ModifiedTime,
+			"name":                                predControl.Name,
+			"paranoia_level":                      predControl.ParanoiaLevel,
+			"severity":                            predControl.Severity,
+			"version":                             predControl.Version,
+			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(predControl.AssociatedInspectionProfileNames),
+		}
+	}
+
+	return predControls
+}

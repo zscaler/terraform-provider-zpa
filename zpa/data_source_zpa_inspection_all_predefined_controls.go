@@ -13,7 +13,8 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"version": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "OWASP_CRS/3.3.0",
 			},
 			"group_name": {
 				Type:     schema.TypeString,
