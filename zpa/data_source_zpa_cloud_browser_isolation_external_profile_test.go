@@ -1,6 +1,5 @@
 package zpa
 
-/*
 // TODO: Testing disabled as QA environments have limited region access
 import (
 	"testing"
@@ -31,4 +30,3 @@ func TestAccDataSourceCBIExternalProfile_Basic(t *testing.T) {
 		},
 	})
 }
-*/

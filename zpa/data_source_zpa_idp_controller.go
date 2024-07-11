@@ -185,8 +185,8 @@ func dataSourceIdpController() *schema.Resource {
 	}
 }
 
-func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceIdpControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.IDPController
 
 	var resp *idpcontroller.IdpController
@@ -198,7 +198,6 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 		resp = res
-
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
@@ -241,23 +240,22 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, m interface{}) error {
 		if resp.AdminMetadata != nil {
 			_ = d.Set("admin_metadata", flattenAdminMeta(resp.AdminMetadata))
 		}
-		epochAttributes := []struct {
-			key  string // The attribute name in the schema
-			time string // The epoch time string from the response
-		}{
-			{"creation_time", resp.CreationTime},
-			{"modified_time", resp.ModifiedTime},
+
+		// Set epoch attributes explicitly
+		creationTime, err := epochToRFC1123(resp.CreationTime, false)
+		if err != nil {
+			return fmt.Errorf("error formatting creation_time: %s", err)
+		}
+		if err := d.Set("creation_time", creationTime); err != nil {
+			return fmt.Errorf("error setting creation_time: %s", err)
 		}
 
-		// Iterate over epoch attributes and convert them
-		for _, attr := range epochAttributes {
-			formattedTime, err := epochToRFC1123(attr.time, false) // Adjust the second parameter based on your format preference
-			if err != nil {
-				return fmt.Errorf("error formatting %s: %s", attr.key, err)
-			}
-			if err := d.Set(attr.key, formattedTime); err != nil {
-				return fmt.Errorf("error setting %s: %s", attr.key, err)
-			}
+		modifiedTime, err := epochToRFC1123(resp.ModifiedTime, false)
+		if err != nil {
+			return fmt.Errorf("error formatting modified_time: %s", err)
+		}
+		if err := d.Set("modified_time", modifiedTime); err != nil {
+			return fmt.Errorf("error setting modified_time: %s", err)
 		}
 	} else {
 		return fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id)

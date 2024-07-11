@@ -113,8 +113,8 @@ func dataSourceProvisioningKey() *schema.Resource {
 	}
 }
 
-func dataSourceProvisioningKeyRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceProvisioningKeyRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ProvisioningKey
 
 	microTenantID := GetString(d.Get("microtenant_id"))

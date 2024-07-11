@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praconsole"
 )
 
-func TestAccResourcePRAConsoleControllerBasic(t *testing.T) {
+func TestAccResourcePRAConsoleController_Basic(t *testing.T) {
 	var praConsole praconsole.PRAConsole
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPRAConsoleController)
 	domainName := "pra_" + generatedName

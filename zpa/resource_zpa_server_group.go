@@ -25,8 +25,8 @@ func resourceServerGroup() *schema.Resource {
 		Update: resourceServerGroupUpdate,
 		Delete: resourceServerGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.ServerGroup
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -150,8 +150,8 @@ func resourceServerGroup() *schema.Resource {
 	}
 }
 
-func resourceServerGroupCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServerGroupCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServerGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -176,11 +176,11 @@ func resourceServerGroupCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Created server group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceServerGroupRead(d, m)
+	return resourceServerGroupRead(d, meta)
 }
 
-func resourceServerGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServerGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServerGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -240,8 +240,8 @@ func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []int
 	return result
 }
 
-func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServerGroup
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -252,13 +252,16 @@ func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	log.Printf("[INFO] Updating server group ID: %v\n", id)
 	req := expandServerGroup(d)
-	if (d.HasChange("servers") || d.HasChange("dynamic_discovery")) && req.DynamicDiscovery && len(req.Servers) > 0 {
-		log.Printf("[ERROR] Can't update the server group: an application server can only be attached to a server when DynamicDiscovery is disabled\n")
-		return fmt.Errorf("can't perform the changes: an application server can only be attached to a server when DynamicDiscovery is disabled")
-	}
-	if (d.HasChange("servers") || d.HasChange("dynamic_discovery")) && !req.DynamicDiscovery && len(req.Servers) == 0 {
-		log.Printf("[ERROR] Can't update server group: servers must not be empty when DynamicDiscovery is disabled\n")
-		return fmt.Errorf("can't update server group: servers must not be empty when DynamicDiscovery is disabled")
+
+	if d.HasChanges("servers", "dynamic_discovery") {
+		if req.DynamicDiscovery && len(req.Servers) > 0 {
+			log.Printf("[ERROR] Can't update the server group: an application server can only be attached to a server when DynamicDiscovery is disabled\n")
+			return fmt.Errorf("can't perform the changes: an application server can only be attached to a server when DynamicDiscovery is disabled")
+		}
+		if !req.DynamicDiscovery && len(req.Servers) == 0 {
+			log.Printf("[ERROR] Can't update server group: servers must not be empty when DynamicDiscovery is disabled\n")
+			return fmt.Errorf("can't update server group: servers must not be empty when DynamicDiscovery is disabled")
+		}
 	}
 
 	if _, _, err := servergroup.Get(service, id); err != nil {
@@ -271,11 +274,11 @@ func resourceServerGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if _, err := servergroup.Update(service, id, &req); err != nil {
 		return err
 	}
-	return resourceServerGroupRead(d, m)
+	return resourceServerGroupRead(d, meta)
 }
 
-func resourceServerGroupDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceServerGroupDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	applicationSegmentService := zClient.ApplicationSegment

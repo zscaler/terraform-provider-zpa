@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
 )
 
-func TestAccResourceServerGroupBasic(t *testing.T) {
+func TestAccResourceServerGroup_Basic(t *testing.T) {
 	var serverGroup servergroup.ServerGroup
 	serverGroupTypeAndName, _, serverGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServerGroup)
 

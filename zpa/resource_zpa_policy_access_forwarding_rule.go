@@ -52,8 +52,8 @@ func resourcePolicyForwardingRule() *schema.Resource {
 	}
 }
 
-func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -90,11 +90,11 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, m interface{}) e
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyForwardingRuleRead(d, m)
+	return resourcePolicyForwardingRuleRead(d, meta)
 }
 
-func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyForwardingRuleRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	policySetID, err := fetchPolicySetIDByType(zClient, "CLIENT_FORWARDING_POLICY", microTenantID)
@@ -137,8 +137,8 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -172,11 +172,11 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 
-	return resourcePolicyForwardingRuleRead(d, m)
+	return resourcePolicyForwardingRuleRead(d, meta)
 }
 
-func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

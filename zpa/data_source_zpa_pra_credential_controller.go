@@ -47,6 +47,11 @@ func dataSourcePRACredentialController() *schema.Resource {
 				Computed:    true,
 				Description: "The username for the login you want to use for the privileged credential",
 			},
+			"password": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The password associated with the username for the login you want to use for the privileged credential",
+			},
 			"creation_time": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -76,8 +81,8 @@ func dataSourcePRACredentialController() *schema.Resource {
 	}
 }
 
-func dataSourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourcePRACredentialControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRACredential
 
 	microTenantID := GetString(d.Get("microtenant_id"))

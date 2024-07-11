@@ -16,8 +16,8 @@ func resourcePRAConsoleController() *schema.Resource {
 		Update: resourcePRAConsoleControllerUpdate,
 		Delete: resourcePRAConsoleControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.PRAConsole
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -114,8 +114,8 @@ func resourcePRAConsoleController() *schema.Resource {
 	}
 }
 
-func resourcePRAConsoleControllerCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAConsoleControllerCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAConsole
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -133,11 +133,11 @@ func resourcePRAConsoleControllerCreate(d *schema.ResourceData, m interface{}) e
 	log.Printf("[INFO] Created pra console request. ID: %v\n", praConsole)
 
 	d.SetId(praConsole.ID)
-	return resourcePRAConsoleControllerRead(d, m)
+	return resourcePRAConsoleControllerRead(d, meta)
 }
 
-func resourcePRAConsoleControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAConsoleControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAConsole
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -169,8 +169,8 @@ func resourcePRAConsoleControllerRead(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func resourcePRAConsoleControllerUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAConsoleControllerUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAConsole
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -193,11 +193,11 @@ func resourcePRAConsoleControllerUpdate(d *schema.ResourceData, m interface{}) e
 		return err
 	}
 
-	return resourcePRAConsoleControllerRead(d, m)
+	return resourcePRAConsoleControllerRead(d, meta)
 }
 
-func resourcePRAConsoleControllerDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAConsoleControllerDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAConsole
 
 	microTenantID := GetString(d.Get("microtenant_id"))

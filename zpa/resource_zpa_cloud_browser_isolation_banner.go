@@ -16,8 +16,8 @@ func resourceCBIBanners() *schema.Resource {
 		Update: resourceCBIBannersUpdate,
 		Delete: resourceCBIBannersDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
 				service := zClient.CBIBannerController
 
 				id := d.Id()
@@ -26,7 +26,7 @@ func resourceCBIBanners() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := cbibannercontroller.GetByName(service, id)
+					resp, _, err := cbibannercontroller.GetByNameOrID(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -81,8 +81,8 @@ func resourceCBIBanners() *schema.Resource {
 	}
 }
 
-func resourceCBIBannersCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBIBannersCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBIBannerController
 
 	req := expandCBIBanner(d)
@@ -95,11 +95,11 @@ func resourceCBIBannersCreate(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Created cbi banner request. ID: %v\n", cbiBanner)
 
 	d.SetId(cbiBanner.ID)
-	return resourceCBIBannersRead(d, m)
+	return resourceCBIBannersRead(d, meta)
 }
 
-func resourceCBIBannersRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBIBannersRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBIBannerController
 
 	resp, _, err := cbibannercontroller.Get(service, d.Id())
@@ -122,12 +122,13 @@ func resourceCBIBannersRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("notification_text", resp.NotificationText)
 	_ = d.Set("logo", resp.Logo)
 	_ = d.Set("banner", resp.Banner)
+	_ = d.Set("persist", resp.Persist)
 
 	return nil
 }
 
-func resourceCBIBannersUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBIBannersUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBIBannerController
 
 	id := d.Id()
@@ -145,11 +146,11 @@ func resourceCBIBannersUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourceCBIBannersRead(d, m)
+	return resourceCBIBannersRead(d, meta)
 }
 
-func resourceCBIBannersDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceCBIBannersDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBIBannerController
 
 	log.Printf("[INFO] Deleting cbi banner ID: %v\n", d.Id())

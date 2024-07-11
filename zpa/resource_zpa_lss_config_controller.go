@@ -100,8 +100,8 @@ func resourceLSSConfigController() *schema.Resource {
 		Update: resourceLSSConfigControllerUpdate,
 		Delete: resourceLSSConfigControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
 				service := zClient.LSSConfigController
 
 				id := d.Id()
@@ -235,8 +235,8 @@ func resourceLSSConfigController() *schema.Resource {
 	}
 }
 
-func resourceLSSConfigControllerCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceLSSConfigControllerCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.LSSConfigController
 
 	req := expandLSSResource(d)
@@ -310,11 +310,11 @@ func resourceLSSConfigControllerCreate(d *schema.ResourceData, m interface{}) er
 	log.Printf("[INFO] Created lss config controller request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceLSSConfigControllerRead(d, m)
+	return resourceLSSConfigControllerRead(d, meta)
 }
 
-func resourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceLSSConfigControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.LSSConfigController
 
 	resp, _, err := lssconfigcontroller.Get(service, d.Id())
@@ -338,8 +338,8 @@ func resourceLSSConfigControllerRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceLSSConfigControllerUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.LSSConfigController
 
 	id := d.Id()
@@ -418,11 +418,11 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, m interface{}) er
 		return err
 	}
 
-	return resourceLSSConfigControllerRead(d, m)
+	return resourceLSSConfigControllerRead(d, meta)
 }
 
-func resourceLSSConfigControllerDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceLSSConfigControllerDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.LSSConfigController
 
 	log.Printf("[INFO] Deleting lss config controller ID: %v\n", d.Id())

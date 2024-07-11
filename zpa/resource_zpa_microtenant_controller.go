@@ -16,8 +16,8 @@ func resourceMicrotenantController() *schema.Resource {
 		Update: resourceMicrotenantUpdate,
 		Delete: resourceMicrotenantDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				zClient := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
 				service := zClient.MicroTenants
 
 				id := d.Id()
@@ -96,8 +96,8 @@ func resourceMicrotenantController() *schema.Resource {
 	}
 }
 
-func resourceMicrotenantCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceMicrotenantCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.MicroTenants
 
 	req := expandMicroTenant(d)
@@ -115,11 +115,11 @@ func resourceMicrotenantCreate(d *schema.ResourceData, m interface{}) error {
 		_ = d.Set("user", userList)
 		log.Printf("[DEBUG] Flattened User: %s", userList)
 	}
-	return resourceMicrotenantRead(d, m)
+	return resourceMicrotenantRead(d, meta)
 }
 
-func resourceMicrotenantRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceMicrotenantRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.MicroTenants
 
 	resp, _, err := microtenants.Get(service, d.Id())
@@ -151,8 +151,8 @@ func resourceMicrotenantRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceMicrotenantUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceMicrotenantUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.MicroTenants
 
 	id := d.Id()
@@ -170,11 +170,11 @@ func resourceMicrotenantUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourceMicrotenantRead(d, m)
+	return resourceMicrotenantRead(d, meta)
 }
 
-func resourceMicrotenantDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceMicrotenantDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.MicroTenants
 
 	log.Printf("[INFO] Deleting microtenant ID: %v\n", d.Id())

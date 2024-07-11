@@ -137,8 +137,8 @@ func dataSourceCustomerVersionProfile() *schema.Resource {
 	}
 }
 
-func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CustomerVersionProfile
 
 	var resp *customerversionprofile.CustomerVersionProfile

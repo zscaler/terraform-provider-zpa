@@ -18,8 +18,8 @@ func resourcePRACredentialController() *schema.Resource {
 		Update: resourcePRACredentialControllerUpdate,
 		Delete: resourcePRACredentialControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.PRACredential
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -108,8 +108,8 @@ func resourcePRACredentialController() *schema.Resource {
 	}
 }
 
-func resourcePRACredentialControllerCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRACredentialControllerCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRACredential
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -128,11 +128,11 @@ func resourcePRACredentialControllerCreate(d *schema.ResourceData, m interface{}
 	log.Printf("[INFO] Created credential controller request. ID: %v\n", credController)
 
 	d.SetId(credController.ID)
-	return resourcePRACredentialControllerRead(d, m)
+	return resourcePRACredentialControllerRead(d, meta)
 }
 
-func resourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRACredentialControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRACredential
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -161,13 +161,13 @@ func resourcePRACredentialControllerRead(d *schema.ResourceData, m interface{}) 
 	return nil
 }
 
-func resourcePRACredentialControllerUpdate(d *schema.ResourceData, m interface{}) error {
+func resourcePRACredentialControllerUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("credential_type") {
 		oldType, newType := d.GetChange("credential_type")
 		return fmt.Errorf("changing 'credential_type' from '%s' to '%s' is not allowed", oldType, newType)
 	}
 
-	zClient := m.(*Client)
+	zClient := meta.(*Client)
 	service := zClient.PRAApproval.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	id := d.Id()
@@ -185,11 +185,11 @@ func resourcePRACredentialControllerUpdate(d *schema.ResourceData, m interface{}
 		return err
 	}
 
-	return resourcePRACredentialControllerRead(d, m)
+	return resourcePRACredentialControllerRead(d, meta)
 }
 
-func resourcePRACredentialControllerDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRACredentialControllerDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRACredential
 
 	microTenantID := GetString(d.Get("microtenant_id"))

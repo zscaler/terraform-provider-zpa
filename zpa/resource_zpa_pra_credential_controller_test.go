@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/pracredential"
 )
 
-func TestAccResourcePRACredentialControllerBasic(t *testing.T) {
+func TestAccResourcePRACredentialController_Basic(t *testing.T) {
 	var praCredential pracredential.Credential
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPRACredentialController)
 

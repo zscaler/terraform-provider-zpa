@@ -40,8 +40,8 @@ func dataSourceServiceEdgeAssistantSchedule() *schema.Resource {
 	}
 }
 
-func dataSourceServiceEdgeRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceServiceEdgeRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeSchedule
 
 	var resp *serviceedgeschedule.AssistantSchedule

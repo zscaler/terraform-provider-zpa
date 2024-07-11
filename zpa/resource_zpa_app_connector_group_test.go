@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
 )
 
-func TestAccResourceAppConnectorGroupBasic(t *testing.T) {
+func TestAccResourceAppConnectorGroup_Basic(t *testing.T) {
 	var groups appconnectorgroup.AppConnectorGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
 

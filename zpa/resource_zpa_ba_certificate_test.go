@@ -18,7 +18,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
 )
 
-func TestAccResourceBaCertificate_basic(t *testing.T) {
+func TestAccResourceBaCertificate_Basic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPABACertificate) // Random certificate name
 	cert, privateKey, err := generateSelfSignedCert(generatedName)
 	if err != nil {

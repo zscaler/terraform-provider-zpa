@@ -21,6 +21,7 @@ TESTARGS?=-test.v
 default: build
 
 dep: # Download required dependencies
+	go mod tidy
 
 docs:
 	go generate
@@ -101,7 +102,7 @@ lint:
 	@$(TFPROVIDERLINT) \
 		-c 1 \
 		-AT001 \
-        -R004 \
+    	-R004 \
 		-S001 \
 		-S002 \
 		-S003 \
@@ -122,14 +123,14 @@ lint:
 		./$(PKG_NAME)
 
 tools:
-	@which $(GOFMT) || go install mvdan.cc/gofumpt@v0.5.0
-	@which $(TFPROVIDERLINT) || go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.29.0
-	@which $(STATICCHECK) || go install honnef.co/go/tools/cmd/staticcheck@v0.4.6
+	@which $(GOFMT) || go install mvdan.cc/gofumpt@v0.6.0
+	@which $(TFPROVIDERLINT) || go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.30.0
+	@which $(STATICCHECK) || go install honnef.co/go/tools/cmd/staticcheck@v0.4.7
 
 tools-update:
-	@go install mvdan.cc/gofumpt@v0.5.0
-	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.29.0
-	@go install honnef.co/go/tools/cmd/staticcheck@v0.4.6
+	@go install mvdan.cc/gofumpt@v0.6.0
+	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.30.0
+	@go install honnef.co/go/tools/cmd/staticcheck@v0.4.7
 
 website:
 ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))

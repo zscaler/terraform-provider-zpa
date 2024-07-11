@@ -381,8 +381,8 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 	}
 }
 
-func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeGroup
 
 	var resp *serviceedgegroup.ServiceEdgeGroup

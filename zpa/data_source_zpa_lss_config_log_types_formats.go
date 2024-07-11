@@ -55,8 +55,8 @@ func getLogType(d *schema.ResourceData) (string, bool) {
 	return value, ok
 }
 
-func dataSourceLSSLogTypeFormatsRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceLSSLogTypeFormatsRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.LSSConfigController
 
 	log.Printf("[INFO] Getting data for LSS Log Types Format set\n")

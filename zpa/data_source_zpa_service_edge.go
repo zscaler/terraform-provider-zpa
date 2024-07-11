@@ -218,8 +218,8 @@ func dataSourceServiceEdgeController() *schema.Resource {
 	}
 }
 
-func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ServiceEdgeController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

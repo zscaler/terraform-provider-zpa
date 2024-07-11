@@ -62,8 +62,8 @@ func resourceAppConnectorAssistantSchedule() *schema.Resource {
 	}
 }
 
-func resourceAppConnectorAssistantScheduleCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceAppConnectorAssistantScheduleCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorSchedule
 
 	req, err := expandAssistantSchedule(d)
@@ -91,18 +91,18 @@ func resourceAppConnectorAssistantScheduleCreate(d *schema.ResourceData, m inter
 			d.SetId(resp.ID)
 
 			// Proceed to update the resource
-			return resourceAppConnectorAssistantScheduleUpdate(d, m)
+			return resourceAppConnectorAssistantScheduleUpdate(d, meta)
 		}
 		return err
 	}
 	log.Printf("[INFO] Created app connector assistant schedule request. ID: %v\n", req.ID)
 	d.SetId(req.ID)
 
-	return resourceAppConnectorAssistantScheduleRead(d, m)
+	return resourceAppConnectorAssistantScheduleRead(d, meta)
 }
 
-func resourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorSchedule
 
 	resp, _, err := appconnectorschedule.GetSchedule(service)
@@ -125,8 +125,8 @@ func resourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, m interfa
 	return nil
 }
 
-func resourceAppConnectorAssistantScheduleUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceAppConnectorAssistantScheduleUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorSchedule
 
 	id := d.Id()
@@ -147,10 +147,10 @@ func resourceAppConnectorAssistantScheduleUpdate(d *schema.ResourceData, m inter
 		return err
 	}
 
-	return resourceAppConnectorAssistantScheduleRead(d, m)
+	return resourceAppConnectorAssistantScheduleRead(d, meta)
 }
 
-func resourceAppConnectorAssistantScheduleDelete(d *schema.ResourceData, m interface{}) error {
+func resourceAppConnectorAssistantScheduleDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 

@@ -186,8 +186,8 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BrowserAccess
 
 	microTenantID := GetString(d.Get("microtenant_id"))

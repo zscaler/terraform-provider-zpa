@@ -48,8 +48,8 @@ func dataSourceTrustedNetwork() *schema.Resource {
 	}
 }
 
-func dataSourceTrustedNetworkRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceTrustedNetworkRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.TrustedNetwork
 
 	microTenantID := GetString(d.Get("microtenant_id"))

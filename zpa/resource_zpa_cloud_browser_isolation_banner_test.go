@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
 )
 
-func TestAccResourceCBIBannersBasic(t *testing.T) {
+func TestAccResourceCBIBanners_Basic(t *testing.T) {
 	var cbiBanner cbibannercontroller.CBIBannerController
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPACBIBannerController)
 
@@ -55,6 +55,15 @@ func TestAccResourceCBIBannersBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "banner", strconv.FormatBool(variable.Banner)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "persist", strconv.FormatBool(variable.Persist)),
 				),
+			},
+			// Import test by ID
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					return cbiBanner.ID, nil
+				},
 			},
 		},
 	})

@@ -55,8 +55,8 @@ func dataSourceSamlAttribute() *schema.Resource {
 	}
 }
 
-func dataSourceSamlAttributeRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceSamlAttributeRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.SAMLAttribute
 
 	var resp *samlattribute.SamlAttribute

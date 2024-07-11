@@ -324,8 +324,8 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 	}
 }
 
-func dataSourceConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceConnectorGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.AppConnectorGroup
 
 	var resp *appconnectorgroup.AppConnectorGroup

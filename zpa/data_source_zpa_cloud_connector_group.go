@@ -110,8 +110,8 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 	}
 }
 
-func dataSourceCloudConnectorGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceCloudConnectorGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CloudConnectorGroup
 
 	var resp *cloudconnectorgroup.CloudConnectorGroup

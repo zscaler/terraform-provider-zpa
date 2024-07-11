@@ -46,8 +46,8 @@ func dataSourceScimGroup() *schema.Resource {
 	}
 }
 
-func dataSourceScimGroupRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceScimGroupRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.IDPController
 
 	var resp *scimgroup.ScimGroup

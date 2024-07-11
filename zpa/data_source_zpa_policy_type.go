@@ -237,8 +237,8 @@ func dataSourcePolicyType() *schema.Resource {
 	}
 }
 
-func dataSourcePolicyTypeRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourcePolicyTypeRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	log.Printf("[INFO] Getting data for policy type\n")
@@ -284,7 +284,6 @@ func flattenPolicySetRules(policySetRules *policysetcontroller.PolicySet) []inte
 			"custom_msg":                  ruleItem.CustomMsg,
 			"description":                 ruleItem.Description,
 			"id":                          ruleItem.ID,
-			"isolation_default_rule":      ruleItem.IsolationDefaultRule,
 			"modified_by":                 ruleItem.ModifiedBy,
 			"modified_time":               ruleItem.ModifiedTime,
 			"operator":                    ruleItem.Operator,

@@ -33,37 +33,39 @@ func dataSourceCBICertificates() *schema.Resource {
 	}
 }
 
-func dataSourceCBICertificatesRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceCBICertificatesRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBICertificateController
 
 	var resp *cbicertificatecontroller.CBICertificate
-	id, ok := d.Get("id").(string)
-	if ok && id != "" {
-		log.Printf("[INFO] Getting data for cbi certificate %s\n", id)
+	id, idOk := d.Get("id").(string)
+	name, nameOk := d.Get("name").(string)
+
+	if idOk && id != "" {
+		log.Printf("[INFO] Getting data for CBI certificate with ID: %s\n", id)
 		res, _, err := cbicertificatecontroller.Get(service, id)
 		if err != nil {
 			return err
 		}
 		resp = res
-	}
-	name, ok := d.Get("name").(string)
-	if id == "" && ok && name != "" {
-		log.Printf("[INFO] Getting data cbi certificate name %s\n", name)
+	} else if nameOk && name != "" {
+		log.Printf("[INFO] Getting data for CBI certificate with name: %s\n", name)
 		res, _, err := cbicertificatecontroller.GetByName(service, name)
 		if err != nil {
 			return err
 		}
 		resp = res
+	} else {
+		return fmt.Errorf("either 'id' or 'name' must be specified")
 	}
+
 	if resp != nil {
 		d.SetId(resp.ID)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("pem", resp.PEM)
 		_ = d.Set("is_default", resp.IsDefault)
-
 	} else {
-		return fmt.Errorf("couldn't find any cbi certificate with name '%s' or id '%s'", name, id)
+		return fmt.Errorf("couldn't find any CBI certificate with name '%s' or id '%s'", name, id)
 	}
 
 	return nil

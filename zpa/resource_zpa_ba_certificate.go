@@ -53,8 +53,8 @@ func resourceBaCertificate() *schema.Resource {
 	}
 }
 
-func resourceBaCertificateCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceBaCertificateCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BACertificate
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -75,8 +75,8 @@ func resourceBaCertificateCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceBaCertificateRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BACertificate
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -104,8 +104,8 @@ func resourceBaCertificateRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceBaCertificateDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceBaCertificateDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.BACertificate
 
 	microTenantID := GetString(d.Get("microtenant_id"))

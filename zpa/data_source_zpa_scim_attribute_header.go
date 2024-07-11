@@ -91,8 +91,8 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 	}
 }
 
-func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ScimAttributeHeader
 
 	var resp *scimattributeheader.ScimAttributeHeader

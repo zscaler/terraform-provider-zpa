@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
 )
 
-func TestAccResourceServiceEdgeGroupBasic(t *testing.T) {
+func TestAccResourceServiceEdgeGroup_Basic(t *testing.T) {
 	var groups serviceedgegroup.ServiceEdgeGroup
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServiceEdgeGroup)
 

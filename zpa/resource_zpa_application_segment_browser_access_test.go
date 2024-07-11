@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
 )
 
-func TestAccResourceApplicationSegmentBrowserAccessBasic(t *testing.T) {
+func TestAccResourceApplicationSegmentBrowserAccess_Basic(t *testing.T) {
 	var browserAccess browseraccess.BrowserAccess
 	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentBrowserAccess)
 	rDomain := acctest.RandomWithPrefix("tf-acc-test")

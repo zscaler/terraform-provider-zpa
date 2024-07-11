@@ -19,8 +19,8 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 		Update: resourceApplicationSegmentInspectionUpdate,
 		Delete: resourceApplicationSegmentInspectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.ApplicationSegmentInspection
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -60,11 +60,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"segment_group_id": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-			"segment_group_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
 			},
 			"bypass_type": {
 				Type:        schema.TypeString,
@@ -205,8 +200,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"common_apps_dto": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
@@ -215,54 +208,50 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 									"name": {
 										Type:     schema.TypeString,
 										Optional: true,
-										ForceNew: true,
-									},
-									"description": {
-										Type:     schema.TypeString,
-										Optional: true,
-										ForceNew: true,
 									},
 									"enabled": {
 										Type:     schema.TypeBool,
 										Optional: true,
-										ForceNew: true,
+										Computed: true,
 									},
 									"app_types": {
 										Type:     schema.TypeSet,
 										Optional: true,
-										ForceNew: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
 									"application_port": {
 										Type:     schema.TypeString,
 										Optional: true,
-										ForceNew: true,
 									},
 									"application_protocol": {
 										Type:     schema.TypeString,
 										Optional: true,
-										ForceNew: true,
+										// ForceNew: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"HTTP",
 											"HTTPS",
 										}, false),
 									},
 									"certificate_id": {
-										Type:     schema.TypeString,
-										ForceNew: true,
+										Type: schema.TypeString,
+										// ForceNew: true,
 										Optional: true,
 									},
 									"domain": {
-										Type:     schema.TypeString,
-										ForceNew: true,
+										Type: schema.TypeString,
+										// ForceNew: true,
 										Optional: true,
 									},
 									"trust_untrusted_cert": {
-										Type:     schema.TypeBool,
-										ForceNew: true,
+										Type: schema.TypeBool,
+										// ForceNew: true,
 										Optional: true,
 									},
 								},
@@ -292,8 +281,8 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -323,11 +312,11 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, m interf
 	log.Printf("[INFO] Created inspection application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceApplicationSegmentInspectionRead(d, m)
+	return resourceApplicationSegmentInspectionRead(d, meta)
 }
 
-func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -348,7 +337,6 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	log.Printf("[INFO] Getting sra application segment:\n%+v\n", resp)
 	d.SetId(resp.ID)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
-	_ = d.Set("segment_group_name", resp.SegmentGroupName)
 	_ = d.Set("bypass_type", resp.BypassType)
 	_ = d.Set("config_space", resp.ConfigSpace)
 	_ = d.Set("domain_names", resp.DomainNames)
@@ -371,7 +359,7 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp.AppServerGroups))
 
-	if err := d.Set("common_apps_dto", flattenInspectionCommonAppsDto(d, resp.InspectionAppDto)); err != nil {
+	if err := d.Set("common_apps_dto", flattenInspectionCommonAppsDto(resp.InspectionAppDto)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
@@ -379,22 +367,26 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, m interfac
 		return err
 	}
 
-	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
 	return nil
 }
 
 func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
-	ids := make([]interface{}, len(serverGroup))
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroup))
 	for i, group := range serverGroup {
 		ids[i] = group.ID
 	}
-	return ids
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }
 
-func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -428,11 +420,11 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	return resourceApplicationSegmentInspectionRead(d, m)
+	return resourceApplicationSegmentInspectionRead(d, meta)
 }
 
-func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -459,34 +451,11 @@ func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, m interf
 	return nil
 }
 
-/*
-	func detachInspectionPortalsFromGroup(client *Client, segmentID, segmentGroupID string) error {
-		log.Printf("[INFO] Detaching inspection application segment  %s from segment group: %s\n", segmentID, segmentGroupID)
-		service := client.SegmentGroup
-
-		segGroup, _, err := segmentgroup.Get(service, segmentGroupID)
-		if err != nil {
-			log.Printf("[error] Error while getting segment group id: %s", segmentGroupID)
-			return err
-		}
-		adaptedApplications := []segmentgroup.Application{}
-		for _, app := range segGroup.Applications {
-			if app.ID != segmentID {
-				adaptedApplications = append(adaptedApplications, app)
-			}
-		}
-		segGroup.Applications = adaptedApplications
-		_, err = segmentgroup.Update(service, segmentGroupID, segGroup)
-		return err
-	}
-*/
-
 func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
 	details := applicationsegmentinspection.AppSegmentInspection{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
 		SegmentGroupID:            d.Get("segment_group_id").(string),
-		SegmentGroupName:          d.Get("segment_group_name").(string),
 		BypassType:                d.Get("bypass_type").(string),
 		ConfigSpace:               d.Get("config_space").(string),
 		ICMPAccessType:            d.Get("icmp_access_type").(string),
@@ -511,9 +480,6 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 	}
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
-	}
-	if d.HasChange("segment_group_name") {
-		details.SegmentGroupName = d.Get("segment_group_name").(string)
 	}
 	if d.HasChange("server_groups") {
 		details.AppServerGroups = expandInspectionAppServerGroups(d)
@@ -561,20 +527,12 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 
 func expandInspectionCommonAppsDto(d *schema.ResourceData) applicationsegmentinspection.CommonAppsDto {
 	result := applicationsegmentinspection.CommonAppsDto{}
-	appsConfigInterface, ok := d.GetOk("common_apps_dto")
-	if !ok {
-		return result
-	}
-	appsConfigSet, ok := appsConfigInterface.(*schema.Set)
-	if !ok {
-		return result
-	}
-	for _, appconf := range appsConfigSet.List() {
-		appConfMap, ok := appconf.(map[string]interface{})
-		if !ok {
-			return result
+	if commonAppsInterface, ok := d.GetOk("common_apps_dto"); ok {
+		commonAppsList := commonAppsInterface.(*schema.Set).List()
+		if len(commonAppsList) > 0 {
+			commonAppMap := commonAppsList[0].(map[string]interface{})
+			result.AppsConfig = expandInspectionAppsConfig(commonAppMap["apps_config"])
 		}
-		result.AppsConfig = expandInspectionAppsConfig(appConfMap["apps_config"])
 	}
 	return result
 }
@@ -596,7 +554,6 @@ func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationse
 			appTypes := SetToStringSlice(appTypesSet)
 			commonAppConfigDto = append(commonAppConfigDto, applicationsegmentinspection.AppsConfig{
 				Name:                commonAppConfig["name"].(string),
-				Description:         commonAppConfig["description"].(string),
 				Enabled:             commonAppConfig["enabled"].(bool),
 				ApplicationPort:     commonAppConfig["application_port"].(string),
 				ApplicationProtocol: commonAppConfig["application_protocol"].(string),
@@ -632,38 +589,31 @@ func expandInspectionAppServerGroups(d *schema.ResourceData) []applicationsegmen
 	return []applicationsegmentinspection.AppServerGroups{}
 }
 
-func flattenInspectionCommonAppsDto(d *schema.ResourceData, apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
-	commonApp := make([]interface{}, 1)
-	commonApp[0] = map[string]interface{}{
-		"apps_config": flattenInspectionAppsConfig(d, apps),
-	}
-	return commonApp
-}
-
-func flattenInspectionAppsConfig(d *schema.ResourceData, appConfigs []applicationsegmentinspection.InspectionAppDto) []interface{} {
-	cApp := expandInspectionCommonAppsDto(d)
-
-	appConfig := make([]interface{}, len(appConfigs))
-	for i, val := range appConfigs {
+func flattenInspectionCommonAppsDto(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
+	commonAppsDto := make([]interface{}, 1)
+	appsConfig := make([]interface{}, len(apps))
+	for i, app := range apps {
 		appTypes := []string{}
-		for _, a := range cApp.AppsConfig {
-			if a.Name == val.Name {
-				appTypes = a.AppTypes
-			}
+		if app.ApplicationProtocol == "HTTP" || app.ApplicationProtocol == "HTTPS" {
+			appTypes = append(appTypes, "INSPECT")
 		}
-		appConfig[i] = map[string]interface{}{
-			"name":                 val.Name,
-			"description":          val.Description,
-			"enabled":              val.Enabled,
-			"domain":               val.Domain,
-			"application_port":     val.ApplicationPort,
-			"certificate_id":       val.CertificateID,
-			"application_protocol": val.ApplicationProtocol,
-			"trust_untrusted_cert": val.TrustUntrustedCert,
+		appConfigMap := map[string]interface{}{
+			"id":                   app.ID,
+			"name":                 app.Name,
+			"enabled":              app.Enabled,
+			"domain":               app.Domain,
+			"application_port":     app.ApplicationPort,
+			"certificate_id":       app.CertificateID,
+			"application_protocol": app.ApplicationProtocol,
+			"trust_untrusted_cert": app.TrustUntrustedCert,
 			"app_types":            appTypes,
 		}
+		appsConfig[i] = appConfigMap
 	}
-	return appConfig
+	commonAppsDto[0] = map[string]interface{}{
+		"apps_config": appsConfig,
+	}
+	return commonAppsDto
 }
 
 func validateProtocolAndCertID(d *schema.ResourceData) error {

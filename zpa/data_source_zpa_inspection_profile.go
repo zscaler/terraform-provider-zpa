@@ -359,8 +359,8 @@ func dataSourceInspectionProfile() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionProfileRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionProfile
 
 	var resp *inspection_profile.InspectionProfile
@@ -467,43 +467,4 @@ func flattenCustomControls(customControl []inspection_profile.InspectionCustomCo
 	}
 
 	return customControls
-}
-
-func flattenAssociatedInspectionProfileNames(associatedInspectionProfileNames []inspection_profile.AssociatedProfileNames) []interface{} {
-	rule := make([]interface{}, len(associatedInspectionProfileNames))
-	for i, val := range associatedInspectionProfileNames {
-		rule[i] = map[string]interface{}{
-			"id":   val.ID,
-			"name": val.Name,
-		}
-	}
-
-	return rule
-}
-
-func flattenPredefinedControls(predControl []inspection_profile.CustomCommonControls) []interface{} {
-	predControls := make([]interface{}, len(predControl))
-	for i, predControl := range predControl {
-		predControls[i] = map[string]interface{}{
-			"id":                                  predControl.ID,
-			"action":                              predControl.Action,
-			"action_value":                        predControl.ActionValue,
-			"attachment":                          predControl.Attachment,
-			"control_group":                       predControl.ControlGroup,
-			"control_number":                      predControl.ControlNumber,
-			"creation_time":                       predControl.CreationTime,
-			"default_action":                      predControl.DefaultAction,
-			"default_action_value":                predControl.DefaultActionValue,
-			"description":                         predControl.Description,
-			"modified_by":                         predControl.ModifiedBy,
-			"modified_time":                       predControl.ModifiedTime,
-			"name":                                predControl.Name,
-			"paranoia_level":                      predControl.ParanoiaLevel,
-			"severity":                            predControl.Severity,
-			"version":                             predControl.Version,
-			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(predControl.AssociatedInspectionProfileNames),
-		}
-	}
-
-	return predControls
 }

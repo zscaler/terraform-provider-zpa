@@ -209,8 +209,8 @@ func dataSourceMicrotenantController() *schema.Resource {
 	}
 }
 
-func dataSourceMicrotenantControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceMicrotenantControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.MicroTenants
 
 	var resp *microtenants.MicroTenant

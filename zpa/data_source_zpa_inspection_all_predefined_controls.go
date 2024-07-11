@@ -13,7 +13,8 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"version": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Default:  "OWASP_CRS/3.3.0",
 			},
 			"group_name": {
 				Type:     schema.TypeString,
@@ -121,8 +122,8 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionAllPredefinedControlsRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceInspectionAllPredefinedControlsRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.InspectionPredefinedControls
 
 	version, versionSet := d.Get("version").(string)

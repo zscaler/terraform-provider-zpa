@@ -13,7 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
 )
 
-func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
+func TestAccResourceApplicationSegmentPRA_Basic(t *testing.T) {
 	var appSegment applicationsegmentpra.AppSegmentPRA
 	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentPRA)
 
@@ -58,11 +58,11 @@ func TestAccResourceApplicationSegmentPRABasic(t *testing.T) {
 				),
 			},
 			// Import test
-			// {
-			// 	ResourceName:      appSegmentTypeAndName,
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				ResourceName:      appSegmentTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

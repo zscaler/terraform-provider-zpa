@@ -10,7 +10,7 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
 )
 
-func TestAccDataSourceProvisioningKey_Basic_AppConnectorGroup(t *testing.T) {
+func TestAccDataSourceProvisioningKeyAppConnectorGroup_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
 
 	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
@@ -39,7 +39,7 @@ func TestAccDataSourceProvisioningKey_Basic_AppConnectorGroup(t *testing.T) {
 
 /*
 // Testing Provisioning Key for Service Edge Group
-func TestAccDataSourceProvisioningKey_Basic_ServiceEdgeGroup(t *testing.T) {
+func TestAccDataSourceProvisioningKeyServiceEdgeGroup_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAProvisioningKey)
 
 	serviceEdgeGroupTypeAndName, _, serviceEdgeGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAServiceEdgeGroup)

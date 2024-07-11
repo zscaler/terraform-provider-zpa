@@ -1,6 +1,5 @@
 package zpa
 
-/*
 import (
 	"fmt"
 	"os"
@@ -10,8 +9,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAppConnectorAssistantSchedule_basic(t *testing.T) {
+func TestAccAppConnectorAssistantSchedule_Basic(t *testing.T) {
 	customerID := os.Getenv("ZPA_CUSTOMER_ID")
+	if customerID == "" {
+		t.Fatal("ZPA_CUSTOMER_ID must be set for acceptance tests")
+	}
+
+	resourceTypeAndName := "zpa_app_connector_assistant_schedule.this"
+	initialConfig := testAccAppConnectorAssistantScheduleConfig(customerID, "true")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -19,73 +24,29 @@ func TestAccAppConnectorAssistantSchedule_basic(t *testing.T) {
 		CheckDestroy: testAccCheckAppConnectorAssistantScheduleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAppConnectorAssistantScheduleConfig(),
+				Config: initialConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAppConnectorAssistantScheduleExists("zpa_app_connector_assistant_schedule.this"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "enabled", "true"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "delete_disabled", "true"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "frequency", "days"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "frequency_interval", "7"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "customer_id", customerID),
-				),
-			},
-			// Test resource update
-			{
-				Config: testAccAppConnectorAssistantScheduleConfigUpdated(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAppConnectorAssistantScheduleExists("zpa_app_connector_assistant_schedule.this"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "enabled", "false"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "delete_disabled", "false"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "frequency_interval", "14"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "customer_id", customerID),
-				),
-			},
-			// Test resource update
-			{
-				Config: testAccAppConnectorAssistantScheduleConfigEnabled(),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAppConnectorAssistantScheduleExists("zpa_app_connector_assistant_schedule.this"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "enabled", "true"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "delete_disabled", "true"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "frequency_interval", "30"),
-					resource.TestCheckResourceAttr("zpa_app_connector_assistant_schedule.this", "customer_id", customerID),
+					testAccCheckAppConnectorAssistantScheduleExists(resourceTypeAndName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", "true"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "delete_disabled", "true"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "frequency", "days"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "customer_id", customerID),
 				),
 			},
 		},
 	})
 }
 
-func testAccAppConnectorAssistantScheduleConfig() string {
-	return `
+func testAccAppConnectorAssistantScheduleConfig(customerID, deleteDisabled string) string {
+	return fmt.Sprintf(`
 resource "zpa_app_connector_assistant_schedule" "this" {
   enabled = true
-  delete_disabled = true
+  delete_disabled = %s
   frequency = "days"
-  frequency_interval = "7"
+  frequency_interval = "5"
+  customer_id = "%s"
 }
-`
-}
-
-func testAccAppConnectorAssistantScheduleConfigUpdated() string {
-	return `
-resource "zpa_app_connector_assistant_schedule" "this" {
-  enabled = false
-  delete_disabled = false
-  frequency = "days"
-  frequency_interval = "14"
-}
-`
-}
-
-func testAccAppConnectorAssistantScheduleConfigEnabled() string {
-	return `
-resource "zpa_app_connector_assistant_schedule" "this" {
-  enabled = true
-  delete_disabled = true
-  frequency = "days"
-  frequency_interval = "30"
-}
-`
+`, deleteDisabled, customerID)
 }
 
 func testAccCheckAppConnectorAssistantScheduleExists(n string) resource.TestCheckFunc {
@@ -107,4 +68,3 @@ func testAccCheckAppConnectorAssistantScheduleDestroy(s *terraform.State) error 
 	// Implement if there's anything to check upon resource destruction
 	return nil
 }
-*/

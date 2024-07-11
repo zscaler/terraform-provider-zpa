@@ -190,8 +190,8 @@ func dataSourceApplicationSegmentPRA() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
 	var resp *applicationsegmentpra.AppSegmentPRA

@@ -56,8 +56,8 @@ func dataSourceCBIZPAProfiles() *schema.Resource {
 	}
 }
 
-func dataSourceCBIZPAProfilesRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceCBIZPAProfilesRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.CBIZpaProfile
 
 	var resp *cbizpaprofile.ZPAProfiles

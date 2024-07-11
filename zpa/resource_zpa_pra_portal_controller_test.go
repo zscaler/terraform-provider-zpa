@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praportal"
 )
 
-func TestAccResourcePRAPortalControllerBasic(t *testing.T) {
+func TestAccResourcePRAPortalController_Basic(t *testing.T) {
 	var praPortal praportal.PRAPortal
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPRAPortalController)
 

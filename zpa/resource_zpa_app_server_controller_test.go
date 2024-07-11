@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
 )
 
-func TestAccResourceApplicationServerBasic(t *testing.T) {
+func TestAccResourceApplicationServer_Basic(t *testing.T) {
 	var servers appservercontroller.ApplicationServer
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationServer)
 

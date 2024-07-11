@@ -37,8 +37,8 @@ func dataSourceAccessPolicyPlatforms() *schema.Resource {
 	}
 }
 
-func dataSourceAccessPolicyPlatformsRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceAccessPolicyPlatformsRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.Platforms
 
 	log.Printf("[INFO] Getting data for all platforms set\n")

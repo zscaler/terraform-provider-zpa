@@ -24,8 +24,8 @@ func resourceApplicationSegment() *schema.Resource {
 		Update: resourceApplicationSegmentUpdate,
 		Delete: resourceApplicationSegmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.ApplicationSegment
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -230,8 +230,8 @@ func resourceApplicationSegment() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegment
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -259,11 +259,11 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, m interface{}) err
 	log.Printf("[INFO] Created application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceApplicationSegmentRead(d, m)
+	return resourceApplicationSegmentRead(d, meta)
 }
 
-func resourceApplicationSegmentRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegment
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -333,8 +333,8 @@ func flattenAppServerGroupsSimple(serverGroups []applicationsegment.AppServerGro
 	return result
 }
 
-func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	id := d.Id()
@@ -366,7 +366,7 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, m interface{}) err
 		return err
 	}
 
-	return resourceApplicationSegmentRead(d, m)
+	return resourceApplicationSegmentRead(d, meta)
 }
 
 func detachAppsFromAllPolicyRules(id string, policySetControllerService *services.Service) {
@@ -414,8 +414,8 @@ func detachAppsFromAllPolicyRules(id string, policySetControllerService *service
 	}
 }
 
-func resourceApplicationSegmentDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourceApplicationSegmentDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.ApplicationSegment.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	policySetControllerService := zClient.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
 	id := d.Id()

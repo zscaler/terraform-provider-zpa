@@ -12,7 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
 )
 
-func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
+func TestAccResourceInspectionCustomControls_Basic(t *testing.T) {
 	var control inspection_custom_controls.InspectionCustomControl
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionCustomControl)
 
@@ -27,15 +27,12 @@ func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
 					testAccCheckInspectionCustomControlsExists(resourceTypeAndName, &control),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.CustomControlDescription),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", "BLOCK"),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.InspectionCustomControlDefaultAction),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", variable.CustomControlParanoia),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.CustomControlDefaultAction),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "protocol_type", "HTTP"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.CustomControlSeverity),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.CustomControlControlType),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "2"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 
 			// Update test
@@ -45,15 +42,18 @@ func TestAccResourceInspectionCustomControlsBasic(t *testing.T) {
 					testAccCheckInspectionCustomControlsExists(resourceTypeAndName, &control),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", "tf-acc-test-"+generatedName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.CustomControlDescriptionUpdate),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "action", "PASS"),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.CustomControlDefaultAction),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "paranoia_level", variable.CustomControlParanoiaUpdate),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "default_action", variable.CustomControlDefaultAction),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "protocol_type", "HTTP"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "severity", variable.CustomControlSeverityUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "type", variable.CustomControlControlType),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "rules.#", "2"),
 				),
-				ExpectNonEmptyPlan: true,
+			},
+			// Import test
+			{
+				ResourceName:      resourceTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -127,7 +127,6 @@ func getInspectionCustomControlsResourceHCL(generatedName, description, severity
 resource "%s" "%s" {
 	name           = "tf-acc-test-%s"
 	description    = "%s"
-	action         = "PASS"
 	default_action = "PASS"
 	paranoia_level = "1"
 	protocol_type  = "HTTP"
@@ -158,7 +157,6 @@ resource "%s" "%s" {
 		generatedName,
 
 		description,
-		// action,
 		severity,
 		controlType,
 	)

@@ -46,8 +46,8 @@ func resourcePolicyTimeoutRule() *schema.Resource {
 	}
 }
 
-func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -83,11 +83,11 @@ func resourcePolicyTimeoutRuleCreate(d *schema.ResourceData, m interface{}) erro
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyTimeoutRuleRead(d, m)
+	return resourcePolicyTimeoutRuleRead(d, meta)
 }
 
-func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	policySetID, err := fetchPolicySetIDByType(zClient, "TIMEOUT_POLICY", microTenantID)
@@ -132,8 +132,8 @@ func resourcePolicyTimeoutRuleRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*Client)
+func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*Client)
 	service := client.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -167,11 +167,11 @@ func resourcePolicyTimeoutRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 
-	return resourcePolicyTimeoutRuleRead(d, m)
+	return resourcePolicyTimeoutRuleRead(d, meta)
 }
 
-func resourcePolicyTimeoutRuleDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*Client)
+func resourcePolicyTimeoutRuleDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*Client)
 	service := client.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

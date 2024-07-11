@@ -12,7 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
-func TestAccResourcePolicyIsolationRuleBasic(t *testing.T) {
+func TestAccResourcePolicyIsolationRule_Basic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyIsolationRule)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test

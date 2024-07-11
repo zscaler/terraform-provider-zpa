@@ -87,8 +87,8 @@ func resourcePolicyAccessRule() *schema.Resource {
 	}
 }
 
-func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -126,11 +126,11 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyAccessRead(d, m)
+	return resourcePolicyAccessRead(d, meta)
 }
 
-func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	policySetID, err := fetchPolicySetIDByType(zClient, "ACCESS_POLICY", microTenantID)
@@ -175,8 +175,8 @@ func resourcePolicyAccessRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -210,11 +210,11 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	return resourcePolicyAccessRead(d, m)
+	return resourcePolicyAccessRead(d, meta)
 }
 
-func resourcePolicyAccessDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyAccessDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetController
 
 	microTenantID := GetString(d.Get("microtenant_id"))

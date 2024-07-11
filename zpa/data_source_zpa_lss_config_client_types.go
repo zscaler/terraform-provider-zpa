@@ -41,8 +41,8 @@ func dataSourceLSSClientTypes() *schema.Resource {
 	}
 }
 
-func dataSourceLSSClientTypesRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceLSSClientTypesRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.LSSConfigController
 
 	log.Printf("[INFO] Getting data for global policy set\n")

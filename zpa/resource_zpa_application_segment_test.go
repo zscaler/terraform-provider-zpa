@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 )
 
-func TestAccResourceApplicationSegmentBasic(t *testing.T) {
+func TestAccResourceApplicationSegment_Basic(t *testing.T) {
 	var appSegment applicationsegment.ApplicationSegmentResource
 	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegment)
 	rPort := acctest.RandIntRange(1000, 9999)

@@ -19,8 +19,8 @@ func resourcePRAPrivilegedApprovalController() *schema.Resource {
 		Update: resourcePRAPrivilegedApprovalControllerUpdate,
 		Delete: resourcePRAPrivilegedApprovalControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-				client := m.(*Client)
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
 				service := client.PRAApproval
 
 				microTenantID := GetString(d.Get("microtenant_id"))
@@ -55,7 +55,6 @@ func resourcePRAPrivilegedApprovalController() *schema.Resource {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
-				MaxItems:    1,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "The email address of the user that you are assigning the privileged approval to",
 			},
@@ -158,8 +157,8 @@ func resourcePRAPrivilegedApprovalController() *schema.Resource {
 	}
 }
 
-func resourcePRAPrivilegedApprovalControllerCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAPrivilegedApprovalControllerCreate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAApproval
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -199,11 +198,11 @@ func resourcePRAPrivilegedApprovalControllerCreate(d *schema.ResourceData, m int
 	log.Printf("[INFO] Created privileged approval request. ID: %v\n", praApproval.ID)
 
 	d.SetId(praApproval.ID)
-	return resourcePRAPrivilegedApprovalControllerRead(d, m)
+	return resourcePRAPrivilegedApprovalControllerRead(d, meta)
 }
 
-func resourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAApproval
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -227,6 +226,20 @@ func resourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, m inter
 	_ = d.Set("email_ids", resp.EmailIDs)
 	_ = d.Set("status", resp.Status)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
+
+	// Use the existing utility function to convert epoch to RFC1123
+	startTimeStr, err := epochToRFC1123(resp.StartTime, false) // Adjust second parameter as needed
+	if err != nil {
+		return err
+	}
+	endTimeStr, err := epochToRFC1123(resp.EndTime, false) // Adjust second parameter as needed
+	if err != nil {
+		return err
+	}
+
+	_ = d.Set("start_time", startTimeStr)
+	_ = d.Set("end_time", endTimeStr)
+
 	_ = d.Set("applications", flattenPRAApplicationsSimple(resp.Applications))
 
 	_ = d.Set("working_hours", flattenWorkingHours(resp.WorkingHours))
@@ -234,8 +247,8 @@ func resourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourcePRAPrivilegedApprovalControllerUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAPrivilegedApprovalControllerUpdate(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAApproval
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -279,11 +292,11 @@ func resourcePRAPrivilegedApprovalControllerUpdate(d *schema.ResourceData, m int
 		return err
 	}
 
-	return resourcePRAPrivilegedApprovalControllerRead(d, m)
+	return resourcePRAPrivilegedApprovalControllerRead(d, meta)
 }
 
-func resourcePRAPrivilegedApprovalControllerDelete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePRAPrivilegedApprovalControllerDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PRAApproval
 
 	microTenantID := GetString(d.Get("microtenant_id"))

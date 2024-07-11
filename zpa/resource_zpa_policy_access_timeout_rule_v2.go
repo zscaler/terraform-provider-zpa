@@ -148,8 +148,8 @@ func resourcePolicyTimeoutRuleV2() *schema.Resource {
 	}
 }
 
-func resourcePolicyTimeoutRuleV2Create(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyTimeoutRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -195,11 +195,11 @@ func resourcePolicyTimeoutRuleV2Create(d *schema.ResourceData, m interface{}) er
 	}
 	d.SetId(policysetcontrollerv2.ID)
 
-	return resourcePolicyTimeoutRuleV2Read(d, m)
+	return resourcePolicyTimeoutRuleV2Read(d, meta)
 }
 
-func resourcePolicyTimeoutRuleV2Read(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyTimeoutRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -240,8 +240,8 @@ func resourcePolicyTimeoutRuleV2Read(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourcePolicyTimeoutRuleV2Update(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyTimeoutRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -296,11 +296,11 @@ func resourcePolicyTimeoutRuleV2Update(d *schema.ResourceData, m interface{}) er
 		return err
 	}
 
-	return resourcePolicyTimeoutRuleV2Read(d, m)
+	return resourcePolicyTimeoutRuleV2Read(d, meta)
 }
 
-func resourcePolicyTimeoutRuleV2Delete(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func resourcePolicyTimeoutRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
 
 	// Assume "TIMEOUT_POLICY" is the policy type for this resource. Adjust as needed.

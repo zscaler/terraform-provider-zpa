@@ -600,7 +600,7 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 
 /*
 	func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
-		return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 			service := m.(*Client).policysetcontroller.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 			id := d.Id()
@@ -623,8 +623,8 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	}
 */
 func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
-	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-		client := m.(*Client)
+	return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+		client := meta.(*Client)
 		service := client.PolicySetController
 
 		microTenantID := GetString(d.Get("microtenant_id"))
@@ -652,7 +652,7 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 
 /*
 	func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
-		return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 			service := m.(*Client).policysetcontrollerv2.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 			id := d.Id()
@@ -675,8 +675,8 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 	}
 */
 func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
-	return func(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-		client := m.(*Client)
+	return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+		client := meta.(*Client)
 		service := client.PolicySetControllerV2
 
 		microTenantID := GetString(d.Get("microtenant_id"))
@@ -1173,17 +1173,6 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 	return nil
 }
 
-/*
-func fetchPolicySetIDByType(client *Client, policyType string, microTenantID string) (string, error) {
-	service := client.policysetcontrollerv2.WithMicroTenant(microTenantID)
-	globalPolicySet, _, err := service.GetByPolicyType(policyType)
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch policy set ID for type '%s': %v", policyType, err)
-	}
-	return globalPolicySet.ID, nil
-}
-*/
-
 func fetchPolicySetIDByType(client *Client, policyType string, microTenantID string) (string, error) {
 	service := client.PolicySetControllerV2
 
@@ -1251,4 +1240,118 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 		v2Request.Conditions = append(v2Request.Conditions, newCondition)
 	}
 	return v2Request
+}
+
+// ////////// Dedicated Functions used by the ZPA Inspection Profile ////////////
+func expandPredefinedControls(d *schema.ResourceData) []common.CustomCommonControls {
+	if v, ok := d.GetOk("predefined_controls"); ok {
+		predefinedControlsSet := v.(*schema.Set)
+		var predefinedControls []common.CustomCommonControls
+
+		for _, v := range predefinedControlsSet.List() {
+			controlMap := v.(map[string]interface{})
+
+			control := common.CustomCommonControls{
+				ID:          controlMap["id"].(string),
+				Action:      controlMap["action"].(string),
+				ActionValue: controlMap["action_value"].(string),
+			}
+			predefinedControls = append(predefinedControls, control)
+		}
+
+		return predefinedControls
+	}
+
+	return nil
+}
+
+func expandPredefinedAPIControls(d *schema.ResourceData) []common.CustomCommonControls {
+	if v, ok := d.GetOk("predefined_api_controls"); ok {
+		predefinedControlsSet := v.(*schema.Set)
+		var predefinedControls []common.CustomCommonControls
+
+		for _, v := range predefinedControlsSet.List() {
+			controlMap := v.(map[string]interface{})
+
+			control := common.CustomCommonControls{
+				ID:          controlMap["id"].(string),
+				Action:      controlMap["action"].(string),
+				ActionValue: controlMap["action_value"].(string),
+			}
+			predefinedControls = append(predefinedControls, control)
+		}
+
+		return predefinedControls
+	}
+
+	return nil
+}
+
+func flattenAssociatedInspectionProfileNames(associatedInspectionProfileNames []common.AssociatedProfileNames) []interface{} {
+	rule := make([]interface{}, len(associatedInspectionProfileNames))
+	for i, val := range associatedInspectionProfileNames {
+		rule[i] = map[string]interface{}{
+			"id":   val.ID,
+			"name": val.Name,
+		}
+	}
+	return rule
+}
+
+func flattenPredefinedControlsSimple(predControl []common.CustomCommonControls) []interface{} {
+	if len(predControl) == 0 {
+		return nil
+	}
+
+	predControls := make([]interface{}, len(predControl))
+	for i, control := range predControl {
+		controlMap := make(map[string]interface{})
+		controlMap["id"] = control.ID
+		controlMap["action"] = control.Action
+		controlMap["action_value"] = control.ActionValue
+		predControls[i] = controlMap
+	}
+	return predControls
+}
+
+func flattenPredefinedApiControlsSimple(predControl []common.CustomCommonControls) []interface{} {
+	if len(predControl) == 0 {
+		return nil
+	}
+
+	predControls := make([]interface{}, len(predControl))
+	for i, control := range predControl {
+		controlMap := make(map[string]interface{})
+		controlMap["id"] = control.ID
+		controlMap["action"] = control.Action
+		controlMap["action_value"] = control.ActionValue
+		predControls[i] = controlMap
+	}
+	return predControls
+}
+
+func flattenPredefinedControls(predControl []common.CustomCommonControls) []interface{} {
+	predControls := make([]interface{}, len(predControl))
+	for i, predControl := range predControl {
+		predControls[i] = map[string]interface{}{
+			"id":                                  predControl.ID,
+			"action":                              predControl.Action,
+			"action_value":                        predControl.ActionValue,
+			"attachment":                          predControl.Attachment,
+			"control_group":                       predControl.ControlGroup,
+			"control_number":                      predControl.ControlNumber,
+			"creation_time":                       predControl.CreationTime,
+			"default_action":                      predControl.DefaultAction,
+			"default_action_value":                predControl.DefaultActionValue,
+			"description":                         predControl.Description,
+			"modified_by":                         predControl.ModifiedBy,
+			"modified_time":                       predControl.ModifiedTime,
+			"name":                                predControl.Name,
+			"paranoia_level":                      predControl.ParanoiaLevel,
+			"severity":                            predControl.Severity,
+			"version":                             predControl.Version,
+			"associated_inspection_profile_names": flattenAssociatedInspectionProfileNames(predControl.AssociatedInspectionProfileNames),
+		}
+	}
+	return predControls
 }

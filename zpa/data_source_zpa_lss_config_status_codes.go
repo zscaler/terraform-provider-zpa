@@ -60,8 +60,8 @@ func toMapString(v map[string]interface{}) map[string]string {
 	return result
 }
 
-func dataSourceLSSStatusCodesRead(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
+func dataSourceLSSStatusCodesRead(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
 	service := zClient.LSSConfigController
 
 	log.Printf("[INFO] Getting data for LSS Status Codes set\n")
