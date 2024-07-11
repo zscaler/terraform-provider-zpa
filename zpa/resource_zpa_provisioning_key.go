@@ -117,7 +117,7 @@ func resourceProvisioningKey() *schema.Resource {
 			"provisioning_key": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Sensitive:   true,
+				Optional:    true,
 				Description: "read only field. Ignored in PUT/POST calls.",
 			},
 			"association_type": {

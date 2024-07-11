@@ -64,6 +64,11 @@ func resourceInspectionProfile() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "",
+				ValidateFunc: validation.StringInSlice([]string{
+					"COMMON",
+					"NONE",
+					"SPECIFIC",
+				}, false),
 			},
 			"associate_all_controls": {
 				Type:     schema.TypeBool,
@@ -126,99 +131,13 @@ func resourceInspectionProfile() *schema.Resource {
 				Description: "The actions of the predefined, custom, or override controls",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			// "global_control_actions_obj": {
-			// 	Type:        schema.TypeList,
-			// 	Optional:    true,
-			// 	MaxItems:    1,
-			// 	Description: "The actions object for the predefined, custom, or override controls",
-			// 	Elem: &schema.Resource{
-			// 		Schema: map[string]*schema.Schema{
-			// 			"predefined": {
-			// 				Type:     schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Resource{
-			// 					Schema: map[string]*schema.Schema{
-			// 						"action": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 						"action_value": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 					},
-			// 				},
-			// 			},
-			// 			"custom": {
-			// 				Type:     schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Resource{
-			// 					Schema: map[string]*schema.Schema{
-			// 						"action": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 						"action_value": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 					},
-			// 				},
-			// 			},
-			// 			"websocket": {
-			// 				Type:     schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Resource{
-			// 					Schema: map[string]*schema.Schema{
-			// 						"action": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 						"action_value": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 					},
-			// 				},
-			// 			},
-			// 			"threatlabz": {
-			// 				Type:     schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Resource{
-			// 					Schema: map[string]*schema.Schema{
-			// 						"action": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 						"action_value": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 					},
-			// 				},
-			// 			},
-			// 			"api": {
-			// 				Type:     schema.TypeList,
-			// 				Optional: true,
-			// 				Elem: &schema.Resource{
-			// 					Schema: map[string]*schema.Schema{
-			// 						"action": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 						"action_value": {
-			// 							Type:     schema.TypeString,
-			// 							Optional: true,
-			// 						},
-			// 					},
-			// 				},
-			// 			},
-			// 		},
-			// 	},
-			// },
-			"incarnation_number": {
-				Type:     schema.TypeString,
+			"common_global_override_actions_config": {
+				Type:     schema.TypeMap,
 				Optional: true,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"paranoia_level": {
 				Type:        schema.TypeString,
@@ -226,6 +145,27 @@ func resourceInspectionProfile() *schema.Resource {
 				Description: "The OWASP Predefined Paranoia Level",
 			},
 			"predefined_controls": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The predefined controls",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"action": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"action_value": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"predefined_api_controls": {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				Description: "The predefined controls",
@@ -366,7 +306,9 @@ func resourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) err
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("api_profile", resp.APIProfile)
+	_ = d.Set("override_action", resp.OverrideAction)
 	_ = d.Set("associate_all_controls", d.Get("associate_all_controls"))
+	_ = d.Set("common_global_override_actions_config", resp.CommonGlobalOverrideActionsConfig)
 	_ = d.Set("global_control_actions", resp.GlobalControlActions)
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
 
@@ -389,6 +331,10 @@ func resourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) err
 
 	if err := d.Set("predefined_controls", flattenPredefinedControlsSimple(resp.PredefinedControls)); err != nil {
 		return fmt.Errorf("error setting predefined_controls: %s", err)
+	}
+
+	if err := d.Set("predefined_api_controls", flattenPredefinedApiControlsSimple(resp.PredefinedAPIControls)); err != nil {
+		return fmt.Errorf("error setting predefined_api_controls: %s", err)
 	}
 
 	if resp.WebSocketControls != nil {
@@ -454,20 +400,21 @@ func resourceInspectionProfileDelete(d *schema.ResourceData, meta interface{}) e
 
 func expandInspectionProfile(d *schema.ResourceData) inspection_profile.InspectionProfile {
 	inspection_profile := inspection_profile.InspectionProfile{
-		ID:                   d.Id(),
-		Name:                 d.Get("name").(string),
-		Description:          d.Get("description").(string),
-		APIProfile:           d.Get("api_profile").(bool),
-		GlobalControlActions: SetToStringList(d, "global_control_actions"),
-		// GlobalControlActionsObj:   expandGlobalControlActionsObj(d),
-		IncarnationNumber:         d.Get("incarnation_number").(string),
-		ParanoiaLevel:             d.Get("paranoia_level").(string),
-		PredefinedControlsVersion: d.Get("predefined_controls_version").(string),
-		ControlInfoResource:       expandControlsInfo(d),
-		CustomControls:            expandCustomControls(d),
-		PredefinedControls:        expandPredefinedControls(d),
-		ThreatLabzControls:        expandThreatLabzControls(d),
-		WebSocketControls:         expandWebSocketControls(d),
+		ID:                                d.Id(),
+		Name:                              d.Get("name").(string),
+		Description:                       d.Get("description").(string),
+		APIProfile:                        d.Get("api_profile").(bool),
+		OverrideAction:                    d.Get("override_action").(string),
+		CommonGlobalOverrideActionsConfig: d.Get("common_global_override_actions_config").(map[string]interface{}),
+		GlobalControlActions:              SetToStringList(d, "global_control_actions"),
+		ParanoiaLevel:                     d.Get("paranoia_level").(string),
+		PredefinedControlsVersion:         d.Get("predefined_controls_version").(string),
+		ControlInfoResource:               expandControlsInfo(d),
+		CustomControls:                    expandCustomControls(d),
+		PredefinedAPIControls:             expandPredefinedAPIControls(d),
+		PredefinedControls:                expandPredefinedControls(d),
+		ThreatLabzControls:                expandThreatLabzControls(d),
+		WebSocketControls:                 expandWebSocketControls(d),
 	}
 
 	if inspection_profile.PredefinedControlsVersion == "" {

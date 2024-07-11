@@ -140,7 +140,7 @@ const (
 	InspectionProfileDescription       = "tf-acc-test"
 	InspectionProfileDescriptionUpdate = "tf-acc-test-updated"
 	InspectionProfileParanoia          = "1"
-	InspectionProfileParanoiaUpdate    = "2"
+	InspectionProfileParanoiaUpdate    = "4"
 )
 
 // Inspection Custom Control
@@ -152,8 +152,7 @@ const (
 	CustomControlSeverity          = "INFO"
 	CustomControlSeverityUpdate    = "CRITICAL"
 	CustomControlControlType       = "RESPONSE"
-	CustomControlAction            = "BLOCK"
-	CustomControlActionUpdate      = "PASS"
+	CustomControlDefaultAction     = "PASS"
 )
 
 // Microtenant

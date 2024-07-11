@@ -1265,6 +1265,28 @@ func expandPredefinedControls(d *schema.ResourceData) []common.CustomCommonContr
 	return nil
 }
 
+func expandPredefinedAPIControls(d *schema.ResourceData) []common.CustomCommonControls {
+	if v, ok := d.GetOk("predefined_api_controls"); ok {
+		predefinedControlsSet := v.(*schema.Set)
+		var predefinedControls []common.CustomCommonControls
+
+		for _, v := range predefinedControlsSet.List() {
+			controlMap := v.(map[string]interface{})
+
+			control := common.CustomCommonControls{
+				ID:          controlMap["id"].(string),
+				Action:      controlMap["action"].(string),
+				ActionValue: controlMap["action_value"].(string),
+			}
+			predefinedControls = append(predefinedControls, control)
+		}
+
+		return predefinedControls
+	}
+
+	return nil
+}
+
 func flattenAssociatedInspectionProfileNames(associatedInspectionProfileNames []common.AssociatedProfileNames) []interface{} {
 	rule := make([]interface{}, len(associatedInspectionProfileNames))
 	for i, val := range associatedInspectionProfileNames {
@@ -1286,7 +1308,23 @@ func flattenPredefinedControlsSimple(predControl []common.CustomCommonControls) 
 		controlMap := make(map[string]interface{})
 		controlMap["id"] = control.ID
 		controlMap["action"] = control.Action
-		controlMap["action_value"] = control.Action
+		controlMap["action_value"] = control.ActionValue
+		predControls[i] = controlMap
+	}
+	return predControls
+}
+
+func flattenPredefinedApiControlsSimple(predControl []common.CustomCommonControls) []interface{} {
+	if len(predControl) == 0 {
+		return nil
+	}
+
+	predControls := make([]interface{}, len(predControl))
+	for i, control := range predControl {
+		controlMap := make(map[string]interface{})
+		controlMap["id"] = control.ID
+		controlMap["action"] = control.Action
+		controlMap["action_value"] = control.ActionValue
 		predControls[i] = controlMap
 	}
 	return predControls

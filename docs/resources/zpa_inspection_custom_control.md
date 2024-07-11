@@ -114,7 +114,7 @@ The following arguments are supported:
 - `version` - (Required) The version of the predefined control, the default is: `OWASP_CRS/3.3.0`
 - `name` - (Required) Name of the custom control
 - `paranoia_level` - (Required) OWASP Predefined Paranoia Level.
-- `protocol_type` - (string) Returned values: `HTTP`, `HTTPS`, `FTP`, `RDP`, `SSH`, `WEBSOCKET`
+- `protocol_type` - (string) Returned values: `HTTP`, `HTTPS`
 - `severity` - (Required) Severity of the control number. Supported values: `CRITICAL`, `ERROR`, `WARNING`, `INFO`
 - `type` - (Required) Rules to be applied to the request or response type
 - `rules` - (Required) Rules of the custom controls applied as conditions `JSON`

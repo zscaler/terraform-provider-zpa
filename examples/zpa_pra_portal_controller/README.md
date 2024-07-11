@@ -1,7 +1,8 @@
-# Retrieve ZPA Cloud Browser Isolation External Profile
 
-This example will show you how to use Terraform to implement a ZPA Cloud Browser Isolation External Profile.
-This example codifies [this API](https://config.private.zscaler.com/swagger-ui.html#/cbi-profile-controller).
+# Create Privileged Remote Access Portal
+
+This example will show you how to create a privileged remote access portal.
+This example codifies [this API](https://help.zscaler.com/zpa/configuring-privileged-portals-using-api).
 
 To run, configure your ZPA provider as described [Here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md)
 

@@ -47,6 +47,11 @@ func dataSourcePRACredentialController() *schema.Resource {
 				Computed:    true,
 				Description: "The username for the login you want to use for the privileged credential",
 			},
+			"password": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The password associated with the username for the login you want to use for the privileged credential",
+			},
 			"creation_time": {
 				Type:        schema.TypeString,
 				Computed:    true,

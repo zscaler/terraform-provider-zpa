@@ -48,10 +48,6 @@ func TestAccResourcePRAPrivilegedApprovalController_Basic(t *testing.T) {
 				ResourceName:      resourceTypeAndName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"start_time",
-					"end_time",
-				},
 			},
 		},
 	})
@@ -105,9 +101,9 @@ func testAccCheckPRAPrivilegedApprovalConfigure(resourceTypeAndName, generatedNa
 	// Generate start_time and end_time dynamically
 	now := time.Now()
 	// Ensure start_time is not more than 1 hour in the past
-	startTime := now.Add(-30 * time.Minute).Format(time.RFC1123Z)
+	startTime := now.Add(-30 * time.Minute).Format(time.RFC1123)
 	// Ensure end_time is no more than 365 days from start_time
-	endTime := now.AddDate(0, 3, 0).Format(time.RFC1123Z) // Example: 3 months from now
+	endTime := now.AddDate(0, 3, 0).Format(time.RFC1123) // Example: 3 months from now
 
 	userEmails := []string{
 		"kathy.kavanagh@bd-hashicorp.com",

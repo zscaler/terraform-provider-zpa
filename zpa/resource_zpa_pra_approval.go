@@ -226,6 +226,20 @@ func resourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, meta in
 	_ = d.Set("email_ids", resp.EmailIDs)
 	_ = d.Set("status", resp.Status)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
+
+	// Use the existing utility function to convert epoch to RFC1123
+	startTimeStr, err := epochToRFC1123(resp.StartTime, false) // Adjust second parameter as needed
+	if err != nil {
+		return err
+	}
+	endTimeStr, err := epochToRFC1123(resp.EndTime, false) // Adjust second parameter as needed
+	if err != nil {
+		return err
+	}
+
+	_ = d.Set("start_time", startTimeStr)
+	_ = d.Set("end_time", endTimeStr)
+
 	_ = d.Set("applications", flattenPRAApplicationsSimple(resp.Applications))
 
 	_ = d.Set("working_hours", flattenWorkingHours(resp.WorkingHours))

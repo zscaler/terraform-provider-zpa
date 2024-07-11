@@ -121,14 +121,12 @@ resource "%s" "%s" {
 		content {
 		id           = predefined_controls.value.id
 		action       = predefined_controls.value.action == "" ? predefined_controls.value.default_action : predefined_controls.value.action
-		action_value = predefined_controls.value.action_value
 		}
 	}
 
 	predefined_controls {
 		id     = data.zpa_inspection_predefined_controls.this.id
 		action = "BLOCK"
-		protocol_type = "HTTP"
 	}
 }
 

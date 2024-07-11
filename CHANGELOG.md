@@ -1,10 +1,10 @@
 # Changelog
 
-## 3.3.25 (July, xx 2024)
+## 3.31.0 (July, 11 2024)
 
 ### Notes
 
-- Release date: **(July, xx 2024)**
+- Release date: **(July, 11 2024)**
 - Supported Terraform version: **v1.x**
 
 ### Deprecations
@@ -14,6 +14,8 @@
 
 ### Bug Fixes
 - [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_application_segment_inspection` drift issues within `common_apps_dto` and `tcp_port_range`
+- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_inspection_custom_controls` drift issues `protocol_type` attribute
+- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_inspection_custom_controls`import issues.
 
 ### Enhancements
 - [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Added new attributes to `zpa_cloud_browser_isolation_external_profile`:

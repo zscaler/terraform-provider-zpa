@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
 )
@@ -28,12 +27,12 @@ func resourceInspectionCustomControls() *schema.Resource {
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
 				if parseIDErr == nil {
 					// assume if the passed value is an int
-					d.Set("custom_id", id)
+					d.Set("id", id)
 				} else {
 					resp, _, err := inspection_custom_controls.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
-						d.Set("custom_id", resp.ID)
+						d.Set("id", resp.ID)
 					} else {
 						return []*schema.ResourceData{d}, err
 					}
@@ -50,51 +49,39 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"action": {
+			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "The performed action",
-				ValidateFunc: validation.StringInSlice([]string{
-					"PASS",
-					"BLOCK",
-					"REDIRECT",
-				}, false),
+				Description: "Description of the custom control",
 			},
-			"action_value": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"associated_inspection_profile_names": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
-				Description: "Name of the inspection profile",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-						},
-					},
-				},
-			},
-			"control_number": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"control_rule_json": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The control rule in JSON format that has the conditions and type of control for the inspection control",
-			},
+			// "action": {
+			// 	Type:        schema.TypeString,
+			// 	Optional:    true,
+			// 	Computed:    true,
+			// 	Description: "The performed action",
+			// 	ValidateFunc: validation.StringInSlice([]string{
+			// 		"PASS",
+			// 		"BLOCK",
+			// 		"REDIRECT",
+			// 	}, false),
+			// },
+			// "action_value": {
+			// 	Type:     schema.TypeString,
+			// 	Optional: true,
+			// 	Computed: true,
+			// },
+			// "control_number": {
+			// 	Type:     schema.TypeString,
+			// 	Optional: true,
+			// 	Computed: true,
+			// },
+			// "control_rule_json": {
+			// 	Type:        schema.TypeString,
+			// 	Optional:    true,
+			// 	Computed:    true,
+			// 	Description: "The control rule in JSON format that has the conditions and type of control for the inspection control",
+			// },
 			"control_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -102,9 +89,10 @@ func resourceInspectionCustomControls() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"WEBSOCKET_PREDEFINED",
 					"WEBSOCKET_CUSTOM",
-					"ZSCALER",
+					"THREATLABZ",
 					"CUSTOM",
 					"PREDEFINED",
+					"API_PREDEFINED",
 				}, false),
 			},
 			"default_action": {
@@ -123,12 +111,6 @@ func resourceInspectionCustomControls() *schema.Resource {
 				Computed:    true,
 				Description: "This is used to provide the redirect URL if the default action is set to REDIRECT",
 			},
-			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "Description of the custom control",
-			},
 			"paranoia_level": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -146,6 +128,10 @@ func resourceInspectionCustomControls() *schema.Resource {
 					"RDP",
 					"SSH",
 					"WEBSOCKET",
+					"VNC",
+					"NONE",
+					"AUTO",
+					"DYNAMIC",
 				}, false),
 			},
 			"rules": {
@@ -178,13 +164,15 @@ func resourceInspectionCustomControls() *schema.Resource {
 								"REQUEST_BODY",
 								"RESPONSE_HEADERS",
 								"RESPONSE_BODY",
+								"WS_MAX_PAYLOAD_SIZE",
+								"WS_MAX_FRAGMENT_PER_MESSAGE",
 							}, false),
 						},
 						"conditions": {
 							Type:     schema.TypeList,
 							Optional: true,
 							Computed: true,
-							MaxItems: 1,
+							// MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"lhs": {
@@ -270,9 +258,9 @@ func updateInspectionProfile(zClient *Client, customControlID string, req *inspe
 		updateProfile := &inspection_profile.InspectionProfile{
 			CustomControls: []inspection_profile.InspectionCustomControl{
 				{
-					ID:                 obj.ID,
-					Action:             req.Action,
-					ActionValue:        req.ActionValue,
+					ID: obj.ID,
+					// Action:             req.Action,
+					// ActionValue:        req.ActionValue,
 					DefaultAction:      req.DefaultAction,
 					DefaultActionValue: req.DefaultActionValue,
 				},
@@ -324,15 +312,13 @@ func resourceInspectionCustomControlsRead(d *schema.ResourceData, meta interface
 	}
 	log.Printf("[INFO] Getting custom inspection control:\n%+v\n", resp)
 	d.SetId(resp.ID)
-	_ = d.Set("action", resp.Action)
-	_ = d.Set("action_value", resp.ActionValue)
-	_ = d.Set("control_number", resp.ControlNumber)
-	_ = d.Set("control_rule_json", resp.ControlRuleJson)
+	_ = d.Set("name", resp.Name)
+	_ = d.Set("description", resp.Description)
+	// _ = d.Set("control_number", resp.ControlNumber)
 	_ = d.Set("default_action", resp.DefaultAction)
 	_ = d.Set("default_action_value", resp.DefaultActionValue)
-	_ = d.Set("description", resp.Description)
-	_ = d.Set("name", resp.Name)
 	_ = d.Set("paranoia_level", resp.ParanoiaLevel)
+	_ = d.Set("protocol_type", resp.ProtocolType)
 	_ = d.Set("severity", resp.Severity)
 	_ = d.Set("version", resp.Version)
 	_ = d.Set("type", resp.Type)
@@ -404,45 +390,19 @@ func resourceInspectionCustomControlsDelete(d *schema.ResourceData, meta interfa
 
 func expandInspectionCustomControls(d *schema.ResourceData) inspection_custom_controls.InspectionCustomControl {
 	custom_control := inspection_custom_controls.InspectionCustomControl{
-		ID:                               d.Id(),
-		Action:                           d.Get("action").(string),
-		ActionValue:                      d.Get("action_value").(string),
-		ControlNumber:                    d.Get("control_number").(string),
-		ControlRuleJson:                  d.Get("control_rule_json").(string),
-		DefaultAction:                    d.Get("default_action").(string),
-		DefaultActionValue:               d.Get("default_action_value").(string),
-		Description:                      d.Get("description").(string),
-		Name:                             d.Get("name").(string),
-		ParanoiaLevel:                    d.Get("paranoia_level").(string),
-		Severity:                         d.Get("severity").(string),
-		Type:                             d.Get("type").(string),
-		Version:                          d.Get("version").(string),
-		AssociatedInspectionProfileNames: expandAssociatedInspectionProfileNames(d),
-		Rules:                            expandInspectionCustomControlsRules(d),
+		ID:                 d.Id(),
+		DefaultAction:      d.Get("default_action").(string),
+		DefaultActionValue: d.Get("default_action_value").(string),
+		Description:        d.Get("description").(string),
+		Name:               d.Get("name").(string),
+		ParanoiaLevel:      d.Get("paranoia_level").(string),
+		ProtocolType:       d.Get("protocol_type").(string),
+		Severity:           d.Get("severity").(string),
+		Type:               d.Get("type").(string),
+		Version:            d.Get("version").(string),
+		Rules:              expandInspectionCustomControlsRules(d),
 	}
 	return custom_control
-}
-
-func expandAssociatedInspectionProfileNames(d *schema.ResourceData) []common.AssociatedProfileNames {
-	inspectionProfileInterface, ok := d.GetOk("associated_inspection_profile_names")
-	if ok {
-		inspectionProfile := inspectionProfileInterface.(*schema.Set)
-		log.Printf("[INFO] associated inspection profile names data: %+v\n", inspectionProfile)
-		var inspectionProfiles []common.AssociatedProfileNames
-		for _, inspectionProfile := range inspectionProfile.List() {
-			inspectionProfile, ok := inspectionProfile.(map[string]interface{})
-			if ok {
-				for _, id := range inspectionProfile["id"].(*schema.Set).List() {
-					inspectionProfiles = append(inspectionProfiles, common.AssociatedProfileNames{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return inspectionProfiles
-	}
-
-	return []common.AssociatedProfileNames{}
 }
 
 func expandInspectionCustomControlsRules(d *schema.ResourceData) []inspection_custom_controls.Rules {
