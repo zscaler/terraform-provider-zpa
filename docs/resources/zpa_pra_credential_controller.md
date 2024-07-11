@@ -29,7 +29,7 @@ resource "zpa_pra_credential_controller" "this" {
 ```
 
 ######### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE #########  
-######### ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS #########
+######### ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ##########
 ```terraform
 # Creates Credential of Type "SSH_KEY"
 resource "zpa_pra_credential_controller" "this" {
