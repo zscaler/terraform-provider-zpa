@@ -24,17 +24,17 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - Supported Terraform version: **v1.x**
 
 ### Deprecations
-- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) The following attributes are not deprecated:
+- [PR #471](https://github.com/zscaler/terraform-provider-zpa/pull/468) The following attributes are not deprecated:
   - ``zpa_application_segment_browser_access``: `cname`, `hidden`, `local_name`, `path`
   - ``zpa_application_segment_pra``: `cname`, `segment_group_name`
 
 ### Bug Fixes
-- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_application_segment_inspection` drift issues within `common_apps_dto` and `tcp_port_range`
-- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_inspection_custom_controls` drift issues `protocol_type` attribute
-- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_inspection_custom_controls`import issues.
+- [PR #471](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_application_segment_inspection` drift issues within `common_apps_dto` and `tcp_port_range`
+- [PR #471](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_inspection_custom_controls` drift issues `protocol_type` attribute
+- [PR #471](https://github.com/zscaler/terraform-provider-zpa/pull/468) Fixed `zpa_inspection_custom_controls`import issues.
 
 ### Enhancements
-- [PR #468](https://github.com/zscaler/terraform-provider-zpa/pull/468) Added new attributes to `zpa_cloud_browser_isolation_external_profile`:
+- [PR #471](https://github.com/zscaler/terraform-provider-zpa/pull/468) Added new attributes to `zpa_cloud_browser_isolation_external_profile`:
   - `flattened_pdf` - Enable to allow downloading of flattened files from isolation container to your local computer.
 
     **NOTE** `flattened_pdf` must be set to `false` when `upload_download` is set to `all`
@@ -67,7 +67,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - `debug_mode`- Enable to allow starting isolation sessions in debug mode to collect troubleshooting information.
   - `allowed:` - Enable to allow starting isolation sessions in debug mode to collect troubleshooting information.
   - `file_password:` - Set an optional password to debug files when this mode is enabled.
-  
+
 ## 3.3.25 (July, 2 2024)
 
 ### Notes
