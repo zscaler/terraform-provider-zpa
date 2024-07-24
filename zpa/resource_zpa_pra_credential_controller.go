@@ -118,6 +118,8 @@ func resourcePRACredentialControllerCreate(d *schema.ResourceData, meta interfac
 	}
 
 	req := expandPRACredentialController(d)
+
+	sanitizeFields(&req)
 	log.Printf("[INFO] Creating credential controller with request\n%+v\n", req)
 
 	credController, _, err := pracredential.Create(service, &req)
@@ -172,6 +174,7 @@ func resourcePRACredentialControllerUpdate(d *schema.ResourceData, meta interfac
 
 	id := d.Id()
 	log.Printf("[INFO] Updating credential controller ID: %v\n", id)
+
 	req := expandPRACredentialController(d)
 
 	if _, _, err := pracredential.Get(service, id); err != nil {

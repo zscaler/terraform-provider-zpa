@@ -39,8 +39,8 @@ func testAccDataSourceApplicationSegmentByTypeCheck(application_type string) res
 func testAccCheckDataSourceApplicationSegmentByTypeConfig_basic(resourceNameSuffix, domainNameSuffix string) string {
 	return fmt.Sprintf(`
 resource "zpa_segment_group" "this" {
-  name                   = "tf-acc-test-%s"
-  description            = "tf-acc-test-%s"
+  name                   = "tf-acc-test-01"
+  description            = "tf-acc-test-01"
   enabled                = true
 }
 
@@ -52,12 +52,12 @@ resource "zpa_application_segment_pra" "this" {
   bypass_type      = "NEVER"
   is_cname_enabled = true
   tcp_port_ranges  = ["2222", "2222"]
-  domain_names     = ["tests-%s.example.com"]
+  domain_names     = ["ssh_pra01.example.com"]
   segment_group_id = zpa_segment_group.this.id
   common_apps_dto {
     apps_config {
-      name                 = "%s-app"
-      domain               = "tests-%s.example.com"
+      name                 = "ssh_pra01.example.com"
+      domain               = "ssh_pra01.example.com"
       application_protocol = "SSH"
       application_port     = "2222"
       enabled = true
@@ -78,12 +78,12 @@ resource "zpa_application_segment_inspection" "this" {
   bypass_type      = "NEVER"
   is_cname_enabled = true
   tcp_port_ranges  = ["4444", "4444"]
-  domain_names     = ["tests-%s.example.com"]
+  domain_names     = ["web01.example.com"]
   segment_group_id = zpa_segment_group.this.id
   common_apps_dto {
     apps_config {
-      name                 = "%s-app"
-      domain               = "tests-%s.example.com"
+      name                 = "web01.example.com"
+      domain               = "web01.example.com"
       application_protocol = "HTTPS"
       application_port     = "4444"
       certificate_id       = data.zpa_ba_certificate.jenkins.id
@@ -100,13 +100,13 @@ resource "zpa_application_segment_browser_access" "this" {
     health_reporting          = "ON_ACCESS"
     bypass_type               = "NEVER"
     tcp_port_ranges           = ["4445", "4445"]
-    domain_names              = ["tests-%s.example.com"]
+    domain_names              = ["web02.example.com"]
     segment_group_id          = zpa_segment_group.this.id
 
     clientless_apps {
-        name                  = "%s-app"
+        name                  = "web02.example.com"
 		    enabled               = true
-		    domain                = "tests-%s.example.com"
+		    domain                = "web02.example.com"
         application_protocol  = "HTTPS"
         application_port      = "4445"
         certificate_id        = data.zpa_ba_certificate.jenkins.id
@@ -128,8 +128,7 @@ data "zpa_application_segment_by_type" "ba" {
 	application_type = "BROWSER_ACCESS"
 	depends_on = [zpa_segment_group.this, zpa_application_segment_browser_access.this]
   }
-`, resourceNameSuffix, resourceNameSuffix, resourceNameSuffix, resourceNameSuffix, domainNameSuffix, resourceNameSuffix, domainNameSuffix,
-		resourceNameSuffix, resourceNameSuffix, domainNameSuffix, resourceNameSuffix, domainNameSuffix,
-		resourceNameSuffix, resourceNameSuffix, domainNameSuffix, resourceNameSuffix, domainNameSuffix,
+`, resourceNameSuffix, resourceNameSuffix, domainNameSuffix, resourceNameSuffix, domainNameSuffix,
+		resourceNameSuffix,
 	)
 }

@@ -148,7 +148,7 @@ resource "%s" "%s" {
 	tcp_keep_alive = "1"
 	common_apps_dto {
 		apps_config {
-		  name                 = "testAcc_ssh_pra"
+		  name                 = "ssh_pra.example.com"
 		  domain               = "ssh_pra.example.com"
 		  application_protocol = "SSH"
 		  application_port     = "22"
@@ -156,7 +156,7 @@ resource "%s" "%s" {
 		  app_types = ["SECURE_REMOTE_ACCESS"]
 		}
 		  apps_config {
-		  name                 = "testAcc_rdp_pra"
+		  name                 = "rdp_pra.example.com"
 		  domain               = "rdp_pra.example.com"
 		  application_protocol = "RDP"
 		  connection_security  = "ANY"

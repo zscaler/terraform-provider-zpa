@@ -137,8 +137,8 @@ func getPolicyCredentialAccessRuleHCL(rName, generatedName, desc, praCredentialT
 	return fmt.Sprintf(`
 
 resource "zpa_application_segment_pra" "this" {
-	name             = "tf-acc-test-%s"
-	description      = "tf-acc-test-%s"
+	name             = "tf-acc-test"
+	description      = "tf-acc-test"
 	enabled          = true
 	health_reporting = "ON_ACCESS"
 	bypass_type      = "NEVER"
@@ -148,7 +148,7 @@ resource "zpa_application_segment_pra" "this" {
 	segment_group_id = zpa_segment_group.this.id
 	common_apps_dto {
 		apps_config {
-			name                 = "rdp_pra3392"
+			name                 = "rdp_pra3392.example.com"
 			domain               = "rdp_pra3392.example.com"
 			application_protocol = "RDP"
 			connection_security  = "ANY"
@@ -157,7 +157,7 @@ resource "zpa_application_segment_pra" "this" {
 			app_types            = ["SECURE_REMOTE_ACCESS"]
 		}
 		apps_config {
-			name                 = "ssh_pra3223"
+			name                 = "ssh_pra3223.example.com"
 			domain               = "ssh_pra3223.example.com"
 			application_protocol = "SSH"
 			application_port     = "3223"
@@ -173,12 +173,10 @@ resource "zpa_segment_group" "this" {
 	enabled     = true
 }
 
-locals {
-	pra_application_ids = {
-	  for app_dto in flatten([for common_apps in zpa_application_segment_pra.this.common_apps_dto : common_apps.apps_config]) :
-	  app_dto.name => app_dto.id
-	}
-	pra_application_id_rdp_pra3392 = lookup(local.pra_application_ids, "rdp_pra3392", "")
+data "zpa_application_segment_by_type" "rdp_pra3392" {
+    application_type = "SECURE_REMOTE_ACCESS"
+    name = "rdp_pra3392"
+	depends_on = [zpa_application_segment_pra.this]
 }
 
 data "zpa_ba_certificate" "this1" {
@@ -200,7 +198,7 @@ resource "zpa_pra_console_controller" "rdp_pra" {
 	description = "Created with Terraform"
 	enabled     = true
 	pra_application {
-		id = local.pra_application_id_rdp_pra3392
+		id = data.zpa_application_segment_by_type.rdp_pra3392.id
 	}
 	pra_portals {
 		id = [ zpa_pra_portal_controller.this.id ]
@@ -241,12 +239,11 @@ resource "%s" "%s" {
 			values         = [zpa_pra_console_controller.rdp_pra.id]
 			}
 		}
+	depends_on = [zpa_pra_console_controller.rdp_pra, zpa_pra_portal_controller.this]
 }
 
 `,
 		// PRA Application Segment and Segment Group name generation
-		generatedName,
-		generatedName,
 		generatedName,
 		generatedName,
 

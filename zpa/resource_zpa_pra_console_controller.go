@@ -93,7 +93,6 @@ func resourcePRAConsoleController() *schema.Resource {
 			"pra_application": {
 				Type:     schema.TypeList,
 				Required: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {

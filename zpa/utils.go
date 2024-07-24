@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -316,4 +317,29 @@ func detachSegmentGroup(client *Client, segmentID, segmentGroupID string) error 
 	segGroup.Applications = adaptedApplications
 	_, err = segmentgroup.Update(service, segmentGroupID, segGroup)
 	return err
+}
+
+var sensitiveFieldNames = []string{"password", "passphrase", "private_key", "debugMode.filePassword"}
+
+func sanitizeFields(input interface{}) {
+	val := reflect.ValueOf(input).Elem()
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		if isSensitiveField(field.Name) {
+			if val.Field(i).CanSet() && val.Field(i).Kind() == reflect.String {
+				val.Field(i).SetString("***REDACTED***")
+			}
+		}
+	}
+}
+
+func isSensitiveField(fieldName string) bool {
+	fieldName = strings.ToLower(fieldName)
+	for _, sensitiveField := range sensitiveFieldNames {
+		if strings.Contains(fieldName, sensitiveField) {
+			return true
+		}
+	}
+	return false
 }

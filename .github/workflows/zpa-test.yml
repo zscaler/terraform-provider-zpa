@@ -249,7 +249,7 @@ jobs:
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
   zpa-prod-tenants:
-    needs: [zpa-beta-tenants]
+    # needs: [zpa-beta-tenants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
