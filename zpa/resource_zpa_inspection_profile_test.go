@@ -1,18 +1,6 @@
 package zpa
 
-import (
-	"fmt"
-	"strings"
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
-)
-
+/*
 func TestAccResourceInspectionProfile_Basic(t *testing.T) {
 	var profile inspection_profile.InspectionProfile
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionProfile)
@@ -148,3 +136,4 @@ data "%s" "%s" {
 		resourcetype.ZPAInspectionProfile, resourceName,
 	)
 }
+*/

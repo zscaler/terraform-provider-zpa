@@ -53,7 +53,7 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPAInspectionCustomControl, sweepTestInspectionCustomControl)
 		setupSweeper(resourcetype.ZPAInspectionProfile, sweepTestInspectionProfile)
 		setupSweeper(resourcetype.ZPALSSController, sweepTestLSSConfigController)
-		setupSweeper(resourcetype.ZPASegmentGroup, sweepTestSegmentGroup)
+		// setupSweeper(resourcetype.ZPASegmentGroup, sweepTestSegmentGroup)
 		setupSweeper(resourcetype.ZPAServerGroup, sweepTestServerGroup)
 		setupSweeper(resourcetype.ZPAServiceEdgeGroup, sweepTestServiceEdgeGroup)
 		setupSweeper(resourcetype.ZPAPolicyAccessRule, sweepTestAccessPolicyRuleByType)

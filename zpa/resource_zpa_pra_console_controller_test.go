@@ -144,7 +144,7 @@ resource "zpa_application_segment_pra" "this" {
 	segment_group_id = zpa_segment_group.this.id
 	common_apps_dto {
 		apps_config {
-		name                 = "rdp_pra3392"
+		name                 = "rdp_pra3392.example.com"
 		domain               = "rdp_pra3392.example.com"
 		application_protocol = "RDP"
 		connection_security  = "ANY"
@@ -153,7 +153,7 @@ resource "zpa_application_segment_pra" "this" {
 		app_types            = ["SECURE_REMOTE_ACCESS"]
 		}
 		apps_config {
-		name                 = "ssh_pra3223"
+		name                 = "ssh_pra3223.example.com"
 		domain               = "ssh_pra3223.example.com"
 		application_protocol = "SSH"
 		application_port     = "3223"
@@ -169,20 +169,18 @@ resource "zpa_segment_group" "this" {
 	enabled     = true
 }
 
-locals {
-	pra_application_ids = {
-	  for app_dto in flatten([for common_apps in zpa_application_segment_pra.this.common_apps_dto : common_apps.apps_config]) :
-	  app_dto.name => app_dto.id
-	}
-	pra_application_id_rdp_pra3392 = lookup(local.pra_application_ids, "rdp_pra3392", "")
-  }
+data "zpa_application_segment_by_type" "rdp_pra3392" {
+    application_type = "SECURE_REMOTE_ACCESS"
+    name = "rdp_pra3392"
+	depends_on = [zpa_application_segment_pra.this]
+}
 
 resource "%s" "%s" {
 	name = "%s"
 	description = "%s"
 	enabled = "%s"
 	pra_application {
-		id = local.pra_application_id_rdp_pra3392
+		id = data.zpa_application_segment_by_type.rdp_pra3392.id
 	}
 	 pra_portals {
 		id = ["${%s.id}"]

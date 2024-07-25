@@ -1,4 +1,4 @@
 package zpa
 
 // ProviderVersion is set at build-time in the release process
-var ProviderVersion = "3.3.25"
+var ProviderVersion = "3.32.0"
