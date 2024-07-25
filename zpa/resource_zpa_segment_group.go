@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
@@ -13,79 +14,45 @@ import (
 )
 
 func resourceSegmentGroup() *schema.Resource {
+	// Generate the schema from the struct using reflection
+	s := common.StructToSchema(segmentgroup.SegmentGroup{})
+
 	return &schema.Resource{
 		Create: resourceSegmentGroupCreate,
 		Read:   resourceSegmentGroupRead,
 		Update: resourceSegmentGroupUpdate,
 		Delete: resourceSegmentGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.SegmentGroup
-
-				microTenantID := GetString(d.Get("microtenant_id"))
-				if microTenantID != "" {
-					service = service.WithMicroTenant(microTenantID)
-				}
-
-				id := d.Id()
-				_, parseIDErr := strconv.ParseInt(id, 10, 64)
-				if parseIDErr == nil {
-					// assume if the passed value is an int
-					_ = d.Set("id", id)
-				} else {
-					resp, _, err := segmentgroup.GetByName(service, id)
-					if err == nil {
-						d.SetId(resp.ID)
-						_ = d.Set("id", resp.ID)
-					} else {
-						return []*schema.ResourceData{d}, err
-					}
-				}
-				return []*schema.ResourceData{d}, nil
-			},
+			State: resourceSegmentGroupImporter,
 		},
-
-		Schema: map[string]*schema.Schema{
-			"applications": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Description: "Description of the app group.",
-				Optional:    true,
-			},
-			"enabled": {
-				Type:        schema.TypeBool,
-				Description: "Whether this app group is enabled or not.",
-				Optional:    true,
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"name": {
-				Type:        schema.TypeString,
-				Description: "Name of the app group.",
-				Required:    true,
-			},
-			"microtenant_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-		},
+		Schema: s,
 	}
+}
+
+func resourceSegmentGroupImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	client := meta.(*Client)
+	service := client.SegmentGroup
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	id := d.Id()
+	_, parseIDErr := strconv.ParseInt(id, 10, 64)
+	if parseIDErr == nil {
+		// assume if the passed value is an int
+		_ = d.Set("id", id)
+	} else {
+		resp, _, err := segmentgroup.GetByName(service, id)
+		if err == nil {
+			d.SetId(resp.ID)
+			_ = d.Set("id", resp.ID)
+		} else {
+			return []*schema.ResourceData{d}, err
+		}
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceSegmentGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -97,16 +64,15 @@ func resourceSegmentGroupCreate(d *schema.ResourceData, meta interface{}) error 
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	req := expandSegmentGroup(d)
-	log.Printf("[INFO] Creating segment group with request\n%+v\n", req)
+	var req segmentgroup.SegmentGroup
+	common.DataToStructPointer(d, &req)
 
 	segmentgroup, _, err := segmentgroup.Create(service, &req)
 	if err != nil {
 		return err
 	}
-	log.Printf("[INFO] Created segment group request. ID: %v\n", segmentgroup)
-
 	d.SetId(segmentgroup.ID)
+
 	return resourceSegmentGroupRead(d, meta)
 }
 
@@ -126,31 +92,17 @@ func resourceSegmentGroupRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-
 		return err
 	}
 
 	log.Printf("[INFO] Getting segment group:\n%+v\n", resp)
 	d.SetId(resp.ID)
-	_ = d.Set("description", resp.Description)
-	_ = d.Set("enabled", resp.Enabled)
-	_ = d.Set("name", resp.Name)
-	_ = d.Set("microtenant_id", resp.MicroTenantID)
-	if err := d.Set("applications", flattenSegmentGroupApplicationsSimple(resp)); err != nil {
-		return fmt.Errorf("failed to read applications %s", err)
+
+	if err := common.StructToData(resp, d); err != nil {
+		return fmt.Errorf("failed to read segment group: %s", err)
 	}
+
 	return nil
-}
-
-func flattenSegmentGroupApplicationsSimple(segmentGroup *segmentgroup.SegmentGroup) []interface{} {
-	segmentGroupApplications := make([]interface{}, len(segmentGroup.Applications))
-	for i, segmentGroupApplication := range segmentGroup.Applications {
-		segmentGroupApplications[i] = map[string]interface{}{
-			"id": segmentGroupApplication.ID,
-		}
-	}
-
-	return segmentGroupApplications
 }
 
 func resourceSegmentGroupUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -164,7 +116,9 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, meta interface{}) error 
 
 	id := d.Id()
 	log.Printf("[INFO] Updating segment group ID: %v\n", id)
-	req := expandSegmentGroup(d)
+
+	var req segmentgroup.SegmentGroup
+	common.DataToStructPointer(d, &req)
 
 	if _, _, err := segmentgroup.Get(service, id); err != nil {
 		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
@@ -178,6 +132,24 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	return resourceSegmentGroupRead(d, meta)
+}
+
+func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error {
+	zClient := meta.(*Client)
+	microTenantID := GetString(d.Get("microtenant_id"))
+	policySetControllerService := zClient.PolicySetController.WithMicroTenant(microTenantID)
+	service := zClient.SegmentGroup.WithMicroTenant(microTenantID)
+
+	log.Printf("[INFO] Deleting segment group ID: %v\n", d.Id())
+
+	detachSegmentGroupFromAllPolicyRules(d.Id(), policySetControllerService)
+
+	if _, err := segmentgroup.Delete(service, d.Id()); err != nil {
+		return err
+	}
+	d.SetId("")
+	log.Printf("[INFO] Segment group deleted")
+	return nil
 }
 
 func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService *services.Service) {
@@ -226,24 +198,7 @@ func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService 
 	}
 }
 
-func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error {
-	zClient := meta.(*Client)
-	microTenantID := GetString(d.Get("microtenant_id"))
-	policySetControllerService := zClient.PolicySetController.WithMicroTenant(microTenantID)
-	service := zClient.SegmentGroup.WithMicroTenant(microTenantID)
-
-	log.Printf("[INFO] Deleting segment group ID: %v\n", d.Id())
-
-	detachSegmentGroupFromAllPolicyRules(d.Id(), policySetControllerService)
-
-	if _, err := segmentgroup.Delete(service, d.Id()); err != nil {
-		return err
-	}
-	d.SetId("")
-	log.Printf("[INFO] segment group deleted")
-	return nil
-}
-
+/*
 func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 	segmentGroup := segmentgroup.SegmentGroup{
 		ID:            d.Id(),
@@ -269,3 +224,15 @@ func expandSegmentGroupApplications(segmentGroupApplication []interface{}) []seg
 
 	return segmentGroupApplications
 }
+
+func flattenSegmentGroupApplicationsSimple(segmentGroup *segmentgroup.SegmentGroup) []interface{} {
+	segmentGroupApplications := make([]interface{}, len(segmentGroup.Applications))
+	for i, segmentGroupApplication := range segmentGroup.Applications {
+		segmentGroupApplications[i] = map[string]interface{}{
+			"id": segmentGroupApplication.ID,
+		}
+	}
+
+	return segmentGroupApplications
+}
+*/

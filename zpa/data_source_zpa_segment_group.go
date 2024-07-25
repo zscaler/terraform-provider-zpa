@@ -158,10 +158,10 @@ func dataSourceSegmentGroup() *schema.Resource {
 					},
 				},
 			},
-			"config_space": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+			// "config_space": {
+			// 	Type:     schema.TypeString,
+			// 	Computed: true,
+			// },
 			"creation_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -233,7 +233,7 @@ func dataSourceSegmentGroupRead(d *schema.ResourceData, meta interface{}) error 
 
 	if resp != nil {
 		d.SetId(resp.ID)
-		_ = d.Set("config_space", resp.ConfigSpace)
+		// _ = d.Set("config_space", resp.ConfigSpace)
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("enabled", resp.Enabled)
@@ -257,28 +257,27 @@ func flattenSegmentGroupApplications(segmentGroup *segmentgroup.SegmentGroup) []
 	segmentGroupApplications := make([]interface{}, len(segmentGroup.Applications))
 	for i, segmentGroupApplication := range segmentGroup.Applications {
 		segmentGroupApplications[i] = map[string]interface{}{
-			"bypass_type":            segmentGroupApplication.BypassType,
-			"config_space":           segmentGroupApplication.ConfigSpace,
-			"creation_time":          segmentGroupApplication.CreationTime,
-			"default_idle_timeout":   segmentGroupApplication.DefaultIdleTimeout,
-			"default_max_age":        segmentGroupApplication.DefaultMaxAge,
-			"description":            segmentGroupApplication.Description,
-			"domain_name":            segmentGroupApplication.DomainName,
-			"domain_names":           segmentGroupApplication.DomainNames,
-			"double_encrypt":         segmentGroupApplication.DoubleEncrypt,
-			"enabled":                segmentGroupApplication.Enabled,
-			"health_check_type":      segmentGroupApplication.HealthCheckType,
-			"ip_anchored":            segmentGroupApplication.IPAnchored,
-			"log_features":           segmentGroupApplication.LogFeatures,
-			"modified_by":            segmentGroupApplication.ModifiedBy,
-			"modified_time":          segmentGroupApplication.ModifiedTime,
-			"name":                   segmentGroupApplication.Name,
-			"id":                     segmentGroupApplication.ID,
-			"passive_health_enabled": segmentGroupApplication.PassiveHealthEnabled,
-			"tcp_port_ranges":        segmentGroupApplication.TCPPortRanges,
-			"tcp_ports_in":           segmentGroupApplication.TCPPortsIn,
-			"tcp_ports_out":          segmentGroupApplication.TCPPortsOut,
-			"server_groups":          flattenAppServerGroup(segmentGroupApplication),
+			// "bypass_type":            segmentGroupApplication.BypassType,
+			// "config_space":           segmentGroupApplication.ConfigSpace,
+			// "creation_time":          segmentGroupApplication.CreationTime,
+			// "default_idle_timeout":   segmentGroupApplication.DefaultIdleTimeout,
+			// "default_max_age":        segmentGroupApplication.DefaultMaxAge,
+			// "description":            segmentGroupApplication.Description,
+			// "domain_name":            segmentGroupApplication.DomainName,
+			// "domain_names":           segmentGroupApplication.DomainNames,
+			// "double_encrypt":         segmentGroupApplication.DoubleEncrypt,
+			// "enabled":                segmentGroupApplication.Enabled,
+			// "health_check_type":      segmentGroupApplication.HealthCheckType,
+			// "ip_anchored":            segmentGroupApplication.IPAnchored,
+			// "modified_by":            segmentGroupApplication.ModifiedBy,
+			// "modified_time":          segmentGroupApplication.ModifiedTime,
+			"name": segmentGroupApplication.Name,
+			"id":   segmentGroupApplication.ID,
+			// "passive_health_enabled": segmentGroupApplication.PassiveHealthEnabled,
+			// "tcp_port_ranges":        segmentGroupApplication.TCPPortRanges,
+			// "tcp_ports_in":           segmentGroupApplication.TCPPortsIn,
+			// "tcp_ports_out":          segmentGroupApplication.TCPPortsOut,
+			"server_groups": flattenAppServerGroup(segmentGroupApplication),
 		}
 	}
 
