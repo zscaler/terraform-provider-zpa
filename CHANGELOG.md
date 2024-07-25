@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.32.0 (July, 24 2024)
+
+### Notes
+
+- Release date: **(July, 24 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Fixed drift issues with the following resources:
+  - `zpa_inspection_profile`
+  - `zpa_policy_access_inspection_rule_v2`
+  - `zpa_pra_approval`
+
+### Documentation
+- [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Added documentation for the following resource:
+  - `zpa_policy_redirection_rule`
+
 ## 3.31.0 (July, 11 2024)
 
 ### Notes

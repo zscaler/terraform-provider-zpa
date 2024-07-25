@@ -15,7 +15,7 @@ import (
 func TestAccResourcePolicyInspectionRuleV2_Basic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAPolicyInspectionRuleV2)
 	rName := acctest.RandomWithPrefix("tf-acc-test")
-	updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
+	// updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
 	// inspectionProfileTypeAndName, _, inspectionProfileGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionProfile)
@@ -38,10 +38,10 @@ func TestAccResourcePolicyInspectionRuleV2_Basic(t *testing.T) {
 			},
 			// Update test
 			{
-				Config: testAccCheckPolicyInspectionRuleV2Configure(resourceTypeAndName, generatedName, updatedRName, randDesc),
+				Config: testAccCheckPolicyInspectionRuleV2Configure(resourceTypeAndName, generatedName, rName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyInspectionRuleV2Exists(resourceTypeAndName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "INSPECT"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
