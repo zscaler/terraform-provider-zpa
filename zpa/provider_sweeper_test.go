@@ -30,7 +30,6 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/pracredential"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praportal"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
 )
@@ -101,7 +100,7 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestLSSConfigController(testClient) // TODO: Tests is failing on QA2 tenant. Needs further investigation.
 	sweepTestAccessPolicyRuleByType(testClient)
 	sweepTestProvisioningKey(testClient)
-	sweepTestSegmentGroup(testClient)
+	// sweepTestSegmentGroup(testClient)
 	sweepTestServerGroup(testClient)
 	sweepTestServiceEdgeGroup(testClient)
 	sweepTestCBIBanner(testClient)
@@ -493,32 +492,34 @@ func sweepTestProvisioningKey(client *testClient) error {
 	return condenseError(errorList)
 }
 
-func sweepTestSegmentGroup(client *testClient) error {
-	var errorList []error
-	group, _, err := segmentgroup.GetAll(client.sdkClient.SegmentGroup)
-	if err != nil {
-		return err
-	}
-	// Logging the number of identified resources before the deletion loop
-	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
-	for _, b := range group {
-		// Check if the resource name has the required prefix before deleting it
-		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := segmentgroup.Delete(client.sdkClient.SegmentGroup, b.ID); err != nil {
-				errorList = append(errorList, err)
-				continue
+/*
+	func sweepTestSegmentGroup(client *testClient) error {
+		var errorList []error
+		group, _, err := segmentgroup.GetAll(client.sdkClient.SegmentGroup)
+		if err != nil {
+			return err
+		}
+		// Logging the number of identified resources before the deletion loop
+		sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
+		for _, b := range group {
+			// Check if the resource name has the required prefix before deleting it
+			if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
+				if _, err := segmentgroup.Delete(client.sdkClient.SegmentGroup, b.ID); err != nil {
+					errorList = append(errorList, err)
+					continue
+				}
+				logSweptResource(resourcetype.ZPASegmentGroup, fmt.Sprintf(b.ID), b.Name)
 			}
-			logSweptResource(resourcetype.ZPASegmentGroup, fmt.Sprintf(b.ID), b.Name)
 		}
-	}
-	// Log errors encountered during the deletion process
-	if len(errorList) > 0 {
-		for _, err := range errorList {
-			sweeperLogger.Error(err.Error())
+		// Log errors encountered during the deletion process
+		if len(errorList) > 0 {
+			for _, err := range errorList {
+				sweeperLogger.Error(err.Error())
+			}
 		}
+		return condenseError(errorList)
 	}
-	return condenseError(errorList)
-}
+*/
 
 func sweepTestServerGroup(client *testClient) error {
 	var errorList []error

@@ -1190,15 +1190,16 @@ func fetchPolicySetIDByType(client *Client, policyType string, microTenantID str
 // ConvertV1ResponseToV2Request converts a PolicyRuleResource (API v1 response) to a PolicyRule (API v2 request) with aggregated values.
 func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleResource) policysetcontrollerv2.PolicyRule {
 	v2Request := policysetcontrollerv2.PolicyRule{
-		ID:                    v1Response.ID,
-		Name:                  v1Response.Name,
-		Description:           v1Response.Description,
-		Action:                v1Response.Action,
-		PolicySetID:           v1Response.PolicySetID,
-		Operator:              v1Response.Operator,
-		CustomMsg:             v1Response.CustomMsg,
-		ZpnIsolationProfileID: v1Response.ZpnIsolationProfileID,
-		Conditions:            make([]policysetcontrollerv2.PolicyRuleResourceConditions, 0),
+		ID:                     v1Response.ID,
+		Name:                   v1Response.Name,
+		Description:            v1Response.Description,
+		Action:                 v1Response.Action,
+		PolicySetID:            v1Response.PolicySetID,
+		Operator:               v1Response.Operator,
+		CustomMsg:              v1Response.CustomMsg,
+		ZpnIsolationProfileID:  v1Response.ZpnIsolationProfileID,
+		ZpnInspectionProfileID: v1Response.ZpnInspectionProfileID,
+		Conditions:             make([]policysetcontrollerv2.PolicyRuleResourceConditions, 0),
 	}
 
 	for _, condition := range v1Response.Conditions {

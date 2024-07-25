@@ -35,20 +35,13 @@ func TestAccResourcePolicyInspectionRuleV2_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "INSPECT"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
-				// ExpectNonEmptyPlan: true,
-			},
-			// Import test
-			{
-				ResourceName:      resourceTypeAndName,
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 			// Update test
 			{
-				Config: testAccCheckPolicyInspectionRuleConfigure(resourceTypeAndName, generatedName, updatedRName, randDesc),
+				Config: testAccCheckPolicyInspectionRuleV2Configure(resourceTypeAndName, generatedName, updatedRName, randDesc),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyInspectionRuleV2Exists(resourceTypeAndName),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedRName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "INSPECT"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),

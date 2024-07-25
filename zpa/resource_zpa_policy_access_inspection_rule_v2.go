@@ -18,7 +18,6 @@ func resourcePolicyInspectionRuleV2() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: importPolicyStateContextFuncV2([]string{"INSPECTION_POLICY"}),
 		},
-
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,

@@ -39,8 +39,8 @@ func testAccDataSourceApplicationSegmentByTypeCheck(application_type string) res
 func testAccCheckDataSourceApplicationSegmentByTypeConfig_basic(resourceNameSuffix, domainNameSuffix string) string {
 	return fmt.Sprintf(`
 resource "zpa_segment_group" "this" {
-  name                   = "tf-acc-test-01"
-  description            = "tf-acc-test-01"
+  name                   = "tf-acc-test-10"
+  description            = "tf-acc-test-10"
   enabled                = true
 }
 
@@ -64,6 +64,7 @@ resource "zpa_application_segment_pra" "this" {
       app_types = [ "SECURE_REMOTE_ACCESS" ]
     }
   }
+  depends_on = [zpa_segment_group.this]
 }
 
 data "zpa_ba_certificate" "jenkins" {
@@ -91,6 +92,7 @@ resource "zpa_application_segment_inspection" "this" {
       app_types            = [ "INSPECT" ]
     }
   }
+  depends_on = [zpa_segment_group.this]
 }
 
 resource "zpa_application_segment_browser_access" "this" {
@@ -112,6 +114,7 @@ resource "zpa_application_segment_browser_access" "this" {
         certificate_id        = data.zpa_ba_certificate.jenkins.id
         trust_untrusted_cert  = true
     }
+  depends_on = [zpa_segment_group.this]
 }
 
 data "zpa_application_segment_by_type" "pra" {
