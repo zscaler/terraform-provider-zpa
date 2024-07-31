@@ -52,6 +52,10 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -203,6 +207,18 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
 						"allow_options": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -230,12 +246,6 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Optional:    true,
 							Description: "ID of the BA certificate.",
 						},
-						// "cname": {
-						// 	Type:       schema.TypeString,
-						// 	Computed:   true,
-						// 	Optional:   true,
-						// 	Deprecated: "The `cname` field is now deprecated, you can safely remove this attribute from your configuration",
-						// },
 						"description": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -250,27 +260,6 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						// "hidden": {
-						// 	Type:     schema.TypeBool,
-						// 	Optional: true,
-						// 	Computed: true,
-						// },
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						// "local_domain": {
-						// 	Type:     schema.TypeString,
-						// 	Computed: true,
-						// },
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						// "path": {
-						// 	Type:     schema.TypeString,
-						// 	Computed: true,
-						// },
 						"trust_untrusted_cert": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -369,6 +358,7 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta in
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("ip_anchored", resp.IPAnchored)
 	_ = d.Set("match_style", resp.MatchStyle)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
@@ -473,6 +463,7 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 		ICMPAccessType:            d.Get("icmp_access_type").(string),
 		Description:               d.Get("description").(string),
 		MatchStyle:                d.Get("match_style").(string),
+		MicroTenantID:             d.Get("microtenant_id").(string),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
 		HealthReporting:           d.Get("health_reporting").(string),
@@ -599,19 +590,16 @@ func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []inter
 	clientlessApps := make([]interface{}, len(clientlessApp.ClientlessApps))
 	for i, clientlessApp := range clientlessApp.ClientlessApps {
 		clientlessApps[i] = map[string]interface{}{
+			"id":                   clientlessApp.ID,
+			"name":                 clientlessApp.Name,
+			"microtenant_id":       clientlessApp.MicroTenantID,
 			"allow_options":        clientlessApp.AllowOptions,
 			"application_port":     clientlessApp.ApplicationPort,
 			"application_protocol": clientlessApp.ApplicationProtocol,
 			"certificate_id":       clientlessApp.CertificateID,
-			// "cname":                clientlessApp.Cname,
-			"description": clientlessApp.Description,
-			"domain":      clientlessApp.Domain,
-			"enabled":     clientlessApp.Enabled,
-			// "hidden":               clientlessApp.Hidden,
-			"id": clientlessApp.ID,
-			// "local_domain":         clientlessApp.LocalDomain,
-			"name": clientlessApp.Name,
-			// "path":                 clientlessApp.Path,
+			"description":          clientlessApp.Description,
+			"domain":               clientlessApp.Domain,
+			"enabled":              clientlessApp.Enabled,
 			"trust_untrusted_cert": clientlessApp.TrustUntrustedCert,
 		}
 	}

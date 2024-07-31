@@ -1,5 +1,22 @@
 # Changelog
 
+## 3.321.0 (July, 30 2024)
+
+### Notes
+
+- Release date: **(July, 30 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Removed unsupported attributes `microtenant_id` and `microtenant_name` from `zpa_application_segment_inspection` resource and data source.
+  ~> **NOTE** Although that's a safe change, it may cause a temporary drift in order to update the statefile. Microtenant is not currently supported for Inspection Application Segments
+
+ - [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Added missing `microtenant_id` attribute to nested block `common_apps_dto.apps_config` in the resource and data source `zpa_application_segment_pra`.
+  ~> **NOTE** Although that's a safe change, it may cause a temporary drift in order to update the statefile.
+
+ - [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Added missing `microtenant_id` attribute to nested block `clientless_apps` in the resource and data source `zpa_application_segment_browser_access`.
+  ~> **NOTE** Although that's a safe change, it may cause a temporary drift in order to update the statefile.
+
 ## 3.32.0 (July, 24 2024)
 
 ### Notes

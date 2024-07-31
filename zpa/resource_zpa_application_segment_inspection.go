@@ -23,11 +23,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				client := meta.(*Client)
 				service := client.ApplicationSegmentInspection
 
-				microTenantID := GetString(d.Get("microtenant_id"))
-				if microTenantID != "" {
-					service = service.WithMicroTenant(microTenantID)
-				}
-
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
 				if parseIDErr == nil {
@@ -285,11 +280,6 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, meta int
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
-	microTenantID := GetString(d.Get("microtenant_id"))
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
-
 	req := expandInspectionApplicationSegment(d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
@@ -318,11 +308,6 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, meta int
 func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
-
-	microTenantID := GetString(d.Get("microtenant_id"))
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
 
 	resp, _, err := applicationsegmentinspection.Get(service, d.Id())
 	if err != nil {
@@ -389,11 +374,6 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta int
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
-	microTenantID := GetString(d.Get("microtenant_id"))
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
-
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection application segment ID: %v\n", id)
 	req := expandInspectionApplicationSegment(d, zClient, id)
@@ -426,11 +406,6 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta int
 func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
-
-	microTenantID := GetString(d.Get("microtenant_id"))
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
 
 	id := d.Id()
 	segmentGroupID, ok := d.GetOk("segment_group_id")
@@ -487,11 +462,7 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if zClient != nil && id != "" {
-		microTenantID := GetString(d.Get("microtenant_id"))
 		service := zClient.ApplicationSegmentInspection
-		if microTenantID != "" {
-			service = service.WithMicroTenant(microTenantID)
-		}
 
 		resource, _, err := applicationsegmentinspection.Get(service, id)
 		if err == nil {
