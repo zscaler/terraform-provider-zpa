@@ -15,78 +15,78 @@ on:
   workflow_dispatch:
 
 jobs:
-  zpa-qa1-tenants:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        goVersion: ["1.22"]
-        environment:
-          - ZPA_QA_TENANT01
-          - ZPA_QA_TENANT02
-    environment: ${{ matrix.environment }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-              token: ${{ secrets.GITHUB_TOKEN }}
+  # zpa-qa1-tenants:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       goVersion: ["1.22"]
+  #       environment:
+  #         - ZPA_QA_TENANT01
+  #         - ZPA_QA_TENANT02
+  #   environment: ${{ matrix.environment }}
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #             token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.goVersion }}
+  #     - name: Setup Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: ${{ matrix.goVersion }}
 
-      - name: Clean existing Go modules
-        run: go clean -modcache
+  #     - name: Clean existing Go modules
+  #       run: go clean -modcache
 
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+  #     - name: Cache Go modules
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~/go/pkg/mod
+  #           ~/.cache/go-build
+  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-go-
 
-      - name: Setup Go Tools
-        run: make tools
+  #     - name: Setup Go Tools
+  #       run: make tools
 
-      - name: Download Go Dependencies
-        run: |
-          go mod tidy && go mod vendor
+  #     - name: Download Go Dependencies
+  #       run: |
+  #         go mod tidy && go mod vendor
 
-      - name: Setup Go Tools
-        run: make tools
+  #     - name: Setup Go Tools
+  #       run: make tools
 
-      - name: Check Formatting
-        run: make fmtcheck
+  #     - name: Check Formatting
+  #       run: make fmtcheck
 
-      # - name: Vet Code
-      #   run: make vet
+  #     # - name: Vet Code
+  #     #   run: make vet
 
-      - name: Lint Code
-        run: make lint
+  #     - name: Lint Code
+  #       run: make lint
 
-      - name: Check Build
-        run: make build
+  #     - name: Check Build
+  #       run: make build
 
-      - name: Run tests with retry
-        uses: nick-fields/retry@v3
-        with:
-          max_attempts: 1
-          timeout_minutes: 30  # Adjust as needed
-          command: |
-            make sweep
-            make test:integration:zpa
-            make sweep
-        env:
-          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
-          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
-          ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
-          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
-          TF_ACC: ${{ secrets.TF_ACC }}
-          ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
+  #     - name: Run tests with retry
+  #       uses: nick-fields/retry@v3
+  #       with:
+  #         max_attempts: 1
+  #         timeout_minutes: 30  # Adjust as needed
+  #         command: |
+  #           make sweep
+  #           make test:integration:zpa
+  #           make sweep
+  #       env:
+  #         ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+  #         ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+  #         ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+  #         ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+  #         TF_ACC: ${{ secrets.TF_ACC }}
+  #         ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
   # zpa-qa2-tenants:
   #   runs-on: ubuntu-latest
@@ -162,7 +162,7 @@ jobs:
   #         ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
   zpa-beta-tenants:
-    needs: [zpa-qa1-tenants]
+    # needs: [zpa-qa1-tenants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -235,7 +235,7 @@ jobs:
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
   zpa-prod-tenants:
-    needs: [zpa-beta-tenants, zpa-qa1-tenants]
+    needs: [zpa-beta-tenants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
