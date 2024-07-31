@@ -16,6 +16,19 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Name of the application.",
+			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -71,14 +84,15 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"enabled": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
 			"health_reporting": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Whether health reporting for the app is Continuous or On Access. Supported values: NONE, ON_ACCESS, CONTINUOUS.",
+			},
+			"match_style": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"ip_anchored": {
 				Type:     schema.TypeBool,
@@ -89,16 +103,23 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
 			},
-			"name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Name of the application.",
-			},
 			"clientless_apps": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"allow_options": {
 							Type:     schema.TypeBool,
 							Computed: true,
@@ -143,17 +164,9 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"local_domain": {
 							Type:     schema.TypeString,
 							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
 						},
 						"path": {
 							Type:     schema.TypeString,
@@ -224,6 +237,8 @@ func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta 
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("enabled", resp.Enabled)
+		_ = d.Set("microtenant_id", resp.MicroTenantID)
+		_ = d.Set("match_style", resp.MatchStyle)
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 		_ = d.Set("double_encrypt", resp.DoubleEncrypt)
 		_ = d.Set("health_check_type", resp.HealthCheckType)

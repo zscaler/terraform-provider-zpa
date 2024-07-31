@@ -95,14 +95,6 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 				Optional:    true,
 				Description: "Name of the application.",
 			},
-			"microtenant_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"microtenant_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"inspection_apps": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -190,11 +182,6 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta int
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
-	microTenantID := GetString(d.Get("microtenant_id"))
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
-
 	var resp *applicationsegmentinspection.AppSegmentInspection
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
@@ -234,8 +221,6 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta int
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("ip_anchored", resp.IPAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
-		_ = d.Set("microtenant_id", resp.MicroTenantID)
-		_ = d.Set("microtenant_name", resp.MicroTenantName)
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 

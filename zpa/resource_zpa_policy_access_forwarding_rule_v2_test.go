@@ -134,8 +134,13 @@ data "zpa_idp_controller" "bd_user_okta" {
     name = "BD_Okta_Users"
 }
 
-data "zpa_scim_groups" "contractors" {
-	name     = "Contractors"
+data "zpa_scim_groups" "a000" {
+	name     = "A000"
+	idp_name = "BD_Okta_Users"
+}
+
+data "zpa_scim_groups" "b000" {
+	name     = "B000"
 	idp_name = "BD_Okta_Users"
 }
 
@@ -152,14 +157,18 @@ resource "%s" "%s" {
 			rhs = false
 		  }
 		}
-	  }
+	}
 	conditions {
 	operator = "OR"
 	operands {
 		object_type = "SCIM_GROUP"
 		entry_values {
-		lhs = data.zpa_idp_controller.bd_user_okta.id
-		rhs = data.zpa_scim_groups.contractors.id
+			lhs = data.zpa_idp_controller.bd_user_okta.id
+			rhs = data.zpa_scim_groups.a000.id
+		}
+		entry_values {
+			lhs = data.zpa_idp_controller.bd_user_okta.id
+			rhs = data.zpa_scim_groups.b000.id
 		}
 	}
 	}

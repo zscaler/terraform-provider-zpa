@@ -12,9 +12,34 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.32.0``
+``Last updated: v3.32.1``
 
 ---
+
+## 3.32.1 (July, 31 2024)
+
+### Notes
+
+- Release date: **(July, 31 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Removed unsupported attributes `microtenant_id` and `microtenant_name` from `zpa_application_segment_inspection` resource and data source.
+  ~> **NOTE** Although that's a safe change, it may cause a temporary drift in order to update the statefile. Microtenant is not currently supported for Inspection Application Segments
+
+ - [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Added missing `microtenant_id` attribute to nested block `common_apps_dto.apps_config` in the resource and data source `zpa_application_segment_pra`.
+  ~> **NOTE** Although that's a safe change, it may cause a temporary drift in order to update the statefile.
+
+ - [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Added missing `microtenant_id` attribute to nested block `clientless_apps` in the resource and data source `zpa_application_segment_browser_access`.
+  ~> **NOTE** Although that's a safe change, it may cause a temporary drift in order to update the statefile.
+
+ - [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Fixed drift related to common flattening and expand functions for all v2 Access policy resources.
+  ~> **NOTE** This fix does not affect existing configurations using the `v2` policy type.
+
+### Documentation
+- [PR #473](https://github.com/zscaler/terraform-provider-zpa/pull/473) Added documentation examples for the following resources and datasources:
+  - ``zpa_service_edge_assistant_schedule``
+  - ``zpa_policy_credential_rule``
 
 ## 3.32.0 (July, 24 2024)
 

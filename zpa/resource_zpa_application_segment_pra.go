@@ -28,6 +28,11 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				client := meta.(*Client)
 				service := client.ApplicationSegmentPRA
 
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
+
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
 				if parseIDErr == nil {
@@ -56,6 +61,10 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Required:     true,
 				Description:  "Name of the application.",
 				ValidateFunc: validation.StringIsNotEmpty,
+			},
+			"microtenant_id": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
@@ -213,6 +222,10 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
+									"microtenant_id": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
 									"name": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -281,6 +294,11 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, meta interface{
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	req := expandSRAApplicationSegment(d, zClient, "")
 	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
 		return err
@@ -319,6 +337,11 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	resp, _, err := applicationsegmentpra.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
@@ -344,6 +367,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
 	_ = d.Set("match_style", resp.MatchStyle)
+	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
@@ -433,6 +457,11 @@ func resourceApplicationSegmentPRADelete(d *schema.ResourceData, meta interface{
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentPRA
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	id := d.Id()
 	segmentGroupID, ok := d.GetOk("segment_group_id")
 	if ok && segmentGroupID != nil {
@@ -452,7 +481,13 @@ func resourceApplicationSegmentPRADelete(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentpra.AppSegmentPRA {
+func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id string) applicationsegmentpra.AppSegmentPRA {
+	microTenantID := GetString(d.Get("microtenant_id"))
+	service := client.ApplicationSegmentPRA
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	details := applicationsegmentpra.AppSegmentPRA{
 		ID:                        d.Id(),
 		SegmentGroupID:            d.Get("segment_group_id").(string),
@@ -466,6 +501,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id str
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
 		IpAnchored:                d.Get("ip_anchored").(bool),
+		MicroTenantID:             d.Get("microtenant_id").(string),
 		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
@@ -488,13 +524,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, zClient *Client, id str
 
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
-	if zClient != nil && id != "" {
-		microTenantID := GetString(d.Get("microtenant_id"))
-		service := zClient.ApplicationSegmentPRA
-		if microTenantID != "" {
-			service = service.WithMicroTenant(microTenantID)
-		}
-
+	if service != nil && id != "" {
 		resource, _, err := applicationsegmentpra.Get(service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
@@ -607,6 +637,7 @@ func flattenCommonAppsDto(apps []applicationsegmentpra.PRAApps) []interface{} {
 			"domain":               app.Domain,
 			"application_port":     app.ApplicationPort,
 			"application_protocol": app.ApplicationProtocol,
+			"microtenant_id":       app.MicroTenantID,
 			"app_types":            appTypes,
 		}
 		if app.ApplicationProtocol == "RDP" {

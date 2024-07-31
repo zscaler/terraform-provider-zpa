@@ -827,7 +827,7 @@ func GetGlobalPolicySetByPolicyType(client *Client, policyType string) (*policys
 }
 
 //######################################################################################################################
-//######################################## ZPA ACCESS POLICY V2 COMMON CONDITIONS FUNCTIONS ########################################
+//################################ ZPA ACCESS POLICY V2 COMMON CONDITIONS FUNCTIONS ####################################
 //######################################################################################################################
 
 func ExpandPolicyConditionsV2(d *schema.ResourceData) ([]policysetcontrollerv2.PolicyRuleResourceConditions, error) {
@@ -852,7 +852,6 @@ func ExpandPolicyConditionsV2(d *schema.ResourceData) ([]policysetcontrollerv2.P
 		}
 		return conditionSets, nil
 	}
-
 	return []policysetcontrollerv2.PolicyRuleResourceConditions{}, nil
 }
 
@@ -910,7 +909,6 @@ func expandOperandsListV2(ops interface{}) ([]policysetcontrollerv2.PolicyRuleRe
 	return []policysetcontrollerv2.PolicyRuleResourceOperands{}, nil
 }
 
-// flattenConditions flattens the conditions part of the policy rule into a format suitable for Terraform schema.
 func flattenConditionsV2(conditions []policysetcontrollerv2.PolicyRuleResourceConditions) []interface{} {
 	if conditions == nil {
 		return nil
@@ -926,13 +924,12 @@ func flattenConditionsV2(conditions []policysetcontrollerv2.PolicyRuleResourceCo
 	return c
 }
 
-// flattenOperands flattens the operands part of the conditions into a format suitable for Terraform schema.
 func flattenOperandsV2(operands []policysetcontrollerv2.PolicyRuleResourceOperands) []interface{} {
 	if operands == nil {
 		return nil
 	}
 
-	o := make([]interface{}, len(operands)) // Simplified slice initialization
+	o := make([]interface{}, len(operands))
 	for i, operand := range operands {
 		operandMap := make(map[string]interface{})
 		operandMap["object_type"] = operand.ObjectType
@@ -940,7 +937,7 @@ func flattenOperandsV2(operands []policysetcontrollerv2.PolicyRuleResourceOperan
 		if len(operand.Values) > 0 {
 			operandMap["values"] = operand.Values
 		} else {
-			operandMap["values"] = []interface{}{} // Ensure "values" key exists with an empty slice if no values are present.
+			operandMap["values"] = []interface{}{}
 		}
 
 		entryValues := make([]interface{}, len(operand.EntryValuesLHSRHS))
@@ -954,7 +951,7 @@ func flattenOperandsV2(operands []policysetcontrollerv2.PolicyRuleResourceOperan
 		if len(entryValues) > 0 {
 			operandMap["entry_values"] = entryValues
 		} else {
-			operandMap["entry_values"] = []interface{}{} // Ensure "entry_values" key exists with an empty slice if no entry values are present.
+			operandMap["entry_values"] = []interface{}{}
 		}
 
 		o[i] = operandMap
