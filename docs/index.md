@@ -177,7 +177,7 @@ The following arguments are supported:
 * ``zpa_client_id`` - (Required) ZPA client ID, is equivalent to a username.
 * ``zpa_client_secret`` - (Required) ZPA client secret, is equivalent to a secret password.
 * ``zpa_customer_id`` - (Required) ZPA customer ID, is equivalent to your ZPA tenant identification.
-* ``zpa_cloud`` - (Required) ZPA Cloud name `BETA`, `GOV`, `GOVUS` or `PREVIEW`.
+* ``zpa_cloud`` - (Required) ZPA Cloud name `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `ZPATWO` clouds.
 
 ### Optional
 
@@ -185,18 +185,19 @@ The following arguments are supported:
 
 ### Zscaler Private Access Microtenant
 
-## Support
+A Microtenant is a delegated administrator responsibility that is assigned to an admin by an admin with Microtenant administrator privileges. Microtenants are defined by an authentication domain and assigned to admins based on country, department, and company for role-based administration control. A Microtenant is created within a tenant and is used when departments or subsidiaries within an organization want to manage their configurations independently.[Read More](https://help.zscaler.com/zpa/about-microtenants)
 
-This template/solution is released under an as-is, best effort, support
-policy. These scripts should be seen as community supported and Zscaler
-Technology Alliances Team will contribute our expertise as and when possible.
-We do not provide technical support or help in using or troubleshooting the components
-of the project through our normal support options such as Zscaler support teams,
-or ASC (Authorized Support Centers) partners and backline
-support options. The underlying product used (Zscaler Private Access API) but the
-scripts or templates are still supported, but the support is only for the
-product functionality and not for help in deploying or using the template or
-script itself. Unless explicitly tagged, all projects or work posted in our
-[GitHub repository](https://github.com/zscaler) or sites other
-than our official [Downloads page](https://help.zscaler.com/login-tickets)
-are provided under the best effort policy.
+To manage a microtenant using the ZPA Terraform provider, the administrator for the parent or default tenant, must first provision the microtenant using the resource `zpa_microtenant_controller`. The resource will output the administrator credentials for the new microtenant, which can then be provided to the microtenant administrator.
+
+The microtenant administrator can then create his own microtenant API credentials required to authenticate via API to the ZPA platform. From that point, the administrator can then individually manage his own resources in an isolated manner.
+When authenticating to microtenant via API using the ZPA Terraform provider, the administrator must provide the following environment variable credentials: `ZPA_CLIENT_ID`, `ZPA_CLIENT_SECRET`, `ZPA_CUSTOMER_ID`, `ZPA_CLOUD`, `ZPA_MICROTENANT_ID`
+
+~> **NOTE 1** Only environment variables are currently supported when authenticating to a Microtenant.
+
+~> **NOTE 2** The environment variable `ZPA_MICROTENANT_ID` is mandatory when provisioning/managing resources exclusively within a Microtenant.
+
+~> **NOTE 3** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is required to provision resources in the `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `ZPATWO` clouds.
+
+## Support Disclaimer
+
+-> **Disclaimer:** Please refer to our [General Support Statement](guides/support.md) before proceeding with the use of this provider. You can also refer to our [troubleshooting guide](guides/troubleshooting.md) for guidance on typical problems.

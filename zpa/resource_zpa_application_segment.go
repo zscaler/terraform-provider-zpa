@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -23,6 +24,20 @@ func resourceApplicationSegment() *schema.Resource {
 		Read:   resourceApplicationSegmentRead,
 		Update: resourceApplicationSegmentUpdate,
 		Delete: resourceApplicationSegmentDelete,
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			// Get the value of the ip_anchored attribute
+			ipAnchored := d.Get("ip_anchored").(bool)
+
+			// Check if match_style is set
+			if matchStyle, ok := d.GetOk("match_style"); ok {
+				// If ip_anchored is true and match_style is set, return an error
+				if ipAnchored && matchStyle != "" {
+					return fmt.Errorf("match_style cannot be set when ip_anchored is true")
+				}
+			}
+
+			return nil
+		},
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				client := meta.(*Client)

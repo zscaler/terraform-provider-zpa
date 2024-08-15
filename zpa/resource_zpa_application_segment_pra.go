@@ -198,15 +198,6 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 					"0", "1",
 				}, false),
 			},
-			"match_style": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"EXCLUSIVE",
-					"INCLUSIVE",
-				}, false),
-			},
 			"common_apps_dto": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -366,7 +357,6 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
-	_ = d.Set("match_style", resp.MatchStyle)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
@@ -506,7 +496,6 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id stri
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
-		MatchStyle:                d.Get("match_style").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		TCPAppPortRange:           []common.NetworkPorts{},

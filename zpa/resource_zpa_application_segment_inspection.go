@@ -131,15 +131,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 					"CONTINUOUS",
 				}, false),
 			},
-			"match_style": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"EXCLUSIVE",
-					"INCLUSIVE",
-				}, false),
-			},
 			"passive_health_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -330,7 +321,6 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta inter
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
-	_ = d.Set("match_style", resp.MatchStyle)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
@@ -437,7 +427,6 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 		Description:               d.Get("description").(string),
 		HealthReporting:           d.Get("health_reporting").(string),
 		HealthCheckType:           d.Get("health_check_type").(string),
-		MatchStyle:                d.Get("match_style").(string),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
