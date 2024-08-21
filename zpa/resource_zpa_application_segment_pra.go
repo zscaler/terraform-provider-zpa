@@ -70,6 +70,11 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"bypass_on_reauth": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"bypass_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -196,15 +201,6 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"0", "1",
-				}, false),
-			},
-			"match_style": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"EXCLUSIVE",
-					"INCLUSIVE",
 				}, false),
 			},
 			"common_apps_dto": {
@@ -356,6 +352,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	d.SetId(resp.ID)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("bypass_type", resp.BypassType)
+	_ = d.Set("bypass_on_reauth", resp.BypassOnReauth)
 	_ = d.Set("config_space", resp.ConfigSpace)
 	_ = d.Set("domain_names", resp.DomainNames)
 	_ = d.Set("name", resp.Name)
@@ -366,7 +363,6 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
-	_ = d.Set("match_style", resp.MatchStyle)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
@@ -492,6 +488,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id stri
 		ID:                        d.Id(),
 		SegmentGroupID:            d.Get("segment_group_id").(string),
 		BypassType:                d.Get("bypass_type").(string),
+		BypassOnReauth:            d.Get("bypass_on_reauth").(bool),
 		ConfigSpace:               d.Get("config_space").(string),
 		IcmpAccessType:            d.Get("icmp_access_type").(string),
 		Description:               d.Get("description").(string),
@@ -506,7 +503,6 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id stri
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
-		MatchStyle:                d.Get("match_style").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		TCPAppPortRange:           []common.NetworkPorts{},

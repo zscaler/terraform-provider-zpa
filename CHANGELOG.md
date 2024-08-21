@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.32.2 (August, 16 2024)
+
+### Notes
+
+- Release date: **(August, 16 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #476](https://github.com/zscaler/terraform-provider-zpa/pull/476) - Fixed validation for the `match_style` attribute in the resource `zpa_application_segment`. 
+  **NOTE**: Notice that `match_style` also known as [Multimatch](https://help.zscaler.com/zpa/using-app-segment-multimatch) cannot be configured when `ip_anchored` is enabled. Also, `match_style` is NOT supported for the following application segment resources: `zpa_application_segment_browser_access`, `zpa_application_segment_inspection` or `zpa_application_segment_pra`.
+- [PR #476](https://github.com/zscaler/terraform-provider-zpa/pull/476) - Added support to attribute: `bypass_on_reauth` to the following application segment resources: `zpa_application_segment`, `zpa_application_segment_inspection` and `zpa_application_segment_pra`
+  - **NOTE** `bypass_on_reauth` attribute is not currently supported when configuring `zpa_application_segment_browser_access` as it is not supported by the ZPA API.
+
+### Documentation
+- [PR #476](https://github.com/zscaler/terraform-provider-zpa/pull/476) - Added documentation for resource and datasource: `zpa_service_edge_assistant_schedule`
+
 ## 3.32.1 (July, 31 2024)
 
 ### Notes

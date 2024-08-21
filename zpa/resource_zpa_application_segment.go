@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -23,6 +24,20 @@ func resourceApplicationSegment() *schema.Resource {
 		Read:   resourceApplicationSegmentRead,
 		Update: resourceApplicationSegmentUpdate,
 		Delete: resourceApplicationSegmentDelete,
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			// Get the value of the ip_anchored attribute
+			ipAnchored := d.Get("ip_anchored").(bool)
+
+			// Check if match_style is set
+			if matchStyle, ok := d.GetOk("match_style"); ok {
+				// If ip_anchored is true and match_style is set, return an error
+				if ipAnchored && matchStyle != "" {
+					return fmt.Errorf("match_style cannot be set when ip_anchored is true")
+				}
+			}
+
+			return nil
+		},
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				client := meta.(*Client)
@@ -56,6 +71,22 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Name of the application.",
+				ValidateFunc: validation.StringIsNotEmpty,
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the application.",
+			},
+			"enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether this application is enabled or not.",
+			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -63,6 +94,11 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 			"segment_group_name": {
 				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"bypass_on_reauth": {
+				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
 			},
@@ -103,11 +139,6 @@ func resourceApplicationSegment() *schema.Resource {
 				}, false),
 				Default: "DEFAULT",
 			},
-			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Description of the application.",
-			},
 			"domain_names": {
 				Type:        schema.TypeSet,
 				Required:    true,
@@ -118,11 +149,6 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Whether Double Encryption is enabled or disabled for the app.",
-			},
-			"enabled": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Whether this application is enabled or not.",
 			},
 			"health_check_type": {
 				Type:     schema.TypeString,
@@ -185,12 +211,6 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
-			},
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Name of the application.",
-				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"passive_health_enabled": {
 				Type:     schema.TypeBool,
@@ -284,14 +304,16 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[INFO] Reading application segment and settings states: %+v\n", resp)
 	_ = d.Set("id", resp.ID)
+	_ = d.Set("name", resp.Name)
+	_ = d.Set("description", resp.Description)
+	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
+	_ = d.Set("bypass_on_reauth", resp.BypassOnReauth)
 	_ = d.Set("bypass_type", resp.BypassType)
 	_ = d.Set("config_space", resp.ConfigSpace)
-	_ = d.Set("description", resp.Description)
 	_ = d.Set("domain_names", resp.DomainNames)
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
-	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
@@ -303,7 +325,6 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) er
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
-	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
@@ -438,12 +459,13 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 	details := applicationsegment.ApplicationSegmentResource{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
+		Description:               d.Get("description").(string),
 		SegmentGroupID:            d.Get("segment_group_id").(string),
 		SegmentGroupName:          d.Get("segment_group_name").(string),
 		BypassType:                d.Get("bypass_type").(string),
+		BypassOnReauth:            d.Get("bypass_on_reauth").(bool),
 		ConfigSpace:               d.Get("config_space").(string),
 		IcmpAccessType:            d.Get("icmp_access_type").(string),
-		Description:               d.Get("description").(string),
 		DomainNames:               SetToStringList(d, "domain_names"),
 		HealthCheckType:           d.Get("health_check_type").(string),
 		MatchStyle:                d.Get("match_style").(string),
