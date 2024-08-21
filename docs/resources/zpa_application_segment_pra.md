@@ -92,6 +92,7 @@ The following arguments are supported:
 ### Optional
 
 - `description` - (String) Description of the application.
+- `bypass_on_reauth` (Boolean) Supported values: `true`, `false`
 - `bypass_type` (String) Indicates whether users can bypass ZPA to access applications. Default value is: `NEVER` and supported values are: `ALWAYS`, `NEVER` and `ON_NET`. The value `NEVER` indicates the use of the client forwarding policy.
 - `double_encrypt` (Boolean) Whether Double Encryption is enabled or disabled for the app. Supported values are `true` and `false`
 - `enabled` - (Boolean) Whether this application is enabled or not. Supported values are `true` and `false`

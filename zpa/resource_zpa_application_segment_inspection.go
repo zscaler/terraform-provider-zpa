@@ -56,6 +56,11 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"bypass_on_reauth": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"bypass_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -314,6 +319,7 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta inter
 	d.SetId(resp.ID)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("bypass_type", resp.BypassType)
+	_ = d.Set("bypass_on_reauth", resp.BypassOnReauth)
 	_ = d.Set("config_space", resp.ConfigSpace)
 	_ = d.Set("domain_names", resp.DomainNames)
 	_ = d.Set("name", resp.Name)
@@ -422,6 +428,7 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 		Name:                      d.Get("name").(string),
 		SegmentGroupID:            d.Get("segment_group_id").(string),
 		BypassType:                d.Get("bypass_type").(string),
+		BypassOnReauth:            d.Get("bypass_on_reauth").(bool),
 		ConfigSpace:               d.Get("config_space").(string),
 		ICMPAccessType:            d.Get("icmp_access_type").(string),
 		Description:               d.Get("description").(string),
