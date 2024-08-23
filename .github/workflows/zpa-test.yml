@@ -93,7 +93,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: ["1.21"]
+        goVersion: ["1.22"]
         environment:
           - ZPA_QA2_TENANT01
           # - ZPA_QA2_TENANT02
