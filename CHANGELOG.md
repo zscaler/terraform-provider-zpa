@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.32.3 (August, 22 2024)
+
+### Notes
+
+- Release date: **(August, 22 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #476](https://github.com/zscaler/terraform-provider-zpa/pull/476) - Fixed validation for the `match_style` attribute in the resource `zpa_application_segment`. 
+
 ## 3.32.2 (August, 16 2024)
 
 ### Notes
