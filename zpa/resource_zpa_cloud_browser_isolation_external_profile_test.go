@@ -1,5 +1,6 @@
 package zpa
 
+/*
 // TODO: Testing disabled as QA environments have limited region access
 import (
 	"fmt"
@@ -180,3 +181,4 @@ resource "%s" "%s" {
 		generatedName,
 	)
 }
+*/

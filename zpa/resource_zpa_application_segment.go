@@ -100,16 +100,16 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 			"tcp_port_range": resourceAppSegmentPortRange("tcp port range"),
 			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
-
 			"tcp_port_ranges": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+
 			"udp_port_ranges": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Description: "UDP port ranges used to access the app.",
@@ -469,6 +469,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 		TCPAppPortRange: []common.NetworkPorts{},
 		UDPAppPortRange: []common.NetworkPorts{},
 	}
+
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if service != nil && id != "" {
@@ -478,8 +479,9 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 			remoteUDPAppPortRanges = resource.UDPPortRanges
 		}
 	}
+
 	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
-	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+	TCPAppPortRanges := convertToPortRange(stringSliceToInterfaceSlice(SetToStringList(d, "tcp_port_ranges"))) // Convert to []interface{}
 	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
 		details.TCPPortRanges = TCPAppPortRanges
 	} else {
@@ -487,7 +489,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 	}
 
 	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
-	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+	UDPAppPortRanges := convertToPortRange(stringSliceToInterfaceSlice(SetToStringList(d, "udp_port_ranges"))) // Convert to []interface{}
 	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
 		details.UDPPortRanges = UDPAppPortRanges
 	} else {
@@ -501,6 +503,14 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 		details.UDPPortRanges = []string{}
 	}
 	return details
+}
+
+func stringSliceToInterfaceSlice(strings []string) []interface{} {
+	interfaces := make([]interface{}, len(strings))
+	for i, s := range strings {
+		interfaces[i] = s
+	}
+	return interfaces
 }
 
 func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServerGroups {
