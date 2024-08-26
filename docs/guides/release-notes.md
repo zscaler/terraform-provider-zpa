@@ -12,9 +12,22 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.32.3``
+``Last updated: v3.32.4``
 
 ---
+
+## 3.32.4 (August, 26 2024)
+
+### Notes
+
+- Release date: **(August, 26 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #478](https://github.com/zscaler/terraform-provider-zpa/pull/478) - Fixed drift within the attribute `service_edge` for the resource `zpa_service_edge_group` to ignore the order of IDs
+
+### Enhancements
+- [PR #478](https://github.com/zscaler/terraform-provider-zpa/pull/478) Added new attributes to `privileged_approvals_enabled` to resource: `zpa_microtenant_controller`. The attribute indicates if Privileged Approvals is enabled (true) for the Microtenant.
 
 ## 3.32.3 (August, 22 2024)
 

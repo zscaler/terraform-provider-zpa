@@ -40,8 +40,9 @@ func resourceMicrotenantController() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The unique identifier of the Microtenant for the ZPA tenant.",
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -49,23 +50,32 @@ func resourceMicrotenantController() *schema.Resource {
 				Required:    true,
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The description of the Microtenant.",
 			},
 			"enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether or not the Microtenant is enabled.",
 			},
 			"criteria_attribute": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The criteria attribute for the Microtenant. The supported value is AuthDomain.",
 			},
 			"criteria_attribute_values": {
-				Type:     schema.TypeSet,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "The value for the criteria attribute. This is the valid authentication domains configured for a customer (e.g., ExampleAuthDomain.com).",
+			},
+			"privileged_approvals_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Indicates if Privileged Approvals is enabled (true) for the Microtenant. This allows approval-based access even if no Authentication Domain is selected.",
 			},
 			"user": {
 				Type:     schema.TypeSet,
@@ -141,6 +151,7 @@ func resourceMicrotenantRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("criteria_attribute", resp.CriteriaAttribute)
 	_ = d.Set("criteria_attribute_values", resp.CriteriaAttributeValues)
+	_ = d.Set("privileged_approvals_enabled", resp.PrivilegedApprovalsEnabled)
 
 	if resp.UserResource != nil {
 		userList := flattenMicroTenantUser(resp.UserResource)
@@ -189,12 +200,13 @@ func resourceMicrotenantDelete(d *schema.ResourceData, meta interface{}) error {
 
 func expandMicroTenant(d *schema.ResourceData) microtenants.MicroTenant {
 	microTenants := microtenants.MicroTenant{
-		ID:                      d.Id(),
-		Name:                    d.Get("name").(string),
-		Description:             d.Get("description").(string),
-		Enabled:                 d.Get("enabled").(bool),
-		CriteriaAttribute:       d.Get("criteria_attribute").(string),
-		CriteriaAttributeValues: SetToStringSlice(d.Get("criteria_attribute_values").(*schema.Set)),
+		ID:                         d.Id(),
+		Name:                       d.Get("name").(string),
+		Description:                d.Get("description").(string),
+		Enabled:                    d.Get("enabled").(bool),
+		CriteriaAttribute:          d.Get("criteria_attribute").(string),
+		CriteriaAttributeValues:    SetToStringSlice(d.Get("criteria_attribute_values").(*schema.Set)),
+		PrivilegedApprovalsEnabled: d.Get("privileged_approvals_enabled").(bool),
 	}
 	return microTenants
 }

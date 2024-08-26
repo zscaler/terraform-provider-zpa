@@ -26,6 +26,7 @@ resource "zpa_microtenant_controller" "this" {
   enabled = true
   criteria_attribute = "AuthDomain"
   criteria_attribute_values = ["acme.com"]
+  privileged_approvals_enabled = true
 }
 
 // To output specific Microtenant user information,
@@ -53,6 +54,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `description` (Optional) Description of the microtenant controller.
 * `enabled` (Optional) Whether this microtenant resource is enabled or not.
+* `privileged_approvals_enabled` - (Optional) Indicates if Privileged Approvals is enabled (true) for the Microtenant. 
 
 ## Import
 

@@ -116,7 +116,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Computed: true,
 							Elem: &schema.Schema{
@@ -379,16 +379,19 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 func expandServiceEdges(d *schema.ResourceData) []serviceedgegroup.ServiceEdges {
 	serviceEdgesGroupInterface, ok := d.GetOk("service_edges")
 	if ok {
-		serviceEdge := serviceEdgesGroupInterface.(*schema.Set)
-		log.Printf("[INFO] service edges data: %+v\n", serviceEdge)
+		serviceEdgeSet := serviceEdgesGroupInterface.(*schema.Set)
 		var serviceEdgesGroups []serviceedgegroup.ServiceEdges
-		for _, serviceEdgesGroup := range serviceEdge.List() {
-			serviceEdgesGroup, ok := serviceEdgesGroup.(map[string]interface{})
+
+		for _, serviceEdgeInterface := range serviceEdgeSet.List() {
+			serviceEdgeMap, ok := serviceEdgeInterface.(map[string]interface{})
 			if ok {
-				for _, id := range serviceEdgesGroup["id"].([]interface{}) {
-					serviceEdgesGroups = append(serviceEdgesGroups, serviceedgegroup.ServiceEdges{
-						ID: id.(string),
-					})
+				idSet, ok := serviceEdgeMap["id"].(*schema.Set)
+				if ok {
+					for _, id := range idSet.List() {
+						serviceEdgesGroups = append(serviceEdgesGroups, serviceedgegroup.ServiceEdges{
+							ID: id.(string),
+						})
+					}
 				}
 			}
 		}

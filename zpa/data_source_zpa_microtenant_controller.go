@@ -45,6 +45,10 @@ func dataSourceMicrotenantController() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"privileged_approvals_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"creation_time": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -110,6 +114,10 @@ func dataSourceMicrotenantController() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"delivery_tag": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"email": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -123,6 +131,11 @@ func dataSourceMicrotenantController() *schema.Resource {
 							Computed: true,
 						},
 						"group_ids": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+						"iam_user_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -146,6 +159,14 @@ func dataSourceMicrotenantController() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"one_identity_user": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"operation_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"phone_number": {
 							Type:     schema.TypeBool,
 							Computed: true,
@@ -156,6 +177,10 @@ func dataSourceMicrotenantController() *schema.Resource {
 						},
 						"role_id": {
 							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"sync_version": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"microtenant_id": {
@@ -241,6 +266,7 @@ func dataSourceMicrotenantControllerRead(d *schema.ResourceData, meta interface{
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("criteria_attribute", resp.CriteriaAttribute)
 		_ = d.Set("criteria_attribute_values", resp.CriteriaAttributeValues)
+		_ = d.Set("privileged_approvals_enabled", resp.PrivilegedApprovalsEnabled)
 		_ = d.Set("operator", resp.Operator)
 		_ = d.Set("priority", resp.Priority)
 		_ = d.Set("creation_time", resp.CreationTime)
@@ -281,21 +307,26 @@ func flattenMicroTenantUserResource(userResource *microtenants.UserResource) []m
 	result[0]["comments"] = userResource.Comments
 	result[0]["customer_id"] = userResource.CustomerID
 	result[0]["display_name"] = userResource.DisplayName
+	result[0]["delivery_tag"] = userResource.DeliveryTag
 	result[0]["email"] = userResource.Email
 	result[0]["eula"] = userResource.Eula
 	result[0]["force_pwd_change"] = userResource.ForcePwdChange
 	result[0]["group_ids"] = userResource.GroupIDs
+	result[0]["iam_user_id"] = userResource.IAMUserID
 	result[0]["is_enabled"] = userResource.IsEnabled
 	result[0]["is_locked"] = userResource.IsLocked
 	result[0]["language_code"] = userResource.LanguageCode
 	result[0]["local_login_disabled"] = userResource.LocalLoginDisabled
+	result[0]["one_identity_user"] = userResource.OneIdentityUser
+	result[0]["operation_type	"] = userResource.OperationType
 	result[0]["password"] = userResource.Password
 	result[0]["phone_number"] = userResource.PhoneNumber
 	result[0]["pin_session"] = userResource.PinSession
+	result[0]["sync_version"] = userResource.SyncVersion
 	result[0]["role_id"] = userResource.RoleID
 	result[0]["microtenant_id"] = userResource.MicrotenantID
 	result[0]["microtenant_name"] = userResource.MicrotenantName
-	result[0]["time_zone"] = userResource.Timezone
+	result[0]["timezone"] = userResource.Timezone
 	result[0]["tmp_password"] = userResource.TmpPassword
 	result[0]["token_id"] = userResource.TokenID
 	result[0]["two_factor_auth_enabled"] = userResource.TwoFactorAuthEnabled

@@ -39,3 +39,4 @@ In addition to all arguments above, the following attributes are exported:
 * `criteria_attribute_values` - (string) The domain associated with the respective microtenant controller resource
 * `description` (string) Description of the microtenant controller.
 * `enabled` (bool) Whether this microtenant resource is enabled or not.
+* `privileged_approvals_enabled` - (Optional) Indicates if Privileged Approvals is enabled (true) for the Microtenant. 
