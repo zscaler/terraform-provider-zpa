@@ -37,7 +37,7 @@ func TestAccResourceApplicationSegmentInspection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "1"),
 				),
 			},
 
@@ -54,7 +54,7 @@ func TestAccResourceApplicationSegmentInspection_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "1"),
 				),
 			},
 			// Import test
