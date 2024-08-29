@@ -76,14 +76,14 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
 
 			"tcp_port_ranges": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"udp_port_ranges": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Description: "UDP port ranges used to access the app.",
@@ -466,8 +466,12 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 			remoteUDPAppPortRanges = resource.UDPPortRanges
 		}
 	}
+
+	// Manually duplicate each entry in the list to represent "From" and "To" values
+	TCPAppPortRanges := duplicatePortRanges(d.Get("tcp_port_ranges").(*schema.Set).List())
+	UDPAppPortRanges := duplicatePortRanges(d.Get("udp_port_ranges").(*schema.Set).List())
+
 	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
-	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
 	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
 		details.TCPPortRanges = TCPAppPortRanges
 	} else {
@@ -475,7 +479,6 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 	}
 
 	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
-	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
 	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
 		details.UDPPortRanges = UDPAppPortRanges
 	} else {
