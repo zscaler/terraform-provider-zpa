@@ -10,7 +10,6 @@
 ### Bug Fixes
 - [PR #481](https://github.com/zscaler/terraform-provider-zpa/pull/481) - Fixed drift issue within the attribute `tcp_port_ranges` and `udp_port_ranges` for the resource `zpa_application_segment` to ignore the order which the port numbers are configured.
 
-
 ## 3.32.4 (August, 26 2024)
 
 ### Notes
