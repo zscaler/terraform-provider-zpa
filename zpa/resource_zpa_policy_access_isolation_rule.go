@@ -156,7 +156,6 @@ func resourcePolicyIsolationRuleUpdate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return err
 	}
-	// Replace ValidatePolicyRuleConditions with ValidateConditions
 	if err := ValidateConditions(req.Conditions, zClient, GetString(d.Get("microtenant_id"))); err != nil {
 		return err
 	}
