@@ -16,15 +16,19 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 3.32.6 (August, xx 2024)
+## 3.33.0 (September, 5 2024)
 
 ### Notes
 
-- Release date: **(August, xx 2024)**
+- Release date: **(September, 5 2024)**
 - Supported Terraform version: **v1.x**
 
+### Enhancements
+- [PR #483](https://github.com/zscaler/terraform-provider-zpa/pull/483) Updated `resourceSegmentGroupUpdate` function in the resource `zpa_segment_group` to use the new GO SDK function `UpdateV2`. The `UpdateV2` function offers a newly enhanced v2 ZPA API endpoint.
+
 ### Bug Fixes
-- [PR #482](https://github.com/zscaler/terraform-provider-zpa/pull/482) - Fixed drift issue within all policy access rule v2 resources.
+- [PR #483](https://github.com/zscaler/terraform-provider-zpa/pull/483) - Fixed drift issue within all policy access rule v2 resources.
+- [PR #483](https://github.com/zscaler/terraform-provider-zpa/pull/483) - Fixed drift within the resource `zpa_provisioning_key` related to the attribute `microtenant_id` when setting the microtenant ID via environment variable.
 
 ## 3.32.5 (August, 28 2024)
 
