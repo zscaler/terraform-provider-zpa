@@ -173,7 +173,7 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, meta interface{}) error 
 		}
 	}
 
-	if _, err := segmentgroup.Update(service, id, &req); err != nil {
+	if _, err := segmentgroup.UpdateV2(service, id, &req); err != nil {
 		return err
 	}
 
