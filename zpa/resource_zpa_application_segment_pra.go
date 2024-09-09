@@ -65,6 +65,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"microtenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"segment_group_id": {
 				Type:     schema.TypeString,

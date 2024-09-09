@@ -213,6 +213,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"microtenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"server_groups": {
 				Type:        schema.TypeSet,
