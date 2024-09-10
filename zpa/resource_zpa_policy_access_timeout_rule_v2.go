@@ -65,7 +65,7 @@ func resourcePolicyTimeoutRuleV2() *schema.Resource {
 				Computed: true,
 			},
 			"conditions": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Description: "This is for proviidng the set of conditions for the policy.",
@@ -85,7 +85,7 @@ func resourcePolicyTimeoutRuleV2() *schema.Resource {
 							}, false),
 						},
 						"operands": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Optional:    true,
 							Computed:    true,
 							Description: "This signifies the various policy criteria.",
@@ -117,7 +117,7 @@ func resourcePolicyTimeoutRuleV2() *schema.Resource {
 										}, false),
 									},
 									"entry_values": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeSet,
 										Optional: true,
 										Computed: true,
 										Elem: &schema.Resource{
