@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.33.2 (September, 10 2024)
+
+### Notes
+
+- Release date: **(September, 10 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #486](https://github.com/zscaler/terraform-provider-zpa/pull/486) - Fixed drift related to common flattening and expand functions for all v2 Access policy resources.
+  ~> **NOTE** This fix does not affect existing configurations using the `v2` policy type.
+
 ## 3.33.1 (September, 8 2024)
 
 ### Notes

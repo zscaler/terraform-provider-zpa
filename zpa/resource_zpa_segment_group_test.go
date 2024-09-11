@@ -19,7 +19,6 @@ func TestAccResourceSegmentGroup_Basic(t *testing.T) {
 	resourceTypeAndName, _, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 
 	initialName := "tf-acc-test-" + generatedName
-	updatedName := "tf-updated-" + generatedName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -38,10 +37,10 @@ func TestAccResourceSegmentGroup_Basic(t *testing.T) {
 
 			// Update test
 			{
-				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, updatedName, variable.SegmentGroupDescriptionUpdate, variable.SegmentGroupEnabledUpdate),
+				Config: testAccCheckSegmentGroupConfigure(resourceTypeAndName, initialName, variable.SegmentGroupDescriptionUpdate, variable.SegmentGroupEnabledUpdate),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSegmentGroupExists(resourceTypeAndName, &segmentGroup),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "name", updatedName),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "name", initialName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.SegmentGroupDescriptionUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.SegmentGroupEnabledUpdate)),
 				),

@@ -90,9 +90,9 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"values": {
-										Type:     schema.TypeSet,
-										Optional: true,
-										// Computed:    true,
+										Type:        schema.TypeSet,
+										Optional:    true,
+										Computed:    true,
 										Description: "This denotes a list of values for the given object type. The value depend upon the key. If rhs is defined this list will be ignored",
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -130,12 +130,12 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 												"rhs": {
 													Type:     schema.TypeString,
 													Optional: true,
-													// Computed: true,
+													Computed: true,
 												},
 												"lhs": {
 													Type:     schema.TypeString,
 													Optional: true,
-													// Computed: true,
+													Computed: true,
 												},
 											},
 										},
@@ -186,6 +186,11 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 }
 
 func resourcePolicyAccessV2Create(d *schema.ResourceData, meta interface{}) error {
+
+	if err := validateObjectTypeUniqueness(d); err != nil {
+		return err
+	}
+
 	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
@@ -266,6 +271,11 @@ func resourcePolicyAccessV2Read(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourcePolicyAccessV2Update(d *schema.ResourceData, meta interface{}) error {
+
+	if err := validateObjectTypeUniqueness(d); err != nil {
+		return err
+	}
+
 	zClient := meta.(*Client)
 	service := zClient.PolicySetControllerV2
 
