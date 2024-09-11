@@ -135,9 +135,6 @@ jobs:
       - name: Check Formatting
         run: make fmtcheck
 
-      # - name: Vet Code
-      #   run: make vet
-
       - name: Lint Code
         run: make lint
 
@@ -162,7 +159,7 @@ jobs:
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
   zpa-beta-tenants:
-    needs: [zpa-qa1-tenants]
+    needs: [zpa-qa2-tenants]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
