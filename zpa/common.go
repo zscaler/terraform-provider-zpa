@@ -827,91 +827,9 @@ func GetGlobalPolicySetByPolicyType(client *Client, policyType string) (*policys
 	return globalPolicySet, nil
 }
 
-//######################################################################################################################
-//################################ ZPA ACCESS POLICY V2 COMMON CONDITIONS FUNCTIONS ####################################
-//######################################################################################################################
-
-/*
-func ExpandPolicyConditionsV2(d *schema.ResourceData) ([]policysetcontrollerv2.PolicyRuleResourceConditions, error) {
-	conditionInterface, ok := d.GetOk("conditions")
-	if ok {
-		conditions := conditionInterface.([]interface{})
-		log.Printf("[INFO] conditions data: %+v\n", conditions)
-		var conditionSets []policysetcontrollerv2.PolicyRuleResourceConditions
-		for _, condition := range conditions {
-			conditionSet, _ := condition.(map[string]interface{})
-			if conditionSet != nil {
-				operands, err := expandOperandsListV2(conditionSet["operands"])
-				if err != nil {
-					return nil, err
-				}
-				conditionSets = append(conditionSets, policysetcontrollerv2.PolicyRuleResourceConditions{
-					ID:       conditionSet["id"].(string),
-					Operator: conditionSet["operator"].(string),
-					Operands: operands,
-				})
-			}
-		}
-		return conditionSets, nil
-	}
-	return []policysetcontrollerv2.PolicyRuleResourceConditions{}, nil
-}
-
-func expandOperandsListV2(ops interface{}) ([]policysetcontrollerv2.PolicyRuleResourceOperands, error) {
-	if ops != nil {
-		operands := ops.([]interface{})
-		log.Printf("[INFO] operands data: %+v\n", operands)
-		var operandsSets []policysetcontrollerv2.PolicyRuleResourceOperands
-		for _, operand := range operands {
-			operandSet, _ := operand.(map[string]interface{})
-			id, _ := operandSet["id"].(string)
-			IdpID, _ := operandSet["idp_id"].(string)
-
-			// Extracting Values from TypeSet
-			var values []string
-			if valuesInterface, valuesOk := operandSet["values"].(*schema.Set); valuesOk && valuesInterface != nil {
-				for _, v := range valuesInterface.List() {
-					if strVal, ok := v.(string); ok {
-						values = append(values, strVal)
-					}
-				}
-			}
-
-			// Extracting EntryValues
-			var entryValues []policysetcontrollerv2.OperandsResourceLHSRHSValue
-			if entryValuesInterface, ok := operandSet["entry_values"].([]interface{}); ok {
-				for _, ev := range entryValuesInterface {
-					entryValueMap, _ := ev.(map[string]interface{})
-					lhs, _ := entryValueMap["lhs"].(string)
-					rhs, _ := entryValueMap["rhs"].(string)
-
-					entryValues = append(entryValues, policysetcontrollerv2.OperandsResourceLHSRHSValue{
-						LHS: lhs,
-						RHS: rhs,
-					})
-				}
-			}
-
-			log.Printf("[DEBUG] Extracted values: %+v\n", values)
-			log.Printf("[DEBUG] Extracted entryValues: %+v\n", entryValues)
-
-			op := policysetcontrollerv2.PolicyRuleResourceOperands{
-				ID:                id,
-				ObjectType:        operandSet["object_type"].(string),
-				IDPID:             IdpID,
-				Values:            values,
-				EntryValuesLHSRHS: entryValues,
-			}
-
-			operandsSets = append(operandsSets, op)
-		}
-
-		return operandsSets, nil
-	}
-	return []policysetcontrollerv2.PolicyRuleResourceOperands{}, nil
-}
-*/
-
+// ######################################################################################################################
+// ################################ ZPA ACCESS POLICY V2 COMMON CONDITIONS FUNCTIONS ####################################
+// ######################################################################################################################
 func ExpandPolicyConditionsV2(d *schema.ResourceData) ([]policysetcontrollerv2.PolicyRuleResourceConditions, error) {
 	conditionInterface, ok := d.GetOk("conditions")
 	if ok {
@@ -1043,6 +961,35 @@ func flattenOperandsV2(operands []policysetcontrollerv2.PolicyRuleResourceOperan
 		o[i] = operandMap
 	}
 	return o
+}
+
+func validateObjectTypeUniqueness(d *schema.ResourceData) error {
+	conditions, ok := d.GetOk("conditions")
+	if !ok {
+		return nil
+	}
+
+	conditionsSet := conditions.(*schema.Set).List()
+
+	for _, condition := range conditionsSet {
+		conditionMap := condition.(map[string]interface{})
+		if operands, ok := conditionMap["operands"].(*schema.Set); ok {
+			objectTypeSet := make(map[string]struct{})
+
+			for _, operand := range operands.List() {
+				operandMap := operand.(map[string]interface{})
+				objectType := operandMap["object_type"].(string)
+
+				// Check for duplicate object_type
+				if _, exists := objectTypeSet[objectType]; exists {
+					return fmt.Errorf("object_type '%s' can only be specified once in the operands block. Please aggregate all entry_values under the same object_type", objectType)
+				}
+				objectTypeSet[objectType] = struct{}{}
+			}
+		}
+	}
+
+	return nil
 }
 
 // ValidatePolicyRuleConditions ensures that the necessary values are provided for specific object types.
@@ -1270,63 +1217,6 @@ func fetchPolicySetIDByType(client *Client, policyType string, microTenantID str
 	return globalPolicySet.ID, nil
 }
 
-/*
-// ConvertV1ResponseToV2Request converts a PolicyRuleResource (API v1 response) to a PolicyRule (API v2 request) with aggregated values.
-func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleResource) policysetcontrollerv2.PolicyRule {
-	v2Request := policysetcontrollerv2.PolicyRule{
-		ID:                     v1Response.ID,
-		Name:                   v1Response.Name,
-		Description:            v1Response.Description,
-		Action:                 v1Response.Action,
-		PolicySetID:            v1Response.PolicySetID,
-		Operator:               v1Response.Operator,
-		CustomMsg:              v1Response.CustomMsg,
-		ZpnIsolationProfileID:  v1Response.ZpnIsolationProfileID,
-		ZpnInspectionProfileID: v1Response.ZpnInspectionProfileID,
-		Conditions:             make([]policysetcontrollerv2.PolicyRuleResourceConditions, 0),
-	}
-
-	for _, condition := range v1Response.Conditions {
-		newCondition := policysetcontrollerv2.PolicyRuleResourceConditions{
-			Operator: condition.Operator,
-			Operands: make([]policysetcontrollerv2.PolicyRuleResourceOperands, 0),
-		}
-
-		// Use a map to aggregate RHS values by ObjectType
-		operandMap := make(map[string][]string)
-		entryValuesMap := make(map[string][]policysetcontrollerv2.OperandsResourceLHSRHSValue)
-
-		for _, operand := range condition.Operands {
-			switch operand.ObjectType {
-			case "APP", "APP_GROUP", "CONSOLE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE":
-				operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
-			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE":
-				entryValuesMap[operand.ObjectType] = append(entryValuesMap[operand.ObjectType], policysetcontrollerv2.OperandsResourceLHSRHSValue{
-					LHS: operand.LHS,
-					RHS: operand.RHS,
-				})
-			}
-		}
-
-		// Create operand blocks from the aggregated data
-		for objectType, values := range operandMap {
-			newCondition.Operands = append(newCondition.Operands, policysetcontrollerv2.PolicyRuleResourceOperands{
-				ObjectType: objectType,
-				Values:     values,
-			})
-		}
-
-		for objectType, entryValues := range entryValuesMap {
-			newCondition.Operands = append(newCondition.Operands, policysetcontrollerv2.PolicyRuleResourceOperands{
-				ObjectType:        objectType,
-				EntryValuesLHSRHS: entryValues,
-			})
-		}
-		v2Request.Conditions = append(v2Request.Conditions, newCondition)
-	}
-	return v2Request
-}
-*/
 // ConvertV1ResponseToV2Request converts a PolicyRuleResource (API v1 response) to a PolicyRule (API v2 request) with aggregated values.
 func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleResource) policysetcontrollerv2.PolicyRule {
 	v2Request := policysetcontrollerv2.PolicyRule{
