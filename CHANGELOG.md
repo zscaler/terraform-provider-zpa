@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.33.3 (September, 18 2024)
+
+### Notes
+
+- Release date: **(September, 18 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #489](https://github.com/zscaler/terraform-provider-zpa/pull/489) - Fixed drift within attribute `common_apps_dto` and `pra_apps` in the `zpa_application_segment_pra` resource.
+- [PR #489](https://github.com/zscaler/terraform-provider-zpa/pull/489) - Fixed drift within attribute `common_apps_dto` and `pra_apps` in the `zpa_application_segment_inspection` resource.
+  ~> **NOTE** This fix does not affect existing configurations.
+
 ## 3.33.2 (September, 10 2024)
 
 ### Notes

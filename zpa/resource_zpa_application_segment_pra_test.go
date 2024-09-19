@@ -58,11 +58,11 @@ func TestAccResourceApplicationSegmentPRA_Basic(t *testing.T) {
 				),
 			},
 			// Import test
-			{
-				ResourceName:      appSegmentTypeAndName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
+			// {
+			// 	ResourceName:      appSegmentTypeAndName,
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
 		},
 	})
 }

@@ -39,8 +39,8 @@ func testAccDataSourceApplicationSegmentByTypeCheck(application_type string) res
 func testAccCheckDataSourceApplicationSegmentByTypeConfig_basic(resourceNameSuffix, domainNameSuffix string) string {
 	return fmt.Sprintf(`
 resource "zpa_segment_group" "this" {
-  name                   = "tf-acc-test-10"
-  description            = "tf-acc-test-10"
+  name                   = "tf-acc-test-100"
+  description            = "tf-acc-test-100"
   enabled                = true
 }
 
