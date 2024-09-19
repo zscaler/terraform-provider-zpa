@@ -7,8 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
@@ -180,6 +178,7 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, meta interface{}) error 
 	return resourceSegmentGroupRead(d, meta)
 }
 
+/*
 func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService *services.Service) {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
@@ -225,24 +224,52 @@ func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService 
 		}
 	}
 }
+*/
 
 func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
+	policySetControllerService := zClient.PolicySetController
+
 	microTenantID := GetString(d.Get("microtenant_id"))
-	policySetControllerService := zClient.PolicySetController.WithMicroTenant(microTenantID)
-	service := zClient.SegmentGroup.WithMicroTenant(microTenantID)
+	if microTenantID != "" {
+		policySetControllerService = policySetControllerService.WithMicroTenant(microTenantID)
+	}
 
-	log.Printf("[INFO] Deleting segment group ID: %v\n", d.Id())
+	service := zClient.SegmentGroup
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
-	detachSegmentGroupFromAllPolicyRules(d.Id(), policySetControllerService)
+	log.Printf("[INFO] Deleting app connector group ID: %v\n", d.Id())
+
+	//detach app connector group from all access policy rules
+	detachAppConnectorGroupFromAllAccessPolicyRules(d, policySetControllerService)
 
 	if _, err := segmentgroup.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
-	log.Printf("[INFO] segment group deleted")
+	log.Printf("[INFO] app connector group deleted")
 	return nil
 }
+
+// func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error {
+// 	zClient := meta.(*Client)
+// 	microTenantID := GetString(d.Get("microtenant_id"))
+// 	policySetControllerService := zClient.PolicySetController.WithMicroTenant(microTenantID)
+// 	service := zClient.SegmentGroup.WithMicroTenant(microTenantID)
+
+// 	log.Printf("[INFO] Deleting segment group ID: %v\n", d.Id())
+
+// 	detachSegmentGroupFromAllPolicyRules(d.Id(), policySetControllerService)
+
+// 	if _, err := segmentgroup.Delete(service, d.Id()); err != nil {
+// 		return err
+// 	}
+// 	d.SetId("")
+// 	log.Printf("[INFO] segment group deleted")
+// 	return nil
+// }
 
 func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 	segmentGroup := segmentgroup.SegmentGroup{
