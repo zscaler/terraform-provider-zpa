@@ -19,37 +19,11 @@ import (
 
 func resourceApplicationSegmentPRA() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceApplicationSegmentPRACreate,
-		Read:   resourceApplicationSegmentPRARead,
-		Update: resourceApplicationSegmentPRAUpdate,
-		Delete: resourceApplicationSegmentPRADelete,
-		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.ApplicationSegmentPRA
-
-				microTenantID := GetString(d.Get("microtenant_id"))
-				if microTenantID != "" {
-					service = service.WithMicroTenant(microTenantID)
-				}
-
-				id := d.Id()
-				_, parseIDErr := strconv.ParseInt(id, 10, 64)
-				if parseIDErr == nil {
-					// assume if the passed value is an int
-					d.Set("id", id)
-				} else {
-					resp, _, err := applicationsegmentpra.GetByName(service, id)
-					if err == nil {
-						d.SetId(resp.ID)
-						d.Set("id", resp.ID)
-					} else {
-						return []*schema.ResourceData{d}, err
-					}
-				}
-				return []*schema.ResourceData{d}, nil
-			},
-		},
+		Create:   resourceApplicationSegmentPRACreate,
+		Read:     resourceApplicationSegmentPRARead,
+		Update:   resourceApplicationSegmentPRAUpdate,
+		Delete:   resourceApplicationSegmentPRADelete,
+		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -423,7 +397,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenPRAAppServerGroupsSimple(resp.ServerGroups))
 
-	// Use the new flatten function for praApps
+	//Use the new flatten function for praApps
 	if err := d.Set("pra_apps", flattenPRAApps(resp.PRAApps)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}

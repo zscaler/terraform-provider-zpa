@@ -3,7 +3,6 @@ package zpa
 import (
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -14,32 +13,11 @@ import (
 
 func resourceApplicationSegmentInspection() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceApplicationSegmentInspectionCreate,
-		Read:   resourceApplicationSegmentInspectionRead,
-		Update: resourceApplicationSegmentInspectionUpdate,
-		Delete: resourceApplicationSegmentInspectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.ApplicationSegmentInspection
-
-				id := d.Id()
-				_, parseIDErr := strconv.ParseInt(id, 10, 64)
-				if parseIDErr == nil {
-					// assume if the passed value is an int
-					d.Set("id", id)
-				} else {
-					resp, _, err := applicationsegmentinspection.GetByName(service, id)
-					if err == nil {
-						d.SetId(resp.ID)
-						d.Set("id", resp.ID)
-					} else {
-						return []*schema.ResourceData{d}, err
-					}
-				}
-				return []*schema.ResourceData{d}, nil
-			},
-		},
+		Create:   resourceApplicationSegmentInspectionCreate,
+		Read:     resourceApplicationSegmentInspectionRead,
+		Update:   resourceApplicationSegmentInspectionUpdate,
+		Delete:   resourceApplicationSegmentInspectionDelete,
+		Importer: &schema.ResourceImporter{},
 
 		Schema: map[string]*schema.Schema{
 			"id": {

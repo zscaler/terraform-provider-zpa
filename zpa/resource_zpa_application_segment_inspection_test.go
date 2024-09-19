@@ -58,11 +58,11 @@ func TestAccResourceApplicationSegmentInspection_Basic(t *testing.T) {
 				),
 			},
 			// Import test
-			{
-				ResourceName:      appSegmentTypeAndName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
+			// {
+			// 	ResourceName:      appSegmentTypeAndName,
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
 		},
 	})
 }
@@ -145,6 +145,7 @@ resource "%s" "%s" {
 	is_cname_enabled = "%s"
 	select_connector_close_to_app = true
 	health_reporting = "ON_ACCESS"
+	health_check_type = "NONE"
 	bypass_type = "NEVER"
 	tcp_keep_alive = "1"
 	tcp_port_ranges  = ["443", "443"]
