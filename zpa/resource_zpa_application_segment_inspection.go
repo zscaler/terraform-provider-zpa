@@ -201,10 +201,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"enabled": {
 							Type:     schema.TypeBool,
 							Computed: true,
@@ -621,7 +617,6 @@ func flattenInspectionApps(apps []applicationsegmentinspection.InspectionAppDto)
 		appConfigMap := map[string]interface{}{
 			"id":                     app.ID,
 			"name":                   app.Name,
-			"description":            app.Description,
 			"enabled":                app.Enabled,
 			"application_port":       app.ApplicationPort,
 			"application_protocol":   app.ApplicationProtocol,
