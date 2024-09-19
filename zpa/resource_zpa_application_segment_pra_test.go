@@ -141,7 +141,6 @@ resource "%s" "%s" {
 	is_cname_enabled = "%s"
 	select_connector_close_to_app = true
 	health_reporting = "ON_ACCESS"
-	health_check_type = "NONE"
 	bypass_type = "NEVER"
 	tcp_port_ranges = ["22", "22", "3389", "3389"]
 	domain_names = ["ssh_pra.example.com", "rdp_pra.example.com"]
