@@ -96,7 +96,7 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 				Description: "Name of the application.",
 			},
 			"inspection_apps": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -104,8 +104,16 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"app_id": {
+						"name": {
 							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"enabled": {
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
 						"application_port": {
@@ -124,20 +132,16 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"domain": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"enabled": {
-							Type:     schema.TypeBool,
+						"app_id": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"name": {
-							Type:     schema.TypeString,
+						"trusted_untrusted_cert": {
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
 					},
