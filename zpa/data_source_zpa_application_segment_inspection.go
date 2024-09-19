@@ -224,8 +224,8 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta int
 		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
 		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
-		if err := d.Set("inspection_apps", flattenInspectionApps(resp)); err != nil {
-			return fmt.Errorf("failed to read inspection apps %s", err)
+		if err := d.Set("inspection_apps", flattenInspectionApps(resp.InspectionAppDto)); err != nil {
+			return fmt.Errorf("failed to read inspection apps in application segment %s", err)
 		}
 
 		if err := d.Set("server_groups", flattenInspectionAppServerGroups(resp.AppServerGroups)); err != nil {
@@ -256,24 +256,4 @@ func flattenInspectionAppServerGroups(appServerGroup []applicationsegmentinspect
 	mapIds["id"] = ids
 	result[0] = mapIds
 	return result
-}
-
-func flattenInspectionApps(inspectionApp *applicationsegmentinspection.AppSegmentInspection) []interface{} {
-	inspectionApps := make([]interface{}, len(inspectionApp.InspectionAppDto))
-	for i, val := range inspectionApp.InspectionAppDto {
-		inspectionApps[i] = map[string]interface{}{
-			"id":                   val.ID,
-			"app_id":               val.AppID,
-			"application_port":     val.ApplicationPort,
-			"application_protocol": val.ApplicationProtocol,
-			"certificate_id":       val.CertificateID,
-			"certificate_name":     val.CertificateName,
-			"description":          val.Description,
-			"domain":               val.Domain,
-			"enabled":              val.Enabled,
-			"name":                 val.Name,
-		}
-	}
-
-	return inspectionApps
 }

@@ -188,6 +188,66 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 					"0", "1",
 				}, false),
 			},
+			"inspection_apps": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"enabled": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"application_port": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"application_protocol": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"certificate_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"certificate_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"domain": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"app_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"trusted_untrusted_cert": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"microtenant_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"common_apps_dto": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -340,8 +400,8 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta inter
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp.AppServerGroups))
 
-	if err := d.Set("common_apps_dto", flattenInspectionCommonAppsDto(resp.InspectionAppDto)); err != nil {
-		return fmt.Errorf("failed to read common application in application segment %s", err)
+	if err := d.Set("inspection_apps", flattenInspectionApps(resp.InspectionAppDto)); err != nil {
+		return fmt.Errorf("failed to read inspection apps in application segment %s", err)
 	}
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
@@ -559,33 +619,32 @@ func expandInspectionAppServerGroups(d *schema.ResourceData) []applicationsegmen
 	return []applicationsegmentinspection.AppServerGroups{}
 }
 
-func flattenInspectionCommonAppsDto(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
-	commonAppsDto := make([]interface{}, 1)
+func flattenInspectionApps(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
+	if len(apps) == 0 {
+		return []interface{}{}
+	}
+
 	appsConfig := make([]interface{}, len(apps))
 	for i, app := range apps {
-		appTypes := []string{}
-		if app.ApplicationProtocol == "HTTP" || app.ApplicationProtocol == "HTTPS" {
-			appTypes = append(appTypes, "INSPECT")
-		}
 		appConfigMap := map[string]interface{}{
-			"id":                   app.ID,
-			"name":                 app.Name,
-			"enabled":              app.Enabled,
-			"domain":               app.Domain,
-			"application_port":     app.ApplicationPort,
-			"certificate_id":       app.CertificateID,
-			"application_protocol": app.ApplicationProtocol,
-			"trust_untrusted_cert": app.TrustUntrustedCert,
-			"app_types":            appTypes,
+			"id":                     app.ID,
+			"name":                   app.Name,
+			"description":            app.Description,
+			"enabled":                app.Enabled,
+			"application_port":       app.ApplicationPort,
+			"application_protocol":   app.ApplicationProtocol,
+			"certificate_id":         app.CertificateID,
+			"certificate_name":       app.CertificateName,
+			"domain":                 app.Domain,
+			"app_id":                 app.AppID,
+			"trusted_untrusted_cert": app.TrustUntrustedCert,
+			"microtenant_id":         app.MicroTenantID,
+			"microtenant_name":       app.MicroTenantName,
 		}
 		appsConfig[i] = appConfigMap
 	}
-	commonAppsDto[0] = map[string]interface{}{
-		"apps_config": appsConfig,
-	}
-	return commonAppsDto
+	return appsConfig
 }
-
 func validateProtocolAndCertID(d *schema.ResourceData) error {
 	commonAppsDto, ok := d.GetOk("common_apps_dto")
 	if !ok || len(commonAppsDto.(*schema.Set).List()) == 0 {
