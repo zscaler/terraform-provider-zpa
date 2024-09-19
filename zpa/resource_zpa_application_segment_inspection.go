@@ -237,14 +237,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
-						"microtenant_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"microtenant_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -412,18 +404,6 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta inter
 		return err
 	}
 	return nil
-}
-
-func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroup))
-	for i, group := range serverGroup {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
 }
 
 func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -619,6 +599,18 @@ func expandInspectionAppServerGroups(d *schema.ResourceData) []applicationsegmen
 	return []applicationsegmentinspection.AppServerGroups{}
 }
 
+func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroup))
+	for i, group := range serverGroup {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+
 func flattenInspectionApps(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
 	if len(apps) == 0 {
 		return []interface{}{}
@@ -638,8 +630,6 @@ func flattenInspectionApps(apps []applicationsegmentinspection.InspectionAppDto)
 			"domain":                 app.Domain,
 			"app_id":                 app.AppID,
 			"trusted_untrusted_cert": app.TrustUntrustedCert,
-			"microtenant_id":         app.MicroTenantID,
-			"microtenant_name":       app.MicroTenantName,
 		}
 		appsConfig[i] = appConfigMap
 	}
