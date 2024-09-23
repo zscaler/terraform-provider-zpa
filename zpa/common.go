@@ -1227,6 +1227,7 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 		PolicySetID:            v1Response.PolicySetID,
 		Operator:               v1Response.Operator,
 		CustomMsg:              v1Response.CustomMsg,
+		MicroTenantID:          v1Response.MicroTenantID,
 		ZpnIsolationProfileID:  v1Response.ZpnIsolationProfileID,
 		ZpnInspectionProfileID: v1Response.ZpnInspectionProfileID,
 		Conditions:             make([]policysetcontrollerv2.PolicyRuleResourceConditions, 0),

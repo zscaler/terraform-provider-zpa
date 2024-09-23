@@ -307,20 +307,19 @@ func resourcePolicyCapabilitiesAccessRuleUpdate(d *schema.ResourceData, meta int
 
 func resourcePolicyCapabilitiesAccessRuleDelete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
-	microTenantID := GetString(d.Get("microtenant_id"))
+	service := zClient.PolicySetControllerV2
 
-	// Assume "CAPABILITIES_POLICY" is the policy type for this resource. Adjust as needed.
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	policySetID, err := fetchPolicySetIDByType(zClient, "CAPABILITIES_POLICY", microTenantID)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
-
-	service := zClient.PolicySetControllerV2
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
 
 	if _, err := policysetcontrollerv2.Delete(service, policySetID, d.Id()); err != nil {
 		return err

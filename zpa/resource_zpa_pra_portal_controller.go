@@ -74,6 +74,7 @@ func resourcePRAPortalController() *schema.Resource {
 			"certificate_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The unique identifier of the certificate",
 			},
 			"user_notification": {

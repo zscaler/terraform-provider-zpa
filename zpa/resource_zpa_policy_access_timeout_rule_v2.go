@@ -301,7 +301,13 @@ func resourcePolicyTimeoutRuleV2Update(d *schema.ResourceData, meta interface{})
 
 func resourcePolicyTimeoutRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
+
+	service := zClient.PolicySetControllerV2
+
 	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	// Assume "TIMEOUT_POLICY" is the policy type for this resource. Adjust as needed.
 	policySetID, err := fetchPolicySetIDByType(zClient, "TIMEOUT_POLICY", microTenantID)
@@ -311,13 +317,8 @@ func resourcePolicyTimeoutRuleV2Delete(d *schema.ResourceData, meta interface{})
 
 	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
 
-	service := zClient.PolicySetControllerV2
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
-
 	if _, err := policysetcontrollerv2.Delete(service, policySetID, d.Id()); err != nil {
-		return err
+		return fmt.Errorf("failed to delete policy timeout rule: %w", err)
 	}
 
 	return nil

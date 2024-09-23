@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.33.4 (September, 23 2024)
+
+### Notes
+
+- Release date: **(September, 23 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #492](https://github.com/zscaler/terraform-provider-zpa/pull/492) - Fixed drift within attribute `zpa_policy_credential_access_rule`.
+- [PR #492](https://github.com/zscaler/terraform-provider-zpa/pull/492) - Fixed detachement function within `zpa_segment_group`
+  ~> **NOTE** This fix does not affect existing configurations.
+
 ## 3.33.3 (September, 18 2024)
 
 ### Notes
