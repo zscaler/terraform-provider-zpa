@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -213,6 +214,15 @@ func resourcePolicyCredentialAccessRuleRead(d *schema.ResourceData, meta interfa
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
 	_ = d.Set("credential", flattenCredential(resp.Credential))
 
+	// Ensure microtenant_id is being correctly set in state
+	if v2PolicyRule.MicroTenantID != "" {
+		log.Printf("[INFO] Setting microtenant_id in state: %s\n", v2PolicyRule.MicroTenantID)
+		_ = d.Set("microtenant_id", v2PolicyRule.MicroTenantID)
+	} else {
+		log.Printf("[WARN] microtenant_id is empty in response.")
+		_ = d.Set("microtenant_id", "")
+	}
+
 	return nil
 }
 
@@ -259,7 +269,12 @@ func resourcePolicyCredentialAccessRuleUpdate(d *schema.ResourceData, meta inter
 
 func resourcePolicyCredentialAccessRuleDelete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
+	service := zClient.PolicySetControllerV2
+
 	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	policySetID, err := fetchPolicySetIDByType(zClient, "CREDENTIAL_POLICY", microTenantID)
 	if err != nil {
@@ -268,13 +283,8 @@ func resourcePolicyCredentialAccessRuleDelete(d *schema.ResourceData, meta inter
 
 	log.Printf("[INFO] Deleting policy credential rule with id %v\n", d.Id())
 
-	service := zClient.PolicySetControllerV2
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
-
 	if _, err := policysetcontrollerv2.Delete(service, policySetID, d.Id()); err != nil {
-		return err
+		return fmt.Errorf("failed to delete policy credential rule: %w", err)
 	}
 
 	return nil

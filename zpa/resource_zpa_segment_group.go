@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
 )
 
@@ -178,53 +180,38 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, meta interface{}) error 
 	return resourceSegmentGroupRead(d, meta)
 }
 
-/*
-func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService *services.Service) {
+func detachSegmentGroupFromAllPolicyRules(d *schema.ResourceData, policySetControllerService *services.Service) {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
-
-	var rules []policysetcontroller.PolicyRule
-	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
-
-	for _, t := range types {
-		policySet, _, err := policysetcontroller.GetByPolicyType(policySetControllerService, t)
-		if err != nil {
-			continue
-		}
-		r, _, err := policysetcontroller.GetAllByType(policySetControllerService, t)
-		if err != nil {
-			continue
-		}
-		for _, rule := range r {
-			rule.PolicySetID = policySet.ID
-			rules = append(rules, rule)
-		}
+	accessPolicySet, _, err := policysetcontroller.GetByPolicyType(policySetControllerService, "ACCESS_POLICY")
+	if err != nil {
+		return
 	}
-
+	rules, _, err := policysetcontroller.GetAllByType(policySetControllerService, "ACCESS_POLICY")
+	if err != nil {
+		return
+	}
 	for _, rule := range rules {
+		ids := []policysetcontroller.AppConnectorGroups{}
 		changed := false
-		for i, condition := range rule.Conditions {
-			operands := []policysetcontroller.Operands{}
-			for _, op := range condition.Operands {
-				if op.ObjectType == "APP_GROUP" && op.LHS == "id" && op.RHS == id {
-					changed = true
-					continue
-				}
-				operands = append(operands, op)
+		for _, app := range rule.AppConnectorGroups {
+			if app.ID == d.Id() {
+				changed = true
+				continue
 			}
-			rule.Conditions[i].Operands = operands
+			ids = append(ids, policysetcontroller.AppConnectorGroups{
+				ID: app.ID,
+			})
 		}
-		if len(rule.Conditions) == 0 {
-			rule.Conditions = []policysetcontroller.Conditions{}
-		}
+		rule.AppConnectorGroups = ids
 		if changed {
-			if _, err := policysetcontroller.UpdateRule(policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
+			microTenantID := GetString(d.Get("microtenant_id"))
+			if _, err := policysetcontroller.UpdateRule(policySetControllerService.WithMicroTenant(microTenantID), accessPolicySet.ID, rule.ID, &rule); err != nil {
 				continue
 			}
 		}
 	}
 }
-*/
 
 func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
@@ -243,33 +230,15 @@ func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[INFO] Deleting app connector group ID: %v\n", d.Id())
 
 	//detach app connector group from all access policy rules
-	detachAppConnectorGroupFromAllAccessPolicyRules(d, policySetControllerService)
+	detachSegmentGroupFromAllPolicyRules(d, policySetControllerService)
 
 	if _, err := segmentgroup.Delete(service, d.Id()); err != nil {
 		return err
 	}
 	d.SetId("")
-	log.Printf("[INFO] app connector group deleted")
+	log.Printf("[INFO] segment group deleted")
 	return nil
 }
-
-// func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error {
-// 	zClient := meta.(*Client)
-// 	microTenantID := GetString(d.Get("microtenant_id"))
-// 	policySetControllerService := zClient.PolicySetController.WithMicroTenant(microTenantID)
-// 	service := zClient.SegmentGroup.WithMicroTenant(microTenantID)
-
-// 	log.Printf("[INFO] Deleting segment group ID: %v\n", d.Id())
-
-// 	detachSegmentGroupFromAllPolicyRules(d.Id(), policySetControllerService)
-
-// 	if _, err := segmentgroup.Delete(service, d.Id()); err != nil {
-// 		return err
-// 	}
-// 	d.SetId("")
-// 	log.Printf("[INFO] segment group deleted")
-// 	return nil
-// }
 
 func expandSegmentGroup(d *schema.ResourceData) segmentgroup.SegmentGroup {
 	segmentGroup := segmentgroup.SegmentGroup{
