@@ -25,7 +25,6 @@ func resourceApplicationSegment() *schema.Resource {
 		Update: resourceApplicationSegmentUpdate,
 		Delete: resourceApplicationSegmentDelete,
 		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-			// Validation for select_connector_close_to_app
 			if selectConnectorCloseToApp, ok := d.GetOk("select_connector_close_to_app"); ok && selectConnectorCloseToApp.(bool) {
 				udpAppPortRange := d.Get("udp_port_range").(*schema.Set).List()
 				udpPortRanges := d.Get("udp_port_ranges").([]interface{})
@@ -35,7 +34,6 @@ func resourceApplicationSegment() *schema.Resource {
 				}
 			}
 
-			// Validation for bypass_type
 			if bypassType, ok := d.GetOk("bypass_type"); ok && bypassType.(string) == "ALWAYS" {
 				tcpPortRange := d.Get("tcp_port_range").(*schema.Set).List()
 				tcpPortRanges := d.Get("tcp_port_ranges").([]interface{})

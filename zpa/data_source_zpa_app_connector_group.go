@@ -372,7 +372,7 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, meta interface{}) erro
 		_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
-		_ = d.Set("connectors", flattenConnectors(resp.Connectors))
+		_ = d.Set("connectors", flattenConnectors(resp))
 		_ = d.Set("microtenant_id", resp.MicroTenantID)
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
@@ -386,9 +386,9 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func flattenConnectors(appConnector []appconnectorgroup.Connector) []interface{} {
-	appConnectors := make([]interface{}, len(appConnector))
-	for i, appConnectorItem := range appConnector {
+func flattenConnectors(appConnector *appconnectorgroup.AppConnectorGroup) []interface{} {
+	appConnectors := make([]interface{}, len(appConnector.Connectors))
+	for i, appConnectorItem := range appConnector.Connectors {
 		appConnectors[i] = map[string]interface{}{
 			"application_start_time":               appConnectorItem.ApplicationStartTime,
 			"appconnector_group_id":                appConnectorItem.AppConnectorGroupID,
