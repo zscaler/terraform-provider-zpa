@@ -102,8 +102,8 @@ The following arguments are supported:
     ~> **NOTE**: The approval `start_time` cannot be more than 1 hour in the past.
 - `end_time` (String) The set end time in either `RFC1123Z` i.e `"Mon, 02 Jan 2006 15:04:05 -0700"` or `RFC1123` i.e `"Mon, 02 Jan 2006 15:04:05 MST"` format that the user has access to the Privileged Remote Access portal.
     ~> **NOTE**: The approval `end_time` cannot be more than 1 year or 365 days.
-- `pra_application` (Block Set) The Privileged Remote Access application segment resource
-    - `id` (List of Strings) The unique identifier of the Privileged Remote Access-enabled application segment.
+- `applications` (Block Set) The unique identifier of the application segment.
+    - `id` (List of Strings) The unique identifier of the application segment
 - `working_hours` - The Privileged Remote Access application segment resource
     - `days` (List of Strings) The days of the week that you want to enable the privileged approval. Supported values are: `"MON"`, `"TUE"`, `"WED"`, `"THU"`, `"FRI"`, `"SAT"`, `"SUN"`
     - `start_time` - (String) The start time that the user has access to the privileged approval.

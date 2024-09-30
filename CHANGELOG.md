@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.33.5 (September, 30 2024)
+
+### Notes
+
+- Release date: **(September, 30 2024)**
+- Supported Terraform version: **v1.x**
+
+### Enhancement
+- [PR #493](https://github.com/zscaler/terraform-provider-zpa/pull/493) - Added plan stage validation for attributes `select_connector_close_to_app` and `bypass_type` in the resource `zpa_application_segment`.
+- [PR #493](https://github.com/zscaler/terraform-provider-zpa/pull/493) - Added new attribute `use_in_dr_mode` in the resource `zpa_service_edge_group`.
+
 ## 3.33.4 (September, 23 2024)
 
 ### Notes

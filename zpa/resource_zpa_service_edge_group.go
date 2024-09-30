@@ -9,7 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgecontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/trustednetwork"
 )
 
 func resourceServiceEdgeGroup() *schema.Resource {
@@ -108,6 +110,11 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Optional:    true,
 				Default:     true,
 				Description: "Whether the default version profile of the App Connector Group is applied or overridden.",
+			},
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
 			},
 			"service_edges": {
 				Type:     schema.TypeSet,
@@ -283,6 +290,7 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, meta interface{}) erro
 	_ = d.Set("longitude", resp.Longitude)
 	_ = d.Set("location", resp.Location)
 	_ = d.Set("upgrade_day", resp.UpgradeDay)
+	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
@@ -361,6 +369,7 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		Location:                      d.Get("location").(string),
 		Longitude:                     d.Get("longitude").(string),
 		UpgradeDay:                    d.Get("upgrade_day").(string),
+		UseInDrMode:                   d.Get("use_in_dr_mode").(bool),
 		UpgradeTimeInSecs:             d.Get("upgrade_time_in_secs").(string),
 		VersionProfileID:              d.Get("version_profile_id").(string),
 		VersionProfileName:            d.Get("version_profile_name").(string),
@@ -373,14 +382,15 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		ServiceEdges:                  expandServiceEdges(d),
 		TrustedNetworks:               expandTrustedNetworks(d),
 	}
+
 	return serviceEdgeGroup
 }
 
-func expandServiceEdges(d *schema.ResourceData) []serviceedgegroup.ServiceEdges {
+func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceEdgeController {
 	serviceEdgesGroupInterface, ok := d.GetOk("service_edges")
 	if ok {
 		serviceEdgeSet := serviceEdgesGroupInterface.(*schema.Set)
-		var serviceEdgesGroups []serviceedgegroup.ServiceEdges
+		var serviceEdgesGroups []serviceedgecontroller.ServiceEdgeController
 
 		for _, serviceEdgeInterface := range serviceEdgeSet.List() {
 			serviceEdgeMap, ok := serviceEdgeInterface.(map[string]interface{})
@@ -388,7 +398,7 @@ func expandServiceEdges(d *schema.ResourceData) []serviceedgegroup.ServiceEdges 
 				idSet, ok := serviceEdgeMap["id"].(*schema.Set)
 				if ok {
 					for _, id := range idSet.List() {
-						serviceEdgesGroups = append(serviceEdgesGroups, serviceedgegroup.ServiceEdges{
+						serviceEdgesGroups = append(serviceEdgesGroups, serviceedgecontroller.ServiceEdgeController{
 							ID: id.(string),
 						})
 					}
@@ -398,18 +408,18 @@ func expandServiceEdges(d *schema.ResourceData) []serviceedgegroup.ServiceEdges 
 		return serviceEdgesGroups
 	}
 
-	return []serviceedgegroup.ServiceEdges{}
+	return []serviceedgecontroller.ServiceEdgeController{}
 }
 
-func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNetworks {
+func expandTrustedNetworks(d *schema.ResourceData) []trustednetwork.TrustedNetwork {
 	trustedNetworksInterface, ok := d.GetOk("trusted_networks")
 	if ok {
 		trustedNetworkSet, ok := trustedNetworksInterface.(*schema.Set)
 		if !ok {
-			return []serviceedgegroup.TrustedNetworks{}
+			return []trustednetwork.TrustedNetwork{}
 		}
 		log.Printf("[INFO] trusted network data: %+v\n", trustedNetworkSet)
-		var trustedNetworks []serviceedgegroup.TrustedNetworks
+		var trustedNetworks []trustednetwork.TrustedNetwork
 		for _, trustedNetwork := range trustedNetworkSet.List() {
 			trustedNetworkMap, ok := trustedNetwork.(map[string]interface{})
 			if ok && trustedNetworkMap != nil {
@@ -418,7 +428,7 @@ func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNet
 					continue
 				}
 				for _, id := range idSet.List() {
-					trustedNetworks = append(trustedNetworks, serviceedgegroup.TrustedNetworks{
+					trustedNetworks = append(trustedNetworks, trustednetwork.TrustedNetwork{
 						ID: id.(string),
 					})
 				}
@@ -427,10 +437,10 @@ func expandTrustedNetworks(d *schema.ResourceData) []serviceedgegroup.TrustedNet
 		return trustedNetworks
 	}
 
-	return []serviceedgegroup.TrustedNetworks{}
+	return []trustednetwork.TrustedNetwork{}
 }
 
-func flattenAppTrustedNetworksSimple(trustedNetworks []serviceedgegroup.TrustedNetworks) []interface{} {
+func flattenAppTrustedNetworksSimple(trustedNetworks []trustednetwork.TrustedNetwork) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
 	ids := make([]string, len(trustedNetworks))
@@ -442,7 +452,7 @@ func flattenAppTrustedNetworksSimple(trustedNetworks []serviceedgegroup.TrustedN
 	return result
 }
 
-func flattenServiceEdgeSimple(serviceEdges []serviceedgegroup.ServiceEdges) []interface{} {
+func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeController) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
 	ids := make([]string, len(serviceEdges))

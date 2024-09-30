@@ -25,6 +25,10 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Name of the Service Edge Group.",
 			},
+			"alt_cloud": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"city_country": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -75,7 +79,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Whether the default version profile of the App Connector Group is applied or overridden.",
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -83,12 +87,72 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"use_in_dr_mode": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"site_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"site_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"upgrade_day": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Service Edges in this group will attempt to update to a newer version of the software during this specified day.",
+			},
+			"upgrade_time_in_secs": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Service Edges in this group will attempt to update to a newer version of the software during this specified time.",
+			},
+			"version_profile_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the version profile. To learn more",
+			},
+			"version_profile_name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the version profile. To learn more",
+			},
+			"version_profile_visibility_scope": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of the version profile. To learn more",
+			},
+			"grace_distance_enabled": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "If enabled, allows ZPA Private Service Edge Groups within the specified distance to be prioritized over a closer ZPA Public Service Edge.",
+			},
+			"grace_distance_value": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Indicates the maximum distance in miles or kilometers to ZPA Private Service Edge groups that would override a ZPA Public Service Edge",
+			},
+			"grace_distance_value_unit": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Indicates the grace distance unit of measure in miles or kilometers. This value is only required if grace_distance_value is set to true",
+			},
 			"service_edges": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"application_start_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"service_edge_group_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"service_edge_group_name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -132,7 +196,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"ipacl": {
+						"ip_acl": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -164,10 +228,6 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"listen_ips": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"location": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -176,7 +236,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -184,9 +244,13 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"name": {
+						"listen_ips": {
 							Type:     schema.TypeString,
 							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						"provisioning_key_id": {
 							Type:     schema.TypeString,
@@ -204,14 +268,6 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"service_edge_group_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"service_edge_group_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"private_ip": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -225,7 +281,15 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
+						"publish_ipv6": {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
 						"sarge_version": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"runtime_os": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -242,12 +306,28 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"zpn_sub_module_upgrade_list": {
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"microtenant_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"private_broker_version": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"application_start_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"broker_id": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -259,11 +339,27 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"entity_gid": {
+									"disable_auto_update": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"last_connect_time": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"modifiedby": {
+									"last_disconnect_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"last_upgraded_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"lone_warrior": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"modified_by": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -271,11 +367,55 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"expected_version": {
+									"platform": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"role": {
+									"platform_detail": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"previous_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"service_edge_group_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"private_ip": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"public_ip": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"restart_instructions": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"restart_time_in_sec": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"runtime_os": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"sarge_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"system_start_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"tunnel_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"upgrade_attempt": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -283,9 +423,65 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"upgrade_time": {
-										Type:     schema.TypeString,
+									"upgrade_now_once": {
+										Type:     schema.TypeBool,
 										Computed: true,
+									},
+									"zpn_sub_module_upgrade": {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"id": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"creation_time": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"current_version": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"entity_gid": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"entity_type": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"expected_version": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"modified_by": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"modified_time": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"previous_version": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"role": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"upgrade_status": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"upgrade_time": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+											},
+										},
 									},
 								},
 							},
@@ -314,7 +510,7 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"modifiedby": {
+						"modified_by": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -336,46 +532,6 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 						},
 					},
 				},
-			},
-			"upgrade_day": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Service Edges in this group will attempt to update to a newer version of the software during this specified day.",
-			},
-			"upgrade_time_in_secs": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Service Edges in this group will attempt to update to a newer version of the software during this specified time.",
-			},
-			"version_profile_id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "ID of the version profile. To learn more",
-			},
-			"version_profile_name": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "ID of the version profile. To learn more",
-			},
-			"version_profile_visibility_scope": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "ID of the version profile. To learn more",
-			},
-			"grace_distance_enabled": {
-				Type:        schema.TypeBool,
-				Computed:    true,
-				Description: "If enabled, allows ZPA Private Service Edge Groups within the specified distance to be prioritized over a closer ZPA Public Service Edge.",
-			},
-			"grace_distance_value": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Indicates the maximum distance in miles or kilometers to ZPA Private Service Edge groups that would override a ZPA Public Service Edge",
-			},
-			"grace_distance_value_unit": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Indicates the grace distance unit of measure in miles or kilometers. This value is only required if grace_distance_value is set to true",
 			},
 		},
 	}
@@ -411,15 +567,19 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, meta interface{}) er
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("enabled", resp.Enabled)
+		_ = d.Set("alt_cloud", resp.AltCloud)
 		_ = d.Set("geo_location_id", resp.GeoLocationID)
 		_ = d.Set("is_public", resp.IsPublic)
 		_ = d.Set("latitude", resp.Latitude)
 		_ = d.Set("location", resp.Location)
 		_ = d.Set("longitude", resp.Longitude)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("upgrade_day", resp.UpgradeDay)
+		_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
+		_ = d.Set("site_id", resp.SiteID)
+		_ = d.Set("site_name", resp.SiteName)
 		_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 		_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
@@ -429,7 +589,7 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, meta interface{}) er
 		_ = d.Set("grace_distance_value", resp.GraceDistanceValue)
 		_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
 		_ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
-		_ = d.Set("service_edges", flattenServiceEdges(resp.ServiceEdges))
+		_ = d.Set("service_edges", flattenServiceEdges(resp))
 
 	} else {
 		return fmt.Errorf("couldn't find any service edge group with name '%s' or id '%s'", name, id)
@@ -438,9 +598,10 @@ func dataSourceServiceEdgeGroupRead(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func flattenServiceEdges(serviceEdge []serviceedgegroup.ServiceEdges) []interface{} {
-	serviceEdges := make([]interface{}, len(serviceEdge))
-	for i, serviceEdge := range serviceEdge {
+func flattenServiceEdges(serviceEdgeGroup *serviceedgegroup.ServiceEdgeGroup) []interface{} {
+	// Access the ServiceEdges directly from the ServiceEdgeGroup struct
+	serviceEdges := make([]interface{}, len(serviceEdgeGroup.ServiceEdges))
+	for i, serviceEdge := range serviceEdgeGroup.ServiceEdges {
 		serviceEdges[i] = map[string]interface{}{
 			"application_start_time":               serviceEdge.ApplicationStartTime,
 			"control_channel_status":               serviceEdge.ControlChannelStatus,
@@ -453,7 +614,7 @@ func flattenServiceEdges(serviceEdge []serviceedgegroup.ServiceEdges) []interfac
 			"expected_version":                     serviceEdge.ExpectedVersion,
 			"fingerprint":                          serviceEdge.Fingerprint,
 			"id":                                   serviceEdge.ID,
-			"ipacl":                                serviceEdge.IPACL,
+			"ip_acl":                               serviceEdge.IPACL,
 			"issued_cert_id":                       serviceEdge.IssuedCertID,
 			"last_broker_connect_time":             serviceEdge.LastBrokerConnectTime,
 			"last_broker_connect_time_duration":    serviceEdge.LastBrokerConnectTimeDuration,
@@ -464,7 +625,7 @@ func flattenServiceEdges(serviceEdge []serviceedgegroup.ServiceEdges) []interfac
 			"location":                             serviceEdge.Location,
 			"longitude":                            serviceEdge.Longitude,
 			"listen_ips":                           serviceEdge.ListenIPs,
-			"modifiedby":                           serviceEdge.ModifiedBy,
+			"modified_by":                          serviceEdge.ModifiedBy,
 			"modified_time":                        serviceEdge.ModifiedTime,
 			"name":                                 serviceEdge.Name,
 			"provisioning_key_id":                  serviceEdge.ProvisioningKeyID,
@@ -480,6 +641,7 @@ func flattenServiceEdges(serviceEdge []serviceedgegroup.ServiceEdges) []interfac
 			"enrollment_cert":                      serviceEdge.EnrollmentCert,
 			"upgrade_attempt":                      serviceEdge.UpgradeAttempt,
 			"upgrade_status":                       serviceEdge.UpgradeStatus,
+			"private_broker_version":               flattenPrivateBrokerVersion(&serviceEdge.PrivateBrokerVersion),
 		}
 	}
 	return serviceEdges
@@ -493,7 +655,7 @@ func flattenTrustedNetworks(trustedNetwork *serviceedgegroup.ServiceEdgeGroup) [
 			"domain":             val.Domain,
 			"id":                 val.ID,
 			"master_customer_id": val.MasterCustomerID,
-			"modifiedby":         val.ModifiedBy,
+			"modified_by":        val.ModifiedBy,
 			"modified_time":      val.ModifiedTime,
 			"name":               val.Name,
 			"network_id":         val.NetworkID,

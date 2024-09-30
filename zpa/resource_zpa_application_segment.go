@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -23,6 +24,29 @@ func resourceApplicationSegment() *schema.Resource {
 		Read:   resourceApplicationSegmentRead,
 		Update: resourceApplicationSegmentUpdate,
 		Delete: resourceApplicationSegmentDelete,
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			if selectConnectorCloseToApp, ok := d.GetOk("select_connector_close_to_app"); ok && selectConnectorCloseToApp.(bool) {
+				udpAppPortRange := d.Get("udp_port_range").(*schema.Set).List()
+				udpPortRanges := d.Get("udp_port_ranges").([]interface{})
+
+				if len(udpAppPortRange) > 0 || len(udpPortRanges) > 0 {
+					return fmt.Errorf("the protocol configuration for the application is invalid. App Connector Closest to App supports only TCP applications")
+				}
+			}
+
+			if bypassType, ok := d.GetOk("bypass_type"); ok && bypassType.(string) == "ALWAYS" {
+				tcpPortRange := d.Get("tcp_port_range").(*schema.Set).List()
+				tcpPortRanges := d.Get("tcp_port_ranges").([]interface{})
+				udpPortRange := d.Get("udp_port_range").(*schema.Set).List()
+				udpPortRanges := d.Get("udp_port_ranges").([]interface{})
+
+				if len(tcpPortRange) > 0 || len(tcpPortRanges) > 0 || len(udpPortRange) > 0 || len(udpPortRanges) > 0 {
+					return fmt.Errorf("TCP and UDP port configuration must be disabled as bypass_type is set to ALWAYS. In order to add ports, please change the bypass_type to NEVER or ON_NET")
+				}
+			}
+
+			return nil
+		},
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				client := meta.(*Client)
@@ -101,7 +125,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"tcp_port_range": resourceAppSegmentPortRange("tcp port range"),
 			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
 			"tcp_port_ranges": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: "TCP port ranges used to access the app.",
@@ -109,7 +133,7 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 
 			"udp_port_ranges": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: "UDP port ranges used to access the app.",
@@ -181,7 +205,6 @@ func resourceApplicationSegment() *schema.Resource {
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 			},
 			"use_in_dr_mode": {
 				Type:     schema.TypeBool,
@@ -247,9 +270,9 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, meta interface{}) 
 
 	req := expandApplicationSegmentRequest(d, zClient, "")
 
-	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
-	}
+	// if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	// 	return err
+	// }
 
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
@@ -328,18 +351,6 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func flattenAppServerGroupsSimple(serverGroups []applicationsegment.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroups))
-	for i, group := range serverGroups {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-
 func resourceApplicationSegmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
 	microTenantID := GetString(d.Get("microtenant_id"))
@@ -348,9 +359,9 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, meta interface{}) 
 	log.Printf("[INFO] Updating application segment ID: %v\n", id)
 	req := expandApplicationSegmentRequest(d, zClient, id)
 
-	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
-	}
+	// if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+	// 	return err
+	// }
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the application segment")
@@ -599,4 +610,16 @@ func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServe
 	}
 
 	return []applicationsegment.AppServerGroups{}
+}
+
+func flattenAppServerGroupsSimple(serverGroups []applicationsegment.AppServerGroups) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroups))
+	for i, group := range serverGroups {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }
