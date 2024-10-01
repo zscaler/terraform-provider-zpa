@@ -12,9 +12,19 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.33.5``
+``Last updated: v3.33.6``
 
 ---
+
+## 3.33.6 (October, 1 2024)
+
+### Notes
+
+- Release date: **(October, 1 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #495](https://github.com/zscaler/terraform-provider-zpa/pull/495) - Fixed issue with attribute `tcp_port_range` and `udp_port_range` within the resource `zpa_application_segment` 
 
 ## 3.33.5 (September, 30 2024)
 

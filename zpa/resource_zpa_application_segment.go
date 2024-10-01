@@ -36,9 +36,9 @@ func resourceApplicationSegment() *schema.Resource {
 
 			if bypassType, ok := d.GetOk("bypass_type"); ok && bypassType.(string) == "ALWAYS" {
 				tcpPortRange := d.Get("tcp_port_range").(*schema.Set).List()
-				tcpPortRanges := d.Get("tcp_port_ranges").([]interface{})
+				tcpPortRanges := d.Get("tcp_port_ranges").(*schema.Set).List()
 				udpPortRange := d.Get("udp_port_range").(*schema.Set).List()
-				udpPortRanges := d.Get("udp_port_ranges").([]interface{})
+				udpPortRanges := d.Get("udp_port_ranges").(*schema.Set).List()
 
 				if len(tcpPortRange) > 0 || len(tcpPortRanges) > 0 || len(udpPortRange) > 0 || len(udpPortRanges) > 0 {
 					return fmt.Errorf("TCP and UDP port configuration must be disabled as bypass_type is set to ALWAYS. In order to add ports, please change the bypass_type to NEVER or ON_NET")
@@ -125,7 +125,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"tcp_port_range": resourceAppSegmentPortRange("tcp port range"),
 			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
 			"tcp_port_ranges": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Description: "TCP port ranges used to access the app.",
@@ -133,7 +133,7 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 
 			"udp_port_ranges": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Description: "UDP port ranges used to access the app.",
