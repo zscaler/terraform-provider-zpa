@@ -421,24 +421,10 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta 
 
 func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
-	service := zClient.BrowserAccess
 
-	microTenantID := GetString(d.Get("microtenant_id"))
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
+	service := zClient.BrowserAccess.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	id := d.Id()
-	segmentGroupID, ok := d.GetOk("segment_group_id")
-	if ok && segmentGroupID != nil {
-		gID, ok := segmentGroupID.(string)
-		if ok && gID != "" {
-			// detach it from segment group first
-			if err := detachSegmentGroup(zClient, id, gID); err != nil {
-				return err
-			}
-		}
-	}
 	log.Printf("[INFO] Deleting browser access application with id %v\n", id)
 	if _, err := browseraccess.Delete(service, id); err != nil {
 		return err
@@ -499,9 +485,7 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client) browseraccess.
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
 	}
-	// if d.HasChange("server_groups") {
-	// 	details.AppServerGroups = expandClientlessAppServerGroups(d)
-	// }
+
 	if d.HasChange("clientless_apps") {
 		details.ClientlessApps = expandClientlessApps(d)
 	}
@@ -527,6 +511,7 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 					Domain:              clientlessApp["domain"].(string),
 					Enabled:             clientlessApp["enabled"].(bool),
 					Name:                clientlessApp["name"].(string),
+					MicroTenantID:       clientlessApp["microtenant_id"].(string),
 					TrustUntrustedCert:  clientlessApp["trust_untrusted_cert"].(bool),
 				})
 			}
@@ -536,30 +521,6 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 
 	return []browseraccess.ClientlessApps{}
 }
-
-/*
-func expandClientlessAppServerGroups(d *schema.ResourceData) []browseraccess.AppServerGroups {
-	serverGroupsInterface, ok := d.GetOk("server_groups")
-	if ok {
-		serverGroup := serverGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
-		var serverGroups []browseraccess.AppServerGroups
-		for _, appServerGroup := range serverGroup.List() {
-			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if ok {
-				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					serverGroups = append(serverGroups, browseraccess.AppServerGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return serverGroups
-	}
-
-	return []browseraccess.AppServerGroups{}
-}
-*/
 
 func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []interface{} {
 	clientlessApps := make([]interface{}, len(clientlessApp.ClientlessApps))
@@ -581,15 +542,3 @@ func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []inter
 
 	return clientlessApps
 }
-
-// func flattenClientlessAppServerGroups(serverGroups []browseraccess.AppServerGroups) []interface{} {
-// 	result := make([]interface{}, 1)
-// 	mapIds := make(map[string]interface{})
-// 	ids := make([]string, len(serverGroups))
-// 	for i, serverGroup := range serverGroups {
-// 		ids[i] = serverGroup.ID
-// 	}
-// 	mapIds["id"] = ids
-// 	result[0] = mapIds
-// 	return result
-// }
