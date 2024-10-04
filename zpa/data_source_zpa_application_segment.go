@@ -107,45 +107,17 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Computed: true,
 			},
 			"server_groups": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Description: "List of the server group IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"config_space": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"creation_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"enabled": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
 						"id": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeList,
 							Computed: true,
-						},
-						"dynamic_discovery": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"modifiedby": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"modified_time": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 					},
 				},
@@ -226,11 +198,16 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) 
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 		_ = d.Set("microtenant_id", resp.MicroTenantID)
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
-		_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
-		_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
-		if err := d.Set("server_groups", flattenAppServerGroups(resp)); err != nil {
+		if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
+		}
+
+		if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
+			return err
+		}
+		if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
+			return err
 		}
 
 		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
@@ -248,6 +225,7 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
+/*
 func flattenAppServerGroups(serverGroup *applicationsegment.ApplicationSegmentResource) []interface{} {
 	serverGroups := make([]interface{}, len(serverGroup.ServerGroups))
 	for i, val := range serverGroup.ServerGroups {
@@ -266,3 +244,4 @@ func flattenAppServerGroups(serverGroup *applicationsegment.ApplicationSegmentRe
 
 	return serverGroups
 }
+*/

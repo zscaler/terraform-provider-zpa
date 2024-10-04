@@ -169,8 +169,8 @@ func resourcePolicyAccessRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
 	_ = d.Set("microtenant_id", microTenantID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
-	_ = d.Set("app_server_groups", flattenPolicyRuleServerGroups(resp.AppServerGroups))
-	_ = d.Set("app_connector_groups", flattenPolicyRuleAppConnectorGroups(resp.AppConnectorGroups))
+	_ = d.Set("app_server_groups", flattenCommonAppServerGroups(resp.AppServerGroups))
+	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
 
 	return nil
 }
@@ -244,7 +244,7 @@ func resourcePolicyAccessDelete(d *schema.ResourceData, meta interface{}) error 
 }
 
 func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontroller.PolicyRule, error) {
-	log.Printf("[INFO] action_id:%v\n", d.Get("action_id"))
+
 	conditions, err := ExpandPolicyConditions(d)
 	if err != nil {
 		return nil, err
@@ -265,11 +265,12 @@ func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policy
 		MicroTenantID:      d.Get("microtenant_id").(string),
 		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
-		AppServerGroups:    expandPolicySetControllerAppServerGroups(d),
-		AppConnectorGroups: expandPolicysetControllerAppConnectorGroups(d),
+		AppServerGroups:    expandCommonServerGroups(d),
+		AppConnectorGroups: expandCommonAppConnectorGroups(d),
 	}, nil
 }
 
+/*
 func expandPolicySetControllerAppServerGroups(d *schema.ResourceData) []policysetcontroller.AppServerGroups {
 	appServerGroupsInterface, ok := d.GetOk("app_server_groups")
 	if ok {
@@ -314,7 +315,7 @@ func expandPolicysetControllerAppConnectorGroups(d *schema.ResourceData) []polic
 	return []policysetcontroller.AppConnectorGroups{}
 }
 
-func flattenPolicyRuleServerGroups(appServerGroup []policysetcontroller.AppServerGroups) []interface{} {
+func flattenPolicyRuleServerGroups(appServerGroup []servergroup.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
 	ids := make([]string, len(appServerGroup))
@@ -337,3 +338,4 @@ func flattenPolicyRuleAppConnectorGroups(appConnectorGroups []policysetcontrolle
 	result[0] = mapIds
 	return result
 }
+*/

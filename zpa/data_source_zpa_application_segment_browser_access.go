@@ -245,22 +245,27 @@ func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta 
 		_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 		_ = d.Set("ip_anchored", resp.IPAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
-		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
 		if err := d.Set("clientless_apps", flattenBaClientlessApps(resp)); err != nil {
 			return fmt.Errorf("failed to read clientless apps %s", err)
 		}
 
-		if err := d.Set("server_groups", flattenClientlessAppServerGroups(resp.AppServerGroups)); err != nil {
+		if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups)); err != nil {
 			return fmt.Errorf("failed to read app server groups %s", err)
+		}
+
+		if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
+			return err
+		}
+		if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
+			return err
 		}
 
 		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 			return err
 		}
 
-		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+		if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 			return err
 		}
 	} else {

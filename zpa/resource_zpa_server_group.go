@@ -12,6 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
 )
@@ -209,35 +210,11 @@ func resourceServerGroupRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
-	_ = d.Set("app_connector_groups", flattenAppConnectorGroupsSimple(resp.AppConnectorGroups))
+	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
 	_ = d.Set("applications", flattenServerGroupApplicationsSimple(resp.Applications))
 	_ = d.Set("servers", flattenServers(resp.Servers))
 
 	return nil
-}
-
-func flattenAppConnectorGroupsSimple(appConnectorGroups []servergroup.AppConnectorGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appConnectorGroups))
-	for i, group := range appConnectorGroups {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-
-func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(apps))
-	for i, app := range apps {
-		ids[i] = app.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
 }
 
 func resourceServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -324,14 +301,14 @@ func detachServerGroupFromAllAccessPolicyRules(id string, policySetControllerSer
 		return
 	}
 	for _, accessPolicyRule := range accessPolicyRules {
-		ids := []policysetcontroller.AppServerGroups{}
+		ids := []servergroup.ServerGroup{}
 		changed := false
 		for _, app := range accessPolicyRule.AppServerGroups {
 			if app.ID == id {
 				changed = true
 				continue
 			}
-			ids = append(ids, policysetcontroller.AppServerGroups{
+			ids = append(ids, servergroup.ServerGroup{
 				ID: app.ID,
 			})
 		}
@@ -350,12 +327,12 @@ func detachServerGroupFromAllAppSegments(id string, applicationSegmentService *s
 		return
 	}
 	for _, app := range apps {
-		ids := []applicationsegment.AppServerGroups{}
+		ids := []servergroup.ServerGroup{}
 		for _, appServerGroup := range app.ServerGroups {
 			if appServerGroup.ID == id {
 				continue
 			}
-			ids = append(ids, applicationsegment.AppServerGroups{
+			ids = append(ids, servergroup.ServerGroup{
 				ID: appServerGroup.ID,
 			})
 		}
@@ -407,7 +384,7 @@ func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 		ConfigSpace:        d.Get("config_space").(string),
 		DynamicDiscovery:   d.Get("dynamic_discovery").(bool),
 		MicroTenantID:      d.Get("microtenant_id").(string),
-		AppConnectorGroups: expandAppConnectorGroups(d),
+		AppConnectorGroups: expandCommonAppConnectorGroups(d),
 		Applications:       expandServerGroupApplications(d),
 		Servers:            expandApplicationServers(d),
 	}
@@ -417,6 +394,7 @@ func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 	return result
 }
 
+/*
 func expandAppConnectorGroups(d *schema.ResourceData) []servergroup.AppConnectorGroups {
 	appConnectorGroupsInterface, ok := d.GetOk("app_connector_groups")
 	if ok {
@@ -438,6 +416,7 @@ func expandAppConnectorGroups(d *schema.ResourceData) []servergroup.AppConnector
 
 	return []servergroup.AppConnectorGroups{}
 }
+*/
 
 func expandServerGroupApplications(d *schema.ResourceData) []servergroup.Applications {
 	serverGroupAppsInterface, ok := d.GetOk("applications")
@@ -461,17 +440,17 @@ func expandServerGroupApplications(d *schema.ResourceData) []servergroup.Applica
 	return []servergroup.Applications{}
 }
 
-func expandApplicationServers(d *schema.ResourceData) []servergroup.ApplicationServer {
+func expandApplicationServers(d *schema.ResourceData) []appservercontroller.ApplicationServer {
 	applicationServersInterface, ok := d.GetOk("servers")
 	if ok {
 		applicationServer := applicationServersInterface.(*schema.Set)
 		log.Printf("[INFO] server group application data: %+v\n", applicationServer)
-		var applicationServers []servergroup.ApplicationServer
+		var applicationServers []appservercontroller.ApplicationServer
 		for _, applicationServer := range applicationServer.List() {
 			applicationServer, _ := applicationServer.(map[string]interface{})
 			if applicationServer != nil {
 				for _, id := range applicationServer["id"].([]interface{}) {
-					applicationServers = append(applicationServers, servergroup.ApplicationServer{
+					applicationServers = append(applicationServers, appservercontroller.ApplicationServer{
 						ID: id.(string),
 					})
 				}
@@ -480,5 +459,31 @@ func expandApplicationServers(d *schema.ResourceData) []servergroup.ApplicationS
 		return applicationServers
 	}
 
-	return []servergroup.ApplicationServer{}
+	return []appservercontroller.ApplicationServer{}
 }
+
+func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(apps))
+	for i, app := range apps {
+		ids[i] = app.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+
+/*
+func flattenAppConnectorGroupsSimple(appConnectorGroups []servergroup.AppConnectorGroups) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(appConnectorGroups))
+	for i, group := range appConnectorGroups {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+*/

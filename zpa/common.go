@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
@@ -24,6 +25,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/samlattribute"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimattributeheader"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/trustednetwork"
 )
 
@@ -576,7 +579,7 @@ func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts
 
 func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeSet,
+		Type:     schema.TypeList,
 		Optional: true,
 		Computed: true,
 		// Activate the "Attributes as Blocks" processing mode to permit dynamic declaration of no ports
@@ -1414,4 +1417,127 @@ func flattenPredefinedControls(predControl []common.CustomCommonControls) []inte
 		}
 	}
 	return predControls
+}
+
+func expandCommonServerGroups(d *schema.ResourceData) []servergroup.ServerGroup {
+	serverGroupInterface, ok := d.GetOk("server_groups")
+	if ok {
+		serverGroupSet, ok := serverGroupInterface.(*schema.Set)
+		if !ok {
+			return []servergroup.ServerGroup{}
+		}
+		log.Printf("[INFO] server group data: %+v\n", serverGroupSet)
+		var serverGroups []servergroup.ServerGroup
+		for _, serverGroup := range serverGroupSet.List() {
+			serverGroupMap, ok := serverGroup.(map[string]interface{})
+			if ok && serverGroupMap != nil {
+				idSet, ok := serverGroupMap["id"].(*schema.Set)
+				if !ok {
+					continue
+				}
+				for _, id := range idSet.List() {
+					serverGroups = append(serverGroups, servergroup.ServerGroup{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return serverGroups
+	}
+
+	return []servergroup.ServerGroup{}
+}
+
+func expandCommonAppConnectorGroups(d *schema.ResourceData) []appconnectorgroup.AppConnectorGroup {
+	appConnectorGroupInterface, ok := d.GetOk("app_connector_groups")
+	if ok {
+		appConnectorGroupSet, ok := appConnectorGroupInterface.(*schema.Set)
+		if !ok {
+			return []appconnectorgroup.AppConnectorGroup{}
+		}
+		log.Printf("[INFO] app connector group data: %+v\n", appConnectorGroupSet)
+		var appConnectorGroups []appconnectorgroup.AppConnectorGroup
+		for _, appConnectorGroup := range appConnectorGroupSet.List() {
+			appConnectorGroupMap, ok := appConnectorGroup.(map[string]interface{})
+			if ok && appConnectorGroupMap != nil {
+				idSet, ok := appConnectorGroupMap["id"].(*schema.Set)
+				if !ok {
+					continue
+				}
+				for _, id := range idSet.List() {
+					appConnectorGroups = append(appConnectorGroups, appconnectorgroup.AppConnectorGroup{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return appConnectorGroups
+	}
+
+	return []appconnectorgroup.AppConnectorGroup{}
+}
+
+func expandCommonServiceEdgeGroups(d *schema.ResourceData) []serviceedgegroup.ServiceEdgeGroup {
+	serviceEdgeGroupInterface, ok := d.GetOk("service_edge_groups")
+	if ok {
+		serviceEdgeGroupSet, ok := serviceEdgeGroupInterface.(*schema.Set)
+		if !ok {
+			return []serviceedgegroup.ServiceEdgeGroup{}
+		}
+		log.Printf("[INFO] service edge group data: %+v\n", serviceEdgeGroupSet)
+		var serviceEdgeGroups []serviceedgegroup.ServiceEdgeGroup
+		for _, serviceEdgeGroup := range serviceEdgeGroupSet.List() {
+			serviceEdgeGroupMap, ok := serviceEdgeGroup.(map[string]interface{})
+			if ok && serviceEdgeGroupMap != nil {
+				idSet, ok := serviceEdgeGroupMap["id"].(*schema.Set)
+				if !ok {
+					continue
+				}
+				for _, id := range idSet.List() {
+					serviceEdgeGroups = append(serviceEdgeGroups, serviceedgegroup.ServiceEdgeGroup{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return serviceEdgeGroups
+	}
+
+	return []serviceedgegroup.ServiceEdgeGroup{}
+}
+
+func flattenCommonAppConnectorGroups(appConnectorGroups []appconnectorgroup.AppConnectorGroup) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(appConnectorGroups))
+	for i, appConnectorGroup := range appConnectorGroups {
+		ids[i] = appConnectorGroup.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+
+func flattenCommonAppServerGroups(serverGroups []servergroup.ServerGroup) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroups))
+	for i, serverGroup := range serverGroups {
+		ids[i] = serverGroup.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+
+func flattenCommonServiceEdgeGroups(serviceEdgeGroups []serviceedgegroup.ServiceEdgeGroup) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serviceEdgeGroups))
+	for i, serviceEdgeGroup := range serviceEdgeGroups {
+		ids[i] = serviceEdgeGroup.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }

@@ -142,17 +142,6 @@ func resourceSegmentGroupRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func flattenSegmentGroupApplicationsSimple(segmentGroup *segmentgroup.SegmentGroup) []interface{} {
-	segmentGroupApplications := make([]interface{}, len(segmentGroup.Applications))
-	for i, segmentGroupApplication := range segmentGroup.Applications {
-		segmentGroupApplications[i] = map[string]interface{}{
-			"id": segmentGroupApplication.ID,
-		}
-	}
-
-	return segmentGroupApplications
-}
-
 func resourceSegmentGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
 	service := zClient.SegmentGroup
@@ -180,39 +169,6 @@ func resourceSegmentGroupUpdate(d *schema.ResourceData, meta interface{}) error 
 	return resourceSegmentGroupRead(d, meta)
 }
 
-func detachSegmentGroupFromAllPolicyRules(d *schema.ResourceData, policySetControllerService *services.Service) {
-	policyRulesDetchLock.Lock()
-	defer policyRulesDetchLock.Unlock()
-	accessPolicySet, _, err := policysetcontroller.GetByPolicyType(policySetControllerService, "ACCESS_POLICY")
-	if err != nil {
-		return
-	}
-	rules, _, err := policysetcontroller.GetAllByType(policySetControllerService, "ACCESS_POLICY")
-	if err != nil {
-		return
-	}
-	for _, rule := range rules {
-		ids := []policysetcontroller.AppConnectorGroups{}
-		changed := false
-		for _, app := range rule.AppConnectorGroups {
-			if app.ID == d.Id() {
-				changed = true
-				continue
-			}
-			ids = append(ids, policysetcontroller.AppConnectorGroups{
-				ID: app.ID,
-			})
-		}
-		rule.AppConnectorGroups = ids
-		if changed {
-			microTenantID := GetString(d.Get("microtenant_id"))
-			if _, err := policysetcontroller.UpdateRule(policySetControllerService.WithMicroTenant(microTenantID), accessPolicySet.ID, rule.ID, &rule); err != nil {
-				continue
-			}
-		}
-	}
-}
-
 func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
 	policySetControllerService := zClient.PolicySetController
@@ -230,7 +186,7 @@ func resourceSegmentGroupDelete(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[INFO] Deleting app connector group ID: %v\n", d.Id())
 
 	//detach app connector group from all access policy rules
-	detachSegmentGroupFromAllPolicyRules(d, policySetControllerService)
+	detachSegmentGroupFromAllPolicyRules(d.Id(), policySetControllerService)
 
 	if _, err := segmentgroup.Delete(service, d.Id()); err != nil {
 		return err
@@ -261,6 +217,62 @@ func expandSegmentGroupApplications(segmentGroupApplication []interface{}) []seg
 			ID: segmentGroupItem["id"].(string),
 		}
 
+	}
+
+	return segmentGroupApplications
+}
+
+func detachSegmentGroupFromAllPolicyRules(id string, policySetControllerService *services.Service) {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
+	var rules []policysetcontroller.PolicyRule
+	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
+	for _, t := range types {
+		policySet, _, err := policysetcontroller.GetByPolicyType(policySetControllerService, t)
+		if err != nil {
+			continue
+		}
+		r, _, err := policysetcontroller.GetAllByType(policySetControllerService, t)
+		if err != nil {
+			continue
+		}
+		for _, rule := range r {
+			rule.PolicySetID = policySet.ID
+			rules = append(rules, rule)
+		}
+	}
+	log.Printf("[INFO] detaching Segment Groups From All Policy Rules, len:%d \n", len(rules))
+	for _, rr := range rules {
+		rule := rr
+		changed := false
+		for i, condition := range rr.Conditions {
+			operands := []policysetcontroller.Operands{}
+			for _, op := range condition.Operands {
+				if op.ObjectType == "APP_GROUP" && op.LHS == "id" && op.RHS == id {
+					changed = true
+					continue
+				}
+				operands = append(operands, op)
+			}
+			rule.Conditions[i].Operands = operands
+		}
+		if len(rule.Conditions) == 0 {
+			rule.Conditions = []policysetcontroller.Conditions{}
+		}
+		if changed {
+			if _, err := policysetcontroller.UpdateRule(policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
+				continue
+			}
+		}
+	}
+}
+
+func flattenSegmentGroupApplicationsSimple(segmentGroup *segmentgroup.SegmentGroup) []interface{} {
+	segmentGroupApplications := make([]interface{}, len(segmentGroup.Applications))
+	for i, segmentGroupApplication := range segmentGroup.Applications {
+		segmentGroupApplications[i] = map[string]interface{}{
+			"id": segmentGroupApplication.ID,
+		}
 	}
 
 	return segmentGroupApplications

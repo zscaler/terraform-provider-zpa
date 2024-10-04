@@ -312,14 +312,14 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(d *schema.ResourceData, pol
 		return
 	}
 	for _, rule := range rules {
-		ids := []policysetcontroller.AppConnectorGroups{}
+		ids := []appconnectorgroup.AppConnectorGroup{}
 		changed := false
 		for _, app := range rule.AppConnectorGroups {
 			if app.ID == d.Id() {
 				changed = true
 				continue
 			}
-			ids = append(ids, policysetcontroller.AppConnectorGroups{
+			ids = append(ids, appconnectorgroup.AppConnectorGroup{
 				ID: app.ID,
 			})
 		}

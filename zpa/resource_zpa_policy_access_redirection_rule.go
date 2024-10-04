@@ -132,7 +132,7 @@ func resourcePolicyRedictionRuleRead(d *schema.ResourceData, meta interface{}) e
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
-	_ = d.Set("service_edge_groups", flattenPolicyRuleServiceEdgeGroups(resp.ServiceEdgeGroups))
+	_ = d.Set("service_edge_groups", flattenCommonServiceEdgeGroups(resp.ServiceEdgeGroups))
 	return nil
 }
 
@@ -211,10 +211,11 @@ func expandCreatePolicyRedirectionRule(d *schema.ResourceData) (*policysetcontro
 		Priority:          d.Get("priority").(string),
 		MicroTenantID:     GetString(d.Get("microtenant_id")),
 		Conditions:        conditions,
-		ServiceEdgeGroups: expandPolicysetControllerServiceEdgeGroups(d),
+		ServiceEdgeGroups: expandCommonServiceEdgeGroups(d),
 	}, nil
 }
 
+/*
 func expandPolicysetControllerServiceEdgeGroups(d *schema.ResourceData) []policysetcontroller.ServiceEdgeGroups {
 	serviceEdgeGroupsInterface, ok := d.GetOk("service_edge_groups")
 	if ok {
@@ -248,3 +249,4 @@ func flattenPolicyRuleServiceEdgeGroups(serviceEdgeGroup []policysetcontroller.S
 	result[0] = mapIds
 	return result
 }
+*/

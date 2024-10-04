@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
 func resourceApplicationSegmentInspection() *schema.Resource {
@@ -54,14 +53,14 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
 
 			"tcp_port_ranges": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"udp_port_ranges": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: "UDP port ranges used to access the app.",
@@ -302,7 +301,7 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, meta int
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
-	req := expandInspectionApplicationSegment(d, zClient, "")
+	req := expandInspectionApplicationSegment(d)
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
@@ -362,12 +361,17 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta inter
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("ip_anchored", resp.IPAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
-	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
-	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
-	_ = d.Set("server_groups", flattenInspectionAppServerGroupsSimple(resp.AppServerGroups))
+	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups))
 
 	if err := d.Set("inspection_apps", flattenInspectionApps(resp.InspectionAppDto)); err != nil {
 		return fmt.Errorf("failed to read inspection apps in application segment %s", err)
+	}
+
+	if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
+		return err
+	}
+	if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
+		return err
 	}
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
@@ -386,7 +390,7 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta int
 
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection application segment ID: %v\n", id)
-	req := expandInspectionApplicationSegment(d, zClient, id)
+	req := expandInspectionApplicationSegment(d)
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
@@ -436,7 +440,7 @@ func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, meta int
 	return nil
 }
 
-func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
+func expandInspectionApplicationSegment(d *schema.ResourceData) applicationsegmentinspection.AppSegmentInspection {
 	details := applicationsegmentinspection.AppSegmentInspection{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
@@ -458,52 +462,21 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		DomainNames:               expandStringInSlice(d, "domain_names"),
-		TCPAppPortRange:           []common.NetworkPorts{},
-		UDPAppPortRange:           []common.NetworkPorts{},
-		AppServerGroups:           expandInspectionAppServerGroups(d),
+		AppServerGroups:           expandCommonServerGroups(d),
 		CommonAppsDto:             expandInspectionCommonAppsDto(d),
+
+		TCPPortRanges: ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
+		UDPPortRanges: ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
+
+		// Use the helper for structured port ranges
+		TCPAppPortRange: expandAppSegmentNetworkPorts(d, "tcp_port_range"),
+		UDPAppPortRange: expandAppSegmentNetworkPorts(d, "udp_port_range"),
 	}
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
 	}
 	if d.HasChange("server_groups") {
-		details.AppServerGroups = expandInspectionAppServerGroups(d)
-	}
-	remoteTCPAppPortRanges := []string{}
-	remoteUDPAppPortRanges := []string{}
-	if zClient != nil && id != "" {
-		service := zClient.ApplicationSegmentInspection
-
-		resource, _, err := applicationsegmentinspection.Get(service, id)
-		if err == nil {
-			remoteTCPAppPortRanges = resource.TCPPortRanges
-			remoteUDPAppPortRanges = resource.UDPPortRanges
-		}
-	}
-
-	// Manually duplicate each entry in the list to represent "From" and "To" values
-	TCPAppPortRanges := duplicatePortRanges(d.Get("tcp_port_ranges").(*schema.Set).List())
-	UDPAppPortRanges := duplicatePortRanges(d.Get("udp_port_ranges").(*schema.Set).List())
-
-	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
-	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
-		details.TCPPortRanges = TCPAppPortRanges
-	} else {
-		details.TCPPortRanges = TCPAppPortRange
-	}
-
-	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
-	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
-		details.UDPPortRanges = UDPAppPortRanges
-	} else {
-		details.UDPPortRanges = UDPAppPortRange
-	}
-
-	if details.TCPPortRanges == nil {
-		details.TCPPortRanges = []string{}
-	}
-	if details.UDPPortRanges == nil {
-		details.UDPPortRanges = []string{}
+		details.AppServerGroups = expandCommonServerGroups(d)
 	}
 
 	return details
@@ -551,17 +524,18 @@ func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationse
 	return commonAppConfigDto
 }
 
-func expandInspectionAppServerGroups(d *schema.ResourceData) []applicationsegmentinspection.AppServerGroups {
+/*
+func expandInspectionAppServerGroups(d *schema.ResourceData) []servergroup.AppServerGroups {
 	serverGroupsInterface, ok := d.GetOk("server_groups")
 	if ok {
 		serverGroup := serverGroupsInterface.(*schema.Set)
 		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
-		var serverGroups []applicationsegmentinspection.AppServerGroups
+		var serverGroups []servergroup.AppServerGroups
 		for _, appServerGroup := range serverGroup.List() {
 			appServerGroup, _ := appServerGroup.(map[string]interface{})
 			if ok {
 				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					serverGroups = append(serverGroups, applicationsegmentinspection.AppServerGroups{
+					serverGroups = append(serverGroups, servergroup.AppServerGroups{
 						ID: id.(string),
 					})
 				}
@@ -570,10 +544,12 @@ func expandInspectionAppServerGroups(d *schema.ResourceData) []applicationsegmen
 		return serverGroups
 	}
 
-	return []applicationsegmentinspection.AppServerGroups{}
+	return []servergroup.AppServerGroups{}
 }
+*/
 
-func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
+/*
+func flattenInspectionAppServerGroupsSimple(serverGroup []servergroup.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
 	ids := make([]string, len(serverGroup))
@@ -584,6 +560,7 @@ func flattenInspectionAppServerGroupsSimple(serverGroup []applicationsegmentinsp
 	result[0] = mapIds
 	return result
 }
+*/
 
 func flattenInspectionApps(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
 	if len(apps) == 0 {

@@ -8,9 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
 func resourceApplicationSegmentBrowserAccess() *schema.Resource {
@@ -87,6 +85,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -291,7 +290,7 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, meta 
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	req := expandBrowserAccess(d, zClient, "")
+	req := expandBrowserAccess(d, zClient)
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
@@ -357,15 +356,20 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta in
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
-	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
 	if err := d.Set("clientless_apps", flattenBaClientlessApps(resp)); err != nil {
 		return fmt.Errorf("failed to read clientless apps %s", err)
 	}
 
-	if err := d.Set("server_groups", flattenClientlessAppServerGroups(resp.AppServerGroups)); err != nil {
+	if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups)); err != nil {
 		return fmt.Errorf("failed to read app server groups %s", err)
+	}
+
+	if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
+		return err
+	}
+	if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
+		return err
 	}
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
@@ -390,7 +394,7 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta 
 
 	id := d.Id()
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
-	req := expandBrowserAccess(d, zClient, "")
+	req := expandBrowserAccess(d, zClient)
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
@@ -443,7 +447,10 @@ func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, meta 
 	return nil
 }
 
-func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
+func expandBrowserAccess(d *schema.ResourceData, zClient *Client) browseraccess.BrowserAccess {
+	// Capture MicroTenantID for child tenant scenario
+	microTenantID := GetString(d.Get("microtenant_id"))
+
 	details := browseraccess.BrowserAccess{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
@@ -466,59 +473,39 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+		AppServerGroups:           expandCommonServerGroups(d),
+		ClientlessApps:            expandClientlessApps(d),
 
-		TCPAppPortRange: []common.NetworkPorts{},
-		UDPAppPortRange: []common.NetworkPorts{},
-	}
-	remoteTCPAppPortRanges := []string{}
-	remoteUDPAppPortRanges := []string{}
-	if zClient != nil && id != "" {
-		microTenantID := GetString(d.Get("microtenant_id"))
-		service := zClient.ApplicationSegment
-		if microTenantID != "" {
-			service = service.WithMicroTenant(microTenantID)
-		}
-
-		resource, _, err := applicationsegment.Get(service, id)
-		if err == nil {
-			remoteTCPAppPortRanges = resource.TCPPortRanges
-			remoteUDPAppPortRanges = resource.UDPPortRanges
-		}
-	}
-	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
-	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
-	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
-		details.TCPPortRanges = TCPAppPortRanges
-	} else {
-		details.TCPPortRanges = TCPAppPortRange
+		TCPPortRanges: ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
+		UDPPortRanges: ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
+		// Use the helper for structured port ranges
+		TCPAppPortRange: expandAppSegmentNetworkPorts(d, "tcp_port_range"),
+		UDPAppPortRange: expandAppSegmentNetworkPorts(d, "udp_port_range"),
 	}
 
-	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
-	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
-	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
-		details.UDPPortRanges = UDPAppPortRanges
-	} else {
-		details.UDPPortRanges = UDPAppPortRange
+	// // Optionally handle any further details if needed
+	// if zClient != nil && id != "" {
+	// 	microTenantID := GetString(d.Get("microtenant_id"))
+	// 	service := zClient.BrowserAccess
+	// 	if microTenantID != "" {
+	// 		service = service.WithMicroTenant(microTenantID)
+	// 	}
+	// }
+	// Apply microtenant context if available
+	if microTenantID != "" {
+		zClient.BrowserAccess = zClient.BrowserAccess.WithMicroTenant(microTenantID)
 	}
-
-	if details.TCPPortRanges == nil {
-		details.TCPPortRanges = []string{}
-	}
-	if details.UDPPortRanges == nil {
-		details.UDPPortRanges = []string{}
-	}
+	// Handle specific changes, to be sure we're updating the correct fields
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
 	}
-	if d.HasChange("segment_group_name") {
-		details.SegmentGroupName = d.Get("segment_group_name").(string)
-	}
-	if d.HasChange("server_groups") {
-		details.AppServerGroups = expandClientlessAppServerGroups(d)
-	}
+	// if d.HasChange("server_groups") {
+	// 	details.AppServerGroups = expandClientlessAppServerGroups(d)
+	// }
 	if d.HasChange("clientless_apps") {
 		details.ClientlessApps = expandClientlessApps(d)
 	}
+
 	return details
 }
 
@@ -536,15 +523,11 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 					ApplicationPort:     clientlessApp["application_port"].(string),
 					ApplicationProtocol: clientlessApp["application_protocol"].(string),
 					CertificateID:       clientlessApp["certificate_id"].(string),
-					// Cname:               clientlessApp["cname"].(string),
-					Description: clientlessApp["description"].(string),
-					Domain:      clientlessApp["domain"].(string),
-					Enabled:     clientlessApp["enabled"].(bool),
-					// Hidden:              clientlessApp["hidden"].(bool),
-					// LocalDomain:        clientlessApp["local_domain"].(string),
-					Name: clientlessApp["name"].(string),
-					// Path:               clientlessApp["path"].(string),
-					TrustUntrustedCert: clientlessApp["trust_untrusted_cert"].(bool),
+					Description:         clientlessApp["description"].(string),
+					Domain:              clientlessApp["domain"].(string),
+					Enabled:             clientlessApp["enabled"].(bool),
+					Name:                clientlessApp["name"].(string),
+					TrustUntrustedCert:  clientlessApp["trust_untrusted_cert"].(bool),
 				})
 			}
 		}
@@ -554,6 +537,7 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 	return []browseraccess.ClientlessApps{}
 }
 
+/*
 func expandClientlessAppServerGroups(d *schema.ResourceData) []browseraccess.AppServerGroups {
 	serverGroupsInterface, ok := d.GetOk("server_groups")
 	if ok {
@@ -575,6 +559,7 @@ func expandClientlessAppServerGroups(d *schema.ResourceData) []browseraccess.App
 
 	return []browseraccess.AppServerGroups{}
 }
+*/
 
 func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []interface{} {
 	clientlessApps := make([]interface{}, len(clientlessApp.ClientlessApps))
@@ -597,14 +582,14 @@ func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []inter
 	return clientlessApps
 }
 
-func flattenClientlessAppServerGroups(serverGroups []browseraccess.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroups))
-	for i, serverGroup := range serverGroups {
-		ids[i] = serverGroup.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
+// func flattenClientlessAppServerGroups(serverGroups []browseraccess.AppServerGroups) []interface{} {
+// 	result := make([]interface{}, 1)
+// 	mapIds := make(map[string]interface{})
+// 	ids := make([]string, len(serverGroups))
+// 	for i, serverGroup := range serverGroups {
+// 		ids[i] = serverGroup.ID
+// 	}
+// 	mapIds["id"] = ids
+// 	result[0] = mapIds
+// 	return result
+// }

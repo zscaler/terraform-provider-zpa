@@ -264,8 +264,8 @@ func resourcePolicyAccessV2Read(d *schema.ResourceData, meta interface{}) error 
 	_ = d.Set("policy_set_id", policySetID) // Here, you're setting it based on fetched ID
 	_ = d.Set("custom_msg", v2PolicyRule.CustomMsg)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
-	_ = d.Set("app_server_groups", flattenPolicyRuleServerGroupsV2(resp.AppServerGroups))
-	_ = d.Set("app_connector_groups", flattenPolicyRuleAppConnectorGroupsV2(resp.AppConnectorGroups))
+	_ = d.Set("app_server_groups", flattenCommonAppServerGroups(resp.AppServerGroups))
+	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
 
 	return nil
 }
@@ -359,11 +359,12 @@ func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*poli
 		Operator:           d.Get("operator").(string),
 		PolicySetID:        policySetID,
 		Conditions:         conditions,
-		AppServerGroups:    expandPolicySetControllerAppServerGroupsV2(d),
-		AppConnectorGroups: expandPolicysetControllerAppConnectorGroupsV2(d),
+		AppServerGroups:    expandCommonServerGroups(d),
+		AppConnectorGroups: expandCommonAppConnectorGroups(d),
 	}, nil
 }
 
+/*
 func expandPolicySetControllerAppServerGroupsV2(d *schema.ResourceData) []policysetcontrollerv2.AppServerGroups {
 	appServerGroupsInterface, ok := d.GetOk("app_server_groups")
 	if ok {
@@ -431,3 +432,4 @@ func flattenPolicyRuleAppConnectorGroupsV2(appConnectorGroups []policysetcontrol
 	result[0] = mapIds
 	return result
 }
+*/

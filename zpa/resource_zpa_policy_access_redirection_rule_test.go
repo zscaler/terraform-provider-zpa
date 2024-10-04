@@ -114,7 +114,7 @@ func testAccCheckPolicyRedictionRuleExists(resource string) resource.TestCheckFu
 func testAccCheckPolicyRedictionRuleConfigure(resourceTypeAndName, rName, generatedName, desc, serviceEdgeGroupHCL, serviceEdgeGroupTypeAndName string) string {
 	return fmt.Sprintf(`
 
-// app connector group resource
+// service edge group resource
 %s
 
 // redirection policy access rule resource

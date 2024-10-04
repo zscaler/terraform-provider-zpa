@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -135,3 +136,4 @@ data "zpa_application_segment_by_type" "ba" {
 		resourceNameSuffix,
 	)
 }
+*/

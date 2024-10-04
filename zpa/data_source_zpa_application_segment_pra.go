@@ -238,17 +238,23 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("failed to read sra apps %s", err)
 		}
 
-		if err := d.Set("server_groups", flattenSRAAppServerGroups(resp.ServerGroups)); err != nil {
-			return fmt.Errorf("failed to read app server groups %s", err)
+		_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups))
+
+		if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
+			return err
+		}
+		if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
+			return err
 		}
 
 		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 			return err
 		}
 
-		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+		if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 			return err
 		}
+
 	} else {
 		return fmt.Errorf("couldn't find any browser access application with name '%s' or id '%s'", name, id)
 	}
@@ -256,6 +262,7 @@ func dataSourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{
 	return nil
 }
 
+/*
 func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
@@ -267,6 +274,7 @@ func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerG
 	result[0] = mapIds
 	return result
 }
+*/
 
 func flattenSRAApps(sraApp *applicationsegmentpra.AppSegmentPRA) []interface{} {
 	sraApps := make([]interface{}, len(sraApp.PRAApps))
