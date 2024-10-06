@@ -87,6 +87,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+
 			"udp_port_ranges": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -357,16 +358,17 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta in
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
-	_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-	_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
 	if err := d.Set("clientless_apps", flattenBaClientlessApps(resp)); err != nil {
 		return fmt.Errorf("failed to read clientless apps %s", err)
 	}
 
-	if err := d.Set("server_groups", flattenClientlessAppServerGroups(resp.AppServerGroups)); err != nil {
+	if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups)); err != nil {
 		return fmt.Errorf("failed to read app server groups %s", err)
 	}
+
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
@@ -417,24 +419,10 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta 
 
 func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, meta interface{}) error {
 	zClient := meta.(*Client)
-	service := zClient.BrowserAccess
 
-	microTenantID := GetString(d.Get("microtenant_id"))
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
+	service := zClient.BrowserAccess.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	id := d.Id()
-	segmentGroupID, ok := d.GetOk("segment_group_id")
-	if ok && segmentGroupID != nil {
-		gID, ok := segmentGroupID.(string)
-		if ok && gID != "" {
-			// detach it from segment group first
-			if err := detachSegmentGroup(zClient, id, gID); err != nil {
-				return err
-			}
-		}
-	}
 	log.Printf("[INFO] Deleting browser access application with id %v\n", id)
 	if _, err := browseraccess.Delete(service, id); err != nil {
 		return err
@@ -444,6 +432,12 @@ func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, meta 
 }
 
 func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
+	microTenantID := GetString(d.Get("microtenant_id"))
+	service := zClient.BrowserAccess
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	details := browseraccess.BrowserAccess{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
@@ -466,19 +460,15 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+		AppServerGroups:           expandCommonServerGroups(d),
+		ClientlessApps:            expandClientlessApps(d),
 
 		TCPAppPortRange: []common.NetworkPorts{},
 		UDPAppPortRange: []common.NetworkPorts{},
 	}
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
-	if zClient != nil && id != "" {
-		microTenantID := GetString(d.Get("microtenant_id"))
-		service := zClient.ApplicationSegment
-		if microTenantID != "" {
-			service = service.WithMicroTenant(microTenantID)
-		}
-
+	if service != nil && id != "" {
 		resource, _, err := applicationsegment.Get(service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
@@ -507,18 +497,15 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 	if details.UDPPortRanges == nil {
 		details.UDPPortRanges = []string{}
 	}
+	// Handle specific changes, to be sure we're updating the correct fields
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
 	}
-	if d.HasChange("segment_group_name") {
-		details.SegmentGroupName = d.Get("segment_group_name").(string)
-	}
-	if d.HasChange("server_groups") {
-		details.AppServerGroups = expandClientlessAppServerGroups(d)
-	}
+
 	if d.HasChange("clientless_apps") {
 		details.ClientlessApps = expandClientlessApps(d)
 	}
+
 	return details
 }
 
@@ -536,15 +523,12 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 					ApplicationPort:     clientlessApp["application_port"].(string),
 					ApplicationProtocol: clientlessApp["application_protocol"].(string),
 					CertificateID:       clientlessApp["certificate_id"].(string),
-					// Cname:               clientlessApp["cname"].(string),
-					Description: clientlessApp["description"].(string),
-					Domain:      clientlessApp["domain"].(string),
-					Enabled:     clientlessApp["enabled"].(bool),
-					// Hidden:              clientlessApp["hidden"].(bool),
-					// LocalDomain:        clientlessApp["local_domain"].(string),
-					Name: clientlessApp["name"].(string),
-					// Path:               clientlessApp["path"].(string),
-					TrustUntrustedCert: clientlessApp["trust_untrusted_cert"].(bool),
+					Description:         clientlessApp["description"].(string),
+					Domain:              clientlessApp["domain"].(string),
+					Enabled:             clientlessApp["enabled"].(bool),
+					Name:                clientlessApp["name"].(string),
+					MicroTenantID:       clientlessApp["microtenant_id"].(string),
+					TrustUntrustedCert:  clientlessApp["trust_untrusted_cert"].(bool),
 				})
 			}
 		}
@@ -552,28 +536,6 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 	}
 
 	return []browseraccess.ClientlessApps{}
-}
-
-func expandClientlessAppServerGroups(d *schema.ResourceData) []browseraccess.AppServerGroups {
-	serverGroupsInterface, ok := d.GetOk("server_groups")
-	if ok {
-		serverGroup := serverGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
-		var serverGroups []browseraccess.AppServerGroups
-		for _, appServerGroup := range serverGroup.List() {
-			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if ok {
-				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					serverGroups = append(serverGroups, browseraccess.AppServerGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return serverGroups
-	}
-
-	return []browseraccess.AppServerGroups{}
 }
 
 func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []interface{} {
@@ -595,16 +557,4 @@ func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []inter
 	}
 
 	return clientlessApps
-}
-
-func flattenClientlessAppServerGroups(serverGroups []browseraccess.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroups))
-	for i, serverGroup := range serverGroups {
-		ids[i] = serverGroup.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
 }

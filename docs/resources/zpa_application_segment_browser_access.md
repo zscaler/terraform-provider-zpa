@@ -108,6 +108,9 @@ The following arguments are supported:
   - `certificate_id` - (String) - ID of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
   - `domain` - (String) - Domain name or IP address of the BA app.
   - `allow_options` - (Boolean) - If you want ZPA to forward unauthenticated HTTP preflight OPTIONS requests from the browser to the app.. Supported values: `true` and `false`
+  - `microtenant_id` (Boolean) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenant_id as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenant_id as null to retrieve data from all customers associated with the tenant.
+
+⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 ### Optional
 
@@ -130,7 +133,7 @@ In addition to all arguments above, the following attributes are exported:
 
 - `use_in_dr_mode` - (Boolean) Whether or not the application resource is designated for disaster recovery. Supported values: `true`, `false`
 - `is_incomplete_dr_config` - (Boolean) Indicates whether or not the disaster recovery configuration is incomplete. Supported values: `true`, `false`
-- `microtenant_id` (Boolean) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
+- `microtenant_id` (Boolean) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenant_id as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenant_id as null to retrieve data from all customers associated with the tenant.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

@@ -372,13 +372,15 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, meta interface{}) erro
 		_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 		_ = d.Set("version_profile_id", resp.VersionProfileID)
 		_ = d.Set("version_profile_name", resp.VersionProfileName)
-		_ = d.Set("connectors", flattenConnectors(resp))
 		_ = d.Set("microtenant_id", resp.MicroTenantID)
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
+		_ = d.Set("connectors", flattenConnectors(resp))
+
 		if err := d.Set("server_groups", flattenServerGroups(resp)); err != nil {
-			return fmt.Errorf("failed to read server groups %s", err)
+			return fmt.Errorf("failed to read app server groups %s", err)
 		}
+
 	} else {
 		return fmt.Errorf("couldn't find any app connector group with name '%s' or id '%s'", name, id)
 	}

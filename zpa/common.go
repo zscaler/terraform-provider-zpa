@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
@@ -24,6 +25,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/samlattribute"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimattributeheader"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/trustednetwork"
 )
 
@@ -194,6 +197,17 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 	case "COUNTRY_CODE":
 		if operand.LHS == "" || !isValidAlpha2(operand.LHS) {
 			return lhsWarn(operand.ObjectType, "valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes", operand.LHS, nil)
+		}
+		return nil
+	case "RISK_FACTOR_TYPE":
+		// Check if lhs is "ZIA"
+		if operand.LHS != "ZIA" {
+			return lhsWarn(operand.ObjectType, "\"ZIA\"", operand.LHS, nil)
+		}
+		// Validate rhs for RISK_FACTOR_TYPE
+		validRHSValues := []string{"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"}
+		if !contains(validRHSValues, operand.RHS) {
+			return rhsWarn(operand.ObjectType, "\"UNKNOWN\", \"LOW\", \"MEDIUM\", \"HIGH\", \"CRITICAL\"", operand.RHS, nil)
 		}
 		return nil
 	default:
@@ -552,31 +566,9 @@ func flattenNetworkPorts(ports []common.NetworkPorts) []interface{} {
 	return portsObj
 }
 
-/*
-func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
-	var ports []common.NetworkPorts
-	if portsInterface, ok := d.GetOk(key); ok {
-		portSet, ok := portsInterface.(*schema.Set)
-		if !ok {
-			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
-			return ports
-		}
-		ports = make([]common.NetworkPorts, len(portSet.List()))
-		for i, val := range portSet.List() {
-			portItem := val.(map[string]interface{})
-			ports[i] = common.NetworkPorts{
-				From: portItem["from"].(string),
-				To:   portItem["to"].(string),
-			}
-		}
-	}
-	return ports
-}
-*/
-
 func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeSet,
+		Type:     schema.TypeList,
 		Optional: true,
 		Computed: true,
 		// Activate the "Attributes as Blocks" processing mode to permit dynamic declaration of no ports
@@ -1014,6 +1006,8 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 
 	validPlatformTypes := []string{"mac", "linux", "ios", "windows", "android"}
 
+	validRiskScore := []string{"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"}
+
 	// Adjust to handle *schema.Set instead of []interface{}
 	conditionsSet := conditions.(*schema.Set)
 	for _, condition := range conditionsSet.List() {
@@ -1078,6 +1072,27 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 					}
 					if !rhsOk || rhs != "true" {
 						return fmt.Errorf("rhs value must be 'true' for PLATFORM object_type")
+					}
+				}
+			case "RISK_FACTOR_TYPE":
+				entryValuesSet, ok := operandMap["entry_values"].(*schema.Set)
+				if !ok || entryValuesSet.Len() == 0 {
+					return fmt.Errorf("please provide valid risk factor values: %v", validRiskScore)
+				}
+				for _, ev := range entryValuesSet.List() {
+					evMap := ev.(map[string]interface{})
+					lhs, lhsOk := evMap["lhs"].(string)
+					rhs, rhsOk := evMap["rhs"].(string)
+
+					// Ensure lhs is "ZIA"
+					if !lhsOk || lhs != "ZIA" {
+						return fmt.Errorf("LHS must be 'ZIA' for RISK_FACTOR_TYPE")
+					}
+
+					// Ensure rhs is one of the valid risk scores
+					validRHSValues := []string{"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"}
+					if !rhsOk || !contains(validRHSValues, rhs) {
+						return fmt.Errorf("RHS must be one of 'UNKNOWN', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL' for RISK_FACTOR_TYPE")
 					}
 				}
 			case "POSTURE":
@@ -1247,7 +1262,7 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 			switch operand.ObjectType {
 			case "APP", "APP_GROUP", "CONSOLE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE":
 				operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
-			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE":
+			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE", "RISK_FACTOR_TYPE":
 				entryValuesMap[operand.ObjectType] = append(entryValuesMap[operand.ObjectType], policysetcontrollerv2.OperandsResourceLHSRHSValue{
 					LHS: operand.LHS,
 					RHS: operand.RHS,
@@ -1414,4 +1429,127 @@ func flattenPredefinedControls(predControl []common.CustomCommonControls) []inte
 		}
 	}
 	return predControls
+}
+
+func expandCommonServerGroups(d *schema.ResourceData) []servergroup.ServerGroup {
+	serverGroupInterface, ok := d.GetOk("server_groups")
+	if ok {
+		serverGroupSet, ok := serverGroupInterface.(*schema.Set)
+		if !ok {
+			return []servergroup.ServerGroup{}
+		}
+		log.Printf("[INFO] server group data: %+v\n", serverGroupSet)
+		var serverGroups []servergroup.ServerGroup
+		for _, serverGroup := range serverGroupSet.List() {
+			serverGroupMap, ok := serverGroup.(map[string]interface{})
+			if ok && serverGroupMap != nil {
+				idSet, ok := serverGroupMap["id"].(*schema.Set)
+				if !ok {
+					continue
+				}
+				for _, id := range idSet.List() {
+					serverGroups = append(serverGroups, servergroup.ServerGroup{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return serverGroups
+	}
+
+	return []servergroup.ServerGroup{}
+}
+
+func expandCommonAppConnectorGroups(d *schema.ResourceData) []appconnectorgroup.AppConnectorGroup {
+	appConnectorGroupInterface, ok := d.GetOk("app_connector_groups")
+	if ok {
+		appConnectorGroupSet, ok := appConnectorGroupInterface.(*schema.Set)
+		if !ok {
+			return []appconnectorgroup.AppConnectorGroup{}
+		}
+		log.Printf("[INFO] app connector group data: %+v\n", appConnectorGroupSet)
+		var appConnectorGroups []appconnectorgroup.AppConnectorGroup
+		for _, appConnectorGroup := range appConnectorGroupSet.List() {
+			appConnectorGroupMap, ok := appConnectorGroup.(map[string]interface{})
+			if ok && appConnectorGroupMap != nil {
+				idSet, ok := appConnectorGroupMap["id"].(*schema.Set)
+				if !ok {
+					continue
+				}
+				for _, id := range idSet.List() {
+					appConnectorGroups = append(appConnectorGroups, appconnectorgroup.AppConnectorGroup{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return appConnectorGroups
+	}
+
+	return []appconnectorgroup.AppConnectorGroup{}
+}
+
+func expandCommonServiceEdgeGroups(d *schema.ResourceData) []serviceedgegroup.ServiceEdgeGroup {
+	serviceEdgeGroupInterface, ok := d.GetOk("service_edge_groups")
+	if ok {
+		serviceEdgeGroupSet, ok := serviceEdgeGroupInterface.(*schema.Set)
+		if !ok {
+			return []serviceedgegroup.ServiceEdgeGroup{}
+		}
+		log.Printf("[INFO] service edge group data: %+v\n", serviceEdgeGroupSet)
+		var serviceEdgeGroups []serviceedgegroup.ServiceEdgeGroup
+		for _, serviceEdgeGroup := range serviceEdgeGroupSet.List() {
+			serviceEdgeGroupMap, ok := serviceEdgeGroup.(map[string]interface{})
+			if ok && serviceEdgeGroupMap != nil {
+				idSet, ok := serviceEdgeGroupMap["id"].(*schema.Set)
+				if !ok {
+					continue
+				}
+				for _, id := range idSet.List() {
+					serviceEdgeGroups = append(serviceEdgeGroups, serviceedgegroup.ServiceEdgeGroup{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return serviceEdgeGroups
+	}
+
+	return []serviceedgegroup.ServiceEdgeGroup{}
+}
+
+func flattenCommonAppConnectorGroups(appConnectorGroups []appconnectorgroup.AppConnectorGroup) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(appConnectorGroups))
+	for i, appConnectorGroup := range appConnectorGroups {
+		ids[i] = appConnectorGroup.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+
+func flattenCommonAppServerGroups(serverGroups []servergroup.ServerGroup) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroups))
+	for i, serverGroup := range serverGroups {
+		ids[i] = serverGroup.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+
+func flattenCommonServiceEdgeGroups(serviceEdgeGroups []serviceedgegroup.ServiceEdgeGroup) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serviceEdgeGroups))
+	for i, serviceEdgeGroup := range serviceEdgeGroups {
+		ids[i] = serviceEdgeGroup.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }

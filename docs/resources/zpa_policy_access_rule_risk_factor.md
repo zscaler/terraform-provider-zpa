@@ -4,7 +4,7 @@ subcategory: "Policy Set Controller"
 description: |-
   Official documentation https://help.zscaler.com/zpa/about-access-policy
   API documentation https://help.zscaler.com/zpa/configuring-access-policies-using-api
-  Creates and manages ZPA Policy Access Rule with Application Segment conditions.
+  Creates and manages ZPA Policy Access Rule with Risk Factor conditions.
 ---
 
 # zpa_policy_access_rule (Resource)
@@ -12,63 +12,47 @@ description: |-
 * [Official documentation](https://help.zscaler.com/zpa/about-access-policy)
 * [API documentation](https://help.zscaler.com/zpa/configuring-access-policies-using-api)
 
-The **zpa_policy_access_rule** resource creates and manages a policy access rule with Application Segment conditions in the Zscaler Private Access cloud.
+The **zpa_policy_access_rule** resource creates and manages a policy access rule with Risk Factor conditions in the Zscaler Private Access cloud.
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
 ## Example Usage
-```terraform
-resource "zpa_policy_access_rule" "this" {
-  name                          = "Example"
-  description                   = "Example"
-  action                        = "ALLOW"
-  operator                      = "AND"
 
+```terraform
+
+resource "zpa_policy_access_rule" "access_policy_allow_machinetunnel" {
+  action      = "ALLOW"
+  name        = "Example_Risk_Score_Test"
+  description = "Example_Risk_Score_Test"
+  operator    = "AND"
+  
   conditions {
     operator = "OR"
     operands {
-      name =  "Example"
-      object_type = "APP"
-      lhs = "id"
-      rhs = data.zpa_application_segment.this.id
+      lhs         = "ZIA"
+      object_type = "RISK_FACTOR_TYPE"
+      rhs         = "UNKNOWN"
     }
-  }
-}
-
-resource "zpa_application_segment" "this" {
-  name             = "Example"
-  description      = "Example"
-  enabled          = true
-  health_reporting = "ON_ACCESS"
-  bypass_type      = "NEVER"
-  is_cname_enabled = true
-  tcp_port_ranges  = ["80", "80"]
-  domain_names     = ["crm.example.com"]
-  segment_group_id = zpa_segment_group.this.id
-  server_groups {
-    id = [zpa_server_group.this.id]
-  }
-}
-
-resource "zpa_segment_group" "this" {
-  name            = "Example"
-  description     = "Example"
-  enabled         = true
-}
-
-// Retrieve App Connector Group
-data "zpa_app_connector_group" "this" {
-  name = "Example"
-}
-
-// Create Server Group
-resource "zpa_server_group" "this" {
-  name              = "Example"
-  description       = "Example"
-  enabled           = true
-  dynamic_discovery = true
-  app_connector_groups {
-    id = [data.zpa_app_connector_group.this.id]
+    operands {
+      lhs         = "ZIA"
+      object_type = "RISK_FACTOR_TYPE"
+      rhs         = "LOW"
+    }
+    operands {
+      lhs         = "ZIA"
+      object_type = "RISK_FACTOR_TYPE"
+      rhs         = "MEDIUM"
+    }
+    operands {
+      lhs         = "ZIA"
+      object_type = "RISK_FACTOR_TYPE"
+      rhs         = "HIGH"
+    }
+    operands {
+      lhs         = "ZIA"
+      object_type = "RISK_FACTOR_TYPE"
+      rhs         = "CRITICAL"
+    }
   }
 }
 ```
@@ -77,7 +61,7 @@ resource "zpa_server_group" "this" {
 
 ### Required
 
-* `name` (Required) This is the name of the policy rule.
+- `name` (String) This is the name of the policy rule.
 
 ### Optional
 
@@ -87,6 +71,7 @@ resource "zpa_server_group" "this" {
 - `custom_msg` (String) This is for providing a customer message for the user.
 - `description` (String) This is the description of the access policy rule.
 - `operator` (String) Supported values: ``AND``, ``OR``
+- `policy_type` (String) Supported values: ``ACCESS_POLICY`` or ``GLOBAL_POLICY``
 - `rule_order` (String, Deprecated)
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
@@ -96,19 +81,20 @@ resource "zpa_server_group" "this" {
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 - `conditions` (Block Set)
-  * `operator` (String) Supported values: ``AND``, and ``OR``
-  * `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
+  - `operator` (String) Supported values: ``AND``, and ``OR``
+  - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-- `operands` (Block Set) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
-    * `name` (String)
-    * `object_type` (String) This is for specifying the policy critiera. Supported values: `APP`. Use [zpa_application_segment](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment) resource or data source to associate or retrieve the Application Segment ``id`` attribute .
-    * `lhs` (String) LHS must always carry the string value ``id``.
-    * `rhs` (String) This is the ``id`` value of the application segment resource.
-    * `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
+  - `operands` (Block Set) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
+    - `object_type` (String) This is for specifying the policy critiera. For posture profile the supported value is:  `POSTURE`
+    - `name` (String)
+    - `lhs` (String) - Posture Profile (posture_udid) required when ``object_type = "POSTURE"``. Use [zpa_posture_profile](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile) data source to retrieve the ``posture_udid``
+    - `rhs` (String) Required when ``object_type = "POSTURE"``. Supported values are:
+      - ``true`` = ``VERIFIED``
+      - ``false`` = ``VERIFICATION FAILED``
 
-    ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+  ⚠️ **WARNING:**: The attribute ``microtenant_id`` is not supported within the `operands` block when the `object_type` is set to `POSTURE`. ZPA automatically assumes the posture profile ID that belongs to the parent tenant.
 
 - `app_connector_groups` (Block Set)
   * `id` (String) The ID of an app connector group resource

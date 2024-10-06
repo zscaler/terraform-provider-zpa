@@ -19,8 +19,8 @@ func TestAccResourcePolicyAccessRuleV2_Basic(t *testing.T) {
 	// updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
 	randDesc := acctest.RandString(10)
 
-	// appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
-	// appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
+	appConnectorGroupTypeAndName, _, appConnectorGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAAppConnectorGroup)
+	appConnectorGroupHCL := testAccCheckAppConnectorGroupConfigure(appConnectorGroupTypeAndName, appConnectorGroupGeneratedName, variable.AppConnectorDescription, variable.AppConnectorEnabled)
 
 	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
 	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, "tf-acc-test-"+segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
@@ -31,29 +31,29 @@ func TestAccResourcePolicyAccessRuleV2_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckPolicyAccessRuleV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckPolicyAccessRuleV2Configure(resourceTypeAndName, generatedName, rName, randDesc, segmentGroupHCL, segmentGroupTypeAndName),
+				Config: testAccCheckPolicyAccessRuleV2Configure(resourceTypeAndName, generatedName, rName, randDesc, segmentGroupHCL, segmentGroupTypeAndName, appConnectorGroupHCL, appConnectorGroupTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyAccessRuleV2Exists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "4"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "5"),
 				),
 			},
 
 			// Update test
 			{
-				Config: testAccCheckPolicyAccessRuleV2Configure(resourceTypeAndName, generatedName, rName, randDesc, segmentGroupHCL, segmentGroupTypeAndName),
+				Config: testAccCheckPolicyAccessRuleV2Configure(resourceTypeAndName, generatedName, rName, randDesc, segmentGroupHCL, segmentGroupTypeAndName, appConnectorGroupHCL, appConnectorGroupTypeAndName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckPolicyAccessRuleV2Exists(resourceTypeAndName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "name", rName),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
-					// resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "4"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "5"),
 				),
 			},
 			// Import test
@@ -114,10 +114,11 @@ func testAccCheckPolicyAccessRuleV2Exists(resource string) resource.TestCheckFun
 	}
 }
 
-func testAccCheckPolicyAccessRuleV2Configure(resourceTypeAndName, rName, generatedName, desc, segmentGroupHCL, segmentGroupTypeAndName string) string {
+func testAccCheckPolicyAccessRuleV2Configure(resourceTypeAndName, rName, generatedName, desc, segmentGroupHCL, segmentGroupTypeAndName, appConnectorGroupHCL, appConnectorGroupTypeAndName string) string {
 	return fmt.Sprintf(`
 
 // app connector group resource
+%s
 
 // segment group resource
 %s
@@ -130,9 +131,9 @@ data "%s" "%s" {
 }
 `,
 		// resource variables
-		// appConnectorGroupHCL,
 		segmentGroupHCL,
-		getPolicyAccessRuleV2HCL(rName, generatedName, desc, segmentGroupTypeAndName),
+		appConnectorGroupHCL,
+		getPolicyAccessRuleV2HCL(rName, generatedName, desc, segmentGroupTypeAndName, appConnectorGroupTypeAndName),
 
 		// data source variables
 		resourcetype.ZPAPolicyType,
@@ -141,7 +142,7 @@ data "%s" "%s" {
 	)
 }
 
-func getPolicyAccessRuleV2HCL(rName, generatedName, desc, segmentGroupTypeAndName string) string {
+func getPolicyAccessRuleV2HCL(rName, generatedName, desc, segmentGroupTypeAndName, appConnectorGroupTypeAndName string) string {
 	return fmt.Sprintf(`
 
 data "zpa_idp_controller" "this" {
@@ -173,6 +174,9 @@ resource "%s" "%s" {
 	description   		= "%s"
 	action        		= "ALLOW"
 	operator      		= "AND"
+	app_connector_groups {
+		id = ["${%s.id}"]
+	}
 	conditions {
 		operator = "OR"
 		operands {
@@ -222,7 +226,25 @@ resource "%s" "%s" {
 		  }
 		}
 	}
-	depends_on = [ %s ]
+	conditions {
+		operator = "OR"
+		operands {
+		  object_type = "RISK_FACTOR_TYPE"
+		  entry_values {
+			lhs = "ZIA"
+			rhs = "UNKNOWN"
+		  }
+		  entry_values {
+			lhs = "ZIA"
+			rhs = "LOW"
+		  }
+		  entry_values {
+			lhs = "ZIA"
+			rhs = "MEDIUM"
+		  }
+		}
+	}
+	depends_on = [ %s, %s ]
 }
 `,
 		// resource variables
@@ -230,9 +252,9 @@ resource "%s" "%s" {
 		rName,
 		generatedName,
 		desc,
-		// appConnectorGroupTypeAndName,
+		appConnectorGroupTypeAndName,
 		segmentGroupTypeAndName,
-		// appConnectorGroupTypeAndName,
+		appConnectorGroupTypeAndName,
 		segmentGroupTypeAndName,
 	)
 }

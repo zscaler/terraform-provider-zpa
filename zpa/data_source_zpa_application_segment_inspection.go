@@ -225,22 +225,27 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta int
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("ip_anchored", resp.IPAnchored)
 		_ = d.Set("health_reporting", resp.HealthReporting)
-		_ = d.Set("tcp_port_ranges", resp.TCPPortRanges)
-		_ = d.Set("udp_port_ranges", resp.UDPPortRanges)
 
 		if err := d.Set("inspection_apps", flattenInspectionApps(resp.InspectionAppDto)); err != nil {
 			return fmt.Errorf("failed to read inspection apps in application segment %s", err)
 		}
 
-		if err := d.Set("server_groups", flattenInspectionAppServerGroups(resp.AppServerGroups)); err != nil {
+		if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups)); err != nil {
 			return fmt.Errorf("failed to read server groups for inspection app %s", err)
+		}
+
+		if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
+			return err
+		}
+		if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
+			return err
 		}
 
 		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 			return err
 		}
 
-		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+		if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 			return err
 		}
 	} else {
@@ -250,6 +255,7 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta int
 	return nil
 }
 
+/*
 func flattenInspectionAppServerGroups(appServerGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
@@ -261,3 +267,4 @@ func flattenInspectionAppServerGroups(appServerGroup []applicationsegmentinspect
 	result[0] = mapIds
 	return result
 }
+*/

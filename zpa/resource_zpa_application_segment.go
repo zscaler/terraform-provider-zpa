@@ -1,7 +1,6 @@
 package zpa
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"strconv"
@@ -24,29 +23,6 @@ func resourceApplicationSegment() *schema.Resource {
 		Read:   resourceApplicationSegmentRead,
 		Update: resourceApplicationSegmentUpdate,
 		Delete: resourceApplicationSegmentDelete,
-		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-			if selectConnectorCloseToApp, ok := d.GetOk("select_connector_close_to_app"); ok && selectConnectorCloseToApp.(bool) {
-				udpAppPortRange := d.Get("udp_port_range").(*schema.Set).List()
-				udpPortRanges := d.Get("udp_port_ranges").([]interface{})
-
-				if len(udpAppPortRange) > 0 || len(udpPortRanges) > 0 {
-					return fmt.Errorf("the protocol configuration for the application is invalid. App Connector Closest to App supports only TCP applications")
-				}
-			}
-
-			if bypassType, ok := d.GetOk("bypass_type"); ok && bypassType.(string) == "ALWAYS" {
-				tcpPortRange := d.Get("tcp_port_range").(*schema.Set).List()
-				tcpPortRanges := d.Get("tcp_port_ranges").(*schema.Set).List()
-				udpPortRange := d.Get("udp_port_range").(*schema.Set).List()
-				udpPortRanges := d.Get("udp_port_ranges").(*schema.Set).List()
-
-				if len(tcpPortRange) > 0 || len(tcpPortRanges) > 0 || len(udpPortRange) > 0 || len(udpPortRanges) > 0 {
-					return fmt.Errorf("TCP and UDP port configuration must be disabled as bypass_type is set to ALWAYS. In order to add ports, please change the bypass_type to NEVER or ON_NET")
-				}
-			}
-
-			return nil
-		},
 		Importer: &schema.ResourceImporter{
 			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				client := meta.(*Client)
@@ -80,22 +56,6 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Name of the application.",
-				ValidateFunc: validation.StringIsNotEmpty,
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Description of the application.",
-			},
-			"enabled": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Whether this application is enabled or not.",
-			},
 			"segment_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -124,16 +84,16 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 			"tcp_port_range": resourceAppSegmentPortRange("tcp port range"),
 			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
+
 			"tcp_port_ranges": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-
 			"udp_port_ranges": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: "UDP port ranges used to access the app.",
@@ -148,6 +108,11 @@ func resourceApplicationSegment() *schema.Resource {
 				}, false),
 				Default: "DEFAULT",
 			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the application.",
+			},
 			"domain_names": {
 				Type:        schema.TypeSet,
 				Required:    true,
@@ -158,6 +123,11 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Whether Double Encryption is enabled or disabled for the app.",
+			},
+			"enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether this application is enabled or not.",
 			},
 			"health_check_type": {
 				Type:     schema.TypeString,
@@ -205,6 +175,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"use_in_dr_mode": {
 				Type:     schema.TypeBool,
@@ -219,6 +190,12 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.",
+			},
+			"name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "Name of the application.",
+				ValidateFunc: validation.StringIsNotEmpty,
 			},
 			"passive_health_enabled": {
 				Type:     schema.TypeBool,
@@ -236,7 +213,6 @@ func resourceApplicationSegment() *schema.Resource {
 			"microtenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 			},
 			"server_groups": {
 				Type:        schema.TypeSet,
@@ -270,9 +246,9 @@ func resourceApplicationSegmentCreate(d *schema.ResourceData, meta interface{}) 
 
 	req := expandApplicationSegmentRequest(d, zClient, "")
 
-	// if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-	// 	return err
-	// }
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
 
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
@@ -313,16 +289,15 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[INFO] Reading application segment and settings states: %+v\n", resp)
 	_ = d.Set("id", resp.ID)
-	_ = d.Set("name", resp.Name)
-	_ = d.Set("description", resp.Description)
-	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("segment_group_id", resp.SegmentGroupID)
 	_ = d.Set("segment_group_name", resp.SegmentGroupName)
-	_ = d.Set("bypass_on_reauth", resp.BypassOnReauth)
 	_ = d.Set("bypass_type", resp.BypassType)
+	_ = d.Set("bypass_on_reauth", resp.BypassOnReauth)
 	_ = d.Set("config_space", resp.ConfigSpace)
+	_ = d.Set("description", resp.Description)
 	_ = d.Set("domain_names", resp.DomainNames)
 	_ = d.Set("double_encrypt", resp.DoubleEncrypt)
+	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("health_check_type", resp.HealthCheckType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("icmp_access_type", resp.IcmpAccessType)
@@ -334,11 +309,12 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) er
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
+	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
-	_ = d.Set("server_groups", flattenAppServerGroupsSimple(resp.ServerGroups))
+	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
@@ -359,9 +335,9 @@ func resourceApplicationSegmentUpdate(d *schema.ResourceData, meta interface{}) 
 	log.Printf("[INFO] Updating application segment ID: %v\n", id)
 	req := expandApplicationSegmentRequest(d, zClient, id)
 
-	// if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-	// 	return err
-	// }
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return err
+	}
 
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the application segment")
@@ -446,7 +422,6 @@ func resourceApplicationSegmentDelete(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-/*
 func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id string) applicationsegment.ApplicationSegmentResource {
 	microTenantID := GetString(d.Get("microtenant_id"))
 	service := client.ApplicationSegment
@@ -469,6 +444,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 		MatchStyle:                d.Get("match_style").(string),
 		HealthReporting:           d.Get("health_reporting").(string),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
+		MicroTenantID:             d.Get("microtenant_id").(string),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
@@ -478,7 +454,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 
-		ServerGroups:    expandAppServerGroups(d),
+		ServerGroups:    expandCommonServerGroups(d),
 		TCPAppPortRange: []common.NetworkPorts{},
 		UDPAppPortRange: []common.NetworkPorts{},
 	}
@@ -514,112 +490,4 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 		details.UDPPortRanges = []string{}
 	}
 	return details
-}
-*/
-
-func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id string) applicationsegment.ApplicationSegmentResource {
-	microTenantID := GetString(d.Get("microtenant_id"))
-	service := client.ApplicationSegment
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
-
-	details := applicationsegment.ApplicationSegmentResource{
-		ID:                        d.Id(),
-		Name:                      d.Get("name").(string),
-		SegmentGroupID:            d.Get("segment_group_id").(string),
-		SegmentGroupName:          d.Get("segment_group_name").(string),
-		BypassType:                d.Get("bypass_type").(string),
-		BypassOnReauth:            d.Get("bypass_on_reauth").(bool),
-		ConfigSpace:               d.Get("config_space").(string),
-		IcmpAccessType:            d.Get("icmp_access_type").(string),
-		Description:               d.Get("description").(string),
-		DomainNames:               SetToStringList(d, "domain_names"),
-		HealthCheckType:           d.Get("health_check_type").(string),
-		MatchStyle:                d.Get("match_style").(string),
-		HealthReporting:           d.Get("health_reporting").(string),
-		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
-		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
-		DoubleEncrypt:             d.Get("double_encrypt").(bool),
-		Enabled:                   d.Get("enabled").(bool),
-		IpAnchored:                d.Get("ip_anchored").(bool),
-		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
-		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
-		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
-		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
-
-		ServerGroups:    expandAppServerGroups(d),
-		TCPAppPortRange: []common.NetworkPorts{},
-		UDPAppPortRange: []common.NetworkPorts{},
-	}
-	remoteTCPAppPortRanges := []string{}
-	remoteUDPAppPortRanges := []string{}
-	if service != nil && id != "" {
-		resource, _, err := applicationsegment.Get(service, id)
-		if err == nil {
-			remoteTCPAppPortRanges = resource.TCPPortRanges
-			remoteUDPAppPortRanges = resource.UDPPortRanges
-		}
-	}
-
-	// Manually duplicate each entry in the list to represent "From" and "To" values
-	TCPAppPortRanges := duplicatePortRanges(d.Get("tcp_port_ranges").(*schema.Set).List())
-	UDPAppPortRanges := duplicatePortRanges(d.Get("udp_port_ranges").(*schema.Set).List())
-
-	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
-	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
-		details.TCPPortRanges = TCPAppPortRanges
-	} else {
-		details.TCPPortRanges = TCPAppPortRange
-	}
-
-	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
-	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
-		details.UDPPortRanges = UDPAppPortRanges
-	} else {
-		details.UDPPortRanges = UDPAppPortRange
-	}
-
-	if details.TCPPortRanges == nil {
-		details.TCPPortRanges = []string{}
-	}
-	if details.UDPPortRanges == nil {
-		details.UDPPortRanges = []string{}
-	}
-
-	return details
-}
-
-func expandAppServerGroups(d *schema.ResourceData) []applicationsegment.AppServerGroups {
-	serverGroupsInterface, ok := d.GetOk("server_groups")
-	if ok {
-		serverGroup := serverGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
-		var serverGroups []applicationsegment.AppServerGroups
-		for _, appServerGroup := range serverGroup.List() {
-			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if ok {
-				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					serverGroups = append(serverGroups, applicationsegment.AppServerGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return serverGroups
-	}
-
-	return []applicationsegment.AppServerGroups{}
-}
-
-func flattenAppServerGroupsSimple(serverGroups []applicationsegment.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroups))
-	for i, group := range serverGroups {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
 }

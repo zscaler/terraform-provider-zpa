@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
@@ -65,14 +66,14 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"udp_port_range": resourceAppSegmentPortRange("udp port range"),
 
 			"tcp_port_ranges": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: "TCP port ranges used to access the app.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"udp_port_ranges": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Computed:    true,
 				Description: "UDP port ranges used to access the app.",
@@ -393,14 +394,14 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
-	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
-	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
-	_ = d.Set("server_groups", flattenPRAAppServerGroupsSimple(resp.ServerGroups))
+	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups))
 
-	//Use the new flatten function for praApps
 	if err := d.Set("pra_apps", flattenPRAApps(resp.PRAApps)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
+
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
@@ -409,19 +410,8 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
 		return err
 	}
-	return nil
-}
 
-func flattenPRAAppServerGroupsSimple(serverGroup []applicationsegmentpra.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroup))
-	for i, group := range serverGroup {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
+	return nil
 }
 
 func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -435,7 +425,7 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, meta interface{
 
 	id := d.Id()
 	log.Printf("[INFO] Updating pra application segment ID: %v\n", id)
-	req := expandSRAApplicationSegment(d, zClient, id)
+	req := expandSRAApplicationSegment(d, zClient, "")
 
 	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
 		return err
@@ -489,7 +479,7 @@ func resourceApplicationSegmentPRADelete(d *schema.ResourceData, meta interface{
 
 func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id string) applicationsegmentpra.AppSegmentPRA {
 	microTenantID := GetString(d.Get("microtenant_id"))
-	service := client.ApplicationSegmentPRA
+	service := client.ApplicationSegment
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
@@ -515,34 +505,23 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id stri
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		DomainNames:               SetToStringList(d, "domain_names"),
-		TCPAppPortRange:           []common.NetworkPorts{},
-		UDPAppPortRange:           []common.NetworkPorts{},
-		ServerGroups:              expandPRAAppServerGroups(d),
+		ServerGroups:              expandCommonServerGroups(d),
 		CommonAppsDto:             expandCommonAppsDto(d),
-	}
 
-	if d.HasChange("name") {
-		details.Name = d.Get("name").(string)
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
 	}
-	if d.HasChange("server_groups") {
-		details.ServerGroups = expandPRAAppServerGroups(d)
-	}
-
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if service != nil && id != "" {
-		resource, _, err := applicationsegmentpra.Get(service, id)
+		resource, _, err := applicationsegment.Get(service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
 			remoteUDPAppPortRanges = resource.UDPPortRanges
 		}
 	}
-
-	// Manually duplicate each entry in the list to represent "From" and "To" values
-	TCPAppPortRanges := duplicatePortRanges(d.Get("tcp_port_ranges").(*schema.Set).List())
-	UDPAppPortRanges := duplicatePortRanges(d.Get("udp_port_ranges").(*schema.Set).List())
-
 	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
+	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
 	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
 		details.TCPPortRanges = TCPAppPortRanges
 	} else {
@@ -550,6 +529,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id stri
 	}
 
 	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
+	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
 	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
 		details.UDPPortRanges = UDPAppPortRanges
 	} else {
@@ -561,6 +541,17 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id stri
 	}
 	if details.UDPPortRanges == nil {
 		details.UDPPortRanges = []string{}
+	}
+	if d.HasChange("name") {
+		details.Name = d.Get("name").(string)
+	}
+	if d.HasChange("server_groups") {
+		details.ServerGroups = expandCommonServerGroups(d)
+	}
+
+	// Apply microtenant context if available
+	if microTenantID != "" {
+		client.ApplicationSegment = client.ApplicationSegment.WithMicroTenant(microTenantID)
 	}
 
 	return details
@@ -606,28 +597,6 @@ func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.A
 		}
 	}
 	return commonAppConfigDto
-}
-
-func expandPRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.AppServerGroups {
-	serverGroupsInterface, ok := d.GetOk("server_groups")
-	if ok {
-		serverGroup := serverGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
-		var serverGroups []applicationsegmentpra.AppServerGroups
-		for _, appServerGroup := range serverGroup.List() {
-			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if ok {
-				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					serverGroups = append(serverGroups, applicationsegmentpra.AppServerGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return serverGroups
-	}
-
-	return []applicationsegmentpra.AppServerGroups{}
 }
 
 func flattenPRAApps(apps []applicationsegmentpra.PRAApps) []interface{} {
@@ -737,3 +706,41 @@ func customizeDiffApplicationSegmentPRA(ctx context.Context, d *schema.ResourceD
 	}
 	return nil
 }
+
+/*
+func expandPRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.AppServerGroups {
+	serverGroupsInterface, ok := d.GetOk("server_groups")
+	if ok {
+		serverGroup := serverGroupsInterface.(*schema.Set)
+		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
+		var serverGroups []applicationsegmentpra.AppServerGroups
+		for _, appServerGroup := range serverGroup.List() {
+			appServerGroup, _ := appServerGroup.(map[string]interface{})
+			if ok {
+				for _, id := range appServerGroup["id"].(*schema.Set).List() {
+					serverGroups = append(serverGroups, applicationsegmentpra.AppServerGroups{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return serverGroups
+	}
+
+	return []applicationsegmentpra.AppServerGroups{}
+}
+*/
+
+/*
+func flattenPRAAppServerGroupsSimple(serverGroup []applicationsegmentpra.AppServerGroups) []interface{} {
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroup))
+	for i, group := range serverGroup {
+		ids[i] = group.ID
+	}
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
+}
+*/
