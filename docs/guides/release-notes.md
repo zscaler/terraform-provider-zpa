@@ -23,8 +23,12 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - Release date: **(October, 3 2024)**
 - Supported Terraform version: **v1.x**
 
+### Enhancements
+- [PR #496](https://github.com/zscaler/terraform-provider-zpa/pull/496) - Added new `object_type` `RISK_FACTOR_TYPE` to the following ZPA access policy resources: `zpa_policy_access_rule`, and `zpa_policy_access_rule_v2`
+
 ### Bug Fixes
-- [PR #496](https://github.com/zscaler/terraform-provider-zpa/pull/496) - Fixed issue with attribute `tcp_port_range`/`udp_port_range` and `tcp_port_ranges`/`udp_port_ranges` within the resource `zpa_application_segment`. The fix ensure that both port configuration formats are suported separately without mid-conversion in between. The fix also ensure the port configuration order is ignored during apply and update process. [Issue #490](https://github.com/zscaler/terraform-provider-zpa/issues/490).
+- [PR #496](https://github.com/zscaler/terraform-provider-zpa/pull/496) - Fixed issue with attribute `tcp_port_range`/`udp_port_range` and `tcp_port_ranges`/`udp_port_ranges` within `zpa_application_segment`. The fix ensure that both port configuration formats are suported separately without mid-conversion in between. The fix also ensure the port configuration order is ignored during apply and update process. [Issue #490](https://github.com/zscaler/terraform-provider-zpa/issues/490).
+
 
 ### Internal Changes
 - [PR #496](https://github.com/zscaler/terraform-provider-zpa/pull/496) Consolidated multiple functions supported common/cross-shared resources. The following new common functions were introduced for simplicity:

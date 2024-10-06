@@ -199,6 +199,17 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 			return lhsWarn(operand.ObjectType, "valid ISO-3166 Alpha-2 country code. Please visit the following site for reference: https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes", operand.LHS, nil)
 		}
 		return nil
+	case "RISK_FACTOR_TYPE":
+		// Check if lhs is "ZIA"
+		if operand.LHS != "ZIA" {
+			return lhsWarn(operand.ObjectType, "\"ZIA\"", operand.LHS, nil)
+		}
+		// Validate rhs for RISK_FACTOR_TYPE
+		validRHSValues := []string{"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"}
+		if !contains(validRHSValues, operand.RHS) {
+			return rhsWarn(operand.ObjectType, "\"UNKNOWN\", \"LOW\", \"MEDIUM\", \"HIGH\", \"CRITICAL\"", operand.RHS, nil)
+		}
+		return nil
 	default:
 		return fmt.Errorf("[WARN] invalid operand object type %s", operand.ObjectType)
 	}
@@ -554,28 +565,6 @@ func flattenNetworkPorts(ports []common.NetworkPorts) []interface{} {
 	}
 	return portsObj
 }
-
-/*
-func expandNetwokPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
-	var ports []common.NetworkPorts
-	if portsInterface, ok := d.GetOk(key); ok {
-		portSet, ok := portsInterface.(*schema.Set)
-		if !ok {
-			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
-			return ports
-		}
-		ports = make([]common.NetworkPorts, len(portSet.List()))
-		for i, val := range portSet.List() {
-			portItem := val.(map[string]interface{})
-			ports[i] = common.NetworkPorts{
-				From: portItem["from"].(string),
-				To:   portItem["to"].(string),
-			}
-		}
-	}
-	return ports
-}
-*/
 
 func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	return &schema.Schema{
@@ -1017,6 +1006,8 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 
 	validPlatformTypes := []string{"mac", "linux", "ios", "windows", "android"}
 
+	validRiskScore := []string{"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"}
+
 	// Adjust to handle *schema.Set instead of []interface{}
 	conditionsSet := conditions.(*schema.Set)
 	for _, condition := range conditionsSet.List() {
@@ -1081,6 +1072,27 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 					}
 					if !rhsOk || rhs != "true" {
 						return fmt.Errorf("rhs value must be 'true' for PLATFORM object_type")
+					}
+				}
+			case "RISK_FACTOR_TYPE":
+				entryValuesSet, ok := operandMap["entry_values"].(*schema.Set)
+				if !ok || entryValuesSet.Len() == 0 {
+					return fmt.Errorf("please provide valid risk factor values: %v", validRiskScore)
+				}
+				for _, ev := range entryValuesSet.List() {
+					evMap := ev.(map[string]interface{})
+					lhs, lhsOk := evMap["lhs"].(string)
+					rhs, rhsOk := evMap["rhs"].(string)
+
+					// Ensure lhs is "ZIA"
+					if !lhsOk || lhs != "ZIA" {
+						return fmt.Errorf("LHS must be 'ZIA' for RISK_FACTOR_TYPE")
+					}
+
+					// Ensure rhs is one of the valid risk scores
+					validRHSValues := []string{"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"}
+					if !rhsOk || !contains(validRHSValues, rhs) {
+						return fmt.Errorf("RHS must be one of 'UNKNOWN', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL' for RISK_FACTOR_TYPE")
 					}
 				}
 			case "POSTURE":
@@ -1250,7 +1262,7 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 			switch operand.ObjectType {
 			case "APP", "APP_GROUP", "CONSOLE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE":
 				operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
-			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE":
+			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE", "RISK_FACTOR_TYPE":
 				entryValuesMap[operand.ObjectType] = append(entryValuesMap[operand.ObjectType], policysetcontrollerv2.OperandsResourceLHSRHSValue{
 					LHS: operand.LHS,
 					RHS: operand.RHS,

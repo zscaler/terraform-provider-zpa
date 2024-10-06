@@ -81,6 +81,7 @@ func resourcePolicyAccessRule() *schema.Resource {
 					"MACHINE_GRP",
 					"COUNTRY_CODE",
 					"PLATFORM",
+					"RISK_FACTOR_TYPE",
 				}),
 			},
 		),

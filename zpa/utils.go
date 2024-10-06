@@ -91,24 +91,11 @@ func MergeSchema(schemas ...map[string]*schema.Schema) map[string]*schema.Schema
 	return final
 }
 
-/*
 func convertPortsToListString(portRangeLst []common.NetworkPorts) []string {
 	portRanges := make([]string, len(portRangeLst)*2)
 	for i := range portRangeLst {
 		portRanges[2*i] = portRangeLst[i].From
 		portRanges[2*i+1] = portRangeLst[i].To
-	}
-	return portRanges
-}
-*/
-
-/*
-// Function to duplicate each port range value in the list
-func duplicatePortRanges(portRangeLst []interface{}) []string {
-	portRanges := make([]string, 0, len(portRangeLst)*2)
-	for _, v := range portRangeLst {
-		port := v.(string)
-		portRanges = append(portRanges, port, port)
 	}
 	return portRanges
 }
@@ -120,12 +107,77 @@ func convertToPortRange(portRangeLst []interface{}) []string {
 	}
 	return portRanges
 }
+
+/*
+func expandList(portRangeLst []interface{}) []string {
+	portRanges := make([]string, len(portRangeLst))
+	for i, port := range portRangeLst {
+		portRanges[i] = port.(string)
+	}
+
+	return portRanges
+}
 */
 
-// func expandAppSegmentNetworkPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
+func isSameSlice(s1, s2 []string) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+/*
+func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
+	var ports []string
+	if portsInterface, ok := d.GetOk(key); ok {
+		portSet, ok := portsInterface.(*schema.Set)
+		if !ok {
+			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
+			return []string{}
+		}
+		ports = make([]string, len(portSet.List())*2)
+		for i, val := range portSet.List() {
+			portItem := val.(map[string]interface{})
+			ports[2*i] = portItem["from"].(string)
+			ports[2*i+1] = portItem["to"].(string)
+		}
+	}
+	return ports
+}
+*/
+
+func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
+	var ports []string
+	if portsInterface, ok := d.GetOk(key); ok {
+		portList, ok := portsInterface.([]interface{})
+		if !ok {
+			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
+			return []string{}
+		}
+		ports = make([]string, len(portList)*2)
+		for i, val := range portList {
+			portItem := val.(map[string]interface{})
+			ports[2*i] = portItem["from"].(string)
+			ports[2*i+1] = portItem["to"].(string)
+		}
+	}
+	return ports
+}
+
+// Helper function to expand the new format
+// func expandNetworkPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
 // 	var ports []common.NetworkPorts
-// 	if portInterface, ok := d.GetOk(key); ok {
-// 		portSet := portInterface.(*schema.Set)
+// 	if portsInterface, ok := d.GetOk(key); ok {
+// 		portSet, ok := portsInterface.(*schema.Set)
+// 		if !ok {
+// 			log.Printf("[ERROR] conversion failed, %s", key)
+// 			return []common.NetworkPorts{}
+// 		}
 // 		ports = make([]common.NetworkPorts, len(portSet.List()))
 // 		for i, val := range portSet.List() {
 // 			portItem := val.(map[string]interface{})
@@ -138,22 +190,6 @@ func convertToPortRange(portRangeLst []interface{}) []string {
 // 	return ports
 // }
 
-func expandAppSegmentNetworkPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
-	var ports []common.NetworkPorts
-	if portInterface, ok := d.GetOk(key); ok {
-		portList := portInterface.([]interface{}) // TypeList ensures the order is preserved
-		ports = make([]common.NetworkPorts, len(portList))
-		for i, val := range portList {
-			portItem := val.(map[string]interface{})
-			ports[i] = common.NetworkPorts{
-				From: portItem["from"].(string),
-				To:   portItem["to"].(string),
-			}
-		}
-	}
-	return ports
-}
-
 func sliceHasCommon(s1, s2 []string) (bool, string) {
 	for _, i1 := range s1 {
 		for _, i2 := range s2 {
@@ -164,20 +200,6 @@ func sliceHasCommon(s1, s2 []string) (bool, string) {
 	}
 	return false, ""
 }
-
-/*
-func isSameSlice(s1, s2 []string) bool {
-	if len(s1) != len(s2) {
-		return false
-	}
-	for i := range s1 {
-		if s1[i] != s2[i] {
-			return false
-		}
-	}
-	return true
-}
-*/
 
 func expandStringInSlice(d *schema.ResourceData, key string) []string {
 	applicationSegments := d.Get(key).([]interface{})

@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
 func resourceApplicationSegmentBrowserAccess() *schema.Resource {
@@ -290,7 +292,7 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, meta 
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	req := expandBrowserAccess(d, zClient)
+	req := expandBrowserAccess(d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
@@ -365,12 +367,8 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta in
 		return fmt.Errorf("failed to read app server groups %s", err)
 	}
 
-	if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
-		return err
-	}
-	if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
-		return err
-	}
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
@@ -394,7 +392,7 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta 
 
 	id := d.Id()
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
-	req := expandBrowserAccess(d, zClient)
+	req := expandBrowserAccess(d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
@@ -433,9 +431,12 @@ func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, meta 
 	return nil
 }
 
-func expandBrowserAccess(d *schema.ResourceData, zClient *Client) browseraccess.BrowserAccess {
-	// Capture MicroTenantID for child tenant scenario
+func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
 	microTenantID := GetString(d.Get("microtenant_id"))
+	service := zClient.BrowserAccess
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	details := browseraccess.BrowserAccess{
 		ID:                        d.Id(),
@@ -462,24 +463,39 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client) browseraccess.
 		AppServerGroups:           expandCommonServerGroups(d),
 		ClientlessApps:            expandClientlessApps(d),
 
-		TCPPortRanges: ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges: ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
-		// Use the helper for structured port ranges
-		TCPAppPortRange: expandAppSegmentNetworkPorts(d, "tcp_port_range"),
-		UDPAppPortRange: expandAppSegmentNetworkPorts(d, "udp_port_range"),
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
+	}
+	remoteTCPAppPortRanges := []string{}
+	remoteUDPAppPortRanges := []string{}
+	if service != nil && id != "" {
+		resource, _, err := applicationsegment.Get(service, id)
+		if err == nil {
+			remoteTCPAppPortRanges = resource.TCPPortRanges
+			remoteUDPAppPortRanges = resource.UDPPortRanges
+		}
+	}
+	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
+	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
+		details.TCPPortRanges = TCPAppPortRanges
+	} else {
+		details.TCPPortRanges = TCPAppPortRange
 	}
 
-	// // Optionally handle any further details if needed
-	// if zClient != nil && id != "" {
-	// 	microTenantID := GetString(d.Get("microtenant_id"))
-	// 	service := zClient.BrowserAccess
-	// 	if microTenantID != "" {
-	// 		service = service.WithMicroTenant(microTenantID)
-	// 	}
-	// }
-	// Apply microtenant context if available
-	if microTenantID != "" {
-		zClient.BrowserAccess = zClient.BrowserAccess.WithMicroTenant(microTenantID)
+	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
+	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
+		details.UDPPortRanges = UDPAppPortRanges
+	} else {
+		details.UDPPortRanges = UDPAppPortRange
+	}
+
+	if details.TCPPortRanges == nil {
+		details.TCPPortRanges = []string{}
+	}
+	if details.UDPPortRanges == nil {
+		details.UDPPortRanges = []string{}
 	}
 	// Handle specific changes, to be sure we're updating the correct fields
 	if d.HasChange("name") {

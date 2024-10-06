@@ -7,7 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
 func resourceApplicationSegmentInspection() *schema.Resource {
@@ -301,7 +303,7 @@ func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, meta int
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
-	req := expandInspectionApplicationSegment(d)
+	req := expandInspectionApplicationSegment(d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
@@ -367,12 +369,8 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta inter
 		return fmt.Errorf("failed to read inspection apps in application segment %s", err)
 	}
 
-	if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
-		return err
-	}
-	if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
-		return err
-	}
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
@@ -388,9 +386,14 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta int
 	zClient := meta.(*Client)
 	service := zClient.ApplicationSegmentInspection
 
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection application segment ID: %v\n", id)
-	req := expandInspectionApplicationSegment(d)
+	req := expandInspectionApplicationSegment(d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
@@ -440,7 +443,13 @@ func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, meta int
 	return nil
 }
 
-func expandInspectionApplicationSegment(d *schema.ResourceData) applicationsegmentinspection.AppSegmentInspection {
+func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
+	microTenantID := GetString(d.Get("microtenant_id"))
+	service := zClient.ApplicationSegmentInspection
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
 	details := applicationsegmentinspection.AppSegmentInspection{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
@@ -465,13 +474,41 @@ func expandInspectionApplicationSegment(d *schema.ResourceData) applicationsegme
 		AppServerGroups:           expandCommonServerGroups(d),
 		CommonAppsDto:             expandInspectionCommonAppsDto(d),
 
-		TCPPortRanges: ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges: ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
-
-		// Use the helper for structured port ranges
-		TCPAppPortRange: expandAppSegmentNetworkPorts(d, "tcp_port_range"),
-		UDPAppPortRange: expandAppSegmentNetworkPorts(d, "udp_port_range"),
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
 	}
+	remoteTCPAppPortRanges := []string{}
+	remoteUDPAppPortRanges := []string{}
+	if service != nil && id != "" {
+		resource, _, err := applicationsegment.Get(service, id)
+		if err == nil {
+			remoteTCPAppPortRanges = resource.TCPPortRanges
+			remoteUDPAppPortRanges = resource.UDPPortRanges
+		}
+	}
+	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
+	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
+		details.TCPPortRanges = TCPAppPortRanges
+	} else {
+		details.TCPPortRanges = TCPAppPortRange
+	}
+
+	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
+	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
+		details.UDPPortRanges = UDPAppPortRanges
+	} else {
+		details.UDPPortRanges = UDPAppPortRange
+	}
+
+	if details.TCPPortRanges == nil {
+		details.TCPPortRanges = []string{}
+	}
+	if details.UDPPortRanges == nil {
+		details.UDPPortRanges = []string{}
+	}
+
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
 	}
@@ -523,44 +560,6 @@ func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationse
 	}
 	return commonAppConfigDto
 }
-
-/*
-func expandInspectionAppServerGroups(d *schema.ResourceData) []servergroup.AppServerGroups {
-	serverGroupsInterface, ok := d.GetOk("server_groups")
-	if ok {
-		serverGroup := serverGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
-		var serverGroups []servergroup.AppServerGroups
-		for _, appServerGroup := range serverGroup.List() {
-			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if ok {
-				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					serverGroups = append(serverGroups, servergroup.AppServerGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return serverGroups
-	}
-
-	return []servergroup.AppServerGroups{}
-}
-*/
-
-/*
-func flattenInspectionAppServerGroupsSimple(serverGroup []servergroup.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroup))
-	for i, group := range serverGroup {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-*/
 
 func flattenInspectionApps(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
 	if len(apps) == 0 {

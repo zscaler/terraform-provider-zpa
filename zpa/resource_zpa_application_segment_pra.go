@@ -13,7 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
 func resourceApplicationSegmentPRA() *schema.Resource {
@@ -317,7 +319,7 @@ func resourceApplicationSegmentPRACreate(d *schema.ResourceData, meta interface{
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	req := expandSRAApplicationSegment(d, zClient)
+	req := expandSRAApplicationSegment(d, zClient, "")
 	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
 		return err
 	}
@@ -392,19 +394,14 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
-
 	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups))
 
 	if err := d.Set("pra_apps", flattenPRAApps(resp.PRAApps)); err != nil {
 		return fmt.Errorf("failed to read common application in application segment %s", err)
 	}
 
-	if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
-		return err
-	}
-	if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
-		return err
-	}
+	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
+	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return err
@@ -428,7 +425,7 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, meta interface{
 
 	id := d.Id()
 	log.Printf("[INFO] Updating pra application segment ID: %v\n", id)
-	req := expandSRAApplicationSegment(d, zClient)
+	req := expandSRAApplicationSegment(d, zClient, "")
 
 	if err := checkForPRAPortsOverlap(zClient, req); err != nil {
 		return err
@@ -480,9 +477,12 @@ func resourceApplicationSegmentPRADelete(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func expandSRAApplicationSegment(d *schema.ResourceData, client *Client) applicationsegmentpra.AppSegmentPRA {
-	// Capture MicroTenantID for child tenant scenario
+func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id string) applicationsegmentpra.AppSegmentPRA {
 	microTenantID := GetString(d.Get("microtenant_id"))
+	service := client.ApplicationSegment
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	details := applicationsegmentpra.AppSegmentPRA{
 		ID:                        d.Id(),
@@ -508,14 +508,40 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client) applica
 		ServerGroups:              expandCommonServerGroups(d),
 		CommonAppsDto:             expandCommonAppsDto(d),
 
-		TCPPortRanges: ListToStringSlice(d.Get("tcp_port_ranges").([]interface{})),
-		UDPPortRanges: ListToStringSlice(d.Get("udp_port_ranges").([]interface{})),
-
-		// Use the helper for structured port ranges
-		TCPAppPortRange: expandAppSegmentNetworkPorts(d, "tcp_port_range"),
-		UDPAppPortRange: expandAppSegmentNetworkPorts(d, "udp_port_range"),
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
+	}
+	remoteTCPAppPortRanges := []string{}
+	remoteUDPAppPortRanges := []string{}
+	if service != nil && id != "" {
+		resource, _, err := applicationsegment.Get(service, id)
+		if err == nil {
+			remoteTCPAppPortRanges = resource.TCPPortRanges
+			remoteUDPAppPortRanges = resource.UDPPortRanges
+		}
+	}
+	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
+	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
+	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
+		details.TCPPortRanges = TCPAppPortRanges
+	} else {
+		details.TCPPortRanges = TCPAppPortRange
 	}
 
+	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
+	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
+	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
+		details.UDPPortRanges = UDPAppPortRanges
+	} else {
+		details.UDPPortRanges = UDPAppPortRange
+	}
+
+	if details.TCPPortRanges == nil {
+		details.TCPPortRanges = []string{}
+	}
+	if details.UDPPortRanges == nil {
+		details.UDPPortRanges = []string{}
+	}
 	if d.HasChange("name") {
 		details.Name = d.Get("name").(string)
 	}

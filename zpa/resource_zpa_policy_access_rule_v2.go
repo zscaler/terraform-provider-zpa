@@ -119,6 +119,7 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 											"MACHINE_GRP",
 											"COUNTRY_CODE",
 											"PLATFORM",
+											"RISK_FACTOR_TYPE",
 										}, false),
 									},
 									"entry_values": {
@@ -261,7 +262,7 @@ func resourcePolicyAccessV2Read(d *schema.ResourceData, meta interface{}) error 
 	_ = d.Set("description", v2PolicyRule.Description)
 	_ = d.Set("action", v2PolicyRule.Action)
 	_ = d.Set("operator", v2PolicyRule.Operator)
-	_ = d.Set("policy_set_id", policySetID) // Here, you're setting it based on fetched ID
+	_ = d.Set("policy_set_id", policySetID)
 	_ = d.Set("custom_msg", v2PolicyRule.CustomMsg)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
 	_ = d.Set("app_server_groups", flattenCommonAppServerGroups(resp.AppServerGroups))
