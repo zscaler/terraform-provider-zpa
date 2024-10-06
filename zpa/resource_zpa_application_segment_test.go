@@ -40,8 +40,8 @@ func TestAccResourceApplicationSegment_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_range.#", "1"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_range.#", "1"),
 				),
 			},
 
@@ -57,8 +57,8 @@ func TestAccResourceApplicationSegment_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "bypass_type", "NEVER"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_ranges.#", "2"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_range.#", "1"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "udp_port_range.#", "1"),
 				),
 			},
 			// Import test
@@ -144,8 +144,18 @@ resource "%s" "%s" {
 	is_cname_enabled = "%s"
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
-	tcp_port_ranges = ["%d", "%d"]
-	udp_port_ranges = ["%d", "%d"]
+	tcp_port_range = [
+	  {
+		from = "%d"
+		to   = "%d"
+	  }
+	]
+	udp_port_range = [
+	  {
+		from = "%d"
+		to   = "%d"
+	  }
+	]
 	domain_names = ["test.example.com"]
 	segment_group_id = "${%s.id}"
 	tcp_keep_alive = "1"

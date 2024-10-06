@@ -39,7 +39,7 @@ func TestAccResourcePolicyAccessRuleV2_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "4"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "5"),
 				),
 			},
 
@@ -53,7 +53,7 @@ func TestAccResourcePolicyAccessRuleV2_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "4"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "5"),
 				),
 			},
 			// Import test
@@ -223,6 +223,24 @@ resource "%s" "%s" {
 		  entry_values {
 			lhs = "US"
 			rhs = "true"
+		  }
+		}
+	}
+	conditions {
+		operator = "OR"
+		operands {
+		  object_type = "RISK_FACTOR_TYPE"
+		  entry_values {
+			lhs = "ZIA"
+			rhs = "UNKNOWN"
+		  }
+		  entry_values {
+			lhs = "ZIA"
+			rhs = "LOW"
+		  }
+		  entry_values {
+			lhs = "ZIA"
+			rhs = "MEDIUM"
 		  }
 		}
 	}
