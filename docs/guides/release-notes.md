@@ -25,6 +25,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Bug Fixes
 - [PR #499](https://github.com/zscaler/terraform-provider-zpa/pull/499) - Fixed `zpa_application_segment_pra` import function and normalization of computed attributes.
+- [PR #499](https://github.com/zscaler/terraform-provider-zpa/pull/499) - Fixed drift with attribute `health)check_type` in the resources `zpa_application_segment`, `zpa_application_segment_pra`, `zpa_application_segment_inspection` and `zpa_application_segment_browser_access`
 
 ### Enhancements
 - [PR #499](https://github.com/zscaler/terraform-provider-zpa/pull/499) - Added new `zpa_application_segment` attribute `inspect_traffic_with_zia`
