@@ -71,18 +71,15 @@ The following attributes are exported:
   - ``Previous Default`` = ``1``
   - ``New Release`` = ``2``
 - `version_profile_visibility_scope` - (String)
-  Exported values are:
+- `dns_query_type` - (String) Whether IPv4, IPv6, or both, are enabled for DNS resolution of all applications in the App Connector Group. Exported values are:
   - ``"IPV4_IPV6"``
   - ``"IPV4"``
   - ``"IPV6``
-- `country_code` - (String)
-- `dns_query_type` - (String)
-  - ``0`` = ``Default``
-  - ``1`` = ``Previous Default``
-  - ``2`` = ``New Release``
+- `country_code` - (String) The country code of the App Connector.
 - `geo_location_id` - (String)
-- `use_in_dr_mode` - (Optional) Supported values: `true`, `false`
-- `pra_enabled` - (Optional) Supported values: `true`, `false`
-- `waf_disabled` - (Optional) Supported values: `true`, `false`
+- `use_in_dr_mode` - (boolean) Supported values: `true`, `false`
+- `pra_enabled` - (boolean) Supported values: `true`, `false`
+- `waf_disabled` - (boolean) Supported values: `true`, `false`
 - `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
 - `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
+- `lss_app_connector_group` (boolean) Whether or not the App Connector Group is configured for the Log Streaming Service (LSS).

@@ -66,7 +66,7 @@ The following arguments are supported:
   - ``0`` = ``Default``
   - ``1`` = ``Previous Default``
   - ``2`` = ``New Release``
-- `dns_query_type` - (String) Whether IPv4, IPv6, or both, are enabled for DNS resolution of all applications in the App Connector Group. Supported values are: ``IPV4``, ``IPV6``, or``IPV4_IPV6``
+- `dns_query_type` - (String) Whether IPv4, IPv6, or both, are enabled for DNS resolution of all applications in the App Connector Group. Supported values are: ``IPV4``, ``IPV6``, or ``IPV4_IPV6``
 - `tcp_quick_ack_app` - (Boolean) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
 - `tcp_quick_ack_assistant` - (Boolean) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
 - `tcp_quick_ack_read_assistant` - (Boolean) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
@@ -74,6 +74,7 @@ The following arguments are supported:
 - `pra_enabled` - (Boolean) Whether or not Privileged Remote Access is enabled on the App Connector Group. Supported values: `true`, `false`
 - `waf_disabled` - (Boolean) Whether or not AppProtection is disabled for the App Connector Group. Supported values: `true`, `false`
 - `microtenant_id` (String) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
+- `lss_app_connector_group` (boolean) Whether or not the App Connector Group is configured for the Log Streaming Service (LSS).
 
 ## Import
 
