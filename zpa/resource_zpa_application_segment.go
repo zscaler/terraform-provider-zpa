@@ -129,6 +129,11 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional:    true,
 				Description: "Whether this application is enabled or not.",
 			},
+			"inspect_traffic_with_zia": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Indicates if Inspect Traffic with ZIA is enabled for the application.",
+			},
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -309,6 +314,7 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) er
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
+	_ = d.Set("inspect_traffic_with_zia", resp.InspectTrafficWithZia)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
@@ -446,6 +452,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		MicroTenantID:             d.Get("microtenant_id").(string),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
+		InspectTrafficWithZia:     d.Get("inspect_traffic_with_zia").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
 		IpAnchored:                d.Get("ip_anchored").(bool),

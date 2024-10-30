@@ -110,9 +110,10 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Description:      "Longitude of the App Connector Group. Integer or decimal. With values in the range of -180 to 180",
 			},
 			"lss_app_connector_group": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether or not the App Connector Group is configured for the Log Streaming Service (LSS)",
 			},
 			"tcp_quick_ack_app": {
 				Description: "Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value.",

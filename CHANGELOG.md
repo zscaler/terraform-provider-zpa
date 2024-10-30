@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.33.8 (October, 29 2024)
+
+### Notes
+
+- Release date: **(October, 29 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #499](https://github.com/zscaler/terraform-provider-zpa/pull/499) - Fixed `zpa_application_segment_pra` import function and normalization of computed attributes.
+
+### Enhancements
+- [PR #499](https://github.com/zscaler/terraform-provider-zpa/pull/499) - Added new `zpa_application_segment` attribute `inspect_traffic_with_zia`
+
 ## 3.33.7 (October, 3 2024)
 
 ### Notes
@@ -10,8 +23,11 @@
 ### Enhancements
 - [PR #496](https://github.com/zscaler/terraform-provider-zpa/pull/496) - Added new `object_type` `RISK_FACTOR_TYPE` to the following ZPA access policy resources: `zpa_policy_access_rule`, and `zpa_policy_access_rule_v2`
 
+**NOTE**  `RISK_FACTOR_TYPE` is the Risk Score criteria equivalent in the ZPA UI and supports the following values:
+`UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
+
 ### Bug Fixes
-- [PR #496](https://github.com/zscaler/terraform-provider-zpa/pull/496) - Fixed issue with attribute `tcp_port_range`/`udp_port_range` and `tcp_port_ranges`/`udp_port_ranges` within `zpa_application_segment`. The fix ensure that both port configuration formats are suported separately without mid-conversion in between. The fix also ensure the port configuration order is ignored during apply and update process. [Issue #490](https://github.com/zscaler/terraform-provider-zpa/issues/490).
+- [PR #496](https://github.com/zscaler/terraform-provider-zpa/pull/496) - Fixed issue with attribute `tcp_port_range`/`udp_port_range` and `tcp_port_ranges`/`udp_port_ranges` within `zpa_application_segment`. The fix ensure that both port configuration formats are supported interchangeably. The fix also ensure the port configuration order is maintained during configuration. This fix does not impact exist configuration. [Issue #490](https://github.com/zscaler/terraform-provider-zpa/issues/490).
 
 
 ### Internal Changes

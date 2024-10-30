@@ -270,8 +270,9 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 				},
 			},
 			"lss_app_connector_group": {
-				Type:     schema.TypeBool,
-				Computed: true,
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Whether or not the App Connector Group is configured for the Log Streaming Service (LSS)",
 			},
 			"tcp_quick_ack_app": {
 				Description: "Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value.",
