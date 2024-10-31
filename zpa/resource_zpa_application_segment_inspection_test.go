@@ -152,7 +152,6 @@ resource "%s" "%s" {
 	segment_group_id = "${%s.id}"
 	common_apps_dto {
 		apps_config {
-		  name                 = "sales.bd-hashicorp.com"
 		  domain               = "sales.bd-hashicorp.com"
 		  application_protocol = "HTTPS"
 		  application_port     = "443"

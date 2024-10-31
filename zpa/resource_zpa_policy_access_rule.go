@@ -165,7 +165,7 @@ func resourcePolicyAccessRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("default_rule", resp.DefaultRule)
 	_ = d.Set("operator", resp.Operator)
 	_ = d.Set("policy_set_id", policySetID)
-	_ = d.Set("policy_type", "ACCESS_POLICY")
+	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("priority", resp.Priority)
 	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
 	_ = d.Set("microtenant_id", microTenantID)

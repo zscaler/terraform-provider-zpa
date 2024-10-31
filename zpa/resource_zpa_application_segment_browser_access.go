@@ -8,8 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbrowseraccess"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
@@ -35,7 +34,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := browseraccess.GetByName(service, id)
+					resp, _, err := applicationsegmentbrowseraccess.GetByName(service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -123,7 +122,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "NONE",
+				Default:  "DEFAULT",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"NONE",
@@ -175,7 +174,6 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 			},
 			"use_in_dr_mode": {
 				Type:     schema.TypeBool,
@@ -200,6 +198,10 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"app_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -220,13 +222,11 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 						"application_port": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 							Description: "Port for the BA app.",
 						},
 						"application_protocol": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 							Description: "Protocol for the BA app.",
 							ValidateFunc: validation.StringInSlice([]string{
 								"HTTP",
@@ -235,7 +235,6 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 						},
 						"certificate_id": {
 							Type:        schema.TypeString,
-							ForceNew:    true,
 							Optional:    true,
 							Description: "ID of the BA certificate.",
 						},
@@ -305,7 +304,7 @@ func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, meta 
 		return fmt.Errorf("please provide a valid segment group for the application segment")
 	}
 
-	browseraccess, _, err := browseraccess.Create(service, req)
+	browseraccess, _, err := applicationsegmentbrowseraccess.Create(service, req)
 	if err != nil {
 		return err
 	}
@@ -325,7 +324,7 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta in
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := browseraccess.Get(service, d.Id())
+	resp, _, err := applicationsegmentbrowseraccess.Get(service, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing browser access %s from state because it no longer exists in ZPA", d.Id())
@@ -392,28 +391,47 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta 
 
 	id := d.Id()
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
+
+	// Step 1: Retrieve existing configuration to get app_id and clientless_apps.id
+	existingSegment, _, err := applicationsegmentbrowseraccess.Get(service, id)
+	if err != nil {
+		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
+		return err
+	}
+
+	// Step 2: Build the update payload
 	req := expandBrowserAccess(d, zClient, "")
 
+	// Step 3: Inject app_id and clientless_apps.id from the existing configuration
+	req.ID = existingSegment.ID // Assign app_id to the parent application
+	for i, clientlessApp := range req.ClientlessApps {
+		if i < len(existingSegment.ClientlessApps) {
+			clientlessApp.ID = existingSegment.ClientlessApps[i].ID // Existing clientless_app id
+			clientlessApp.AppID = existingSegment.ID                // Assign parent app_id to clientless_app
+			req.ClientlessApps[i] = clientlessApp
+		}
+	}
+
+	// Validate the update request
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return err
 	}
 
+	// Step 4: Ensure segment_group_id is valid if changed
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the browser access application segment")
 		return fmt.Errorf("please provide a valid segment group for the browser access application segment")
 	}
 
-	if _, _, err := browseraccess.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
-			d.SetId("")
-			return nil
-		}
-	}
-
-	if _, err := browseraccess.Update(service, id, &req); err != nil {
+	// Step 5: Perform the update
+	if _, err := applicationsegmentbrowseraccess.Update(service, id, &req); err != nil {
 		return err
 	}
 
+	// Step 6: Refresh the state after updating
 	return resourceApplicationSegmentBrowserAccessRead(d, meta)
 }
 
@@ -424,21 +442,21 @@ func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, meta 
 
 	id := d.Id()
 	log.Printf("[INFO] Deleting browser access application with id %v\n", id)
-	if _, err := browseraccess.Delete(service, id); err != nil {
+	if _, err := applicationsegmentbrowseraccess.Delete(service, id); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) browseraccess.BrowserAccess {
+func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) applicationsegmentbrowseraccess.BrowserAccess {
 	microTenantID := GetString(d.Get("microtenant_id"))
 	service := zClient.BrowserAccess
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	details := browseraccess.BrowserAccess{
+	details := applicationsegmentbrowseraccess.BrowserAccess{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
 		SegmentGroupID:            d.Get("segment_group_id").(string),
@@ -469,7 +487,7 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if service != nil && id != "" {
-		resource, _, err := applicationsegment.Get(service, id)
+		resource, _, err := applicationsegmentbrowseraccess.Get(service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
 			remoteUDPAppPortRanges = resource.UDPPortRanges
@@ -509,16 +527,18 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) bro
 	return details
 }
 
-func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps {
+func expandClientlessApps(d *schema.ResourceData) []applicationsegmentbrowseraccess.ClientlessApps {
 	clientlessInterface, ok := d.GetOk("clientless_apps")
 	if ok {
 		clientless := clientlessInterface.([]interface{})
 		log.Printf("[INFO] clientless apps data: %+v\n", clientless)
-		var clientlessApps []browseraccess.ClientlessApps
+		var clientlessApps []applicationsegmentbrowseraccess.ClientlessApps
 		for _, clientlessApp := range clientless {
 			clientlessApp, ok := clientlessApp.(map[string]interface{})
 			if ok {
-				clientlessApps = append(clientlessApps, browseraccess.ClientlessApps{
+				clientlessApps = append(clientlessApps, applicationsegmentbrowseraccess.ClientlessApps{
+					ID:                  clientlessApp["id"].(string),
+					AppID:               clientlessApp["app_id"].(string),
 					AllowOptions:        clientlessApp["allow_options"].(bool),
 					ApplicationPort:     clientlessApp["application_port"].(string),
 					ApplicationProtocol: clientlessApp["application_protocol"].(string),
@@ -535,14 +555,15 @@ func expandClientlessApps(d *schema.ResourceData) []browseraccess.ClientlessApps
 		return clientlessApps
 	}
 
-	return []browseraccess.ClientlessApps{}
+	return []applicationsegmentbrowseraccess.ClientlessApps{}
 }
 
-func flattenBaClientlessApps(clientlessApp *browseraccess.BrowserAccess) []interface{} {
+func flattenBaClientlessApps(clientlessApp *applicationsegmentbrowseraccess.BrowserAccess) []interface{} {
 	clientlessApps := make([]interface{}, len(clientlessApp.ClientlessApps))
 	for i, clientlessApp := range clientlessApp.ClientlessApps {
 		clientlessApps[i] = map[string]interface{}{
 			"id":                   clientlessApp.ID,
+			"app_id":               clientlessApp.AppID,
 			"name":                 clientlessApp.Name,
 			"microtenant_id":       clientlessApp.MicroTenantID,
 			"allow_options":        clientlessApp.AllowOptions,

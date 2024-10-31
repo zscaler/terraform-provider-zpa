@@ -11,11 +11,11 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbrowseraccess"
 )
 
 func TestAccResourceApplicationSegmentBrowserAccess_Basic(t *testing.T) {
-	var browserAccess browseraccess.BrowserAccess
+	var browserAccess applicationsegmentbrowseraccess.BrowserAccess
 	browserAccessTypeAndName, _, browserAccessGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegmentBrowserAccess)
 	rDomain := acctest.RandomWithPrefix("tf-acc-test")
 	rDescription := acctest.RandomWithPrefix("tf-acc-test")
@@ -79,7 +79,7 @@ func testAccCheckApplicationSegmentBrowserAccessDestroy(s *terraform.State) erro
 			continue
 		}
 
-		_, _, err := browseraccess.GetByName(apiClient.BrowserAccess, rs.Primary.Attributes["name"])
+		_, _, err := applicationsegmentbrowseraccess.GetByName(apiClient.BrowserAccess, rs.Primary.Attributes["name"])
 		if err == nil {
 			return fmt.Errorf("Broser Access still exists")
 		}
@@ -89,7 +89,7 @@ func testAccCheckApplicationSegmentBrowserAccessDestroy(s *terraform.State) erro
 	return nil
 }
 
-func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment *browseraccess.BrowserAccess) resource.TestCheckFunc {
+func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment *applicationsegmentbrowseraccess.BrowserAccess) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resource]
 		if !ok {
@@ -100,7 +100,7 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedSegment, _, err := browseraccess.Get(apiClient.BrowserAccess, rs.Primary.ID)
+		receivedSegment, _, err := applicationsegmentbrowseraccess.Get(apiClient.BrowserAccess, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

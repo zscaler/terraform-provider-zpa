@@ -64,7 +64,6 @@ The following arguments are supported:
 - `segment_group_id` - (String) The unique identifier of the Segment Group.
 - `common_apps_dto` (Block Set, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
   - `apps_config:` (Block Set, Min: 1) List of applications to be configured
-    - `name` - (String) Name of the Privileged Remote Access
     - `domain` - (String) Domain name of the Privileged Remote Access
     - `application_protocol` - (String) Protocol for the Privileged Remote Access. Supported values: `RDP` and `SSH`
     - `application_port` - (String) Port for the Privileged Remote Access
@@ -73,8 +72,6 @@ The following arguments are supported:
     - `enabled` - (Boolean) Whether this application is enabled or not
 - `tcp_port_ranges` - (List of String) TCP port ranges used to access the app.
 - `udp_port_ranges` - (List of String) UDP port ranges used to access the app.
-
-!> **WARNING:** Removing PRA applications from the `common_apps_dto.apps_config` block will cause the provider to force a replacement of the application segment.
 
 -> **NOTE:**  TCP and UDP ports can also be defined using the following model:
 

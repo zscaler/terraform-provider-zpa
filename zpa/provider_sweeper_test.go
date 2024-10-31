@@ -13,11 +13,11 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbrowseraccess"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/browseraccess"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
 	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
@@ -210,7 +210,7 @@ func sweepTestApplicationSegment(client *testClient) error {
 
 func sweepTestApplicationSegmentBA(client *testClient) error {
 	var errorList []error
-	appSegmentBA, _, err := browseraccess.GetAll(client.sdkClient.BrowserAccess)
+	appSegmentBA, _, err := applicationsegmentbrowseraccess.GetAll(client.sdkClient.BrowserAccess)
 	if err != nil {
 		return err
 	}
@@ -219,7 +219,7 @@ func sweepTestApplicationSegmentBA(client *testClient) error {
 	for _, b := range appSegmentBA {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := browseraccess.Delete(client.sdkClient.BrowserAccess, b.ID); err != nil {
+			if _, err := applicationsegmentbrowseraccess.Delete(client.sdkClient.BrowserAccess, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}

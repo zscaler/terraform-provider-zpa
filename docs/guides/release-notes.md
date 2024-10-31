@@ -12,9 +12,23 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.33.8``
+``Last updated: v3.33.9``
 
 ---
+
+## 3.33.9 (October, 31 2024)
+
+### Notes
+
+- Release date: **(October, 31 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #500](https://github.com/zscaler/terraform-provider-zpa/pull/500) - Implemented a fix to the update function across all specialized application segment resources:
+  - `zpa_application_segment_browser_access` - The fix now automatically includes the attributes `app_id` and `ba_app_id` in the payload during updates
+  - `zpa_application_segment_inspection` - The fix now automatically includes the attributes `app_id` and `inspect_app_id` in the payload during updates
+  - `zpa_application_segment_pra` - The fix now automatically includes the attributes `app_id` and `pra_app_id` in the payload during updates.
+  **NOTE:** This update/fix is required to ensure the ZPA API can properly identify the Browser Access, Inspection App and PRA App, based on its specific custom ID. The fix also includes the removal of the `ForceNew` option previously included in the schema to force the resource replacement in case of changes. Issue [PR #498](https://github.com/zscaler/terraform-provider-zpa/pull/498)
 
 ## 3.33.8 (October, 29 2024)
 
