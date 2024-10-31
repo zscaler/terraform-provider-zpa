@@ -224,24 +224,3 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) 
 
 	return nil
 }
-
-/*
-func flattenAppServerGroups(serverGroup *applicationsegment.ApplicationSegmentResource) []interface{} {
-	serverGroups := make([]interface{}, len(serverGroup.ServerGroups))
-	for i, val := range serverGroup.ServerGroups {
-		serverGroups[i] = map[string]interface{}{
-			"name":              val.Name,
-			"id":                val.ID,
-			"config_space":      val.ConfigSpace,
-			"creation_time":     val.CreationTime,
-			"description":       val.Description,
-			"enabled":           val.Enabled,
-			"dynamic_discovery": val.DynamicDiscovery,
-			"modifiedby":        val.ModifiedBy,
-			"modified_time":     val.ModifiedTime,
-		}
-	}
-
-	return serverGroups
-}
-*/

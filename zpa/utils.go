@@ -237,11 +237,18 @@ func GetString(v interface{}) string {
 }
 
 // Helper to safely extract bool values from map
-func GetBool(v interface{}) bool {
-	if b, ok := v.(bool); ok {
-		return b
+// func GetBool(v interface{}) bool {
+// 	if b, ok := v.(bool); ok {
+// 		return b
+// 	}
+// 	return false
+// }
+
+func GetBool(input interface{}) bool {
+	if input == nil {
+		return false
 	}
-	return false
+	return input.(bool)
 }
 
 // Converts an epoch time (in seconds, represented as a string) to a human-readable format.

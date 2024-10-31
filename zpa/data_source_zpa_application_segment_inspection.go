@@ -255,16 +255,26 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta int
 	return nil
 }
 
-/*
-func flattenInspectionAppServerGroups(appServerGroup []applicationsegmentinspection.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appServerGroup))
-	for i, serverGroup := range appServerGroup {
-		ids[i] = serverGroup.ID
+func flattenInspectionApps(apps []applicationsegmentinspection.InspectionAppDto) []interface{} {
+	if len(apps) == 0 {
+		return []interface{}{}
 	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
+
+	appsConfig := make([]interface{}, len(apps))
+	for i, app := range apps {
+		appConfigMap := map[string]interface{}{
+			"id":                     app.ID,
+			"name":                   app.Name,
+			"enabled":                app.Enabled,
+			"application_port":       app.ApplicationPort,
+			"application_protocol":   app.ApplicationProtocol,
+			"certificate_id":         app.CertificateID,
+			"certificate_name":       app.CertificateName,
+			"domain":                 app.Domain,
+			"app_id":                 app.AppID,
+			"trusted_untrusted_cert": app.TrustUntrustedCert,
+		}
+		appsConfig[i] = appConfigMap
+	}
+	return appsConfig
 }
-*/
