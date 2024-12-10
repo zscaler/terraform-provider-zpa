@@ -39,7 +39,7 @@ func TestAccResourcePolicyAccessRuleV2_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "5"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "6"),
 				),
 			},
 
@@ -53,7 +53,7 @@ func TestAccResourcePolicyAccessRuleV2_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "5"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "6"),
 				),
 			},
 			// Import test
@@ -242,6 +242,20 @@ resource "%s" "%s" {
 			lhs = "ZIA"
 			rhs = "MEDIUM"
 		  }
+		}
+	}
+	conditions {
+		operator = "OR"
+		operands {
+			object_type = "CHROME_ENTERPRISE"
+			entry_values {
+				lhs = "managed"
+				rhs = "true"
+			}
+			entry_values {
+				lhs = "managed"
+				rhs = "false"
+			}
 		}
 	}
 	depends_on = [ %s, %s ]

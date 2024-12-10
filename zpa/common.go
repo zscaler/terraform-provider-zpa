@@ -210,6 +210,20 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 			return rhsWarn(operand.ObjectType, "\"UNKNOWN\", \"LOW\", \"MEDIUM\", \"HIGH\", \"CRITICAL\"", operand.RHS, nil)
 		}
 		return nil
+	case "CHROME_ENTERPRISE":
+		if operand.LHS == "" {
+			return lhsWarn(operand.ObjectType, "managed", operand.LHS, nil)
+		}
+		if operand.LHS != "managed" {
+			return lhsWarn(operand.ObjectType, "managed", operand.LHS, nil)
+		}
+		if operand.RHS == "" {
+			return rhsWarn(operand.ObjectType, "true/false", operand.RHS, nil)
+		}
+		if operand.RHS != "true" && operand.RHS != "false" {
+			return rhsWarn(operand.ObjectType, "true/false", operand.RHS, nil)
+		}
+		return nil
 	default:
 		return fmt.Errorf("[WARN] invalid operand object type %s", operand.ObjectType)
 	}
@@ -1210,6 +1224,23 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 					}
 					if rhs == "" {
 						return fmt.Errorf("RHS must be a valid scim group ID and cannot be empty for SCIM_GROUP object_type")
+					}
+				}
+			case "CHROME_ENTERPRISE":
+				entryValuesSet, ok := operandMap["entry_values"].(*schema.Set)
+				if !ok || entryValuesSet.Len() == 0 {
+					return fmt.Errorf("entry_values must be provided for CHROME_ENTERPRISE object_type")
+				}
+				for _, ev := range entryValuesSet.List() {
+					evMap := ev.(map[string]interface{})
+					lhs, lhsOk := evMap["lhs"].(string)
+					rhs, rhsOk := evMap["rhs"].(string)
+
+					if !lhsOk || lhs == "" {
+						return fmt.Errorf("LHS must be a valid Chrome Enterprise ID and cannot be empty for CHROME_ENTERPRISE object_type")
+					}
+					if !rhsOk || rhs != "true" {
+						return fmt.Errorf("rhs value must be 'true' for CHROME_ENTERPRISE object_type")
 					}
 				}
 			}

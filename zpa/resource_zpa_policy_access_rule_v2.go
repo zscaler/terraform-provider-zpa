@@ -120,6 +120,7 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 											"COUNTRY_CODE",
 											"PLATFORM",
 											"RISK_FACTOR_TYPE",
+											"CHROME_ENTERPRISE",
 										}, false),
 									},
 									"entry_values": {
