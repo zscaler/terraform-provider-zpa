@@ -247,7 +247,7 @@ func resourceServiceEdgeGroupCreate(d *schema.ResourceData, meta interface{}) er
 	req := expandServiceEdgeGroup(d)
 	log.Printf("[INFO] Creating zpa service edge group with request\n%+v\n", req)
 
-	resp, _, err := serviceedgegroup.Create(service, req)
+	resp, _, err := serviceedgegroup.Create(service, &req)
 	if err != nil {
 		return err
 	}
