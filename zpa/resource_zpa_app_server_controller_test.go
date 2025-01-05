@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -8,10 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
 )
 
 func TestAccResourceApplicationServer_Basic(t *testing.T) {
@@ -66,13 +67,19 @@ func testAccCheckApplicationServerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := appservercontroller.Get(apiClient.AppServerController, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		server, _, err := appservercontroller.Get(context.Background(), service, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
 
-		if rule != nil {
+		if server != nil {
 			return fmt.Errorf("application server with id %s exists and wasn't destroyed", rs.Primary.ID)
 		}
 	}
@@ -91,7 +98,13 @@ func testAccCheckApplicationServerExists(resource string, server *appservercontr
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedServer, _, err := appservercontroller.Get(apiClient.AppServerController, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedServer, _, err := appservercontroller.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

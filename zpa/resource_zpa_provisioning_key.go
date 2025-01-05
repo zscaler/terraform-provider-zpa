@@ -1,26 +1,28 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/provisioningkey"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
 )
 
 func resourceProvisioningKey() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceProvisioningKeyCreate,
-		Read:   resourceProvisioningKeyRead,
-		Update: resourceProvisioningKeyUpdate,
-		Delete: resourceProvisioningKeyDelete,
+		CreateContext: resourceProvisioningKeyCreate,
+		ReadContext:   resourceProvisioningKeyRead,
+		UpdateContext: resourceProvisioningKeyUpdate,
+		DeleteContext: resourceProvisioningKeyDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.ProvisioningKey
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
+				service := zClient.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -34,7 +36,7 @@ func resourceProvisioningKey() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 					if !associationTypeSet {
-						_, assoc_type, _, err := provisioningkey.GetByIDAllAssociations(service, id)
+						_, assoc_type, _, err := provisioningkey.GetByIDAllAssociations(ctx, service, id)
 						if err != nil {
 							return []*schema.ResourceData{d}, err
 						} else {
@@ -42,7 +44,7 @@ func resourceProvisioningKey() *schema.Resource {
 						}
 					}
 				} else {
-					resp, assoc_type, _, err := provisioningkey.GetByNameAllAssociations(service, id)
+					resp, assoc_type, _, err := provisioningkey.GetByNameAllAssociations(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -149,9 +151,9 @@ func getAssociationType(d *schema.ResourceData) (string, bool) {
 	return value, ok
 }
 
-func resourceProvisioningKeyCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceProvisioningKeyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ProvisioningKey
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -160,24 +162,24 @@ func resourceProvisioningKeyCreate(d *schema.ResourceData, meta interface{}) err
 
 	associationType, ok := getAssociationType(d)
 	if !ok {
-		return fmt.Errorf("associationType is required")
+		return diag.FromErr(fmt.Errorf("associationType is required"))
 	}
 	req := expandProvisioningKey(d)
 	log.Printf("[INFO] Creating zpa provisining key with request\n%+v\n", req)
 
-	resp, _, err := provisioningkey.Create(service, associationType, &req)
+	resp, _, err := provisioningkey.Create(ctx, service, associationType, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created provisining key  request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceProvisioningKeyRead(d, meta)
+	return resourceProvisioningKeyRead(ctx, d, meta)
 }
 
-func resourceProvisioningKeyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceProvisioningKeyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ProvisioningKey
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -186,16 +188,16 @@ func resourceProvisioningKeyRead(d *schema.ResourceData, meta interface{}) error
 
 	associationType, ok := getAssociationType(d)
 	if !ok {
-		return fmt.Errorf("associationType is required")
+		return diag.FromErr(fmt.Errorf("associationType is required"))
 	}
-	resp, _, err := provisioningkey.Get(service, associationType, d.Id())
+	resp, _, err := provisioningkey.Get(ctx, service, associationType, d.Id())
 	if err != nil {
-		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
+		if obj, ok := err.(*errorx.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing provisining key %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting provisining key:\n%+v\n", resp)
@@ -216,9 +218,9 @@ func resourceProvisioningKeyRead(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceProvisioningKeyUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceProvisioningKeyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ProvisioningKey
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -227,28 +229,28 @@ func resourceProvisioningKeyUpdate(d *schema.ResourceData, meta interface{}) err
 
 	associationType, ok := getAssociationType(d)
 	if !ok {
-		return fmt.Errorf("associationType is required")
+		return diag.FromErr(fmt.Errorf("associationType is required"))
 	}
 	id := d.Id()
 	log.Printf("[INFO] Updating provisining key ID: %v\n", id)
 	req := expandProvisioningKey(d)
-	if _, _, err := provisioningkey.Get(service, associationType, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := provisioningkey.Get(ctx, service, associationType, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := provisioningkey.Update(service, associationType, id, &req); err != nil {
-		return err
+	if _, err := provisioningkey.Update(ctx, service, associationType, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceProvisioningKeyRead(d, meta)
+	return resourceProvisioningKeyRead(ctx, d, meta)
 }
 
-func resourceProvisioningKeyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceProvisioningKeyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ProvisioningKey
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -257,12 +259,12 @@ func resourceProvisioningKeyDelete(d *schema.ResourceData, meta interface{}) err
 
 	associationType, ok := getAssociationType(d)
 	if !ok {
-		return fmt.Errorf("associationType is required")
+		return diag.FromErr(fmt.Errorf("associationType is required"))
 	}
 	log.Printf("[INFO] Deleting provisining key  ID: %v\n", d.Id())
 
-	if _, err := provisioningkey.Delete(service, associationType, d.Id()); err != nil {
-		return err
+	if _, err := provisioningkey.Delete(ctx, service, associationType, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] provisining key  deleted")

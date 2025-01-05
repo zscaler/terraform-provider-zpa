@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/enrollmentcert"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/enrollmentcert"
 )
 
 func dataSourceEnrollmentCert() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceEnrollmentCertRead,
+		ReadContext: dataSourceEnrollmentCertRead,
 		Schema: map[string]*schema.Schema{
 			"allow_signing": {
 				Type:     schema.TypeBool,
@@ -109,30 +111,31 @@ func dataSourceEnrollmentCert() *schema.Resource {
 	}
 }
 
-func dataSourceEnrollmentCertRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceEnrollmentCertRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.EnrollmentCert
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
+
 	var resp *enrollmentcert.EnrollmentCert
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for signing certificate %s\n", id)
-		res, _, err := enrollmentcert.Get(service, id)
+		res, _, err := enrollmentcert.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for signing certificate name %s\n", name)
-		res, _, err := enrollmentcert.GetByName(service, name)
+		res, _, err := enrollmentcert.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -161,7 +164,7 @@ func dataSourceEnrollmentCertRead(d *schema.ResourceData, meta interface{}) erro
 		_ = d.Set("zrsa_encrypted_session_key", resp.ZrsaEncryptedSessionKey)
 		_ = d.Set("microtenant_id", resp.MicrotenantID)
 	} else {
-		return fmt.Errorf("couldn't find any signing certificate with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any signing certificate with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

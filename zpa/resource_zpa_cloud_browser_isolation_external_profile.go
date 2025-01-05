@@ -1,28 +1,30 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
 )
 
 func resourceCBIExternalProfile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCBIExternalProfileCreate,
-		Read:   resourceCBIExternalProfileRead,
-		Update: resourceCBIExternalProfileUpdate,
-		Delete: resourceCBIExternalProfileDelete,
+		CreateContext: resourceCBIExternalProfileCreate,
+		ReadContext:   resourceCBIExternalProfileRead,
+		UpdateContext: resourceCBIExternalProfileUpdate,
+		DeleteContext: resourceCBIExternalProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				zClient := meta.(*Client)
-				service := zClient.CBIProfileController
+				service := zClient.Service
 
 				id := d.Id()
-				resp, _, err := cbiprofilecontroller.GetByNameOrID(service, id)
+				resp, _, err := cbiprofilecontroller.GetByNameOrID(ctx, service, id)
 				if err != nil {
 					return nil, err
 				}
@@ -257,44 +259,44 @@ func resourceCBIExternalProfile() *schema.Resource {
 	}
 }
 
-func resourceCBIExternalProfileCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceCBIExternalProfileCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Validate the region_ids length
 	regionIds := d.Get("region_ids").(*schema.Set).List()
 	if len(regionIds) < 2 {
-		return fmt.Errorf("expected region_ids to contain at least 2 items, got %d", len(regionIds))
+		return diag.FromErr(fmt.Errorf("expected region_ids to contain at least 2 items, got %d", len(regionIds)))
 	}
 
 	zClient := meta.(*Client)
-	service := zClient.CBIProfileController
+	service := zClient.Service
 
 	req := expandCBIExternalProfile(d)
 	req.Regions = nil
 	req.Certificates = nil
 	req.Banner = nil
 	log.Printf("[INFO] Creating cbi external profile with request\n%+v\n", req)
-	cbiProfile, _, err := cbiprofilecontroller.Create(service, &req)
+	cbiProfile, _, err := cbiprofilecontroller.Create(ctx, service, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created cbi external profile request. ID: %v\n", cbiProfile)
 
 	d.SetId(cbiProfile.ID)
-	return resourceCBIExternalProfileRead(d, meta)
+	return resourceCBIExternalProfileRead(ctx, d, meta)
 }
 
-func resourceCBIExternalProfileRead(d *schema.ResourceData, meta interface{}) error {
+func resourceCBIExternalProfileRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIProfileController
+	service := zClient.Service
 
-	resp, _, err := cbiprofilecontroller.Get(service, d.Id())
+	resp, _, err := cbiprofilecontroller.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing cbi profile %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 	if resp.BannerID == "" && resp.Banner != nil && resp.Banner.ID != "" {
 		resp.BannerID = resp.Banner.ID
@@ -336,42 +338,42 @@ func resourceCBIExternalProfileRead(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceCBIExternalProfileUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCBIExternalProfileUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Validate the region_ids length
 	regionIds := d.Get("region_ids").(*schema.Set).List()
 	if len(regionIds) < 2 {
-		return fmt.Errorf("expected region_ids to contain at least 2 items, got %d", len(regionIds))
+		return diag.FromErr(fmt.Errorf("expected region_ids to contain at least 2 items, got %d", len(regionIds)))
 	}
 
 	zClient := meta.(*Client)
-	service := zClient.CBIProfileController
+	service := zClient.Service
 
 	id := d.Id()
 	log.Printf("[INFO] Updating cbi profile ID: %v\n", id)
 	req := expandCBIExternalProfile(d)
 
-	if _, _, err := cbiprofilecontroller.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := cbiprofilecontroller.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := cbiprofilecontroller.Update(service, id, &req); err != nil {
-		return err
+	if _, err := cbiprofilecontroller.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceCBIExternalProfileRead(d, meta)
+	return resourceCBIExternalProfileRead(ctx, d, meta)
 }
 
-func resourceCBIExternalProfileDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceCBIExternalProfileDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIProfileController
+	service := zClient.Service
 
 	log.Printf("[INFO] Deleting cbi profile ID: %v\n", d.Id())
 
-	if _, err := cbiprofilecontroller.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := cbiprofilecontroller.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] cbi profile deleted")

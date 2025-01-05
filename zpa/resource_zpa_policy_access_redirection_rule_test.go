@@ -1,16 +1,17 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 )
 
 func TestAccResourcePolicyRedictionRule_Basic(t *testing.T) {
@@ -65,7 +66,7 @@ func TestAccResourcePolicyRedictionRule_Basic(t *testing.T) {
 
 func testAccCheckPolicyRedictionRuleDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := policysetcontroller.GetByPolicyType(apiClient.PolicySetController, "REDIRECTION_POLICY")
+	accessPolicy, _, err := policysetcontroller.GetByPolicyType(context.Background(), apiClient.Service, "REDIRECTION_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource REDIRECTION_POLICY. Received error: %s", err)
 	}
@@ -74,7 +75,13 @@ func testAccCheckPolicyRedictionRuleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := policysetcontroller.GetPolicyRule(apiClient.PolicySetController, accessPolicy.ID, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		rule, _, err := policysetcontroller.GetPolicyRule(context.Background(), service, accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -99,11 +106,17 @@ func testAccCheckPolicyRedictionRuleExists(resource string) resource.TestCheckFu
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := policysetcontroller.GetByPolicyType(apiClient.PolicySetController, "REDIRECTION_POLICY")
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		resp, _, err := policysetcontroller.GetByPolicyType(context.Background(), apiClient.Service, "REDIRECTION_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource REDIRECTION_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = policysetcontroller.GetPolicyRule(apiClient.PolicySetController, resp.ID, rs.Primary.ID)
+		_, _, err = policysetcontroller.GetPolicyRule(context.Background(), service, resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

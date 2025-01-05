@@ -10,28 +10,30 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbrowseraccess"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praapproval"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praconsole"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/pracredential"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praportal"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentbrowseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/bacertificate"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbibannercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/inspectioncontrol/inspection_custom_controls"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/inspectioncontrol/inspection_profile"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praapproval"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praconsole"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/pracredential"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praportal"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/provisioningkey"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
 )
 
 var (
@@ -54,8 +56,9 @@ func logSweptResource(kind, id, nameOrLabel string) {
 	sweeperLogger.Warn(fmt.Sprintf("sweeper found dangling %q %q %q", kind, id, nameOrLabel))
 }
 
+// Adjusted testClient to contain only V3 client services.
 type testClient struct {
-	sdkClient *Client
+	sdkV3Client *zscaler.Client
 }
 
 var (
@@ -81,14 +84,17 @@ func TestRunForcedSweeper(t *testing.T) {
 		return
 	}
 
-	sdkClient, err := sdkClientForTest()
+	// Handle the sdkV3ClientForTest() return values
+	sdkClient, err := sdkV3ClientForTest()
 	if err != nil {
-		t.Fatalf("Failed to get SDK client: %s", err)
+		t.Fatalf("Failed to initialize SDK V3 client: %v", err)
 	}
 
 	testClient := &testClient{
-		sdkClient: sdkClient,
+		sdkV3Client: sdkClient,
 	}
+
+	// Call individual sweeper functions
 	sweepTestAppConnectorGroup(testClient)
 	sweepTestApplicationServer(testClient)
 	sweepTestApplicationSegment(testClient)
@@ -97,11 +103,11 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestApplicationPRA(testClient)
 	sweepTestInspectionCustomControl(testClient)
 	sweepTestInspectionProfile(testClient)
-	sweepTestLSSConfigController(testClient) // TODO: Tests is failing on QA2 tenant. Needs further investigation.
+	sweepTestLSSConfigController(testClient)
 	sweepTestAccessPolicyRuleByType(testClient)
 	sweepTestProvisioningKey(testClient)
-	// sweepTestSegmentGroup(testClient)
 	sweepTestServerGroup(testClient)
+	sweepTestSegmentGroup(testClient)
 	sweepTestServiceEdgeGroup(testClient)
 	sweepTestCBIBanner(testClient)
 	sweepTestCBIExternalProfile(testClient)
@@ -113,38 +119,49 @@ func TestRunForcedSweeper(t *testing.T) {
 
 // Sets up sweeper to clean up dangling resources
 func setupSweeper(resourceType string, del func(*testClient) error) {
-	sdkClient, err := sdkClientForTest()
-	if err != nil {
-		// You might decide how to handle the error here. Using a panic for simplicity.
-		panic(fmt.Sprintf("Failed to get SDK client: %s", err))
-	}
 	resource.AddTestSweepers(resourceType, &resource.Sweeper{
 		Name: resourceType,
 		F: func(_ string) error {
-			return del(&testClient{sdkClient: sdkClient})
+			// Retrieve the client and handle the error
+			sdkClient, err := sdkV3ClientForTest()
+			if err != nil {
+				return fmt.Errorf("failed to initialize SDK V3 client for sweeper: %w", err)
+			}
+
+			// Pass the client to the deleter function
+			return del(&testClient{sdkV3Client: sdkClient})
 		},
 	})
 }
 
-// TODO: Tests is failing on QA2 tenant. Needs further investigation.
 func sweepTestAppConnectorGroup(client *testClient) error {
 	var errorList []error
-	group, _, err := appconnectorgroup.GetAll(client.sdkClient.AppConnectorGroup)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	// Fetch all app connector groups
+	group, _, err := appconnectorgroup.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
+
 	// Logging the number of identified resources before the deletion loop
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
+
+	// Iterate over the groups and delete the ones with the required prefix
 	for _, b := range group {
-		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := appconnectorgroup.Delete(client.sdkClient.AppConnectorGroup, b.ID); err != nil {
+			if _, err := appconnectorgroup.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAAppConnectorGroup, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAAppConnectorGroup, (b.ID), b.Name)
 		}
 	}
+
 	// Log errors encountered during the deletion process
 	if len(errorList) > 0 {
 		for _, err := range errorList {
@@ -156,7 +173,13 @@ func sweepTestAppConnectorGroup(client *testClient) error {
 
 func sweepTestApplicationServer(client *testClient) error {
 	var errorList []error
-	server, _, err := appservercontroller.GetAll(client.sdkClient.AppServerController)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	server, _, err := appservercontroller.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -165,11 +188,11 @@ func sweepTestApplicationServer(client *testClient) error {
 	for _, b := range server {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := appservercontroller.Delete(client.sdkClient.AppServerController, b.ID); err != nil {
+			if _, err := appservercontroller.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAApplicationServer, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAApplicationServer, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -183,7 +206,13 @@ func sweepTestApplicationServer(client *testClient) error {
 
 func sweepTestApplicationSegment(client *testClient) error {
 	var errorList []error
-	appSegment, _, err := applicationsegment.GetAll(client.sdkClient.ApplicationSegment)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	appSegment, _, err := applicationsegment.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -192,11 +221,11 @@ func sweepTestApplicationSegment(client *testClient) error {
 	for _, b := range appSegment {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := applicationsegment.Delete(client.sdkClient.ApplicationSegment, b.ID); err != nil {
+			if _, err := applicationsegment.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAApplicationSegment, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAApplicationSegment, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -210,7 +239,13 @@ func sweepTestApplicationSegment(client *testClient) error {
 
 func sweepTestApplicationSegmentBA(client *testClient) error {
 	var errorList []error
-	appSegmentBA, _, err := applicationsegmentbrowseraccess.GetAll(client.sdkClient.BrowserAccess)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	appSegmentBA, _, err := applicationsegmentbrowseraccess.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -219,11 +254,11 @@ func sweepTestApplicationSegmentBA(client *testClient) error {
 	for _, b := range appSegmentBA {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := applicationsegmentbrowseraccess.Delete(client.sdkClient.BrowserAccess, b.ID); err != nil {
+			if _, err := applicationsegmentbrowseraccess.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAApplicationSegmentBrowserAccess, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAApplicationSegmentBrowserAccess, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -237,7 +272,13 @@ func sweepTestApplicationSegmentBA(client *testClient) error {
 
 func sweepTestApplicationInspection(client *testClient) error {
 	var errorList []error
-	appInspection, _, err := applicationsegmentinspection.GetAll(client.sdkClient.ApplicationSegmentInspection)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	appInspection, _, err := applicationsegmentinspection.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -246,11 +287,11 @@ func sweepTestApplicationInspection(client *testClient) error {
 	for _, b := range appInspection {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := applicationsegmentinspection.Delete(client.sdkClient.ApplicationSegmentInspection, b.ID); err != nil {
+			if _, err := applicationsegmentinspection.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAApplicationSegmentInspection, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAApplicationSegmentInspection, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -264,7 +305,13 @@ func sweepTestApplicationInspection(client *testClient) error {
 
 func sweepTestApplicationPRA(client *testClient) error {
 	var errorList []error
-	pra, _, err := applicationsegmentpra.GetAll(client.sdkClient.ApplicationSegmentPRA)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	pra, _, err := applicationsegmentpra.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -273,11 +320,11 @@ func sweepTestApplicationPRA(client *testClient) error {
 	for _, b := range pra {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := applicationsegmentpra.Delete(client.sdkClient.ApplicationSegmentPRA, b.ID); err != nil {
+			if _, err := applicationsegmentpra.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAApplicationSegmentPRA, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAApplicationSegmentPRA, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -291,7 +338,13 @@ func sweepTestApplicationPRA(client *testClient) error {
 
 func sweepTestInspectionCustomControl(client *testClient) error {
 	var errorList []error
-	customControl, _, err := inspection_custom_controls.GetAll(client.sdkClient.InspectionCustomControls)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	customControl, _, err := inspection_custom_controls.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -300,11 +353,11 @@ func sweepTestInspectionCustomControl(client *testClient) error {
 	for _, b := range customControl {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := inspection_custom_controls.Delete(client.sdkClient.InspectionCustomControls, b.ID); err != nil {
+			if _, err := inspection_custom_controls.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAInspectionCustomControl, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAInspectionCustomControl, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -318,7 +371,13 @@ func sweepTestInspectionCustomControl(client *testClient) error {
 
 func sweepTestInspectionProfile(client *testClient) error {
 	var errorList []error
-	profile, _, err := inspection_profile.GetAll(client.sdkClient.InspectionProfile)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	profile, _, err := inspection_profile.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -327,11 +386,11 @@ func sweepTestInspectionProfile(client *testClient) error {
 	for _, b := range profile {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := inspection_profile.Delete(client.sdkClient.InspectionProfile, b.ID); err != nil {
+			if _, err := inspection_profile.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAInspectionProfile, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAInspectionProfile, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -346,7 +405,12 @@ func sweepTestInspectionProfile(client *testClient) error {
 func sweepTestLSSConfigController(client *testClient) error {
 	var errorList []error
 
-	lssConfig, _, err := lssconfigcontroller.GetAll(client.sdkClient.LSSConfigController)
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	lssConfig, _, err := lssconfigcontroller.GetAll(context.Background(), service)
 	if err != nil {
 		if strings.Contains(err.Error(), "resource.not.found") {
 			// Log that the resource was not found and continue
@@ -364,11 +428,11 @@ func sweepTestLSSConfigController(client *testClient) error {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.LSSConfig.Name, testResourcePrefix) || strings.HasPrefix(b.LSSConfig.Name, updateResourcePrefix) {
 			// Attempt to delete the resource
-			_, err := lssconfigcontroller.Delete(client.sdkClient.LSSConfigController, b.ID)
+			_, err := lssconfigcontroller.Delete(context.Background(), service, b.ID)
 			if err != nil {
 				// Check if the error is because the resource doesn't exist
 				if strings.Contains(err.Error(), "resource.not.found") {
-					sweeperLogger.Info(fmt.Sprintf("Resource %s with ID %s was already deleted.", resourcetype.ZPALSSController, fmt.Sprintf(b.ID)))
+					sweeperLogger.Info(fmt.Sprintf("Resource %s with ID %s was already deleted.", resourcetype.ZPALSSController, (b.ID)))
 					continue
 				}
 				// For any other error, append to the error list and continue
@@ -376,7 +440,7 @@ func sweepTestLSSConfigController(client *testClient) error {
 				continue
 			}
 
-			sweeperLogger.Info(fmt.Sprintf("Swept resource %s with ID %s named %s.", resourcetype.ZPALSSController, fmt.Sprintf(b.ID), b.LSSConfig.Name))
+			sweeperLogger.Info(fmt.Sprintf("Swept resource %s with ID %s named %s.", resourcetype.ZPALSSController, (b.ID), b.LSSConfig.Name))
 		}
 	}
 
@@ -406,6 +470,11 @@ var defaultPolicyNames = map[string]string{
 func sweepTestAccessPolicyRuleByType(client *testClient) error {
 	var errorList []error
 
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
 	policyTypes := []string{
 		"ACCESS_POLICY",
 		"TIMEOUT_POLICY",
@@ -421,7 +490,7 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 
 	for _, policyType := range policyTypes {
 		// Fetch the PolicySet details for the current policy type to get the PolicySetID
-		policySet, _, err := policysetcontroller.GetByPolicyType(client.sdkClient.PolicySetController, policyType)
+		policySet, _, err := policysetcontroller.GetByPolicyType(context.Background(), service, policyType)
 		if err != nil {
 			// If we fail to get a PolicySetID for a specific policy type, append the error and continue to the next type
 			errorList = append(errorList, fmt.Errorf("Failed to get PolicySetID for policy type %s: %v", policyType, err))
@@ -430,7 +499,7 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 		policySetID := policySet.ID
 
 		// Fetch all rules for the current policy type
-		rules, _, err := policysetcontroller.GetAllByType(client.sdkClient.PolicySetController, policyType)
+		rules, _, err := policysetcontroller.GetAllByType(context.Background(), service, policyType)
 		if err != nil {
 			// If we fail to fetch rules for a specific policy type, append the error and continue to the next type
 			errorList = append(errorList, fmt.Errorf("Failed to get rules for policy type %s: %v", policyType, err))
@@ -448,7 +517,7 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 			// Check if the resource name has the required prefix before deleting it
 			if strings.HasPrefix(rule.Name, testResourcePrefix) || strings.HasPrefix(rule.Name, updateResourcePrefix) {
 				// Use the fetched PolicySetID for deletion
-				if _, err := policysetcontroller.Delete(client.sdkClient.PolicySetController, policySetID, rule.ID); err != nil {
+				if _, err := policysetcontroller.Delete(context.Background(), service, policySetID, rule.ID); err != nil {
 					errorList = append(errorList, err)
 					continue
 				}
@@ -466,7 +535,13 @@ func sweepTestAccessPolicyRuleByType(client *testClient) error {
 
 func sweepTestProvisioningKey(client *testClient) error {
 	var errorList []error
-	provisioningKey, err := provisioningkey.GetAll(client.sdkClient.ProvisioningKey)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	provisioningKey, err := provisioningkey.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -476,11 +551,11 @@ func sweepTestProvisioningKey(client *testClient) error {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
 			// Assuming 'AssociationType' is a field in the provisioningKey object
-			if _, err := provisioningkey.Delete(client.sdkClient.ProvisioningKey, b.AssociationType, b.ID); err != nil {
+			if _, err := provisioningkey.Delete(context.Background(), service, b.AssociationType, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAProvisioningKey, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAProvisioningKey, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -492,38 +567,15 @@ func sweepTestProvisioningKey(client *testClient) error {
 	return condenseError(errorList)
 }
 
-/*
-	func sweepTestSegmentGroup(client *testClient) error {
-		var errorList []error
-		group, _, err := segmentgroup.GetAll(client.sdkClient.SegmentGroup)
-		if err != nil {
-			return err
-		}
-		// Logging the number of identified resources before the deletion loop
-		sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
-		for _, b := range group {
-			// Check if the resource name has the required prefix before deleting it
-			if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-				if _, err := segmentgroup.Delete(client.sdkClient.SegmentGroup, b.ID); err != nil {
-					errorList = append(errorList, err)
-					continue
-				}
-				logSweptResource(resourcetype.ZPASegmentGroup, fmt.Sprintf(b.ID), b.Name)
-			}
-		}
-		// Log errors encountered during the deletion process
-		if len(errorList) > 0 {
-			for _, err := range errorList {
-				sweeperLogger.Error(err.Error())
-			}
-		}
-		return condenseError(errorList)
-	}
-*/
-
-func sweepTestServerGroup(client *testClient) error {
+func sweepTestSegmentGroup(client *testClient) error {
 	var errorList []error
-	group, _, err := servergroup.GetAll(client.sdkClient.ServerGroup)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	group, _, err := segmentgroup.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -532,11 +584,44 @@ func sweepTestServerGroup(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := servergroup.Delete(client.sdkClient.ServerGroup, b.ID); err != nil {
+			if _, err := segmentgroup.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAServerGroup, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPASegmentGroup, (b.ID), b.Name)
+		}
+	}
+	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestServerGroup(client *testClient) error {
+	var errorList []error
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	group, _, err := servergroup.GetAll(context.Background(), service)
+	if err != nil {
+		return err
+	}
+	// Logging the number of identified resources before the deletion loop
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(group)))
+	for _, b := range group {
+		// Check if the resource name has the required prefix before deleting it
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
+			if _, err := servergroup.Delete(context.Background(), service, b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPAServerGroup, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -550,7 +635,13 @@ func sweepTestServerGroup(client *testClient) error {
 
 func sweepTestServiceEdgeGroup(client *testClient) error {
 	var errorList []error
-	group, _, err := serviceedgegroup.GetAll(client.sdkClient.ServiceEdgeGroup)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	group, _, err := serviceedgegroup.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -559,11 +650,11 @@ func sweepTestServiceEdgeGroup(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := serviceedgegroup.Delete(client.sdkClient.ServiceEdgeGroup, b.ID); err != nil {
+			if _, err := serviceedgegroup.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAServiceEdgeGroup, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAServiceEdgeGroup, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -577,7 +668,13 @@ func sweepTestServiceEdgeGroup(client *testClient) error {
 
 func sweepTestCBIBanner(client *testClient) error {
 	var errorList []error
-	group, _, err := cbibannercontroller.GetAll(client.sdkClient.CBIBannerController)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	group, _, err := cbibannercontroller.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -586,11 +683,11 @@ func sweepTestCBIBanner(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := cbibannercontroller.Delete(client.sdkClient.CBIBannerController, b.ID); err != nil {
+			if _, err := cbibannercontroller.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPACBIBannerController, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPACBIBannerController, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -604,7 +701,13 @@ func sweepTestCBIBanner(client *testClient) error {
 
 func sweepTestCBIExternalProfile(client *testClient) error {
 	var errorList []error
-	group, _, err := cbiprofilecontroller.GetAll(client.sdkClient.CBIProfileController)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	group, _, err := cbiprofilecontroller.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -613,11 +716,11 @@ func sweepTestCBIExternalProfile(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := cbiprofilecontroller.Delete(client.sdkClient.CBIProfileController, b.ID); err != nil {
+			if _, err := cbiprofilecontroller.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPACBIExternalIsolationProfile, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPACBIExternalIsolationProfile, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -631,7 +734,13 @@ func sweepTestCBIExternalProfile(client *testClient) error {
 
 func sweepTestCBICertificate(client *testClient) error {
 	var errorList []error
-	group, _, err := cbicertificatecontroller.GetAll(client.sdkClient.CBICertificateController)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	group, _, err := cbicertificatecontroller.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -640,11 +749,11 @@ func sweepTestCBICertificate(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := cbicertificatecontroller.Delete(client.sdkClient.CBICertificateController, b.ID); err != nil {
+			if _, err := cbicertificatecontroller.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPACBICertificate, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPACBICertificate, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -658,7 +767,13 @@ func sweepTestCBICertificate(client *testClient) error {
 
 func sweepTestBaCertificate(client *testClient) error {
 	var errorList []error
-	group, _, err := bacertificate.GetAll(client.sdkClient.BACertificate)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	group, _, err := bacertificate.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -667,11 +782,11 @@ func sweepTestBaCertificate(client *testClient) error {
 	for _, b := range group {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := bacertificate.Delete(client.sdkClient.BACertificate, b.ID); err != nil {
+			if _, err := bacertificate.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPABACertificate, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPABACertificate, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -685,7 +800,13 @@ func sweepTestBaCertificate(client *testClient) error {
 
 func sweepTestPRACredentialController(client *testClient) error {
 	var errorList []error
-	credential, _, err := pracredential.GetAll(client.sdkClient.PRACredential)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	credential, _, err := pracredential.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -694,11 +815,11 @@ func sweepTestPRACredentialController(client *testClient) error {
 	for _, b := range credential {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := pracredential.Delete(client.sdkClient.PRACredential, b.ID); err != nil {
+			if _, err := pracredential.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAPRACredentialController, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAPRACredentialController, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -712,7 +833,13 @@ func sweepTestPRACredentialController(client *testClient) error {
 
 func sweepTestPRAConsoleController(client *testClient) error {
 	var errorList []error
-	console, _, err := praconsole.GetAll(client.sdkClient.PRAConsole)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	console, _, err := praconsole.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -721,11 +848,11 @@ func sweepTestPRAConsoleController(client *testClient) error {
 	for _, b := range console {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := praconsole.Delete(client.sdkClient.PRAConsole, b.ID); err != nil {
+			if _, err := praconsole.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAPRAConsoleController, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAPRAConsoleController, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -739,7 +866,13 @@ func sweepTestPRAConsoleController(client *testClient) error {
 
 func sweepTestPRAPortalController(client *testClient) error {
 	var errorList []error
-	portal, _, err := praportal.GetAll(client.sdkClient.PRAPortal)
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
+	portal, _, err := praportal.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -748,11 +881,11 @@ func sweepTestPRAPortalController(client *testClient) error {
 	for _, b := range portal {
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
-			if _, err := praportal.Delete(client.sdkClient.PRAPortal, b.ID); err != nil {
+			if _, err := praportal.Delete(context.Background(), service, b.ID); err != nil {
 				errorList = append(errorList, err)
 				continue
 			}
-			logSweptResource(resourcetype.ZPAPRAPortalController, fmt.Sprintf(b.ID), b.Name)
+			logSweptResource(resourcetype.ZPAPRAPortalController, (b.ID), b.Name)
 		}
 	}
 	// Log errors encountered during the deletion process
@@ -766,8 +899,14 @@ func sweepTestPRAPortalController(client *testClient) error {
 
 func sweepTestPRAPrivilegedApprovalController(client *testClient) error {
 	var errorList []error
+
+	// Instantiate the specific service for App Connector Group
+	service := &zscaler.Service{
+		Client: client.sdkV3Client, // Use the existing SDK client
+	}
+
 	// First, get all pra approval resources
-	approvals, _, err := praapproval.GetAll(client.sdkClient.PRAApproval)
+	approvals, _, err := praapproval.GetAll(context.Background(), service)
 	if err != nil {
 		return err
 	}
@@ -779,11 +918,11 @@ func sweepTestPRAPrivilegedApprovalController(client *testClient) error {
 		for _, emailID := range approval.EmailIDs {
 			if strings.Contains(emailID, "pra_user_") {
 				// If the emailID contains "pra_user_", delete the resource
-				if _, err := praapproval.Delete(client.sdkClient.PRAApproval, approval.ID); err != nil {
+				if _, err := praapproval.Delete(context.Background(), service, approval.ID); err != nil {
 					errorList = append(errorList, err)
 					continue
 				}
-				logSweptResource(resourcetype.ZPAPRAApprovalController, fmt.Sprintf(approval.ID), strings.Join(approval.EmailIDs, ", "))
+				logSweptResource(resourcetype.ZPAPRAApprovalController, (approval.ID), strings.Join(approval.EmailIDs, ", "))
 				break // Exit the loop after deletion to avoid multiple attempts
 			}
 		}

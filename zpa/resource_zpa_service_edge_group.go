@@ -1,29 +1,31 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/trustednetwork"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgecontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/trustednetwork"
 )
 
 func resourceServiceEdgeGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServiceEdgeGroupCreate,
-		Read:   resourceServiceEdgeGroupRead,
-		Update: resourceServiceEdgeGroupUpdate,
-		Delete: resourceServiceEdgeGroupDelete,
+		CreateContext: resourceServiceEdgeGroupCreate,
+		ReadContext:   resourceServiceEdgeGroupRead,
+		UpdateContext: resourceServiceEdgeGroupUpdate,
+		DeleteContext: resourceServiceEdgeGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.ServiceEdgeGroup
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
+				service := zClient.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -36,7 +38,7 @@ func resourceServiceEdgeGroup() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := serviceedgegroup.GetByName(service, id)
+					resp, _, err := serviceedgegroup.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -232,9 +234,9 @@ func resourceServiceEdgeGroup() *schema.Resource {
 	}
 }
 
-func resourceServiceEdgeGroupCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceEdgeGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServiceEdgeGroup
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -242,39 +244,39 @@ func resourceServiceEdgeGroupCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if err := validateAndSetProfileNameID(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	req := expandServiceEdgeGroup(d)
 	log.Printf("[INFO] Creating zpa service edge group with request\n%+v\n", req)
 
-	resp, _, err := serviceedgegroup.Create(service, req)
+	resp, _, err := serviceedgegroup.Create(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created service edge group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceServiceEdgeGroupRead(d, meta)
+	return resourceServiceEdgeGroupRead(ctx, d, meta)
 }
 
-func resourceServiceEdgeGroupRead(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServiceEdgeGroup
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := serviceedgegroup.Get(service, d.Id())
+	resp, _, err := serviceedgegroup.Get(ctx, service, d.Id())
 	if err != nil {
-		if err.(*client.ErrorResponse).IsObjectNotFound() {
+		if err.(*errorx.ErrorResponse).IsObjectNotFound() {
 			log.Printf("[WARN] Removing service edge group %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting service edge group:\n%+v\n", resp)
@@ -308,9 +310,9 @@ func resourceServiceEdgeGroupRead(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceEdgeGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServiceEdgeGroup
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -318,29 +320,29 @@ func resourceServiceEdgeGroupUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if err := validateAndSetProfileNameID(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	id := d.Id()
 	log.Printf("[INFO] Updating service edge group ID: %v\n", id)
 	req := expandServiceEdgeGroup(d)
 
-	if _, _, err := serviceedgegroup.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := serviceedgegroup.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := serviceedgegroup.Update(service, id, &req); err != nil {
-		return err
+	if _, err := serviceedgegroup.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceServiceEdgeGroupRead(d, meta)
+	return resourceServiceEdgeGroupRead(ctx, d, meta)
 }
 
-func resourceServiceEdgeGroupDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceEdgeGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServiceEdgeGroup
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -348,8 +350,8 @@ func resourceServiceEdgeGroupDelete(d *schema.ResourceData, meta interface{}) er
 	}
 	log.Printf("[INFO] Deleting service edge group ID: %v\n", d.Id())
 
-	if _, err := serviceedgegroup.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := serviceedgegroup.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] service edge group deleted")

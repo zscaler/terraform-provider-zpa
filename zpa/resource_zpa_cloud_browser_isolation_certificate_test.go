@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -14,9 +15,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
 )
 
 func TestAccResourceCBICertificate_Basic(t *testing.T) {
@@ -87,7 +88,7 @@ func generateCBIRootCACert() ([]byte, error) {
 			Locality:           []string{"San Jose"},
 			Organization:       []string{"BD-HashiCorp"},
 			OrganizationalUnit: []string{"ITDepartment"},
-			CommonName:         "bd-hashicorp.com",
+			CommonName:         "securitygeek.io",
 		},
 		NotBefore:             notBefore,
 		NotAfter:              notAfter,
@@ -120,7 +121,9 @@ func testAccCheckCBICertificateExists(resource string, certificate *cbicertifica
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedCertificate, _, err := cbicertificatecontroller.Get(apiClient.CBICertificateController, rs.Primary.ID)
+		service := apiClient.Service
+
+		receivedCertificate, _, err := cbicertificatecontroller.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -132,13 +135,14 @@ func testAccCheckCBICertificateExists(resource string, certificate *cbicertifica
 
 func testAccCheckCBICertificateDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
+	service := apiClient.Service
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPACBICertificate {
 			continue
 		}
 
-		cbiCertificate, _, err := cbicertificatecontroller.Get(apiClient.CBICertificateController, rs.Primary.ID)
+		cbiCertificate, _, err := cbicertificatecontroller.Get(context.Background(), service, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)

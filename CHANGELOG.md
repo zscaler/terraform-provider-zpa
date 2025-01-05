@@ -1,5 +1,25 @@
 # Changelog
 
+## 4.0.0 (December, 17 2024)
+
+### Notes
+
+- Release date: **(December, 17  2024)**
+- Supported Terraform version: **v1.x**
+
+#### Enhancements - Zscaler OneAPI Support
+
+[PR #507](https://github.com/zscaler/terraform-provider-zpa/pull/507): The ZPA Terraform Provider now offers support for [OneAPI](https://help.zscaler.com/oneapi/understanding-oneapi) Oauth2 authentication through [Zidentity](https://help.zscaler.com/zidentity/what-zidentity).
+
+**NOTE** As of version v4.0.0, this Terraform provider offers backwards compatibility to the Zscaler legacy API framework. This is the recommended authentication method for organizations whose tenants are still not migrated to [Zidentity](https://help.zscaler.com/zidentity/what-zidentity).
+
+⚠️ **WARNING**: Please refer to the [Index Page](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) page for details on authentication requirements prior to upgrading your provider configuration.
+
+### NEW - RESOURCES, DATA SOURCES, PROPERTIES, ATTRIBUTES, ENV VARS
+
+#### NEW ATTRIBUTES
+- [PR #507](https://github.com/zscaler/terraform-provider-zpa/pull/507) - Added new `object_type` `CHROME_ENTERPRISE` to the following ZPA access policy resources: `zpa_policy_access_rule`, and `zpa_policy_access_rule_v2`
+
 ## 3.33.9 (October, 31 2024)
 
 ### Notes

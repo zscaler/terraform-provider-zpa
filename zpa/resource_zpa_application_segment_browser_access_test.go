@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -8,10 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbrowseraccess"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentbrowseraccess"
 )
 
 func TestAccResourceApplicationSegmentBrowserAccess_Basic(t *testing.T) {
@@ -79,13 +80,22 @@ func testAccCheckApplicationSegmentBrowserAccessDestroy(s *terraform.State) erro
 			continue
 		}
 
-		_, _, err := applicationsegmentbrowseraccess.GetByName(apiClient.BrowserAccess, rs.Primary.Attributes["name"])
-		if err == nil {
-			return fmt.Errorf("Broser Access still exists")
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
 		}
 
-		return nil
+		appSegment, _, err := applicationsegmentbrowseraccess.Get(context.Background(), service, rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
+		}
+
+		if appSegment != nil {
+			return fmt.Errorf("pra console with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
 	}
+
 	return nil
 }
 
@@ -100,7 +110,13 @@ func testAccCheckApplicationSegmentBrowserAccessExists(resource string, segment 
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedSegment, _, err := applicationsegmentbrowseraccess.Get(apiClient.BrowserAccess, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedSegment, _, err := applicationsegmentbrowseraccess.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -140,7 +156,7 @@ func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupT
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "jenkins" {
-	name = "jenkins.bd-hashicorp.com"
+	name = "jenkins.securitygeek.io"
 }
 
 resource "%s" "%s" {
@@ -156,16 +172,16 @@ resource "%s" "%s" {
 		from = "%s"
 		to = "%s"
 	}
-	domain_names = ["%s.bd-hashicorp.com"]
+	domain_names = ["%s.securitygeek.io"]
 	segment_group_id = "${%s.id}"
 	clientless_apps {
-		name                 = "%s.bd-hashicorp.com"
+		name                 = "%s.securitygeek.io"
 		application_protocol = "HTTPS"
 		application_port     = "%s"
 		certificate_id       = data.zpa_ba_certificate.jenkins.id
 		trust_untrusted_cert = true
 		enabled              = true
-		domain               = "%s.bd-hashicorp.com"
+		domain               = "%s.securitygeek.io"
 	}
 	server_groups {
 		id = []

@@ -1,25 +1,28 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorschedule"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorschedule"
 )
 
 func resourceAppConnectorAssistantSchedule() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourceAppConnectorAssistantScheduleCreate,
-		Read:     resourceAppConnectorAssistantScheduleRead,
-		Update:   resourceAppConnectorAssistantScheduleUpdate,
-		Delete:   resourceAppConnectorAssistantScheduleDelete,
-		Importer: &schema.ResourceImporter{},
-
+		CreateContext: resourceAppConnectorAssistantScheduleCreate,
+		ReadContext:   resourceAppConnectorAssistantScheduleRead,
+		UpdateContext: resourceAppConnectorAssistantScheduleUpdate,
+		DeleteContext: resourceAppConnectorAssistantScheduleDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -62,17 +65,17 @@ func resourceAppConnectorAssistantSchedule() *schema.Resource {
 	}
 }
 
-func resourceAppConnectorAssistantScheduleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAppConnectorAssistantScheduleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppConnectorSchedule
+	service := zClient.Service
 
 	req, err := expandAssistantSchedule(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Use = instead of := because err is already declared
-	_, _, err = appconnectorschedule.CreateSchedule(service, req)
+	_, _, err = appconnectorschedule.CreateSchedule(ctx, service, req)
 	if err != nil {
 		// Assuming err.Error() returns a string representation of the error
 		errStr := err.Error()
@@ -82,38 +85,38 @@ func resourceAppConnectorAssistantScheduleCreate(d *schema.ResourceData, meta in
 			log.Printf("[INFO] Resource already exists. Updating instead.")
 
 			// Get the current state of the resource
-			resp, _, err := appconnectorschedule.GetSchedule(service)
+			resp, _, err := appconnectorschedule.GetSchedule(ctx, service)
 			if err != nil {
-				return fmt.Errorf("failed to retrieve existing resource for update: %v", err)
+				return diag.FromErr(fmt.Errorf("failed to retrieve existing resource for update: %v", err))
 			}
 
 			// Set the resource ID in the Terraform state
 			d.SetId(resp.ID)
 
 			// Proceed to update the resource
-			return resourceAppConnectorAssistantScheduleUpdate(d, meta)
+			return resourceAppConnectorAssistantScheduleUpdate(ctx, d, meta)
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created app connector assistant schedule request. ID: %v\n", req.ID)
 	d.SetId(req.ID)
 
-	return resourceAppConnectorAssistantScheduleRead(d, meta)
+	return resourceAppConnectorAssistantScheduleRead(ctx, d, meta)
 }
 
-func resourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAppConnectorAssistantScheduleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppConnectorSchedule
+	service := zClient.Service
 
-	resp, _, err := appconnectorschedule.GetSchedule(service)
+	resp, _, err := appconnectorschedule.GetSchedule(ctx, service)
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing app connector assistant schedule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting application server:\n%+v\n", resp)
@@ -125,32 +128,32 @@ func resourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceAppConnectorAssistantScheduleUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAppConnectorAssistantScheduleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppConnectorSchedule
+	service := zClient.Service
 
 	id := d.Id()
 	log.Printf("[INFO] Updating app connector group ID: %v\n", id)
 	req, err := expandAssistantSchedule(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	if _, _, err := appconnectorschedule.GetSchedule(service); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := appconnectorschedule.GetSchedule(ctx, service); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := appconnectorschedule.UpdateSchedule(service, id, &req); err != nil {
-		return err
+	if _, err := appconnectorschedule.UpdateSchedule(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceAppConnectorAssistantScheduleRead(d, meta)
+	return resourceAppConnectorAssistantScheduleRead(ctx, d, meta)
 }
 
-func resourceAppConnectorAssistantScheduleDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAppConnectorAssistantScheduleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }
 

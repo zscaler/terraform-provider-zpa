@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
 )
 
 func TestAccDataSourceApplicationSegmentByType_Basic(t *testing.T) {
@@ -53,12 +53,12 @@ resource "zpa_application_segment_pra" "this" {
   bypass_type      = "NEVER"
   is_cname_enabled = true
   tcp_port_ranges  = ["2222", "2222"]
-  domain_names     = ["ssh_pra01.bd-hashicorp.com"]
+  domain_names     = ["ssh_pra01.securitygeek.io"]
   segment_group_id = zpa_segment_group.this.id
   common_apps_dto {
     apps_config {
-      name                 = "ssh_pra01.bd-hashicorp.com"
-      domain               = "ssh_pra01.bd-hashicorp.com"
+      name                 = "ssh_pra01.securitygeek.io"
+      domain               = "ssh_pra01.securitygeek.io"
       application_protocol = "SSH"
       application_port     = "2222"
       enabled = true
@@ -69,7 +69,7 @@ resource "zpa_application_segment_pra" "this" {
 }
 
 data "zpa_ba_certificate" "jenkins" {
-  name = "jenkins.bd-hashicorp.com"
+  name = "jenkins.securitygeek.io"
 }
 
 resource "zpa_application_segment_inspection" "this" {
@@ -80,12 +80,12 @@ resource "zpa_application_segment_inspection" "this" {
   bypass_type      = "NEVER"
   is_cname_enabled = true
   tcp_port_ranges  = ["4444", "4444"]
-  domain_names     = ["web01.bd-hashicorp.com"]
+  domain_names     = ["web01.securitygeek.io"]
   segment_group_id = zpa_segment_group.this.id
   common_apps_dto {
     apps_config {
-      name                 = "web01.bd-hashicorp.com"
-      domain               = "web01.bd-hashicorp.com"
+      name                 = "web01.securitygeek.io"
+      domain               = "web01.securitygeek.io"
       application_protocol = "HTTPS"
       application_port     = "4444"
       certificate_id       = data.zpa_ba_certificate.jenkins.id
@@ -103,13 +103,13 @@ resource "zpa_application_segment_browser_access" "this" {
     health_reporting          = "ON_ACCESS"
     bypass_type               = "NEVER"
     tcp_port_ranges           = ["4445", "4445"]
-    domain_names              = ["web02.bd-hashicorp.com"]
+    domain_names              = ["web02.securitygeek.io"]
     segment_group_id          = zpa_segment_group.this.id
 
     clientless_apps {
-        name                  = "web02.bd-hashicorp.com"
+        name                  = "web02.securitygeek.io"
 		    enabled               = true
-		    domain                = "web02.bd-hashicorp.com"
+		    domain                = "web02.securitygeek.io"
         application_protocol  = "HTTPS"
         application_port      = "4445"
         certificate_id        = data.zpa_ba_certificate.jenkins.id

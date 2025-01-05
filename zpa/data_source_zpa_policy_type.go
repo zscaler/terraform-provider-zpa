@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 func dataSourcePolicyType() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcePolicyTypeRead,
+		ReadContext: dataSourcePolicyTypeRead,
 		Schema: map[string]*schema.Schema{
 			"creation_time": {
 				Type:     schema.TypeString,
@@ -237,21 +239,25 @@ func dataSourcePolicyType() *schema.Resource {
 	}
 }
 
-func dataSourcePolicyTypeRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourcePolicyTypeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
+	service := zClient.Service
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	log.Printf("[INFO] Getting data for policy type\n")
 	var resp *policysetcontroller.PolicySet
 	var err error
 	policyType, policyTypeIsSet := d.GetOk("policy_type")
 	if policyTypeIsSet {
-		resp, _, err = policysetcontroller.GetByPolicyType(service, policyType.(string))
+		resp, _, err = policysetcontroller.GetByPolicyType(ctx, service, policyType.(string))
 	} else {
-		resp, _, err = policysetcontroller.GetByPolicyType(service, "GLOBAL_POLICY")
+		resp, _, err = policysetcontroller.GetByPolicyType(ctx, service, "GLOBAL_POLICY")
 	}
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting data for Policy Type:\n%+v\n", resp)
@@ -268,7 +274,7 @@ func dataSourcePolicyTypeRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 	if err := d.Set("rules", flattenPolicySetRules(resp)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

@@ -1,17 +1,19 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/inspectioncontrol/inspection_predefined_controls"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_predefined_controls"
 )
 
 func dataSourceInspectionPredefinedControls() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceInspectionPredefinedControlsRead,
+		ReadContext: dataSourceInspectionPredefinedControlsRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -108,17 +110,17 @@ func dataSourceInspectionPredefinedControls() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceInspectionPredefinedControlsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.InspectionPredefinedControls
+	service := zClient.Service
 
 	var resp *inspection_predefined_controls.PredefinedControls
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for predefined controls %s\n", id)
-		res, _, err := inspection_predefined_controls.Get(service, id)
+		res, _, err := inspection_predefined_controls.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
@@ -126,12 +128,12 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, meta int
 	if ok && name != "" {
 		version, versionSet := d.Get("version").(string)
 		if !versionSet || version == "" {
-			return fmt.Errorf("when the name is set, version must be set as well")
+			return diag.FromErr(fmt.Errorf("when the name is set, version must be set as well"))
 		}
 		log.Printf("[INFO] Getting data for predefined controls name %s\n", name)
-		res, _, err := inspection_predefined_controls.GetByName(service, name, version)
+		res, _, err := inspection_predefined_controls.GetByName(ctx, service, name, version)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
@@ -156,7 +158,7 @@ func dataSourceInspectionPredefinedControlsRead(d *schema.ResourceData, meta int
 		_ = d.Set("version", resp.Version)
 		_ = d.Set("associated_inspection_profile_names", flattenInspectionProfileNames(resp.AssociatedInspectionProfileNames))
 	} else {
-		return fmt.Errorf("couldn't find any predefined inspection controls with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any predefined inspection controls with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

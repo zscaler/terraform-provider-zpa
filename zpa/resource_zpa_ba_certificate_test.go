@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -13,9 +14,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/bacertificate"
 )
 
 func TestAccResourceBaCertificate_Basic(t *testing.T) {
@@ -96,7 +97,9 @@ func testAccCheckBaCertificateExists(n string) resource.TestCheckFunc {
 
 		// Assume you have an API client set up and it has a method to get a certificate by ID
 		apiClient := testAccProvider.Meta().(*Client)
-		_, _, err := bacertificate.Get(apiClient.BACertificate, rs.Primary.ID)
+		service := apiClient.Service
+
+		_, _, err := bacertificate.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("error fetching certificate with resource ID [%s] from API: %s", rs.Primary.ID, err)
 		}
@@ -107,13 +110,14 @@ func testAccCheckBaCertificateExists(n string) resource.TestCheckFunc {
 
 func testAccBaCertificateDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
+	service := apiClient.Service
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPABACertificate {
 			continue
 		}
 
-		baCertificate, _, err := bacertificate.Get(apiClient.BACertificate, rs.Primary.ID)
+		baCertificate, _, err := bacertificate.Get(context.Background(), service, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)

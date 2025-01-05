@@ -6,25 +6,26 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
 )
 
 func resourceApplicationSegmentInspection() *schema.Resource {
 	return &schema.Resource{
-		Create:        resourceApplicationSegmentInspectionCreate,
-		Read:          resourceApplicationSegmentInspectionRead,
-		Update:        resourceApplicationSegmentInspectionUpdate,
-		Delete:        resourceApplicationSegmentInspectionDelete,
+		CreateContext: resourceApplicationSegmentInspectionCreate,
+		ReadContext:   resourceApplicationSegmentInspectionRead,
+		UpdateContext: resourceApplicationSegmentInspectionUpdate,
+		DeleteContext: resourceApplicationSegmentInspectionDelete,
 		CustomizeDiff: customizeDiffApplicationSegmentInspection,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				client := meta.(*Client)
-				service := client.ApplicationSegmentInspection
+				service := client.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -36,7 +37,7 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				if parseIDErr == nil {
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := applicationsegmentinspection.GetByName(service, id)
+					resp, _, err := applicationsegmentinspection.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -316,45 +317,45 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentInspectionCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentInspectionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentInspection
+	service := zClient.Service
 
-	req := expandInspectionApplicationSegment(d, zClient, "")
+	req := expandInspectionApplicationSegment(ctx, d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the application segment")
-		return fmt.Errorf("please provide a valid segment group for the application segment")
+		return diag.FromErr(fmt.Errorf("please provide a valid segment group for the application segment"))
 	}
 
-	resp, _, err := applicationsegmentinspection.Create(service, req)
+	resp, _, err := applicationsegmentinspection.Create(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Created inspection application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceApplicationSegmentInspectionRead(d, meta)
+	return resourceApplicationSegmentInspectionRead(ctx, d, meta)
 }
 
-func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentInspectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentInspection
+	service := zClient.Service
 
-	resp, _, err := applicationsegmentinspection.Get(service, d.Id())
+	resp, _, err := applicationsegmentinspection.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing inspection application segment %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting sra application segment:\n%+v\n", resp)
@@ -386,25 +387,25 @@ func resourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta inter
 
 	// Map inspect to common_apps_dto.apps_config for state management
 	if err := mapInspectAppsToCommonApps(d, resp.InspectionAppDto); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	return nil
 }
 
-func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentInspectionUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentInspection
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -415,37 +416,37 @@ func resourceApplicationSegmentInspectionUpdate(d *schema.ResourceData, meta int
 	log.Printf("[INFO] Updating inspection application segment ID: %v\n", id)
 
 	// Retrieve the current resource to get app_id and pra_app_id
-	resp, _, err := applicationsegmentinspection.Get(service, id)
+	resp, _, err := applicationsegmentinspection.Get(ctx, service, id)
 	if err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error retrieving application segment: %v", err)
+		return diag.FromErr(fmt.Errorf("error retrieving application segment: %v", err))
 	}
 
 	// Extract app_id and inspect_app_id from praApps and set in common_apps_dto in state
 	if err := setInspectionAppIDsInCommonAppsDto(d, resp.InspectionAppDto); err != nil {
-		return fmt.Errorf("error setting app_id and inspect_app_id in common_apps_dto: %v", err)
+		return diag.FromErr(fmt.Errorf("error setting app_id and inspect_app_id in common_apps_dto: %v", err))
 	}
 
-	req := expandInspectionApplicationSegment(d, zClient, "")
+	req := expandInspectionApplicationSegment(ctx, d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	_, err = applicationsegmentinspection.Update(service, id, &req)
+	_, err = applicationsegmentinspection.Update(ctx, service, id, &req)
 	if err != nil {
-		return fmt.Errorf("error updating application segment inspection: %v", err)
+		return diag.FromErr(fmt.Errorf("error updating application segment inspection: %v", err))
 	}
 
-	return resourceApplicationSegmentInspectionRead(d, meta)
+	return resourceApplicationSegmentInspectionRead(ctx, d, meta)
 }
 
-func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentInspectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentInspection
+	service := zClient.Service
 
 	id := d.Id()
 	segmentGroupID, ok := d.GetOk("segment_group_id")
@@ -453,22 +454,22 @@ func resourceApplicationSegmentInspectionDelete(d *schema.ResourceData, meta int
 		gID, ok := segmentGroupID.(string)
 		if ok && gID != "" {
 			// detach it from segment group first
-			if err := detachSegmentGroup(zClient, id, gID); err != nil {
-				return err
+			if err := detachSegmentGroup(ctx, zClient, id, gID); err != nil {
+				return diag.FromErr(err)
 			}
 		}
 	}
 	log.Printf("[INFO] Deleting inspection application segment with id %v\n", id)
-	if _, err := applicationsegmentinspection.Delete(service, id); err != nil {
-		return err
+	if _, err := applicationsegmentinspection.Delete(ctx, service, id); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
+func expandInspectionApplicationSegment(ctx context.Context, d *schema.ResourceData, zClient *Client, id string) applicationsegmentinspection.AppSegmentInspection {
 	microTenantID := GetString(d.Get("microtenant_id"))
-	service := zClient.ApplicationSegmentInspection
+	service := zClient.Service
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
@@ -507,7 +508,7 @@ func expandInspectionApplicationSegment(d *schema.ResourceData, zClient *Client,
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if service != nil && id != "" {
-		resource, _, err := applicationsegment.Get(service, id)
+		resource, _, err := applicationsegment.Get(ctx, service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
 			remoteUDPAppPortRanges = resource.UDPPortRanges

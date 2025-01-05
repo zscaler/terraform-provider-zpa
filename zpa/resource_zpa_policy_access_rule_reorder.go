@@ -1,25 +1,26 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
 )
 
 // Define the Terraform resource for reordering policy access rules.
 func resourcePolicyAccessRuleReorder() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePolicyAccessReorderUpdate,
-		Read:   resourcePolicyAccessReorderRead,
-		Update: resourcePolicyAccessReorderUpdate,
-		Delete: resourcePolicyAccessReorderDelete,
+		CreateContext: resourcePolicyAccessReorderUpdate,
+		ReadContext:   resourcePolicyAccessReorderRead,
+		UpdateContext: resourcePolicyAccessReorderUpdate,
+		DeleteContext: resourcePolicyAccessReorderDelete,
 		Schema: map[string]*schema.Schema{
 			"policy_type": {
 				Type:     schema.TypeString,
@@ -130,10 +131,9 @@ func getRules(d *schema.ResourceData) (*RulesOrders, error) {
 	return &orders, nil
 }
 
-func resourcePolicyAccessReorderRead(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyAccessReorderRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
-
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
@@ -141,16 +141,16 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, meta interface{}) e
 
 	policyType := d.Get("policy_type").(string)
 
-	currentRules, _, err := policysetcontroller.GetAllByType(service, policyType)
+	currentRules, _, err := policysetcontroller.GetAllByType(ctx, service, policyType)
 	if err != nil {
 		log.Printf("[ERROR] failed to get rules: %v\n", err)
 		d.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	configuredRules, err := getRules(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] reorder rules on read: %v\n", configuredRules)
@@ -177,7 +177,7 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if err := d.Set("rules", rulesMap); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(fmt.Sprintf("%s-%s", policyType, "reorder"))
@@ -185,19 +185,18 @@ func resourcePolicyAccessReorderRead(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyAccessReorderUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
-
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	existingRules, _, err := policysetcontroller.GetAllByType(service, d.Get("policy_type").(string))
+	existingRules, _, err := policysetcontroller.GetAllByType(ctx, service, d.Get("policy_type").(string))
 	if err != nil {
 		log.Printf("[ERROR] Failed to get existing rules: %v\n", err)
-		return err
+		return diag.FromErr(err)
 	}
 
 	deceptionAtOne := false
@@ -212,12 +211,12 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, meta interface{})
 
 	userDefinedRules, err := getRules(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := validateRuleOrders(userDefinedRules); err != nil {
 		log.Printf("[ERROR] Reordering rules failed: %v\n", err)
-		return err
+		return diag.FromErr(err)
 	}
 
 	ruleIdToOrder := make(map[string]int)
@@ -231,15 +230,15 @@ func resourcePolicyAccessReorderUpdate(d *schema.ResourceData, meta interface{})
 		ruleIdToOrder[id] = order + baseOrder - 1
 	}
 
-	if _, err := policysetcontroller.BulkReorder(service, d.Get("policy_type").(string), ruleIdToOrder); err != nil {
+	if _, err := policysetcontroller.BulkReorder(ctx, service, d.Get("policy_type").(string), ruleIdToOrder); err != nil {
 		log.Printf("[ERROR] Bulk reordering rules failed: %v", err)
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(fmt.Sprintf("%s-%s", d.Get("policy_type").(string), "reorder"))
-	return resourcePolicyAccessReorderRead(d, meta)
+	return resourcePolicyAccessReorderRead(ctx, d, meta)
 }
 
-func resourcePolicyAccessReorderDelete(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyAccessReorderDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }

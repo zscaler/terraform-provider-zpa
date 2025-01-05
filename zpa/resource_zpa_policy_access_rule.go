@@ -1,20 +1,22 @@
 package zpa
 
 import (
+	"context"
 	"log"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 )
 
 func resourcePolicyAccessRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePolicyAccessCreate,
-		Read:   resourcePolicyAccessRead,
-		Update: resourcePolicyAccessUpdate,
-		Delete: resourcePolicyAccessDelete,
+		CreateContext: resourcePolicyAccessCreate,
+		ReadContext:   resourcePolicyAccessRead,
+		UpdateContext: resourcePolicyAccessUpdate,
+		DeleteContext: resourcePolicyAccessDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: importPolicyStateContextFunc([]string{"ACCESS_POLICY", "GLOBAL_POLICY"}),
 		},
@@ -82,16 +84,16 @@ func resourcePolicyAccessRule() *schema.Resource {
 					"COUNTRY_CODE",
 					"PLATFORM",
 					"RISK_FACTOR_TYPE",
+					"CHROME_ENTERPRISE",
 				}),
 			},
 		),
 	}
 }
 
-func resourcePolicyAccessCreate(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyAccessCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
-
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
@@ -103,56 +105,55 @@ func resourcePolicyAccessCreate(d *schema.ResourceData, meta interface{}) error 
 	if v, ok := d.GetOk("policy_set_id"); ok {
 		policySetID = v.(string)
 	} else {
-		policySetID, err = fetchPolicySetIDByType(zClient, "ACCESS_POLICY", microTenantID)
+		policySetID, err = fetchPolicySetIDByType(ctx, zClient, "ACCESS_POLICY", microTenantID)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	req, err := expandCreatePolicyRule(d, policySetID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Creating ZPA policy access rule with request\n%+v\n", req)
 
-	if err := ValidateConditions(req.Conditions, zClient, microTenantID); err != nil {
-		return err
+	if err := ValidateConditions(ctx, req.Conditions, zClient, microTenantID); err != nil {
+		return diag.FromErr(err)
 	}
 
-	resp, _, err := policysetcontroller.CreateRule(service, req)
+	resp, _, err := policysetcontroller.CreateRule(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyAccessRead(d, meta)
+	return resourcePolicyAccessRead(ctx, d, meta)
 }
 
-func resourcePolicyAccessRead(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyAccessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
-
-	policySetID, err := fetchPolicySetIDByType(zClient, "ACCESS_POLICY", microTenantID)
-	if err != nil {
-		return err
-	}
-
-	service := zClient.PolicySetController
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
+	policySetID, err := fetchPolicySetIDByType(ctx, zClient, "ACCESS_POLICY", microTenantID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	log.Printf("[INFO] Getting Policy Set Rule: policySetID:%s id: %s\n", policySetID, d.Id())
-	resp, respErr, err := policysetcontroller.GetPolicyRule(service, policySetID, d.Id())
+	resp, respErr, err := policysetcontroller.GetPolicyRule(ctx, service, policySetID, d.Id())
 	if err != nil {
 		if respErr != nil && (respErr.StatusCode == 404 || respErr.StatusCode == http.StatusNotFound) {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Got Policy Set Rule:\n%+v\n", resp)
@@ -176,10 +177,9 @@ func resourcePolicyAccessRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourcePolicyAccessUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyAccessUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
-
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
@@ -191,33 +191,32 @@ func resourcePolicyAccessUpdate(d *schema.ResourceData, meta interface{}) error 
 	if v, ok := d.GetOk("policy_set_id"); ok {
 		policySetID = v.(string)
 	} else {
-		policySetID, err = fetchPolicySetIDByType(zClient, "ACCESS_POLICY", microTenantID)
+		policySetID, err = fetchPolicySetIDByType(ctx, zClient, "ACCESS_POLICY", microTenantID)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	ruleID := d.Id()
 	req, err := expandCreatePolicyRule(d, policySetID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	if err := ValidateConditions(req.Conditions, zClient, microTenantID); err != nil {
-		return err
+	if err := ValidateConditions(ctx, req.Conditions, zClient, microTenantID); err != nil {
+		return diag.FromErr(err)
 	}
 
-	if _, err := policysetcontroller.UpdateRule(service, policySetID, ruleID, req); err != nil {
-		return err
+	if _, err := policysetcontroller.UpdateRule(ctx, service, policySetID, ruleID, req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourcePolicyAccessRead(d, meta)
+	return resourcePolicyAccessRead(ctx, d, meta)
 }
 
-func resourcePolicyAccessDelete(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyAccessDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
-
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
@@ -229,16 +228,16 @@ func resourcePolicyAccessDelete(d *schema.ResourceData, meta interface{}) error 
 	if v, ok := d.GetOk("policy_set_id"); ok {
 		policySetID = v.(string)
 	} else {
-		policySetID, err = fetchPolicySetIDByType(zClient, "ACCESS_POLICY", microTenantID)
+		policySetID, err = fetchPolicySetIDByType(ctx, zClient, "ACCESS_POLICY", microTenantID)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
 
-	if _, err := policysetcontroller.Delete(service, policySetID, d.Id()); err != nil {
-		return err
+	if _, err := policysetcontroller.Delete(ctx, service, policySetID, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -270,73 +269,3 @@ func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policy
 		AppConnectorGroups: expandCommonAppConnectorGroups(d),
 	}, nil
 }
-
-/*
-func expandPolicySetControllerAppServerGroups(d *schema.ResourceData) []policysetcontroller.AppServerGroups {
-	appServerGroupsInterface, ok := d.GetOk("app_server_groups")
-	if ok {
-		appServer := appServerGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app server groups data: %+v\n", appServer)
-		var appServerGroups []policysetcontroller.AppServerGroups
-		for _, appServerGroup := range appServer.List() {
-			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if appServerGroup != nil {
-				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					appServerGroups = append(appServerGroups, policysetcontroller.AppServerGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return appServerGroups
-	}
-
-	return []policysetcontroller.AppServerGroups{}
-}
-
-func expandPolicysetControllerAppConnectorGroups(d *schema.ResourceData) []policysetcontroller.AppConnectorGroups {
-	appConnectorGroupsInterface, ok := d.GetOk("app_connector_groups")
-	if ok {
-		appConnector := appConnectorGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app connector groups data: %+v\n", appConnector)
-		var appConnectorGroups []policysetcontroller.AppConnectorGroups
-		for _, appConnectorGroup := range appConnector.List() {
-			appConnectorGroup, _ := appConnectorGroup.(map[string]interface{})
-			if appConnectorGroup != nil {
-				for _, id := range appConnectorGroup["id"].(*schema.Set).List() {
-					appConnectorGroups = append(appConnectorGroups, policysetcontroller.AppConnectorGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return appConnectorGroups
-	}
-
-	return []policysetcontroller.AppConnectorGroups{}
-}
-
-func flattenPolicyRuleServerGroups(appServerGroup []servergroup.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appServerGroup))
-	for i, serverGroup := range appServerGroup {
-		ids[i] = serverGroup.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-
-func flattenPolicyRuleAppConnectorGroups(appConnectorGroups []policysetcontroller.AppConnectorGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appConnectorGroups))
-	for i, group := range appConnectorGroups {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-*/

@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/inspectioncontrol/inspection_profile"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
 )
 
 func dataSourceInspectionProfile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceInspectionProfileRead,
+		ReadContext: dataSourceInspectionProfileRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -359,26 +361,26 @@ func dataSourceInspectionProfile() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceInspectionProfileRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.InspectionProfile
+	service := zClient.Service
 
 	var resp *inspection_profile.InspectionProfile
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for inspection profile  %s\n", id)
-		res, _, err := inspection_profile.Get(service, id)
+		res, _, err := inspection_profile.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for inspection profile name %s\n", name)
-		res, _, err := inspection_profile.GetByName(service, name)
+		res, _, err := inspection_profile.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
@@ -395,15 +397,15 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) e
 		_ = d.Set("predefined_controls_version", resp.PredefinedControlsVersion)
 
 		if err := d.Set("controls_info", flattenControlInfoResource(resp.ControlInfoResource)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("custom_controls", flattenCustomControls(resp.CustomControls)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("predefined_controls", flattenPredefinedControls(resp.PredefinedControls)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		// Flattening ThreatLabz Controls
@@ -424,7 +426,7 @@ func dataSourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) e
 		// 	return err
 		// }
 	} else {
-		return fmt.Errorf("couldn't find any inspection profile with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any inspection profile with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

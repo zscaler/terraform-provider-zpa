@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/bacertificate"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
 )
 
 func dataSourceBaCertificate() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBaCertificateRead,
+		ReadContext: dataSourceBaCertificateRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -89,9 +91,9 @@ func dataSourceBaCertificate() *schema.Resource {
 	}
 }
 
-func dataSourceBaCertificateRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceBaCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.BACertificate
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -101,9 +103,9 @@ func dataSourceBaCertificateRead(d *schema.ResourceData, meta interface{}) error
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for browser certificate %s\n", id)
-		res, _, err := bacertificate.Get(service, id)
+		res, _, err := bacertificate.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -111,9 +113,9 @@ func dataSourceBaCertificateRead(d *schema.ResourceData, meta interface{}) error
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for browser certificate name %s\n", name)
-		res, _, err := bacertificate.GetIssuedByName(service, name)
+		res, _, err := bacertificate.GetIssuedByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -137,38 +139,38 @@ func dataSourceBaCertificateRead(d *schema.ResourceData, meta interface{}) error
 		// Convert and set epoch attributes
 		creationTime, err := epochToRFC1123(resp.CreationTime, false)
 		if err != nil {
-			return fmt.Errorf("error formatting creation_time: %s", err)
+			return diag.FromErr(fmt.Errorf("error formatting creation_time: %s", err))
 		}
 		if err := d.Set("creation_time", creationTime); err != nil {
-			return fmt.Errorf("error setting creation_time: %s", err)
+			return diag.FromErr(fmt.Errorf("error setting creation_time: %s", err))
 		}
 
 		modifiedTime, err := epochToRFC1123(resp.ModifiedTime, false)
 		if err != nil {
-			return fmt.Errorf("error formatting modified_time: %s", err)
+			return diag.FromErr(fmt.Errorf("error formatting modified_time: %s", err))
 		}
 		if err := d.Set("modified_time", modifiedTime); err != nil {
-			return fmt.Errorf("error setting modified_time: %s", err)
+			return diag.FromErr(fmt.Errorf("error setting modified_time: %s", err))
 		}
 
 		validFromInEpochSec, err := epochToRFC1123(resp.ValidFromInEpochSec, false)
 		if err != nil {
-			return fmt.Errorf("error formatting valid_from_in_epochsec: %s", err)
+			return diag.FromErr(fmt.Errorf("error formatting valid_from_in_epochsec: %s", err))
 		}
 		if err := d.Set("valid_from_in_epochsec", validFromInEpochSec); err != nil {
-			return fmt.Errorf("error setting valid_from_in_epochsec: %s", err)
+			return diag.FromErr(fmt.Errorf("error setting valid_from_in_epochsec: %s", err))
 		}
 
 		validToInEpochSec, err := epochToRFC1123(resp.ValidToInEpochSec, false)
 		if err != nil {
-			return fmt.Errorf("error formatting valid_to_in_epochsec: %s", err)
+			return diag.FromErr(fmt.Errorf("error formatting valid_to_in_epochsec: %s", err))
 		}
 		if err := d.Set("valid_to_in_epochsec", validToInEpochSec); err != nil {
-			return fmt.Errorf("error setting valid_to_in_epochsec: %s", err)
+			return diag.FromErr(fmt.Errorf("error setting valid_to_in_epochsec: %s", err))
 		}
 
 	} else {
-		return fmt.Errorf("couldn't find any browser certificate with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any browser certificate with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

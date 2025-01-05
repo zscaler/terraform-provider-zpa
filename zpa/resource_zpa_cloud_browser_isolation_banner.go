@@ -1,24 +1,26 @@
 package zpa
 
 import (
+	"context"
 	"log"
 	"strconv"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbibannercontroller"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
 )
 
 func resourceCBIBanners() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCBIBannersCreate,
-		Read:   resourceCBIBannersRead,
-		Update: resourceCBIBannersUpdate,
-		Delete: resourceCBIBannersDelete,
+		CreateContext: resourceCBIBannersCreate,
+		ReadContext:   resourceCBIBannersRead,
+		UpdateContext: resourceCBIBannersUpdate,
+		DeleteContext: resourceCBIBannersDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				zClient := meta.(*Client)
-				service := zClient.CBIBannerController
+				service := zClient.Service
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -26,7 +28,7 @@ func resourceCBIBanners() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := cbibannercontroller.GetByNameOrID(service, id)
+					resp, _, err := cbibannercontroller.GetByNameOrID(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -81,36 +83,36 @@ func resourceCBIBanners() *schema.Resource {
 	}
 }
 
-func resourceCBIBannersCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceCBIBannersCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIBannerController
+	service := zClient.Service
 
 	req := expandCBIBanner(d)
 	log.Printf("[INFO] Creating cbi banner with request\n%+v\n", req)
 
-	cbiBanner, _, err := cbibannercontroller.Create(service, &req)
+	cbiBanner, _, err := cbibannercontroller.Create(ctx, service, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created cbi banner request. ID: %v\n", cbiBanner)
 
 	d.SetId(cbiBanner.ID)
-	return resourceCBIBannersRead(d, meta)
+	return resourceCBIBannersRead(ctx, d, meta)
 }
 
-func resourceCBIBannersRead(d *schema.ResourceData, meta interface{}) error {
+func resourceCBIBannersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIBannerController
+	service := zClient.Service
 
-	resp, _, err := cbibannercontroller.Get(service, d.Id())
+	resp, _, err := cbibannercontroller.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing cbi certificate %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting cbi certificate:\n%+v\n", resp)
@@ -127,36 +129,36 @@ func resourceCBIBannersRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceCBIBannersUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCBIBannersUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIBannerController
+	service := zClient.Service
 
 	id := d.Id()
 	log.Printf("[INFO] Updating cbi certificate ID: %v\n", id)
 	req := expandCBIBanner(d)
 
-	if _, _, err := cbibannercontroller.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := cbibannercontroller.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := cbibannercontroller.Update(service, id, &req); err != nil {
-		return err
+	if _, err := cbibannercontroller.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceCBIBannersRead(d, meta)
+	return resourceCBIBannersRead(ctx, d, meta)
 }
 
-func resourceCBIBannersDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceCBIBannersDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIBannerController
+	service := zClient.Service
 
 	log.Printf("[INFO] Deleting cbi banner ID: %v\n", d.Id())
 
-	if _, err := cbibannercontroller.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := cbibannercontroller.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] cbi banner deleted")

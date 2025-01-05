@@ -1,17 +1,19 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgecontroller"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgecontroller"
 )
 
 func dataSourceServiceEdgeController() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceServiceEdgeControllerRead,
+		ReadContext: dataSourceServiceEdgeControllerRead,
 		Schema: map[string]*schema.Schema{
 			"application_start_time": {
 				Type:     schema.TypeString,
@@ -359,37 +361,38 @@ func dataSourceServiceEdgeController() *schema.Resource {
 	}
 }
 
-func dataSourceServiceEdgeControllerRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceServiceEdgeControllerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServiceEdgeController
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
+
 	var resp *serviceedgecontroller.ServiceEdgeController
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for service edge controller %s\n", id)
-		res, _, err := serviceedgecontroller.Get(service, id)
+		res, _, err := serviceedgecontroller.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for service edge controller name %s\n", name)
-		res, _, err := serviceedgecontroller.GetByName(service, name)
+		res, _, err := serviceedgecontroller.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 
 	// Ensure resp is not nil before proceeding
 	if resp == nil {
-		return fmt.Errorf("couldn't find any service edge controller with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any service edge controller with name '%s' or id '%s'", name, id))
 	}
 
 	// Set the values in Terraform schema

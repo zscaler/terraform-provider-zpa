@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -8,10 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
 )
 
 func TestAccResourceServiceEdgeGroup_Basic(t *testing.T) {
@@ -74,7 +75,13 @@ func testAccCheckServiceEdgeGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		group, _, err := serviceedgegroup.Get(apiClient.ServiceEdgeGroup, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		group, _, err := serviceedgegroup.Get(context.Background(), service, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -99,7 +106,13 @@ func testAccCheckServiceEdgeGroupExists(resource string, group *serviceedgegroup
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedGroup, _, err := serviceedgegroup.Get(apiClient.ServiceEdgeGroup, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedGroup, _, err := serviceedgegroup.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

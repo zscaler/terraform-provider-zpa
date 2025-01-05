@@ -1,16 +1,17 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentpra"
 )
 
 func TestAccResourceApplicationSegmentPRA_Basic(t *testing.T) {
@@ -58,11 +59,11 @@ func TestAccResourceApplicationSegmentPRA_Basic(t *testing.T) {
 				),
 			},
 			// Import test
-			// {
-			// 	ResourceName:      appSegmentTypeAndName,
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				ResourceName:      appSegmentTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -75,13 +76,22 @@ func testAccCheckApplicationSegmentPRADestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, _, err := applicationsegmentpra.GetByName(apiClient.ApplicationSegmentPRA, rs.Primary.Attributes["name"])
-		if err == nil {
-			return fmt.Errorf("Application Segment PRA still exists")
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
 		}
 
-		return nil
+		appSegment, _, err := applicationsegmentpra.Get(context.Background(), service, rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
+		}
+
+		if appSegment != nil {
+			return fmt.Errorf("pra application segment with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
 	}
+
 	return nil
 }
 
@@ -96,7 +106,13 @@ func testAccCheckApplicationSegmentPRAExists(resource string, segment *applicati
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedSegment, _, err := applicationsegmentpra.Get(apiClient.ApplicationSegmentPRA, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedSegment, _, err := applicationsegmentpra.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -8,9 +9,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praapproval"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praapproval"
 )
 
 func TestAccResourcePRAPrivilegedApprovalController_Basic(t *testing.T) {
@@ -61,13 +62,19 @@ func testAccCheckPRAPrivilegedApprovalDestroy(s *terraform.State) error {
 			continue
 		}
 
-		group, _, err := praapproval.Get(apiClient.PRAApproval, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		approval, _, err := praapproval.Get(context.Background(), service, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
 
-		if group != nil {
+		if approval != nil {
 			return fmt.Errorf("pra approval with id %s exists and wasn't destroyed", rs.Primary.ID)
 		}
 	}
@@ -86,7 +93,13 @@ func testAccCheckPRAPrivilegedApprovalExists(resource string, approval *praappro
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedApproval, _, err := praapproval.Get(apiClient.PRAApproval, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedApproval, _, err := praapproval.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -106,7 +119,7 @@ func testAccCheckPRAPrivilegedApprovalConfigure(resourceTypeAndName, generatedNa
 	endTime := now.AddDate(0, 3, 0).Format(time.RFC1123) // Example: 3 months from now
 
 	userEmails := []string{
-		"kathy.kavanagh@bd-hashicorp.com",
+		"kathy.kavanagh@securitygeek.io",
 	}
 	emailIDs := fmt.Sprintf(`["%s"]`, strings.Join(userEmails, `", "`))
 	return fmt.Sprintf(`
@@ -123,7 +136,6 @@ resource "zpa_application_segment_pra" "this" {
 	segment_group_id = zpa_segment_group.this.id
 	common_apps_dto {
 		apps_config {
-		name                 = "rdp_pra3391.example.com"
 		domain               = "rdp_pra3391.example.com"
 		application_protocol = "RDP"
 		connection_security  = "ANY"
@@ -132,7 +144,6 @@ resource "zpa_application_segment_pra" "this" {
 		app_types            = ["SECURE_REMOTE_ACCESS"]
 		}
 		apps_config {
-		name                 = "ssh_pra3222.example.com"
 		domain               = "ssh_pra3222.example.com"
 		application_protocol = "SSH"
 		application_port     = "3222"

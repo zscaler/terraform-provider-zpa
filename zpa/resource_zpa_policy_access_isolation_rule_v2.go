@@ -1,20 +1,22 @@
 package zpa
 
 import (
+	"context"
 	"log"
 	"net/http"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
 )
 
 func resourcePolicyIsolationRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePolicyIsolationRuleV2Create,
-		Read:   resourcePolicyIsolationRuleV2Read,
-		Update: resourcePolicyIsolationRuleV2Update,
-		Delete: resourcePolicyIsolationRuleV2Delete,
+		CreateContext: resourcePolicyIsolationRuleV2Create,
+		ReadContext:   resourcePolicyIsolationRuleV2Read,
+		UpdateContext: resourcePolicyIsolationRuleV2Update,
+		DeleteContext: resourcePolicyIsolationRuleV2Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: importPolicyStateContextFuncV2([]string{"ISOLATION_POLICY"}),
 		},
@@ -136,9 +138,9 @@ func resourcePolicyIsolationRuleV2() *schema.Resource {
 	}
 }
 
-func resourcePolicyIsolationRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyIsolationRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetControllerV2
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -146,9 +148,9 @@ func resourcePolicyIsolationRuleV2Create(d *schema.ResourceData, meta interface{
 	}
 
 	// Automatically determining policy_set_id for "ISOLATION_POLICY"
-	policySetID, err := fetchPolicySetIDByType(zClient, "ISOLATION_POLICY", GetString(d.Get("microtenant_id")))
+	policySetID, err := fetchPolicySetIDByType(ctx, zClient, "ISOLATION_POLICY", GetString(d.Get("microtenant_id")))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Setting the policy_set_id for further use
@@ -156,47 +158,47 @@ func resourcePolicyIsolationRuleV2Create(d *schema.ResourceData, meta interface{
 
 	req, err := expandPolicyIsolationRule(d, policySetID) // ensure this function now accepts policySetID as a parameter
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Creating zpa policy isolation rule with request\n%+v\n", req)
 
 	if err := ValidatePolicyRuleConditions(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	resp, _, err := policysetcontrollerv2.CreateRule(service, req)
+	resp, _, err := policysetcontrollerv2.CreateRule(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyIsolationRuleV2Read(d, meta)
+	return resourcePolicyIsolationRuleV2Read(ctx, d, meta)
 }
 
-func resourcePolicyIsolationRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyIsolationRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetControllerV2
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	policySetID, err := fetchPolicySetIDByType(zClient, "ISOLATION_POLICY", microTenantID)
+	policySetID, err := fetchPolicySetIDByType(ctx, zClient, "ISOLATION_POLICY", microTenantID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting Policy Set Rule: policySetID:%s id: %s\n", policySetID, d.Id())
-	resp, respErr, err := policysetcontrollerv2.GetPolicyRule(service, policySetID, d.Id())
+	resp, respErr, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, d.Id())
 	if err != nil {
 		if respErr != nil && (respErr.StatusCode == 404 || respErr.StatusCode == http.StatusNotFound) {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	v2PolicyRule := ConvertV1ResponseToV2Request(*resp)
@@ -212,9 +214,9 @@ func resourcePolicyIsolationRuleV2Read(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourcePolicyIsolationRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyIsolationRuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetControllerV2
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -222,9 +224,9 @@ func resourcePolicyIsolationRuleV2Update(d *schema.ResourceData, meta interface{
 	}
 
 	// Automatically determining policy_set_id for "ISOLATION_POLICY"
-	policySetID, err := fetchPolicySetIDByType(zClient, "ISOLATION_POLICY", GetString(d.Get("microtenant_id")))
+	policySetID, err := fetchPolicySetIDByType(ctx, zClient, "ISOLATION_POLICY", GetString(d.Get("microtenant_id")))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Setting the policy_set_id for further use
@@ -234,49 +236,49 @@ func resourcePolicyIsolationRuleV2Update(d *schema.ResourceData, meta interface{
 	log.Printf("[INFO] Updating policy isolation rule ID: %v\n", ruleID)
 	req, err := expandPolicyIsolationRule(d, policySetID) // Adjusted to use the fetched policySetID
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := ValidatePolicyRuleConditions(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Checking the current state of the rule to handle cases where it might have been deleted outside Terraform
-	_, respErr, err := policysetcontrollerv2.GetPolicyRule(service, policySetID, ruleID)
+	_, respErr, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, ruleID)
 	if err != nil {
 		if respErr != nil && (respErr.StatusCode == http.StatusNotFound) {
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
-	if _, err := policysetcontrollerv2.UpdateRule(service, policySetID, ruleID, req); err != nil {
-		return err
+	if _, err := policysetcontrollerv2.UpdateRule(ctx, service, policySetID, ruleID, req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourcePolicyIsolationRuleV2Read(d, meta)
+	return resourcePolicyIsolationRuleV2Read(ctx, d, meta)
 }
 
-func resourcePolicyIsolationRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyIsolationRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
+	service := zClient.Service
+
 	microTenantID := GetString(d.Get("microtenant_id"))
-
-	// Assume "ISOLATION_POLICY" is the policy type for this resource. Adjust as needed.
-	policySetID, err := fetchPolicySetIDByType(zClient, "ISOLATION_POLICY", microTenantID)
-	if err != nil {
-		return err
-	}
-
-	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
-
-	service := zClient.PolicySetControllerV2
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	if _, err := policysetcontrollerv2.Delete(service, policySetID, d.Id()); err != nil {
-		return err
+	// Assume "ISOLATION_POLICY" is the policy type for this resource. Adjust as needed.
+	policySetID, err := fetchPolicySetIDByType(ctx, zClient, "ISOLATION_POLICY", microTenantID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[INFO] Deleting policy set rule with id %v\n", d.Id())
+
+	if _, err := policysetcontrollerv2.Delete(ctx, service, policySetID, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

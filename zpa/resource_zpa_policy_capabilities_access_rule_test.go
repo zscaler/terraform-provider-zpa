@@ -1,15 +1,16 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
 )
 
 func TestAccResourcePolicyCapabilitiesAccessRule_Basic(t *testing.T) {
@@ -58,7 +59,7 @@ func TestAccResourcePolicyCapabilitiesAccessRule_Basic(t *testing.T) {
 
 func testAccCheckPolicyCapabilitiesAccessRuleDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := policysetcontrollerv2.GetByPolicyType(apiClient.PolicySetControllerV2, "CAPABILITIES_POLICY")
+	accessPolicy, _, err := policysetcontrollerv2.GetByPolicyType(context.Background(), apiClient.Service, "CAPABILITIES_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource CAPABILITIES_POLICY. Received error: %s", err)
 	}
@@ -67,7 +68,13 @@ func testAccCheckPolicyCapabilitiesAccessRuleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := policysetcontrollerv2.GetPolicyRule(apiClient.PolicySetControllerV2, accessPolicy.ID, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		rule, _, err := policysetcontrollerv2.GetPolicyRule(context.Background(), service, accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -92,11 +99,17 @@ func testAccCheckPolicyCapabilitiesAccessRuleExists(resource string) resource.Te
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := policysetcontrollerv2.GetByPolicyType(apiClient.PolicySetControllerV2, "CAPABILITIES_POLICY")
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		resp, _, err := policysetcontrollerv2.GetByPolicyType(context.Background(), apiClient.Service, "CAPABILITIES_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource CAPABILITIES_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = policysetcontrollerv2.GetPolicyRule(apiClient.PolicySetControllerV2, resp.ID, rs.Primary.ID)
+		_, _, err = policysetcontrollerv2.GetPolicyRule(context.Background(), service, resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
@@ -128,17 +141,17 @@ func getPolicyCapabilitiesAccessRuleHCL(rName, generatedName, desc string) strin
 	return fmt.Sprintf(`
 
 data "zpa_idp_controller" "this" {
-	name = "BD_Okta_Users"
+	name = "SGIO-User-Okta"
 }
 
 data "zpa_scim_groups" "a000" {
     name = "A000"
-    idp_name = "BD_Okta_Users"
+    idp_name = "SGIO-User-Okta"
 }
 
 data "zpa_scim_groups" "b000" {
     name = "B000"
-    idp_name = "BD_Okta_Users"
+    idp_name = "SGIO-User-Okta"
 }
 
 resource "%s" "%s" {

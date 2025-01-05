@@ -1,13 +1,15 @@
 package zpa
 
 import (
+	"context"
 	"log"
 	"strconv"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 )
 
 func getPolicyRuleResourceSchema() map[string]*schema.Schema {
@@ -95,14 +97,14 @@ func getPolicyRuleResourceSchema() map[string]*schema.Schema {
 
 func resourceLSSConfigController() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLSSConfigControllerCreate,
-		Read:   resourceLSSConfigControllerRead,
-		Update: resourceLSSConfigControllerUpdate,
-		Delete: resourceLSSConfigControllerDelete,
+		CreateContext: resourceLSSConfigControllerCreate,
+		ReadContext:   resourceLSSConfigControllerRead,
+		UpdateContext: resourceLSSConfigControllerUpdate,
+		DeleteContext: resourceLSSConfigControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				zClient := meta.(*Client)
-				service := zClient.LSSConfigController
+				service := zClient.Service
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -110,7 +112,7 @@ func resourceLSSConfigController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := lssconfigcontroller.GetByName(service, id)
+					resp, _, err := lssconfigcontroller.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -235,9 +237,9 @@ func resourceLSSConfigController() *schema.Resource {
 	}
 }
 
-func resourceLSSConfigControllerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceLSSConfigControllerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.LSSConfigController
+	service := zClient.Service
 
 	req := expandLSSResource(d)
 	log.Printf("[INFO] Creating zpa lss config controller with request\n%+v\n", req)
@@ -285,7 +287,7 @@ func resourceLSSConfigControllerCreate(d *schema.ResourceData, meta interface{})
 		for _, operand := range operands {
 			err := validateLSSConfigControllerFilters(sourceLogType, operand.ObjectType, "", operand.Values, operands)
 			if err != nil {
-				return err // handle the error as appropriate
+				return diag.FromErr(err) // handle the error as appropriate
 			}
 		}
 	}
@@ -297,35 +299,35 @@ func resourceLSSConfigControllerCreate(d *schema.ResourceData, meta interface{})
 			// For filter validation, passing empty string as the objectType and nil for values and operands
 			err := validateLSSConfigControllerFilters(sourceLogType, "", filterStr, nil, nil)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
 
-	resp, _, err := lssconfigcontroller.Create(service, &req)
+	resp, _, err := lssconfigcontroller.Create(ctx, service, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Created lss config controller request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceLSSConfigControllerRead(d, meta)
+	return resourceLSSConfigControllerRead(ctx, d, meta)
 }
 
-func resourceLSSConfigControllerRead(d *schema.ResourceData, meta interface{}) error {
+func resourceLSSConfigControllerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.LSSConfigController
+	service := zClient.Service
 
-	resp, _, err := lssconfigcontroller.Get(service, d.Id())
+	resp, _, err := lssconfigcontroller.Get(ctx, service, d.Id())
 	if err != nil {
-		if err.(*client.ErrorResponse).IsObjectNotFound() {
+		if err.(*errorx.ErrorResponse).IsObjectNotFound() {
 			log.Printf("[WARN] Removing lss config controller %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting lss config controller:\n%+v\n", resp)
@@ -338,9 +340,9 @@ func resourceLSSConfigControllerRead(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-func resourceLSSConfigControllerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceLSSConfigControllerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.LSSConfigController
+	service := zClient.Service
 
 	id := d.Id()
 	req := expandLSSResource(d)
@@ -389,7 +391,7 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, meta interface{})
 		for _, operand := range operands {
 			err := validateLSSConfigControllerFilters(sourceLogType, operand.ObjectType, "", operand.Values, operands)
 			if err != nil {
-				return err // handle the error as appropriate
+				return diag.FromErr(err) // handle the error as appropriate
 			}
 		}
 	}
@@ -401,34 +403,34 @@ func resourceLSSConfigControllerUpdate(d *schema.ResourceData, meta interface{})
 			// Pass empty string as objectType and nil for values and operands when validating filters
 			err := validateLSSConfigControllerFilters(sourceLogType, "", filterStr, nil, nil)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
 
-	if _, _, err := lssconfigcontroller.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := lssconfigcontroller.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
-	if _, err := lssconfigcontroller.Update(service, id, &req); err != nil {
-		return err
+	if _, err := lssconfigcontroller.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceLSSConfigControllerRead(d, meta)
+	return resourceLSSConfigControllerRead(ctx, d, meta)
 }
 
-func resourceLSSConfigControllerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceLSSConfigControllerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.LSSConfigController
+	service := zClient.Service
 
 	log.Printf("[INFO] Deleting lss config controller ID: %v\n", d.Id())
 
-	if _, err := lssconfigcontroller.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := lssconfigcontroller.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] lss config controller deleted")

@@ -1,19 +1,19 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"html"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
 )
 
 func dataSourceLSSConfigController() *schema.Resource {
 	return &schema.Resource{
-		Read:     dataSourceLSSConfigControllerRead,
-		Importer: &schema.ResourceImporter{},
-
+		ReadContext: dataSourceLSSConfigControllerRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -270,42 +270,42 @@ func dataSourceLSSConfigController() *schema.Resource {
 	}
 }
 
-func dataSourceLSSConfigControllerRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceLSSConfigControllerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.LSSConfigController
+	service := zClient.Service
 
 	var resp *lssconfigcontroller.LSSResource
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for lss config controller %s\n", id)
-		res, _, err := lssconfigcontroller.Get(service, id)
+		res, _, err := lssconfigcontroller.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for lss config controller %s\n", name)
-		res, _, err := lssconfigcontroller.GetByName(service, name)
+		res, _, err := lssconfigcontroller.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
 		if err := d.Set("config", flattenLSSConfig(resp.LSSConfig)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		_ = d.Set("connector_groups", flattenConnectorGroups(resp.ConnectorGroups))
 
 		if err := d.Set("policy_rule", flattenLSSPolicyRule(resp.PolicyRule)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
-		return fmt.Errorf("couldn't find any lss config controller with name '%s' or id", id)
+		return diag.FromErr(fmt.Errorf("couldn't find any lss config controller with name '%s' or id", id))
 	}
 
 	return nil

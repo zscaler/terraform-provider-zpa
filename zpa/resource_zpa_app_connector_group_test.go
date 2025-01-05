@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -8,10 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
 )
 
 func TestAccResourceAppConnectorGroup_Basic(t *testing.T) {
@@ -73,18 +74,18 @@ func testAccCheckAppConnectorGroupDestroy(s *terraform.State) error {
 		}
 
 		microTenantID := rs.Primary.Attributes["microtenant_id"]
-		service := apiClient.AppConnectorGroup
+		service := apiClient.Service
 		if microTenantID != "" {
 			service = service.WithMicroTenant(microTenantID)
 		}
 
-		rule, _, err := appconnectorgroup.Get(service, rs.Primary.ID)
-
+		// Add context.Background() as the first argument
+		group, _, err := appconnectorgroup.Get(context.Background(), service, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
 
-		if rule != nil {
+		if group != nil {
 			return fmt.Errorf("app connector group with id %s exists and wasn't destroyed", rs.Primary.ID)
 		}
 	}
@@ -104,16 +105,17 @@ func testAccCheckAppConnectorGroupExists(resource string, rule *appconnectorgrou
 
 		apiClient := testAccProvider.Meta().(*Client)
 		microTenantID := rs.Primary.Attributes["microtenant_id"]
-		service := apiClient.AppConnectorGroup
+		service := apiClient.Service
 		if microTenantID != "" {
 			service = service.WithMicroTenant(microTenantID)
 		}
 
-		receivedRule, _, err := appconnectorgroup.Get(service, rs.Primary.ID)
+		// Add context.Background() as the first argument
+		receivedGroup, _, err := appconnectorgroup.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}
-		*rule = *receivedRule
+		*rule = *receivedGroup
 
 		return nil
 	}

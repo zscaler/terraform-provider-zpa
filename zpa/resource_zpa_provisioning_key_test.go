@@ -1,16 +1,17 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/provisioningkey"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/provisioningkey"
 )
 
 func TestAccResourceProvisioningKeyConnector_Basic(t *testing.T) {
@@ -72,13 +73,20 @@ func testAccCheckProvisioningKeyDestroyAppConnector(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := provisioningkey.GetByName(apiClient.ProvisioningKey, rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		// Pass service as the second argument to GetByName
+		provKey, _, err := provisioningkey.GetByName(context.Background(), service, rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
 
-		if rule != nil {
+		if provKey != nil {
 			return fmt.Errorf("provisioning key with id %s exists and wasn't destroyed", rs.Primary.ID)
 		}
 	}
@@ -97,7 +105,14 @@ func testAccCheckProvisioningKeyAppConnectorExists(resource string, provisioning
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedKey, _, err := provisioningkey.GetByName(apiClient.ProvisioningKey, rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		// Pass service as the second argument to GetByName
+		receivedKey, _, err := provisioningkey.GetByName(context.Background(), service, rs.Primary.Attributes["association_type"], rs.Primary.Attributes["name"])
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}

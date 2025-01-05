@@ -4,14 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"runtime"
 	"strings"
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common"
 )
 
 // Resource names, defined in place, used throughout the provider and tests
@@ -22,6 +20,55 @@ const (
 func ZPAProvider() *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"client_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "zpa client id",
+			},
+			"client_secret": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				Description:   "zpa client secret",
+				ConflictsWith: []string{"private_key"},
+			},
+			"private_key": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				Description:   "zpa private key",
+				ConflictsWith: []string{"client_secret"},
+			},
+			"vanity_domain": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "Zscaler Vanity Domain",
+			},
+			"customer_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "zpa customer id",
+			},
+			"microtenant_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: "zpa microtenant ID",
+			},
+			"cloud": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Cloud to use PRODUCTION, BETA",
+				ValidateFunc: func(val any, key string) (warns []string, errs []error) {
+					v := val.(string)
+					if strings.HasPrefix(v, "https://") {
+						return
+					}
+					return validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV"}, true)(val, key)
+				},
+			},
 			"zpa_client_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -54,6 +101,48 @@ func ZPAProvider() *schema.Provider {
 					}
 					return validation.StringInSlice([]string{"PRODUCTION", "ZPATWO", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}, true)(val, key)
 				},
+			},
+			"http_proxy": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Alternate HTTP proxy of scheme://hostname or scheme://hostname:port format",
+			},
+			"backoff": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use exponential back off strategy for rate limits.",
+			},
+			"min_wait_seconds": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "minimum seconds to wait when rate limit is hit. We use exponential backoffs when backoff is enabled.",
+			},
+			"max_wait_seconds": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "maximum seconds to wait when rate limit is hit. We use exponential backoffs when backoff is enabled.",
+			},
+			"max_retries": {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateDiagFunc: intAtMost(100),
+				Description:      "maximum number of retries to attempt before erroring out.",
+			},
+			"parallelism": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Number of concurrent requests to make within a resource where bulk operations are not possible. Take note of https://help.zscaler.com/zpa/understanding-rate-limiting.",
+			},
+			"request_timeout": {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ValidateDiagFunc: intBetween(0, 300),
+				Description:      "Timeout for single request (in seconds) which is made to Zscaler, the default is `0` (means no limit is set). The maximum value can be `300`.",
+			},
+			"use_legacy_client": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -156,6 +245,7 @@ func ZPAProvider() *schema.Provider {
 			"zpa_pra_console_controller":                   dataSourcePRAConsoleController(),
 		},
 	}
+
 	p.ConfigureContextFunc = func(_ context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		terraformVersion := p.TerraformVersion
 		if terraformVersion == "" {
@@ -163,7 +253,7 @@ func ZPAProvider() *schema.Provider {
 			// We can therefore assume that if it's missing it's 0.10 or 0.11
 			terraformVersion = "0.11+compatible"
 		}
-		r, err := zscalerConfigure(d, terraformVersion)
+		r, err := providerConfigure(d, terraformVersion)
 		if err != nil {
 			return nil, diag.Diagnostics{
 				diag.Diagnostic{
@@ -180,38 +270,30 @@ func ZPAProvider() *schema.Provider {
 	return p
 }
 
-func deprecateIncorrectNaming(d *schema.Resource, newResource string) *schema.Resource {
-	d.DeprecationMessage = fmt.Sprintf("Resource is deprecated due to a correction in naming conventions, please use '%s' instead.", newResource)
-	return d
-}
+func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, diag.Diagnostics) {
+	log.Printf("[INFO] Initializing Zscaler client")
 
-func zscalerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
-	log.Printf("[INFO] Initializing ZPA client")
-	clientID := d.Get("zpa_client_id").(string)
-	clientSecret := d.Get("zpa_client_secret").(string)
-	customerID := d.Get("zpa_customer_id").(string)
+	// Create a new configuration
+	config := NewConfig(d)
+	config.TerraformVersion = terraformVersion
 
-	// Retrieve zpa_cloud; if not set, default to the production environment.
-	baseURL := d.Get("zpa_cloud").(string)
-	if baseURL == "" {
-		baseURL = "PRODUCTION" // Replace "PRODUCTION" with the actual URL or identifier of the production environment.
+	// Load the correct SDK client (prioritizing V3)
+	if diags := config.loadClients(); diags.HasError() {
+		return nil, diags
 	}
 
-	config := Config{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		CustomerID:   customerID,
-		BaseURL:      baseURL,
-		UserAgent:    fmt.Sprintf("(%s %s) Terraform/%s Provider/%s Customer/%s", runtime.GOOS, runtime.GOARCH, terraformVersion, common.Version(), customerID),
-	}
-
+	// Ensure the Client instance is returned
 	client, err := config.Client()
 	if err != nil {
-		log.Printf("[ERROR] Error initializing ZPA client: %s", err)
-		return nil, err
+		return nil, diag.FromErr(fmt.Errorf("failed to initialize client: %w", err))
 	}
 
 	return client, nil
+}
+
+func deprecateIncorrectNaming(d *schema.Resource, newResource string) *schema.Resource {
+	d.DeprecationMessage = fmt.Sprintf("Resource is deprecated due to a correction in naming conventions, please use '%s' instead.", newResource)
+	return d
 }
 
 func resourceFuncNoOp(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics {

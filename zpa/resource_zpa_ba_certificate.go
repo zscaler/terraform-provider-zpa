@@ -1,20 +1,24 @@
 package zpa
 
 import (
+	"context"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/bacertificate"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/bacertificate"
 )
 
 func resourceBaCertificate() *schema.Resource {
 	return &schema.Resource{
-		Create:        resourceBaCertificateCreate,
-		Read:          resourceBaCertificateRead,
+		CreateContext: resourceBaCertificateCreate,
+		ReadContext:   resourceBaCertificateRead,
 		UpdateContext: resourceFuncNoOp,
-		Delete:        resourceBaCertificateDelete,
-		Importer:      nil,
+		DeleteContext: resourceBaCertificateDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -53,9 +57,9 @@ func resourceBaCertificate() *schema.Resource {
 	}
 }
 
-func resourceBaCertificateCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceBaCertificateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.BACertificate
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -65,9 +69,9 @@ func resourceBaCertificateCreate(d *schema.ResourceData, meta interface{}) error
 	req := expandBaCertificate(d)
 	log.Printf("[INFO] Creating certificate with request\n%+v\n", req)
 
-	baCertificate, _, err := bacertificate.Create(service, req)
+	baCertificate, _, err := bacertificate.Create(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created certificate request. ID: %v\n", baCertificate)
 
@@ -75,24 +79,24 @@ func resourceBaCertificateCreate(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceBaCertificateRead(d *schema.ResourceData, meta interface{}) error {
+func resourceBaCertificateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.BACertificate
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := bacertificate.Get(service, d.Id())
+	resp, _, err := bacertificate.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing ba certificate %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting ba certificate:\n%+v\n", resp)
@@ -104,9 +108,9 @@ func resourceBaCertificateRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceBaCertificateDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceBaCertificateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.BACertificate
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -115,8 +119,8 @@ func resourceBaCertificateDelete(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[INFO] Deleting certificate ID: %v\n", d.Id())
 
-	if _, err := bacertificate.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := bacertificate.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] certificate deleted")

@@ -1,34 +1,36 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 	"sync"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
 )
 
 var detachLock sync.Mutex
 
 func resourceServerGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServerGroupCreate,
-		Read:   resourceServerGroupRead,
-		Update: resourceServerGroupUpdate,
-		Delete: resourceServerGroupDelete,
+		CreateContext: resourceServerGroupCreate,
+		ReadContext:   resourceServerGroupRead,
+		UpdateContext: resourceServerGroupUpdate,
+		DeleteContext: resourceServerGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.ServerGroup
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
+				service := zClient.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -41,7 +43,7 @@ func resourceServerGroup() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := servergroup.GetByName(service, id)
+					resp, _, err := servergroup.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -151,9 +153,9 @@ func resourceServerGroup() *schema.Resource {
 	}
 }
 
-func resourceServerGroupCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceServerGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServerGroup
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -164,40 +166,40 @@ func resourceServerGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Creating zpa server group with request\n%+v\n", req)
 	if len(req.Servers) > 0 && req.DynamicDiscovery {
 		log.Printf("[ERROR] An application server can only be attached to a server when DynamicDiscovery is disabled\n")
-		return fmt.Errorf("an application server can only be attached to a server when DynamicDiscovery is disabled")
+		return diag.FromErr(fmt.Errorf("an application server can only be attached to a server when DynamicDiscovery is disabled"))
 	}
 	if !req.DynamicDiscovery && len(req.Servers) == 0 {
 		log.Printf("[ERROR] Servers must not be empty when DynamicDiscovery is disabled\n")
-		return fmt.Errorf("servers must not be empty when DynamicDiscovery is disabled")
+		return diag.FromErr(fmt.Errorf("servers must not be empty when DynamicDiscovery is disabled"))
 	}
-	resp, _, err := servergroup.Create(service, &req)
+	resp, _, err := servergroup.Create(ctx, service, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created server group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceServerGroupRead(d, meta)
+	return resourceServerGroupRead(ctx, d, meta)
 }
 
-func resourceServerGroupRead(d *schema.ResourceData, meta interface{}) error {
+func resourceServerGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServerGroup
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := servergroup.Get(service, d.Id())
+	resp, _, err := servergroup.Get(ctx, service, d.Id())
 	if err != nil {
-		if err.(*client.ErrorResponse).IsObjectNotFound() {
+		if err.(*errorx.ErrorResponse).IsObjectNotFound() {
 			log.Printf("[WARN] Removing server group %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting server group:\n%+v\n", resp)
@@ -217,9 +219,9 @@ func resourceServerGroupRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceServerGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServerGroup
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -233,73 +235,69 @@ func resourceServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChanges("servers", "dynamic_discovery") {
 		if req.DynamicDiscovery && len(req.Servers) > 0 {
 			log.Printf("[ERROR] Can't update the server group: an application server can only be attached to a server when DynamicDiscovery is disabled\n")
-			return fmt.Errorf("can't perform the changes: an application server can only be attached to a server when DynamicDiscovery is disabled")
+			return diag.FromErr(fmt.Errorf("can't perform the changes: an application server can only be attached to a server when DynamicDiscovery is disabled"))
 		}
 		if !req.DynamicDiscovery && len(req.Servers) == 0 {
 			log.Printf("[ERROR] Can't update server group: servers must not be empty when DynamicDiscovery is disabled\n")
-			return fmt.Errorf("can't update server group: servers must not be empty when DynamicDiscovery is disabled")
+			return diag.FromErr(fmt.Errorf("can't update server group: servers must not be empty when DynamicDiscovery is disabled"))
 		}
 	}
 
-	if _, _, err := servergroup.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := servergroup.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := servergroup.Update(service, id, &req); err != nil {
-		return err
+	if _, err := servergroup.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
-	return resourceServerGroupRead(d, meta)
+	return resourceServerGroupRead(ctx, d, meta)
 }
 
-func resourceServerGroupDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceServerGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
+	service := zClient.Service
+
 	microTenantID := GetString(d.Get("microtenant_id"))
-
-	applicationSegmentService := zClient.ApplicationSegment
-	policySetControllerService := zClient.PolicySetController
-	appConnectorGroupService := zClient.AppConnectorGroup
-	service := zClient.ServerGroup
-
 	if microTenantID != "" {
-		applicationSegmentService = applicationSegmentService.WithMicroTenant(microTenantID)
-		policySetControllerService = policySetControllerService.WithMicroTenant(microTenantID)
-		appConnectorGroupService = appConnectorGroupService.WithMicroTenant(microTenantID)
 		service = service.WithMicroTenant(microTenantID)
 	}
 
 	log.Printf("[INFO] Deleting server group ID: %v\n", d.Id())
 
-	err := detachServerGroupFromAppConnectorGroups(d.Id(), service, appConnectorGroupService)
-	if err != nil {
+	if err := detachServerGroupFromAppConnectorGroups(ctx, d.Id(), service, service); err != nil {
 		log.Printf("[ERROR] Detaching server group ID: %v from app connector groups failed: %v\n", d.Id(), err)
 	}
 
-	detachServerGroupFromAllAccessPolicyRules(d.Id(), policySetControllerService)
-	detachServerGroupFromAllAppSegments(d.Id(), applicationSegmentService)
+	detachServerGroupFromAllAccessPolicyRules(ctx, d.Id(), service)
+	detachServerGroupFromAllAppSegments(ctx, d.Id(), service)
 
-	if _, err := servergroup.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := servergroup.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] Server group deleted")
 	return nil
 }
 
-func detachServerGroupFromAllAccessPolicyRules(id string, policySetControllerService *services.Service) {
+func detachServerGroupFromAllAccessPolicyRules(ctx context.Context, id string, service *zscaler.Service) {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
 
-	accessPolicySet, _, err := policysetcontroller.GetByPolicyType(policySetControllerService, "ACCESS_POLICY")
+	accessPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, "ACCESS_POLICY")
 	if err != nil {
+		log.Printf("[WARN] Failed to fetch access policy set: %v", err)
 		return
 	}
-	accessPolicyRules, _, err := policysetcontroller.GetAllByType(policySetControllerService, "ACCESS_POLICY")
+
+	accessPolicyRules, _, err := policysetcontroller.GetAllByType(ctx, service, "ACCESS_POLICY")
 	if err != nil {
+		log.Printf("[WARN] Failed to fetch access policy rules: %v", err)
 		return
 	}
+
 	for _, accessPolicyRule := range accessPolicyRules {
 		ids := []servergroup.ServerGroup{}
 		changed := false
@@ -308,55 +306,54 @@ func detachServerGroupFromAllAccessPolicyRules(id string, policySetControllerSer
 				changed = true
 				continue
 			}
-			ids = append(ids, servergroup.ServerGroup{
-				ID: app.ID,
-			})
+			ids = append(ids, servergroup.ServerGroup{ID: app.ID})
 		}
 		accessPolicyRule.AppServerGroups = ids
 		if changed {
-			if _, err := policysetcontroller.UpdateRule(policySetControllerService, accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
-				continue
+			if _, err := policysetcontroller.UpdateRule(ctx, service, accessPolicySet.ID, accessPolicyRule.ID, &accessPolicyRule); err != nil {
+				log.Printf("[WARN] Failed to update access policy rule %s: %v", accessPolicyRule.ID, err)
 			}
 		}
 	}
 }
 
-func detachServerGroupFromAllAppSegments(id string, applicationSegmentService *services.Service) {
-	apps, _, err := applicationsegment.GetAll(applicationSegmentService)
+func detachServerGroupFromAllAppSegments(ctx context.Context, id string, service *zscaler.Service) {
+	apps, _, err := applicationsegment.GetAll(ctx, service)
 	if err != nil {
+		log.Printf("[WARN] Failed to fetch application segments: %v", err)
 		return
 	}
+
 	for _, app := range apps {
 		ids := []servergroup.ServerGroup{}
 		for _, appServerGroup := range app.ServerGroups {
 			if appServerGroup.ID == id {
 				continue
 			}
-			ids = append(ids, servergroup.ServerGroup{
-				ID: appServerGroup.ID,
-			})
+			ids = append(ids, servergroup.ServerGroup{ID: appServerGroup.ID})
 		}
 		app.ServerGroups = ids
-		if _, err := applicationsegment.Update(applicationSegmentService, app.ID, app); err != nil {
-			continue
+		if _, err := applicationsegment.Update(ctx, service, app.ID, app); err != nil {
+			log.Printf("[WARN] Failed to update application segment %s: %v", app.ID, err)
 		}
 	}
 }
 
-func detachServerGroupFromAppConnectorGroups(serverGroupID string, serverGroupService *services.Service, appConnectorGroupService *services.Service) error {
+func detachServerGroupFromAppConnectorGroups(ctx context.Context, serverGroupID string, service *zscaler.Service, appConnectorGroupService *zscaler.Service) error {
 	log.Printf("[INFO] Detaching Server Group %s from App Connector Groups\n", serverGroupID)
-	serverGroup, _, err := servergroup.Get(serverGroupService, serverGroupID)
+
+	serverGroup, _, err := servergroup.Get(ctx, service, serverGroupID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to fetch server group %s: %w", serverGroupID, err)
 	}
 
-	// lock to avoid updating app connector group with a deleted server group ID when running in parallel
 	detachLock.Lock()
 	defer detachLock.Unlock()
 
 	for _, appConnectorGroup := range serverGroup.AppConnectorGroups {
-		app, _, err := appconnectorgroup.Get(appConnectorGroupService, appConnectorGroup.ID)
+		app, _, err := appconnectorgroup.Get(ctx, appConnectorGroupService, appConnectorGroup.ID)
 		if err != nil {
+			log.Printf("[WARN] Failed to fetch app connector group %s: %v", appConnectorGroup.ID, err)
 			continue
 		}
 		appServerGroups := []appconnectorgroup.AppServerGroup{}
@@ -367,9 +364,8 @@ func detachServerGroupFromAppConnectorGroups(serverGroupID string, serverGroupSe
 			appServerGroups = append(appServerGroups, s)
 		}
 		app.AppServerGroup = appServerGroups
-		_, err = appconnectorgroup.Update(appConnectorGroupService, app.ID, app)
-		if err != nil {
-			continue
+		if _, err := appconnectorgroup.Update(ctx, appConnectorGroupService, app.ID, app); err != nil {
+			log.Printf("[WARN] Failed to update app connector group %s: %v", app.ID, err)
 		}
 	}
 	return nil
@@ -393,30 +389,6 @@ func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 	}
 	return result
 }
-
-/*
-func expandAppConnectorGroups(d *schema.ResourceData) []servergroup.AppConnectorGroups {
-	appConnectorGroupsInterface, ok := d.GetOk("app_connector_groups")
-	if ok {
-		appConnector := appConnectorGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app connector groups data: %+v\n", appConnector)
-		var appConnectorGroups []servergroup.AppConnectorGroups
-		for _, appConnectorGroup := range appConnector.List() {
-			appConnectorGroup, ok := appConnectorGroup.(map[string]interface{})
-			if ok {
-				for _, id := range appConnectorGroup["id"].(*schema.Set).List() {
-					appConnectorGroups = append(appConnectorGroups, servergroup.AppConnectorGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return appConnectorGroups
-	}
-
-	return []servergroup.AppConnectorGroups{}
-}
-*/
 
 func expandServerGroupApplications(d *schema.ResourceData) []servergroup.Applications {
 	serverGroupAppsInterface, ok := d.GetOk("applications")
@@ -473,17 +445,3 @@ func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []int
 	result[0] = mapIds
 	return result
 }
-
-/*
-func flattenAppConnectorGroupsSimple(appConnectorGroups []servergroup.AppConnectorGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appConnectorGroups))
-	for i, group := range appConnectorGroups {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-*/

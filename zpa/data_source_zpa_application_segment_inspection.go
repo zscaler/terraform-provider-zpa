@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentinspection"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
 )
 
 func dataSourceApplicationSegmentInspection() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceApplicationSegmentInspectionRead,
+		ReadContext: dataSourceApplicationSegmentInspectionRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -182,26 +184,31 @@ func dataSourceApplicationSegmentInspection() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceApplicationSegmentInspectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentInspection
+	service := zClient.Service
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	var resp *applicationsegmentinspection.AppSegmentInspection
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for inspection application segment %s\n", id)
-		res, _, err := applicationsegmentinspection.Get(service, id)
+		res, _, err := applicationsegmentinspection.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for inspection application segment name %s\n", name)
-		res, _, err := applicationsegmentinspection.GetByName(service, name)
+		res, _, err := applicationsegmentinspection.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -227,29 +234,29 @@ func dataSourceApplicationSegmentInspectionRead(d *schema.ResourceData, meta int
 		_ = d.Set("health_reporting", resp.HealthReporting)
 
 		if err := d.Set("inspection_apps", flattenInspectionApps(resp.InspectionAppDto)); err != nil {
-			return fmt.Errorf("failed to read inspection apps in application segment %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read inspection apps in application segment %s", err))
 		}
 
 		if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups)); err != nil {
-			return fmt.Errorf("failed to read server groups for inspection app %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read server groups for inspection app %s", err))
 		}
 
 		if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
-		return fmt.Errorf("couldn't find any inspection application segment with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any inspection application segment with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

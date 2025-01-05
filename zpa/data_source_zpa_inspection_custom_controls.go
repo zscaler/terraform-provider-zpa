@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/inspectioncontrol/inspection_custom_controls"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
 )
 
 func dataSourceInspectionCustomControls() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceInspectionCustomControlsRead,
+		ReadContext: dataSourceInspectionCustomControlsRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -130,26 +132,26 @@ func dataSourceInspectionCustomControls() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceInspectionCustomControlsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.InspectionCustomControls
+	service := zClient.Service
 
 	var resp *inspection_custom_controls.InspectionCustomControl
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for custom inspection control %s\n", id)
-		res, _, err := inspection_custom_controls.Get(service, id)
+		res, _, err := inspection_custom_controls.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for custom inspection control name %s\n", name)
-		res, _, err := inspection_custom_controls.GetByName(service, name)
+		res, _, err := inspection_custom_controls.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
@@ -174,11 +176,11 @@ func dataSourceInspectionCustomControlsRead(d *schema.ResourceData, meta interfa
 		_ = d.Set("type", resp.Type)
 
 		if err := d.Set("rules", flattenInspectionCustomRules(resp.Rules)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 	} else {
-		return fmt.Errorf("couldn't find any custom inspection controls with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any custom inspection controls with name '%s' or id '%s'", name, id))
 	}
 
 	return nil
