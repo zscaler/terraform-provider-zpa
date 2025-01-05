@@ -12,9 +12,19 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.33.9``
+``Last updated: v3.331.0``
 
 ---
+
+## 3.331.0 (January, 5 2025)
+
+### Notes
+
+- Release date: **(January, 5 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #509](https://github.com/zscaler/terraform-provider-zpa/pull/509) - Upgraded Provider to SDK v2.74.2 to address Double encoding of special characters during GET operations.
 
 ## 3.33.9 (October, 31 2024)
 
