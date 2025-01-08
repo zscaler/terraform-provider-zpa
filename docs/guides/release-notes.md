@@ -28,7 +28,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - [PR #513](https://github.com/zscaler/terraform-provider-zpa/pull/513) -Fixed attribute `app_server_groups` on `zpa_policy_access_rule` resource to prevent innadivertent drifts during plan and apply. Issue [#512](https://github.com/zscaler/terraform-provider-zpa/pull/512)
 - [PR #513](https://github.com/zscaler/terraform-provider-zpa/pull/513) - Deprecated previous `3.331.0` version due to missconfigured semversioning hash calculation.
 
-**NOTE** v3.331.0 and v3.332.0 was a versioning mistake due to backend issues and does not represent hundreds of new features. This will be corrected in the next major version release."
+**NOTE**  v3.331.0 and v3.332.0 was a versioning mistake due to backend issues and does not represent hundreds of new features. This will be corrected in the next major version release 4.0.0 upcoming in the next few weeks. We apologize for the confusion and  incovenience caused."
 
 ## 3.331.0 (January, 5 2025) - DEPRECATED
 
