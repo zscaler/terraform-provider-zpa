@@ -1460,6 +1460,35 @@ func expandCommonServerGroups(d *schema.ResourceData) []servergroup.ServerGroup 
 	return []servergroup.ServerGroup{}
 }
 
+func expandCommonAppServerGroups(d *schema.ResourceData) []servergroup.ServerGroup {
+	serverGroupInterface, ok := d.GetOk("app_server_groups")
+	if ok {
+		serverGroupSet, ok := serverGroupInterface.(*schema.Set)
+		if !ok {
+			return []servergroup.ServerGroup{}
+		}
+		log.Printf("[INFO] server group data: %+v\n", serverGroupSet)
+		var serverGroups []servergroup.ServerGroup
+		for _, serverGroup := range serverGroupSet.List() {
+			serverGroupMap, ok := serverGroup.(map[string]interface{})
+			if ok && serverGroupMap != nil {
+				idSet, ok := serverGroupMap["id"].(*schema.Set)
+				if !ok {
+					continue
+				}
+				for _, id := range idSet.List() {
+					serverGroups = append(serverGroups, servergroup.ServerGroup{
+						ID: id.(string),
+					})
+				}
+			}
+		}
+		return serverGroups
+	}
+
+	return []servergroup.ServerGroup{}
+}
+
 func expandCommonAppConnectorGroups(d *schema.ResourceData) []appconnectorgroup.AppConnectorGroup {
 	appConnectorGroupInterface, ok := d.GetOk("app_connector_groups")
 	if ok {
