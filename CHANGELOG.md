@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.34.0 (January, 8 2025)
+
+### Notes
+
+- Release date: **(January, 8 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #513](https://github.com/zscaler/terraform-provider-zpa/pull/513) - Upgraded Provider to SDK v2.74.2 to address Double encoding of special characters during GET operations.
+- [PR #513](https://github.com/zscaler/terraform-provider-zpa/pull/513) -Fixed attribute `app_server_groups` on `zpa_policy_access_rule` resource to prevent innadivertent drifts during plan and apply. Issue [#512](https://github.com/zscaler/terraform-provider-zpa/pull/512)
+- [PR #513](https://github.com/zscaler/terraform-provider-zpa/pull/513) - Deprecated previous `3.331.0` version due to missconfigured semversioning hash calculation.
+
+
 ## 3.33.10 (January, 8 2025)
 
 ### Notes
