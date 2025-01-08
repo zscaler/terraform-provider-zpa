@@ -148,7 +148,6 @@ resource "zpa_application_segment_pra" "this" {
 	segment_group_id = zpa_segment_group.this.id
 	common_apps_dto {
 		apps_config {
-			name                 = "rdp_pra3392.example.com"
 			domain               = "rdp_pra3392.example.com"
 			application_protocol = "RDP"
 			connection_security  = "ANY"
@@ -157,7 +156,6 @@ resource "zpa_application_segment_pra" "this" {
 			app_types            = ["SECURE_REMOTE_ACCESS"]
 		}
 		apps_config {
-			name                 = "ssh_pra3223.example.com"
 			domain               = "ssh_pra3223.example.com"
 			application_protocol = "SSH"
 			application_port     = "3223"
