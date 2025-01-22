@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/idpcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/samlattribute"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/samlattribute"
 )
 
 func dataSourceSamlAttribute() *schema.Resource {

@@ -19,7 +19,7 @@ func TestAccResourcePolicyInspectionRule_Basic(t *testing.T) {
 	updatedRName := acctest.RandomWithPrefix("tf-updated") // New name for update test
 	randDesc := acctest.RandString(20)
 
-	//inspectionProfileTypeAndName, _, inspectionProfileGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionProfile)
+	// inspectionProfileTypeAndName, _, inspectionProfileGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAInspectionProfile)
 	// inspectionProfileHCL := testAccCheckInspectionProfileConfigure(inspectionProfileTypeAndName, "tf-acc-test-"+inspectionProfileGeneratedName, variable.InspectionProfileDescription, variable.InspectionProfileParanoia)
 
 	resource.Test(t, resource.TestCase{

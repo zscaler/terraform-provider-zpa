@@ -244,7 +244,6 @@ func resourcePolicyAccessDelete(ctx context.Context, d *schema.ResourceData, met
 }
 
 func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontroller.PolicyRule, error) {
-
 	conditions, err := ExpandPolicyConditions(d)
 	if err != nil {
 		return nil, err

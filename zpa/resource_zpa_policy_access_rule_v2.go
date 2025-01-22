@@ -190,7 +190,6 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 }
 
 func resourcePolicyAccessV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	if err := validateObjectTypeUniqueness(d); err != nil {
 		return diag.FromErr(err)
 	}
@@ -275,7 +274,6 @@ func resourcePolicyAccessV2Read(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourcePolicyAccessV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	if err := validateObjectTypeUniqueness(d); err != nil {
 		return diag.FromErr(err)
 	}

@@ -7,12 +7,12 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentpra"
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 )
 
 func resourceApplicationSegmentPRA() *schema.Resource {
@@ -576,7 +576,6 @@ func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.A
 }
 
 func customizeDiffApplicationSegmentPRA(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-
 	// Clear any diffs related to pra_apps to prevent it from being included in the plan or state
 	if d.HasChange("pra_apps") {
 		d.Clear("pra_apps")

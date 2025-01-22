@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
 	"github.com/fabiotavarespr/iso3166"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
 )
 
 // This function checks for ISO3166 Alpha2 Country codes
