@@ -265,7 +265,7 @@ func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policy
 		MicroTenantID:      d.Get("microtenant_id").(string),
 		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
-		AppServerGroups:    expandCommonServerGroups(d),
+		AppServerGroups:    expandCommonAppServerGroups(d),
 		AppConnectorGroups: expandCommonAppConnectorGroups(d),
 	}, nil
 }

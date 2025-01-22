@@ -247,8 +247,9 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 							Computed: true,
 						},
 						"listen_ips": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeSet,
 							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"name": {
 							Type:     schema.TypeString,
