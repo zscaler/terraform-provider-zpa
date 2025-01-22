@@ -70,24 +70,27 @@ func ZPAProvider() *schema.Provider {
 				},
 			},
 			"zpa_client_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ZPA_CLIENT_ID", nil),
-				Description: "zpa client id",
+				Type:          schema.TypeString,
+				Optional:      true,
+				DefaultFunc:   schema.EnvDefaultFunc("ZPA_CLIENT_ID", nil),
+				Description:   "zpa client id",
+				ConflictsWith: []string{"use_legacy_client"},
 			},
 			"zpa_client_secret": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Sensitive:   true,
-				DefaultFunc: schema.EnvDefaultFunc("ZPA_CLIENT_SECRET", nil),
-				Description: "zpa client secret",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				DefaultFunc:   schema.EnvDefaultFunc("ZPA_CLIENT_SECRET", nil),
+				Description:   "zpa client secret",
+				ConflictsWith: []string{"use_legacy_client"},
 			},
 			"zpa_customer_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Sensitive:   true,
-				DefaultFunc: schema.EnvDefaultFunc("ZPA_CUSTOMER_ID", nil),
-				Description: "zpa customer id",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				DefaultFunc:   schema.EnvDefaultFunc("ZPA_CUSTOMER_ID", nil),
+				Description:   "zpa customer id",
+				ConflictsWith: []string{"use_legacy_client"},
 			},
 			"zpa_cloud": {
 				Type:        schema.TypeString,
@@ -101,6 +104,11 @@ func ZPAProvider() *schema.Provider {
 					}
 					return validation.StringInSlice([]string{"PRODUCTION", "ZPATWO", "BETA", "GOV", "GOVUS", "PREVIEW", "DEV", "QA", "QA2"}, true)(val, key)
 				},
+			},
+			"use_legacy_client": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enables interaction with the ZPA legacy API framework",
 			},
 			"http_proxy": {
 				Type:        schema.TypeString,
@@ -138,11 +146,6 @@ func ZPAProvider() *schema.Provider {
 				Optional:         true,
 				ValidateDiagFunc: intBetween(0, 300),
 				Description:      "Timeout for single request (in seconds) which is made to Zscaler, the default is `0` (means no limit is set). The maximum value can be `300`.",
-			},
-			"use_legacy_client": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{

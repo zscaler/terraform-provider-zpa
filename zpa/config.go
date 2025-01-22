@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common"
+	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa"
 )
@@ -244,51 +244,64 @@ func generateUserAgent(terraformVersion, customerID string) string {
 	)
 }
 
-// Instantiate the v2 client from zscaler-sdk-go
 func zscalerSDKV2Client(c *Config) (*zscaler.Service, error) {
 	customUserAgent := generateUserAgent(c.TerraformVersion, c.customerID)
-	// Validate required credentials
-	if c.zpaClientID == "" || c.zpaClientSecret == "" || c.zpaCustomerID == "" || c.BaseURL == "" {
-		return nil, fmt.Errorf(
-			"missing required credentials for V2 client: zpa_client_id, zpa_client_secret, zpa_customer_id, and zpa_cloud must all be set",
-		)
+
+	// Start with base configuration setters
+	setters := []zpa.ConfigSetter{
+		zpa.WithCache(false),
+		zpa.WithHttpClientPtr(http.DefaultClient),
+		zpa.WithRateLimitMaxRetries(int32(c.retryCount)),
+		zpa.WithRequestTimeout(time.Duration(c.requestTimeout) * time.Second),
 	}
 
-	// Create ZPA v2 configuration
-	zpaCfg, err := zpa.NewConfig(c.zpaClientID, c.zpaClientSecret, c.zpaCustomerID, c.BaseURL, customUserAgent)
-	if err != nil {
-		log.Printf("[ERROR] Failed to create ZPA V2 configuration: %v", err)
-		return nil, err
-	}
-
-	// Initialize ZPA client
-	zpaClient := zpa.NewClient(zpaCfg)
-	if zpaClient == nil {
-		return nil, fmt.Errorf("failed to initialize ZPA V2 client")
-	}
-
-	// Configure the Zscaler client
-	cfg, err := zscaler.NewConfiguration(
-		zscaler.WithLegacyClient(true),
-		zscaler.WithZpaLegacyClient(zpaClient),
-		zscaler.WithDebug(true),
+	// Apply credentials and mandatory parameters
+	setters = append(
+		setters,
+		zpa.WithZPAClientID(c.zpaClientID),
+		zpa.WithZPAClientSecret(c.zpaClientSecret),
+		zpa.WithZPACustomerID(c.zpaCustomerID),
+		zpa.WithZPACloud(c.BaseURL),
 	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Zscaler configuration for V2 client: %v", err)
+
+	// Conditionally apply optional parameters
+	switch {
+	case c.microtenantID != "":
+		setters = append(setters, zpa.WithZPAMicrotenantID(c.microtenantID))
 	}
 
-	log.Printf("[DEBUG] Legacy client configuration: %+v", cfg)
-	config, err := zscaler.NewConfiguration(
-		zscaler.WithLegacyClient(true),
-		zscaler.WithZpaLegacyClient(zpaClient))
+	// Configure HTTP proxy if provided
+	if c.httpProxy != "" {
+		_url, err := url.Parse(c.httpProxy)
+		if err != nil {
+			return nil, fmt.Errorf("invalid proxy URL: %v", err)
+		}
+		setters = append(setters, zpa.WithProxyHost(_url.Hostname()))
 
-	if err != nil {
-		return nil, fmt.Errorf("failed to create SDK V3 configuration: %v", err)
+		// Default to port 80 if not provided
+		sPort := _url.Port()
+		if sPort == "" {
+			sPort = "80"
+		}
+		iPort, err := strconv.Atoi(sPort)
+		if err != nil {
+			return nil, fmt.Errorf("invalid proxy port: %v", err)
+		}
+		setters = append(setters, zpa.WithProxyPort(int32(iPort)))
 	}
-	wrappedV2Client, err := zscaler.NewOneAPIClient(config)
+
+	// Initialize ZPA configuration
+	zpaCfg, err := zpa.NewConfiguration(setters...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize legacy v2 client: %w", err)
+		return nil, fmt.Errorf("failed to create ZPA configuration: %v", err)
 	}
+	zpaCfg.UserAgent = customUserAgent
+	// Initialize ZPA client
+	wrappedV2Client, err := zscaler.NewLegacyZpaClient(zpaCfg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create ZPA client: %v", err)
+	}
+
 	log.Println("[INFO] Successfully initialized ZPA V2 client")
 	return wrappedV2Client, nil
 }
