@@ -156,7 +156,7 @@ func getBrowserAccessResourceHCL(generatedName, name, description, segmentGroupT
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "jenkins" {
-	name = "jenkins.securitygeek.io"
+	name = "jenkins.bd-hashicorp.com"
 }
 
 resource "%s" "%s" {
@@ -172,16 +172,16 @@ resource "%s" "%s" {
 		from = "%s"
 		to = "%s"
 	}
-	domain_names = ["%s.securitygeek.io"]
+	domain_names = ["%s.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	clientless_apps {
-		name                 = "%s.securitygeek.io"
+		name                 = "%s.bd-hashicorp.com"
 		application_protocol = "HTTPS"
 		application_port     = "%s"
 		certificate_id       = data.zpa_ba_certificate.jenkins.id
 		trust_untrusted_cert = true
 		enabled              = true
-		domain               = "%s.securitygeek.io"
+		domain               = "%s.bd-hashicorp.com"
 	}
 	server_groups {
 		id = []

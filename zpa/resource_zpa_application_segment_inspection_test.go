@@ -151,7 +151,7 @@ func getApplicationSegmentInspectionResourceHCL(generatedName, name, description
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "sales" {
-	name = "sales.securitygeek.io"
+	name = "sales.bd-hashicorp.com"
 }
 
 resource "%s" "%s" {
@@ -164,11 +164,11 @@ resource "%s" "%s" {
 	bypass_type = "NEVER"
 	tcp_keep_alive = "1"
 	tcp_port_ranges  = ["443", "443"]
-	domain_names = ["sales.securitygeek.io"]
+	domain_names = ["sales.bd-hashicorp.com"]
 	segment_group_id = "${%s.id}"
 	common_apps_dto {
 		apps_config {
-		  domain               = "sales.securitygeek.io"
+		  domain               = "sales.bd-hashicorp.com"
 		  application_protocol = "HTTPS"
 		  application_port     = "443"
 		  certificate_id       = data.zpa_ba_certificate.sales.id

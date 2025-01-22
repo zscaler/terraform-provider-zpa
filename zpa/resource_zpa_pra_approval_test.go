@@ -119,7 +119,7 @@ func testAccCheckPRAPrivilegedApprovalConfigure(resourceTypeAndName, generatedNa
 	endTime := now.AddDate(0, 3, 0).Format(time.RFC1123) // Example: 3 months from now
 
 	userEmails := []string{
-		"kathy.kavanagh@securitygeek.io",
+		"kathy.kavanagh@bd-hashicorp.com",
 	}
 	emailIDs := fmt.Sprintf(`["%s"]`, strings.Join(userEmails, `", "`))
 	return fmt.Sprintf(`

@@ -88,7 +88,7 @@ func generateCBIRootCACert() ([]byte, error) {
 			Locality:           []string{"San Jose"},
 			Organization:       []string{"BD-HashiCorp"},
 			OrganizationalUnit: []string{"ITDepartment"},
-			CommonName:         "securitygeek.io",
+			CommonName:         "bd-hashicorp.com",
 		},
 		NotBefore:             notBefore,
 		NotAfter:              notAfter,

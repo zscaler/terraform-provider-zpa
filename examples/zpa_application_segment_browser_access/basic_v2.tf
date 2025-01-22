@@ -13,17 +13,17 @@ resource "zpa_application_segment_browser_access" "crm_browser_access" {
     from = "8080"
     to   = "8080"
   }
-  domain_names     = ["jenkins.securitygeek.io"]
+  domain_names     = ["jenkins.bd-hashicorp.com"]
   segment_group_id = data.zpa_segment_group.crm_app_group.id
 
   clientless_apps {
-    name                 = "jenkins.securitygeek.io"
+    name                 = "jenkins.bd-hashicorp.com"
     application_protocol = "HTTP"
     application_port     = "8080"
     certificate_id       = data.zpa_ba_certificate.jenkins_ca.id
     trust_untrusted_cert = true
     enabled              = true
-    domain               = "jenkins.securitygeek.io"
+    domain               = "jenkins.bd-hashicorp.com"
   }
   server_groups {
     id = [
@@ -34,7 +34,7 @@ resource "zpa_application_segment_browser_access" "crm_browser_access" {
 
 // Browser Access Certificate
 data "zpa_ba_certificate" "jenkins_ca" {
-  name = "jenkins.securitygeek.io"
+  name = "jenkins.bd-hashicorp.com"
 }
 
 // Server Group

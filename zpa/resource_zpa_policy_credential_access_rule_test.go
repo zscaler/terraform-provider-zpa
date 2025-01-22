@@ -191,14 +191,14 @@ data "zpa_application_segment_by_type" "rdp_pra3392" {
 }
 
 data "zpa_ba_certificate" "this1" {
-	name = "pra01.securitygeek.io"
+	name = "pra01.bd-hashicorp.com"
 }
   
 resource "zpa_pra_portal_controller" "this" {
-	name                      = "pra01.securitygeek.io"
-	description               = "pra01.securitygeek.io"
+	name                      = "pra01.bd-hashicorp.com"
+	description               = "pra01.bd-hashicorp.com"
 	enabled                   = true
-	domain                    = "pra01.securitygeek.io"
+	domain                    = "pra01.bd-hashicorp.com"
 	certificate_id            = data.zpa_ba_certificate.this1.id
 	user_notification         = "Created with Terraform"
 	user_notification_enabled = true

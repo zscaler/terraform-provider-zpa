@@ -119,7 +119,7 @@ resource "%s" "%s" {
 	description = "%s"
 	enabled = %s
 	criteria_attribute = "%s"
-	criteria_attribute_values = ["securitygeek.io"]
+	criteria_attribute_values = ["bd-hashicorp.com"]
 }
 `,
 		// resource variables

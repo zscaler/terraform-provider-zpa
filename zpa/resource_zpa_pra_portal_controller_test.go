@@ -36,7 +36,7 @@ func TestAccResourcePRAPortalController_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.PraPortalDescription),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.PraPortalEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "user_notification_enabled", strconv.FormatBool(variable.PraUserNotificationEnabled)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "domain", domainName+".securitygeek.io"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "domain", domainName+".bd-hashicorp.com"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "user_notification", variable.PraUserNotification),
 				),
 			},
@@ -49,7 +49,7 @@ func TestAccResourcePRAPortalController_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", variable.PraPortalDescriptionUpdate),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.PraPortalEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "user_notification_enabled", strconv.FormatBool(variable.PraUserNotificationEnabled)),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "domain", domainName+".securitygeek.io"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "domain", domainName+".bd-hashicorp.com"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "user_notification", variable.PraUserNotification),
 				),
 			},
@@ -124,13 +124,13 @@ func testAccCheckPRAPortalControllerConfigure(resourceTypeAndName, generatedName
 	return fmt.Sprintf(`
 
 data "zpa_ba_certificate" "this" {
-	name = "pra01.securitygeek.io"
+	name = "pra01.bd-hashicorp.com"
 }
 
 resource "%s" "%s" {
 	name = "%s"
 	description = "%s"
-	domain = "%s.securitygeek.io"
+	domain = "%s.bd-hashicorp.com"
 	user_notification = "%s"
 	enabled = "%s"
 	user_notification_enabled = "%s"
