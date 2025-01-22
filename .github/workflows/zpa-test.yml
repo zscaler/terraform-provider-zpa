@@ -164,7 +164,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: ["1.22"]
+        goVersion: ["1.23"]
         environment:
           - ZPA_BETA_TENANT01
     environment: ${{ matrix.environment }}
