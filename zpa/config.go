@@ -283,11 +283,19 @@ func zscalerSDKV2Client(c *Config) (*zscaler.Service, error) {
 		if sPort == "" {
 			sPort = "80"
 		}
-		iPort, err := strconv.Atoi(sPort)
+		// Parse the port as a 32-bit integer
+		port64, err := strconv.ParseInt(sPort, 10, 32)
 		if err != nil {
 			return nil, fmt.Errorf("invalid proxy port: %v", err)
 		}
-		setters = append(setters, zpa.WithProxyPort(int32(iPort)))
+
+		// Optionally, you can also check the port range if needed
+		if port64 < 1 || port64 > 65535 {
+			return nil, fmt.Errorf("invalid port number: must be between 1 and 65535, got: %d", port64)
+		}
+		// Safe cast to int32
+		port32 := int32(port64)
+		setters = append(setters, zpa.WithProxyPort(port32))
 	}
 
 	// Initialize ZPA configuration
@@ -330,11 +338,19 @@ func zscalerSDKV3Client(c *Config) (*zscaler.Client, error) {
 		if sPort == "" {
 			sPort = "80"
 		}
-		iPort, err := strconv.Atoi(sPort)
+		// Parse the port as a 32-bit integer
+		port64, err := strconv.ParseInt(sPort, 10, 32)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid proxy port: %v", err)
 		}
-		setters = append(setters, zscaler.WithProxyPort(int32(iPort)))
+
+		// Optionally, you can also check the port range if needed
+		if port64 < 1 || port64 > 65535 {
+			return nil, fmt.Errorf("invalid port number: must be between 1 and 65535, got: %d", port64)
+		}
+		// Safe cast to int32
+		port32 := int32(port64)
+		setters = append(setters, zscaler.WithProxyPort(port32))
 	}
 
 	// Main switch to handle the different authentication methods
