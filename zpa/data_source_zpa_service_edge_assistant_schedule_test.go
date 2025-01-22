@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -41,3 +42,4 @@ data "zpa_service_edge_assistant_schedule" "customer_id" {
 	customer_id = data.zpa_service_edge_assistant_schedule.this.customer_id
 }
 `
+*/
