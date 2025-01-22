@@ -34,21 +34,21 @@ func testAccDataSourceScimGroupCheck(name string) resource.TestCheckFunc {
 var testAccCheckDataSourceScimGroupConfig_basic = `
 data "zpa_scim_groups" "engineering" {
     name = "Engineering"
-	idp_name = "SGIO-User-Okta"
+	idp_name = "BD_Okta_Users"
 }
 
 data "zpa_scim_groups" "contractors" {
     name = "Contractors"
-	idp_name = "SGIO-User-Okta"
+	idp_name = "BD_Okta_Users"
 }
 
 data "zpa_scim_groups" "finance" {
     name = "Finance"
-	idp_name = "SGIO-User-Okta"
+	idp_name = "BD_Okta_Users"
 }
 
 data "zpa_scim_groups" "executives" {
     name = "Executives"
-	idp_name = "SGIO-User-Okta"
+	idp_name = "BD_Okta_Users"
 }
 `

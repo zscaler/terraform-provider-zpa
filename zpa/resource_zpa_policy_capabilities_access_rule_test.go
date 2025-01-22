@@ -141,17 +141,17 @@ func getPolicyCapabilitiesAccessRuleHCL(rName, generatedName, desc string) strin
 	return fmt.Sprintf(`
 
 data "zpa_idp_controller" "this" {
-	name = "SGIO-User-Okta"
+	name = "BD_Okta_Users"
 }
 
 data "zpa_scim_groups" "a000" {
     name = "A000"
-    idp_name = "SGIO-User-Okta"
+    idp_name = "BD_Okta_Users"
 }
 
 data "zpa_scim_groups" "b000" {
     name = "B000"
-    idp_name = "SGIO-User-Okta"
+    idp_name = "BD_Okta_Users"
 }
 
 resource "%s" "%s" {

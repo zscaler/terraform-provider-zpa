@@ -8,7 +8,7 @@ import (
 )
 
 var idpNames = []string{
-	"SGIO-Admin-Okta", "SGIO-User-Okta",
+	"BD_Okta_Admin", "BD_Okta_Users",
 }
 
 func TestAccDataSourceIdpController_Basic(t *testing.T) {

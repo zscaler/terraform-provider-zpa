@@ -141,18 +141,18 @@ data "zpa_policy_type" "lss_siem_policy" {
 }
 
 data "zpa_idp_controller" "this" {
-	name = "SGIO-User-Okta"
+	name = "BD_Okta_Users"
    }
 
 # Retrieve the SCIM_GROUP ID(s)
 data "zpa_scim_groups" "engineering" {
   name     = "Engineering"
-  idp_name = "SGIO-User-Okta"
+  idp_name = "BD_Okta_Users"
 }
 
 data "zpa_scim_groups" "finance" {
   name     = "Finance"
-  idp_name = "SGIO-User-Okta"
+  idp_name = "BD_Okta_Users"
 }
 resource "%s" "%s" {
 	config {

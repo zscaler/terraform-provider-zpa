@@ -34,23 +34,23 @@ func testAccDataSourceSamlAttributeCheck(name string) resource.TestCheckFunc {
 
 var testAccCheckDataSourceSamlAttributeConfig_basic = `
 data "zpa_saml_attribute" "email_user_sso" {
-    name = "Email_SGIO-User-Okta"
-	idp_name = "SGIO-User-Okta"
+    name = "Email_BD_Okta_Users"
+	idp_name = "BD_Okta_Users"
 }
 data "zpa_saml_attribute" "department" {
-    name = "DepartmentName_SGIO-User-Okta"
-	idp_name = "SGIO-User-Okta"
+    name = "DepartmentName_BD_Okta_Users"
+	idp_name = "BD_Okta_Users"
 }
 data "zpa_saml_attribute" "first_name" {
-    name = "FirstName_SGIO-User-Okta"
-	idp_name = "SGIO-User-Okta"
+    name = "FirstName_BD_Okta_Users"
+	idp_name = "BD_Okta_Users"
 }
 data "zpa_saml_attribute" "last_name" {
-    name = "LastName_SGIO-User-Okta"
-	idp_name = "SGIO-User-Okta"
+    name = "LastName_BD_Okta_Users"
+	idp_name = "BD_Okta_Users"
 }
 data "zpa_saml_attribute" "group" {
-    name = "GroupName_SGIO-User-Okta"
-	idp_name = "SGIO-User-Okta"
+    name = "GroupName_BD_Okta_Users"
+	idp_name = "BD_Okta_Users"
 }
 `

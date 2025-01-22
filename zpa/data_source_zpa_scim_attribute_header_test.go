@@ -35,21 +35,21 @@ func testAccDataSourceScimAttributeHeaderCheck(name string) resource.TestCheckFu
 var testAccCheckDataSourceScimAttributeHeaderConfig_basic = `
 data "zpa_scim_attribute_header" "email_value" {
     name = "emails.value"
-    idp_name = "SGIO-User-Okta"
+    idp_name = "BD_Okta_Users"
 }
 
 data "zpa_scim_attribute_header" "cost_center" {
     name = "costCenter"
-    idp_name = "SGIO-User-Okta"
+    idp_name = "BD_Okta_Users"
 }
 
 data "zpa_scim_attribute_header" "department" {
     name = "department"
-    idp_name = "SGIO-User-Okta"
+    idp_name = "BD_Okta_Users"
 }
 
 data "zpa_scim_attribute_header" "name_family_name" {
     name = "name.familyName"
-    idp_name = "SGIO-User-Okta"
+    idp_name = "BD_Okta_Users"
 }
 `

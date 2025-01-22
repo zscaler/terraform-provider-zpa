@@ -146,12 +146,12 @@ data "zpa_posture_profile" "crwd_zta_score_80" {
 }
 
 data "zpa_idp_controller" "bd_user_okta" {
-    name = "SGIO-User-Okta"
+    name = "BD_Okta_Users"
 }
 
 data "zpa_scim_groups" "contractors" {
 	name     = "Contractors"
-	idp_name = "SGIO-User-Okta"
+	idp_name = "BD_Okta_Users"
 }
 
 resource "%s" "%s" {
