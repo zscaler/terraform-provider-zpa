@@ -1,27 +1,29 @@
 package zpa
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_profile"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/inspectioncontrol/inspection_profile"
 )
 
 func resourceInspectionProfile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceInspectionProfileCreate,
-		Read:   resourceInspectionProfileRead,
-		Update: resourceInspectionProfileUpdate,
-		Delete: resourceInspectionProfileDelete,
+		CreateContext: resourceInspectionProfileCreate,
+		ReadContext:   resourceInspectionProfileRead,
+		UpdateContext: resourceInspectionProfileUpdate,
+		DeleteContext: resourceInspectionProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				zClient := meta.(*Client)
-				service := zClient.InspectionProfile
+				service := zClient.Service
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -29,7 +31,7 @@ func resourceInspectionProfile() *schema.Resource {
 					// assume if the passed value is an int
 					d.Set("profile_id", id)
 				} else {
-					resp, _, err := inspection_profile.GetByName(service, id)
+					resp, _, err := inspection_profile.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						d.Set("profile_id", resp.ID)
@@ -261,45 +263,45 @@ func validateInspectionProfile(profile *inspection_profile.InspectionProfile) er
 	return nil
 }
 
-func resourceInspectionProfileCreate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	service := zClient.InspectionProfile
+func resourceInspectionProfileCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	zClient := meta.(*Client)
+	service := zClient.Service
 
 	req := expandInspectionProfile(d)
 	log.Printf("[INFO] Creating inspection profile with request\n%+v\n", req)
 	if err := validateInspectionProfile(&req); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	// injectPredefinedControls(zClient, &req)
-	resp, _, err := inspection_profile.Create(service, req)
+	resp, _, err := inspection_profile.Create(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created inspection profile  request. ID: %v\n", resp)
 
 	d.SetId(resp.ID)
 	if v, ok := d.GetOk("associate_all_controls"); ok && v.(bool) {
-		p, _, err := inspection_profile.Get(service, resp.ID)
+		p, _, err := inspection_profile.Get(ctx, service, resp.ID)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
-		inspection_profile.PutAssociate(service, resp.ID, p)
+		inspection_profile.PutAssociate(ctx, service, resp.ID, p)
 	}
-	return resourceInspectionProfileRead(d, m)
+	return resourceInspectionProfileRead(ctx, d, meta)
 }
 
-func resourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) error {
+func resourceInspectionProfileRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.InspectionProfile
+	service := zClient.Service
 
-	resp, _, err := inspection_profile.Get(service, d.Id())
+	resp, _, err := inspection_profile.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing inspection profile %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Getting inspection profile:\n%+v\n", resp)
 	d.SetId(resp.ID)
@@ -321,77 +323,77 @@ func resourceInspectionProfileRead(d *schema.ResourceData, meta interface{}) err
 
 	if len(resp.ControlInfoResource) > 0 {
 		if err := d.Set("controls_info", flattenControlInfoResource(resp.ControlInfoResource)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if err := d.Set("custom_controls", flattenCustomControlsSimple(resp.CustomControls)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("predefined_controls", flattenPredefinedControlsSimple(resp.PredefinedControls)); err != nil {
-		return fmt.Errorf("error setting predefined_controls: %s", err)
+		return diag.FromErr(fmt.Errorf("error setting predefined_controls: %s", err))
 	}
 
 	if err := d.Set("predefined_api_controls", flattenPredefinedApiControlsSimple(resp.PredefinedAPIControls)); err != nil {
-		return fmt.Errorf("error setting predefined_api_controls: %s", err)
+		return diag.FromErr(fmt.Errorf("error setting predefined_api_controls: %s", err))
 	}
 
 	if resp.WebSocketControls != nil {
 		if err := d.Set("websocket_controls", flattenWebSocketControls(resp.WebSocketControls)); err != nil {
-			return fmt.Errorf("error setting websocket_controls: %s", err)
+			return diag.FromErr(fmt.Errorf("error setting websocket_controls: %s", err))
 		}
 	}
 
 	if resp.ThreatLabzControls != nil {
 		if err := d.Set("threat_labz_controls", flattenThreatLabzControls(resp.ThreatLabzControls)); err != nil {
-			return fmt.Errorf("error setting threat_labz_controls: %s", err)
+			return diag.FromErr(fmt.Errorf("error setting threat_labz_controls: %s", err))
 		}
 	}
 
 	return nil
 }
 
-func resourceInspectionProfileUpdate(d *schema.ResourceData, m interface{}) error {
-	zClient := m.(*Client)
-	service := zClient.InspectionProfile
+func resourceInspectionProfileUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	zClient := meta.(*Client)
+	service := zClient.Service
 
 	id := d.Id()
 	log.Printf("[INFO] Updating inspection profile ID: %v\n", id)
 	req := expandInspectionProfile(d)
 	if err := validateInspectionProfile(&req); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	if _, _, err := inspection_profile.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := inspection_profile.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
 	// injectPredefinedControls(zClient, &req)
-	if _, err := inspection_profile.Update(service, id, &req); err != nil {
-		return err
+	if _, err := inspection_profile.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 	if v, ok := d.GetOk("associate_all_controls"); ok && v.(bool) {
-		p, _, err := inspection_profile.Get(service, req.ID)
+		p, _, err := inspection_profile.Get(ctx, service, req.ID)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
-		inspection_profile.PutAssociate(service, req.ID, p)
+		inspection_profile.PutAssociate(ctx, service, req.ID, p)
 	}
-	return resourceInspectionProfileRead(d, m)
+	return resourceInspectionProfileRead(ctx, d, meta)
 }
 
-func resourceInspectionProfileDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceInspectionProfileDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.InspectionProfile
+	service := zClient.Service
 
 	log.Printf("[INFO] Deleting inspection profile ID: %v\n", d.Id())
 
-	if _, err := inspection_profile.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := inspection_profile.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] inspection profile deleted")

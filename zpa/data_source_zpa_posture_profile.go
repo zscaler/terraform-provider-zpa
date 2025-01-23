@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/postureprofile"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/postureprofile"
 )
 
 func dataSourcePostureProfile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcePostureProfileRead,
+		ReadContext: dataSourcePostureProfileRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -56,28 +58,30 @@ func dataSourcePostureProfile() *schema.Resource {
 	}
 }
 
-func dataSourcePostureProfileRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourcePostureProfileRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PostureProfile
+	service := zClient.Service
 
 	var resp *postureprofile.PostureProfile
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for posture profile %s\n", id)
-		res, _, err := postureprofile.Get(service, id)
+		res, _, err := postureprofile.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
+
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for posture profile name %s\n", name)
-		res, _, err := postureprofile.GetByName(service, name)
+		res, _, err := postureprofile.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
+
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
@@ -92,7 +96,7 @@ func dataSourcePostureProfileRead(d *schema.ResourceData, meta interface{}) erro
 		_ = d.Set("zscaler_customer_id", resp.ZscalerCustomerID)
 
 	} else {
-		return fmt.Errorf("couldn't find any posture profile with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any posture profile with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

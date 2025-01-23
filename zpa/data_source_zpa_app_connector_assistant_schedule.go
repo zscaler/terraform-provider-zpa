@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorschedule"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorschedule"
 )
 
 func dataSourceAppConnectorAssistantSchedule() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAppConnectorAssistantScheduleRead,
+		ReadContext: dataSourceAppConnectorAssistantScheduleRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -40,9 +42,9 @@ func dataSourceAppConnectorAssistantSchedule() *schema.Resource {
 	}
 }
 
-func dataSourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAppConnectorAssistantScheduleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppConnectorSchedule
+	service := zClient.Service
 
 	var resp *appconnectorschedule.AssistantSchedule
 	var err error
@@ -52,21 +54,21 @@ func dataSourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, meta in
 
 	if idOk && id != "" {
 		log.Printf("[INFO] Getting data for app connector assistant schedule %s\n", id)
-		resp, _, err = appconnectorschedule.GetSchedule(service)
+		resp, _, err = appconnectorschedule.GetSchedule(ctx, service)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else if customerIDOk && customerID != "" {
-		log.Printf("[INFO] Getting data for app connector name %s\n", customerID)
-		resp, _, err = appconnectorschedule.GetSchedule(service)
+		log.Printf("[INFO] Getting data for app connector with customer ID %s\n", customerID)
+		resp, _, err = appconnectorschedule.GetSchedule(ctx, service)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
 		log.Printf("[INFO] No specific ID or customer ID provided, fetching default schedule")
-		resp, _, err = appconnectorschedule.GetSchedule(service)
+		resp, _, err = appconnectorschedule.GetSchedule(ctx, service)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -78,7 +80,7 @@ func dataSourceAppConnectorAssistantScheduleRead(d *schema.ResourceData, meta in
 		_ = d.Set("frequency", resp.Frequency)
 		_ = d.Set("frequency_interval", resp.FrequencyInterval)
 	} else {
-		return fmt.Errorf("couldn't find any app connector assistant schedule")
+		return diag.FromErr(fmt.Errorf("couldn't find any app connector assistant schedule"))
 	}
 
 	return nil

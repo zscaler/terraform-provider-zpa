@@ -7,24 +7,24 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentpra"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentpra"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 )
 
 func resourceApplicationSegmentPRA() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceApplicationSegmentPRACreate,
-		Read:   resourceApplicationSegmentPRARead,
-		Update: resourceApplicationSegmentPRAUpdate,
-		Delete: resourceApplicationSegmentPRADelete,
+		CreateContext: resourceApplicationSegmentPRACreate,
+		ReadContext:   resourceApplicationSegmentPRARead,
+		UpdateContext: resourceApplicationSegmentPRAUpdate,
+		DeleteContext: resourceApplicationSegmentPRADelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.ApplicationSegment
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
+				service := zClient.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -36,7 +36,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				if parseIDErr == nil {
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := applicationsegmentpra.GetByName(service, id)
+					resp, _, err := applicationsegmentpra.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -290,51 +290,51 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentPRACreate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentPRACreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentPRA
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	req := expandSRAApplicationSegment(d, zClient, "")
+	req := expandSRAApplicationSegment(ctx, d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
-	resp, _, err := applicationsegmentpra.Create(service, req)
+	resp, _, err := applicationsegmentpra.Create(ctx, service, req)
 	if err != nil {
 		log.Printf("[ERROR] Failed to create application segment: %s", err)
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Created application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceApplicationSegmentPRARead(d, meta)
+	return resourceApplicationSegmentPRARead(ctx, d, meta)
 }
 
-func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentPRARead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentPRA
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := applicationsegmentpra.Get(service, d.Id())
+	resp, _, err := applicationsegmentpra.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing sra application segment %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting sra application segment:\n%+v\n", resp)
@@ -363,7 +363,7 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 
 	// Map pra_apps to common_apps_dto.apps_config for state management
 	if err := mapPRAAppsToCommonApps(d, resp.PRAApps); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Map pra_apps back to common_apps_dto.apps_config
@@ -375,19 +375,19 @@ func resourceApplicationSegmentPRARead(d *schema.ResourceData, meta interface{})
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentPRAUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentPRA
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -398,54 +398,65 @@ func resourceApplicationSegmentPRAUpdate(d *schema.ResourceData, meta interface{
 	log.Printf("[INFO] Updating PRA application segment ID: %v\n", id)
 
 	// Retrieve the current resource to get app_id and pra_app_id
-	resp, _, err := applicationsegmentpra.Get(service, id)
+	resp, _, err := applicationsegmentpra.Get(ctx, service, id)
 	if err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error retrieving application segment: %v", err)
+		return diag.FromErr(fmt.Errorf("error retrieving application segment: %v", err))
 	}
 
 	// Extract app_id and pra_app_id from praApps and set in common_apps_dto in state
 	if err := setAppIDsInCommonAppsDto(d, resp.PRAApps); err != nil {
-		return fmt.Errorf("error setting app_id and pra_app_id in common_apps_dto: %v", err)
+		return diag.FromErr(fmt.Errorf("error setting app_id and pra_app_id in common_apps_dto: %v", err))
 	}
 
 	// Prepare the request payload for the update
-	req := expandSRAApplicationSegment(d, zClient, "")
+	req := expandSRAApplicationSegment(ctx, d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Perform the update
-	_, err = applicationsegmentpra.Update(service, id, &req)
+	_, err = applicationsegmentpra.Update(ctx, service, id, &req)
 	if err != nil {
-		return fmt.Errorf("error updating application segment: %v", err)
+		return diag.FromErr(fmt.Errorf("error updating application segment: %v", err))
 	}
 
 	// Refresh the state after the update to ensure correctness
-	return resourceApplicationSegmentPRARead(d, meta)
+	return resourceApplicationSegmentPRARead(ctx, d, meta)
 }
 
-func resourceApplicationSegmentPRADelete(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentPRADelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentPRA.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	policySetControllerService := zClient.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	id := d.Id()
-	log.Printf("[INFO] Deleting application segment with id %v\n", id)
-	detachAppsFromAllPolicyRules(id, policySetControllerService)
-	if _, err := applicationsegmentpra.Delete(service, id); err != nil {
-		return err
+	service := zClient.Service
+
+	// Use MicroTenant if available
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
 	}
 
+	// service := zClient.V3.ApplicationSegmentPRA.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	// policySetControllerService := zClient.V3.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
+
+	log.Printf("[INFO] Deleting application segment pra with id %v\n", d.Id())
+	detachAppConnectorGroupFromAllAccessPolicyRules(ctx, d, service)
+
+	if _, err := applicationsegmentpra.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	log.Printf("[INFO] Application segment pra deleted successfully")
 	return nil
 }
 
-func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id string) applicationsegmentpra.AppSegmentPRA {
+func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zClient *Client, id string) applicationsegmentpra.AppSegmentPRA {
 	microTenantID := GetString(d.Get("microtenant_id"))
-	service := client.ApplicationSegment
+	service := zClient.Service // Unified service interface
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
@@ -480,7 +491,7 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id stri
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if service != nil && id != "" {
-		resource, _, err := applicationsegment.Get(service, id)
+		resource, _, err := applicationsegmentpra.Get(ctx, service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
 			remoteUDPAppPortRanges = resource.UDPPortRanges
@@ -513,11 +524,6 @@ func expandSRAApplicationSegment(d *schema.ResourceData, client *Client, id stri
 	}
 	if d.HasChange("server_groups") {
 		details.ServerGroups = expandCommonServerGroups(d)
-	}
-
-	// Apply microtenant context if available
-	if microTenantID != "" {
-		client.ApplicationSegment = client.ApplicationSegment.WithMicroTenant(microTenantID)
 	}
 
 	return details
@@ -570,7 +576,6 @@ func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.A
 }
 
 func customizeDiffApplicationSegmentPRA(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-
 	// Clear any diffs related to pra_apps to prevent it from being included in the plan or state
 	if d.HasChange("pra_apps") {
 		d.Clear("pra_apps")

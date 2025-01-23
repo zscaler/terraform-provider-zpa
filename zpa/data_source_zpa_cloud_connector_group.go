@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudconnectorgroup"
 )
 
 func dataSourceCloudConnectorGroup() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCloudConnectorGroupRead,
+		ReadContext: dataSourceCloudConnectorGroupRead,
 		Schema: map[string]*schema.Schema{
 			"creation_time": {
 				Type:     schema.TypeString,
@@ -110,26 +112,26 @@ func dataSourceCloudConnectorGroup() *schema.Resource {
 	}
 }
 
-func dataSourceCloudConnectorGroupRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCloudConnectorGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CloudConnectorGroup
+	service := zClient.Service
 
 	var resp *cloudconnectorgroup.CloudConnectorGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for cloud connector group  %s\n", id)
-		res, _, err := cloudconnectorgroup.Get(service, id)
+		res, _, err := cloudconnectorgroup.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for cloud connector group name %s\n", name)
-		res, _, err := cloudconnectorgroup.GetByName(service, name)
+		res, _, err := cloudconnectorgroup.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -148,7 +150,7 @@ func dataSourceCloudConnectorGroupRead(d *schema.ResourceData, meta interface{})
 		_ = d.Set("cloud_connectors", flattenCloudConnectors(resp))
 
 	} else {
-		return fmt.Errorf("couldn't find any cloud connector group with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any cloud connector group with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

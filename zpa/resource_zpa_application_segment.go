@@ -1,32 +1,34 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 	"sync"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 )
 
 var policyRulesDetchLock sync.Mutex
 
 func resourceApplicationSegment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceApplicationSegmentCreate,
-		Read:   resourceApplicationSegmentRead,
-		Update: resourceApplicationSegmentUpdate,
-		Delete: resourceApplicationSegmentDelete,
+		CreateContext: resourceApplicationSegmentCreate,
+		ReadContext:   resourceApplicationSegmentRead,
+		UpdateContext: resourceApplicationSegmentUpdate,
+		DeleteContext: resourceApplicationSegmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.ApplicationSegment
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
+				service := zClient.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -39,7 +41,7 @@ func resourceApplicationSegment() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := applicationsegment.GetByName(service, id)
+					resp, _, err := applicationsegment.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -240,56 +242,56 @@ func resourceApplicationSegment() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegment
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	req := expandApplicationSegmentRequest(d, zClient, "")
+	req := expandApplicationSegmentRequest(ctx, d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Creating application segment request\n%+v\n", req)
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the application segment")
-		return fmt.Errorf("please provide a valid segment group for the application segment")
+		return diag.FromErr(fmt.Errorf("please provide a valid segment group for the application segment"))
 	}
 
-	resp, _, err := applicationsegment.Create(service, req)
+	resp, _, err := applicationsegment.Create(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Created application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
-	return resourceApplicationSegmentRead(d, meta)
+	return resourceApplicationSegmentRead(ctx, d, meta)
 }
 
-func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegment
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := applicationsegment.Get(service, d.Id())
+	resp, _, err := applicationsegment.Get(ctx, service, d.Id())
 	if err != nil {
-		if err.(*client.ErrorResponse).IsObjectNotFound() {
+		if err.(*errorx.ErrorResponse).IsObjectNotFound() {
 			log.Printf("[WARN] Removing application segment %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Reading application segment and settings states: %+v\n", resp)
@@ -323,114 +325,79 @@ func resourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) er
 	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceApplicationSegmentUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
+	service := zClient.Service
+
 	microTenantID := GetString(d.Get("microtenant_id"))
-
-	id := d.Id()
-	log.Printf("[INFO] Updating application segment ID: %v\n", id)
-	req := expandApplicationSegmentRequest(d, zClient, id)
-
-	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
-	}
-
-	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
-		log.Println("[ERROR] Please provide a valid segment group for the application segment")
-		return fmt.Errorf("please provide a valid segment group for the application segment")
-	}
-
-	service := zClient.ApplicationSegment
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	if _, _, err := applicationsegment.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	id := d.Id()
+	log.Printf("[INFO] Updating application segment ID: %v\n", id)
+	req := expandApplicationSegmentRequest(ctx, d, zClient, id)
+
+	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
+		log.Println("[ERROR] Please provide a valid segment group for the application segment")
+		return diag.FromErr(fmt.Errorf("please provide a valid segment group for the application segment"))
+	}
+
+	if _, _, err := applicationsegment.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := applicationsegment.Update(service, id, req); err != nil {
-		return err
+	if _, err := applicationsegment.Update(ctx, service, id, req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceApplicationSegmentRead(d, meta)
+	return resourceApplicationSegmentRead(ctx, d, meta)
 }
 
-func detachAppsFromAllPolicyRules(id string, policySetControllerService *services.Service) {
-	policyRulesDetchLock.Lock()
-	defer policyRulesDetchLock.Unlock()
-	var rules []policysetcontroller.PolicyRule
-	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
-	for _, t := range types {
-		policySet, _, err := policysetcontroller.GetByPolicyType(policySetControllerService, t)
-		if err != nil {
-			continue
-		}
-		r, _, err := policysetcontroller.GetAllByType(policySetControllerService, t)
-		if err != nil {
-			continue
-		}
-		for _, rule := range r {
-			rule.PolicySetID = policySet.ID
-			rules = append(rules, rule)
-		}
-	}
-	log.Printf("[INFO] detachAppsFromAllPolicyRules Updating policy rules, len:%d \n", len(rules))
-	for _, rr := range rules {
-		rule := rr
-		changed := false
-		for i, condition := range rr.Conditions {
-			operands := []policysetcontroller.Operands{}
-			for _, op := range condition.Operands {
-				if op.ObjectType == "APP" && op.LHS == "id" && op.RHS == id {
-					changed = true
-					continue
-				}
-				operands = append(operands, op)
-			}
-			rule.Conditions[i].Operands = operands
-		}
-		if len(rule.Conditions) == 0 {
-			rule.Conditions = []policysetcontroller.Conditions{}
-		}
-		if changed {
-			if _, err := policysetcontroller.UpdateRule(policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
-				continue
-			}
-		}
-	}
-}
-
-func resourceApplicationSegmentDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegment.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	policySetControllerService := zClient.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	id := d.Id()
-	log.Printf("[INFO] Deleting application segment with id %v\n", id)
-	detachAppsFromAllPolicyRules(id, policySetControllerService)
-	if _, err := applicationsegment.Delete(service, id); err != nil {
-		return err
+	service := zClient.Service
+
+	// Use MicroTenant if available
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
 	}
 
+	log.Printf("[INFO] Deleting application segment with id %v\n", d.Id())
+
+	// Pass d.Id() as a string to the detachAppsFromAllPolicyRules function
+	detachAppsFromAllPolicyRules(ctx, d.Id(), service)
+
+	if _, err := applicationsegment.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	log.Printf("[INFO] Application segment deleted successfully")
 	return nil
 }
 
-func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id string) applicationsegment.ApplicationSegmentResource {
+func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData, zClient *Client, id string) applicationsegment.ApplicationSegmentResource {
 	microTenantID := GetString(d.Get("microtenant_id"))
-	service := client.ApplicationSegment
+	service := zClient.Service // Unified service interface
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
@@ -468,7 +435,7 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if service != nil && id != "" {
-		resource, _, err := applicationsegment.Get(service, id)
+		resource, _, err := applicationsegment.Get(ctx, service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
 			remoteUDPAppPortRanges = resource.UDPPortRanges
@@ -497,4 +464,49 @@ func expandApplicationSegmentRequest(d *schema.ResourceData, client *Client, id 
 		details.UDPPortRanges = []string{}
 	}
 	return details
+}
+
+func detachAppsFromAllPolicyRules(ctx context.Context, id string, policySetControllerService *zscaler.Service) {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
+	var rules []policysetcontroller.PolicyRule
+	types := []string{"ACCESS_POLICY", "TIMEOUT_POLICY", "SIEM_POLICY", "CLIENT_FORWARDING_POLICY", "INSPECTION_POLICY"}
+	for _, t := range types {
+		policySet, _, err := policysetcontroller.GetByPolicyType(ctx, policySetControllerService, t)
+		if err != nil {
+			continue
+		}
+		r, _, err := policysetcontroller.GetAllByType(ctx, policySetControllerService, t)
+		if err != nil {
+			continue
+		}
+		for _, rule := range r {
+			rule.PolicySetID = policySet.ID
+			rules = append(rules, rule)
+		}
+	}
+	log.Printf("[INFO] detachAppsFromAllPolicyRules Updating policy rules, len:%d \n", len(rules))
+	for _, rr := range rules {
+		rule := rr
+		changed := false
+		for i, condition := range rr.Conditions {
+			operands := []policysetcontroller.Operands{}
+			for _, op := range condition.Operands {
+				if op.ObjectType == "APP" && op.LHS == "id" && op.RHS == id {
+					changed = true
+					continue
+				}
+				operands = append(operands, op)
+			}
+			rule.Conditions[i].Operands = operands
+		}
+		if len(rule.Conditions) == 0 {
+			rule.Conditions = []policysetcontroller.Conditions{}
+		}
+		if changed {
+			if _, err := policysetcontroller.UpdateRule(ctx, policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
+				continue
+			}
+		}
+	}
 }

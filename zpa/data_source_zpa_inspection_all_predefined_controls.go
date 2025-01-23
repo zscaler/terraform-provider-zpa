@@ -1,15 +1,17 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_predefined_controls"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/inspectioncontrol/inspection_predefined_controls"
 )
 
 func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceInspectionAllPredefinedControlsRead,
+		ReadContext: dataSourceInspectionAllPredefinedControlsRead,
 		Schema: map[string]*schema.Schema{
 			"version": {
 				Type:     schema.TypeString,
@@ -122,24 +124,24 @@ func dataSourceInspectionAllPredefinedControls() *schema.Resource {
 	}
 }
 
-func dataSourceInspectionAllPredefinedControlsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceInspectionAllPredefinedControlsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.InspectionPredefinedControls
+	service := zClient.Service
 
 	version, versionSet := d.Get("version").(string)
 	if !versionSet || version == "" {
-		return fmt.Errorf("when the name is set, version must be set as well")
+		return diag.FromErr(fmt.Errorf("when the name is set, version must be set as well"))
 	}
 	var list []inspection_predefined_controls.PredefinedControls
 	var err error
 	groupName, groupNameSet := d.Get("group_name").(string)
 	if groupNameSet && groupName != "" {
-		list, err = inspection_predefined_controls.GetAllByGroup(service, version, groupName)
+		list, err = inspection_predefined_controls.GetAllByGroup(ctx, service, version, groupName)
 	} else {
-		list, err = inspection_predefined_controls.GetAll(service, version)
+		list, err = inspection_predefined_controls.GetAll(ctx, service, version)
 	}
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("predefined_controls")
 	_ = d.Set("list", flattenList(list))

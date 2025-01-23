@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -8,10 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
 )
 
 func TestAccResourceLSSConfigController_Basic(t *testing.T) {
@@ -60,13 +61,14 @@ func TestAccResourceLSSConfigController_Basic(t *testing.T) {
 
 func testAccCheckLSSConfigControllerDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
+	service := apiClient.Service
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPALSSController {
 			continue
 		}
 
-		lss, _, err := lssconfigcontroller.Get(apiClient.LSSConfigController, rs.Primary.ID)
+		lss, _, err := lssconfigcontroller.Get(context.Background(), service, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("id %s still exists", rs.Primary.ID)
 		}
@@ -87,8 +89,11 @@ func testAccCheckLSSConfigControllerExists(resource string, lss *lssconfigcontro
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no Application Segment ID is set")
 		}
+
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedLss, _, err := lssconfigcontroller.Get(apiClient.LSSConfigController, rs.Primary.ID)
+		service := apiClient.Service
+
+		receivedLss, _, err := lssconfigcontroller.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}

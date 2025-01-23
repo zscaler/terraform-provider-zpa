@@ -12,9 +12,31 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v3.332.0``
+``Last updated: v4.0.0``
 
 ---
+
+## 4.0.0 (January, 21 2025) - BREAKING CHANGES
+
+### Notes
+
+- Release date: **(January 21, 2025)**
+- Supported Terraform version: **v1.x**
+
+#### Enhancements - Zscaler OneAPI Support
+
+[PR #515](https://github.com/zscaler/terraform-provider-zpa/pull/515): The ZPA Terraform Provider now offers support for [OneAPI](https://help.zscaler.com/oneapi/understanding-oneapi) Oauth2 authentication through [Zidentity](https://help.zscaler.com/zidentity/what-zidentity).
+
+**NOTE** As of version v4.0.0, this Terraform provider offers backwards compatibility to the Zscaler legacy API framework. This is the recommended authentication method for organizations whose tenants are still not migrated to [Zidentity](https://help.zscaler.com/zidentity/what-zidentity).
+
+⚠️ **WARNING**: Please refer to the [Index Page](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) page for details on authentication requirements prior to upgrading your provider configuration.
+
+⚠️ **WARNING**: Attention Government customers. OneAPI and Zidentity is not currently supported for the following clouds: `GOV` and `GOVUS`. Refer to the [Legacy API Framework](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index) section for more information on how authenticate to these environments using the legacy method.
+
+### NEW - RESOURCES, DATA SOURCES, PROPERTIES, ATTRIBUTES, ENV VARS
+
+#### NEW ATTRIBUTES
+- [PR #515](https://github.com/zscaler/terraform-provider-zpa/pull/515) - Added new `object_type` `CHROME_ENTERPRISE` to the following ZPA access policy resources: `zpa_policy_access_rule`, and `zpa_policy_access_rule_v2`
 
 ## 3.332.0 (January, 8 2025)
 
@@ -30,7 +52,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 **NOTE**  v3.331.0 and v3.332.0 was a versioning mistake due to backend issues and does not represent hundreds of new features Either version can be safely used without concerns on breaking changes. This will be corrected in the next major version release 4.0.0 upcoming in the next few weeks. We apologize for the confusion and  incovenience caused."
 
-## 3.331.0 (January, 5 2025) - DEPRECATED
+## 3.331.0 (January, 5 2025)
 
 ### Notes
 

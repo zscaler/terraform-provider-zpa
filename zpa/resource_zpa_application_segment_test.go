@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
@@ -8,10 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
 )
 
 func TestAccResourceApplicationSegment_Basic(t *testing.T) {
@@ -79,13 +80,22 @@ func testAccCheckApplicationSegmentDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, _, err := applicationsegment.GetByName(apiClient.ApplicationSegment, rs.Primary.Attributes["name"])
-		if err == nil {
-			return fmt.Errorf("Application Segment still exists")
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
 		}
 
-		return nil
+		appSegment, _, err := applicationsegment.Get(context.Background(), service, rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
+		}
+
+		if appSegment != nil {
+			return fmt.Errorf("application segment with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
 	}
+
 	return nil
 }
 
@@ -98,8 +108,15 @@ func testAccCheckApplicationSegmentExists(resource string, segment *applications
 		if rs.Primary.ID == "" {
 			return fmt.Errorf("no Application Segment ID is set")
 		}
+
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedApp, _, err := applicationsegment.Get(apiClient.ApplicationSegment, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedApp, _, err := applicationsegment.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Received error: %s", resource, err)
 		}
@@ -144,6 +161,7 @@ resource "%s" "%s" {
 	is_cname_enabled = "%s"
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
+	health_check_type = "DEFAULT"
 	tcp_port_range = [
 	  {
 		from = "%d"

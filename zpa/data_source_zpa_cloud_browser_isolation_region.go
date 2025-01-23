@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiregions"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbiregions"
 )
 
 func dataSourceCBIRegions() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCBIRegionsRead,
+		ReadContext: dataSourceCBIRegionsRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -26,17 +28,17 @@ func dataSourceCBIRegions() *schema.Resource {
 	}
 }
 
-func dataSourceCBIRegionsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCBIRegionsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIRegions
+	service := zClient.Service
 
 	var resp *cbiregions.CBIRegions
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for cbi regions name %s\n", name)
-		res, _, err := cbiregions.GetByName(service, name)
+		res, _, err := cbiregions.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -46,7 +48,7 @@ func dataSourceCBIRegionsRead(d *schema.ResourceData, meta interface{}) error {
 		_ = d.Set("name", resp.Name)
 
 	} else {
-		return fmt.Errorf("couldn't find any cbi regions with name '%s'", name)
+		return diag.FromErr(fmt.Errorf("couldn't find any cbi regions with name '%s'", name))
 	}
 
 	return nil

@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbizpaprofile"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbizpaprofile"
 )
 
 func dataSourceCBIZPAProfiles() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCBIZPAProfilesRead,
+		ReadContext: dataSourceCBIZPAProfilesRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -56,18 +58,17 @@ func dataSourceCBIZPAProfiles() *schema.Resource {
 	}
 }
 
-func dataSourceCBIZPAProfilesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCBIZPAProfilesRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIZpaProfile
+	service := zClient.Service
 
 	var resp *cbizpaprofile.ZPAProfiles
-
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for cbi zpa profile name %s\n", name)
-		res, _, err := cbizpaprofile.GetByName(service, name)
+		res, _, err := cbizpaprofile.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -84,7 +85,7 @@ func dataSourceCBIZPAProfilesRead(d *schema.ResourceData, meta interface{}) erro
 		_ = d.Set("cbi_url", resp.CBIURL)
 
 	} else {
-		return fmt.Errorf("couldn't find any cbi zpa profile with name '%s'", name)
+		return diag.FromErr(fmt.Errorf("couldn't find any cbi zpa profile with name '%s'", name))
 	}
 
 	return nil

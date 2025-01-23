@@ -1,24 +1,28 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgeschedule"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgeschedule"
 )
 
 func resourceServiceEdgeAssistantSchedule() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourceServiceEdgeAssistantScheduleCreate,
-		Read:     resourceServiceEdgeAssistantScheduleRead,
-		Update:   resourceServiceEdgeAssistantScheduleUpdate,
-		Delete:   resourceServiceEdgeAssistantScheduleDelete,
-		Importer: &schema.ResourceImporter{},
+		CreateContext: resourceServiceEdgeAssistantScheduleCreate,
+		ReadContext:   resourceServiceEdgeAssistantScheduleRead,
+		UpdateContext: resourceServiceEdgeAssistantScheduleUpdate,
+		DeleteContext: resourceServiceEdgeAssistantScheduleDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -62,17 +66,17 @@ func resourceServiceEdgeAssistantSchedule() *schema.Resource {
 	}
 }
 
-func resourceServiceEdgeAssistantScheduleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceEdgeAssistantScheduleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServiceEdgeSchedule
+	service := zClient.Service
 
 	req, err := expandServiceEdgeAssistantSchedule(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Use = instead of := because err is already declared
-	_, _, err = serviceedgeschedule.CreateSchedule(service, req)
+	_, _, err = serviceedgeschedule.CreateSchedule(ctx, service, req)
 	if err != nil {
 		// Assuming err.Error() returns a string representation of the error
 		errStr := err.Error()
@@ -82,38 +86,38 @@ func resourceServiceEdgeAssistantScheduleCreate(d *schema.ResourceData, meta int
 			log.Printf("[INFO] Resource already exists. Updating instead.")
 
 			// Get the current state of the resource
-			resp, _, err := serviceedgeschedule.GetSchedule(service)
+			resp, _, err := serviceedgeschedule.GetSchedule(ctx, service)
 			if err != nil {
-				return fmt.Errorf("failed to retrieve existing resource for update: %v", err)
+				return diag.FromErr(fmt.Errorf("failed to retrieve existing resource for update: %v", err))
 			}
 
 			// Set the resource ID in the Terraform state
 			d.SetId(resp.ID)
 
 			// Proceed to update the resource
-			return resourceServiceEdgeAssistantScheduleUpdate(d, meta)
+			return resourceServiceEdgeAssistantScheduleUpdate(ctx, d, meta)
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created service edge assistant schedule request. ID: %v\n", req.ID)
 	d.SetId(req.ID)
 
-	return resourceServiceEdgeAssistantScheduleRead(d, meta)
+	return resourceServiceEdgeAssistantScheduleRead(ctx, d, meta)
 }
 
-func resourceServiceEdgeAssistantScheduleRead(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceEdgeAssistantScheduleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServiceEdgeSchedule
+	service := zClient.Service
 
-	resp, _, err := serviceedgeschedule.GetSchedule(service)
+	resp, _, err := serviceedgeschedule.GetSchedule(ctx, service)
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing service edge assistant schedule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting application server:\n%+v\n", resp)
@@ -125,32 +129,32 @@ func resourceServiceEdgeAssistantScheduleRead(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceServiceEdgeAssistantScheduleUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceEdgeAssistantScheduleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServiceEdgeSchedule
+	service := zClient.Service
 
 	id := d.Id()
 	log.Printf("[INFO] Updating service edge ID: %v\n", id)
 	req, err := expandServiceEdgeAssistantSchedule(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	if _, _, err := serviceedgeschedule.GetSchedule(service); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := serviceedgeschedule.GetSchedule(ctx, service); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := serviceedgeschedule.UpdateSchedule(service, id, &req); err != nil {
-		return err
+	if _, err := serviceedgeschedule.UpdateSchedule(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceServiceEdgeAssistantScheduleRead(d, meta)
+	return resourceServiceEdgeAssistantScheduleRead(ctx, d, meta)
 }
 
-func resourceServiceEdgeAssistantScheduleDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceServiceEdgeAssistantScheduleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }
 

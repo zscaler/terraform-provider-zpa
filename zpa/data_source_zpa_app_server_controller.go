@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
 )
 
 func dataSourceApplicationServer() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceApplicationServerRead,
+		ReadContext: dataSourceApplicationServerRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -65,9 +67,9 @@ func dataSourceApplicationServer() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationServerRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceApplicationServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppServerController
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -78,18 +80,18 @@ func dataSourceApplicationServerRead(d *schema.ResourceData, meta interface{}) e
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for application server  %s\n", id)
-		res, _, err := appservercontroller.Get(service, id)
+		res, _, err := appservercontroller.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for application server name %s\n", name)
-		res, _, err := appservercontroller.GetByName(service, name)
+		res, _, err := appservercontroller.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -108,7 +110,7 @@ func dataSourceApplicationServerRead(d *schema.ResourceData, meta interface{}) e
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 	} else {
-		return fmt.Errorf("couldn't find any application server with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any application server with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

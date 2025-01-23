@@ -1,20 +1,22 @@
 package zpa
 
 import (
+	"context"
 	"log"
 	"net/http"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 )
 
 func resourcePolicyForwardingRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePolicyForwardingRuleCreate,
-		Read:   resourcePolicyForwardingRuleRead,
-		Update: resourcePolicyForwardingRuleUpdate,
-		Delete: resourcePolicyForwardingRuleDelete,
+		CreateContext: resourcePolicyForwardingRuleCreate,
+		ReadContext:   resourcePolicyForwardingRuleRead,
+		UpdateContext: resourcePolicyForwardingRuleUpdate,
+		DeleteContext: resourcePolicyForwardingRuleDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: importPolicyStateContextFunc([]string{"CLIENT_FORWARDING_POLICY", "BYPASS_POLICY"}),
 		},
@@ -52,10 +54,9 @@ func resourcePolicyForwardingRule() *schema.Resource {
 	}
 }
 
-func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyForwardingRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
-
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
@@ -69,46 +70,45 @@ func resourcePolicyForwardingRuleCreate(d *schema.ResourceData, meta interface{}
 		policySetID = v.(string)
 	} else {
 		// Fetch policy_set_id based on the policy_type
-		policySetID, err = fetchPolicySetIDByType(zClient, "CLIENT_FORWARDING_POLICY", GetString(d.Get("microtenant_id")))
+		policySetID, err = fetchPolicySetIDByType(ctx, zClient, "CLIENT_FORWARDING_POLICY", GetString(d.Get("microtenant_id")))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	req, err := expandCreatePolicyForwardingRule(d, policySetID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Creating zpa policy forwarding rule with request\n%+v\n", req)
-	if err := ValidateConditions(req.Conditions, zClient, GetString(d.Get("microtenant_id"))); err != nil {
-		return err
+	if err := ValidateConditions(ctx, req.Conditions, zClient, GetString(d.Get("microtenant_id"))); err != nil {
+		return diag.FromErr(err)
 	}
 
-	resp, _, err := policysetcontroller.CreateRule(service, req)
+	resp, _, err := policysetcontroller.CreateRule(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resp.ID)
 
-	return resourcePolicyForwardingRuleRead(d, meta)
+	return resourcePolicyForwardingRuleRead(ctx, d, meta)
 }
 
-func resourcePolicyForwardingRuleRead(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyForwardingRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
-
-	policySetID, err := fetchPolicySetIDByType(zClient, "CLIENT_FORWARDING_POLICY", microTenantID)
-	if err != nil {
-		return err
-	}
-
-	service := zClient.PolicySetController
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
+	policySetID, err := fetchPolicySetIDByType(ctx, zClient, "CLIENT_FORWARDING_POLICY", microTenantID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	log.Printf("[INFO] Getting Policy Set Rule: policySetID:%s id: %s\n", policySetID, d.Id())
-	resp, respErr, err := policysetcontroller.GetPolicyRule(service, policySetID, d.Id())
+	resp, respErr, err := policysetcontroller.GetPolicyRule(ctx, service, policySetID, d.Id())
 	if err != nil {
 		// Adjust this error handling to match how your client library exposes HTTP response details
 		if respErr != nil && (respErr.StatusCode == 404 || respErr.StatusCode == http.StatusNotFound) {
@@ -116,7 +116,7 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, meta interface{}) 
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Got Policy Set Forwarding Rule:\n%+v\n", resp)
 	d.SetId(resp.ID)
@@ -137,10 +137,9 @@ func resourcePolicyForwardingRuleRead(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyForwardingRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
-
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
@@ -153,31 +152,30 @@ func resourcePolicyForwardingRuleUpdate(d *schema.ResourceData, meta interface{}
 	if v, ok := d.GetOk("policy_set_id"); ok {
 		policySetID = v.(string)
 	} else {
-		policySetID, err = fetchPolicySetIDByType(zClient, "CLIENT_FORWARDING_POLICY", GetString(d.Get("microtenant_id")))
+		policySetID, err = fetchPolicySetIDByType(ctx, zClient, "CLIENT_FORWARDING_POLICY", GetString(d.Get("microtenant_id")))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	ruleID := d.Id()
 	log.Printf("[INFO] Updating policy forwarding rule ID: %v\n", ruleID)
 	req, err := expandCreatePolicyForwardingRule(d, policySetID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	if err := ValidateConditions(req.Conditions, zClient, GetString(d.Get("microtenant_id"))); err != nil {
-		return err
+	if err := ValidateConditions(ctx, req.Conditions, zClient, GetString(d.Get("microtenant_id"))); err != nil {
+		return diag.FromErr(err)
 	}
-	if _, err := policysetcontroller.UpdateRule(service, policySetID, ruleID, req); err != nil {
-		return err
+	if _, err := policysetcontroller.UpdateRule(ctx, service, policySetID, ruleID, req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourcePolicyForwardingRuleRead(d, meta)
+	return resourcePolicyForwardingRuleRead(ctx, d, meta)
 }
 
-func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyForwardingRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController
-
+	service := zClient.Service
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
@@ -191,16 +189,16 @@ func resourcePolicyForwardingRuleDelete(d *schema.ResourceData, meta interface{}
 		policySetID = v.(string)
 	} else {
 		// Assuming "CLIENT_FORWARDING_POLICY" as policy type for demonstration
-		policySetID, err = fetchPolicySetIDByType(zClient, "CLIENT_FORWARDING_POLICY", GetString(d.Get("microtenant_id")))
+		policySetID, err = fetchPolicySetIDByType(ctx, zClient, "CLIENT_FORWARDING_POLICY", GetString(d.Get("microtenant_id")))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	log.Printf("[INFO] Deleting policy forwarding rule with id %v\n", d.Id())
 
-	if _, err := policysetcontroller.Delete(service, policySetID, d.Id()); err != nil {
-		return err
+	if _, err := policysetcontroller.Delete(ctx, service, policySetID, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

@@ -1,15 +1,16 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 )
 
 func TestAccResourcePolicyIsolationRule_Basic(t *testing.T) {
@@ -59,7 +60,7 @@ func TestAccResourcePolicyIsolationRule_Basic(t *testing.T) {
 
 func testAccCheckPolicyIsolationRuleDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := policysetcontroller.GetByPolicyType(apiClient.PolicySetController, "ISOLATION_POLICY")
+	accessPolicy, _, err := policysetcontroller.GetByPolicyType(context.Background(), apiClient.Service, "ISOLATION_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource ISOLATION_POLICY. Received error: %s", err)
 	}
@@ -68,7 +69,13 @@ func testAccCheckPolicyIsolationRuleDestroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := policysetcontroller.GetPolicyRule(apiClient.PolicySetController, accessPolicy.ID, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		rule, _, err := policysetcontroller.GetPolicyRule(context.Background(), service, accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -93,11 +100,17 @@ func testAccCheckPolicyIsolationRuleExists(resource string) resource.TestCheckFu
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := policysetcontroller.GetByPolicyType(apiClient.PolicySetController, "ISOLATION_POLICY")
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		resp, _, err := policysetcontroller.GetByPolicyType(context.Background(), apiClient.Service, "ISOLATION_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource ISOLATION_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = policysetcontroller.GetPolicyRule(apiClient.PolicySetController, resp.ID, rs.Primary.ID)
+		_, _, err = policysetcontroller.GetPolicyRule(context.Background(), service, resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

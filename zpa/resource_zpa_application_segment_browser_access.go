@@ -1,27 +1,29 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbrowseraccess"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentbrowseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 )
 
 func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceApplicationSegmentBrowserAccessCreate,
-		Read:   resourceApplicationSegmentBrowserAccessRead,
-		Update: resourceApplicationSegmentBrowserAccessUpdate,
-		Delete: resourceApplicationSegmentBrowserAccessDelete,
+		CreateContext: resourceApplicationSegmentBrowserAccessCreate,
+		ReadContext:   resourceApplicationSegmentBrowserAccessRead,
+		UpdateContext: resourceApplicationSegmentBrowserAccessUpdate,
+		DeleteContext: resourceApplicationSegmentBrowserAccessDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				client := meta.(*Client)
-				service := client.AppServerController
+				service := client.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -34,7 +36,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := applicationsegmentbrowseraccess.GetByName(service, id)
+					resp, _, err := applicationsegmentbrowseraccess.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -282,56 +284,56 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 	}
 }
 
-func resourceApplicationSegmentBrowserAccessCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentBrowserAccessCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.BrowserAccess
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	req := expandBrowserAccess(d, zClient, "")
+	req := expandBrowserAccess(ctx, d, zClient, "")
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Creating browser access request\n%+v\n", req)
 
 	if req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the application segment")
-		return fmt.Errorf("please provide a valid segment group for the application segment")
+		return diag.FromErr(fmt.Errorf("please provide a valid segment group for the application segment"))
 	}
 
-	browseraccess, _, err := applicationsegmentbrowseraccess.Create(service, req)
+	browseraccess, _, err := applicationsegmentbrowseraccess.Create(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Created browser access request. ID: %v\n", browseraccess.ID)
 	d.SetId(browseraccess.ID)
 
-	return resourceApplicationSegmentBrowserAccessRead(d, meta)
+	return resourceApplicationSegmentBrowserAccessRead(ctx, d, meta)
 }
 
-func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentBrowserAccessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.BrowserAccess
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := applicationsegmentbrowseraccess.Get(service, d.Id())
+	resp, _, err := applicationsegmentbrowseraccess.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing browser access %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting browser access:\n%+v\n", resp)
@@ -359,30 +361,30 @@ func resourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta in
 	_ = d.Set("health_reporting", resp.HealthReporting)
 
 	if err := d.Set("clientless_apps", flattenBaClientlessApps(resp)); err != nil {
-		return fmt.Errorf("failed to read clientless apps %s", err)
+		return diag.FromErr(fmt.Errorf("failed to read clientless apps %s", err))
 	}
 
 	if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups)); err != nil {
-		return fmt.Errorf("failed to read app server groups %s", err)
+		return diag.FromErr(fmt.Errorf("failed to read app server groups %s", err))
 	}
 
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentBrowserAccessUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.BrowserAccess
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -393,17 +395,17 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta 
 	log.Printf("[INFO] Updating browser access ID: %v\n", id)
 
 	// Step 1: Retrieve existing configuration to get app_id and clientless_apps.id
-	existingSegment, _, err := applicationsegmentbrowseraccess.Get(service, id)
+	existingSegment, _, err := applicationsegmentbrowseraccess.Get(ctx, service, id)
 	if err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Step 2: Build the update payload
-	req := expandBrowserAccess(d, zClient, "")
+	req := expandBrowserAccess(ctx, d, zClient, "")
 
 	// Step 3: Inject app_id and clientless_apps.id from the existing configuration
 	req.ID = existingSegment.ID // Assign app_id to the parent application
@@ -417,41 +419,47 @@ func resourceApplicationSegmentBrowserAccessUpdate(d *schema.ResourceData, meta 
 
 	// Validate the update request
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Step 4: Ensure segment_group_id is valid if changed
 	if d.HasChange("segment_group_id") && req.SegmentGroupID == "" {
 		log.Println("[ERROR] Please provide a valid segment group for the browser access application segment")
-		return fmt.Errorf("please provide a valid segment group for the browser access application segment")
+		return diag.FromErr(fmt.Errorf("please provide a valid segment group for the browser access application segment"))
 	}
 
 	// Step 5: Perform the update
-	if _, err := applicationsegmentbrowseraccess.Update(service, id, &req); err != nil {
-		return err
+	if _, err := applicationsegmentbrowseraccess.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
 	// Step 6: Refresh the state after updating
-	return resourceApplicationSegmentBrowserAccessRead(d, meta)
+	return resourceApplicationSegmentBrowserAccessRead(ctx, d, meta)
 }
 
-func resourceApplicationSegmentBrowserAccessDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationSegmentBrowserAccessDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
+	service := zClient.Service
 
-	service := zClient.BrowserAccess.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	id := d.Id()
 	log.Printf("[INFO] Deleting browser access application with id %v\n", id)
-	if _, err := applicationsegmentbrowseraccess.Delete(service, id); err != nil {
-		return err
+	if _, err := applicationsegmentbrowseraccess.Delete(ctx, service, id); err != nil {
+		return diag.FromErr(err)
 	}
 
+	d.SetId("")
+	log.Printf("[INFO] browser access application deleted successfully")
 	return nil
 }
 
-func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) applicationsegmentbrowseraccess.BrowserAccess {
+func expandBrowserAccess(ctx context.Context, d *schema.ResourceData, zClient *Client, id string) applicationsegmentbrowseraccess.BrowserAccess {
 	microTenantID := GetString(d.Get("microtenant_id"))
-	service := zClient.BrowserAccess
+	service := zClient.Service // Unified service interface
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
@@ -487,7 +495,7 @@ func expandBrowserAccess(d *schema.ResourceData, zClient *Client, id string) app
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
 	if service != nil && id != "" {
-		resource, _, err := applicationsegmentbrowseraccess.Get(service, id)
+		resource, _, err := applicationsegmentbrowseraccess.Get(ctx, service, id)
 		if err == nil {
 			remoteTCPAppPortRanges = resource.TCPPortRanges
 			remoteUDPAppPortRanges = resource.UDPPortRanges

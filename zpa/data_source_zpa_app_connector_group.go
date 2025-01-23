@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
 )
 
 func dataSourceAppConnectorGroup() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceConnectorGroupRead,
+		ReadContext: dataSourceConnectorGroupRead,
 		Schema: map[string]*schema.Schema{
 			"connectors": {
 				Type:     schema.TypeList,
@@ -325,26 +327,31 @@ func dataSourceAppConnectorGroup() *schema.Resource {
 	}
 }
 
-func dataSourceConnectorGroupRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceConnectorGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppConnectorGroup
+	service := zClient.Service
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	var resp *appconnectorgroup.AppConnectorGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for app connector group  %s\n", id)
-		res, _, err := appconnectorgroup.Get(service, id)
+		res, _, err := appconnectorgroup.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for app connector group name %s\n", name)
-		res, _, err := appconnectorgroup.GetByName(service, name)
+		res, _, err := appconnectorgroup.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -379,11 +386,11 @@ func dataSourceConnectorGroupRead(d *schema.ResourceData, meta interface{}) erro
 		_ = d.Set("connectors", flattenConnectors(resp))
 
 		if err := d.Set("server_groups", flattenServerGroups(resp)); err != nil {
-			return fmt.Errorf("failed to read app server groups %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read app server groups %s", err))
 		}
 
 	} else {
-		return fmt.Errorf("couldn't find any app connector group with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any app connector group with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

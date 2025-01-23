@@ -1,5 +1,26 @@
 # Changelog
 
+## 4.0.0 (January, 21 2025) - BREAKING CHANGES
+
+### Notes
+
+- Release date: **(January 21, 2025)**
+- Supported Terraform version: **v1.x**
+
+#### Enhancements - Zscaler OneAPI Support
+
+[PR #515](https://github.com/zscaler/terraform-provider-zpa/pull/515): The ZPA Terraform Provider now offers support for [OneAPI](https://help.zscaler.com/oneapi/understanding-oneapi) Oauth2 authentication through [Zidentity](https://help.zscaler.com/zidentity/what-zidentity).
+
+**NOTE** As of version v4.0.0, this Terraform provider offers backwards compatibility to the Zscaler legacy API framework. This is the recommended authentication method for organizations whose tenants are still not migrated to [Zidentity](https://help.zscaler.com/zidentity/what-zidentity).
+
+⚠️ **WARNING**: Please refer to the [Index Page](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) page for details on authentication requirements prior to upgrading your provider configuration.
+
+⚠️ **WARNING**: Attention Government customers. OneAPI and Zidentity is not currently supported for the following clouds: `GOV` and `GOVUS`. Refer to the [Legacy API Framework](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index) section for more information on how authenticate to these environments using the legacy method.
+
+### NEW - RESOURCES, DATA SOURCES, PROPERTIES, ATTRIBUTES, ENV VARS
+
+#### NEW ATTRIBUTES
+- [PR #515](https://github.com/zscaler/terraform-provider-zpa/pull/515) - Added new `object_type` `CHROME_ENTERPRISE` to the following ZPA access policy resources: `zpa_policy_access_rule`, and `zpa_policy_access_rule_v2`
 
 ## 3.332.0 (January, 8 2025)
 
@@ -24,6 +45,20 @@
 
 ### Bug Fixes
 - [PR #509](https://github.com/zscaler/terraform-provider-zpa/pull/509) - Upgraded Provider to SDK v2.74.2 to address Double encoding of special characters during GET operations.
+
+## 3.33.9 (October, 31 2024)
+
+### Notes
+
+- Release date: **(October, 31 2024)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+- [PR #500](https://github.com/zscaler/terraform-provider-zpa/pull/500) - Implemented a fix to the update function across all specialized application segment resources:
+  - `zpa_application_segment_browser_access` - The fix now automatically includes the attributes `app_id` and `ba_app_id` in the payload during updates
+  - `zpa_application_segment_inspection` - The fix now automatically includes the attributes `app_id` and `inspect_app_id` in the payload during updates
+  - `zpa_application_segment_pra` - The fix now automatically includes the attributes `app_id` and `pra_app_id` in the payload during updates.
+  **NOTE:** This update/fix is required to ensure the ZPA API can properly identify the Browser Access, Inspection App and PRA App, based on its specific custom ID. The fix also includes the removal of the `ForceNew` option previously included in the schema to force the resource replacement in case of changes. Issue [PR #498](https://github.com/zscaler/terraform-provider-zpa/pull/498)
 
 ## 3.33.9 (October, 31 2024)
 

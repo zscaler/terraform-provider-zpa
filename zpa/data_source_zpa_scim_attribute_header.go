@@ -1,17 +1,19 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/idpcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimattributeheader"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/scimattributeheader"
 )
 
 func dataSourceScimAttributeHeader() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceScimAttributeHeaderRead,
+		ReadContext: dataSourceScimAttributeHeaderRead,
 		Schema: map[string]*schema.Schema{
 			"canonical_values": {
 				Type:     schema.TypeList,
@@ -91,53 +93,72 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 	}
 }
 
-func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceScimAttributeHeaderRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ScimAttributeHeader
+	service := zClient.Service
 
+	// Ensure the service is set correctly before proceeding
+	if service == nil {
+		return diag.FromErr(fmt.Errorf("ScimAttributeHeader service is not available"))
+	}
+
+	// Prepare variables to hold the response objects
 	var resp *scimattributeheader.ScimAttributeHeader
+	var idpResp *idpcontroller.IdpController
+
+	// Extract IDP-related attributes
 	idpId, okidpId := d.Get("idp_id").(string)
 	idpName, okIdpName := d.Get("idp_name").(string)
-	if !okIdpName && !okidpId || idpId == "" && idpName == "" {
-		log.Printf("[INFO] idp name or id is required\n")
-		return fmt.Errorf("idp name or id is required")
+
+	// Check for presence of either IDP name or ID
+	if (!okIdpName && !okidpId) || (idpId == "" && idpName == "") {
+		log.Printf("[INFO] IDP name or ID is required\n")
+		return diag.FromErr(fmt.Errorf("IDP name or ID is required"))
 	}
-	var idpResp *idpcontroller.IdpController
-	// getting Idp controller by id or name
+
+	var err error
+	// Get IDP Controller by ID or name
 	if idpId != "" {
-		resp, _, err := idpcontroller.Get(service, idpId)
-		if err != nil || resp == nil {
-			log.Printf("[INFO] couldn't find idp by id: %s\n", idpId)
-			return err
+		idpResp, _, err = idpcontroller.Get(ctx, service, idpId)
+		if err != nil || idpResp == nil {
+			log.Printf("[INFO] Couldn't find IDP by ID: %s\n", idpId)
+			return diag.FromErr(fmt.Errorf("error fetching IDP by ID: %w", err))
 		}
-		idpResp = resp
 	} else {
-		resp, _, err := idpcontroller.GetByName(service, idpName)
-		if err != nil || resp == nil {
-			log.Printf("[INFO] couldn't find idp by name: %s\n", idpName)
-			return err
+		idpResp, _, err = idpcontroller.GetByName(ctx, service, idpName)
+		if err != nil || idpResp == nil {
+			log.Printf("[INFO] Couldn't find IDP by name: %s\n", idpName)
+			return diag.FromErr(fmt.Errorf("error fetching IDP by name: %w", err))
 		}
-		idpResp = resp
 	}
-	// getting scim attribute header by id or name
-	id, ok := d.Get("id").(string)
-	if ok && id != "" {
-		res, _, err := scimattributeheader.Get(service, idpResp.ID, id)
+
+	// Retrieve SCIM attribute header by ID or name
+	id, idExists := d.Get("id").(string)
+	name, nameExists := d.Get("name").(string)
+
+	if idExists && id != "" {
+		// Fetch by ID
+		res, _, err := scimattributeheader.Get(ctx, service, idpResp.ID, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
+		}
+		resp = res
+	} else if nameExists && name != "" {
+		// Fetch by name
+		res, _, err := scimattributeheader.GetByName(ctx, service, name, idpResp.ID)
+		if err != nil {
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
-	name, ok := d.Get("name").(string)
-	if id == "" && ok && name != "" {
-		res, _, err := scimattributeheader.GetByName(service, name, idpResp.ID)
-		if err != nil {
-			return err
-		}
-		resp = res
-	}
+
+	// Populate the resource data if the response is not nil
 	if resp != nil {
-		values, _ := scimattributeheader.GetValues(service, resp.IdpID, resp.ID)
+		values, err := scimattributeheader.GetValues(ctx, service, resp.IdpID, resp.ID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
 		d.SetId(resp.ID)
 		_ = d.Set("canonical_values", resp.CanonicalValues)
 		_ = d.Set("case_sensitive", resp.CaseSensitive)
@@ -155,9 +176,8 @@ func dataSourceScimAttributeHeaderRead(d *schema.ResourceData, meta interface{})
 		_ = d.Set("schema_uri", resp.SchemaURI)
 		_ = d.Set("uniqueness", resp.Uniqueness)
 		_ = d.Set("values", values)
-
 	} else {
-		return fmt.Errorf("no scim attribute name '%s' & idp name '%s' OR id '%s' was found", name, idpName, id)
+		return diag.FromErr(fmt.Errorf("no SCIM attribute with name '%s' and IDP name '%s', or ID '%s' was found", name, idpName, id))
 	}
 	return nil
 }

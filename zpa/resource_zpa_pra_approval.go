@@ -1,27 +1,29 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praapproval"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praapproval"
 )
 
 func resourcePRAPrivilegedApprovalController() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePRAPrivilegedApprovalControllerCreate,
-		Read:   resourcePRAPrivilegedApprovalControllerRead,
-		Update: resourcePRAPrivilegedApprovalControllerUpdate,
-		Delete: resourcePRAPrivilegedApprovalControllerDelete,
+		CreateContext: resourcePRAPrivilegedApprovalControllerCreate,
+		ReadContext:   resourcePRAPrivilegedApprovalControllerRead,
+		UpdateContext: resourcePRAPrivilegedApprovalControllerUpdate,
+		DeleteContext: resourcePRAPrivilegedApprovalControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.PRAApproval
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
+				service := zClient.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -34,7 +36,7 @@ func resourcePRAPrivilegedApprovalController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := praapproval.GetByEmailID(service, id)
+					resp, _, err := praapproval.GetByEmailID(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -157,9 +159,9 @@ func resourcePRAPrivilegedApprovalController() *schema.Resource {
 	}
 }
 
-func resourcePRAPrivilegedApprovalControllerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourcePRAPrivilegedApprovalControllerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAApproval
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -171,16 +173,16 @@ func resourcePRAPrivilegedApprovalControllerCreate(d *schema.ResourceData, meta 
 
 	// Validate start and end times
 	if err := validateStartTime(startTimeStr, endTimeStr); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	startTimeEpoch, err := convertToEpoch(startTimeStr)
 	if err != nil {
-		return fmt.Errorf("start time conversion error: %s", err)
+		return diag.FromErr(fmt.Errorf("start time conversion error: %s", err))
 	}
 	endTimeEpoch, err := convertToEpoch(endTimeStr)
 	if err != nil {
-		return fmt.Errorf("end time conversion error: %s", err)
+		return diag.FromErr(fmt.Errorf("end time conversion error: %s", err))
 	}
 
 	// Prepare the request object using the converted epoch times.
@@ -190,35 +192,35 @@ func resourcePRAPrivilegedApprovalControllerCreate(d *schema.ResourceData, meta 
 
 	log.Printf("[INFO] Creating privileged approval with request\n%+v\n", req)
 
-	praApproval, _, err := praapproval.Create(service, &req)
+	praApproval, _, err := praapproval.Create(ctx, service, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Created privileged approval request. ID: %v\n", praApproval.ID)
 
 	d.SetId(praApproval.ID)
-	return resourcePRAPrivilegedApprovalControllerRead(d, meta)
+	return resourcePRAPrivilegedApprovalControllerRead(ctx, d, meta)
 }
 
-func resourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, meta interface{}) error {
+func resourcePRAPrivilegedApprovalControllerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAApproval
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := praapproval.Get(service, d.Id())
+	resp, _, err := praapproval.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing privileged approval %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting privileged approval controller:\n%+v\n", resp)
@@ -230,11 +232,11 @@ func resourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, meta in
 	// Use the existing utility function to convert epoch to RFC1123
 	startTimeStr, err := epochToRFC1123(resp.StartTime, false) // Adjust second parameter as needed
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	endTimeStr, err := epochToRFC1123(resp.EndTime, false) // Adjust second parameter as needed
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	_ = d.Set("start_time", startTimeStr)
@@ -247,9 +249,9 @@ func resourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourcePRAPrivilegedApprovalControllerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcePRAPrivilegedApprovalControllerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAApproval
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -264,16 +266,16 @@ func resourcePRAPrivilegedApprovalControllerUpdate(d *schema.ResourceData, meta 
 
 	// Validate start and end times
 	if err := validateStartTime(startTimeStr, endTimeStr); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	startTimeEpoch, err := convertToEpoch(startTimeStr)
 	if err != nil {
-		return fmt.Errorf("start time conversion error: %s", err)
+		return diag.FromErr(fmt.Errorf("start time conversion error: %s", err))
 	}
 	endTimeEpoch, err := convertToEpoch(endTimeStr)
 	if err != nil {
-		return fmt.Errorf("end time conversion error: %s", err)
+		return diag.FromErr(fmt.Errorf("end time conversion error: %s", err))
 	}
 
 	// Prepare the request object using the converted epoch times.
@@ -281,23 +283,23 @@ func resourcePRAPrivilegedApprovalControllerUpdate(d *schema.ResourceData, meta 
 	req.StartTime = fmt.Sprintf("%d", startTimeEpoch)
 	req.EndTime = fmt.Sprintf("%d", endTimeEpoch)
 
-	if _, _, err := praapproval.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := praapproval.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := praapproval.Update(service, id, &req); err != nil {
-		return err
+	if _, err := praapproval.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourcePRAPrivilegedApprovalControllerRead(d, meta)
+	return resourcePRAPrivilegedApprovalControllerRead(ctx, d, meta)
 }
 
-func resourcePRAPrivilegedApprovalControllerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourcePRAPrivilegedApprovalControllerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAApproval
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -306,8 +308,8 @@ func resourcePRAPrivilegedApprovalControllerDelete(d *schema.ResourceData, meta 
 
 	log.Printf("[INFO] Deleting privileged approval ID: %v\n", d.Id())
 
-	if _, err := praapproval.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := praapproval.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] privileged approval deleted")

@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/isolationprofile"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/isolationprofile"
 )
 
 func dataSourceIsolationProfile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIsolationProfileRead,
+		ReadContext: dataSourceIsolationProfileRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -56,17 +58,17 @@ func dataSourceIsolationProfile() *schema.Resource {
 	}
 }
 
-func dataSourceIsolationProfileRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIsolationProfileRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.IsolationProfile
+	service := zClient.Service
 
 	var resp *isolationprofile.IsolationProfile
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for isolation profile name %s\n", name)
-		res, _, err := isolationprofile.GetByName(service, name)
+		res, _, err := isolationprofile.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
@@ -83,7 +85,7 @@ func dataSourceIsolationProfileRead(d *schema.ResourceData, meta interface{}) er
 		_ = d.Set("isolation_tenant_id", resp.IsolationTenantID)
 		_ = d.Set("isolation_url", resp.IsolationURL)
 	} else {
-		return fmt.Errorf("couldn't find any isolation profile with name '%s'", name)
+		return diag.FromErr(fmt.Errorf("couldn't find any isolation profile with name '%s'", name))
 	}
 
 	return nil

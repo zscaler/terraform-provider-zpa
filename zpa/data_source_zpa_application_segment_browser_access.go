@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbrowseraccess"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentbrowseraccess"
 )
 
 func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceApplicationSegmentBrowserAccessRead,
+		ReadContext: dataSourceApplicationSegmentBrowserAccessRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -199,9 +201,9 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceApplicationSegmentBrowserAccessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.BrowserAccess
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -212,18 +214,18 @@ func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta 
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for browser access application %s\n", id)
-		res, _, err := applicationsegmentbrowseraccess.Get(service, id)
+		res, _, err := applicationsegmentbrowseraccess.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for browser access application name %s\n", name)
-		res, _, err := applicationsegmentbrowseraccess.GetByName(service, name)
+		res, _, err := applicationsegmentbrowseraccess.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -247,29 +249,29 @@ func dataSourceApplicationSegmentBrowserAccessRead(d *schema.ResourceData, meta 
 		_ = d.Set("health_reporting", resp.HealthReporting)
 
 		if err := d.Set("clientless_apps", flattenBaClientlessApps(resp)); err != nil {
-			return fmt.Errorf("failed to read clientless apps %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read clientless apps %s", err))
 		}
 
 		if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups)); err != nil {
-			return fmt.Errorf("failed to read app server groups %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read app server groups %s", err))
 		}
 
 		if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
-		return fmt.Errorf("couldn't find any browser access application with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any browser access application with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

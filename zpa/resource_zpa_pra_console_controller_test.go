@@ -1,16 +1,17 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praconsole"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praconsole"
 )
 
 func TestAccResourcePRAConsoleController_Basic(t *testing.T) {
@@ -70,8 +71,13 @@ func testAccCheckPRAConsoleControllerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		console, _, err := praconsole.Get(apiClient.PRAConsole, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
 
+		console, _, err := praconsole.Get(context.Background(), service, rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
 		}
@@ -95,7 +101,13 @@ func testAccCheckPRAConsoleControllerExists(resource string, console *praconsole
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedConsole, _, err := praconsole.Get(apiClient.PRAConsole, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedConsole, _, err := praconsole.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

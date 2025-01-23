@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,8 +12,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/segmentgroup"
 )
 
 func ValidateLatitude(val interface{}, _ string) (warns []string, errs []error) {
@@ -108,17 +109,6 @@ func convertToPortRange(portRangeLst []interface{}) []string {
 	return portRanges
 }
 
-/*
-func expandList(portRangeLst []interface{}) []string {
-	portRanges := make([]string, len(portRangeLst))
-	for i, port := range portRangeLst {
-		portRanges[i] = port.(string)
-	}
-
-	return portRanges
-}
-*/
-
 func isSameSlice(s1, s2 []string) bool {
 	if len(s1) != len(s2) {
 		return false
@@ -130,26 +120,6 @@ func isSameSlice(s1, s2 []string) bool {
 	}
 	return true
 }
-
-/*
-func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
-	var ports []string
-	if portsInterface, ok := d.GetOk(key); ok {
-		portSet, ok := portsInterface.(*schema.Set)
-		if !ok {
-			log.Printf("[ERROR] conversion failed, destUdpPortsInterface")
-			return []string{}
-		}
-		ports = make([]string, len(portSet.List())*2)
-		for i, val := range portSet.List() {
-			portItem := val.(map[string]interface{})
-			ports[2*i] = portItem["from"].(string)
-			ports[2*i+1] = portItem["to"].(string)
-		}
-	}
-	return ports
-}
-*/
 
 func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
 	var ports []string
@@ -167,38 +137,6 @@ func expandAppSegmentNetwokPorts(d *schema.ResourceData, key string) []string {
 		}
 	}
 	return ports
-}
-
-// Helper function to expand the new format
-// func expandNetworkPorts(d *schema.ResourceData, key string) []common.NetworkPorts {
-// 	var ports []common.NetworkPorts
-// 	if portsInterface, ok := d.GetOk(key); ok {
-// 		portSet, ok := portsInterface.(*schema.Set)
-// 		if !ok {
-// 			log.Printf("[ERROR] conversion failed, %s", key)
-// 			return []common.NetworkPorts{}
-// 		}
-// 		ports = make([]common.NetworkPorts, len(portSet.List()))
-// 		for i, val := range portSet.List() {
-// 			portItem := val.(map[string]interface{})
-// 			ports[i] = common.NetworkPorts{
-// 				From: portItem["from"].(string),
-// 				To:   portItem["to"].(string),
-// 			}
-// 		}
-// 	}
-// 	return ports
-// }
-
-func sliceHasCommon(s1, s2 []string) (bool, string) {
-	for _, i1 := range s1 {
-		for _, i2 := range s2 {
-			if i1 == i2 {
-				return true, i1
-			}
-		}
-	}
-	return false, ""
 }
 
 func expandStringInSlice(d *schema.ResourceData, key string) []string {
@@ -326,11 +264,11 @@ func pluralize(count int, singular, plural string) string {
 	return plural
 }
 
-func detachSegmentGroup(client *Client, segmentID, segmentGroupID string) error {
+func detachSegmentGroup(ctx context.Context, zClient *Client, segmentID, segmentGroupID string) error {
 	log.Printf("[INFO] Detaching application segment  %s from segment group: %s\n", segmentID, segmentGroupID)
-	service := client.SegmentGroup
+	service := zClient.Service
 
-	segGroup, _, err := segmentgroup.Get(service, segmentGroupID)
+	segGroup, _, err := segmentgroup.Get(ctx, service, segmentGroupID)
 	if err != nil {
 		log.Printf("[error] Error while getting segment group id: %s", segmentGroupID)
 		return err
@@ -342,7 +280,7 @@ func detachSegmentGroup(client *Client, segmentID, segmentGroupID string) error 
 		}
 	}
 	segGroup.Applications = adaptedApplications
-	_, err = segmentgroup.Update(service, segmentGroupID, segGroup)
+	_, err = segmentgroup.Update(ctx, service, segmentGroupID, segGroup)
 	return err
 }
 

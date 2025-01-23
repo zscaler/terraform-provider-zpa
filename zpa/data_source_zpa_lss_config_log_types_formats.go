@@ -1,19 +1,19 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/lssconfigcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
 )
 
 func dataSourceLSSLogTypeFormats() *schema.Resource {
 	return &schema.Resource{
-		Read:     dataSourceLSSLogTypeFormatsRead,
-		Importer: &schema.ResourceImporter{},
-
+		ReadContext: dataSourceLSSLogTypeFormatsRead,
 		Schema: map[string]*schema.Schema{
 			"log_type": {
 				Type:     schema.TypeString,
@@ -55,18 +55,18 @@ func getLogType(d *schema.ResourceData) (string, bool) {
 	return value, ok
 }
 
-func dataSourceLSSLogTypeFormatsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceLSSLogTypeFormatsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.LSSConfigController
+	service := zClient.Service
 
 	log.Printf("[INFO] Getting data for LSS Log Types Format set\n")
 	logType, ok := getLogType(d)
 	if !ok {
-		return fmt.Errorf("[ERROR] log type is required")
+		return diag.FromErr(fmt.Errorf("[ERROR] log type is required"))
 	}
-	resp, _, err := lssconfigcontroller.GetFormats(service, logType)
+	resp, _, err := lssconfigcontroller.GetFormats(ctx, service, logType)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting LSS Log Types Format:\n%+v\n", resp)

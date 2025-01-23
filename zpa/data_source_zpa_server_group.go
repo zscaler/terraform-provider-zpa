@@ -1,18 +1,20 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 )
 
 func dataSourceServerGroup() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceServerGroupRead,
+		ReadContext: dataSourceServerGroupRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -114,32 +116,35 @@ func dataSourceServerGroup() *schema.Resource {
 	}
 }
 
-func dataSourceServerGroupRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceServerGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ServerGroup
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
+
 	var resp *servergroup.ServerGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for server group  %s\n", id)
-		res, _, err := servergroup.Get(service, id)
+		res, _, err := servergroup.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
+
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for server group name %s\n", name)
-		res, _, err := servergroup.GetByName(service, name)
+		res, _, err := servergroup.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
+
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
@@ -156,18 +161,18 @@ func dataSourceServerGroupRead(d *schema.ResourceData, meta interface{}) error {
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 		if err := d.Set("applications", flattenApplicationsSegments(resp.Applications)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("app_connector_groups", flattenAppConnectorGroups(resp.AppConnectorGroups)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("servers", flattenServers(resp.Servers)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
-		return fmt.Errorf("couldn't find any server group with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any server group with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

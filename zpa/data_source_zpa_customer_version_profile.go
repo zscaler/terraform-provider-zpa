@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/customerversionprofile"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/customerversionprofile"
 )
 
 func dataSourceCustomerVersionProfile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCustomerVersionProfileRead,
+		ReadContext: dataSourceCustomerVersionProfileRead,
 		Schema: map[string]*schema.Schema{
 			"creation_time": {
 				Type:     schema.TypeString,
@@ -137,17 +139,17 @@ func dataSourceCustomerVersionProfile() *schema.Resource {
 	}
 }
 
-func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCustomerVersionProfileRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CustomerVersionProfile
+	service := zClient.Service
 
 	var resp *customerversionprofile.CustomerVersionProfile
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for customer version profile name %s\n", name)
-		res, _, err := customerversionprofile.GetByName(service, name)
+		res, _, err := customerversionprofile.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -167,14 +169,14 @@ func dataSourceCustomerVersionProfileRead(d *schema.ResourceData, meta interface
 		// _ = d.Set("custom_scope_request_customer_ids.delete_customer_ids", resp.CustomScopeRequestCustomerIDs.DeletecustomerIDs)
 
 		if err := d.Set("custom_scope_customer_ids", flattenCustomerIDName(resp.CustomScopeCustomerIDs)); err != nil {
-			return fmt.Errorf("failed to read custom scope customer ids %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read custom scope customer ids %s", err))
 		}
 
 		if err := d.Set("versions", flattenVersions(resp.Versions)); err != nil {
-			return fmt.Errorf("failed to read versions %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read versions %s", err))
 		}
 	} else {
-		return fmt.Errorf("couldn't find any customer version profilee with name '%s'", name)
+		return diag.FromErr(fmt.Errorf("couldn't find any customer version profilee with name '%s'", name))
 	}
 
 	return nil

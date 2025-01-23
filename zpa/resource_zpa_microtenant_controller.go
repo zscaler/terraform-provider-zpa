@@ -1,24 +1,26 @@
 package zpa
 
 import (
+	"context"
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/microtenants"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/microtenants"
 )
 
 func resourceMicrotenantController() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceMicrotenantCreate,
-		Read:   resourceMicrotenantRead,
-		Update: resourceMicrotenantUpdate,
-		Delete: resourceMicrotenantDelete,
+		CreateContext: resourceMicrotenantCreate,
+		ReadContext:   resourceMicrotenantRead,
+		UpdateContext: resourceMicrotenantUpdate,
+		DeleteContext: resourceMicrotenantDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				zClient := meta.(*Client)
-				service := zClient.MicroTenants
+				service := zClient.Service
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
@@ -26,7 +28,7 @@ func resourceMicrotenantController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := microtenants.GetByName(service, id)
+					resp, _, err := microtenants.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -106,16 +108,16 @@ func resourceMicrotenantController() *schema.Resource {
 	}
 }
 
-func resourceMicrotenantCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceMicrotenantCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.MicroTenants
+	service := zClient.Service
 
 	req := expandMicroTenant(d)
 	log.Printf("[INFO] Creating microtenant with request\n%+v\n", req)
 
-	microTenant, _, err := microtenants.Create(service, req)
+	microTenant, _, err := microtenants.Create(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created microtenant request. ID: %v\n", microTenant)
 
@@ -125,22 +127,22 @@ func resourceMicrotenantCreate(d *schema.ResourceData, meta interface{}) error {
 		_ = d.Set("user", userList)
 		log.Printf("[DEBUG] Flattened User: %s", userList)
 	}
-	return resourceMicrotenantRead(d, meta)
+	return resourceMicrotenantRead(ctx, d, meta)
 }
 
-func resourceMicrotenantRead(d *schema.ResourceData, meta interface{}) error {
+func resourceMicrotenantRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.MicroTenants
+	service := zClient.Service
 
-	resp, _, err := microtenants.Get(service, d.Id())
+	resp, _, err := microtenants.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing microtenant %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	// log.Printf("[INFO] Getting microtenant:\n%+v\n", resp)
@@ -162,36 +164,36 @@ func resourceMicrotenantRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceMicrotenantUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceMicrotenantUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.MicroTenants
+	service := zClient.Service
 
 	id := d.Id()
 	log.Printf("[INFO] Updating microtenant ID: %v\n", id)
 	req := expandMicroTenant(d)
 
-	if _, _, err := microtenants.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := microtenants.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := microtenants.Update(service, id, &req); err != nil {
-		return err
+	if _, err := microtenants.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceMicrotenantRead(d, meta)
+	return resourceMicrotenantRead(ctx, d, meta)
 }
 
-func resourceMicrotenantDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceMicrotenantDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.MicroTenants
+	service := zClient.Service
 
 	log.Printf("[INFO] Deleting microtenant ID: %v\n", d.Id())
 
-	if _, err := microtenants.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := microtenants.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] microtenant deleted")

@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbicertificatecontroller"
 )
 
 func dataSourceCBICertificates() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCBICertificatesRead,
+		ReadContext: dataSourceCBICertificatesRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -33,9 +35,9 @@ func dataSourceCBICertificates() *schema.Resource {
 	}
 }
 
-func dataSourceCBICertificatesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCBICertificatesRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBICertificateController
+	service := zClient.Service
 
 	var resp *cbicertificatecontroller.CBICertificate
 	id, idOk := d.Get("id").(string)
@@ -43,20 +45,20 @@ func dataSourceCBICertificatesRead(d *schema.ResourceData, meta interface{}) err
 
 	if idOk && id != "" {
 		log.Printf("[INFO] Getting data for CBI certificate with ID: %s\n", id)
-		res, _, err := cbicertificatecontroller.Get(service, id)
+		res, _, err := cbicertificatecontroller.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	} else if nameOk && name != "" {
 		log.Printf("[INFO] Getting data for CBI certificate with name: %s\n", name)
-		res, _, err := cbicertificatecontroller.GetByName(service, name)
+		res, _, err := cbicertificatecontroller.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	} else {
-		return fmt.Errorf("either 'id' or 'name' must be specified")
+		return diag.FromErr(fmt.Errorf("either 'id' or 'name' must be specified"))
 	}
 
 	if resp != nil {
@@ -65,7 +67,7 @@ func dataSourceCBICertificatesRead(d *schema.ResourceData, meta interface{}) err
 		_ = d.Set("pem", resp.PEM)
 		_ = d.Set("is_default", resp.IsDefault)
 	} else {
-		return fmt.Errorf("couldn't find any CBI certificate with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any CBI certificate with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

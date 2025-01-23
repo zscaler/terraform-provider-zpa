@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentbytype"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentbytype"
 )
 
 func dataSourceApplicationSegmentByType() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceApplicationSegmentByTypeRead,
+		ReadContext: dataSourceApplicationSegmentByTypeRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
@@ -76,9 +78,9 @@ func dataSourceApplicationSegmentByType() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationSegmentByTypeRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceApplicationSegmentByTypeRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegmentByType
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -87,7 +89,7 @@ func dataSourceApplicationSegmentByTypeRead(d *schema.ResourceData, meta interfa
 
 	applicationType := d.Get("application_type").(string)
 	if applicationType != "BROWSER_ACCESS" && applicationType != "SECURE_REMOTE_ACCESS" && applicationType != "INSPECT" {
-		return fmt.Errorf("invalid application_type '%s'. Valid types are 'BROWSER_ACCESS', 'SECURE_REMOTE_ACCESS', 'INSPECT'", applicationType)
+		return diag.FromErr(fmt.Errorf("invalid application_type '%s'. Valid types are 'BROWSER_ACCESS', 'SECURE_REMOTE_ACCESS', 'INSPECT'", applicationType))
 	}
 
 	name := d.Get("name").(string)
@@ -97,13 +99,13 @@ func dataSourceApplicationSegmentByTypeRead(d *schema.ResourceData, meta interfa
 	}
 
 	// Call the SDK function
-	resp, _, err := applicationsegmentbytype.GetByApplicationType(service, name, applicationType, true)
+	resp, _, err := applicationsegmentbytype.GetByApplicationType(ctx, service, name, applicationType, true)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if len(resp) == 0 {
-		return fmt.Errorf("no application segment found for name '%s' and type '%s'", name, applicationType)
+		return diag.FromErr(fmt.Errorf("no application segment found for name '%s' and type '%s'", name, applicationType))
 	}
 
 	// Assuming we are only interested in the first result for simplicity

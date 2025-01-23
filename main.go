@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common"
 )
 
 func main() {

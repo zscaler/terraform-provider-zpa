@@ -1,21 +1,23 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 )
 
 func resourcePolicyRedictionRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePolicyRedictionRuleCreate,
-		Read:   resourcePolicyRedictionRuleRead,
-		Update: resourcePolicyRedictionRuleUpdate,
-		Delete: resourcePolicyRedictionRuleDelete,
+		CreateContext: resourcePolicyRedictionRuleCreate,
+		ReadContext:   resourcePolicyRedictionRuleRead,
+		UpdateContext: resourcePolicyRedictionRuleUpdate,
+		DeleteContext: resourcePolicyRedictionRuleDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: importPolicyStateContextFunc([]string{"REDIRECTION_POLICY"}),
 		},
@@ -77,50 +79,57 @@ func validatePolicyRedirectionRuleAction(d *schema.ResourceData) error {
 	return nil
 }
 
-func resourcePolicyRedictionRuleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyRedictionRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Validate the "action" and "service_edge_groups" attributes
 	if err := validatePolicyRedirectionRuleAction(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
-
+	service := zClient.Service
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 	req, err := expandCreatePolicyRedirectionRule(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Creating zpa policy redirection rule with request\n%+v\n", req)
-	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
-		policysetcontroller, _, err := policysetcontroller.CreateRule(service, req)
+	if err := ValidateConditions(ctx, req.Conditions, zClient, req.MicroTenantID); err == nil {
+		policysetcontroller, _, err := policysetcontroller.CreateRule(ctx, service, req)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		d.SetId(policysetcontroller.ID)
 
-		return resourcePolicyRedictionRuleRead(d, meta)
+		return resourcePolicyRedictionRuleRead(ctx, d, meta)
 	} else {
-		return fmt.Errorf("couldn't validate the zpa policy redirection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+		return diag.FromErr(fmt.Errorf("couldn't validate the zpa policy redirection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name))
 	}
 }
 
-func resourcePolicyRedictionRuleRead(d *schema.ResourceData, meta interface{}) error {
-	service := meta.(*Client).PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
-
-	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, "REDIRECTION_POLICY")
+func resourcePolicyRedictionRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	zClient := meta.(*Client)
+	service := zClient.Service
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, "REDIRECTION_POLICY")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", globalPolicySet.ID, d.Id())
-	resp, _, err := policysetcontroller.GetPolicyRule(service, globalPolicySet.ID, d.Id())
+	resp, _, err := policysetcontroller.GetPolicyRule(ctx, service, globalPolicySet.ID, d.Id())
 	if err != nil {
-		if obj, ok := err.(*client.ErrorResponse); ok && obj.IsObjectNotFound() {
+		if obj, ok := err.(*errorx.ErrorResponse); ok && obj.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Got Policy Set Redirection Rule:\n%+v\n", resp)
@@ -136,53 +145,64 @@ func resourcePolicyRedictionRuleRead(d *schema.ResourceData, meta interface{}) e
 	return nil
 }
 
-func resourcePolicyRedictionRuleUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcePolicyRedictionRuleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Validate the "action" and "service_edge_groups" attributes
 	if err := validatePolicyRedirectionRuleAction(d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	zClient := meta.(*Client)
-	service := zClient.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, "REDIRECTION_POLICY")
+	service := zClient.Service
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, "REDIRECTION_POLICY")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	ruleID := d.Id()
 	log.Printf("[INFO] Updating policy redirection rule ID: %v\n", ruleID)
 	req, err := expandCreatePolicyRedirectionRule(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	if err := ValidateConditions(req.Conditions, zClient, req.MicroTenantID); err == nil {
-		if _, _, err := policysetcontroller.GetPolicyRule(service, globalPolicySet.ID, ruleID); err != nil {
-			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if err := ValidateConditions(ctx, req.Conditions, zClient, req.MicroTenantID); err == nil {
+		if _, _, err := policysetcontroller.GetPolicyRule(ctx, service, globalPolicySet.ID, ruleID); err != nil {
+			if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 				d.SetId("")
 				return nil
 			}
 		}
 
-		if _, err := policysetcontroller.UpdateRule(service, globalPolicySet.ID, ruleID, req); err != nil {
-			return err
+		if _, err := policysetcontroller.UpdateRule(ctx, service, globalPolicySet.ID, ruleID, req); err != nil {
+			return diag.FromErr(err)
 		}
 
-		return resourcePolicyRedictionRuleRead(d, meta)
+		return resourcePolicyRedictionRuleRead(ctx, d, meta)
 	} else {
-		return fmt.Errorf("couldn't validate the zpa policy redirection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name)
+		return diag.FromErr(fmt.Errorf("couldn't validate the zpa policy redirection (%s) operands, please make sure you are using valid inputs for APP type, LHS & RHS", req.Name))
 	}
 }
 
-func resourcePolicyRedictionRuleDelete(d *schema.ResourceData, meta interface{}) error {
-	service := meta.(*Client).PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, "REDIRECTION_POLICY")
+func resourcePolicyRedictionRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	zClient := meta.(*Client)
+	service := zClient.Service
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, "REDIRECTION_POLICY")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Deleting policy redirection rule with id %v\n", d.Id())
 
-	if _, err := policysetcontroller.Delete(service, globalPolicySet.ID, d.Id()); err != nil {
-		return err
+	if _, err := policysetcontroller.Delete(ctx, service, globalPolicySet.ID, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -214,39 +234,3 @@ func expandCreatePolicyRedirectionRule(d *schema.ResourceData) (*policysetcontro
 		ServiceEdgeGroups: expandCommonServiceEdgeGroups(d),
 	}, nil
 }
-
-/*
-func expandPolicysetControllerServiceEdgeGroups(d *schema.ResourceData) []policysetcontroller.ServiceEdgeGroups {
-	serviceEdgeGroupsInterface, ok := d.GetOk("service_edge_groups")
-	if ok {
-		edgeGroup := serviceEdgeGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] service edge groups data: %+v\n", edgeGroup)
-		var edgeGroups []policysetcontroller.ServiceEdgeGroups
-		for _, edgeGroup := range edgeGroup.List() {
-			edgeGroup, _ := edgeGroup.(map[string]interface{})
-			if edgeGroup != nil {
-				for _, id := range edgeGroup["id"].(*schema.Set).List() {
-					edgeGroups = append(edgeGroups, policysetcontroller.ServiceEdgeGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return edgeGroups
-	}
-
-	return []policysetcontroller.ServiceEdgeGroups{}
-}
-
-func flattenPolicyRuleServiceEdgeGroups(serviceEdgeGroup []policysetcontroller.ServiceEdgeGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serviceEdgeGroup))
-	for i, serviceEdgeGroup := range serviceEdgeGroup {
-		ids[i] = serviceEdgeGroup.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-*/

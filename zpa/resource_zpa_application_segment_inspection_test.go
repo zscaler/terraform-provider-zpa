@@ -1,16 +1,17 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegmentinspection"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentinspection"
 )
 
 func TestAccResourceApplicationSegmentInspection_Basic(t *testing.T) {
@@ -58,11 +59,11 @@ func TestAccResourceApplicationSegmentInspection_Basic(t *testing.T) {
 				),
 			},
 			// Import test
-			// {
-			// 	ResourceName:      appSegmentTypeAndName,
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				ResourceName:      appSegmentTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -75,13 +76,22 @@ func testAccCheckApplicationSegmentInspectionDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, _, err := applicationsegmentinspection.GetByName(apiClient.ApplicationSegmentInspection, rs.Primary.Attributes["name"])
-		if err == nil {
-			return fmt.Errorf("Inspection Application Segment Inspection still exists")
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
 		}
 
-		return nil
+		appSegment, _, err := applicationsegmentinspection.Get(context.Background(), service, rs.Primary.ID)
+		if err == nil {
+			return fmt.Errorf("id %s already exists", rs.Primary.ID)
+		}
+
+		if appSegment != nil {
+			return fmt.Errorf("application segment inspection with id %s exists and wasn't destroyed", rs.Primary.ID)
+		}
 	}
+
 	return nil
 }
 
@@ -96,7 +106,13 @@ func testAccCheckApplicationSegmentInspectionExists(resource string, segment *ap
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedSegment, _, err := applicationsegmentinspection.Get(apiClient.ApplicationSegmentInspection, rs.Primary.ID)
+		microTenantID := rs.Primary.Attributes["microtenant_id"]
+		service := apiClient.Service
+		if microTenantID != "" {
+			service = service.WithMicroTenant(microTenantID)
+		}
+
+		receivedSegment, _, err := applicationsegmentinspection.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

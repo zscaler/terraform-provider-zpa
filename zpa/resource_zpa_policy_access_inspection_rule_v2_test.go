@@ -1,15 +1,16 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
 )
 
 func TestAccResourcePolicyInspectionRuleV2_Basic(t *testing.T) {
@@ -60,7 +61,9 @@ func TestAccResourcePolicyInspectionRuleV2_Basic(t *testing.T) {
 
 func testAccCheckPolicyInspectionRuleV2Destroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
-	accessPolicy, _, err := policysetcontrollerv2.GetByPolicyType(apiClient.PolicySetControllerV2, "INSPECTION_POLICY")
+	service := apiClient.Service
+
+	accessPolicy, _, err := policysetcontrollerv2.GetByPolicyType(context.Background(), apiClient.Service, "INSPECTION_POLICY")
 	if err != nil {
 		return fmt.Errorf("failed fetching resource INSPECTION_POLICY. Recevied error: %s", err)
 	}
@@ -69,7 +72,7 @@ func testAccCheckPolicyInspectionRuleV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		rule, _, err := policysetcontrollerv2.GetPolicyRule(apiClient.PolicySetControllerV2, accessPolicy.ID, rs.Primary.ID)
+		rule, _, err := policysetcontrollerv2.GetPolicyRule(context.Background(), service, accessPolicy.ID, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -94,11 +97,12 @@ func testAccCheckPolicyInspectionRuleV2Exists(resource string) resource.TestChec
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		resp, _, err := policysetcontrollerv2.GetByPolicyType(apiClient.PolicySetControllerV2, "INSPECTION_POLICY")
+		service := apiClient.Service
+		resp, _, err := policysetcontrollerv2.GetByPolicyType(context.Background(), apiClient.Service, "INSPECTION_POLICY")
 		if err != nil {
 			return fmt.Errorf("failed fetching resource INSPECTION_POLICY. Recevied error: %s", err)
 		}
-		_, _, err = policysetcontrollerv2.GetPolicyRule(apiClient.PolicySetControllerV2, resp.ID, rs.Primary.ID)
+		_, _, err = policysetcontrollerv2.GetPolicyRule(context.Background(), service, resp.ID, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}

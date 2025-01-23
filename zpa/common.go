@@ -12,22 +12,23 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudconnectorgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/common"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/idpcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/machinegroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/platforms"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontroller"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/policysetcontrollerv2"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/postureprofile"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/samlattribute"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/scimattributeheader"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/segmentgroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/servergroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/serviceedgegroup"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/trustednetwork"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/machinegroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/platforms"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/postureprofile"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/samlattribute"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/scimattributeheader"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/scimgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/trustednetwork"
 )
 
 var (
@@ -58,45 +59,45 @@ func validateAndSetProfileNameID(d *schema.ResourceData) error {
 	return nil
 }
 
-func ValidateConditions(conditions []policysetcontroller.Conditions, zClient *Client, microtenantID string) error {
+func ValidateConditions(ctx context.Context, conditions []policysetcontroller.Conditions, zClient *Client, microtenantID string) error {
 	for _, condition := range conditions {
-		if err := validateOperands(condition.Operands, zClient, microtenantID); err != nil {
+		if err := validateOperands(ctx, condition.Operands, zClient, microtenantID); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func validateOperands(operands []policysetcontroller.Operands, zClient *Client, microtenantID string) error {
+func validateOperands(ctx context.Context, operands []policysetcontroller.Operands, zClient *Client, microtenantID string) error {
 	for _, operand := range operands {
-		if err := validateOperand(operand, zClient, microtenantID); err != nil {
+		if err := validateOperand(ctx, operand, zClient, microtenantID); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func validateOperand(operand policysetcontroller.Operands, zClient *Client, microtenantID string) error {
+func validateOperand(ctx context.Context, operand policysetcontroller.Operands, zClient *Client, microtenantID string) error {
 	switch operand.ObjectType {
 	case "APP":
 		return customValidate(operand, []string{"id"}, "application segment ID", Getter(func(id string) error {
-			_, _, err := applicationsegment.Get(zClient.ApplicationSegment.WithMicroTenant(microtenantID), id)
+			_, _, err := applicationsegment.Get(ctx, zClient.Service.WithMicroTenant(microtenantID), id)
 			return err
 		}))
 	case "APP_GROUP":
 		return customValidate(operand, []string{"id"}, "Segment Group ID", Getter(func(id string) error {
-			_, _, err := segmentgroup.Get(zClient.SegmentGroup.WithMicroTenant(microtenantID), id)
+			_, _, err := segmentgroup.Get(ctx, zClient.Service.WithMicroTenant(microtenantID), id)
 			return err
 		}))
 
 	case "IDP":
 		return customValidate(operand, []string{"id"}, "IDP ID", Getter(func(id string) error {
-			_, _, err := idpcontroller.Get(zClient.IDPController, id)
+			_, _, err := idpcontroller.Get(ctx, zClient.Service, id)
 			return err
 		}))
 	case "EDGE_CONNECTOR_GROUP":
 		return customValidate(operand, []string{"id"}, "cloud connector group ID", Getter(func(id string) error {
-			_, _, err := cloudconnectorgroup.Get(zClient.CloudConnectorGroup, id)
+			_, _, err := cloudconnectorgroup.Get(ctx, zClient.Service, id)
 			return err
 		}))
 	case "CLIENT_TYPE":
@@ -108,14 +109,14 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		}))
 	case "MACHINE_GRP":
 		return customValidate(operand, []string{"id"}, "machine group ID", Getter(func(id string) error {
-			_, _, err := machinegroup.Get(zClient.MachineGroup.WithMicroTenant(microtenantID), id)
+			_, _, err := machinegroup.Get(ctx, zClient.Service.WithMicroTenant(microtenantID), id)
 			return err
 		}))
 	case "POSTURE":
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, nil)
 		}
-		_, _, err := postureprofile.GetByPostureUDID(zClient.PostureProfile, operand.LHS)
+		_, _, err := postureprofile.GetByPostureUDID(ctx, zClient.Service, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, err)
 		}
@@ -127,7 +128,7 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, nil)
 		}
-		_, _, err := trustednetwork.GetByNetID(zClient.TrustedNetwork, operand.LHS)
+		_, _, err := trustednetwork.GetByNetID(ctx, zClient.Service, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid trusted network ID", operand.LHS, err)
 		}
@@ -139,7 +140,7 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, nil)
 		}
-		_, _, err := platforms.GetAllPlatforms(zClient.Platforms)
+		_, _, err := platforms.GetAllPlatforms(ctx, zClient.Service)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid platform ID", operand.LHS, err)
 		}
@@ -151,7 +152,7 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, nil)
 		}
-		_, _, err := samlattribute.Get(zClient.SAMLAttribute, operand.LHS)
+		_, _, err := samlattribute.Get(ctx, zClient.Service, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid SAML Attribute ID", operand.LHS, err)
 		}
@@ -166,14 +167,14 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, nil)
 		}
-		scim, _, err := scimattributeheader.Get(zClient.ScimAttributeHeader, operand.IdpID, operand.LHS)
+		scim, _, err := scimattributeheader.Get(ctx, zClient.Service, operand.IdpID, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, err)
 		}
 		if operand.RHS == "" {
 			return rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
 		}
-		values, _ := scimattributeheader.SearchValues(zClient.ScimAttributeHeader, scim.IdpID, scim.ID, operand.RHS)
+		values, _ := scimattributeheader.SearchValues(ctx, zClient.Service, scim.IdpID, scim.ID, operand.RHS)
 		if len(values) == 0 {
 			return rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
 		}
@@ -182,14 +183,16 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, nil)
 		}
-		_, _, err := idpcontroller.Get(zClient.IDPController, operand.LHS)
+		_, _, err := idpcontroller.Get(ctx, zClient.Service, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid IDP Controller ID", operand.LHS, err)
 		}
 		if operand.RHS == "" {
 			return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, nil)
 		}
-		_, _, err = zClient.ScimGroup.Get(operand.RHS)
+
+		// Call the Get function with ScimGroup as the service parameter
+		_, _, err = scimgroup.Get(ctx, zClient.Service, operand.RHS)
 		if err != nil {
 			return rhsWarn(operand.ObjectType, "SCIM Group ID", operand.RHS, err)
 		}
@@ -208,6 +211,20 @@ func validateOperand(operand policysetcontroller.Operands, zClient *Client, micr
 		validRHSValues := []string{"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"}
 		if !contains(validRHSValues, operand.RHS) {
 			return rhsWarn(operand.ObjectType, "\"UNKNOWN\", \"LOW\", \"MEDIUM\", \"HIGH\", \"CRITICAL\"", operand.RHS, nil)
+		}
+		return nil
+	case "CHROME_ENTERPRISE":
+		if operand.LHS == "" {
+			return lhsWarn(operand.ObjectType, "managed", operand.LHS, nil)
+		}
+		if operand.LHS != "managed" {
+			return lhsWarn(operand.ObjectType, "managed", operand.LHS, nil)
+		}
+		if operand.RHS == "" {
+			return rhsWarn(operand.ObjectType, "true/false", operand.RHS, nil)
+		}
+		if operand.RHS != "true" && operand.RHS != "false" {
+			return rhsWarn(operand.ObjectType, "true/false", operand.RHS, nil)
 		}
 		return nil
 	default:
@@ -616,9 +633,9 @@ func resourceAppSegmentPortRange(desc string) *schema.Schema {
 	}
 */
 func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
-	return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-		client := meta.(*Client)
-		service := client.PolicySetController
+	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+		zClient := meta.(*Client)
+		service := zClient.Service
 
 		microTenantID := GetString(d.Get("microtenant_id"))
 		if microTenantID != "" {
@@ -631,7 +648,7 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 			// assume if the passed value is an int
 			_ = d.Set("id", id)
 		} else {
-			resp, _, err := policysetcontroller.GetByNameAndTypes(service, types, id)
+			resp, _, err := policysetcontroller.GetByNameAndTypes(ctx, service, types, id)
 			if err == nil {
 				d.SetId(resp.ID)
 				_ = d.Set("id", resp.ID)
@@ -668,9 +685,9 @@ func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
 	}
 */
 func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
-	return func(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-		client := meta.(*Client)
-		service := client.PolicySetControllerV2
+	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+		zClient := meta.(*Client)
+		service := zClient.Service
 
 		microTenantID := GetString(d.Get("microtenant_id"))
 		if microTenantID != "" {
@@ -683,7 +700,7 @@ func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
 			// assume if the passed value is an int
 			_ = d.Set("id", id)
 		} else {
-			resp, _, err := policysetcontrollerv2.GetByNameAndTypes(service, types, id)
+			resp, _, err := policysetcontrollerv2.GetByNameAndTypes(ctx, service, types, id)
 			if err == nil {
 				d.SetId(resp.ID)
 				_ = d.Set("id", resp.ID)
@@ -797,7 +814,7 @@ func GetGlobalPolicySetByPolicyType(policysetcontroller services.Service, policy
 }
 */
 
-func GetGlobalPolicySetByPolicyType(client *Client, policyType string) (*policysetcontroller.PolicySet, error) {
+func GetGlobalPolicySetByPolicyType(ctx context.Context, zClient *Client, policyType string) (*policysetcontroller.PolicySet, error) {
 	// Check if the provided policy type is allowed
 	if _, ok := AllowedPolicyTypes[policyType]; !ok {
 		return nil, fmt.Errorf("invalid policy type: %s", policyType)
@@ -810,8 +827,8 @@ func GetGlobalPolicySetByPolicyType(client *Client, policyType string) (*policys
 		return &p, nil
 	}
 
-	service := client.PolicySetController
-	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, policyType)
+	service := zClient.Service
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, policyType)
 	if err != nil {
 		return nil, err
 	}
@@ -1212,20 +1229,37 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 						return fmt.Errorf("RHS must be a valid scim group ID and cannot be empty for SCIM_GROUP object_type")
 					}
 				}
+			case "CHROME_ENTERPRISE":
+				entryValuesSet, ok := operandMap["entry_values"].(*schema.Set)
+				if !ok || entryValuesSet.Len() == 0 {
+					return fmt.Errorf("entry_values must be provided for CHROME_ENTERPRISE object_type")
+				}
+				for _, ev := range entryValuesSet.List() {
+					evMap := ev.(map[string]interface{})
+					lhs, lhsOk := evMap["lhs"].(string)
+					rhs, rhsOk := evMap["rhs"].(string)
+
+					if !lhsOk || lhs == "" {
+						return fmt.Errorf("LHS must be a valid Chrome Enterprise ID and cannot be empty for CHROME_ENTERPRISE object_type")
+					}
+					if !rhsOk || (rhs != "true" && rhs != "false") {
+						return fmt.Errorf("rhs value must be 'true' for CHROME_ENTERPRISE object_type")
+					}
+				}
 			}
 		}
 	}
 	return nil
 }
 
-func fetchPolicySetIDByType(client *Client, policyType string, microTenantID string) (string, error) {
-	service := client.PolicySetControllerV2
+func fetchPolicySetIDByType(ctx context.Context, zClient *Client, policyType string, microTenantID string) (string, error) {
+	service := zClient.Service
 
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(service, policyType)
+	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, policyType)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch policy set ID for type '%s': %v", policyType, err)
 	}
@@ -1262,7 +1296,7 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 			switch operand.ObjectType {
 			case "APP", "APP_GROUP", "CONSOLE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE":
 				operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
-			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE", "RISK_FACTOR_TYPE":
+			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE", "RISK_FACTOR_TYPE", "CHROME_ENTERPRISE":
 				entryValuesMap[operand.ObjectType] = append(entryValuesMap[operand.ObjectType], policysetcontrollerv2.OperandsResourceLHSRHSValue{
 					LHS: operand.LHS,
 					RHS: operand.RHS,

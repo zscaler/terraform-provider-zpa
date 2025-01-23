@@ -1,24 +1,26 @@
 package zpa
 
 import (
+	"context"
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praconsole"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praconsole"
 )
 
 func resourcePRAConsoleController() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePRAConsoleControllerCreate,
-		Read:   resourcePRAConsoleControllerRead,
-		Update: resourcePRAConsoleControllerUpdate,
-		Delete: resourcePRAConsoleControllerDelete,
+		CreateContext: resourcePRAConsoleControllerCreate,
+		ReadContext:   resourcePRAConsoleControllerRead,
+		UpdateContext: resourcePRAConsoleControllerUpdate,
+		DeleteContext: resourcePRAConsoleControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.PRAConsole
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
+				service := zClient.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -31,7 +33,7 @@ func resourcePRAConsoleController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := praconsole.GetByName(service, id)
+					resp, _, err := praconsole.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -113,9 +115,9 @@ func resourcePRAConsoleController() *schema.Resource {
 	}
 }
 
-func resourcePRAConsoleControllerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourcePRAConsoleControllerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAConsole
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -125,34 +127,34 @@ func resourcePRAConsoleControllerCreate(d *schema.ResourceData, meta interface{}
 	req := expandPRAConsole(d)
 	log.Printf("[INFO] Creating pra console with request\n%+v\n", req)
 
-	praConsole, _, err := praconsole.Create(service, &req)
+	praConsole, _, err := praconsole.Create(ctx, service, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created pra console request. ID: %v\n", praConsole)
 
 	d.SetId(praConsole.ID)
-	return resourcePRAConsoleControllerRead(d, meta)
+	return resourcePRAConsoleControllerRead(ctx, d, meta)
 }
 
-func resourcePRAConsoleControllerRead(d *schema.ResourceData, meta interface{}) error {
+func resourcePRAConsoleControllerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAConsole
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := praconsole.Get(service, d.Id())
+	resp, _, err := praconsole.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing pra console %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting pra console controller:\n%+v\n", resp)
@@ -168,9 +170,9 @@ func resourcePRAConsoleControllerRead(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourcePRAConsoleControllerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcePRAConsoleControllerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAConsole
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -181,23 +183,23 @@ func resourcePRAConsoleControllerUpdate(d *schema.ResourceData, meta interface{}
 	log.Printf("[INFO] Updating pra console ID: %v\n", id)
 	req := expandPRAConsole(d)
 
-	if _, _, err := praconsole.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := praconsole.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := praconsole.Update(service, id, &req); err != nil {
-		return err
+	if _, err := praconsole.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourcePRAConsoleControllerRead(d, meta)
+	return resourcePRAConsoleControllerRead(ctx, d, meta)
 }
 
-func resourcePRAConsoleControllerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourcePRAConsoleControllerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAConsole
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -206,8 +208,8 @@ func resourcePRAConsoleControllerDelete(d *schema.ResourceData, meta interface{}
 
 	log.Printf("[INFO] Deleting pra console ID: %v\n", d.Id())
 
-	if _, err := praconsole.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := praconsole.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] pra console deleted")

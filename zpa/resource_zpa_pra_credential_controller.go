@@ -1,26 +1,28 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/pracredential"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/pracredential"
 )
 
 func resourcePRACredentialController() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePRACredentialControllerCreate,
-		Read:   resourcePRACredentialControllerRead,
-		Update: resourcePRACredentialControllerUpdate,
-		Delete: resourcePRACredentialControllerDelete,
+		CreateContext: resourcePRACredentialControllerCreate,
+		ReadContext:   resourcePRACredentialControllerRead,
+		UpdateContext: resourcePRACredentialControllerUpdate,
+		DeleteContext: resourcePRACredentialControllerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-				client := meta.(*Client)
-				service := client.PRACredential
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				zClient := meta.(*Client)
+				service := zClient.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -33,7 +35,7 @@ func resourcePRACredentialController() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := pracredential.GetByName(service, id)
+					resp, _, err := pracredential.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -108,9 +110,9 @@ func resourcePRACredentialController() *schema.Resource {
 	}
 }
 
-func resourcePRACredentialControllerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourcePRACredentialControllerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRACredential
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -122,35 +124,35 @@ func resourcePRACredentialControllerCreate(d *schema.ResourceData, meta interfac
 	sanitizeFields(&req)
 	log.Printf("[INFO] Creating credential controller with request\n%+v\n", req)
 
-	credController, _, err := pracredential.Create(service, &req)
+	credController, _, err := pracredential.Create(ctx, service, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Created credential controller request. ID: %v\n", credController)
 
 	d.SetId(credController.ID)
-	return resourcePRACredentialControllerRead(d, meta)
+	return resourcePRACredentialControllerRead(ctx, d, meta)
 }
 
-func resourcePRACredentialControllerRead(d *schema.ResourceData, meta interface{}) error {
+func resourcePRACredentialControllerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRACredential
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := pracredential.Get(service, d.Id())
+	resp, _, err := pracredential.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing credential controller %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting credential controller:\n%+v\n", resp)
@@ -163,37 +165,42 @@ func resourcePRACredentialControllerRead(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourcePRACredentialControllerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourcePRACredentialControllerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	if d.HasChange("credential_type") {
 		oldType, newType := d.GetChange("credential_type")
-		return fmt.Errorf("changing 'credential_type' from '%s' to '%s' is not allowed", oldType, newType)
+		return diag.FromErr(fmt.Errorf("changing 'credential_type' from '%s' to '%s' is not allowed", oldType, newType))
 	}
 
 	zClient := meta.(*Client)
-	service := zClient.PRAApproval.WithMicroTenant(GetString(d.Get("microtenant_id")))
+	service := zClient.Service
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
 
 	id := d.Id()
 	log.Printf("[INFO] Updating credential controller ID: %v\n", id)
 
 	req := expandPRACredentialController(d)
 
-	if _, _, err := pracredential.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := pracredential.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := pracredential.Update(service, id, &req); err != nil {
-		return err
+	if _, err := pracredential.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourcePRACredentialControllerRead(d, meta)
+	return resourcePRACredentialControllerRead(ctx, d, meta)
 }
 
-func resourcePRACredentialControllerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourcePRACredentialControllerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRACredential
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -202,8 +209,8 @@ func resourcePRACredentialControllerDelete(d *schema.ResourceData, meta interfac
 
 	log.Printf("[INFO] Deleting credential controller ID: %v\n", d.Id())
 
-	if _, err := pracredential.Delete(service, d.Id()); err != nil {
-		return err
+	if _, err := pracredential.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] credential controller deleted")

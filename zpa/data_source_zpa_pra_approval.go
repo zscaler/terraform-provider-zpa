@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/privilegedremoteaccess/praapproval"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praapproval"
 )
 
 func dataSourcePRAPrivilegedApprovalController() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcePRAPrivilegedApprovalControllerRead,
+		ReadContext: dataSourcePRAPrivilegedApprovalControllerRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
@@ -119,30 +121,31 @@ func dataSourcePRAPrivilegedApprovalController() *schema.Resource {
 	}
 }
 
-func dataSourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourcePRAPrivilegedApprovalControllerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.PRAApproval
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
+
 	var resp *praapproval.PrivilegedApproval
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for pra approval controller %s\n", id)
-		res, _, err := praapproval.Get(service, id)
+		res, _, err := praapproval.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
 	emailID, ok := d.Get("email_ids").(string)
 	if id == "" && ok && emailID != "" {
 		log.Printf("[INFO] Getting data for pra approval email ID %s\n", emailID)
-		res, _, err := praapproval.GetByEmailID(service, emailID)
+		res, _, err := praapproval.GetByEmailID(ctx, service, emailID)
 		if err != nil {
-			return err
+			return diag.FromErr(err) // Wrap error using diag.FromErr
 		}
 		resp = res
 	}
@@ -158,14 +161,14 @@ func dataSourcePRAPrivilegedApprovalControllerRead(d *schema.ResourceData, meta 
 		_ = d.Set("microtenant_id", resp.MicroTenantID)
 
 		if err := d.Set("working_hours", flattenWorkingHours(resp.WorkingHours)); err != nil {
-			return fmt.Errorf("failed to read pra working hours %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read pra working hours %s", err))
 		}
 		if err := d.Set("applications", flattenPRAApplications(resp.Applications)); err != nil {
-			return fmt.Errorf("failed to read pra applications %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read pra applications %s", err))
 		}
 
 	} else {
-		return fmt.Errorf("couldn't find any pra privileged approval with id '%s'", id)
+		return diag.FromErr(fmt.Errorf("couldn't find any pra privileged approval with id '%s'", id))
 	}
 
 	return nil

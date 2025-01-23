@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbibannercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbibannercontroller"
 )
 
 func dataSourceCBIBanners() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCBIBannersRead,
+		ReadContext: dataSourceCBIBannersRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -52,26 +54,26 @@ func dataSourceCBIBanners() *schema.Resource {
 	}
 }
 
-func dataSourceCBIBannersRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCBIBannersRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIBannerController
+	service := zClient.Service
 
 	var resp *cbibannercontroller.CBIBannerController
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for cbi banner %s\n", id)
-		res, _, err := cbibannercontroller.Get(service, id)
+		res, _, err := cbibannercontroller.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data cbi banner name %s\n", name)
-		res, _, err := cbibannercontroller.GetByNameOrID(service, name)
+		res, _, err := cbibannercontroller.GetByNameOrID(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -87,7 +89,7 @@ func dataSourceCBIBannersRead(d *schema.ResourceData, meta interface{}) error {
 		_ = d.Set("is_default", resp.IsDefault)
 
 	} else {
-		return fmt.Errorf("couldn't find any cbi banner with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any cbi banner with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

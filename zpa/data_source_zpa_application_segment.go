@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
 )
 
 func dataSourceApplicationSegment() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceApplicationSegmentRead,
+		ReadContext: dataSourceApplicationSegmentRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -146,9 +148,9 @@ func dataSourceApplicationSegment() *schema.Resource {
 	}
 }
 
-func dataSourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.ApplicationSegment
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -159,18 +161,18 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) 
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for application segment %s\n", id)
-		res, _, err := applicationsegment.Get(service, id)
+		res, _, err := applicationsegment.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for application segment name %s\n", name)
-		res, _, err := applicationsegment.GetByName(service, name)
+		res, _, err := applicationsegment.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -200,26 +202,26 @@ func dataSourceApplicationSegmentRead(d *schema.ResourceData, meta interface{}) 
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
 
 		if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups)); err != nil {
-			return fmt.Errorf("failed to read app server groups %s", err)
+			return diag.FromErr(fmt.Errorf("failed to read app server groups %s", err))
 		}
 
 		if err := d.Set("tcp_port_ranges", resp.TCPPortRanges); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		if err := d.Set("udp_port_ranges", resp.UDPPortRanges); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 	} else {
-		return fmt.Errorf("couldn't find any application segment with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any application segment with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

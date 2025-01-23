@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/idpcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/idpcontroller"
 )
 
 func dataSourceIdpController() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdpControllerRead,
+		ReadContext: dataSourceIdpControllerRead,
 		Schema: map[string]*schema.Schema{
 			"admin_metadata": {
 				Type:     schema.TypeList,
@@ -185,26 +187,25 @@ func dataSourceIdpController() *schema.Resource {
 	}
 }
 
-func dataSourceIdpControllerRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdpControllerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.IDPController
-
+	service := zClient.Service
 	var resp *idpcontroller.IdpController
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for idp controller %s\n", id)
-		res, _, err := idpcontroller.Get(service, id)
+		res, _, err := idpcontroller.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for idp controller name %s\n", name)
-		res, _, err := idpcontroller.GetByName(service, name)
+		res, _, err := idpcontroller.GetByName(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -244,21 +245,21 @@ func dataSourceIdpControllerRead(d *schema.ResourceData, meta interface{}) error
 		// Set epoch attributes explicitly
 		creationTime, err := epochToRFC1123(resp.CreationTime, false)
 		if err != nil {
-			return fmt.Errorf("error formatting creation_time: %s", err)
+			return diag.FromErr(fmt.Errorf("error formatting creation_time: %s", err))
 		}
 		if err := d.Set("creation_time", creationTime); err != nil {
-			return fmt.Errorf("error setting creation_time: %s", err)
+			return diag.FromErr(fmt.Errorf("error setting creation_time: %s", err))
 		}
 
 		modifiedTime, err := epochToRFC1123(resp.ModifiedTime, false)
 		if err != nil {
-			return fmt.Errorf("error formatting modified_time: %s", err)
+			return diag.FromErr(fmt.Errorf("error formatting modified_time: %s", err))
 		}
 		if err := d.Set("modified_time", modifiedTime); err != nil {
-			return fmt.Errorf("error setting modified_time: %s", err)
+			return diag.FromErr(fmt.Errorf("error setting modified_time: %s", err))
 		}
 	} else {
-		return fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any idp controller with name '%s' or id '%s'", name, id))
 	}
 	return nil
 }

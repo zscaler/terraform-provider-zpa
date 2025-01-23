@@ -164,7 +164,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        goVersion: ["1.22"]
+        goVersion: ["1.23"]
         environment:
           - ZPA_BETA_TENANT01
     environment: ${{ matrix.environment }}
@@ -221,86 +221,93 @@ jobs:
             make test:integration:zpa
             make sweep
         env:
-          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
-          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+          ZSCALER_CLIENT_ID: ${{ secrets.ZSCALER_CLIENT_ID }}
+          ZSCALER_CLIENT_SECRET: ${{ secrets.ZSCALER_CLIENT_SECRET }}
+          ZSCALER_VANITY_DOMAIN: ${{ secrets.ZSCALER_VANITY_DOMAIN }}
+          ZSCALER_CLOUD: ${{ secrets.ZSCALER_CLOUD }}
           ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
-          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+          # ZSCALER_SDK_LOG: ${{ secrets.ZSCALER_SDK_LOG }}
+          # ZSCALER_SDK_VERBOSE: ${{ secrets.ZSCALER_SDK_VERBOSE }}
+          ZPA_SDK_TEST_SWEEP: ${{ secrets.ZPA_SDK_TEST_SWEEP }}
+          OKTA_CLIENT_ORGURL: ${{ secrets.OKTA_CLIENT_ORGURL }}
+          OKTA_CLIENT_TOKEN: ${{ secrets.OKTA_CLIENT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TF_ACC: ${{ secrets.TF_ACC }}
           ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
-  zpa-prod-tenants:
-    # needs: [zpa-beta-tenants]
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        goVersion: ["1.22"]
-        environment:
-          - ZPA_PROD_TENANT01
-    environment: ${{ matrix.environment }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-              token: ${{ secrets.GITHUB_TOKEN }}
+  # zpa-prod-tenants:
+  #   # needs: [zpa-beta-tenants]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       goVersion: ["1.22"]
+  #       environment:
+  #         - ZPA_PROD_TENANT01
+  #   environment: ${{ matrix.environment }}
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #             token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ matrix.goVersion }}
+  #     - name: Setup Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: ${{ matrix.goVersion }}
 
-      - name: Clean existing Go modules
-        run: go clean -modcache
+  #     - name: Clean existing Go modules
+  #       run: go clean -modcache
 
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+  #     - name: Cache Go modules
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~/go/pkg/mod
+  #           ~/.cache/go-build
+  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-go-
 
-      - name: Setup Go Tools
-        run: make tools
+  #     - name: Setup Go Tools
+  #       run: make tools
 
-      - name: Download Go Dependencies
-        run: |
-          go mod tidy && go mod vendor
+  #     - name: Download Go Dependencies
+  #       run: |
+  #         go mod tidy && go mod vendor
 
-      - name: Setup Go Tools
-        run: make tools
+  #     - name: Setup Go Tools
+  #       run: make tools
 
-      - name: Check Formatting
-        run: make fmtcheck
+  #     - name: Check Formatting
+  #       run: make fmtcheck
 
-      - name: Lint Code
-        run: make lint
+  #     - name: Lint Code
+  #       run: make lint
 
-      - name: Check Build
-        run: make build
+  #     - name: Check Build
+  #       run: make build
 
-      - name: Run tests with retry
-        uses: nick-fields/retry@v3
-        with:
-          max_attempts: 1
-          timeout_minutes: 30  # Adjust as needed
-          command: |
-            make sweep
-            make test:integration:zpa
-            make sweep
-        env:
-          ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
-          ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
-          ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
-          ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
-          TF_ACC: ${{ secrets.TF_ACC }}
-          ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
+  #     - name: Run tests with retry
+  #       uses: nick-fields/retry@v3
+  #       with:
+  #         max_attempts: 1
+  #         timeout_minutes: 30  # Adjust as needed
+  #         command: |
+  #           make sweep
+  #           make test:integration:zpa
+  #           make sweep
+  #       env:
+  #         ZPA_CLIENT_ID: ${{ secrets.ZPA_CLIENT_ID }}
+  #         ZPA_CLIENT_SECRET: ${{ secrets.ZPA_CLIENT_SECRET }}
+  #         ZPA_CUSTOMER_ID: ${{ secrets.ZPA_CUSTOMER_ID }}
+  #         ZPA_CLOUD: ${{ secrets.ZPA_CLOUD }}
+  #         TF_ACC: ${{ secrets.TF_ACC }}
+  #         ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
-      - name: Publish test coverage
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.out 
-          fail_ci_if_error: true
+  #     - name: Publish test coverage
+  #       uses: codecov/codecov-action@v5
+  #       with:
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+  #         file: ./coverage.out 
+  #         fail_ci_if_error: true

@@ -1,26 +1,27 @@
 package zpa
 
 import (
+	"context"
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
 )
 
 func resourceApplicationServer() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceApplicationServerCreate,
-		Read:   resourceApplicationServerRead,
-		Update: resourceApplicationServerUpdate,
-		Delete: resourceApplicationServerDelete,
+		CreateContext: resourceApplicationServerCreate,
+		ReadContext:   resourceApplicationServerRead,
+		UpdateContext: resourceApplicationServerUpdate,
+		DeleteContext: resourceApplicationServerDelete,
 		Importer: &schema.ResourceImporter{
-			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				client := meta.(*Client)
-				service := client.AppServerController
+				service := client.Service
 
 				microTenantID := GetString(d.Get("microtenant_id"))
 				if microTenantID != "" {
@@ -33,7 +34,7 @@ func resourceApplicationServer() *schema.Resource {
 					// assume if the passed value is an int
 					_ = d.Set("id", id)
 				} else {
-					resp, _, err := appservercontroller.GetByName(service, id)
+					resp, _, err := appservercontroller.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
 						_ = d.Set("id", resp.ID)
@@ -100,46 +101,46 @@ func resourceApplicationServer() *schema.Resource {
 	}
 }
 
-func resourceApplicationServerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationServerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppServerController
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	req := expandCreateAppServerRequest(d)
+	req := expandAppServerRequest(d)
 	log.Printf("[INFO] Creating zpa application server with request\n%+v\n", req)
 
-	resp, _, err := appservercontroller.Create(service, req)
+	resp, _, err := appservercontroller.Create(ctx, service, req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created application server request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceApplicationServerRead(d, meta)
+	return resourceApplicationServerRead(ctx, d, meta)
 }
 
-func resourceApplicationServerRead(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppServerController
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := appservercontroller.Get(service, d.Id())
+	resp, _, err := appservercontroller.Get(ctx, service, d.Id())
 	if err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing application server %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting application server:\n%+v\n", resp)
@@ -153,94 +154,53 @@ func resourceApplicationServerRead(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceApplicationServerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceApplicationServerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.AppServerController
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
-	log.Println("An update occurred")
 
-	if d.HasChanges("app_server_group_ids", "name", "description", "address", "enabled") {
-		log.Println("The AppServerGroupID, name, description or address has been changed")
+	id := d.Id()
+	log.Printf("[INFO] Updating application server ID: %v\n", id)
+	req := expandAppServerRequest(d)
 
-		if _, _, err := appservercontroller.Get(service, d.Id()); err != nil {
-			if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
-				d.SetId("")
-				return nil
-			}
-		}
-
-		if _, err := appservercontroller.Update(service, d.Id(), appservercontroller.ApplicationServer{
-			AppServerGroupIds: SetToStringSlice(d.Get("app_server_group_ids").(*schema.Set)),
-			Name:              d.Get("name").(string),
-			Description:       d.Get("description").(string),
-			Address:           d.Get("address").(string),
-			Enabled:           d.Get("enabled").(bool),
-			MicroTenantID:     d.Get("microtenant_id").(string),
-		}); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func resourceApplicationServerDelete(d *schema.ResourceData, meta interface{}) error {
-	zClient := meta.(*Client)
-	service := zClient.AppServerController
-
-	microTenantID := GetString(d.Get("microtenant_id"))
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
-	log.Printf("[INFO] Deleting application server ID: %v\n", d.Id())
-
-	err := removeServerFromGroup(service, d.Id())
-	if err != nil {
-		return err
-	}
-
-	if _, err = appservercontroller.Delete(service, d.Id()); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := appservercontroller.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
-		return err
 	}
 
+	if _, err := appservercontroller.Update(ctx, service, id, req); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceApplicationServerRead(ctx, d, meta)
+}
+
+func resourceApplicationServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	zClient := meta.(*Client)
+	service := zClient.Service
+
+	microTenantID := GetString(d.Get("microtenant_id"))
+	if microTenantID != "" {
+		service = service.WithMicroTenant(microTenantID)
+	}
+
+	// Call Delete with context and necessary parameters
+	if _, err := appservercontroller.Delete(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
+	}
+
+	d.SetId("")
+	log.Printf("[INFO] application server deleted successfully")
 	return nil
 }
 
-func removeServerFromGroup(service *services.Service, serverID string) error {
-	// Remove the reference to this server from server groups.
-
-	resp, _, err := appservercontroller.Get(service, serverID)
-	if err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
-			return nil
-		}
-		return err
-	}
-
-	if len(resp.AppServerGroupIds) != 0 {
-		log.Printf("[INFO] Removing server group ID/s from application server: %s", serverID)
-		resp.AppServerGroupIds = make([]string, 0)
-
-		log.Printf("[INFO] Updating server group ID: %s", serverID)
-		_, err = appservercontroller.Update(service, serverID, *resp)
-		if err != nil {
-			log.Printf("[ERROR] Failed to update application server ID: %s", serverID)
-			return err
-		}
-	}
-
-	return nil
-}
-
-func expandCreateAppServerRequest(d *schema.ResourceData) appservercontroller.ApplicationServer {
+func expandAppServerRequest(d *schema.ResourceData) appservercontroller.ApplicationServer {
 	applicationServer := appservercontroller.ApplicationServer{
 		ID:                d.Id(),
 		Address:           d.Get("address").(string),

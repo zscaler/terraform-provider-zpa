@@ -1,20 +1,24 @@
 package zpa
 
 import (
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	client "github.com/zscaler/zscaler-sdk-go/v2/zpa"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/emergencyaccess"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/emergencyaccess"
 )
 
 func resourceEmergencyAccess() *schema.Resource {
 	return &schema.Resource{
-		Create:   resourceEmergencyAccessCreate,
-		Read:     resourceEmergencyAccessRead,
-		Update:   resourceEmergencyAccessUpdate,
-		Delete:   resourceEmergencyAccessDeactivated,
-		Importer: &schema.ResourceImporter{},
+		CreateContext: resourceEmergencyAccessCreate,
+		ReadContext:   resourceEmergencyAccessRead,
+		UpdateContext: resourceEmergencyAccessUpdate,
+		DeleteContext: resourceEmergencyAccessDeactivated,
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 		Schema: map[string]*schema.Schema{
 			"user_id": {
 				Type:        schema.TypeString,
@@ -44,9 +48,9 @@ func resourceEmergencyAccess() *schema.Resource {
 	}
 }
 
-func resourceEmergencyAccessCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceEmergencyAccessCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.EmergencyAccess
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -56,34 +60,34 @@ func resourceEmergencyAccessCreate(d *schema.ResourceData, meta interface{}) err
 	req := expandEmergencyAccess(d)
 	log.Printf("[INFO] Creating emergency access user with request\n%+v\n", req)
 
-	emgAccess, _, err := emergencyaccess.Create(service, &req)
+	emgAccess, _, err := emergencyaccess.Create(ctx, service, &req)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Created emergency access user request. ID: %v\n", emgAccess)
 
 	d.SetId(emgAccess.UserID)
-	return resourceEmergencyAccessRead(d, meta)
+	return resourceEmergencyAccessRead(ctx, d, meta)
 }
 
-func resourceEmergencyAccessRead(d *schema.ResourceData, meta interface{}) error {
+func resourceEmergencyAccessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.EmergencyAccess
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := emergencyaccess.Get(service, d.Id())
+	resp, _, err := emergencyaccess.Get(ctx, service, d.Id())
 	if err != nil {
-		if errResp, ok := err.(*client.ErrorResponse); ok && errResp.IsObjectNotFound() {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing emergency access user %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
 		}
 
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] Getting emergency access user:\n%+v\n", resp)
@@ -94,9 +98,9 @@ func resourceEmergencyAccessRead(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceEmergencyAccessUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceEmergencyAccessUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.EmergencyAccess
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -107,23 +111,23 @@ func resourceEmergencyAccessUpdate(d *schema.ResourceData, meta interface{}) err
 	log.Printf("[INFO] Updating emergency access user ID: %v\n", id)
 	req := expandEmergencyAccess(d)
 
-	if _, _, err := emergencyaccess.Get(service, id); err != nil {
-		if respErr, ok := err.(*client.ErrorResponse); ok && respErr.IsObjectNotFound() {
+	if _, _, err := emergencyaccess.Get(ctx, service, id); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
 	}
 
-	if _, err := emergencyaccess.Update(service, id, &req); err != nil {
-		return err
+	if _, err := emergencyaccess.Update(ctx, service, id, &req); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return resourceEmergencyAccessRead(d, meta)
+	return resourceEmergencyAccessRead(ctx, d, meta)
 }
 
-func resourceEmergencyAccessDeactivated(d *schema.ResourceData, meta interface{}) error {
+func resourceEmergencyAccessDeactivated(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.EmergencyAccess
+	service := zClient.Service
 
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
@@ -132,8 +136,8 @@ func resourceEmergencyAccessDeactivated(d *schema.ResourceData, meta interface{}
 
 	log.Printf("[INFO] Deactivated Emergency Access User ID: %v\n", d.Id())
 
-	if _, err := emergencyaccess.Deactivate(service, d.Id()); err != nil {
-		return err
+	if _, err := emergencyaccess.Deactivate(ctx, service, d.Id()); err != nil {
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	log.Printf("[INFO] Emergency Access User ID deactivated")

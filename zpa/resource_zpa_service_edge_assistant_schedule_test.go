@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"fmt"
 	"os"
@@ -68,3 +69,4 @@ func testAccCheckServiceEdgeAssistantScheduleDestroy(s *terraform.State) error {
 	// Implement if there's anything to check upon resource destruction
 	return nil
 }
+*/

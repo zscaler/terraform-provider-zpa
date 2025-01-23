@@ -1,16 +1,18 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
 )
 
 func dataSourceCBIExternalProfile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCBIExternalProfileRead,
+		ReadContext: dataSourceCBIExternalProfileRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -212,26 +214,26 @@ func dataSourceCBIExternalProfile() *schema.Resource {
 	}
 }
 
-func dataSourceCBIExternalProfileRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCBIExternalProfileRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.CBIProfileController
+	service := zClient.Service
 
 	var resp *cbiprofilecontroller.IsolationProfile
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for CBI external profile ID: %s\n", id)
-		res, _, err := cbiprofilecontroller.Get(service, id)
+		res, _, err := cbiprofilecontroller.Get(ctx, service, id)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
 	name, ok := d.Get("name").(string)
 	if id == "" && ok && name != "" {
 		log.Printf("[INFO] Getting data for CBI external profile name: %s\n", name)
-		res, _, err := cbiprofilecontroller.GetByNameOrID(service, name)
+		res, _, err := cbiprofilecontroller.GetByNameOrID(ctx, service, name)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -255,7 +257,7 @@ func dataSourceCBIExternalProfileRead(d *schema.ResourceData, meta interface{}) 
 			_ = d.Set("debug_mode", flattenDebugMode(resp.DebugMode))
 		}
 	} else {
-		return fmt.Errorf("couldn't find any CBI external profile with name '%s' or id '%s'", name, id)
+		return diag.FromErr(fmt.Errorf("couldn't find any CBI external profile with name '%s' or id '%s'", name, id))
 	}
 
 	return nil

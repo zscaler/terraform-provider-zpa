@@ -125,7 +125,6 @@ resource "zpa_policy_access_rule_v2" "this" {
       }
     }
   }
-}
   conditions {
     operator = "OR"
     operands {
@@ -152,6 +151,21 @@ resource "zpa_policy_access_rule_v2" "this" {
       }
     }
   }
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "CHROME_ENTERPRISE"
+      entry_values {
+        lhs = "managed"
+        rhs = "true"
+      }
+      entry_values {
+        lhs = "managed"
+        rhs = "false"
+      }
+    }
+  }
+}
 ```
 
 ## Schema
@@ -224,6 +238,13 @@ resource "zpa_policy_access_rule_v2" "this" {
             - `lhs` - (String) -  2 Letter Country in ``ISO 3166 Alpha2 Code`` [Lear More](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_ENTERPRISE`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  Must be set to `managed`
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
@@ -256,3 +277,4 @@ terraform import zpa_policy_access_rule_v2.example <rule_id>
 | [TRUSTED_NETWORK](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network) | ``network_id``  | ``"true"`` |
 | [COUNTRY_CODE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_platforms) | [2 Letter ISO3166 Alpha2](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)  | ``"true"`` / ``"false"`` |
 | [RISK_FACTOR_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``ZIA``  | ``"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"`` |
+| [CHROME_ENTERPRISE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``managed``  | ``"true" / "false"`` |

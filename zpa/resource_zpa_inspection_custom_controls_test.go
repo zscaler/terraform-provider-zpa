@@ -1,15 +1,16 @@
 package zpa
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v3/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v2/zpa/services/inspectioncontrol/inspection_custom_controls"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
+	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/inspectioncontrol/inspection_custom_controls"
 )
 
 func TestAccResourceInspectionCustomControls_Basic(t *testing.T) {
@@ -61,13 +62,14 @@ func TestAccResourceInspectionCustomControls_Basic(t *testing.T) {
 
 func testAccCheckInspectionCustomControlsDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
+	service := apiClient.Service
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != resourcetype.ZPAInspectionCustomControl {
 			continue
 		}
 
-		rule, _, err := inspection_custom_controls.Get(apiClient.InspectionCustomControls, rs.Primary.ID)
+		rule, _, err := inspection_custom_controls.Get(context.Background(), service, rs.Primary.ID)
 
 		if err == nil {
 			return fmt.Errorf("id %s already exists", rs.Primary.ID)
@@ -92,7 +94,9 @@ func testAccCheckInspectionCustomControlsExists(resource string, rule *inspectio
 		}
 
 		apiClient := testAccProvider.Meta().(*Client)
-		receivedControl, _, err := inspection_custom_controls.Get(apiClient.InspectionCustomControls, rs.Primary.ID)
+		service := apiClient.Service
+
+		receivedControl, _, err := inspection_custom_controls.Get(context.Background(), service, rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("failed fetching resource %s. Recevied error: %s", resource, err)
 		}
