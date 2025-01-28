@@ -1,10 +1,21 @@
 # Changelog
 
-## 4.0.0 (January, 21 2025) - BREAKING CHANGES
+## 4.0.1 (January, 27 2025)
 
 ### Notes
 
-- Release date: **(January 21, 2025)**
+- Release date: **(January, 27 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhacements
+
+- [PR #516](https://github.com/zscaler/terraform-provider-zpa/pull/516) - Removed `ConflictsWith` validation from `provider.go`. 
+
+## 4.0.0 (January, 22 2025) - BREAKING CHANGES
+
+### Notes
+
+- Release date: **(January 22, 2025)**
 - Supported Terraform version: **v1.x**
 
 #### Enhancements - Zscaler OneAPI Support
