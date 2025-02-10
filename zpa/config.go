@@ -113,6 +113,20 @@ func NewConfig(d *schema.ResourceData) *Config {
 		config.vanityDomain = os.Getenv("ZSCALER_VANITY_DOMAIN")
 	}
 
+	if val, ok := d.GetOk("zscaler_cloud"); ok {
+		config.cloud = val.(string)
+	}
+	if config.cloud == "" && os.Getenv("ZSCALER_CLOUD") != "" {
+		config.cloud = os.Getenv("ZSCALER_CLOUD")
+	}
+
+	if val, ok := d.GetOk("customer_id"); ok {
+		config.customerID = val.(string)
+	}
+	if config.customerID == "" && os.Getenv("ZPA_CUSTOMER_ID") != "" {
+		config.customerID = os.Getenv("ZPA_CUSTOMER_ID")
+	}
+
 	if val, ok := d.GetOk("zpa_client_id"); ok {
 		config.zpaClientID = val.(string)
 	}
@@ -141,25 +155,11 @@ func NewConfig(d *schema.ResourceData) *Config {
 		config.BaseURL = os.Getenv("ZPA_CLOUD")
 	}
 
-	if val, ok := d.GetOk("customer_id"); ok {
-		config.customerID = val.(string)
-	}
-	if config.customerID == "" && os.Getenv("ZPA_CUSTOMER_ID") != "" {
-		config.customerID = os.Getenv("ZPA_CUSTOMER_ID")
-	}
-
 	if val, ok := d.GetOk("microtenant_id"); ok {
 		config.microtenantID = val.(string)
 	}
 	if config.microtenantID == "" && os.Getenv("ZPA_MICROTENANT_ID") != "" {
 		config.microtenantID = os.Getenv("ZPA_MICROTENANT_ID")
-	}
-
-	if val, ok := d.GetOk("cloud"); ok {
-		config.cloud = val.(string)
-	}
-	if config.cloud == "" && os.Getenv("ZSCALER_CLOUD") != "" {
-		config.cloud = os.Getenv("ZSCALER_CLOUD")
 	}
 
 	if val, ok := d.GetOk("max_retries"); ok {
