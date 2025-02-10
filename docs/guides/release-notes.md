@@ -12,9 +12,24 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.0.1``
+``Last updated: v4.0.2``
 
 ---
+
+## 4.0.2 (February, 10 2025)
+
+### Notes
+
+- Release date: **(February, 10 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #522](https://github.com/zscaler/terraform-provider-zpa/pull/522) - Re-introduced attribute `cname` for the resource and data source `zpa_application_segment_browser_access` as a `Computed` only attribute.
+
+### Internal Changes
+- [PR #522](https://github.com/zscaler/terraform-provider-zpa/pull/522) - Updated `version.go` to `v4.0.2`
+- [PR #522](https://github.com/zscaler/terraform-provider-zpa/pull/522) - Upgraded provider to [Zscaler SDK GO v3.1.4](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v3.1.4) to fix rate limiting override panic issues.
 
 ## 4.0.1 (January, 27 2025)
 
