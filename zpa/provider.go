@@ -57,17 +57,11 @@ func ZPAProvider() *schema.Provider {
 				Sensitive:   true,
 				Description: "zpa microtenant ID",
 			},
-			"cloud": {
+			"zscaler_cloud": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Cloud to use PRODUCTION, BETA",
-				ValidateFunc: func(val any, key string) (warns []string, errs []error) {
-					v := val.(string)
-					if strings.HasPrefix(v, "https://") {
-						return
-					}
-					return validation.StringInSlice([]string{"PRODUCTION", "BETA", "GOV"}, true)(val, key)
-				},
+				Sensitive:   true,
+				Description: "Zscaler Cloud Name",
 			},
 			"zpa_client_id": {
 				Type:        schema.TypeString,

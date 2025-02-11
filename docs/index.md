@@ -113,7 +113,7 @@ on-demand sync of newly created roles.
 
 ### Default Environment variables
 
-You can provide credentials via the `ZSCALER_CLIENT_ID`, `ZSCALER_CLIENT_SECRET`, `ZSCALER_VANITY_DOMAIN`, `ZSCALER_CLOUD` environment variables, representing your Zidentity OneAPI credentials `clientId`, `clientSecret`, `vanityDomain` and `cloud` respectively.
+You can provide credentials via the `ZSCALER_CLIENT_ID`, `ZSCALER_CLIENT_SECRET`, `ZSCALER_VANITY_DOMAIN`, `ZSCALER_CLOUD` environment variables, representing your Zidentity OneAPI credentials `clientId`, `clientSecret`, `vanityDomain` and `zscaler_cloud` respectively.
 
 | Argument        | Description                                                                                         | Environment Variable     |
 |-----------------|-----------------------------------------------------------------------------------------------------|--------------------------|
@@ -123,7 +123,7 @@ You can provide credentials via the `ZSCALER_CLIENT_ID`, `ZSCALER_CLIENT_SECRET`
 | `customer_id`   | _(String)_ A string that contains the ZPA customer ID which identifies the tenant                   | `ZPA_CUSTOMER_ID`    |
 | `microtenant_id`| _(String)_ A string that contains the ZPA microtenant ID which identifies the tenant                | `ZPA_MICROTENANT_ID`    |
 | `vanity_domain` | _(String)_ Refers to the domain name used by your organization.                                     | `ZSCALER_VANITY_DOMAIN`  |
-| `cloud`         | _(String)_ The name of the Zidentity cloud, e.g., beta.                                             | `ZSCALER_CLOUD`          |
+| `zscaler_cloud`         | _(String)_ The name of the Zidentity cloud, e.g., beta.                                             | `ZSCALER_CLOUD`          |
 
 ### Alternative OneAPI Cloud Environments
 
@@ -132,36 +132,13 @@ OneAPI supports authentication and can interact with alternative Zscaler enviorn
 | Argument         | Description                                                                                         |   | Environment Variable     |
 |------------------|-----------------------------------------------------------------------------------------------------|---|--------------------------|
 | `vanity_domain`   | _(String)_ Refers to the domain name used by your organization |   | `ZSCALER_VANITY_DOMAIN`  |
-| `cloud`          | _(String)_ The name of the Zidentity cloud i.e beta      |   | `ZSCALER_CLOUD`          |
+| `zscaler_cloud`          | _(String)_ The name of the Zidentity cloud i.e beta      |   | `ZSCALER_CLOUD`          |
 
 For example: Authenticating to Zscaler Beta environment:
 
 ```sh
 export ZSCALER_VANITY_DOMAIN="acme"
 export ZSCALER_CLOUD="beta"
-```
-
-### OneAPI Framework - Configuration file
-
-You can use a configuration file to specify your credentials. The
-file location must be `$HOME/.zscaler/zscaler.yaml` on Linux and OS X, or
-`"%USERPROFILE%\.zscaler/zscaler.yaml"` for Windows users.
-If we fail to detect credentials inline, or in the environment variable, Terraform will check
-this location.
-
-Usage:
-
-```terraform
-provider "zpa" {}
-```
-
-```yaml
-zscaler:
-  client:
-    client_id: "{yourClientId}"
-    client_secret: "{yourClientSecret}"
-    vanity_domain: "{youVanityDomain}"
-    cloud: "{yourZidentityCloud}"
 ```
 
 ## Legacy API Framework
@@ -230,30 +207,6 @@ $env:ZPA_CLIENT_SECRET='xxxxxxxxxxxxxxxx'
 $env:ZPA_CUSTOMER_ID='xxxxxxxxxxxxxxxx'
 $env:ZSCALER_USE_LEGACY_CLIENT=true
 terraform plan
-```
-
-### Legacy API Framework - Configuration file
-
-You can use a configuration file to specify your credentials. The
-file location must be `$HOME/.zscaler/zscaler.yaml` on Linux and OS X, or
-`"%USERPROFILE%\.zscaler/zscaler.yaml"` for Windows users.
-If we fail to detect credentials inline, or in the environment variable, Terraform will check
-this location.
-
-Usage:
-
-```terraform
-provider "zpa" {}
-```
-
-```yaml
-zpa:
-  client:
-    zpa_client_id: "{yourClientId}"
-    zpa_client_secret: "{yourClientSecret}"
-    zpa_customer_id: "{youCustomerId}"
-    use_legacy_client: true
-
 ```
 
 ## Argument Reference
