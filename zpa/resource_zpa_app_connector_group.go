@@ -179,7 +179,9 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Name of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
 				ValidateFunc: validation.StringInSlice([]string{
-					"Default", "Previous Default", "New Release",
+					"Default", "Previous Default",
+					"New Release", "Default - el8",
+					"New Release - el8", "Previous Default - el8",
 				}, false),
 			},
 			"version_profile_id": {
@@ -187,9 +189,9 @@ func resourceAppConnectorGroup() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "ID of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
-				ValidateFunc: validation.StringInSlice([]string{
-					"0", "1", "2",
-				}, false),
+				// ValidateFunc: validation.StringInSlice([]string{
+				// 	"0", "1", "2",
+				// }, false),
 			},
 		},
 	}
@@ -204,9 +206,11 @@ func resourceAppConnectorGroupCreate(ctx context.Context, d *schema.ResourceData
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	if err := validateAndSetProfileNameID(d); err != nil {
+	// Ensure version_profile_id is set if version_profile_name is provided
+	if err := validateAndSetProfileNameID(ctx, d, service); err != nil {
 		return diag.FromErr(err)
 	}
+
 	req := expandAppConnectorGroup(d)
 	log.Printf("[INFO] Creating zpa app connector group with request\n%+v\n", req)
 
@@ -278,9 +282,11 @@ func resourceAppConnectorGroupUpdate(ctx context.Context, d *schema.ResourceData
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	if err := validateAndSetProfileNameID(d); err != nil {
+	// Ensure version_profile_id is set if version_profile_name is provided
+	if err := validateAndSetProfileNameID(ctx, d, service); err != nil {
 		return diag.FromErr(err)
 	}
+
 	id := d.Id()
 	log.Printf("[INFO] Updating app connector group ID: %v\n", id)
 	req := expandAppConnectorGroup(d)
