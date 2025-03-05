@@ -2,7 +2,6 @@ package zpa
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -12,10 +11,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/customerversionprofile"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/idpcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/machinegroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/platforms"
@@ -37,25 +38,56 @@ var (
 )
 
 // Common values shared between Service Edge Groups and App Connector Groups
-var versionProfileNameIDMapping map[string]string = map[string]string{
-	"Default":          "0",
-	"Previous Default": "1",
-	"New Release":      "2",
-}
+// var versionProfileNameIDMapping map[string]string = map[string]string{
+// 	"Default":          "0",
+// 	"Previous Default": "1",
+// 	"New Release":      "2",
+// }
 
 // Common validation shared between Service Edge Groups and App Connector Groups
-func validateAndSetProfileNameID(d *schema.ResourceData) error {
-	_, versionProfileIDSet := d.GetOk("version_profile_id")
-	versionProfileName, versionProfileNameSet := d.GetOk("version_profile_name")
-	if versionProfileNameSet && d.HasChange("version_profile_name") {
-		if id, ok := versionProfileNameIDMapping[versionProfileName.(string)]; ok {
-			d.Set("version_profile_id", id)
-		}
+// func validateAndSetProfileNameID(d *schema.ResourceData) error {
+// 	_, versionProfileIDSet := d.GetOk("version_profile_id")
+// 	versionProfileName, versionProfileNameSet := d.GetOk("version_profile_name")
+// 	if versionProfileNameSet && d.HasChange("version_profile_name") {
+// 		if id, ok := versionProfileNameIDMapping[versionProfileName.(string)]; ok {
+// 			d.Set("version_profile_id", id)
+// 		}
+// 		return nil
+// 	}
+// 	if !versionProfileNameSet && !versionProfileIDSet {
+// 		return errors.New("one of version_profile_id or version_profile_name must be set")
+// 	}
+// 	return nil
+// }
+
+func validateAndSetProfileNameID(ctx context.Context, d *schema.ResourceData, service *zscaler.Service) error {
+	// Ensure override_version_profile is true, otherwise we skip this logic
+	overrideVersionProfile := d.Get("override_version_profile").(bool)
+	if !overrideVersionProfile {
+		return nil // Skip processing if override_version_profile is false
+	}
+
+	// If version_profile_id is already set, return (user explicitly provided it)
+	if vpid, ok := d.GetOk("version_profile_id"); ok && vpid.(string) != "" {
 		return nil
 	}
-	if !versionProfileNameSet && !versionProfileIDSet {
-		return errors.New("one of version_profile_id or version_profile_name must be set")
+
+	// Retrieve version_profile_name
+	versionProfileName, ok := d.GetOk("version_profile_name")
+	if !ok || versionProfileName.(string) == "" {
+		return fmt.Errorf("version_profile_name must be provided when override_version_profile is enabled")
 	}
+
+	// Lookup version_profile_id using version_profile_name
+	resp, _, err := customerversionprofile.GetByName(ctx, service, versionProfileName.(string))
+	if err != nil {
+		return fmt.Errorf("failed to find version profile with name %s: %v", versionProfileName, err)
+	}
+
+	// Set version_profile_id based on the lookup result
+	_ = d.Set("version_profile_id", resp.ID)
+	log.Printf("[INFO] Automatically resolved version_profile_id: %s for version_profile_name: %s", resp.ID, versionProfileName)
+
 	return nil
 }
 

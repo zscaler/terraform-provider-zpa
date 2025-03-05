@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.0.3 (March, 5 2025)
+
+### Notes
+
+- Release date: **(March, 5 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #529](https://github.com/zscaler/terraform-provider-zpa/pull/529) - Improved attributes `version_profile_name` and `version_profile_id` in the resource `zpa_app_connector_group` and `zpa_service_edge_group`. Users can now use the attribute `version_profile_name` by providing the profile name and the provider will automatically retrieve and set the `version_profile_id`. The currently supported `version_profile_name` attribute values are:
+  - ``Default``, ``Previous Default``, ``New Release``, ``Default - el8``, ``New Release - el8``, ``Previous Default - el8``
+
+  **NOTE:** Users still leveraging the attribute `version_profile_id` directly can continue without impact to their existing configuration.
+
 ## 4.0.2 (February, 10 2025)
 
 ### Notes

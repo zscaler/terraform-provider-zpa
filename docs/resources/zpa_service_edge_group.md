@@ -14,7 +14,48 @@ description: |-
 
 The **zpa_service_edge_group** resource creates a service edge group in the Zscaler Private Access cloud. This resource can then be referenced in a service edge connector.
 
-## Example Usage
+## Example Usage - Using Version Profile Name
+
+```terraform
+# ZPA Service Edge Group resource - Trusted Network
+resource "zpa_service_edge_group" "service_edge_group_sjc" {
+  name                 = "Service Edge Group San Jose"
+  description          = "Service Edge Group in San Jose"
+  enabled              = true
+  is_public            = true
+  upgrade_day          = "SUNDAY"
+  upgrade_time_in_secs = "66600"
+  latitude             = "37.3382082"
+  longitude            = "-121.8863286"
+  location             = "San Jose, CA, USA"
+  version_profile_name = "New Release"
+  trusted_networks {
+    id = [ data.zpa_trusted_network.example.id ]
+  }
+}
+```
+
+```terraform
+# ZPA Service Edge Group resource - No Trusted Network
+resource "zpa_service_edge_group" "service_edge_group_nyc" {
+  name                 = "Service Edge Group New York"
+  description          = "Service Edge Group in New York"
+  enabled              = true
+  is_public            = true
+  upgrade_day          = "SUNDAY"
+  upgrade_time_in_secs = "66600"
+  latitude             = "40.7128"
+  longitude            = "-73.935242"
+  location             = "New York, NY, USA"
+  version_profile_id   = data.zpa_customer_version_profile.this.id 
+}
+```
+
+## Example Usage - Using Version Profile ID
+
+data "zpa_customer_version_profile" "this" {
+  name = "New Release"
+}
 
 ```terraform
 # ZPA Service Edge Group resource - Trusted Network
@@ -77,10 +118,17 @@ In addition to all arguments above, the following attributes are exported:
 - `grace_distance_value_unit`: Indicates the grace distance unit of measure in miles or kilometers. This value is only required if `grace_distance_enabled` is set to true. Support values are: `MILES` and `KMS`
 
 - `override_version_profile` - (Boolean) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
-- `version_profile_id` - (String) ID of the version profile. To learn more, see Version Profile Use Cases. Supported values are:
+
+- `version_profile_id` - (String) The unique identifier of the version profile. Supported values are:
   - ``0`` = ``Default``
   - ``1`` = ``Previous Default``
   - ``2`` = ``New Release``
+
+  **NOTE:** In order to retrieve other version profile IDs, you can leverage the data source `zpa_customer_version_profile`
+
+- `version_profile_name` - (String) The unique identifier of the version profile. Supported values are:
+  - ``Default``, ``Previous Default``, ``New Release``, ``Default - el8``, ``New Release - el8``, ``Previous Default - el8``
+
 - `service_edges` - (Block Set) The list of ZPA Private Service Edges in the ZPA Private Service Edge Group.
     - `id` - (List of Strings) The unique identifier of the ZPA Private Service Edge.
 - `trusted_networks` - (Block Set) Trusted networks for this Service Edge Group. List of trusted network objects
