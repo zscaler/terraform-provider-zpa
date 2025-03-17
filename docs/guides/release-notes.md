@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.0.5``
+``Last updated: v4.0.6``
 
 ---
+
+## 4.0.6 (March, 17 2025)
+
+### Notes
+
+- Release date: **(March, 17 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #537](https://github.com/zscaler/terraform-provider-zpa/pull/537) - Upgraded to [Zscaler SDK GO v3.1.10](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v3.1.8) to fix url encoding.
 
 ## 4.0.5 (March, 17 2025)
 
