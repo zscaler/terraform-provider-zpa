@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.0.5 (March, 17 2025)
+
+### Notes
+
+- Release date: **(March, 17 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #536](https://github.com/zscaler/terraform-provider-zpa/pull/536) - Upgraded to [Zscaler SDK GO v3.1.9](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v3.1.8) to fix url encoding.
+
 ## 4.0.4 (March, 15 2025)
 
 ### Notes
