@@ -14,6 +14,8 @@ description: |-
 
 Use the **zpa_application_server** data source to get information about an application server created in the Zscaler Private Access cloud. This data source must be used in the following circumstances:
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 1. Server Group (When Dynamic Discovery is set to false)
 
 ## Zenith Community - ZPA Application Server

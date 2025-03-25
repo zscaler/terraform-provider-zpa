@@ -14,6 +14,8 @@ description: |-
 
 The **zpa_trusted_network** data source to get information about a trusted network created in the Zscaler Private Access Mobile Portal. This data source can then be referenced within the following resources:
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 1. Access Policy
 2. Forwarding Policy
 3. Inspection Policy
