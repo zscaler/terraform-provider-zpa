@@ -6,13 +6,13 @@ require (
 	github.com/bflad/tfproviderlint v0.31.0
 	github.com/client9/misspell v0.3.4
 	github.com/fabiotavarespr/iso3166 v0.0.3
-	github.com/hashicorp/go-cty v1.4.1
+	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/terraform-plugin-docs v0.21.0
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.36.1
 	github.com/zscaler/terraform-provider-zpa/v3 v3.332.0
-	github.com/zscaler/zscaler-sdk-go/v3 v3.1.10
+	github.com/zscaler/zscaler-sdk-go/v3 v3.1.11
 )
 
 require (
@@ -33,7 +33,7 @@ require (
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
-	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
+	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect

@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0.7 (March, 25 2025)
+
+### Notes
+
+- Release date: **(March, 25 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #541](https://github.com/zscaler/terraform-provider-zpa/pull/541) - Upgraded to [Zscaler SDK GO v3.1.11](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v3.1.11) to fix url encoding.
+- [PR #541](https://github.com/zscaler/terraform-provider-zpa/pull/541) - Fixed PRA Console, PRA Portal, PRA Credentials detachment functions to ensure proper removal from associated policies.
+
 ## 4.0.6 (March, 17 2025)
 
 ### Notes
