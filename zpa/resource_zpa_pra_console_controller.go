@@ -2,12 +2,15 @@ package zpa
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praconsole"
 )
 
@@ -98,9 +101,8 @@ func resourcePRAConsoleController() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The unique identifier of the Privileged Remote Access-enabled application",
+							Type:     schema.TypeString,
+							Required: true,
 						},
 					},
 				},
@@ -164,8 +166,12 @@ func resourcePRAConsoleControllerRead(ctx context.Context, d *schema.ResourceDat
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("icon_text", resp.IconText)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
-	_ = d.Set("pra_application", flattenPRAApplicationIDSimple(resp.PRAApplication))
 	_ = d.Set("pra_portals", flattenPRAPortalIDSimple(resp.PRAPortals))
+
+	if v := flattenPRAApplicationIDSimple(resp.PRAApplication); v != nil {
+		log.Printf("[DEBUG] Setting pra_application in state: %+v\n", v)
+		_ = d.Set("pra_application", v)
+	}
 
 	return nil
 }
@@ -201,6 +207,7 @@ func resourcePRAConsoleControllerDelete(ctx context.Context, d *schema.ResourceD
 	zClient := meta.(*Client)
 	service := zClient.Service
 
+	// Use MicroTenant if available
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
@@ -208,8 +215,13 @@ func resourcePRAConsoleControllerDelete(ctx context.Context, d *schema.ResourceD
 
 	log.Printf("[INFO] Deleting pra console ID: %v\n", d.Id())
 
+	// Detach the segment group from all policy rules before attempting to delete it
+	if err := detachPRAConsoleFromPolicy(ctx, d.Id(), service); err != nil {
+		return diag.FromErr(fmt.Errorf("error detaching pra console with ID %s from PolicySetControllers: %s", d.Id(), err))
+	}
+
 	if _, err := praconsole.Delete(ctx, service, d.Id()); err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("error deleting pra console with ID %s: %s", d.Id(), err))
 	}
 	d.SetId("")
 	log.Printf("[INFO] pra console deleted")
@@ -239,12 +251,10 @@ func expandPRAApplication(d *schema.ResourceData) *praconsole.PRAApplication {
 		if len(applicationList) > 0 {
 			firstApplication, ok := applicationList[0].(map[string]interface{})
 			if !ok || firstApplication == nil {
-				// The first application is not a valid map, handle accordingly
 				return nil
 			}
 			id, ok := firstApplication["id"].(string)
 			if !ok || id == "" {
-				// The ID is not a string or is empty, handle accordingly
 				return nil
 			}
 			return &praconsole.PRAApplication{
@@ -252,7 +262,7 @@ func expandPRAApplication(d *schema.ResourceData) *praconsole.PRAApplication {
 			}
 		}
 	}
-	return nil // No pra_application found or ID is empty
+	return nil
 }
 
 func expandPRAPortal(d *schema.ResourceData) []praconsole.PRAPortals {
@@ -289,9 +299,62 @@ func flattenPRAPortalIDSimple(praPortals []praconsole.PRAPortals) []interface{} 
 	return result
 }
 
-func flattenPRAApplicationIDSimple(praApplication praconsole.PRAApplication) []map[string]interface{} {
-	result := make([]map[string]interface{}, 1)
-	result[0] = make(map[string]interface{})
-	result[0]["id"] = praApplication.ID
-	return result
+func flattenPRAApplicationIDSimple(praApplication praconsole.PRAApplication) []interface{} {
+	if praApplication.ID == "" {
+		return nil
+	}
+	return []interface{}{
+		map[string]interface{}{
+			"id": praApplication.ID,
+		},
+	}
+}
+
+func detachPRAConsoleFromPolicy(ctx context.Context, id string, policySetControllerService *zscaler.Service) error {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
+
+	var rules []policysetcontroller.PolicyRule
+	types := []string{"CREDENTIAL_POLICY"}
+
+	for _, t := range types {
+		policySet, _, err := policysetcontroller.GetByPolicyType(ctx, policySetControllerService, t)
+		if err != nil {
+			return fmt.Errorf("failed to get policy set for type %s: %w", t, err)
+		}
+		r, _, err := policysetcontroller.GetAllByType(ctx, policySetControllerService, t)
+		if err != nil {
+			return fmt.Errorf("failed to get rules for policy type %s: %w", t, err)
+		}
+		for _, rule := range r {
+			rule.PolicySetID = policySet.ID
+			rules = append(rules, rule)
+		}
+	}
+
+	log.Printf("[INFO] detachPRAConsoleFromPolicy Updating policy rules, len:%d \n", len(rules))
+	for _, rr := range rules {
+		rule := rr
+		changed := false
+		for i, condition := range rr.Conditions {
+			operands := []policysetcontroller.Operands{}
+			for _, op := range condition.Operands {
+				if op.ObjectType == "APP" && op.LHS == "id" && op.RHS == id {
+					changed = true
+					continue
+				}
+				operands = append(operands, op)
+			}
+			rule.Conditions[i].Operands = operands
+		}
+		if len(rule.Conditions) == 0 {
+			rule.Conditions = []policysetcontroller.Conditions{}
+		}
+		if changed {
+			if _, err := policysetcontroller.UpdateRule(ctx, policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
+				return fmt.Errorf("failed to update rule ID %s in policy set %s: %w", rule.ID, rule.PolicySetID, err)
+			}
+		}
+	}
+	return nil
 }

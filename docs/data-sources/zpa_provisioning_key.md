@@ -19,6 +19,8 @@ Use the **zpa_provisioning_key** data source to get information about a provisio
 
 -> **NOTE** The ``association_type`` parameter is required in order to distinguish between ``CONNECTOR_GRP`` and ``SERVICE_EDGE_GRP``
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 ## Zenith Community - ZPA Provisioning Keys
 
 [![ZPA Terraform provider Video Series Ep3 - Provisioning Keys](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_provisioning_key.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEnCAI/video-zpa-terraform-provider-video-series-ep3-provisioning-keys)

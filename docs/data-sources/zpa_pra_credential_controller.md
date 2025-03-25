@@ -14,6 +14,8 @@ description: |-
 
 The **zpa_pra_credential_controller** resource creates a privileged remote access credential in the Zscaler Private Access cloud. This resource can then be referenced in an privileged access policy resource.
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 ## Example Usage
 
 ```terraform

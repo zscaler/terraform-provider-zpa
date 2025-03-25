@@ -16,6 +16,8 @@ The **zpa_microtenant_controller** data source to get information about a machin
 
 ⚠️ **WARNING:**: This feature is in limited availability and requires additional license. To learn more, contact Zscaler Support or your local account team.
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 ## Example Usage
 
 ```terraform

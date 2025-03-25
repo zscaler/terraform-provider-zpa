@@ -15,6 +15,8 @@ description: |-
 The **zpa_pra_console_controller** data source gets information about a privileged remote access console created in the Zscaler Private Access cloud.
 This resource can then be referenced in an privileged access policy credential and a privileged access portal resource.
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 ## Example Usage
 
 ```terraform

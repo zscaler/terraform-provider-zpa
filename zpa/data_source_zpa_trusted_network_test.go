@@ -7,9 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+// var networkNames = []string{
+// 	"BD Trusted Network 01",
+// 	"BD  TrustedNetwork  01",
+// 	"BD-TrustedNetwork03",
+// 	"BDTrustedNetwork",
+// }
+
 var networkNames = []string{
-	"BD Trusted Network 01",
-	"BD  TrustedNetwork  01",
 	"BD-TrustedNetwork03",
 	"BDTrustedNetwork",
 }

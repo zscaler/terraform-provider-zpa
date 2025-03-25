@@ -201,13 +201,13 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				}, false),
 			},
 			"common_apps_dto": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Computed: true,
 							Elem: &schema.Resource{
@@ -363,13 +363,8 @@ func resourceApplicationSegmentPRARead(ctx context.Context, d *schema.ResourceDa
 
 	// Map pra_apps to common_apps_dto.apps_config for state management
 	if err := mapPRAAppsToCommonApps(d, resp.PRAApps); err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("failed to map PRA apps to common apps: %v", err))
 	}
-
-	// Map pra_apps back to common_apps_dto.apps_config
-	// if err := mapPRAAppsToCommonApps(d, resp.PRAApps); err != nil {
-	// 	return err
-	// }
 
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
@@ -419,13 +414,11 @@ func resourceApplicationSegmentPRAUpdate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	// Perform the update
 	_, err = applicationsegmentpra.Update(ctx, service, id, &req)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating application segment: %v", err))
 	}
 
-	// Refresh the state after the update to ensure correctness
 	return resourceApplicationSegmentPRARead(ctx, d, meta)
 }
 
@@ -433,14 +426,10 @@ func resourceApplicationSegmentPRADelete(ctx context.Context, d *schema.Resource
 	zClient := meta.(*Client)
 	service := zClient.Service
 
-	// Use MicroTenant if available
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
-
-	// service := zClient.V3.ApplicationSegmentPRA.WithMicroTenant(GetString(d.Get("microtenant_id")))
-	// policySetControllerService := zClient.V3.PolicySetController.WithMicroTenant(GetString(d.Get("microtenant_id")))
 
 	log.Printf("[INFO] Deleting application segment pra with id %v\n", d.Id())
 	detachAppConnectorGroupFromAllAccessPolicyRules(ctx, d, service)
@@ -456,7 +445,7 @@ func resourceApplicationSegmentPRADelete(ctx context.Context, d *schema.Resource
 
 func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zClient *Client, id string) applicationsegmentpra.AppSegmentPRA {
 	microTenantID := GetString(d.Get("microtenant_id"))
-	service := zClient.Service // Unified service interface
+	service := zClient.Service
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
@@ -532,60 +521,58 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 func expandCommonAppsDto(d *schema.ResourceData) applicationsegmentpra.CommonAppsDto {
 	result := applicationsegmentpra.CommonAppsDto{}
 	if commonAppsInterface, ok := d.GetOk("common_apps_dto"); ok {
-		commonAppsList := commonAppsInterface.(*schema.Set).List()
+		commonAppsList := commonAppsInterface.([]interface{})
 		if len(commonAppsList) > 0 {
 			commonAppMap := commonAppsList[0].(map[string]interface{})
-			result.AppsConfig = expandAppsConfig(commonAppMap["apps_config"])
+			appsConfig := commonAppMap["apps_config"].([]interface{})
+			var appConfigs []applicationsegmentpra.AppsConfig
+
+			for _, appConfig := range appsConfig {
+				appConfigMap := appConfig.(map[string]interface{})
+
+				appTypesSet, ok := appConfigMap["app_types"].(*schema.Set)
+				var appTypes []string
+				if ok {
+					appTypes = interfaceSliceToStringSlice(appTypesSet.List())
+				}
+
+				appConfig := applicationsegmentpra.AppsConfig{
+					AppID:               appConfigMap["app_id"].(string),
+					PRAAppID:            appConfigMap["pra_app_id"].(string),
+					Name:                appConfigMap["name"].(string),
+					Enabled:             appConfigMap["enabled"].(bool),
+					Domain:              appConfigMap["domain"].(string),
+					ApplicationPort:     appConfigMap["application_port"].(string),
+					ApplicationProtocol: appConfigMap["application_protocol"].(string),
+					ConnectionSecurity:  appConfigMap["connection_security"].(string),
+					AppTypes:            appTypes,
+				}
+				appConfigs = append(appConfigs, appConfig)
+			}
+			result.AppsConfig = appConfigs
 		}
 	}
 	return result
 }
 
-func expandAppsConfig(appsConfigInterface interface{}) []applicationsegmentpra.AppsConfig {
-	appsConfig, ok := appsConfigInterface.(*schema.Set)
-	if !ok {
-		return []applicationsegmentpra.AppsConfig{}
+func interfaceSliceToStringSlice(in []interface{}) []string {
+	out := make([]string, len(in))
+	for i, v := range in {
+		out[i] = v.(string)
 	}
-	log.Printf("[INFO] apps config data: %+v\n", appsConfig)
-	var commonAppConfigDto []applicationsegmentpra.AppsConfig
-	for _, commonAppConfig := range appsConfig.List() {
-		appConfigMap, ok := commonAppConfig.(map[string]interface{})
-		if ok {
-			// Automatically set `name` to match `domain` to prevent drift
-			appConfigMap["name"] = appConfigMap["domain"].(string)
-
-			appTypesSet, ok := appConfigMap["app_types"].(*schema.Set)
-			if !ok {
-				continue
-			}
-			appTypes := SetToStringSlice(appTypesSet)
-			commonAppConfigDto = append(commonAppConfigDto, applicationsegmentpra.AppsConfig{
-				AppID:               appConfigMap["app_id"].(string),
-				PRAAppID:            appConfigMap["pra_app_id"].(string),
-				Name:                appConfigMap["name"].(string),
-				Enabled:             appConfigMap["enabled"].(bool),
-				Domain:              appConfigMap["domain"].(string),
-				ApplicationPort:     appConfigMap["application_port"].(string),
-				ApplicationProtocol: appConfigMap["application_protocol"].(string),
-				ConnectionSecurity:  appConfigMap["connection_security"].(string),
-				AppTypes:            appTypes,
-			})
-		}
-	}
-	return commonAppConfigDto
+	return out
 }
 
 func customizeDiffApplicationSegmentPRA(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	// Clear any diffs related to pra_apps to prevent it from being included in the plan or state
 	if d.HasChange("pra_apps") {
 		d.Clear("pra_apps")
 	}
 
-	commonAppsDto := d.Get("common_apps_dto").(*schema.Set).List()
+	commonAppsDto := d.Get("common_apps_dto").([]interface{})
 
 	for _, dto := range commonAppsDto {
 		dtoMap := dto.(map[string]interface{})
-		appsConfig := dtoMap["apps_config"].(*schema.Set).List()
+		appsConfig := dtoMap["apps_config"].([]interface{})
 
 		for _, appConfig := range appsConfig {
 			appConfigMap := appConfig.(map[string]interface{})
@@ -607,43 +594,66 @@ func customizeDiffApplicationSegmentPRA(ctx context.Context, d *schema.ResourceD
 }
 
 func mapPRAAppsToCommonApps(d *schema.ResourceData, praApps []applicationsegmentpra.PRAApps) error {
-	// If the API returned any PRA Apps, map them to common_apps_dto.apps_config
 	if len(praApps) == 0 {
 		return nil
 	}
 
-	// Create a single common_apps_dto with multiple apps_config blocks
-	commonAppsConfig := make([]interface{}, len(praApps))
-	for i, app := range praApps {
-		commonAppMap := map[string]interface{}{
-			"name":                 app.Name,
-			"domain":               app.Domain,
-			"application_protocol": app.ApplicationProtocol,
-			"application_port":     app.ApplicationPort,
-			"enabled":              app.Enabled,
-			"app_types":            []interface{}{"SECURE_REMOTE_ACCESS"},
-			"app_id":               app.AppID, // Populate app_id from praApps
-			"connection_security":  app.ConnectionSecurity,
+	currentCommonApps := d.Get("common_apps_dto").([]interface{})
+	var currentDomains []string
+	if len(currentCommonApps) > 0 {
+		appsConfig := currentCommonApps[0].(map[string]interface{})["apps_config"].([]interface{})
+		for _, app := range appsConfig {
+			currentDomains = append(currentDomains, app.(map[string]interface{})["domain"].(string))
 		}
-		// Only set pra_app_id if it's present in the response
-		if app.ID != "" {
-			commonAppMap["pra_app_id"] = app.ID // Populate pra_app_id from praApps
-		}
-		commonAppsConfig[i] = commonAppMap
 	}
 
-	// Wrap commonAppsConfig in the common_apps_dto block
+	praAppsMap := make(map[string]applicationsegmentpra.PRAApps)
+	for _, app := range praApps {
+		praAppsMap[app.Domain] = app
+	}
+
+	var commonAppsConfig []interface{}
+	for _, domain := range currentDomains {
+		if app, exists := praAppsMap[domain]; exists {
+			commonAppMap := map[string]interface{}{
+				"name":                 app.Name,
+				"domain":               app.Domain,
+				"application_protocol": app.ApplicationProtocol,
+				"application_port":     app.ApplicationPort,
+				"enabled":              app.Enabled,
+				"app_types":            []string{"SECURE_REMOTE_ACCESS"},
+				"app_id":               app.AppID,
+				"connection_security":  app.ConnectionSecurity,
+				"pra_app_id":           app.ID,
+			}
+			commonAppsConfig = append(commonAppsConfig, commonAppMap)
+		}
+	}
+
+	for _, app := range praApps {
+		if !contains(currentDomains, app.Domain) {
+			commonAppMap := map[string]interface{}{
+				"name":                 app.Name,
+				"domain":               app.Domain,
+				"application_protocol": app.ApplicationProtocol,
+				"application_port":     app.ApplicationPort,
+				"enabled":              app.Enabled,
+				"app_types":            []string{"SECURE_REMOTE_ACCESS"},
+				"app_id":               app.AppID,
+				"connection_security":  app.ConnectionSecurity,
+				"pra_app_id":           app.ID,
+			}
+			commonAppsConfig = append(commonAppsConfig, commonAppMap)
+		}
+	}
+
 	commonAppsDto := []interface{}{
 		map[string]interface{}{
 			"apps_config": commonAppsConfig,
 		},
 	}
 
-	// Set common_apps_dto in the resource data
-	if err := d.Set("common_apps_dto", commonAppsDto); err != nil {
-		return fmt.Errorf("failed to set common_apps_dto: %s", err)
-	}
-	return nil
+	return d.Set("common_apps_dto", commonAppsDto)
 }
 
 func setAppIDsInCommonAppsDto(d *schema.ResourceData, praApps []applicationsegmentpra.PRAApps) error {
@@ -656,14 +666,14 @@ func setAppIDsInCommonAppsDto(d *schema.ResourceData, praApps []applicationsegme
 	praAppID := praApps[0].ID
 
 	// Update the common_apps_dto with extracted app_id and pra_app_id values
-	commonAppsDto := d.Get("common_apps_dto").(*schema.Set).List()
+	commonAppsDto := d.Get("common_apps_dto").([]interface{})
 	if len(commonAppsDto) == 0 {
 		return fmt.Errorf("common_apps_dto block is missing")
 	}
 
 	// Update the first entry in commonAppsDto.appsConfig with app_id and pra_app_id
 	commonAppConfig := commonAppsDto[0].(map[string]interface{})
-	appsConfig := commonAppConfig["apps_config"].(*schema.Set).List()
+	appsConfig := commonAppConfig["apps_config"].([]interface{})
 
 	if len(appsConfig) > 0 {
 		appConfig := appsConfig[0].(map[string]interface{})
@@ -678,126 +688,3 @@ func setAppIDsInCommonAppsDto(d *schema.ResourceData, praApps []applicationsegme
 
 	return nil
 }
-
-/*
-func flattenPRAApps(apps []applicationsegmentpra.PRAApps) []interface{} {
-	if len(apps) == 0 {
-		return []interface{}{}
-	}
-
-	appsConfig := make([]interface{}, len(apps))
-	for i, app := range apps {
-		appConfigMap := map[string]interface{}{
-			"id":                   app.ID,
-			"name":                 app.Name,
-			"enabled":              app.Enabled,
-			"application_port":     app.ApplicationPort,
-			"application_protocol": app.ApplicationProtocol,
-			"domain":               app.Domain,
-			"app_id":               app.AppID,
-			"hidden":               app.Hidden,
-			"connection_security":  app.ConnectionSecurity,
-			"microtenant_id":       app.MicroTenantID,
-		}
-		appsConfig[i] = appConfigMap
-	}
-	return appsConfig
-}
-
-
-func checkForPRAPortsOverlap(client *Client, app applicationsegmentpra.AppSegmentPRA) error {
-	//lintignore:R018
-	time.Sleep(time.Second * time.Duration(rand.Intn(5)))
-
-	microTenantID := app.MicroTenantID
-	service := client.ApplicationSegmentPRA
-	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
-	}
-
-	apps, _, err := applicationsegmentpra.GetAll(service)
-	if err != nil {
-		return err
-	}
-	for _, app2 := range apps {
-		if found, common := sliceHasCommon(app.DomainNames, app2.DomainNames); found && app2.ID != app.ID && app2.Name != app.Name {
-			// check for TCP ports
-			if overlap, o1, o2 := PRAPortOverlap(app.TCPPortRanges, app2.TCPPortRanges); overlap {
-				return fmt.Errorf("found TCP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
-			}
-			// check for UDP ports
-			if overlap, o1, o2 := PRAPortOverlap(app.UDPPortRanges, app2.UDPPortRanges); overlap {
-				return fmt.Errorf("found UDP overlapping ports: %v of application %s with %v of application %s (%s) with common domain name %s", o1, app.Name, o2, app2.Name, app2.ID, common)
-			}
-		}
-	}
-	return nil
-}
-
-func PRAPortOverlap(s1, s2 []string) (bool, []string, []string) {
-	for i1 := 0; i1 < len(s1); i1 += 2 {
-		port1Start, _ := strconv.Atoi(s1[i1])
-		port1End, _ := strconv.Atoi(s1[i1+1])
-		port1Start, port1End = int(math.Min(float64(port1Start), float64(port1End))), int(math.Max(float64(port1Start), float64(port1End)))
-		for i2 := 0; i2 < len(s2); i2 += 2 {
-			port2Start, _ := strconv.Atoi(s2[i2])
-			port2End, _ := strconv.Atoi(s2[i2+1])
-			port2Start, port2End = int(math.Min(float64(port2Start), float64(port2End))), int(math.Max(float64(port2Start), float64(port2End)))
-			if port1Start == port2Start || port1End == port2End || port1Start == port2End || port2Start == port1End {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-			if port1Start < port2Start && port1End > port2Start {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-			if port1End < port2End && port1End > port2Start {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-			if port2Start < port1Start && port2End > port1Start {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-			if port2End < port1End && port2End > port1Start {
-				return true, s1[i1 : i1+2], s2[i2 : i2+2]
-			}
-		}
-	}
-	return false, nil, nil
-}
-*/
-
-/*
-func expandPRAAppServerGroups(d *schema.ResourceData) []applicationsegmentpra.AppServerGroups {
-	serverGroupsInterface, ok := d.GetOk("server_groups")
-	if ok {
-		serverGroup := serverGroupsInterface.(*schema.Set)
-		log.Printf("[INFO] app server groups data: %+v\n", serverGroup)
-		var serverGroups []applicationsegmentpra.AppServerGroups
-		for _, appServerGroup := range serverGroup.List() {
-			appServerGroup, _ := appServerGroup.(map[string]interface{})
-			if ok {
-				for _, id := range appServerGroup["id"].(*schema.Set).List() {
-					serverGroups = append(serverGroups, applicationsegmentpra.AppServerGroups{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return serverGroups
-	}
-
-	return []applicationsegmentpra.AppServerGroups{}
-}
-*/
-
-/*
-func flattenPRAAppServerGroupsSimple(serverGroup []applicationsegmentpra.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroup))
-	for i, group := range serverGroup {
-		ids[i] = group.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-*/

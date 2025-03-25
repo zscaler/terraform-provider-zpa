@@ -14,6 +14,8 @@ description: |-
 
 Use the **zpa_application_segment_browser_access** data source to get information about a browser access application segment created in the Zscaler Private Access cloud. This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 ## Zenith Community - ZPA Browser Access Application Segment
 
 [![ZPA Terraform provider Video Series Ep8 - Browser Access Application Segment](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_browser_access_application_segments.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEGCAY/zpa-terraform-provider-video-series-ep8-zpa-browser-access-application-segment)

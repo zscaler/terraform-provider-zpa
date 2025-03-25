@@ -9,7 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/pracredential"
 )
 
@@ -209,6 +211,11 @@ func resourcePRACredentialControllerDelete(ctx context.Context, d *schema.Resour
 
 	log.Printf("[INFO] Deleting credential controller ID: %v\n", d.Id())
 
+	// Detach the pra credential from all policy rules before attempting to delete it
+	if err := detachPRACredentialFromPolicy(ctx, d.Id(), service); err != nil {
+		return diag.FromErr(fmt.Errorf("error detaching pra credential with ID %s from PolicySetControllers: %s", d.Id(), err))
+	}
+
 	if _, err := pracredential.Delete(ctx, service, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
@@ -231,4 +238,53 @@ func expandPRACredentialController(d *schema.ResourceData) pracredential.Credent
 		MicroTenantID:  d.Get("microtenant_id").(string),
 	}
 	return credController
+}
+
+func detachPRACredentialFromPolicy(ctx context.Context, id string, policySetControllerService *zscaler.Service) error {
+	policyRulesDetchLock.Lock()
+	defer policyRulesDetchLock.Unlock()
+
+	var rules []policysetcontroller.PolicyRule
+	types := []string{"CREDENTIAL_POLICY"}
+
+	for _, t := range types {
+		policySet, _, err := policysetcontroller.GetByPolicyType(ctx, policySetControllerService, t)
+		if err != nil {
+			return fmt.Errorf("failed to get policy set for type %s: %w", t, err)
+		}
+		r, _, err := policysetcontroller.GetAllByType(ctx, policySetControllerService, t)
+		if err != nil {
+			return fmt.Errorf("failed to get rules for policy type %s: %w", t, err)
+		}
+		for _, rule := range r {
+			rule.PolicySetID = policySet.ID
+			rules = append(rules, rule)
+		}
+	}
+
+	log.Printf("[INFO] detachPRAConsoleFromPolicy Updating policy rules, len:%d \n", len(rules))
+	for _, rr := range rules {
+		rule := rr
+		changed := false
+		for i, condition := range rr.Conditions {
+			operands := []policysetcontroller.Operands{}
+			for _, op := range condition.Operands {
+				if op.ObjectType == "APP" && op.LHS == "id" && op.RHS == id {
+					changed = true
+					continue
+				}
+				operands = append(operands, op)
+			}
+			rule.Conditions[i].Operands = operands
+		}
+		if len(rule.Conditions) == 0 {
+			rule.Conditions = []policysetcontroller.Conditions{}
+		}
+		if changed {
+			if _, err := policysetcontroller.UpdateRule(ctx, policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
+				return fmt.Errorf("failed to update rule ID %s in policy set %s: %w", rule.ID, rule.PolicySetID, err)
+			}
+		}
+	}
+	return nil
 }

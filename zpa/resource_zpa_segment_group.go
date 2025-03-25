@@ -207,18 +207,16 @@ func resourceSegmentGroupDelete(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("[INFO] Deleting segment group ID: %v\n", d.Id())
 
-	// Detach the segment group from all policy rules before attempting to delete it
 	if err := detachSegmentGroupFromAllPolicyRules(ctx, d.Id(), service); err != nil {
 		return diag.FromErr(fmt.Errorf("error detaching SegmentGroup with ID %s from PolicySetControllers: %s", d.Id(), err))
 	}
 
-	// Proceed with deletion of the segment group
 	if _, err := segmentgroup.Delete(ctx, service, d.Id()); err != nil {
 		return diag.FromErr(fmt.Errorf("error deleting SegmentGroup with ID %s: %s", d.Id(), err))
 	}
 
 	log.Printf("[INFO] Segment group with ID %s deleted", d.Id())
-	d.SetId("") // Indicate that the resource was successfully deleted.
+	d.SetId("")
 	return nil
 }
 

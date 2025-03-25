@@ -7,9 +7,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+// var machineGroupNames = []string{
+// 	"BD-MGR01", "BD-MGR02", "BD MGR 03", "BD  MGR  04", "BD   MGR   05",
+// 	"BD    MGR06", "BD  MGR 07", "BD  M GR   08", "BD   M   GR 09",
+// }
+
 var machineGroupNames = []string{
-	"BD-MGR01", "BD-MGR02", "BD MGR 03", "BD  MGR  04", "BD   MGR   05",
-	"BD    MGR06", "BD  MGR 07", "BD  M GR   08", "BD   M   GR 09",
+	"BD-MGR01", "BD-MGR02", "BD MGR 03",
 }
 
 func TestAccDataSourceMachineGroup_Basic(t *testing.T) {
