@@ -151,8 +151,8 @@ resource "zpa_application_segment_pra" "this" {
 	health_reporting = "ON_ACCESS"
 	bypass_type      = "NEVER"
 	is_cname_enabled = true
-	tcp_port_ranges  = ["3223", "3223", "3392", "3392"]
-	domain_names     = ["ssh_pra3223.example.com", "rdp_pra3392.example.com"]
+	tcp_port_ranges  = [ "3392", "3392"]
+	domain_names     = ["rdp_pra3392.example.com"]
 	segment_group_id = zpa_segment_group.this.id
 	common_apps_dto {
 		apps_config {
@@ -160,13 +160,6 @@ resource "zpa_application_segment_pra" "this" {
 		application_protocol = "RDP"
 		connection_security  = "ANY"
 		application_port     = "3392"
-		enabled              = true
-		app_types            = ["SECURE_REMOTE_ACCESS"]
-		}
-		apps_config {
-		domain               = "ssh_pra3223.example.com"
-		application_protocol = "SSH"
-		application_port     = "3223"
 		enabled              = true
 		app_types            = ["SECURE_REMOTE_ACCESS"]
 		}

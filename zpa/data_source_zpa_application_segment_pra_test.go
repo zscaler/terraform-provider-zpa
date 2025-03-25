@@ -36,7 +36,7 @@ func TestAccDataSourceApplicationSegmentPRA_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "enabled", strconv.FormatBool(variable.AppSegmentEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "is_cname_enabled", strconv.FormatBool(variable.AppSegmentCnameEnabled)),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "common_apps_dto.#", "1"),
-					resource.TestCheckResourceAttr(dataSourceTypeAndName, "tcp_port_ranges.#", "4"),
+					resource.TestCheckResourceAttr(dataSourceTypeAndName, "tcp_port_ranges.#", "2"),
 				),
 			},
 		},

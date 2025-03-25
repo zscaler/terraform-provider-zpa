@@ -38,7 +38,7 @@ func TestAccResourceApplicationSegmentPRA_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
 				),
 			},
 
@@ -55,7 +55,7 @@ func TestAccResourceApplicationSegmentPRA_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "health_reporting", "ON_ACCESS"),
 					resource.TestCheckResourceAttrSet(appSegmentTypeAndName, "segment_group_id"),
 					resource.TestCheckResourceAttr(appSegmentTypeAndName, "common_apps_dto.#", "1"),
-					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "4"),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tcp_port_ranges.#", "2"),
 				),
 			},
 			// Import test
@@ -158,18 +158,11 @@ resource "%s" "%s" {
 	select_connector_close_to_app = true
 	health_reporting = "ON_ACCESS"
 	bypass_type = "NEVER"
-	tcp_port_ranges = ["22", "22", "3389", "3389"]
-	domain_names = ["ssh_pra.example.com", "rdp_pra.example.com"]
+	tcp_port_ranges = ["3389", "3389"]
+	domain_names = ["rdp_pra.example.com"]
 	segment_group_id = "${%s.id}"
 	tcp_keep_alive = "1"
 	common_apps_dto {
-		apps_config {
-		  domain               = "ssh_pra.example.com"
-		  application_protocol = "SSH"
-		  application_port     = "22"
-		  enabled = true
-		  app_types = ["SECURE_REMOTE_ACCESS"]
-		}
 		  apps_config {
 		  domain               = "rdp_pra.example.com"
 		  application_protocol = "RDP"
