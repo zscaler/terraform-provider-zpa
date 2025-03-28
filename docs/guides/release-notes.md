@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.0.7``
+``Last updated: v4.0.8``
 
 ---
+
+## 4.0.8 (March, 28 2025)
+
+### Notes
+
+- Release date: **(March, 28 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #543](https://github.com/zscaler/terraform-provider-zpa/pull/543) - Fixed `detachPRAConsoleFromPolicy` function within the resource `zpa_pra_console_controller` to ensure proper resource deletion flow.
 
 ## 4.0.7 (March, 25 2025)
 

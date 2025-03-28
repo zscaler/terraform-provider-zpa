@@ -269,20 +269,6 @@ func dataSourceApplicationSegmentPRARead(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-/*
-func flattenSRAAppServerGroups(appServerGroup []applicationsegmentpra.AppServerGroups) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appServerGroup))
-	for i, serverGroup := range appServerGroup {
-		ids[i] = serverGroup.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
-*/
-
 func flattenSRAApps(sraApp *applicationsegmentpra.AppSegmentPRA) []interface{} {
 	sraApps := make([]interface{}, len(sraApp.PRAApps))
 	for i, val := range sraApp.PRAApps {
