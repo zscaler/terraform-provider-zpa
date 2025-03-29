@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.36.1
 	github.com/zscaler/terraform-provider-zpa/v3 v3.332.0
-	github.com/zscaler/zscaler-sdk-go/v3 v3.1.12
+	github.com/zscaler/zscaler-sdk-go/v3 v3.1.13
 )
 
 require (

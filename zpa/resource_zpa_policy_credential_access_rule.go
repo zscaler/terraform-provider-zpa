@@ -121,8 +121,7 @@ func resourcePolicyCredentialAccessRule() *schema.Resource {
 			},
 			"credential": {
 				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -245,27 +244,43 @@ func resourcePolicyCredentialAccessRuleUpdate(ctx context.Context, d *schema.Res
 	d.Set("policy_set_id", policySetID)
 	ruleID := d.Id()
 	log.Printf("[INFO] Updating policy credential rule ID: %v\n", ruleID)
+
 	req, err := expandCredentialPolicyRule(d, policySetID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := ValidatePolicyRuleConditions(d); err != nil {
-		return diag.FromErr(err)
-	}
+	// Retrieve the current state from the API
+	resp, respErr, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, ruleID)
+	log.Printf("[DEBUG] API returned credential ID: %+v", resp.Credential)
 
-	_, respErr, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, ruleID)
 	if err != nil {
-		if respErr != nil && (respErr.StatusCode == http.StatusNotFound) {
+		if respErr != nil && respErr.StatusCode == http.StatusNotFound {
 			d.SetId("")
 			return nil
 		}
 		return diag.FromErr(err)
 	}
 
+	// If Credential.ID is missing in the request, fallback to the value returned from the API
+	if req.Credential.ID == "" && resp != nil && resp.Credential.ID != "" {
+		log.Printf("[DEBUG] Credential ID missing in request, falling back to existing API value: %s", resp.Credential.ID)
+		req.Credential.ID = resp.Credential.ID
+	}
+
+	// Final validation
+	if req.Credential.ID == "" {
+		return diag.Errorf("credential block must be present and contain an ID during update")
+	}
+
+	if err := ValidatePolicyRuleConditions(d); err != nil {
+		return diag.FromErr(err)
+	}
+
 	if _, err := policysetcontrollerv2.UpdateRule(ctx, service, policySetID, ruleID, req); err != nil {
 		return diag.FromErr(err)
 	}
+
 	return resourcePolicyCredentialAccessRuleRead(ctx, d, meta)
 }
 
@@ -292,22 +307,42 @@ func resourcePolicyCredentialAccessRuleDelete(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func flattenCredential(credential *policysetcontrollerv2.Credential) []interface{} {
-	if credential == nil || credential.ID == "" {
+func flattenCredential(credential policysetcontrollerv2.Credential) []interface{} {
+	if credential.ID == "" {
 		return []interface{}{}
 	}
 
-	m := make(map[string]interface{})
-	m["id"] = credential.ID
-
+	m := map[string]interface{}{
+		"id": credential.ID,
+	}
 	return []interface{}{m}
 }
+
+// func expandCredentialPolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
+// 	conditions, err := ExpandPolicyConditionsV2(d)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	credential := expandCredential(d)
+
+// 	return &policysetcontrollerv2.PolicyRule{
+// 		ID:            d.Get("id").(string),
+// 		Name:          d.Get("name").(string),
+// 		Description:   d.Get("description").(string),
+// 		Action:        d.Get("action").(string),
+// 		MicroTenantID: d.Get("microtenant_id").(string),
+// 		PolicySetID:   policySetID,
+// 		Conditions:    conditions,
+// 		Credential:    credential,
+// 	}, nil
+// }
 
 func expandCredentialPolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
 	conditions, err := ExpandPolicyConditionsV2(d)
 	if err != nil {
 		return nil, err
 	}
+
 	credential := expandCredential(d)
 
 	return &policysetcontrollerv2.PolicyRule{
@@ -322,12 +357,33 @@ func expandCredentialPolicyRule(d *schema.ResourceData, policySetID string) (*po
 	}, nil
 }
 
-func expandCredential(d *schema.ResourceData) *policysetcontrollerv2.Credential {
-	if v, ok := d.GetOk("credential"); ok && len(v.([]interface{})) > 0 {
-		credentialMap := v.([]interface{})[0].(map[string]interface{})
-		return &policysetcontrollerv2.Credential{
-			ID: credentialMap["id"].(string),
-		}
+func expandCredential(d *schema.ResourceData) policysetcontrollerv2.Credential {
+	v := d.Get("credential")
+	if v == nil {
+		return policysetcontrollerv2.Credential{}
 	}
-	return nil
+
+	items, ok := v.([]interface{})
+	if !ok || len(items) == 0 || items[0] == nil {
+		return policysetcontrollerv2.Credential{}
+	}
+
+	credMap, ok := items[0].(map[string]interface{})
+	if !ok {
+		return policysetcontrollerv2.Credential{}
+	}
+
+	idRaw, ok := credMap["id"]
+	if !ok {
+		return policysetcontrollerv2.Credential{}
+	}
+
+	idStr, ok := idRaw.(string)
+	if !ok || idStr == "" {
+		return policysetcontrollerv2.Credential{}
+	}
+
+	return policysetcontrollerv2.Credential{
+		ID: idStr,
+	}
 }

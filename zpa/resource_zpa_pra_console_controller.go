@@ -2,15 +2,18 @@ package zpa
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/privilegedremoteaccess/praconsole"
 )
 
@@ -205,26 +208,24 @@ func resourcePRAConsoleControllerUpdate(ctx context.Context, d *schema.ResourceD
 
 func resourcePRAConsoleControllerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
-	service := zClient.Service
+	svc := zClient.Service
 
-	// Use MicroTenant if available
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
-		service = service.WithMicroTenant(microTenantID)
+		svc = svc.WithMicroTenant(microTenantID)
 	}
 
-	log.Printf("[INFO] Deleting pra console ID: %v\n", d.Id())
-
-	// Detach the segment group from all policy rules before attempting to delete it
-	if err := detachPRAConsoleFromPolicy(ctx, d.Id(), service); err != nil {
-		return diag.FromErr(fmt.Errorf("error detaching pra console with ID %s from PolicySetControllers: %s", d.Id(), err))
+	// Detach the PRA console from any credential policies.
+	if err := detachPRAConsoleFromPolicy(ctx, d.Id(), svc); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to detach PRA console from policy: %w", err))
 	}
 
-	if _, err := praconsole.Delete(ctx, service, d.Id()); err != nil {
-		return diag.FromErr(fmt.Errorf("error deleting pra console with ID %s: %s", d.Id(), err))
+	log.Printf("[INFO] Deleting PRA console ID: %v", d.Id())
+	if _, err := praconsole.Delete(ctx, svc, d.Id()); err != nil {
+		return diag.FromErr(fmt.Errorf("error deleting PRA console with ID %s: %s", d.Id(), err))
 	}
 	d.SetId("")
-	log.Printf("[INFO] pra console deleted")
+	log.Printf("[INFO] PRA console deleted")
 	return nil
 }
 
@@ -310,51 +311,95 @@ func flattenPRAApplicationIDSimple(praApplication praconsole.PRAApplication) []i
 	}
 }
 
-func detachPRAConsoleFromPolicy(ctx context.Context, id string, policySetControllerService *zscaler.Service) error {
+func detachPRAConsoleFromPolicy(ctx context.Context, id string, svc *zscaler.Service) error {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
 
-	var rules []policysetcontroller.PolicyRule
-	types := []string{"CREDENTIAL_POLICY"}
+	// Get all rules for relevant policy types (expand if needed)
+	types := []string{"CREDENTIAL_POLICY"} // Add others if needed
+	var allRules []policysetcontrollerv2.PolicyRuleResource
 
 	for _, t := range types {
-		policySet, _, err := policysetcontroller.GetByPolicyType(ctx, policySetControllerService, t)
+		policySet, _, err := policysetcontrollerv2.GetByPolicyType(ctx, svc, t)
 		if err != nil {
 			return fmt.Errorf("failed to get policy set for type %s: %w", t, err)
 		}
-		r, _, err := policysetcontroller.GetAllByType(ctx, policySetControllerService, t)
+
+		rules, _, err := policysetcontrollerv2.GetAllByType(ctx, svc, t)
 		if err != nil {
 			return fmt.Errorf("failed to get rules for policy type %s: %w", t, err)
 		}
-		for _, rule := range r {
+
+		for _, rule := range rules {
 			rule.PolicySetID = policySet.ID
-			rules = append(rules, rule)
+			allRules = append(allRules, rule)
 		}
 	}
 
-	log.Printf("[INFO] detachPRAConsoleFromPolicy Updating policy rules, len:%d \n", len(rules))
-	for _, rr := range rules {
-		rule := rr
-		changed := false
-		for i, condition := range rr.Conditions {
-			operands := []policysetcontroller.Operands{}
-			for _, op := range condition.Operands {
-				if op.ObjectType == "APP" && op.LHS == "id" && op.RHS == id {
-					changed = true
-					continue
+	// Track rules we modified
+	modifiedRules := make(map[string]bool)
+	// Phase 1: Update all rules to remove the PRA console reference
+	for _, rule := range allRules {
+		modifiedRules[rule.ID] = false
+		newConditions := []policysetcontrollerv2.PolicyRuleResourceConditions{}
+		for _, cond := range rule.Conditions {
+			newOperands := []policysetcontrollerv2.PolicyRuleResourceOperands{}
+			for _, op := range cond.Operands {
+				if strings.EqualFold(op.ObjectType, "CONSOLE") && strings.EqualFold(op.LHS, "id") {
+					log.Printf("[DEBUG] Detaching PRA console from rule %s, op: %+v , id: %s", rule.ID, op, id)
+					// Filter out our PRA console ID
+					if len(op.Values) > 0 {
+						filteredValues := []string{}
+						for _, v := range op.Values {
+							if v == id {
+								modifiedRules[rule.ID] = true
+								continue
+							}
+							filteredValues = append(filteredValues, v)
+						}
+						op.Values = filteredValues
+						if len(filteredValues) > 0 {
+							newOperands = append(newOperands, op)
+						}
+					} else if op.RHS == id {
+						modifiedRules[rule.ID] = true
+						continue
+					} else {
+						newOperands = append(newOperands, op)
+					}
+				} else {
+					newOperands = append(newOperands, op)
 				}
-				operands = append(operands, op)
 			}
-			rule.Conditions[i].Operands = operands
+
+			if len(newOperands) > 0 {
+				cond.Operands = newOperands
+				newConditions = append(newConditions, cond)
+			}
 		}
-		if len(rule.Conditions) == 0 {
-			rule.Conditions = []policysetcontroller.Conditions{}
-		}
-		if changed {
-			if _, err := policysetcontroller.UpdateRule(ctx, policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
-				return fmt.Errorf("failed to update rule ID %s in policy set %s: %w", rule.ID, rule.PolicySetID, err)
+
+		if modifiedRules[rule.ID] {
+			data, _ := json.MarshalIndent(rule.Conditions, "", "  ")
+			log.Printf("[DEBUG] rule Conditions before update: %s", string(data))
+			rule.Conditions = newConditions
+			data, _ = json.MarshalIndent(rule.Conditions, "", "  ")
+			log.Printf("[DEBUG] rule Conditionsafter update: %s", string(data))
+
+			// Retry updates in case of transient errors
+			maxRetries := 3
+			for i := 0; i < maxRetries; i++ {
+				convertedRule := ConvertV1ResponseToV2Request(rule)
+				_, err := policysetcontrollerv2.UpdateRule(ctx, svc, rule.PolicySetID, rule.ID, &convertedRule)
+				if err == nil {
+					break
+				}
+				if i == maxRetries-1 {
+					return fmt.Errorf("failed to update rule %s after %d attempts: %w", rule.ID, maxRetries, err)
+				}
+				time.Sleep(1 * time.Second)
 			}
 		}
 	}
+
 	return nil
 }

@@ -21,7 +21,7 @@ func dataSourcePRAConsoleController() *schema.Resource {
 			},
 			"name": {
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "The name of the privileged console",
 			},
 			"description": {
