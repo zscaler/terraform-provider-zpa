@@ -63,6 +63,7 @@ In addition to all arguments above, the following attributes are exported:
 - `select_connector_close_to_app` - (Boolean) Default: false. Boolean: `true`, `false`.
 - `use_in_dr_mode` (Boolean) Default: false. Boolean: `true`, `false`.
 - `is_incomplete_dr_config` (Boolean) Default: false. Boolean: `true`, `false`.
+- `fqdn_dns_check` - (Boolean) Supported values: `true`, `false`
 - `domain_names` - List of domains and IPs.
 - `segment_group_id` - (string)
 - `segment_group_name` - (string)

@@ -102,7 +102,7 @@ The following arguments are supported:
 - `latitude` - (String) Latitude for the Service Edge Group. Integer or decimal with values in the range of `-90` to `90`
 - `longitude` - (String) Longitude for the Service Edge Group. Integer or decimal with values in the range of `-180` to `180`
 - `location` - (String) Location of the App Connector Group. i.e ``"San Jose, CA, USA"``
-- `city_country` - (String) Whether Double Encryption is enabled or disabled for the app. i.e ``"San Jose, US"``
+- `city_country` - (String) The city and country of the App Connector i.e ``"San Jose, US"``
 - `country_code` - (String) Provide a 2 letter [ISO3166 Alpha2 Country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). i.e ``"US"``, ``"CA"``
 
 ### Optional
