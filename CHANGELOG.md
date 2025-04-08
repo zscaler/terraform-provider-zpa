@@ -1,5 +1,20 @@
 # Changelog
 
+## 4.0.9 (April, 8 2025)
+
+### Notes
+
+- Release date: **(April, 8 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #544](https://github.com/zscaler/terraform-provider-zpa/pull/544) - Added new attribute `fqdn_dns_check` to `zpa_application_segment` resources.
+
+### Bug Fixes
+
+- [PR #544](https://github.com/zscaler/terraform-provider-zpa/pull/544) - Fixed `zpa_service_edge_group` attributes `service_edges` and `trusted_networks` to prevent drifts due to attribute ordering.
+
 ## 4.0.8 (March, 28 2025)
 
 ### Notes

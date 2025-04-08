@@ -192,6 +192,7 @@ Supported values: `EXCLUSIVE`, `INCLUSIVE`. [Learn More](https://help.zscaler.co
 - `use_in_dr_mode` - (Boolean) Supported values: `true`, `false`
 - `is_incomplete_dr_config` - (Boolean) Supported values: `true`, `false`
 - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
+- `fqdn_dns_check` - (Boolean) Supported values: `true`, `false`
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

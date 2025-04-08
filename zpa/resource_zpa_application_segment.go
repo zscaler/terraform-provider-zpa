@@ -179,6 +179,10 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"fqdn_dns_check": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -320,6 +324,7 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
+	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups))
@@ -427,10 +432,10 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
-
-		ServerGroups:    expandCommonServerGroups(d),
-		TCPAppPortRange: []common.NetworkPorts{},
-		UDPAppPortRange: []common.NetworkPorts{},
+		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
+		ServerGroups:              expandCommonServerGroups(d),
+		TCPAppPortRange:           []common.NetworkPorts{},
+		UDPAppPortRange:           []common.NetworkPorts{},
 	}
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
