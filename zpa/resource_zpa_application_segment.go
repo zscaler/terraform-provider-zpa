@@ -323,7 +323,6 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("inspect_traffic_with_zia", resp.InspectTrafficWithZia)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
-	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))

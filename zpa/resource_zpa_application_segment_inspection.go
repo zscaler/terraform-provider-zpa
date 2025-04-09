@@ -193,7 +193,10 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"ip_anchored": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+			},
+			"fqdn_dns_check": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
@@ -381,6 +384,7 @@ func resourceApplicationSegmentInspectionRead(ctx context.Context, d *schema.Res
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("ip_anchored", resp.IPAnchored)
 	_ = d.Set("health_reporting", resp.HealthReporting)
+	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("tcp_protocols", resp.TCPProtocols)
 	_ = d.Set("udp_protocols", resp.UDPProtocols)
 	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups))
@@ -491,6 +495,7 @@ func expandInspectionApplicationSegment(ctx context.Context, d *schema.ResourceD
 		Enabled:                   d.Get("enabled").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		IPAnchored:                d.Get("ip_anchored").(bool),
+		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
 		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),

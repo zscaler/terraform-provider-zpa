@@ -170,7 +170,10 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"ip_anchored": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+			},
+			"fqdn_dns_check": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
@@ -358,6 +361,7 @@ func resourceApplicationSegmentPRARead(ctx context.Context, d *schema.ResourceDa
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
+	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("health_reporting", resp.HealthReporting)
 	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups))
 
@@ -464,6 +468,7 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
 		Enabled:                   d.Get("enabled").(bool),
 		IpAnchored:                d.Get("ip_anchored").(bool),
+		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
 		MicroTenantID:             d.Get("microtenant_id").(string),
 		IsCnameEnabled:            d.Get("is_cname_enabled").(bool),
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),

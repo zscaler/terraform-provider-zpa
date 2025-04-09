@@ -173,6 +173,10 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"fqdn_dns_check": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -360,6 +364,7 @@ func resourceApplicationSegmentBrowserAccessRead(ctx context.Context, d *schema.
 	_ = d.Set("select_connector_close_to_app", resp.SelectConnectorCloseToApp)
 	_ = d.Set("use_in_dr_mode", resp.UseInDrMode)
 	_ = d.Set("is_incomplete_dr_config", resp.IsIncompleteDRConfig)
+	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("tcp_keep_alive", resp.TCPKeepAlive)
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
@@ -491,6 +496,7 @@ func expandBrowserAccess(ctx context.Context, d *schema.ResourceData, zClient *C
 		SelectConnectorCloseToApp: d.Get("select_connector_close_to_app").(bool),
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
 		AppServerGroups:           expandCommonServerGroups(d),
 		ClientlessApps:            expandClientlessApps(d),
 

@@ -25,7 +25,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Enhancements
 
-- [PR #544](https://github.com/zscaler/terraform-provider-zpa/pull/544) - Added new attribute `fqdn_dns_check` to `zpa_application_segment` resources.
+- [PR #544](https://github.com/zscaler/terraform-provider-zpa/pull/544) - Added new attribute `fqdn_dns_check` to all application segment resources.
 
 ### Bug Fixes
 
