@@ -62,6 +62,7 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 			"custom_msg": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "This is for providing a customer message for the user.",
 			},
 			"conditions": {
