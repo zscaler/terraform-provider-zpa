@@ -32,7 +32,6 @@ resource "zpa_application_segment_pra" "this" {
   }
   common_apps_dto {
     apps_config {
-      name                 = "ssh_pra"
       domain               = "ssh_pra.example.com"
       application_protocol = "SSH"
       application_port     = "22"
@@ -40,7 +39,6 @@ resource "zpa_application_segment_pra" "this" {
       app_types = [ "SECURE_REMOTE_ACCESS" ]
     }
     apps_config {
-    name                 = "rdp_pra"
     domain               = "rdp_pra.example.com"
     application_protocol = "RDP"
     connection_security  = "ANY"

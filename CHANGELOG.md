@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.0.10 (April, 11 2025)
+
+### Notes
+
+- Release date: **(April, 11 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #546](https://github.com/zscaler/terraform-provider-zpa/pull/546) - Fixed drift issue with the resources `zpa_policy_access_rule` and `zpa_policy_access_rule_v2` due to pre-populated attribute `custom_msg`.
+
 ## 4.0.9 (April, 8 2025)
 
 ### Notes

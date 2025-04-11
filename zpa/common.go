@@ -491,6 +491,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"custom_msg": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Computed:    true,
 			Description: "This is for providing a customer message for the user.",
 		},
 		"default_rule": {
