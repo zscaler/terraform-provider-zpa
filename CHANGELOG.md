@@ -12,6 +12,7 @@
 - [PR #546](https://github.com/zscaler/terraform-provider-zpa/pull/546) - Fixed drift issue with the resources `zpa_policy_access_rule` and `zpa_policy_access_rule_v2` due to pre-populated attribute `custom_msg`.
 - [PR #546](https://github.com/zscaler/terraform-provider-zpa/pull/546) - Fixed `flattenServiceEdgeSimple` and `flattenAppTrustedNetworksSimple` functions in the resource `zpa_service_edge_group` to prevent drifts due to block count ordering.
 - [PR #546](https://github.com/zscaler/terraform-provider-zpa/pull/546) - Fixed provider block documentation due to missing required attribute/parameter `customer_id`
+- [PR #546](https://github.com/zscaler/terraform-provider-zpa/pull/546) - Fixed documentation for `zpa_application_segment_pra` by removing the attribute `name` from within the `common_apps_dto.apps_config` block as it's not required.
 
 ## 4.0.9 (April, 8 2025)
 
