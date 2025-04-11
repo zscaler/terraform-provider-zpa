@@ -388,31 +388,6 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 	return serviceEdgeGroup
 }
 
-// func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceEdgeController {
-// 	serviceEdgesGroupInterface, ok := d.GetOk("service_edges")
-// 	if ok {
-// 		serviceEdgeSet := serviceEdgesGroupInterface.(*schema.Set)
-// 		var serviceEdgesGroups []serviceedgecontroller.ServiceEdgeController
-
-// 		for _, serviceEdgeInterface := range serviceEdgeSet.List() {
-// 			serviceEdgeMap, ok := serviceEdgeInterface.(map[string]interface{})
-// 			if ok {
-// 				idSet, ok := serviceEdgeMap["id"].(*schema.Set)
-// 				if ok {
-// 					for _, id := range idSet.List() {
-// 						serviceEdgesGroups = append(serviceEdgesGroups, serviceedgecontroller.ServiceEdgeController{
-// 							ID: id.(string),
-// 						})
-// 					}
-// 				}
-// 			}
-// 		}
-// 		return serviceEdgesGroups
-// 	}
-
-// 	return []serviceedgecontroller.ServiceEdgeController{}
-// }
-
 func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceEdgeController {
 	serviceEdgesGroupInterface, ok := d.GetOk("service_edges")
 	if !ok {
@@ -451,35 +426,6 @@ func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceE
 	return serviceEdges
 }
 
-// func expandTrustedNetworks(d *schema.ResourceData) []trustednetwork.TrustedNetwork {
-// 	trustedNetworksInterface, ok := d.GetOk("trusted_networks")
-// 	if ok {
-// 		trustedNetworkSet, ok := trustedNetworksInterface.(*schema.Set)
-// 		if !ok {
-// 			return []trustednetwork.TrustedNetwork{}
-// 		}
-// 		log.Printf("[INFO] trusted network data: %+v\n", trustedNetworkSet)
-// 		var trustedNetworks []trustednetwork.TrustedNetwork
-// 		for _, trustedNetwork := range trustedNetworkSet.List() {
-// 			trustedNetworkMap, ok := trustedNetwork.(map[string]interface{})
-// 			if ok && trustedNetworkMap != nil {
-// 				idSet, ok := trustedNetworkMap["id"].(*schema.Set)
-// 				if !ok {
-// 					continue
-// 				}
-// 				for _, id := range idSet.List() {
-// 					trustedNetworks = append(trustedNetworks, trustednetwork.TrustedNetwork{
-// 						ID: id.(string),
-// 					})
-// 				}
-// 			}
-// 		}
-// 		return trustedNetworks
-// 	}
-
-// 	return []trustednetwork.TrustedNetwork{}
-// }
-
 func expandTrustedNetworks(d *schema.ResourceData) []trustednetwork.TrustedNetwork {
 	trustedNetworksInterface, ok := d.GetOk("trusted_networks")
 	if !ok {
@@ -509,69 +455,40 @@ func expandTrustedNetworks(d *schema.ResourceData) []trustednetwork.TrustedNetwo
 	}
 
 	if len(trustedNetworks) == 0 {
-		return nil // ✅ omit entirely
+		return nil
 	}
 
 	return trustedNetworks
 }
 
-// func flattenAppTrustedNetworksSimple(trustedNetworks []trustednetwork.TrustedNetwork) []interface{} {
-// 	result := make([]interface{}, 1)
-// 	mapIds := make(map[string]interface{})
-// 	ids := make([]string, len(trustedNetworks))
-// 	for i, networks := range trustedNetworks {
-// 		ids[i] = networks.ID
-// 	}
-// 	mapIds["id"] = ids
-// 	result[0] = mapIds
-// 	return result
-// }
-
 func flattenAppTrustedNetworksSimple(trustedNetworks []trustednetwork.TrustedNetwork) []interface{} {
 	if len(trustedNetworks) == 0 {
 		return nil
 	}
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(trustedNetworks))
-	for i, n := range trustedNetworks {
-		ids[i] = n.ID
-	}
-	mapIds["id"] = schema.NewSet(schema.HashString, stringSliceToInterfaceSlice(ids))
-	return []interface{}{mapIds}
-}
 
-func stringSliceToInterfaceSlice(input []string) []interface{} {
-	out := make([]interface{}, len(input))
-	for i, v := range input {
-		out[i] = v
-	}
-	return out
-}
+	var results []interface{}
 
-// func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeController) []interface{} {
-// 	result := make([]interface{}, 1)
-// 	mapIds := make(map[string]interface{})
-// 	ids := make([]string, len(serviceEdges))
-// 	for i, edges := range serviceEdges {
-// 		ids[i] = edges.ID
-// 	}
-// 	mapIds["id"] = ids
-// 	result[0] = mapIds
-// 	return result
-// }
+	for _, edge := range trustedNetworks {
+		results = append(results, map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, []interface{}{edge.ID}),
+		})
+	}
+
+	return results
+}
 
 func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeController) []interface{} {
 	if len(serviceEdges) == 0 {
 		return nil
 	}
 
-	ids := make([]string, len(serviceEdges))
-	for i, edge := range serviceEdges {
-		ids[i] = edge.ID
+	var results []interface{}
+
+	for _, edge := range serviceEdges {
+		results = append(results, map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, []interface{}{edge.ID}),
+		})
 	}
 
-	mapIds := make(map[string]interface{})
-	mapIds["id"] = schema.NewSet(schema.HashString, stringSliceToInterfaceSlice(ids))
-
-	return []interface{}{mapIds}
+	return results
 }

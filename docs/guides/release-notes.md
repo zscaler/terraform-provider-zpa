@@ -26,6 +26,8 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 ### Bug Fixes
 
 - [PR #546](https://github.com/zscaler/terraform-provider-zpa/pull/546) - Fixed drift issue with the resources `zpa_policy_access_rule` and `zpa_policy_access_rule_v2` due to pre-populated attribute `custom_msg`.
+- [PR #546](https://github.com/zscaler/terraform-provider-zpa/pull/546) - Fixed `flattenServiceEdgeSimple` and `flattenAppTrustedNetworksSimple` functions in the resource `zpa_service_edge_group` to prevent drifts due to block count ordering.
+- [PR #546](https://github.com/zscaler/terraform-provider-zpa/pull/546) - Fixed provider block documentation due to missing required attribute/parameter `customer_id`
 
 ## 4.0.9 (April, 8 2025)
 
