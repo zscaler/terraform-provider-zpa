@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0.11 (April, 14 2025)
+
+### Notes
+
+- Release date: **(April, 14 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+### Bug Fixes
+[PR #548](https://github.com/zscaler/zscaler-sdk-go/pull/548) - Set pointer in the `credential` block attribute in the ZPA `policysetcontrollerv2` resource.
+
 ## 4.0.10 (April, 11 2025)
 
 ### Notes

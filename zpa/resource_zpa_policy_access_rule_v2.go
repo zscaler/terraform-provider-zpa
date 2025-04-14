@@ -351,13 +351,33 @@ func resourcePolicyAccessV2Delete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
+// func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
+// 	conditions, err := ExpandPolicyConditionsV2(d)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return &policysetcontrollerv2.PolicyRule{
+// 		ID:                 d.Get("id").(string),
+// 		Name:               d.Get("name").(string),
+// 		Description:        d.Get("description").(string),
+// 		Action:             d.Get("action").(string),
+// 		CustomMsg:          d.Get("custom_msg").(string),
+// 		Operator:           d.Get("operator").(string),
+// 		PolicySetID:        policySetID,
+// 		Conditions:         conditions,
+// 		AppServerGroups:    expandCommonServerGroups(d),
+// 		AppConnectorGroups: expandCommonAppConnectorGroups(d),
+
+// 	}, nil
+// }
+
 func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
 	conditions, err := ExpandPolicyConditionsV2(d)
 	if err != nil {
 		return nil, err
 	}
-
-	return &policysetcontrollerv2.PolicyRule{
+	rule := &policysetcontrollerv2.PolicyRule{
 		ID:                 d.Get("id").(string),
 		Name:               d.Get("name").(string),
 		Description:        d.Get("description").(string),
@@ -368,5 +388,17 @@ func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*poli
 		Conditions:         conditions,
 		AppServerGroups:    expandCommonServerGroups(d),
 		AppConnectorGroups: expandCommonAppConnectorGroups(d),
-	}, nil
+	}
+
+	// Conditionally set credential if the user actually set it in TF.
+	// ADDING CONDITION TO EXPLICITLY IGNORE THE CREDENTIAL ATTRIBUTE
+	if val, ok := d.GetOk("credential"); ok {
+		c := val.(map[string]interface{})
+		rule.Credential = &policysetcontrollerv2.Credential{
+			ID:   c["id"].(string),
+			Name: c["name"].(string),
+		}
+	}
+
+	return rule, nil
 }

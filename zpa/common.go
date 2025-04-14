@@ -1312,7 +1312,6 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 		MicroTenantID:                v1Response.MicroTenantID,
 		ZpnIsolationProfileID:        v1Response.ZpnIsolationProfileID,
 		ZpnInspectionProfileID:       v1Response.ZpnInspectionProfileID,
-		Credential:                   v1Response.Credential,
 		ActionID:                     v1Response.ActionID,
 		Disabled:                     v1Response.Disabled,
 		ExtranetEnabled:              v1Response.ExtranetEnabled,
@@ -1329,10 +1328,13 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 		AppServerGroups:              v1Response.AppServerGroups,
 		AppConnectorGroups:           v1Response.AppConnectorGroups,
 		ServiceEdgeGroups:            v1Response.ServiceEdgeGroups,
+		Credential:                   v1Response.Credential,
 		PrivilegedCapabilities:       v1Response.PrivilegedCapabilities,
-		ExtranetDTO:                  v1Response.ExtranetDTO,
 		PrivilegedPortalCapabilities: v1Response.PrivilegedPortalCapabilities,
-		Conditions:                   make([]policysetcontrollerv2.PolicyRuleResourceConditions, 0),
+
+		ExtranetDTO: v1Response.ExtranetDTO,
+
+		Conditions: make([]policysetcontrollerv2.PolicyRuleResourceConditions, 0),
 	}
 
 	for _, condition := range v1Response.Conditions {
