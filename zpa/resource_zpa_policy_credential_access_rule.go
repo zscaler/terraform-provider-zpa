@@ -213,7 +213,7 @@ func resourcePolicyCredentialAccessRuleRead(ctx context.Context, d *schema.Resou
 	_ = d.Set("policy_set_id", policySetID)
 	_ = d.Set("microtenant_id", v2PolicyRule.MicroTenantID)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
-	_ = d.Set("credential", flattenCredential(resp.Credential))
+	_ = d.Set("credential", flattenCredential(*resp.Credential))
 
 	// Ensure microtenant_id is being correctly set in state
 	if v2PolicyRule.MicroTenantID != "" {
@@ -353,7 +353,7 @@ func expandCredentialPolicyRule(d *schema.ResourceData, policySetID string) (*po
 		MicroTenantID: d.Get("microtenant_id").(string),
 		PolicySetID:   policySetID,
 		Conditions:    conditions,
-		Credential:    credential,
+		Credential:    &credential,
 	}, nil
 }
 
