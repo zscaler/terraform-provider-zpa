@@ -1520,33 +1520,68 @@ func flattenPredefinedControls(predControl []common.CustomCommonControls) []inte
 	return predControls
 }
 
+// func expandCommonServerGroups(d *schema.ResourceData) []servergroup.ServerGroup {
+// 	serverGroupInterface, ok := d.GetOk("server_groups")
+// 	if ok {
+// 		serverGroupSet, ok := serverGroupInterface.(*schema.Set)
+// 		if !ok {
+// 			return []servergroup.ServerGroup{}
+// 		}
+// 		log.Printf("[INFO] server group data: %+v\n", serverGroupSet)
+// 		var serverGroups []servergroup.ServerGroup
+// 		for _, serverGroup := range serverGroupSet.List() {
+// 			serverGroupMap, ok := serverGroup.(map[string]interface{})
+// 			if ok && serverGroupMap != nil {
+// 				idSet, ok := serverGroupMap["id"].(*schema.Set)
+// 				if !ok {
+// 					continue
+// 				}
+// 				for _, id := range idSet.List() {
+// 					serverGroups = append(serverGroups, servergroup.ServerGroup{
+// 						ID: id.(string),
+// 					})
+// 				}
+// 			}
+// 		}
+// 		return serverGroups
+// 	}
+
+// 	return []servergroup.ServerGroup{}
+// }
+
 func expandCommonServerGroups(d *schema.ResourceData) []servergroup.ServerGroup {
 	serverGroupInterface, ok := d.GetOk("server_groups")
-	if ok {
-		serverGroupSet, ok := serverGroupInterface.(*schema.Set)
-		if !ok {
-			return []servergroup.ServerGroup{}
-		}
-		log.Printf("[INFO] server group data: %+v\n", serverGroupSet)
-		var serverGroups []servergroup.ServerGroup
-		for _, serverGroup := range serverGroupSet.List() {
-			serverGroupMap, ok := serverGroup.(map[string]interface{})
-			if ok && serverGroupMap != nil {
-				idSet, ok := serverGroupMap["id"].(*schema.Set)
-				if !ok {
-					continue
-				}
-				for _, id := range idSet.List() {
-					serverGroups = append(serverGroups, servergroup.ServerGroup{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return serverGroups
+	if !ok {
+		return nil
 	}
 
-	return []servergroup.ServerGroup{}
+	serverGroupSet, ok := serverGroupInterface.(*schema.Set)
+	if !ok || serverGroupSet.Len() == 0 {
+		return nil
+	}
+
+	var serverGroups []servergroup.ServerGroup
+	for _, serverGroup := range serverGroupSet.List() {
+		serverGroupMap, ok := serverGroup.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		idSet, ok := serverGroupMap["id"].(*schema.Set)
+		if !ok || idSet.Len() == 0 {
+			continue
+		}
+		for _, id := range idSet.List() {
+			serverGroups = append(serverGroups, servergroup.ServerGroup{
+				ID: id.(string),
+			})
+		}
+	}
+
+	if len(serverGroups) == 0 {
+		return nil
+	}
+
+	return serverGroups
 }
 
 func expandCommonAppServerGroups(d *schema.ResourceData) []servergroup.ServerGroup {
@@ -1578,33 +1613,68 @@ func expandCommonAppServerGroups(d *schema.ResourceData) []servergroup.ServerGro
 	return []servergroup.ServerGroup{}
 }
 
+// func expandCommonAppConnectorGroups(d *schema.ResourceData) []appconnectorgroup.AppConnectorGroup {
+// 	appConnectorGroupInterface, ok := d.GetOk("app_connector_groups")
+// 	if ok {
+// 		appConnectorGroupSet, ok := appConnectorGroupInterface.(*schema.Set)
+// 		if !ok {
+// 			return []appconnectorgroup.AppConnectorGroup{}
+// 		}
+// 		log.Printf("[INFO] app connector group data: %+v\n", appConnectorGroupSet)
+// 		var appConnectorGroups []appconnectorgroup.AppConnectorGroup
+// 		for _, appConnectorGroup := range appConnectorGroupSet.List() {
+// 			appConnectorGroupMap, ok := appConnectorGroup.(map[string]interface{})
+// 			if ok && appConnectorGroupMap != nil {
+// 				idSet, ok := appConnectorGroupMap["id"].(*schema.Set)
+// 				if !ok {
+// 					continue
+// 				}
+// 				for _, id := range idSet.List() {
+// 					appConnectorGroups = append(appConnectorGroups, appconnectorgroup.AppConnectorGroup{
+// 						ID: id.(string),
+// 					})
+// 				}
+// 			}
+// 		}
+// 		return appConnectorGroups
+// 	}
+
+// 	return []appconnectorgroup.AppConnectorGroup{}
+// }
+
 func expandCommonAppConnectorGroups(d *schema.ResourceData) []appconnectorgroup.AppConnectorGroup {
 	appConnectorGroupInterface, ok := d.GetOk("app_connector_groups")
-	if ok {
-		appConnectorGroupSet, ok := appConnectorGroupInterface.(*schema.Set)
-		if !ok {
-			return []appconnectorgroup.AppConnectorGroup{}
-		}
-		log.Printf("[INFO] app connector group data: %+v\n", appConnectorGroupSet)
-		var appConnectorGroups []appconnectorgroup.AppConnectorGroup
-		for _, appConnectorGroup := range appConnectorGroupSet.List() {
-			appConnectorGroupMap, ok := appConnectorGroup.(map[string]interface{})
-			if ok && appConnectorGroupMap != nil {
-				idSet, ok := appConnectorGroupMap["id"].(*schema.Set)
-				if !ok {
-					continue
-				}
-				for _, id := range idSet.List() {
-					appConnectorGroups = append(appConnectorGroups, appconnectorgroup.AppConnectorGroup{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return appConnectorGroups
+	if !ok {
+		return nil
 	}
 
-	return []appconnectorgroup.AppConnectorGroup{}
+	appConnectorGroupSet, ok := appConnectorGroupInterface.(*schema.Set)
+	if !ok || appConnectorGroupSet.Len() == 0 {
+		return nil
+	}
+
+	var appConnectorGroups []appconnectorgroup.AppConnectorGroup
+	for _, appConnectorGroup := range appConnectorGroupSet.List() {
+		appConnectorGroupMap, ok := appConnectorGroup.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		idSet, ok := appConnectorGroupMap["id"].(*schema.Set)
+		if !ok || idSet.Len() == 0 {
+			continue
+		}
+		for _, id := range idSet.List() {
+			appConnectorGroups = append(appConnectorGroups, appconnectorgroup.AppConnectorGroup{
+				ID: id.(string),
+			})
+		}
+	}
+
+	if len(appConnectorGroups) == 0 {
+		return nil
+	}
+
+	return appConnectorGroups
 }
 
 func expandCommonServiceEdgeGroups(d *schema.ResourceData) []serviceedgegroup.ServiceEdgeGroup {
@@ -1636,28 +1706,60 @@ func expandCommonServiceEdgeGroups(d *schema.ResourceData) []serviceedgegroup.Se
 	return []serviceedgegroup.ServiceEdgeGroup{}
 }
 
+// func flattenCommonAppConnectorGroups(appConnectorGroups []appconnectorgroup.AppConnectorGroup) []interface{} {
+// 	result := make([]interface{}, 1)
+// 	mapIds := make(map[string]interface{})
+// 	ids := make([]string, len(appConnectorGroups))
+// 	for i, appConnectorGroup := range appConnectorGroups {
+// 		ids[i] = appConnectorGroup.ID
+// 	}
+// 	mapIds["id"] = ids
+// 	result[0] = mapIds
+// 	return result
+// }
+
 func flattenCommonAppConnectorGroups(appConnectorGroups []appconnectorgroup.AppConnectorGroup) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(appConnectorGroups))
-	for i, appConnectorGroup := range appConnectorGroups {
-		ids[i] = appConnectorGroup.ID
+	if len(appConnectorGroups) == 0 {
+		return nil
 	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
+
+	var results []interface{}
+
+	for _, group := range appConnectorGroups {
+		results = append(results, map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, []interface{}{group.ID}),
+		})
+	}
+
+	return results
 }
 
+// func flattenCommonAppServerGroups(serverGroups []servergroup.ServerGroup) []interface{} {
+// 	result := make([]interface{}, 1)
+// 	mapIds := make(map[string]interface{})
+// 	ids := make([]string, len(serverGroups))
+// 	for i, serverGroup := range serverGroups {
+// 		ids[i] = serverGroup.ID
+// 	}
+// 	mapIds["id"] = ids
+// 	result[0] = mapIds
+// 	return result
+// }
+
 func flattenCommonAppServerGroups(serverGroups []servergroup.ServerGroup) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serverGroups))
-	for i, serverGroup := range serverGroups {
-		ids[i] = serverGroup.ID
+	if len(serverGroups) == 0 {
+		return nil
 	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
+
+	var results []interface{}
+
+	for _, group := range serverGroups {
+		results = append(results, map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, []interface{}{group.ID}),
+		})
+	}
+
+	return results
 }
 
 func flattenCommonServiceEdgeGroups(serviceEdgeGroups []serviceedgegroup.ServiceEdgeGroup) []interface{} {

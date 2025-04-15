@@ -89,7 +89,6 @@ func resourcePRAConsoleController() *schema.Resource {
 						"id": {
 							Type:     schema.TypeSet,
 							Optional: true,
-							Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},

@@ -101,7 +101,6 @@ func resourceServerGroup() *schema.Resource {
 			"servers": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Computed:    true,
 				Description: "This field is a list of servers that are applicable only when dynamic discovery is disabled. Server name is required only in cases where the new servers need to be created in this API. For existing servers, pass only the serverId.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -118,7 +117,6 @@ func resourceServerGroup() *schema.Resource {
 			"applications": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Computed:    true,
 				Description: "This field is a json array of app-connector-id only.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -135,7 +133,6 @@ func resourceServerGroup() *schema.Resource {
 			"app_connector_groups": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Computed:    true,
 				Description: "List of app-connector IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -412,36 +409,87 @@ func expandServerGroupApplications(d *schema.ResourceData) []servergroup.Applica
 	return []servergroup.Applications{}
 }
 
+// func expandApplicationServers(d *schema.ResourceData) []appservercontroller.ApplicationServer {
+// 	applicationServersInterface, ok := d.GetOk("servers")
+// 	if ok {
+// 		applicationServer := applicationServersInterface.(*schema.Set)
+// 		log.Printf("[INFO] server group application data: %+v\n", applicationServer)
+// 		var applicationServers []appservercontroller.ApplicationServer
+// 		for _, applicationServer := range applicationServer.List() {
+// 			applicationServer, _ := applicationServer.(map[string]interface{})
+// 			if applicationServer != nil {
+// 				for _, id := range applicationServer["id"].([]interface{}) {
+// 					applicationServers = append(applicationServers, appservercontroller.ApplicationServer{
+// 						ID: id.(string),
+// 					})
+// 				}
+// 			}
+// 		}
+// 		return applicationServers
+// 	}
+
+// 	return []appservercontroller.ApplicationServer{}
+// }
+
 func expandApplicationServers(d *schema.ResourceData) []appservercontroller.ApplicationServer {
 	applicationServersInterface, ok := d.GetOk("servers")
-	if ok {
-		applicationServer := applicationServersInterface.(*schema.Set)
-		log.Printf("[INFO] server group application data: %+v\n", applicationServer)
-		var applicationServers []appservercontroller.ApplicationServer
-		for _, applicationServer := range applicationServer.List() {
-			applicationServer, _ := applicationServer.(map[string]interface{})
-			if applicationServer != nil {
-				for _, id := range applicationServer["id"].([]interface{}) {
-					applicationServers = append(applicationServers, appservercontroller.ApplicationServer{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return applicationServers
+	if !ok {
+		return nil
 	}
 
-	return []appservercontroller.ApplicationServer{}
+	appServerSet, ok := applicationServersInterface.(*schema.Set)
+	if !ok || appServerSet.Len() == 0 {
+		return nil
+	}
+
+	var appServers []appservercontroller.ApplicationServer
+	for _, appServer := range appServerSet.List() {
+		appServerMap, ok := appServer.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		idSet, ok := appServerMap["id"].(*schema.Set)
+		if !ok || idSet.Len() == 0 {
+			continue
+		}
+		for _, id := range idSet.List() {
+			appServers = append(appServers, appservercontroller.ApplicationServer{
+				ID: id.(string),
+			})
+		}
+	}
+
+	if len(appServers) == 0 {
+		return nil
+	}
+
+	return appServers
 }
 
-func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(apps))
-	for i, app := range apps {
-		ids[i] = app.ID
+// func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []interface{} {
+// 	result := make([]interface{}, 1)
+// 	mapIds := make(map[string]interface{})
+// 	ids := make([]string, len(apps))
+// 	for i, app := range apps {
+// 		ids[i] = app.ID
+// 	}
+// 	mapIds["id"] = ids
+// 	result[0] = mapIds
+// 	return result
+// }
+
+func flattenServerGroupApplicationsSimple(serverGroups []servergroup.Applications) []interface{} {
+	if len(serverGroups) == 0 {
+		return nil
 	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
+
+	var results []interface{}
+
+	for _, group := range serverGroups {
+		results = append(results, map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, []interface{}{group.ID}),
+		})
+	}
+
+	return results
 }

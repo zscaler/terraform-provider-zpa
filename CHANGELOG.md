@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.0.11 (April, 14 2025)
+## 4.0.12 (April, 14 2025)
 
 ### Notes
 
@@ -8,6 +8,21 @@
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
+[PR #549](https://github.com/zscaler/zscaler-sdk-go/pull/549) - Enhanced nested functions to prevent drifts when unordered IDs are returned from the API. The following resources were adjusted:
+* `resource_zpa_application_segment` - Attribute `server_groups`
+* `resource_zpa_application_segment_browser_access` - Attribute `server_groups`
+* `resource_zpa_application_segment_inspection` - Attribute `server_groups`
+* `resource_zpa_application_segment_pra` - Attribute `server_groups`
+* `resource_zpa_server_group` - Attribute `app_connector_groups`
+* `resource_zpa_policy_access_rule` - Attribute `app_server_groups` and `app_connector_groups`
+* `resource_zpa_policy_access_rule_v2` - Attribute `app_server_groups` and `app_connector_groups`
+
+## 4.0.11 (April, 14 2025)
+
+### Notes
+
+- Release date: **(April, 14 2025)**
+- Supported Terraform version: **v1.x**
 
 ### Bug Fixes
 [PR #548](https://github.com/zscaler/zscaler-sdk-go/pull/548) - Set pointer in the `credential` block attribute in the ZPA `policysetcontrollerv2` resource.

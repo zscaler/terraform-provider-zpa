@@ -228,7 +228,6 @@ func resourceApplicationSegment() *schema.Resource {
 			"server_groups": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Computed:    true,
 				Description: "List of the server group IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
