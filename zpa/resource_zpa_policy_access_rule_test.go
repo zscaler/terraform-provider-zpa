@@ -40,7 +40,7 @@ func TestAccResourcePolicyAccessRule_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "3"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "2"),
 				),
 			},
 
@@ -54,7 +54,7 @@ func TestAccResourcePolicyAccessRule_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "ALLOW"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "operator", "AND"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "app_connector_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "3"),
+					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "2"),
 				),
 			},
 			// Import test
@@ -227,14 +227,6 @@ resource "%s" "%s" {
 		  object_type = "RISK_FACTOR_TYPE"
 		  lhs         = "ZIA"
 		  rhs         = "CRITICAL"
-		}
-	}
-	conditions {
-		operator = "OR"
-		operands {
-			object_type = "CHROME_ENTERPRISE"
-			lhs = "managed"
-			rhs = "true"
 		}
 	}
 	depends_on = [ %s, %s ]

@@ -1734,33 +1734,33 @@ func flattenCommonAppConnectorGroups(appConnectorGroups []appconnectorgroup.AppC
 	return results
 }
 
-// func flattenCommonAppServerGroups(serverGroups []servergroup.ServerGroup) []interface{} {
-// 	result := make([]interface{}, 1)
-// 	mapIds := make(map[string]interface{})
-// 	ids := make([]string, len(serverGroups))
-// 	for i, serverGroup := range serverGroups {
-// 		ids[i] = serverGroup.ID
-// 	}
-// 	mapIds["id"] = ids
-// 	result[0] = mapIds
-// 	return result
-// }
-
 func flattenCommonAppServerGroups(serverGroups []servergroup.ServerGroup) []interface{} {
-	if len(serverGroups) == 0 {
-		return nil
+	result := make([]interface{}, 1)
+	mapIds := make(map[string]interface{})
+	ids := make([]string, len(serverGroups))
+	for i, serverGroup := range serverGroups {
+		ids[i] = serverGroup.ID
 	}
-
-	var results []interface{}
-
-	for _, group := range serverGroups {
-		results = append(results, map[string]interface{}{
-			"id": schema.NewSet(schema.HashString, []interface{}{group.ID}),
-		})
-	}
-
-	return results
+	mapIds["id"] = ids
+	result[0] = mapIds
+	return result
 }
+
+// func flattenCommonAppServerGroups(serverGroups []servergroup.ServerGroup) []interface{} {
+// 	if len(serverGroups) == 0 {
+// 		return nil
+// 	}
+
+// 	var results []interface{}
+
+// 	for _, group := range serverGroups {
+// 		results = append(results, map[string]interface{}{
+// 			"id": schema.NewSet(schema.HashString, []interface{}{group.ID}),
+// 		})
+// 	}
+
+// 	return results
+// }
 
 func flattenCommonServiceEdgeGroups(serviceEdgeGroups []serviceedgegroup.ServiceEdgeGroup) []interface{} {
 	result := make([]interface{}, 1)
