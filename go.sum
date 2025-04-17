@@ -450,8 +450,8 @@ github.com/zclconf/go-cty-debug v0.0.0-20240509010212-0d6042c53940/go.mod h1:CmB
 github.com/zclconf/go-cty-yaml v1.0.2/go.mod h1:IP3Ylp0wQpYm50IHK8OZWKMu6sPJIUgKa8XhiVHura0=
 github.com/zscaler/terraform-provider-zpa/v3 v3.332.0 h1:JghKz+jMWXqEFSD0SJBYXL0MISom/gm2UDn3dkapDZc=
 github.com/zscaler/terraform-provider-zpa/v3 v3.332.0/go.mod h1:TEzhvgpdplae6lh8D5F0VSK6fy4Jlxvf5zGXqe+zRqM=
-github.com/zscaler/zscaler-sdk-go/v3 v3.1.14 h1:V2lMK0d6g5ucrZPq1swIkp6dbLinOm+qamUGhavWcRY=
-github.com/zscaler/zscaler-sdk-go/v3 v3.1.14/go.mod h1:a2/yvK4QjmbDAnCXgPDFAopGLQ3CF4QbZ+NC0WtZDAw=
+github.com/zscaler/zscaler-sdk-go/v3 v3.2.0 h1:LbhnHB+/hjF1AjR8oKemKN69LYXhiOwFkhLQBc8OCpM=
+github.com/zscaler/zscaler-sdk-go/v3 v3.2.0/go.mod h1:a2/yvK4QjmbDAnCXgPDFAopGLQ3CF4QbZ+NC0WtZDAw=
 go.abhg.dev/goldmark/frontmatter v0.2.0 h1:P8kPG0YkL12+aYk2yU3xHv4tcXzeVnN+gU0tJ5JnxRw=
 go.abhg.dev/goldmark/frontmatter v0.2.0/go.mod h1:XqrEkZuM57djk7zrlRUB02x8I5J0px76YjkOzhB4YlU=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=

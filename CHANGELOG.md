@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0.12 (April, 16 2025)
+
+### Notes
+
+- Release date: **(April, 16 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+### Bug Fixes
+[PR #552](https://github.com/zscaler/terraform-provider-zpa/pull/552) - Fixed resource `zpa_application_segment_pra` to ensure proper PRA Application update and deletion process / cleanup.
+
 ## 4.0.11 (April, 14 2025)
 
 ### Notes
@@ -10,7 +22,7 @@
 ### Bug Fixes
 
 ### Bug Fixes
-[PR #548](https://github.com/zscaler/zscaler-sdk-go/pull/548) - Set pointer in the `credential` block attribute in the ZPA `policysetcontrollerv2` resource.
+[PR #548](https://github.com/zscaler/terraform-provider-zpa/pull/548) - Set pointer in the `credential` block attribute in the ZPA `policysetcontrollerv2` resource.
 
 ## 4.0.10 (April, 11 2025)
 
