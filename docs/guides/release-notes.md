@@ -12,9 +12,21 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.0.11``
+``Last updated: v4.0.12``
 
 ---
+
+## 4.0.12 (April, 16 2025)
+
+### Notes
+
+- Release date: **(April, 16 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+### Bug Fixes
+[PR #552](https://github.com/zscaler/terraform-provider-zpa/pull/552) - Fixed resource `zpa_application_segment_pra` to ensure proper PRA Application update and deletion process / cleanup.
 
 ## 4.0.11 (April, 14 2025)
 
