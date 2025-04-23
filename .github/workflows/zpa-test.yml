@@ -5,6 +5,10 @@ on:
   pull_request:
     branches: [ master ]
 
+  schedule:
+    - cron: '0 12 * * 1-5' # UTC
+  workflow_dispatch:
+
 permissions:
   contents: read
   pull-requests: write
@@ -14,9 +18,6 @@ permissions:
   # ensure you are alerted to something breaking due to an API change, even if the code did not
   # change.
 
-  schedule:
-    - cron: '0 12 * * 1-5' # UTC
-  workflow_dispatch:
 
 jobs:
   # zpa-qa1-tenants:
