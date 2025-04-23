@@ -363,7 +363,7 @@ func resourceApplicationSegmentPRARead(ctx context.Context, d *schema.ResourceDa
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("health_reporting", resp.HealthReporting)
-	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups))
+	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
 
 	// Map pra_apps to common_apps_dto.apps_config for state management
 	if err := mapPRAAppsToCommonApps(d, resp.PRAApps); err != nil {

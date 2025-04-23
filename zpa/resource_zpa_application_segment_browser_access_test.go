@@ -183,9 +183,6 @@ resource "%s" "%s" {
 		enabled              = true
 		domain               = "%s.bd-hashicorp.com"
 	}
-	server_groups {
-		id = []
-	}
 	depends_on = [ %s ]
 }
 `,

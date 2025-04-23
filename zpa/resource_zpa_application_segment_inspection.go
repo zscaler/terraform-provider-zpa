@@ -387,7 +387,7 @@ func resourceApplicationSegmentInspectionRead(ctx context.Context, d *schema.Res
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("tcp_protocols", resp.TCPProtocols)
 	_ = d.Set("udp_protocols", resp.UDPProtocols)
-	_ = d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups))
+	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 
 	// Map inspect to common_apps_dto.apps_config for state management
 	if err := mapInspectAppsToCommonApps(d, resp.InspectionAppDto); err != nil {

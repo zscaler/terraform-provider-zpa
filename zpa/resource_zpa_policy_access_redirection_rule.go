@@ -141,7 +141,7 @@ func resourcePolicyRedictionRuleRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("policy_set_id", resp.PolicySetID)
 	_ = d.Set("policy_type", resp.PolicyType)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
-	_ = d.Set("service_edge_groups", flattenCommonServiceEdgeGroups(resp.ServiceEdgeGroups))
+	_ = d.Set("service_edge_groups", flattenServiceEdgeGroupSimple(resp.ServiceEdgeGroups))
 	return nil
 }
 

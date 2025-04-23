@@ -177,9 +177,7 @@ resource "%s" "%s" {
 	domain_names = ["test.example.com"]
 	segment_group_id = "${%s.id}"
 	tcp_keep_alive = "1"
-	server_groups {
-		id = []
-	}
+
 	depends_on = [ %s ]
 }
 `,

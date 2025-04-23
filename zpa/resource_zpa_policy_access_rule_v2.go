@@ -268,7 +268,7 @@ func resourcePolicyAccessV2Read(ctx context.Context, d *schema.ResourceData, met
 	_ = d.Set("policy_set_id", policySetID)
 	_ = d.Set("custom_msg", v2PolicyRule.CustomMsg)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
-	_ = d.Set("app_server_groups", flattenCommonAppServerGroups(resp.AppServerGroups))
+	_ = d.Set("app_server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
 
 	return nil

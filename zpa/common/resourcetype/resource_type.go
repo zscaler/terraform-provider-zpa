@@ -34,6 +34,7 @@ const (
 	ZPAPRAConsoleController            = "zpa_pra_console_controller"
 	ZPAPRAConsoleControllerBulk        = "zpa_pra_console_controller_bulk"
 	ZPAPRACredentialController         = "zpa_pra_credential_controller"
+	ZPAPRACredentialPool               = "zpa_pra_credential_pool"
 	ZPAPRAPortalController             = "zpa_pra_portal_controller"
 	ZPAPRAApprovalController           = "zpa_pra_approval_controller"
 	ZPACustomerVersionProfile          = "zpa_customer_version_profile"

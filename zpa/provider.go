@@ -182,6 +182,7 @@ func ZPAProvider() *schema.Provider {
 			"zpa_pra_approval_controller":                  resourcePRAPrivilegedApprovalController(),
 			"zpa_pra_portal_controller":                    resourcePRAPortalController(),
 			"zpa_pra_credential_controller":                resourcePRACredentialController(),
+			"zpa_pra_credential_pool":                      resourcePRACredentialPool(),
 			"zpa_pra_console_controller":                   resourcePRAConsoleController(),
 
 			// The day I realized I was naming stuff wrong :'-(
@@ -236,6 +237,7 @@ func ZPAProvider() *schema.Provider {
 			"zpa_pra_approval_controller":                  dataSourcePRAPrivilegedApprovalController(),
 			"zpa_pra_portal_controller":                    dataSourcePRAPortalController(),
 			"zpa_pra_credential_controller":                dataSourcePRACredentialController(),
+			"zpa_pra_credential_pool":                      dataSourcePRACredentialPool(),
 			"zpa_pra_console_controller":                   dataSourcePRAConsoleController(),
 		},
 	}
