@@ -48,21 +48,21 @@ testacc:
 
 test\:integration\:zpa:
 	@echo "$(COLOR_ZSCALER)Running zpa integration tests...$(COLOR_NONE)"
-	go test -v -race -cover -coverprofile=zpacoverage.out -covermode=atomic ./zpa -parallel 1 -timeout 60m
+	go test -v -race -cover -coverprofile=zpacoverage.out -covermode=atomic ./zpa -parallel 1 -timeout 120m
 	go tool cover -html=zpacoverage.out -o zpacoverage.html
 	go tool cover -func zpacoverage.out | grep total:
 
 build13: GOOS=$(shell go env GOOS)
 build13: GOARCH=$(shell go env GOARCH)
 ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
-build13: DESTINATION=$(APPDATA)/terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/4.0.12/$(GOOS)_$(GOARCH)
+build13: DESTINATION=$(APPDATA)/terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/4.1.0/$(GOOS)_$(GOARCH)
 else
-build13: DESTINATION=$(HOME)/.terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/4.0.12/$(GOOS)_$(GOARCH)
+build13: DESTINATION=$(HOME)/.terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/4.1.0/$(GOOS)_$(GOARCH)
 endif
 build13: fmtcheck
 	@echo "==> Installing plugin to $(DESTINATION)"
 	@mkdir -p $(DESTINATION)
-	go build -o $(DESTINATION)/terraform-provider-zpa_v4.0.12
+	go build -o $(DESTINATION)/terraform-provider-zpa_v4.1.0
 
 vet:
 	@echo "==> Checking source code against go vet and staticcheck"

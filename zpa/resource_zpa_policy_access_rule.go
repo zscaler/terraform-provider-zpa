@@ -171,7 +171,7 @@ func resourcePolicyAccessRead(ctx context.Context, d *schema.ResourceData, meta 
 	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
 	_ = d.Set("microtenant_id", microTenantID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
-	_ = d.Set("app_server_groups", flattenCommonAppServerGroups(resp.AppServerGroups))
+	_ = d.Set("app_server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
 
 	return nil
@@ -264,7 +264,7 @@ func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policy
 		MicroTenantID:      d.Get("microtenant_id").(string),
 		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
 		Conditions:         conditions,
-		AppServerGroups:    expandCommonAppServerGroups(d),
+		AppServerGroups:    expandCommonServerGroups(d),
 		AppConnectorGroups: expandCommonAppConnectorGroups(d),
 	}, nil
 }

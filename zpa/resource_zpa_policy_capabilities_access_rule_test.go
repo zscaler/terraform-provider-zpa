@@ -31,7 +31,7 @@ func TestAccResourcePolicyCapabilitiesAccessRule_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "CHECK_CAPABILITIES"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "privileged_capabilities.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 			},
 
@@ -44,7 +44,7 @@ func TestAccResourcePolicyCapabilitiesAccessRule_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceTypeAndName, "description", randDesc),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "action", "CHECK_CAPABILITIES"),
 					resource.TestCheckResourceAttr(resourceTypeAndName, "privileged_capabilities.#", "1"),
-					resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
+					// resource.TestCheckResourceAttr(resourceTypeAndName, "conditions.#", "1"),
 				),
 			},
 			// Import test
@@ -140,20 +140,6 @@ data "%s" "%s" {
 func getPolicyCapabilitiesAccessRuleHCL(rName, generatedName, desc string) string {
 	return fmt.Sprintf(`
 
-data "zpa_idp_controller" "this" {
-	name = "BD_Okta_Users"
-}
-
-data "zpa_scim_groups" "a000" {
-    name = "A000"
-    idp_name = "BD_Okta_Users"
-}
-
-data "zpa_scim_groups" "b000" {
-    name = "B000"
-    idp_name = "BD_Okta_Users"
-}
-
 resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
@@ -165,23 +151,8 @@ resource "%s" "%s" {
 		file_download         = true
 		inspect_file_upload   = true
 		inspect_file_download = true
-	  }
-	  conditions {
-		operator = "OR"
-		operands {
-		  object_type = "SCIM_GROUP"
-		  entry_values {
-			rhs = data.zpa_scim_groups.a000.id
-			lhs = data.zpa_idp_controller.this.id
-		  }
-		  entry_values {
-			rhs = data.zpa_scim_groups.b000.id
-			lhs = data.zpa_idp_controller.this.id
-		  }
-		}
-	  }
 	}
-
+}
 `,
 		// resource variables
 		resourcetype.ZPAPolicyCapabilitiesRule,

@@ -120,13 +120,27 @@ func resourcePolicyCredentialAccessRule() *schema.Resource {
 				},
 			},
 			"credential": {
-				Type:     schema.TypeList,
-				Required: true,
+				Type:         schema.TypeList,
+				Optional:     true,
+				ExactlyOneOf: []string{"credential", "credential_pool"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"credential_pool": {
+				Type:         schema.TypeList,
+				Optional:     true,
+				ExactlyOneOf: []string{"credential", "credential_pool"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
@@ -213,7 +227,8 @@ func resourcePolicyCredentialAccessRuleRead(ctx context.Context, d *schema.Resou
 	_ = d.Set("policy_set_id", policySetID)
 	_ = d.Set("microtenant_id", v2PolicyRule.MicroTenantID)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
-	_ = d.Set("credential", flattenCredential(*resp.Credential))
+	_ = d.Set("credential", flattenCredential(resp.Credential))
+	_ = d.Set("credential_pool", flattenCredential(resp.CredentialPool))
 
 	// Ensure microtenant_id is being correctly set in state
 	if v2PolicyRule.MicroTenantID != "" {
@@ -307,35 +322,17 @@ func resourcePolicyCredentialAccessRuleDelete(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func flattenCredential(credential policysetcontrollerv2.Credential) []interface{} {
-	if credential.ID == "" {
+func flattenCredential(credential *policysetcontrollerv2.Credential) []interface{} {
+	if credential == nil || credential.ID == "" {
 		return []interface{}{}
 	}
 
-	m := map[string]interface{}{
-		"id": credential.ID,
+	return []interface{}{
+		map[string]interface{}{
+			"id": credential.ID,
+		},
 	}
-	return []interface{}{m}
 }
-
-// func expandCredentialPolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
-// 	conditions, err := ExpandPolicyConditionsV2(d)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	credential := expandCredential(d)
-
-// 	return &policysetcontrollerv2.PolicyRule{
-// 		ID:            d.Get("id").(string),
-// 		Name:          d.Get("name").(string),
-// 		Description:   d.Get("description").(string),
-// 		Action:        d.Get("action").(string),
-// 		MicroTenantID: d.Get("microtenant_id").(string),
-// 		PolicySetID:   policySetID,
-// 		Conditions:    conditions,
-// 		Credential:    credential,
-// 	}, nil
-// }
 
 func expandCredentialPolicyRule(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
 	conditions, err := ExpandPolicyConditionsV2(d)
@@ -343,47 +340,41 @@ func expandCredentialPolicyRule(d *schema.ResourceData, policySetID string) (*po
 		return nil, err
 	}
 
-	credential := expandCredential(d)
+	var credential *policysetcontrollerv2.Credential
+	var credentialPool *policysetcontrollerv2.Credential
+
+	if v, ok := d.GetOk("credential"); ok {
+		if items := v.([]interface{}); len(items) > 0 {
+			m := items[0].(map[string]interface{})
+			if id, ok := m["id"].(string); ok && id != "" {
+				credential = &policysetcontrollerv2.Credential{ID: id}
+			}
+		}
+	}
+
+	if v, ok := d.GetOk("credential_pool"); ok {
+		if items := v.([]interface{}); len(items) > 0 {
+			m := items[0].(map[string]interface{})
+			if id, ok := m["id"].(string); ok && id != "" {
+				credentialPool = &policysetcontrollerv2.Credential{ID: id}
+			}
+		}
+	}
+
+	// Validate mutual exclusivity
+	if credential != nil && credentialPool != nil {
+		return nil, fmt.Errorf("only one of 'credential' or 'credential_pool' can be set")
+	}
 
 	return &policysetcontrollerv2.PolicyRule{
-		ID:            d.Get("id").(string),
-		Name:          d.Get("name").(string),
-		Description:   d.Get("description").(string),
-		Action:        d.Get("action").(string),
-		MicroTenantID: d.Get("microtenant_id").(string),
-		PolicySetID:   policySetID,
-		Conditions:    conditions,
-		Credential:    &credential,
+		ID:             d.Get("id").(string),
+		Name:           d.Get("name").(string),
+		Description:    d.Get("description").(string),
+		Action:         d.Get("action").(string),
+		MicroTenantID:  d.Get("microtenant_id").(string),
+		PolicySetID:    policySetID,
+		Conditions:     conditions,
+		Credential:     credential,
+		CredentialPool: credentialPool,
 	}, nil
-}
-
-func expandCredential(d *schema.ResourceData) policysetcontrollerv2.Credential {
-	v := d.Get("credential")
-	if v == nil {
-		return policysetcontrollerv2.Credential{}
-	}
-
-	items, ok := v.([]interface{})
-	if !ok || len(items) == 0 || items[0] == nil {
-		return policysetcontrollerv2.Credential{}
-	}
-
-	credMap, ok := items[0].(map[string]interface{})
-	if !ok {
-		return policysetcontrollerv2.Credential{}
-	}
-
-	idRaw, ok := credMap["id"]
-	if !ok {
-		return policysetcontrollerv2.Credential{}
-	}
-
-	idStr, ok := idRaw.(string)
-	if !ok || idStr == "" {
-		return policysetcontrollerv2.Credential{}
-	}
-
-	return policysetcontrollerv2.Credential{
-		ID: idStr,
-	}
 }

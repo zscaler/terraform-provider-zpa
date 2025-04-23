@@ -172,9 +172,6 @@ resource "%s" "%s" {
 		  app_types = ["SECURE_REMOTE_ACCESS"]
 		}
 	}
-	server_groups {
-		id = []
-	}
 	depends_on = [ %s ]
 }
 `,

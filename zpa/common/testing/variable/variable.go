@@ -175,6 +175,11 @@ const (
 	CredentialDescriptionUpdate = "Credential Controller Test Update"
 )
 
+// Credential Pool
+const (
+	CredentialType = "USERNAME_PASSWORD"
+)
+
 // Credential Controller
 const (
 	PraPortalDescription       = "Portal Controller Test"

@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -9,7 +10,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 )
@@ -109,7 +109,6 @@ func accPreCheck() error {
 }
 
 func TestProviderValidate(t *testing.T) {
-	// Define environment variables related to ZPA authentication
 	envKeys := []string{
 		"ZSCALER_CLIENT_ID",
 		"ZSCALER_CLIENT_SECRET",
@@ -118,7 +117,7 @@ func TestProviderValidate(t *testing.T) {
 		"ZSCALER_CLOUD",
 	}
 	envVals := make(map[string]string)
-	// Save and clear ZPA env vars to test configuration cleanly
+
 	for _, key := range envKeys {
 		val := os.Getenv(key)
 		if val != "" {
@@ -127,53 +126,51 @@ func TestProviderValidate(t *testing.T) {
 		}
 	}
 
-	// Define test cases for the various configurations
 	tests := []struct {
 		name         string
 		clientID     string
 		clientSecret string
 		vanityDomain string
 		customerID   string
-		cloud        string // Optional field
+		cloud        string
 		expectError  bool
 	}{
-		{"valid client_id + client_secret", "clientID", "clientSecret", "vanityDomain", "customerID", "cloud", false},
-		{"missing client_id", "", "clientSecret", "vanityDomain", "customerID", "cloud", true},
-		{"missing clientSecret", "clientID", "", "vanityDomain", "customerID", "cloud", true},
-		{"missing vanity domain", "clientID", "clientSecret", "", "customerID", "cloud", true},
-		{"valid client_id + client_secret without cloud", "clientID", "clientSecret", "vanityDomain", "customerID", "", false}, // Ensures cloud is optional
+		{"valid client_id + client_secret", "clientID", "clientSecret", "vanityDomain", "customerID", "zscaler_cloud", false},
+		{"missing client_id", "", "clientSecret", "vanityDomain", "customerID", "zscaler_cloud", true},
+		{"missing clientSecret", "clientID", "", "vanityDomain", "customerID", "zscaler_cloud", true},
+		{"missing vanity domain", "clientID", "clientSecret", "", "customerID", "zscaler_cloud", true},
+		{"valid client_id + client_secret without zscaler_cloud", "clientID", "clientSecret", "vanityDomain", "customerID", "", false},
 	}
 
-	// Execute each test case
 	for _, test := range tests {
-		resourceConfig := map[string]interface{}{
-			"vanity_domain": test.vanityDomain,
-			"customer_id":   test.customerID,
-		}
-		if test.clientID != "" {
-			resourceConfig["client_id"] = test.clientID
-		}
-		if test.clientSecret != "" {
-			resourceConfig["client_secret"] = test.clientSecret
-		}
-		if test.cloud != "" {
-			resourceConfig["cloud"] = test.cloud
-		}
+		t.Run(test.name, func(t *testing.T) {
+			resourceConfig := map[string]interface{}{
+				"vanity_domain": test.vanityDomain,
+				"customer_id":   test.customerID,
+			}
+			if test.clientID != "" {
+				resourceConfig["client_id"] = test.clientID
+			}
+			if test.clientSecret != "" {
+				resourceConfig["client_secret"] = test.clientSecret
+			}
+			if test.cloud != "" {
+				resourceConfig["zscaler_cloud"] = test.cloud
+			}
 
-		config := terraform.NewResourceConfigRaw(resourceConfig)
-		provider := ZPAProvider()
-		err := provider.Validate(config)
+			provider := ZPAProvider()
+			rawData := schema.TestResourceDataRaw(t, provider.Schema, resourceConfig)
+			_, diags := provider.ConfigureContextFunc(context.Background(), rawData)
 
-		// Check expectations based on each test case setup
-		if test.expectError && err == nil {
-			t.Errorf("test %q: expected error but received none", test.name)
-		}
-		if !test.expectError && err != nil {
-			t.Errorf("test %q: did not expect error but received error: %+v", test.name, err)
-		}
+			if test.expectError && !diags.HasError() {
+				t.Errorf("expected error but received none")
+			}
+			if !test.expectError && diags.HasError() {
+				t.Errorf("did not expect error but received: %+v", diags)
+			}
+		})
 	}
 
-	// Restore environment variables after the tests
 	for key, val := range envVals {
 		os.Setenv(key, val)
 	}
@@ -190,6 +187,7 @@ func sdkV3ClientForTest() (*zscaler.Client, error) {
 		clientSecret: os.Getenv("ZSCALER_CLIENT_SECRET"),
 		customerID:   os.Getenv("ZPA_CUSTOMER_ID"),
 		vanityDomain: os.Getenv("ZSCALER_VANITY_DOMAIN"),
+		cloud:        os.Getenv("ZSCALER_CLOUD"),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize SDK V3 client: %w", err)

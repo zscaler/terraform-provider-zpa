@@ -374,7 +374,7 @@ func resourceApplicationSegmentBrowserAccessRead(ctx context.Context, d *schema.
 		return diag.FromErr(fmt.Errorf("failed to read clientless apps %s", err))
 	}
 
-	if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.AppServerGroups)); err != nil {
+	if err := d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups)); err != nil {
 		return diag.FromErr(fmt.Errorf("failed to read app server groups %s", err))
 	}
 

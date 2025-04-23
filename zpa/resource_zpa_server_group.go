@@ -106,7 +106,7 @@ func resourceServerGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -214,7 +214,7 @@ func resourceServerGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
 	_ = d.Set("applications", flattenServerGroupApplicationsSimple(resp.Applications))
-	_ = d.Set("servers", flattenServers(resp.Servers))
+	_ = d.Set("servers", flattenApplicationServer(resp.Servers))
 
 	return nil
 }
@@ -412,6 +412,7 @@ func expandServerGroupApplications(d *schema.ResourceData) []servergroup.Applica
 	return []servergroup.Applications{}
 }
 
+/*
 func expandApplicationServers(d *schema.ResourceData) []appservercontroller.ApplicationServer {
 	applicationServersInterface, ok := d.GetOk("servers")
 	if ok {
@@ -433,7 +434,79 @@ func expandApplicationServers(d *schema.ResourceData) []appservercontroller.Appl
 
 	return []appservercontroller.ApplicationServer{}
 }
+*/
 
+func expandApplicationServers(d *schema.ResourceData) []appservercontroller.ApplicationServer {
+	appServerInterface, ok := d.GetOk("servers")
+	if !ok {
+		return nil
+	}
+
+	appServerSet, ok := appServerInterface.(*schema.Set)
+	if !ok || appServerSet.Len() == 0 {
+		return nil
+	}
+
+	var appServers []appservercontroller.ApplicationServer
+
+	for _, appServerInterface := range appServerSet.List() {
+		appConnectorGroupMap, ok := appServerInterface.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		idSet, ok := appConnectorGroupMap["id"].(*schema.Set)
+		if !ok || idSet.Len() == 0 {
+			continue
+		}
+
+		for _, id := range idSet.List() {
+			appServers = append(appServers, appservercontroller.ApplicationServer{
+				ID: id.(string),
+			})
+		}
+	}
+
+	if len(appServers) == 0 {
+		return nil
+	}
+
+	return appServers
+}
+
+func flattenServerGroupApplicationsSimple(applications []servergroup.Applications) []interface{} {
+	if len(applications) == 0 {
+		return nil
+	}
+
+	var results []interface{}
+
+	for _, edge := range applications {
+		results = append(results, map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, []interface{}{edge.ID}),
+		})
+	}
+
+	return results
+}
+
+func flattenApplicationServer(applications []appservercontroller.ApplicationServer) []interface{} {
+	if len(applications) == 0 {
+		return nil
+	}
+
+	var results []interface{}
+
+	for _, edge := range applications {
+		results = append(results, map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, []interface{}{edge.ID}),
+		})
+	}
+
+	return results
+}
+
+/*
 func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
@@ -445,3 +518,4 @@ func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []int
 	result[0] = mapIds
 	return result
 }
+*/

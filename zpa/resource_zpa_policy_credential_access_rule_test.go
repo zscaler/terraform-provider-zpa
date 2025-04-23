@@ -216,26 +216,6 @@ resource "zpa_pra_console_controller" "rdp_pra" {
 	}
 }
 
-data "zpa_saml_attribute" "email_user_sso" {
-    name = "Email_BD_Okta_Users"
-    idp_name = "BD_Okta_Users"
-}
-
-data "zpa_saml_attribute" "group_user" {
-    name = "GroupName_BD_Okta_Users"
-    idp_name = "BD_Okta_Users"
-}
-
-data "zpa_scim_groups" "a000" {
-    name = "A000"
-    idp_name = "BD_Okta_Users"
-}
-
-data "zpa_scim_groups" "b000" {
-    name = "B000"
-    idp_name = "BD_Okta_Users"
-}
-
 resource "%s" "%s" {
 	name          				= "%s"
 	description   				= "%s"
