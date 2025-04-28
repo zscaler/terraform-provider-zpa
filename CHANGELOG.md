@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.1 (April, 28 2025)
+
+### Notes
+
+- Release date: **(April, 28 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+[PR #557](https://github.com/zscaler/terraform-provider-zpa/pull/557) - Fixed `zpa_server_group` panic during import process.
+
 ## 4.1.0 (April, 23 2025)
 
 ### Notes

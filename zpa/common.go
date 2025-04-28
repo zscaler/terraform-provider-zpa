@@ -1832,15 +1832,3 @@ func flattenCommonAppServerGroups(serverGroups []servergroup.ServerGroup) []inte
 	result[0] = mapIds
 	return result
 }
-
-func flattenCommonServiceEdgeGroups(serviceEdgeGroups []serviceedgegroup.ServiceEdgeGroup) []interface{} {
-	result := make([]interface{}, 1)
-	mapIds := make(map[string]interface{})
-	ids := make([]string, len(serviceEdgeGroups))
-	for i, serviceEdgeGroup := range serviceEdgeGroups {
-		ids[i] = serviceEdgeGroup.ID
-	}
-	mapIds["id"] = ids
-	result[0] = mapIds
-	return result
-}
