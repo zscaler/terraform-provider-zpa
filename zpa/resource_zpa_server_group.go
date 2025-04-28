@@ -474,21 +474,21 @@ func expandApplicationServers(d *schema.ResourceData) []appservercontroller.Appl
 	return appServers
 }
 
-func flattenServerGroupApplicationsSimple(applications []servergroup.Applications) []interface{} {
-	if len(applications) == 0 {
-		return nil
-	}
+// func flattenServerGroupApplicationsSimple(applications []servergroup.Applications) []interface{} {
+// 	if len(applications) == 0 {
+// 		return nil
+// 	}
 
-	var results []interface{}
+// 	var results []interface{}
 
-	for _, edge := range applications {
-		results = append(results, map[string]interface{}{
-			"id": schema.NewSet(schema.HashString, []interface{}{edge.ID}),
-		})
-	}
+// 	for _, edge := range applications {
+// 		results = append(results, map[string]interface{}{
+// 			"id": schema.NewSet(schema.HashString, []interface{}{edge.ID}),
+// 		})
+// 	}
 
-	return results
-}
+// 	return results
+// }
 
 func flattenApplicationServer(applications []appservercontroller.ApplicationServer) []interface{} {
 	if len(applications) == 0 {
@@ -506,7 +506,6 @@ func flattenApplicationServer(applications []appservercontroller.ApplicationServ
 	return results
 }
 
-/*
 func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []interface{} {
 	result := make([]interface{}, 1)
 	mapIds := make(map[string]interface{})
@@ -518,4 +517,3 @@ func flattenServerGroupApplicationsSimple(apps []servergroup.Applications) []int
 	result[0] = mapIds
 	return result
 }
-*/

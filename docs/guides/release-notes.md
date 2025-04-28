@@ -12,9 +12,41 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.0.12``
+``Last updated: v4.1.1``
 
 ---
+
+## 4.1.1 (April, 28 2025)
+
+### Notes
+
+- Release date: **(April, 28 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+[PR #557](https://github.com/zscaler/terraform-provider-zpa/pull/557) - Fixed `zpa_server_group` panic during import process.
+
+## 4.1.0 (April, 23 2025)
+
+### Notes
+
+- Release date: **(April, 23 2025)**
+- Supported Terraform version: **v1.x**
+
+### NEW RESOURCE
+
+[PR #552](https://github.com/zscaler/terraform-provider-zpa/pull/552) - The following new resource and data source have been introduced: `zpa_pra_credential_pool`. This resource creates a privileged remote access credential pool that can be referenced in an privileged credential access policy resource.
+
+### Bug Fixes
+[PR #552](https://github.com/zscaler/terraform-provider-zpa/pull/552) - Enhanced nested flattening and expanding functions to provide more agnostic configuration when using dynamic blocks. The following resources are affected:
+- `zpa_application_segment`
+- `zpa_application_segment_pra`
+- `zpa_application_segment_inspection`
+- `zpa_application_segment_browser_access`
+- `zpa_policy_access_rule`
+- `zpa_policy_access_rule_v2`
+- `zpa_policy_access_redirection_rule`
+- `zpa_server_group`
 
 ## 4.0.12 (April, 16 2025)
 
