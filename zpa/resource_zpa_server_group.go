@@ -133,9 +133,9 @@ func resourceServerGroup() *schema.Resource {
 				},
 			},
 			"app_connector_groups": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
+				MaxItems:    1,
 				Description: "List of app-connector IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -412,30 +412,6 @@ func expandServerGroupApplications(d *schema.ResourceData) []servergroup.Applica
 	return []servergroup.Applications{}
 }
 
-/*
-func expandApplicationServers(d *schema.ResourceData) []appservercontroller.ApplicationServer {
-	applicationServersInterface, ok := d.GetOk("servers")
-	if ok {
-		applicationServer := applicationServersInterface.(*schema.Set)
-		log.Printf("[INFO] server group application data: %+v\n", applicationServer)
-		var applicationServers []appservercontroller.ApplicationServer
-		for _, applicationServer := range applicationServer.List() {
-			applicationServer, _ := applicationServer.(map[string]interface{})
-			if applicationServer != nil {
-				for _, id := range applicationServer["id"].([]interface{}) {
-					applicationServers = append(applicationServers, appservercontroller.ApplicationServer{
-						ID: id.(string),
-					})
-				}
-			}
-		}
-		return applicationServers
-	}
-
-	return []appservercontroller.ApplicationServer{}
-}
-*/
-
 func expandApplicationServers(d *schema.ResourceData) []appservercontroller.ApplicationServer {
 	appServerInterface, ok := d.GetOk("servers")
 	if !ok {
@@ -473,22 +449,6 @@ func expandApplicationServers(d *schema.ResourceData) []appservercontroller.Appl
 
 	return appServers
 }
-
-// func flattenServerGroupApplicationsSimple(applications []servergroup.Applications) []interface{} {
-// 	if len(applications) == 0 {
-// 		return nil
-// 	}
-
-// 	var results []interface{}
-
-// 	for _, edge := range applications {
-// 		results = append(results, map[string]interface{}{
-// 			"id": schema.NewSet(schema.HashString, []interface{}{edge.ID}),
-// 		})
-// 	}
-
-// 	return results
-// }
 
 func flattenApplicationServer(applications []appservercontroller.ApplicationServer) []interface{} {
 	if len(applications) == 0 {
