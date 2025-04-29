@@ -142,6 +142,7 @@ resource "%s" "%s" {
 	grace_distance_enabled    = true
 	grace_distance_value      = "10"
 	grace_distance_value_unit = "KMS"
+
 }
 
 data "%s" "%s" {
