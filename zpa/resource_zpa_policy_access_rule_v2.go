@@ -152,36 +152,30 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 				},
 			},
 			"app_server_groups": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
+				Type:     schema.TypeList,
+				Optional: true,
+				// MaxItems: 1,
 				Description: "List of the server group IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeSet,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
 			},
 			"app_connector_groups": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
-				Description: "List of app-connector IDs.",
+				Type:     schema.TypeList,
+				Optional: true,
+				// MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeSet,
 							Optional: true,
-							Computed: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -350,27 +344,6 @@ func resourcePolicyAccessV2Delete(ctx context.Context, d *schema.ResourceData, m
 
 	return nil
 }
-
-// func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
-// 	conditions, err := ExpandPolicyConditionsV2(d)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &policysetcontrollerv2.PolicyRule{
-// 		ID:                 d.Get("id").(string),
-// 		Name:               d.Get("name").(string),
-// 		Description:        d.Get("description").(string),
-// 		Action:             d.Get("action").(string),
-// 		CustomMsg:          d.Get("custom_msg").(string),
-// 		Operator:           d.Get("operator").(string),
-// 		PolicySetID:        policySetID,
-// 		Conditions:         conditions,
-// 		AppServerGroups:    expandCommonServerGroups(d),
-// 		AppConnectorGroups: expandCommonAppConnectorGroups(d),
-
-// 	}, nil
-// }
 
 func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*policysetcontrollerv2.PolicyRule, error) {
 	conditions, err := ExpandPolicyConditionsV2(d)

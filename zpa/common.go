@@ -1890,10 +1890,29 @@ func flattenCommonAppConnectorGroups(appConnectorGroups []appconnectorgroup.AppC
 }
 */
 
+/*
 func flattenCommonAppServerGroupSimple(appConnectorGroups []servergroup.ServerGroup) []interface{} {
 	ids := make([]interface{}, len(appConnectorGroups))
 	for i, edge := range appConnectorGroups {
 		ids[i] = edge.ID
+	}
+
+	return []interface{}{
+		map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, ids),
+		},
+	}
+}
+*/
+
+func flattenCommonAppServerGroupSimple(serverGroups []servergroup.ServerGroup) []interface{} {
+	if len(serverGroups) == 0 {
+		return nil
+	}
+
+	ids := make([]interface{}, len(serverGroups))
+	for i, group := range serverGroups {
+		ids[i] = group.ID
 	}
 
 	return []interface{}{
