@@ -1797,6 +1797,7 @@ func expandCommonAppConnectorGroups(d *schema.ResourceData) []appconnectorgroup.
 	}
 	return groups
 }
+
 func expandCommonServiceEdgeGroups(d *schema.ResourceData) []serviceedgegroup.ServiceEdgeGroup {
 	raw, ok := d.GetOk("service_edge_groups")
 	if !ok || raw == nil {

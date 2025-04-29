@@ -51,18 +51,15 @@ func resourcePolicyAccessRule() *schema.Resource {
 					},
 				},
 				"app_connector_groups": {
-					Type:        schema.TypeSet,
-					Optional:    true,
-					Computed:    true,
-					Description: "List of app-connector IDs.",
+					Type:     schema.TypeList,
+					Optional: true,
+					// MaxItems: 1,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"id": {
 								Type:     schema.TypeSet,
-								Optional: true,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
+								Required: true,
+								Elem:     &schema.Schema{Type: schema.TypeString},
 							},
 						},
 					},
