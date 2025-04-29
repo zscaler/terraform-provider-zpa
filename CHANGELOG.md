@@ -1,14 +1,15 @@
 # Changelog
 
-## 4.1.1 (April, 28 2025)
+## 4.1.1 (April, 29 2025)
 
 ### Notes
 
-- Release date: **(April, 28 2025)**
+- Release date: **(April, 29 2025)**
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
 [PR #557](https://github.com/zscaler/terraform-provider-zpa/pull/557) - Fixed `zpa_server_group` panic during import process.
+[PR #558](https://github.com/zscaler/terraform-provider-zpa/pull/558) - Fixed `zpa_service_edge_group` drift with nested blocks. Notice that the `trusted_networks` and `service_edges` blocks can only repeated once.
 
 ## 4.1.0 (April, 23 2025)
 
