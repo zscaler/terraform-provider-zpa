@@ -63,7 +63,20 @@ func resourcePolicyRedictionRule() *schema.Resource {
 // validatePolicyRedirectionRuleAction validates the "action" attribute against "service_edge_groups" requirements.
 func validatePolicyRedirectionRuleAction(d *schema.ResourceData) error {
 	action := d.Get("action").(string)
-	serviceEdgeGroups := d.Get("service_edge_groups").(*schema.Set).List()
+
+	raw := d.Get("service_edge_groups")
+	var serviceEdgeGroups []interface{}
+
+	switch v := raw.(type) {
+	case *schema.Set:
+		serviceEdgeGroups = v.List()
+	case []interface{}:
+		serviceEdgeGroups = v
+	case nil:
+		serviceEdgeGroups = []interface{}{}
+	default:
+		return fmt.Errorf("service_edge_groups has unexpected type %T", raw)
+	}
 
 	switch action {
 	case "REDIRECT_PREFERRED", "REDIRECT_ALWAYS":
@@ -72,7 +85,7 @@ func validatePolicyRedirectionRuleAction(d *schema.ResourceData) error {
 		}
 	case "REDIRECT_DEFAULT":
 		if len(serviceEdgeGroups) > 0 {
-			return fmt.Errorf("zpa Private Service Edge groups must be empty when the Private Service Edge Selection Method is REDIRECT_DEFAULT")
+			return fmt.Errorf("ZPA Private Service Edge groups must be empty when the Private Service Edge Selection Method is REDIRECT_DEFAULT")
 		}
 	}
 
