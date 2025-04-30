@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 )
 
 func resourcePolicyAccessRule() *schema.Resource {
@@ -34,9 +36,8 @@ func resourcePolicyAccessRule() *schema.Resource {
 					}, false),
 				},
 				"app_server_groups": {
-					Type:     schema.TypeList,
-					Optional: true,
-					// MaxItems: 1,
+					Type:        schema.TypeList,
+					Optional:    true,
 					Description: "List of the server group IDs.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -51,7 +52,6 @@ func resourcePolicyAccessRule() *schema.Resource {
 				"app_connector_groups": {
 					Type:     schema.TypeList,
 					Optional: true,
-					// MaxItems: 1,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"id": {
@@ -244,22 +244,34 @@ func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policy
 		return nil, err
 	}
 	return &policysetcontroller.PolicyRule{
-		ID:                 d.Get("id").(string),
-		Name:               d.Get("name").(string),
-		Description:        d.Get("description").(string),
-		Action:             d.Get("action").(string),
-		ActionID:           d.Get("action_id").(string),
-		BypassDefaultRule:  d.Get("bypass_default_rule").(bool),
-		CustomMsg:          d.Get("custom_msg").(string),
-		DefaultRule:        d.Get("default_rule").(bool),
-		Operator:           d.Get("operator").(string),
-		PolicySetID:        policySetID,
-		PolicyType:         d.Get("policy_type").(string),
-		Priority:           d.Get("priority").(string),
-		MicroTenantID:      d.Get("microtenant_id").(string),
-		LSSDefaultRule:     d.Get("lss_default_rule").(bool),
-		Conditions:         conditions,
-		AppServerGroups:    expandCommonServerGroups(d),
-		AppConnectorGroups: expandCommonAppConnectorGroups(d),
+		ID:                d.Get("id").(string),
+		Name:              d.Get("name").(string),
+		Description:       d.Get("description").(string),
+		Action:            d.Get("action").(string),
+		ActionID:          d.Get("action_id").(string),
+		BypassDefaultRule: d.Get("bypass_default_rule").(bool),
+		CustomMsg:         d.Get("custom_msg").(string),
+		DefaultRule:       d.Get("default_rule").(bool),
+		Operator:          d.Get("operator").(string),
+		PolicySetID:       policySetID,
+		PolicyType:        d.Get("policy_type").(string),
+		Priority:          d.Get("priority").(string),
+		MicroTenantID:     d.Get("microtenant_id").(string),
+		LSSDefaultRule:    d.Get("lss_default_rule").(bool),
+		Conditions:        conditions,
+		AppServerGroups: func() []servergroup.ServerGroup {
+			groups := expandAppServerGroups(d)
+			if groups == nil {
+				return []servergroup.ServerGroup{}
+			}
+			return groups
+		}(),
+		AppConnectorGroups: func() []appconnectorgroup.AppConnectorGroup {
+			groups := expandCommonAppConnectorGroups(d)
+			if groups == nil {
+				return []appconnectorgroup.AppConnectorGroup{}
+			}
+			return groups
+		}(),
 	}, nil
 }

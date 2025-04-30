@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
 )
 
 func resourcePolicyRedictionRule() *schema.Resource {
@@ -39,18 +40,15 @@ func resourcePolicyRedictionRule() *schema.Resource {
 					"CLIENT_TYPE",
 				}),
 				"service_edge_groups": {
-					Type:        schema.TypeSet,
+					Type:        schema.TypeList,
 					Optional:    true,
-					Computed:    true,
 					Description: "List of the service edge group IDs.",
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"id": {
 								Type:     schema.TypeSet,
-								Optional: true,
-								Elem: &schema.Schema{
-									Type: schema.TypeString,
-								},
+								Required: true,
+								Elem:     &schema.Schema{Type: schema.TypeString},
 							},
 						},
 					},
@@ -232,18 +230,25 @@ func expandCreatePolicyRedirectionRule(d *schema.ResourceData) (*policysetcontro
 		return nil, err
 	}
 	return &policysetcontroller.PolicyRule{
-		ID:                d.Get("id").(string),
-		Name:              d.Get("name").(string),
-		Description:       d.Get("description").(string),
-		Action:            d.Get("action").(string),
-		ActionID:          d.Get("action_id").(string),
-		CustomMsg:         d.Get("custom_msg").(string),
-		Operator:          d.Get("operator").(string),
-		PolicySetID:       policySetID,
-		PolicyType:        d.Get("policy_type").(string),
-		Priority:          d.Get("priority").(string),
-		MicroTenantID:     GetString(d.Get("microtenant_id")),
-		Conditions:        conditions,
-		ServiceEdgeGroups: expandCommonServiceEdgeGroups(d),
+		ID:            d.Get("id").(string),
+		Name:          d.Get("name").(string),
+		Description:   d.Get("description").(string),
+		Action:        d.Get("action").(string),
+		ActionID:      d.Get("action_id").(string),
+		CustomMsg:     d.Get("custom_msg").(string),
+		Operator:      d.Get("operator").(string),
+		PolicySetID:   policySetID,
+		PolicyType:    d.Get("policy_type").(string),
+		Priority:      d.Get("priority").(string),
+		MicroTenantID: GetString(d.Get("microtenant_id")),
+		Conditions:    conditions,
+		ServiceEdgeGroups: func() []serviceedgegroup.ServiceEdgeGroup {
+			groups := expandCommonServiceEdgeGroups(d)
+			if groups == nil {
+				return []serviceedgegroup.ServiceEdgeGroup{}
+			}
+			return groups
+		}(),
+		// ServiceEdgeGroups: expandCommonServiceEdgeGroups(d),
 	}, nil
 }

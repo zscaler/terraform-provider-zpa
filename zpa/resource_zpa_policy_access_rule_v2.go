@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 )
 
 func resourcePolicyAccessRuleV2() *schema.Resource {
@@ -351,16 +353,30 @@ func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*poli
 		return nil, err
 	}
 	rule := &policysetcontrollerv2.PolicyRule{
-		ID:                 d.Get("id").(string),
-		Name:               d.Get("name").(string),
-		Description:        d.Get("description").(string),
-		Action:             d.Get("action").(string),
-		CustomMsg:          d.Get("custom_msg").(string),
-		Operator:           d.Get("operator").(string),
-		PolicySetID:        policySetID,
-		Conditions:         conditions,
-		AppServerGroups:    expandCommonServerGroups(d),
-		AppConnectorGroups: expandCommonAppConnectorGroups(d),
+		ID:          d.Get("id").(string),
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
+		Action:      d.Get("action").(string),
+		CustomMsg:   d.Get("custom_msg").(string),
+		Operator:    d.Get("operator").(string),
+		PolicySetID: policySetID,
+		Conditions:  conditions,
+		AppServerGroups: func() []servergroup.ServerGroup {
+			groups := expandAppServerGroups(d)
+			if groups == nil {
+				return []servergroup.ServerGroup{}
+			}
+			return groups
+		}(),
+		AppConnectorGroups: func() []appconnectorgroup.AppConnectorGroup {
+			groups := expandCommonAppConnectorGroups(d)
+			if groups == nil {
+				return []appconnectorgroup.AppConnectorGroup{}
+			}
+			return groups
+		}(),
+		// AppServerGroups:    expandAppServerGroups(d),
+		// AppConnectorGroups: expandCommonAppConnectorGroups(d),
 	}
 
 	// Conditionally set credential if the user actually set it in TF.
