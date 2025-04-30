@@ -13,6 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentinspection"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 )
 
 func resourceApplicationSegmentInspection() *schema.Resource {
@@ -300,18 +301,14 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				},
 			},
 			"server_groups": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
-				Description: "List of the server group IDs.",
+				Type:     schema.TypeList,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeSet,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -504,8 +501,15 @@ func expandInspectionApplicationSegment(ctx context.Context, d *schema.ResourceD
 		DomainNames:               expandStringInSlice(d, "domain_names"),
 		TCPProtocols:              expandStringInSlice(d, "tcp_protocols"),
 		UDPProtocols:              expandStringInSlice(d, "udp_protocols"),
-		AppServerGroups:           expandCommonServerGroups(d),
-		CommonAppsDto:             expandInspectionCommonAppsDto(d),
+		// AppServerGroups:           expandCommonServerGroups(d),
+		AppServerGroups: func() []servergroup.ServerGroup {
+			groups := expandCommonServerGroups(d)
+			if groups == nil {
+				return []servergroup.ServerGroup{}
+			}
+			return groups
+		}(),
+		CommonAppsDto: expandInspectionCommonAppsDto(d),
 
 		TCPAppPortRange: []common.NetworkPorts{},
 		UDPAppPortRange: []common.NetworkPorts{},

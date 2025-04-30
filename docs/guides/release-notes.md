@@ -12,9 +12,30 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.1.1``
+``Last updated: v4.1.2``
 
 ---
+
+## 4.1.2 (April, 30 2025)
+
+### Notes
+
+- Release date: **(April, 30 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+[PR #561](https://github.com/zscaler/terraform-provider-zpa/pull/561) - Fixed `zpa_server_group` panic during import process.
+[PR #561](https://github.com/zscaler/terraform-provider-zpa/pull/561) - Fixed `zpa_service_edge_group` drift with nested blocks. Notice that the `trusted_networks` and `service_edges` blocks can only repeated once.
+
+[PR #561](https://github.com/zscaler/terraform-provider-zpa/pull/561) - Enhanced nested flattening and expanding functions to provide more agnostic configuration when using dynamic blocks. The following resources are affected:
+- `zpa_application_segment`
+- `zpa_application_segment_pra`
+- `zpa_application_segment_inspection`
+- `zpa_application_segment_browser_access`
+- `zpa_policy_access_rule`
+- `zpa_policy_access_rule_v2`
+- `zpa_policy_access_redirection_rule`
+- `zpa_server_group`
 
 ## 4.1.1 (April, 29 2025)
 

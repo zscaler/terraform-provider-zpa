@@ -15,6 +15,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 )
 
 var policyRulesDetchLock sync.Mutex
@@ -226,18 +227,14 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional: true,
 			},
 			"server_groups": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
-				Description: "List of the server group IDs.",
+				Type:     schema.TypeList,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeSet,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -432,9 +429,16 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
-		ServerGroups:              expandCommonServerGroups(d),
-		TCPAppPortRange:           []common.NetworkPorts{},
-		UDPAppPortRange:           []common.NetworkPorts{},
+		ServerGroups: func() []servergroup.ServerGroup {
+			groups := expandCommonServerGroups(d)
+			if groups == nil {
+				return []servergroup.ServerGroup{}
+			}
+			return groups
+		}(),
+		// ServerGroups:    expandCommonServerGroups(d),
+		TCPAppPortRange: []common.NetworkPorts{},
+		UDPAppPortRange: []common.NetworkPorts{},
 	}
 	remoteTCPAppPortRanges := []string{}
 	remoteUDPAppPortRanges := []string{}
