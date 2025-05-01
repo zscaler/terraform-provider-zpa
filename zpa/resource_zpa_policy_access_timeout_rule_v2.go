@@ -59,12 +59,12 @@ func resourcePolicyTimeoutRuleV2() *schema.Resource {
 			"reauth_idle_timeout": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"reauth_timeout": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"conditions": {
 				Type:        schema.TypeSet,
@@ -235,8 +235,17 @@ func resourcePolicyTimeoutRuleV2Read(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("action", v2PolicyRule.Action)
 	_ = d.Set("policy_set_id", policySetID)
 	_ = d.Set("custom_msg", v2PolicyRule.CustomMsg)
-	_ = d.Set("reauth_idle_timeout", secondsToHumanReadable(resp.ReauthIdleTimeout))
-	_ = d.Set("reauth_timeout", secondsToHumanReadable(resp.ReauthTimeout))
+	if resp.ReauthIdleTimeout == "-1" {
+		_ = d.Set("reauth_idle_timeout", "never")
+	} else {
+		_ = d.Set("reauth_idle_timeout", secondsToHumanReadable(resp.ReauthIdleTimeout))
+	}
+	if resp.ReauthTimeout == "-1" {
+		_ = d.Set("reauth_timeout", "never")
+	} else {
+		_ = d.Set("reauth_timeout", secondsToHumanReadable(resp.ReauthTimeout))
+	}
+
 	_ = d.Set("microtenant_id", v2PolicyRule.MicroTenantID)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
 

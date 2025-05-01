@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.3 (May, xx 2025)
+
+### Notes
+
+- Release date: **(May, xx 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+[PR #563](https://github.com/zscaler/terraform-provider-zpa/pull/563) - Fixed drift with attributes `reauth_idle_timeout` and `reauth_timeout` in the resource `zpa_policy_timeout_rule_v2`.
+
 ## 4.1.2 (April, 30 2025)
 
 ### Notes
