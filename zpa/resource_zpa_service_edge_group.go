@@ -118,17 +118,39 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			// "service_edges": {
+			// 	Type:     schema.TypeList,
+			// 	Optional: true,
+			// 	MaxItems: 1,
+			// 	Description: "WARNING: Service edge membership is managed externally. " +
+			// 		"Specifying this field will enforce exact membership matching.",
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"id": {
+			// 				Type:     schema.TypeSet,
+			// 				Required: true,
+			// 				Elem:     &schema.Schema{Type: schema.TypeString},
+			// 			},
+			// 		},
+			// 	},
+			// },
 			"service_edges": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true, // This is key
 				MaxItems: 1,
-				Description: "WARNING: Service edge membership is managed externally. " +
-					"Specifying this field will enforce exact membership matching.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// If the field isn't set in config (regardless of static or dynamic block)
+					if _, ok := d.GetOk("service_edges"); !ok {
+						return true
+					}
+					return false
+				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeSet,
-							Required: true,
+							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
