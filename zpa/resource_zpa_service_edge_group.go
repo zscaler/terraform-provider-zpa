@@ -122,8 +122,8 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			// 	Type:     schema.TypeList,
 			// 	Optional: true,
 			// 	MaxItems: 1,
-			// 	Description: "WARNING: Service edge membership is managed externally. " +
-			// 		"Specifying this field will enforce exact membership matching.",
+			// Description: "WARNING: Service edge membership is managed externally. " +
+			// 	"Specifying this field will enforce exact membership matching.",
 			// 	Elem: &schema.Resource{
 			// 		Schema: map[string]*schema.Schema{
 			// 			"id": {
@@ -139,6 +139,9 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Optional: true,
 				Computed: true, // This is key
 				MaxItems: 1,
+				Description: "WARNING: Service edge membership is managed externally. " +
+					"Specifying this field will enforce exact membership matching." +
+					"This field will be deprecated in future versions",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					// If the field isn't set in config (regardless of static or dynamic block)
 					if _, ok := d.GetOk("service_edges"); !ok {
