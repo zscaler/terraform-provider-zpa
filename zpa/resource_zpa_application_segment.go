@@ -226,6 +226,11 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"api_protection_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "If set to true, designates the application segment for API traffic inspection",
+			},
 			"server_groups": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -321,6 +326,7 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
+	_ = d.Set("api_protection_enabled", resp.APIProtectionEnabled)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
@@ -429,6 +435,7 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
+		APIProtectionEnabled:      d.Get("api_protection_enabled").(bool),
 		ServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
 			if groups == nil {

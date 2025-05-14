@@ -129,16 +129,34 @@ In addition to all arguments above, the following attributes are exported:
 - `version_profile_name` - (String) The unique identifier of the version profile. Supported values are:
   - ``Default``, ``Previous Default``, ``New Release``, ``Default - el8``, ``New Release - el8``, ``Previous Default - el8``
 
-- `service_edges` - (Block Set) The list of ZPA Private Service Edges in the ZPA Private Service Edge Group. Maximum 1 block allowed.
-    - `id` - (List of Strings) The unique identifier of the ZPA Private Service Edge.
-- `trusted_networks` - (Block Set) Trusted networks for this Service Edge Group. List of trusted network objects Maximum 1 block allowed.
-    - `id` - (List of Strings) The unique identifier of the trusted network.
 - `upgrade_day` - (Strings) Service Edges in this group will attempt to update to a newer version of the software during this specified day. Default value: `SUNDAY` List of valid days (i.e., Sunday, Monday)
 - `upgrade_time_in_secs` - (Strings) Service Edges in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600` Integer in seconds (i..e, 66600). The integer must be greater than or equal to 0 and less than `86400`, in `15` minute intervals
 - `use_in_dr_mode` - (Boolean) Whether or not the App Connector Group is designated for disaster recovery. Supported values: `true`, `false`
 - `microtenant_id` (Strings) The ID of the microtenant the resource is to be associated with.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
+- `trusted_networks` - (Block Set) Trusted networks for this Service Edge Group. List of trusted network objects Maximum 1 block allowed.
+    - `id` - (List of Strings) The unique identifier of the trusted network.
+
+- `service_edges` - (Block Set) The list of ZPA Private Service Edges in the ZPA Private Service Edge Group. Maximum 1 block allowed.
+    - `id` - (List of Strings) The unique identifier of the ZPA Private Service Edge.
+
+  ### New `service_edges` Behavior
+  - **When omitted**: Terraform will ignore service edge membership completely (no drift detection)
+  - **When specified**: Terraform will enforce exact membership matching
+    - You must include all required service edge IDs in the list
+    - Any discrepancy between configuration and actual state will be reported as drift
+
+  ### Important Notes
+  ⚠️ **Deprecation Notice**: The `service_edges` block will be deprecated in a future release  
+  🔧 **External Management**: Service edge membership is typically managed outside Terraform  
+  💡 **Recommendation**: Only use this block if you require Terraform to explicitly manage membership
+
+  ### Migration Guidance
+  If you're currently using this block but don't need strict membership control:
+  1. Remove the `service_edges` block from your configuration
+  2. Run `terraform apply` to update the state
 
 ## Import
 

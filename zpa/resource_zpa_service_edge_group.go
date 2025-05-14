@@ -121,7 +121,9 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			"service_edges": {
 				Type:     schema.TypeList,
 				Optional: true,
-				// MaxItems: 1,
+				MaxItems: 1,
+				Description: "WARNING: Service edge membership is managed externally. " +
+					"Specifying this field will enforce exact membership matching.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -304,7 +306,14 @@ func resourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData, m
 		_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
 	}
 	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
-	_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
+	// Only set service_edges if they were previously configured or exist in the diff
+	if _, ok := d.GetOk("service_edges"); ok {
+		_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
+	} else {
+		// Explicitly remove from state if not configured
+		_ = d.Set("service_edges", nil)
+	}
+
 	return nil
 }
 
@@ -388,6 +397,7 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 	return serviceEdgeGroup
 }
 
+/*
 func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceEdgeController {
 	raw, ok := d.GetOk("service_edges")
 	if !ok || raw == nil {
@@ -411,6 +421,47 @@ func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceE
 
 	idSet, ok := idRaw.(*schema.Set)
 	if !ok {
+		return nil
+	}
+
+	var edges []serviceedgecontroller.ServiceEdgeController
+	for _, id := range idSet.List() {
+		edges = append(edges, serviceedgecontroller.ServiceEdgeController{
+			ID: id.(string),
+		})
+	}
+	return edges
+}
+*/
+
+func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceEdgeController {
+	// Return nil if service_edges isn't in config
+	if _, ok := d.GetOk("service_edges"); !ok {
+		return nil
+	}
+
+	raw := d.Get("service_edges")
+	if raw == nil {
+		return nil
+	}
+
+	blocks := raw.([]interface{})
+	if len(blocks) == 0 || blocks[0] == nil {
+		return nil
+	}
+
+	block, ok := blocks[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+
+	idRaw, ok := block["id"]
+	if !ok || idRaw == nil {
+		return nil
+	}
+
+	idSet, ok := idRaw.(*schema.Set)
+	if !ok || idSet.Len() == 0 {
 		return nil
 	}
 
@@ -459,6 +510,23 @@ func expandTrustedNetworks(d *schema.ResourceData) []trustednetwork.TrustedNetwo
 }
 
 // func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeController) []interface{} {
+// 	ids := make([]interface{}, len(serviceEdges))
+// 	for i, edge := range serviceEdges {
+// 		ids[i] = edge.ID
+// 	}
+
+// 	return []interface{}{
+// 		map[string]interface{}{
+// 			"id": schema.NewSet(schema.HashString, ids),
+// 		},
+// 	}
+// }
+
+// func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeController) []interface{} {
+// 	if len(serviceEdges) == 0 {
+// 		return nil
+// 	}
+
 // 	ids := make([]interface{}, len(serviceEdges))
 // 	for i, edge := range serviceEdges {
 // 		ids[i] = edge.ID
