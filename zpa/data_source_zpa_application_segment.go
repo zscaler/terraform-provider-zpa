@@ -108,6 +108,10 @@ func dataSourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
+			"api_protection_enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"server_groups": {
 				Type:        schema.TypeSet,
 				Computed:    true,
@@ -200,6 +204,7 @@ func dataSourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceDat
 		_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 		_ = d.Set("microtenant_id", resp.MicroTenantID)
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
+		_ = d.Set("api_protection_enabled", resp.APIProtectionEnabled)
 
 		if err := d.Set("server_groups", flattenCommonAppServerGroups(resp.ServerGroups)); err != nil {
 			return diag.FromErr(fmt.Errorf("failed to read app server groups %s", err))

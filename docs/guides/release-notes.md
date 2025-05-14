@@ -16,6 +16,33 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
+## 4.1.3 (May, 14 2025)
+
+### Notes
+
+- Release date: **(May, 14 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+[PR #564](https://github.com/zscaler/terraform-provider-zpa/pull/564) - Fixed drift with attributes `reauth_idle_timeout` and `reauth_timeout` in the resource `zpa_policy_timeout_rule_v2`.
+[PR #564](https://github.com/zscaler/terraform-provider-zpa/pull/564) - Modified behavior of `service_edges` block in `zpa_service_edge_group` resource:
+
+### New Behavior
+- **When omitted**: Terraform will ignore service edge membership completely (no drift detection)
+- **When specified**: Terraform will enforce exact membership matching
+  - You must include all required service edge IDs in the list
+  - Any discrepancy between configuration and actual state will be reported as drift
+
+### Important Notes
+⚠️ **Deprecation Notice**: The `service_edges` block will be deprecated in a future release  
+🔧 **External Management**: Service edge membership is typically managed outside Terraform  
+💡 **Recommendation**: Only use this block if you require Terraform to explicitly manage membership
+
+### Migration Guidance
+If you're currently using this block but don't need strict membership control:
+1. Remove the `service_edges` block from your configuration
+2. Run `terraform apply` to update the state
+
 ## 4.1.2 (April, 30 2025)
 
 ### Notes
