@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.4 (May, 22 2025)
+
+### Notes
+
+- Release date: **(May, 22 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+[PR #568](https://github.com/zscaler/terraform-provider-zpa/pull/568) - Fixed panic on the resource `zpa_policy_credential_rule` due to missing nil pointer on the attribute `credential` and `credential_pool`
+
 ## 4.1.3 (May, 14 2025)
 
 ### Notes

@@ -267,8 +267,6 @@ func resourcePolicyCredentialAccessRuleUpdate(ctx context.Context, d *schema.Res
 
 	// Retrieve the current state from the API
 	resp, respErr, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, ruleID)
-	log.Printf("[DEBUG] API returned credential ID: %+v", resp.Credential)
-
 	if err != nil {
 		if respErr != nil && respErr.StatusCode == http.StatusNotFound {
 			d.SetId("")
@@ -277,15 +275,21 @@ func resourcePolicyCredentialAccessRuleUpdate(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 
-	// If Credential.ID is missing in the request, fallback to the value returned from the API
-	if req.Credential.ID == "" && resp != nil && resp.Credential.ID != "" {
-		log.Printf("[DEBUG] Credential ID missing in request, falling back to existing API value: %s", resp.Credential.ID)
-		req.Credential.ID = resp.Credential.ID
+	// Handle credential or credential pool fallback logic
+	if req.Credential == nil && req.CredentialPool == nil {
+		// If both are nil in request, check if we should fall back to API values
+		if resp != nil {
+			if resp.Credential != nil && resp.Credential.ID != "" {
+				req.Credential = resp.Credential
+			} else if resp.CredentialPool != nil && resp.CredentialPool.ID != "" {
+				req.CredentialPool = resp.CredentialPool
+			}
+		}
 	}
 
-	// Final validation
-	if req.Credential.ID == "" {
-		return diag.Errorf("credential block must be present and contain an ID during update")
+	// Final validation - ensure we have either credential or credential pool
+	if (req.Credential == nil || req.Credential.ID == "") && (req.CredentialPool == nil || req.CredentialPool.ID == "") {
+		return diag.Errorf("either credential or credential_pool block must be present and contain an ID during update")
 	}
 
 	if err := ValidatePolicyRuleConditions(d); err != nil {
@@ -298,7 +302,6 @@ func resourcePolicyCredentialAccessRuleUpdate(ctx context.Context, d *schema.Res
 
 	return resourcePolicyCredentialAccessRuleRead(ctx, d, meta)
 }
-
 func resourcePolicyCredentialAccessRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
 	service := zClient.Service
