@@ -89,6 +89,31 @@ func resourcePRAPortalController() *schema.Resource {
 				Optional:    true,
 				Description: "Indicates if the Notification Banner is enabled (true) or disabled (false)",
 			},
+			"user_portal_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
+			"ext_label": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
+			"ext_domain": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
+			"ext_domain_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
+			"ext_domain_translation": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
 			"microtenant_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -151,6 +176,11 @@ func resourcePRAPortalControllerRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("user_notification", resp.UserNotification)
 	_ = d.Set("user_notification_enabled", resp.UserNotificationEnabled)
+	_ = d.Set("user_portal_name", resp.UserPortalName)
+	_ = d.Set("ext_label", resp.ExtLabel)
+	_ = d.Set("ext_domain", resp.ExtDomain)
+	_ = d.Set("ext_domain_name", resp.ExtDomainName)
+	_ = d.Set("ext_domain_translation", resp.ExtDomainTranslation)
 	return nil
 }
 
@@ -216,6 +246,11 @@ func expandPRAPortalController(d *schema.ResourceData) praportal.PRAPortal {
 		MicroTenantID:           d.Get("microtenant_id").(string),
 		UserNotification:        d.Get("user_notification").(string),
 		UserNotificationEnabled: d.Get("user_notification_enabled").(bool),
+		UserPortalName:          d.Get("user_portal_name").(string),
+		ExtLabel:                d.Get("ext_label").(string),
+		ExtDomain:               d.Get("ext_domain").(string),
+		ExtDomainName:           d.Get("ext_domain_name").(string),
+		ExtDomainTranslation:    d.Get("ext_domain_translation").(string),
 	}
 	return praPortal
 }
