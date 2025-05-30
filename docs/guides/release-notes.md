@@ -12,9 +12,22 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.1.5``
+``Last updated: v4.1.6``
 
 ---
+
+## 4.1.6 (May, 30 2025)
+
+### Notes
+
+- Release date: **(May, 30 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+[PR #571](https://github.com/zscaler/terraform-provider-zpa/pull/571) - Added new Access Policy Resource `zpa_policy_browser_protection_rule` to support ``USER_PORTAL`` `object_type`
+
+### Documentation
+[PR #571](https://github.com/zscaler/terraform-provider-zpa/pull/571) - Updated all access policy documentations and examples.
 
 ## 4.1.5 (May, 29 2025)
 

@@ -1005,6 +1005,10 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 				if !valuesPresent || valuesSet.Len() == 0 {
 					return fmt.Errorf("a Branch Connector Group ID must be provided when object_type = BRANCH_CONNECTOR_GROUP")
 				}
+			case "USER_PORTAL":
+				if !valuesPresent || valuesSet.Len() == 0 {
+					return fmt.Errorf("a User Portal ID must be provided when object_type = USER_PORTAL")
+				}
 			case "CLIENT_TYPE":
 				if !valuesPresent || valuesSet.Len() == 0 {
 					return fmt.Errorf("please provide one of the valid Client Types: %v", validClientTypes)
@@ -1169,6 +1173,10 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 						return fmt.Errorf("RHS must be a valid scim group ID and cannot be empty for SCIM_GROUP object_type")
 					}
 				}
+			case "CHROME_POSTURE_PROFILE":
+				if !valuesPresent || valuesSet.Len() == 0 {
+					return fmt.Errorf("a Chrome Posture Profile ID must be provided when object_type = CHROME_POSTURE_PROFILE")
+				}
 			case "CHROME_ENTERPRISE":
 				entryValuesSet, ok := operandMap["entry_values"].(*schema.Set)
 				if !ok || entryValuesSet.Len() == 0 {
@@ -1257,7 +1265,7 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 
 		for _, operand := range condition.Operands {
 			switch operand.ObjectType {
-			case "APP", "APP_GROUP", "CONSOLE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE":
+			case "APP", "APP_GROUP", "CONSOLE", "CHROME_POSTURE_PROFILE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE", "USER_PORTAL":
 				operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
 			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE", "RISK_FACTOR_TYPE", "CHROME_ENTERPRISE":
 				entryValuesMap[operand.ObjectType] = append(entryValuesMap[operand.ObjectType], policysetcontrollerv2.OperandsResourceLHSRHSValue{

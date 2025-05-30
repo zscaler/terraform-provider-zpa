@@ -1,5 +1,5 @@
 ---
-page_title: "zpa_policy_access_rule_v2 Resource - terraform-provider-zpa"
+page_title: "zpa_policy_browser_protection_rule Resource - terraform-provider-zpa"
 subcategory: "Policy Set Controller V2"
 description: |-
   Official documentation https://help.zscaler.com/zpa/about-access-policy
@@ -7,18 +7,18 @@ description: |-
   Creates and manages ZPA Policy Access Rule via API v2 endpoints.
 ---
 
-# zpa_policy_access_rule_v2 (Resource)
+# zpa_policy_browser_protection_rule (Resource)
 
 * [Official documentation](https://help.zscaler.com/zpa/about-access-policy)
 * [API documentation](https://help.zscaler.com/zpa/configuring-access-policies-using-api#postV2)
 
-The **zpa_policy_access_rule_v2** resource creates and manages policy access rule in the Zscaler Private Access cloud using a new v2 API endpoint.
+The **zpa_policy_browser_protection_rule** resource creates and manages policy access rule in the Zscaler Private Access cloud using a new v2 API endpoint.
 
   ⚠️ **NOTE**: This resource is recommended if your configuration requires the association of more than 1000 resource criteria per rule.
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
-## Example Usage
+## Example Usage - Browser Protection with MONITOR ACTION
 
 ```terraform
 # Retrieve Policy Types
@@ -59,10 +59,10 @@ resource "zpa_segment_group" "this" {
  }
 
 # Create Policy Access Rule V2
-resource "zpa_policy_access_rule_v2" "this" {
+resource "zpa_policy_browser_protection_rule" "this" {
   name          = "Example"
   description   = "Example"
-  action        = "ALLOW"
+  action        = "MONITOR"
 
   conditions {
     operator = "OR"
@@ -100,69 +100,111 @@ resource "zpa_policy_access_rule_v2" "this" {
   conditions {
     operator = "OR"
     operands {
-      object_type = "PLATFORM"
+      object_type = "USER_PORTAL"
+      values      = ["145262059234265326"]
+    }
+  }
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "CLIENT_TYPE"
+      values      = ["zpn_client_type_exporter"]
+    }
+  }
+}
+```
+
+## Example Usage - Browser Protection with DO_NOT_MONITOR ACTION
+
+```terraform
+# Retrieve Policy Types
+# Retrieve Identity Provider ID
+data "zpa_idp_controller" "this" {
+	name = "Idp_Name"
+}
+
+# Retrieve SAML Attribute ID
+data "zpa_saml_attribute" "email_user_sso" {
+    name = "Email_Users"
+    idp_name = "Idp_Name"
+}
+
+# Retrieve SAML Attribute ID
+data "zpa_saml_attribute" "group_user" {
+    name = "GroupName_Users"
+    idp_name = "Idp_Name"
+}
+
+# Retrieve SCIM Group ID
+data "zpa_scim_groups" "a000" {
+    name = "A000"
+    idp_name = "Idp_Name"
+}
+
+# Retrieve SCIM Group ID
+data "zpa_scim_groups" "b000" {
+    name = "B000"
+    idp_name = "Idp_Name"
+}
+
+# Create Segment Group
+resource "zpa_segment_group" "this" {
+   name = "Example"
+   description = "Example"
+   enabled = true
+ }
+
+# Create Policy Access Rule V2
+resource "zpa_policy_browser_protection_rule" "this" {
+  name          = "Example"
+  description   = "Example"
+  action        = "DO_NOT_MONITOR"
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "APP_GROUP"
+      values      = [zpa_segment_group.this.id]
+    }
+  }
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "SAML"
       entry_values {
-        rhs = "true"
-        lhs = "linux"
+        rhs = "user1@acme.com"
+        lhs = data.zpa_saml_attribute.email_user_sso.id
       }
       entry_values {
-        rhs = "true"
-        lhs = "android"
+        rhs = "A000"
+        lhs = data.zpa_saml_attribute.group_user.id
+      }
+    }
+    operands {
+      object_type = "SCIM_GROUP"
+      entry_values {
+        rhs = data.zpa_scim_groups.a000.id
+        lhs = data.zpa_idp_controller.this.id
+      }
+      entry_values {
+        rhs = data.zpa_scim_groups.b000.id
+        lhs = data.zpa_idp_controller.this.id
       }
     }
   }
   conditions {
     operator = "OR"
     operands {
-      object_type = "COUNTRY_CODE"
-      entry_values {
-        lhs = "CA"
-        rhs = "true"
-      }
-      entry_values {
-        lhs = "US"
-        rhs = "true"
-      }
+      object_type = "USER_PORTAL"
+      values      = ["145262059234265326"]
     }
   }
   conditions {
     operator = "OR"
     operands {
-      object_type = "RISK_FACTOR_TYPE"
-      entry_values {
-        lhs = "ZIA"
-        rhs = "UNKNOWN"
-      }
-      entry_values {
-        lhs = "ZIA"
-        rhs = "LOW"
-      }
-      entry_values {
-        lhs = "ZIA"
-        rhs = "MEDIUM"
-      }
-      entry_values {
-        lhs = "ZIA"
-        rhs = "HIGH"
-      }
-      entry_values {
-        lhs = "ZIA"
-        rhs = "CRITICAL"
-      }
-    }
-  }
-  conditions {
-    operator = "OR"
-    operands {
-      object_type = "CHROME_ENTERPRISE"
-      entry_values {
-        lhs = "managed"
-        rhs = "true"
-      }
-      entry_values {
-        lhs = "managed"
-        rhs = "false"
-      }
+      object_type = "CLIENT_TYPE"
+      values      = ["zpn_client_type_exporter"]
     }
   }
 }
@@ -177,58 +219,31 @@ resource "zpa_policy_access_rule_v2" "this" {
 ### Optional
 
 - `description` (String) This is the description of the access policy rule.
-- `action` (String) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``, and ``REQUIRE_APPROVAL``
-- `custom_msg` (String) This is for providing a customer message for the user.
+- `action` (String) This is for providing the rule action. Supported values: ``MONITOR``, ``DO_NOT_MONITOR``
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
-
-- `app_connector_groups` (Block Set)
-  - `id` (String) The ID of an app connector group resource
-
-- `app_server_groups` (Block Set)
-  - `id` (String) The ID of a server group resource
 
 - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-- `conditions` (Block Set)  - This is for providing the set of conditions for the policy. Separate condition blocks for each object type is required.
+- `conditions` (Block Set)  - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
-        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `BRANCH_CONNECTOR_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`, `LOCATION`.
+        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`
         - `values` (Block List) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
 
 - `conditions` (Block Set)  - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `PLATFORM`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  Supported values: `android`, `ios`, `linux`, `mac`, `windows`
-            - `rhs` - (String) - Supported values: `"true"` or `"false"`
+    - `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
+        - `object_type` (String) The object type of the operand. Supported values: `USER_PORTAL`
+        - `values` (Block List) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
 
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+- `conditions` (Block Set)  - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `COUNTRY_CODE`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  2 Letter Country in ``ISO 3166 Alpha2 Code`` [Lear More](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)
-            - `rhs` - (String) - Supported values: `"true"` or `"false"`
-
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
-    - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `POSTURE`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  The Posture Profile `posture_udid` value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile)
-            - `rhs` - (String) - Supported values: `"true"` or `"false"`
-
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
-    - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `TRUSTED_NETWORK`
-        - `entry_values` (Block Set)
-            - `lhs` (String) -  The Trusted Network `network_id` value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network)
-            - `rhs` (String) - Supported values: `"true"` or `"false"`
+    - `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
+        - `object_type` (String) The object type of the operand. Supported values: `CLIENT_TYPE`
+        - `values` (Block List) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
 
 - `conditions` - (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
@@ -249,15 +264,6 @@ resource "zpa_policy_access_rule_v2" "this" {
         - `entry_values` (Block Set)
             - `lhs` - (String) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
             - `rhs` - (String) - The SAML attribute string i.e Group name, Department Name, Email address etc.
-
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
-    - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_ENTERPRISE`, `CHROME_POSTURE_PROFILE`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  Must be set to `managed`
-            - `rhs` - (String) - Supported values: `"true"` or `"false"`
-        - `values` (Block List) The list of ID values for each `CHROME_POSTURE_PROFILE`
 
 ## Import
 
