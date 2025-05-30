@@ -20,6 +20,34 @@ func resourcePRAPortalController() *schema.Resource {
 		ReadContext:   resourcePRAPortalControllerRead,
 		UpdateContext: resourcePRAPortalControllerUpdate,
 		DeleteContext: resourcePRAPortalControllerDelete,
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			externalFields := []string{
+				"ext_label",
+				"ext_domain",
+				"ext_domain_name",
+				"ext_domain_translation",
+				"user_portal_gid",
+			}
+
+			externalSet := false
+			for _, field := range externalFields {
+				if v, ok := d.GetOk(field); ok && v != "" {
+					externalSet = true
+					break
+				}
+			}
+
+			if externalSet {
+				if v, ok := d.GetOk("certificate_id"); ok && v != "" {
+					return fmt.Errorf(
+						"'certificate_id' cannot be set when any of the following are configured: ext_label, ext_domain, ext_domain_name, ext_domain_translation, user_portal_gid",
+					)
+				}
+			}
+
+			return nil
+		},
+
 		Importer: &schema.ResourceImporter{
 			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				zClient := meta.(*Client)
@@ -89,11 +117,6 @@ func resourcePRAPortalController() *schema.Resource {
 				Optional:    true,
 				Description: "Indicates if the Notification Banner is enabled (true) or disabled (false)",
 			},
-			"user_portal_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The name of the user portal.",
-			},
 			"ext_label": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -117,8 +140,12 @@ func resourcePRAPortalController() *schema.Resource {
 			"microtenant_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as 0 when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.",
+			},
+			"user_portal_gid": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The unique identifier of the user portal.",
 			},
 		},
 	}
@@ -176,11 +203,11 @@ func resourcePRAPortalControllerRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("user_notification", resp.UserNotification)
 	_ = d.Set("user_notification_enabled", resp.UserNotificationEnabled)
-	_ = d.Set("user_portal_name", resp.UserPortalName)
 	_ = d.Set("ext_label", resp.ExtLabel)
 	_ = d.Set("ext_domain", resp.ExtDomain)
 	_ = d.Set("ext_domain_name", resp.ExtDomainName)
 	_ = d.Set("ext_domain_translation", resp.ExtDomainTranslation)
+	_ = d.Set("user_portal_gid", resp.UserPortalGid)
 	return nil
 }
 
@@ -246,11 +273,11 @@ func expandPRAPortalController(d *schema.ResourceData) praportal.PRAPortal {
 		MicroTenantID:           d.Get("microtenant_id").(string),
 		UserNotification:        d.Get("user_notification").(string),
 		UserNotificationEnabled: d.Get("user_notification_enabled").(bool),
-		UserPortalName:          d.Get("user_portal_name").(string),
 		ExtLabel:                d.Get("ext_label").(string),
 		ExtDomain:               d.Get("ext_domain").(string),
 		ExtDomainName:           d.Get("ext_domain_name").(string),
 		ExtDomainTranslation:    d.Get("ext_domain_translation").(string),
+		UserPortalGid:           d.Get("user_portal_gid").(string),
 	}
 	return praPortal
 }

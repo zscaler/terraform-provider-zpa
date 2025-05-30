@@ -315,8 +315,8 @@ github.com/klauspost/compress v1.11.2/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYs
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
-github.com/kr/pretty v0.3.0 h1:WgNl7dwNpEZ6jJ9k1snq4pZsg7DOEN8hP9Xw0Tsjwk0=
-github.com/kr/pretty v0.3.0/go.mod h1:640gp4NfQd8pI5XOwp5fnNeVWj67G7CFk/SaSQn7NBk=
+github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
+github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
@@ -446,8 +446,8 @@ github.com/zclconf/go-cty-debug v0.0.0-20240509010212-0d6042c53940/go.mod h1:CmB
 github.com/zclconf/go-cty-yaml v1.0.2/go.mod h1:IP3Ylp0wQpYm50IHK8OZWKMu6sPJIUgKa8XhiVHura0=
 github.com/zscaler/terraform-provider-zpa/v3 v3.332.0 h1:JghKz+jMWXqEFSD0SJBYXL0MISom/gm2UDn3dkapDZc=
 github.com/zscaler/terraform-provider-zpa/v3 v3.332.0/go.mod h1:TEzhvgpdplae6lh8D5F0VSK6fy4Jlxvf5zGXqe+zRqM=
-github.com/zscaler/zscaler-sdk-go/v3 v3.4.1 h1:THZtwOaKVrTOEq4pMPbIS9Uh5aKbq+mrX4VeXf4xWCs=
-github.com/zscaler/zscaler-sdk-go/v3 v3.4.1/go.mod h1:nCK1JzZwQK1hqJyekt/VUNFUvD4nDJzgWr2HL3X5y6g=
+github.com/zscaler/zscaler-sdk-go/v3 v3.4.2 h1:5fq6373D3AjCQ4ru4iv43zEjvBajZkyEz3dWAHpAagg=
+github.com/zscaler/zscaler-sdk-go/v3 v3.4.2/go.mod h1:GW51EwFjrtx5kAPx3jTpmRUEvuJw5lq8N3Bj5Gp/8zo=
 go.abhg.dev/goldmark/frontmatter v0.2.0 h1:P8kPG0YkL12+aYk2yU3xHv4tcXzeVnN+gU0tJ5JnxRw=
 go.abhg.dev/goldmark/frontmatter v0.2.0/go.mod h1:XqrEkZuM57djk7zrlRUB02x8I5J0px76YjkOzhB4YlU=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
