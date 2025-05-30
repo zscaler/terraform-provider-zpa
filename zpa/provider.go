@@ -160,6 +160,7 @@ func ZPAProvider() *schema.Provider {
 			"zpa_server_group":                             resourceServerGroup(),
 			"zpa_policy_access_rule_reorder":               resourcePolicyAccessRuleReorder(),
 			"zpa_policy_access_rule":                       resourcePolicyAccessRule(),
+			"zpa_policy_browser_protection_rule":           resourcePolicyBrowserProtectionRule(),
 			"zpa_policy_inspection_rule":                   resourcePolicyInspectionRule(),
 			"zpa_policy_timeout_rule":                      resourcePolicyTimeoutRule(),
 			"zpa_policy_forwarding_rule":                   resourcePolicyForwardingRule(),

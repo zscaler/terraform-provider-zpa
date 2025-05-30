@@ -221,7 +221,7 @@ resource "zpa_policy_credential_rule" "this" {
         - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`
         - `entry_values` (Block Set) 
             - `lhs` - (String) -  The Identity Provider (IdP) ID
-            - `rhs` - (String) - The SCIM Group unique identified (ID)
+            - `rhs` - (String) - The SCIM Group unique identified (ID) [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups)
     - `operands` (Block Set)  - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
         - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM`
         - `entry_values` (Block Set)
