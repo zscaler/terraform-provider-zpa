@@ -16,15 +16,16 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-## 4.1.5 (May, 28 2025)
+## 4.1.5 (May, 29 2025)
 
 ### Notes
 
-- Release date: **(May, 28 2025)**
+- Release date: **(May, 29 2025)**
 - Supported Terraform version: **v1.x**
 
-### Bug Fixes
+### Enhancements
 [PR #569](https://github.com/zscaler/terraform-provider-zpa/pull/569) - Added support for PRA User Portal with Zscaler Managed Certificate to resource `zpa_pra_portal_controller`
+[PR #570](https://github.com/zscaler/terraform-provider-zpa/pull/570) - Added support for Zscaler Managed Certificate to resource `zpa_application_segment_browser_access`
 
 ## 4.1.4 (May, 22 2025)
 

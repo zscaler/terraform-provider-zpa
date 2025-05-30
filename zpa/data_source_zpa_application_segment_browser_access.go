@@ -178,6 +178,16 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"ext_label": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The domain prefix for the privileged portal URL. The supported string can include numbers, lower case characters, and only supports a hyphen (-).",
+						},
+						"ext_domain": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal.",
+						},
 					},
 				},
 			},

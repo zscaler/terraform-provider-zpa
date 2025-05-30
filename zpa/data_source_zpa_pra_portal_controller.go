@@ -89,6 +89,41 @@ func dataSourcePRAPortalController() *schema.Resource {
 				Computed:    true,
 				Description: "The name of the Microtenant",
 			},
+			"ext_label": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The domain prefix for the privileged portal URL. The supported string can include numbers, lower case characters, and only supports a hyphen (-).",
+			},
+			"ext_domain": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal.",
+			},
+			"ext_domain_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The domain suffix for the privileged portal URL. This field must be one of the customer's authentication domains.",
+			},
+			"ext_domain_translation": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The translation of the external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal.",
+			},
+			"user_portal_gid": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The unique identifier of the user portal.",
+			},
+			"user_portal_name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The unique identifier of the user portal.",
+			},
+			"getc_name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The unique identifier of the user portal.",
+			},
 		},
 	}
 }
@@ -137,6 +172,12 @@ func dataSourcePRAPortalControllerRead(ctx context.Context, d *schema.ResourceDa
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("microtenant_id", resp.MicroTenantID)
 		_ = d.Set("microtenant_name", resp.MicroTenantName)
+		_ = d.Set("ext_label", resp.ExtLabel)
+		_ = d.Set("ext_domain", resp.ExtDomain)
+		_ = d.Set("ext_domain_name", resp.ExtDomainName)
+		_ = d.Set("ext_domain_translation", resp.ExtDomainTranslation)
+		_ = d.Set("user_portal_gid", resp.UserPortalGid)
+		_ = d.Set("getc_name", resp.GetcName)
 	} else {
 		return diag.FromErr(fmt.Errorf("couldn't find any pra portal controller with name '%s' or id '%s'", name, id))
 	}

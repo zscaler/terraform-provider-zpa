@@ -21,6 +21,41 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 		ReadContext:   resourceApplicationSegmentBrowserAccessRead,
 		UpdateContext: resourceApplicationSegmentBrowserAccessUpdate,
 		DeleteContext: resourceApplicationSegmentBrowserAccessDelete,
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			clientlessAppsRaw, ok := d.GetOk("clientless_apps")
+			if !ok {
+				return nil
+			}
+
+			clientlessApps, ok := clientlessAppsRaw.([]interface{})
+			if !ok {
+				return nil
+			}
+
+			for i, appRaw := range clientlessApps {
+				app, ok := appRaw.(map[string]interface{})
+				if !ok {
+					continue
+				}
+
+				extLabel, hasExtLabel := app["ext_label"].(string)
+				extDomain, hasExtDomain := app["ext_domain"].(string)
+				certID, hasCertID := app["certificate_id"].(string)
+
+				extFieldsSet := (hasExtLabel && extLabel != "") || (hasExtDomain && extDomain != "")
+				certSet := hasCertID && certID != ""
+
+				if extFieldsSet && certSet {
+					return fmt.Errorf(
+						"clientless_apps[%d]: 'certificate_id' cannot be set when either 'ext_label' or 'ext_domain' is configured",
+						i,
+					)
+				}
+			}
+
+			return nil
+		},
+
 		Importer: &schema.ResourceImporter{
 			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 				client := meta.(*Client)
@@ -270,6 +305,16 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Computed:    true,
 							Description: "Indicates whether Use Untrusted Certificates is enabled or disabled for a BA app.",
 						},
+						"ext_label": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The domain prefix for the privileged portal URL. The supported string can include numbers, lower case characters, and only supports a hyphen (-).",
+						},
+						"ext_domain": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal.",
+						},
 					},
 				},
 			},
@@ -494,7 +539,6 @@ func expandBrowserAccess(ctx context.Context, d *schema.ResourceData, zClient *C
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
-		// AppServerGroups:           expandCommonServerGroups(d),
 		AppServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
 			if groups == nil {
@@ -572,6 +616,8 @@ func expandClientlessApps(d *schema.ResourceData) []applicationsegmentbrowseracc
 					Name:                clientlessApp["name"].(string),
 					MicroTenantID:       clientlessApp["microtenant_id"].(string),
 					TrustUntrustedCert:  clientlessApp["trust_untrusted_cert"].(bool),
+					ExtLabel:            clientlessApp["ext_label"].(string),
+					ExtDomain:           clientlessApp["ext_domain"].(string),
 				})
 			}
 		}
@@ -598,6 +644,8 @@ func flattenBaClientlessApps(clientlessApp *applicationsegmentbrowseraccess.Brow
 			"domain":               clientlessApp.Domain,
 			"enabled":              clientlessApp.Enabled,
 			"trust_untrusted_cert": clientlessApp.TrustUntrustedCert,
+			"ext_label":            clientlessApp.ExtLabel,
+			"ext_domain":           clientlessApp.ExtDomain,
 		}
 	}
 
