@@ -236,11 +236,9 @@ To manage a microtenant using the ZPA Terraform provider, the administrator for 
 The microtenant administrator can then create his own microtenant API credentials required to authenticate via API to the ZPA platform. From that point, the administrator can then individually manage his own resources in an isolated manner.
 When authenticating to microtenant via API using the ZPA Terraform provider, the administrator must provide the following environment variable credentials: `ZPA_CLIENT_ID`, `ZPA_CLIENT_SECRET`, `ZPA_CUSTOMER_ID`, `ZPA_CLOUD`, `ZPA_MICROTENANT_ID`
 
-~> **NOTE 1** Only environment variables are currently supported when authenticating to a Microtenant.
+~> **NOTE 1** The environment variable `ZPA_MICROTENANT_ID` is mandatory when provisioning/managing resources exclusively within a Microtenant.
 
-~> **NOTE 2** The environment variable `ZPA_MICROTENANT_ID` is mandatory when provisioning/managing resources exclusively within a Microtenant.
-
-~> **NOTE 3** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is required to provision resources in the `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `ZPATWO` clouds.
+~> **NOTE 2** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is required to provision resources in the `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `ZPATWO` clouds.
 
 ## Argument Reference - OneAPI
 
