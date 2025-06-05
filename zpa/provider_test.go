@@ -109,11 +109,12 @@ func accPreCheck() error {
 }
 
 func TestProviderValidate(t *testing.T) {
+	// Save and clear environment variables
 	envKeys := []string{
 		"ZSCALER_CLIENT_ID",
 		"ZSCALER_CLIENT_SECRET",
-		"ZPA_CUSTOMER_ID",
 		"ZSCALER_VANITY_DOMAIN",
+		"ZPA_CUSTOMER_ID",
 		"ZSCALER_CLOUD",
 	}
 	envVals := make(map[string]string)
@@ -126,6 +127,7 @@ func TestProviderValidate(t *testing.T) {
 		}
 	}
 
+	// Define test cases using actual env values for valid config
 	tests := []struct {
 		name         string
 		clientID     string
@@ -135,18 +137,67 @@ func TestProviderValidate(t *testing.T) {
 		cloud        string
 		expectError  bool
 	}{
-		{"valid client_id + client_secret", "clientID", "clientSecret", "vanityDomain", "customerID", "zscaler_cloud", false},
-		{"missing client_id", "", "clientSecret", "vanityDomain", "customerID", "zscaler_cloud", true},
-		{"missing clientSecret", "clientID", "", "vanityDomain", "customerID", "zscaler_cloud", true},
-		{"missing vanity domain", "clientID", "clientSecret", "", "customerID", "zscaler_cloud", true},
-		{"valid client_id + client_secret without zscaler_cloud", "clientID", "clientSecret", "vanityDomain", "customerID", "", false},
+		{
+			name:         "valid client_id + client_secret",
+			clientID:     envVals["ZSCALER_CLIENT_ID"],
+			clientSecret: envVals["ZSCALER_CLIENT_SECRET"],
+			vanityDomain: envVals["ZSCALER_VANITY_DOMAIN"],
+			customerID:   envVals["ZPA_CUSTOMER_ID"],
+			cloud:        envVals["ZSCALER_CLOUD"],
+			expectError:  false,
+		},
+		{
+			name:         "missing client_id",
+			clientID:     "",
+			clientSecret: envVals["ZSCALER_CLIENT_SECRET"],
+			vanityDomain: envVals["ZSCALER_VANITY_DOMAIN"],
+			customerID:   envVals["ZPA_CUSTOMER_ID"],
+			cloud:        envVals["ZSCALER_CLOUD"],
+			expectError:  true,
+		},
+		{
+			name:         "missing clientSecret",
+			clientID:     envVals["ZSCALER_CLIENT_ID"],
+			clientSecret: "",
+			vanityDomain: envVals["ZSCALER_VANITY_DOMAIN"],
+			customerID:   envVals["ZPA_CUSTOMER_ID"],
+			cloud:        envVals["ZSCALER_CLOUD"],
+			expectError:  true,
+		},
+		{
+			name:         "missing vanity domain",
+			clientID:     envVals["ZSCALER_CLIENT_ID"],
+			clientSecret: envVals["ZSCALER_CLIENT_SECRET"],
+			vanityDomain: "",
+			customerID:   envVals["ZPA_CUSTOMER_ID"],
+			cloud:        envVals["ZSCALER_CLOUD"],
+			expectError:  true,
+		},
+		{
+			name:         "valid client_id + client_secret without zscaler_cloud",
+			clientID:     envVals["ZSCALER_CLIENT_ID"],
+			clientSecret: envVals["ZSCALER_CLIENT_SECRET"],
+			vanityDomain: envVals["ZSCALER_VANITY_DOMAIN"],
+			customerID:   envVals["ZPA_CUSTOMER_ID"],
+			cloud:        "",
+			expectError:  false,
+		},
+		{
+			name:         "valid client_id + client_secret, zscaler_cloud and without customer_id",
+			clientID:     envVals["ZSCALER_CLIENT_ID"],
+			clientSecret: envVals["ZSCALER_CLIENT_SECRET"],
+			vanityDomain: envVals["ZSCALER_VANITY_DOMAIN"],
+			customerID:   "",
+			cloud:        envVals["ZSCALER_CLOUD"],
+			expectError:  true,
+		},
 	}
 
+	// Execute each test case
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			resourceConfig := map[string]interface{}{
 				"vanity_domain": test.vanityDomain,
-				"customer_id":   test.customerID,
 			}
 			if test.clientID != "" {
 				resourceConfig["client_id"] = test.clientID
@@ -157,9 +208,12 @@ func TestProviderValidate(t *testing.T) {
 			if test.cloud != "" {
 				resourceConfig["zscaler_cloud"] = test.cloud
 			}
-
+			if test.customerID != "" {
+				resourceConfig["customer_id"] = test.customerID
+			}
 			provider := ZPAProvider()
 			rawData := schema.TestResourceDataRaw(t, provider.Schema, resourceConfig)
+
 			_, diags := provider.ConfigureContextFunc(context.Background(), rawData)
 
 			if test.expectError && !diags.HasError() {
@@ -171,6 +225,7 @@ func TestProviderValidate(t *testing.T) {
 		})
 	}
 
+	// Restore original env vars
 	for key, val := range envVals {
 		os.Setenv(key, val)
 	}
