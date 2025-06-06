@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccDataSourceAccessPolicyClientTypes_Basic(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories,
 		Steps: []resource.TestStep{
