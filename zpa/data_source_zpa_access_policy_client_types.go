@@ -52,6 +52,18 @@ func dataSourceAccessPolicyClientTypes() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"zpn_client_type_zapp_partner": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"zpn_client_type_vdi": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"zpn_client_type_zia_inspection": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -97,5 +109,15 @@ func dataSourceAccessPolicyClientTypesRead(ctx context.Context, d *schema.Resour
 		return diag.FromErr(fmt.Errorf("failed to set zpn_client_type_branch_connector: %v", err))
 	}
 
+	if err := d.Set("zpn_client_type_zapp_partner", resp.ZPNClientTypePartner); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to set zpn_client_type_zapp_partner: %v", err))
+	}
+
+	if err := d.Set("zpn_client_type_vdi", resp.ZPNClientTypeVDI); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to set zpn_client_type_vdi: %v", err))
+	}
+	if err := d.Set("zpn_client_type_zia_inspection", resp.ZPNClientTypeZIAInspection); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to set zpn_client_type_zia_inspection: %v", err))
+	}
 	return nil
 }
