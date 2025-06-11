@@ -12,9 +12,19 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.1.8``
+``Last updated: v4.1.9``
 
 ---
+
+## 4.1.9 (June, 11 2025)
+
+### Notes
+
+- Release date: **(June, 11 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+[PR #576](https://github.com/zscaler/terraform-provider-zpa/pull/576) - Updated the Policy Client Types: `zpn_client_type_zapp_partner`, `zpn_client_type_vdi`, `zpn_client_type_zia_inspection`
 
 ## 4.1.8 (June, 6 2025)
 

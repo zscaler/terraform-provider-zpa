@@ -110,12 +110,23 @@ func validateOperand(ctx context.Context, operand policysetcontroller.Operands, 
 			return err
 		}))
 	case "CLIENT_TYPE":
-		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' or 'zpn_client_type_exporter_noauth' or 'zpn_client_type_slogger' or 'zpn_client_type_branch_connector'", Getter(func(id string) error {
-			if id != "zpn_client_type_zapp" && id != "zpn_client_type_exporter" && id != "zpn_client_type_exporter_noauth" && id != "zpn_client_type_ip_anchoring" && id != "zpn_client_type_browser_isolation" && id != "zpn_client_type_machine_tunnel" && id != "zpn_client_type_edge_connector" && id != "zpn_client_type_slogger" && id != "zpn_client_type_branch_connector" && id != "zpn_client_type_zapp_partner" {
-				return fmt.Errorf("RHS values must be 'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_exporter_noauth' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' or 'zpn_client_type_slogger' or 'zpn_client_type_branch_connector' or 'zpn_client_type_zapp_partner 'when object type is CLIENT_TYPE")
+		return customValidate(operand, []string{"id"}, "'zpn_client_type_zapp' or 'zpn_client_type_exporter' or 'zpn_client_type_exporter_noauth' or 'zpn_client_type_ip_anchoring' or 'zpn_client_type_browser_isolation' or 'zpn_client_type_machine_tunnel' or 'zpn_client_type_edge_connector' or 'zpn_client_type_slogger' or 'zpn_client_type_branch_connector' or 'zpn_client_type_zapp_partner' or 'zpn_client_type_vdi'", Getter(func(id string) error {
+			if id != "zpn_client_type_zapp" &&
+				id != "zpn_client_type_exporter" &&
+				id != "zpn_client_type_exporter_noauth" &&
+				id != "zpn_client_type_ip_anchoring" &&
+				id != "zpn_client_type_browser_isolation" &&
+				id != "zpn_client_type_machine_tunnel" &&
+				id != "zpn_client_type_edge_connector" &&
+				id != "zpn_client_type_slogger" &&
+				id != "zpn_client_type_branch_connector" &&
+				id != "zpn_client_type_zapp_partner" &&
+				id != "zpn_client_type_vdi" {
+				return fmt.Errorf("RHS values must be one of 'zpn_client_type_zapp', 'zpn_client_type_exporter', 'zpn_client_type_exporter_noauth', 'zpn_client_type_ip_anchoring', 'zpn_client_type_browser_isolation', 'zpn_client_type_machine_tunnel', 'zpn_client_type_edge_connector', 'zpn_client_type_slogger', 'zpn_client_type_branch_connector', 'zpn_client_type_zapp_partner', or 'zpn_client_type_vdi' when object type is CLIENT_TYPE")
 			}
 			return nil
 		}))
+
 	case "MACHINE_GRP":
 		return customValidate(operand, []string{"id"}, "machine group ID", Getter(func(id string) error {
 			_, _, err := machinegroup.Get(ctx, zClient.Service.WithMicroTenant(microtenantID), id)
@@ -950,14 +961,17 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 	}
 
 	validClientTypes := []string{
-		"zpn_client_type_zapp",
 		"zpn_client_type_exporter",
-		"zpn_client_type_ip_anchoring",
-		"zpn_client_type_browser_isolation",
+		"zpn_client_type_exporter_noauth",
 		"zpn_client_type_machine_tunnel",
 		"zpn_client_type_edge_connector",
-		"zpn_client_type_exporter_noauth",
+		"zpn_client_type_zia_inspection",
+		"zpn_client_type_vdi",
+		"zpn_client_type_zapp",
 		"zpn_client_type_slogger",
+		"zpn_client_type_browser_isolation",
+		"zpn_client_type_ip_anchoring",
+		"zpn_client_type_zapp_partner",
 		"zpn_client_type_branch_connector",
 	}
 
@@ -1027,13 +1041,13 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 				for _, ev := range entryValuesSet.List() {
 					evMap := ev.(map[string]interface{})
 					lhs, lhsOk := evMap["lhs"].(string)
-					rhs, rhsOk := evMap["rhs"].(string)
+					// rhs, rhsOk := evMap["rhs"].(string)
 					if !lhsOk || !contains(validPlatformTypes, lhs) {
 						return fmt.Errorf("please provide one of the valid platform types: %v", validPlatformTypes)
 					}
-					if !rhsOk || rhs != "true" {
-						return fmt.Errorf("rhs value must be 'true' for PLATFORM object_type")
-					}
+					// if !rhsOk || rhs != "true" {
+					// 	return fmt.Errorf("rhs value must be 'true' for PLATFORM object_type")
+					// }
 				}
 			case "RISK_FACTOR_TYPE":
 				entryValuesSet, ok := operandMap["entry_values"].(*schema.Set)
