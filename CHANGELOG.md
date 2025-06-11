@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.9 (June, 11 2025)
+
+### Notes
+
+- Release date: **(June, 11 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+[PR #576](https://github.com/zscaler/terraform-provider-zpa/pull/576) - Updated the Policy Client Types: `zpn_client_type_zapp_partner`, `zpn_client_type_vdi`, `zpn_client_type_zia_inspection`
+
 ## 4.1.8 (June, 6 2025)
 
 ### Notes
@@ -8,7 +18,7 @@
 - Supported Terraform version: **v1.x**
 
 ### Enhancements
-[PR #348](https://github.com/zscaler/zscaler-sdk-go/pull/348) - Added new Policy Client Types: `zpn_client_type_zapp_partner`, `zpn_client_type_vdi`, `zpn_client_type_zia_inspection` to data source: `zpa_access_policy_client_types`
+[PR #574](https://github.com/zscaler/terraform-provider-zpa/pull/574) - Added new Policy Client Types: `zpn_client_type_zapp_partner`, `zpn_client_type_vdi`, `zpn_client_type_zia_inspection` to data source: `zpa_access_policy_client_types`
 
 ### Bug Fixes
 [PR #574](https://github.com/zscaler/terraform-provider-zpa/pull/574) - Upgraded to [Zscaler GO SDK v3.4.4](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v3.4.3)

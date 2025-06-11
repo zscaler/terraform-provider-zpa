@@ -105,14 +105,18 @@ resource "zpa_policy_access_rule" "this" {
     - `idp_id` (String)
     - `object_type` (String) This is for specifying the policy critiera. Supported values: `APP`, `APP_GROUP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `EDGE_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, `CLIENT_TYPE`, `PLATFORM`, `COUNTRY_CODE`.
     - `CLIENT_TYPE` (Optional) - The below options are the only ones supported in an access policy rule.
-      - `zpn_client_type_exporter`
-      - `zpn_client_type_browser_isolation`
-      - `zpn_client_type_machine_tunnel`
-      - `zpn_client_type_ip_anchoring`
-      - `zpn_client_type_edge_connector`
-      - `zpn_client_type_zapp`
-      - `zpn_client_type_zapp_partner`
-      - `zpn_client_type_branch_connector`
+      - `"zpn_client_type_exporter"` - "Web Browser"`
+      - `"zpn_client_type_exporter_noauth"` - "Web Browser Unauthenticated"`
+      - `"zpn_client_type_machine_tunnel"` - "Machine Tunnel"
+      - `"zpn_client_type_edge_connector"` - "Cloud Connector"
+      - `"zpn_client_type_zia_inspection"` - "ZIA Inspection"
+      - `"zpn_client_type_vdi"` - "Client Connector for VDI"
+      - `"zpn_client_type_zapp"` - "Client Connector"
+      - `"zpn_client_type_slogger"` - "ZPA LSS"
+      - `"zpn_client_type_browser_isolation"` - "Cloud Browser"
+      - `"zpn_client_type_ip_anchoring"` - "ZIA Service Edge"
+      - `"zpn_client_type_zapp_partner"` - "Client Connector Partner"
+      - `"zpn_client_type_branch_connector"` - "Branch Connector"
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is not supported within the `operands` block when the `object_type` is set to `SAML`, `SCIM`, `SCIM_GROUP`, `IDP`, `POSTURE`, `TRUSTED_NETWORK` . ZPA automatically assumes the posture profile ID that belongs to the parent tenant.
 

@@ -169,12 +169,15 @@ var noFilterSupportLogTypes = map[string]string{
 
 var supportedClientTypes = map[string]struct{}{
 	"zpn_client_type_exporter":          {},
-	"zpn_client_type_browser_isolation": {},
+	"zpn_client_type_exporter_noauth":   {},
 	"zpn_client_type_machine_tunnel":    {},
-	"zpn_client_type_ip_anchoring":      {},
 	"zpn_client_type_edge_connector":    {},
+	"zpn_client_type_zia_inspection":    {},
+	"zpn_client_type_vdi":               {},
 	"zpn_client_type_zapp":              {},
 	"zpn_client_type_slogger":           {},
+	"zpn_client_type_browser_isolation": {},
+	"zpn_client_type_ip_anchoring":      {},
 	"zpn_client_type_zapp_partner":      {},
 	"zpn_client_type_branch_connector":  {},
 }

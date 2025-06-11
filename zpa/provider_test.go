@@ -109,6 +109,7 @@ func accPreCheck() error {
 }
 
 func TestProviderValidate(t *testing.T) {
+	// Save current env vars and clear them to simulate controlled test inputs
 	envKeys := []string{
 		"ZSCALER_CLIENT_ID",
 		"ZSCALER_CLIENT_SECRET",
@@ -117,13 +118,9 @@ func TestProviderValidate(t *testing.T) {
 		"ZSCALER_CLOUD",
 	}
 	envVals := make(map[string]string)
-
 	for _, key := range envKeys {
-		val := os.Getenv(key)
-		if val != "" {
-			envVals[key] = val
-			os.Unsetenv(key)
-		}
+		envVals[key] = os.Getenv(key)
+		os.Unsetenv(key)
 	}
 
 	tests := []struct {
@@ -134,16 +131,63 @@ func TestProviderValidate(t *testing.T) {
 		customerID   string
 		cloud        string
 		expectError  bool
+		skipIfCloud  bool
 	}{
-		{"valid client_id + client_secret", "clientID", "clientSecret", "vanityDomain", "customerID", "zscaler_cloud", false},
-		{"missing client_id", "", "clientSecret", "vanityDomain", "customerID", "zscaler_cloud", true},
-		{"missing clientSecret", "clientID", "", "vanityDomain", "customerID", "zscaler_cloud", true},
-		{"missing vanity domain", "clientID", "clientSecret", "", "customerID", "zscaler_cloud", true},
-		{"valid client_id + client_secret without zscaler_cloud", "clientID", "clientSecret", "vanityDomain", "customerID", "", false},
+		{
+			name:         "valid client_id + client_secret",
+			clientID:     envVals["ZSCALER_CLIENT_ID"],
+			clientSecret: envVals["ZSCALER_CLIENT_SECRET"],
+			vanityDomain: envVals["ZSCALER_VANITY_DOMAIN"],
+			customerID:   envVals["ZPA_CUSTOMER_ID"],
+			cloud:        envVals["ZSCALER_CLOUD"],
+			expectError:  false,
+		},
+		{
+			name:         "missing client_id",
+			clientID:     "",
+			clientSecret: "clientSecret",
+			vanityDomain: "vanityDomain",
+			customerID:   "customerID",
+			cloud:        "zscaler_cloud",
+			expectError:  true,
+		},
+		{
+			name:         "missing clientSecret",
+			clientID:     "clientID",
+			clientSecret: "",
+			vanityDomain: "vanityDomain",
+			customerID:   "customerID",
+			cloud:        "zscaler_cloud",
+			expectError:  true,
+		},
+		{
+			name:         "missing vanity domain",
+			clientID:     "clientID",
+			clientSecret: "clientSecret",
+			vanityDomain: "",
+			customerID:   "customerID",
+			cloud:        "zscaler_cloud",
+			expectError:  true,
+		},
+		{
+			name:         "valid client_id + client_secret without zscaler_cloud",
+			clientID:     envVals["ZSCALER_CLIENT_ID"],
+			clientSecret: envVals["ZSCALER_CLIENT_SECRET"],
+			vanityDomain: envVals["ZSCALER_VANITY_DOMAIN"],
+			customerID:   envVals["ZPA_CUSTOMER_ID"],
+			cloud:        "", // simulate unset cloud
+			expectError:  false,
+			skipIfCloud:  true, // only run if cloud is NOT needed
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			// Skip if this test depends on cloud being unset and cloud is required
+			if test.skipIfCloud && envVals["ZSCALER_CLOUD"] != "" {
+				t.Skipf("Skipping '%s': cloud-specific credentials cannot authenticate without ZSCALER_CLOUD", test.name)
+			}
+
 			resourceConfig := map[string]interface{}{
 				"vanity_domain": test.vanityDomain,
 				"customer_id":   test.customerID,
@@ -171,6 +215,7 @@ func TestProviderValidate(t *testing.T) {
 		})
 	}
 
+	// Restore environment variables after test run
 	for key, val := range envVals {
 		os.Setenv(key, val)
 	}
