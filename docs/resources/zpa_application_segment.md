@@ -149,7 +149,7 @@ resource "zpa_app_connector_group" "this" {
 The following arguments are supported:
 
 - `name` - (String) Name. The name of the App Connector Group to be exported.
-- `domain_names` - (Required) List of domains and IPs.
+- `domain_names` - (List) List of domains and IPs.
 - `server_groups` - (Block Set) List of Server Group IDs
   - `id` - (Required)
 - `segment_group_id` - (String) List of Segment Group IDs
@@ -193,6 +193,8 @@ Supported values: `EXCLUSIVE`, `INCLUSIVE`. [Learn More](https://help.zscaler.co
 - `is_incomplete_dr_config` - (Boolean) Supported values: `true`, `false`
 - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 - `fqdn_dns_check` - (Boolean) When set to Enabled, Zscaler Client Connector receives CNAME DNS records from the App Connector for FQDN applications. Supported values: `true`, `false`
+- `share_to_microtenants` (List) List of destination Microtenants to which the application segment is to be shared with.
+
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

@@ -13,6 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment_share"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
@@ -127,6 +128,12 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional:    true,
 				Description: "Whether Double Encryption is enabled or disabled for the app.",
 			},
+			"share_to_microtenants": {
+				Type:        schema.TypeSet,
+				Required:    true,
+				Description: "Share the Application Segment to microtenants",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -140,7 +147,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "NONE",
+				Default:  "DEFAULT",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"NONE",
@@ -277,6 +284,20 @@ func resourceApplicationSegmentCreate(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[INFO] Created application segment request. ID: %v\n", resp.ID)
 	d.SetId(resp.ID)
 
+	// 🔽 ADD THIS BLOCK RIGHT AFTER d.SetId(...)
+	shareTo := SetToStringList(d, "share_to_microtenants")
+	if len(shareTo) > 0 {
+		log.Printf("[INFO] Sharing application segment %s to microtenants: %v", resp.ID, shareTo)
+		shareReq := applicationsegment_share.AppSegmentSharedToMicrotenant{
+			ApplicationID:       resp.ID,
+			ShareToMicrotenants: shareTo,
+			MicroTenantID:       microTenantID,
+		}
+		if _, err := applicationsegment_share.AppSegmentMicrotenantShare(ctx, service, resp.ID, shareReq); err != nil {
+			return diag.FromErr(fmt.Errorf("failed to share application segment to microtenants: %w", err))
+		}
+	}
+
 	return resourceApplicationSegmentRead(ctx, d, meta)
 }
 
@@ -331,6 +352,14 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
 
+	shareTo := []string{}
+	if len(resp.SharedMicrotenantDetails.SharedToMicrotenants) > 0 {
+		for _, smt := range resp.SharedMicrotenantDetails.SharedToMicrotenants {
+			shareTo = append(shareTo, smt.ID)
+		}
+	}
+	_ = d.Set("share_to_microtenants", shareTo)
+
 	if err := d.Set("tcp_port_range", flattenNetworkPorts(resp.TCPAppPortRange)); err != nil {
 		return diag.FromErr(err)
 	}
@@ -373,6 +402,20 @@ func resourceApplicationSegmentUpdate(ctx context.Context, d *schema.ResourceDat
 
 	if _, err := applicationsegment.Update(ctx, service, id, req); err != nil {
 		return diag.FromErr(err)
+	}
+
+	// Share if needed
+	shareTo := SetToStringList(d, "share_to_microtenants")
+	if len(shareTo) > 0 {
+		log.Printf("[INFO] Sharing updated application segment %s to microtenants: %v", id, shareTo)
+		shareReq := applicationsegment_share.AppSegmentSharedToMicrotenant{
+			ApplicationID:       id,
+			ShareToMicrotenants: shareTo,
+			MicroTenantID:       microTenantID,
+		}
+		if _, err := applicationsegment_share.AppSegmentMicrotenantShare(ctx, service, id, shareReq); err != nil {
+			return diag.FromErr(fmt.Errorf("failed to share updated application segment to microtenants: %w", err))
+		}
 	}
 
 	return resourceApplicationSegmentRead(ctx, d, meta)
@@ -425,6 +468,7 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		HealthReporting:           d.Get("health_reporting").(string),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		MicroTenantID:             d.Get("microtenant_id").(string),
+		ShareToMicrotenants:       SetToStringList(d, "share_to_microtenants"),
 		PassiveHealthEnabled:      d.Get("passive_health_enabled").(bool),
 		InspectTrafficWithZia:     d.Get("inspect_traffic_with_zia").(bool),
 		DoubleEncrypt:             d.Get("double_encrypt").(bool),
