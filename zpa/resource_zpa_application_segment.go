@@ -130,7 +130,7 @@ func resourceApplicationSegment() *schema.Resource {
 			},
 			"share_to_microtenants": {
 				Type:        schema.TypeSet,
-				Required:    true,
+				Optional:    true,
 				Description: "Share the Application Segment to microtenants",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
