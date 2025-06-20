@@ -12,9 +12,19 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.1.9``
+``Last updated: v4.1.10``
 
 ---
+
+## 4.1.10 (June, 19 2025)
+
+### Notes
+
+- Release date: **(June, 19 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+[PR #578](https://github.com/zscaler/terraform-provider-zpa/pull/578) - Added the attribute `share_to_microtenants` to resource `zpa_application_segment`. [Issue #577](https://github.com/zscaler/terraform-provider-zpa/issues/577)
 
 ## 4.1.9 (June, 11 2025)
 
