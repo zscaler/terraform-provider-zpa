@@ -1,10 +1,10 @@
 # Changelog
 
-## 4.1.11 (June, 20 2025)
+## 4.1.12 (June, 27 2025)
 
 ### Notes
 
-- Release date: **(June, 20 2025)**
+- Release date: **(June, 27 2025)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements

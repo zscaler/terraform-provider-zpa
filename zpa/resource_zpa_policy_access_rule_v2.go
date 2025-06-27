@@ -154,9 +154,8 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 				},
 			},
 			"app_server_groups": {
-				Type:     schema.TypeList,
-				Optional: true,
-				// MaxItems: 1,
+				Type:        schema.TypeList,
+				Optional:    true,
 				Description: "List of the server group IDs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -171,7 +170,6 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 			"app_connector_groups": {
 				Type:     schema.TypeList,
 				Optional: true,
-				// MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
