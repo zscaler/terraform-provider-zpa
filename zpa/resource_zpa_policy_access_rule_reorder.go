@@ -110,12 +110,34 @@ func hasDuplicates(orders map[string]int) (int, []string, bool) {
 	return 0, nil, false
 }
 
+// func getRules(d *schema.ResourceData) (*RulesOrders, error) {
+// 	policyType := d.Get("policy_type").(string)
+// 	orders := RulesOrders{
+// 		PolicyType: policyType,
+// 		Orders:     map[string]int{},
+// 	}
+// 	rulesSet, ok := d.Get("rules").(*schema.Set)
+// 	if ok && rulesSet != nil {
+// 		for _, r := range rulesSet.List() {
+// 			rule, ok := r.(map[string]interface{})
+// 			if !ok || rule == nil {
+// 				continue
+// 			}
+// 			id := rule["id"].(string)
+// 			order, _ := strconv.Atoi(rule["order"].(string))
+// 			orders.Orders[id] = order
+// 		}
+// 	}
+// 	return &orders, nil
+// }
+
 func getRules(d *schema.ResourceData) (*RulesOrders, error) {
 	policyType := d.Get("policy_type").(string)
 	orders := RulesOrders{
 		PolicyType: policyType,
 		Orders:     map[string]int{},
 	}
+
 	rulesSet, ok := d.Get("rules").(*schema.Set)
 	if ok && rulesSet != nil {
 		for _, r := range rulesSet.List() {
@@ -125,6 +147,11 @@ func getRules(d *schema.ResourceData) (*RulesOrders, error) {
 			}
 			id := rule["id"].(string)
 			order, _ := strconv.Atoi(rule["order"].(string))
+			// Skip if this is the Zscaler Deception rule (rule 1)
+			if order == 1 {
+				log.Printf("[INFO] Skipping rule ID %s as it appears to be Zscaler Deception", id)
+				continue
+			}
 			orders.Orders[id] = order
 		}
 	}
@@ -226,7 +253,15 @@ func resourcePolicyAccessReorderUpdate(ctx context.Context, d *schema.ResourceDa
 		baseOrder = 2
 	}
 
+	// for id, order := range userDefinedRules.Orders {
+	// 	ruleIdToOrder[id] = order + baseOrder - 1
+	// }
+
 	for id, order := range userDefinedRules.Orders {
+		// Skip the Zscaler Deception ID if somehow it sneaks in
+		if id == deceptionID {
+			continue
+		}
 		ruleIdToOrder[id] = order + baseOrder - 1
 	}
 
