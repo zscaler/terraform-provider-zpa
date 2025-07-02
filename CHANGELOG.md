@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.13 (July, 2 2025)
+
+### Notes
+
+- Release date: **(July, 2 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+[PR #581](https://github.com/zscaler/terraform-provider-zpa/pull/581) - Fixed `zpa_policy_access_rule_reorder` resource to ensure it ignores `Zscaler Deception` order when it is not present.
+
 ## 4.1.12 (June, 27 2025)
 
 ### Notes
