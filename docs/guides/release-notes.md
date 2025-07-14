@@ -24,7 +24,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
-[PR #583](https://github.com/zscaler/terraform-provider-zpa/pull/583) - Fixed attribute `servers` in the resource ``zpa_server_groups` to prevent unexpected drifts.
+[PR #583](https://github.com/zscaler/terraform-provider-zpa/pull/583) - Fixed attribute `servers` in the resource `zpa_server_groups` to prevent unexpected drifts.
 
 
 ## 4.1.13 (July, 2 2025)
