@@ -12,9 +12,31 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.1.14``
+``Last updated: v4.2.0``
 
 ---
+
+## 4.2.0 (August, 22 2025)
+
+### Notes
+
+- Release date: **(August, 222025)**
+- Supported Terraform version: **v1.x**
+
+### NEW - RESOURCES AND DATA SOURCES
+
+The following new resources have been introduced:
+
+- [PR #588](https://github.com/zscaler/terraform-provider-zia/pull/588) - Added and resource``zpa_c2c_ip_ranges`` - Added C2C IP Ranges
+- [PR #588](https://github.com/zscaler/terraform-provider-zia/pull/588) - Added and resource``zpa_private_cloud_group`` - Added Private Cloud Group
+- [PR #588](https://github.com/zscaler/terraform-provider-zia/pull/588) - Added and resource``zpa_user_portal_controller`` - Added User Portal Controller
+- [PR #588](https://github.com/zscaler/terraform-provider-zia/pull/588) - Added and resource``zpa_user_portal_link`` - Added User Portal Link
+
+### NEW - DATA SOURCES
+
+The following new data sources have been introduced:
+
+- [PR #452](https://github.com/zscaler/terraform-provider-zia/pull/452) - Added and datasource``zpa_private_cloud_controller`` - Retrieves private cloud controller.
 
 ## 4.1.14 (July, 14 2025)
 
