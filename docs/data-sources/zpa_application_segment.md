@@ -65,8 +65,8 @@ In addition to all arguments above, the following attributes are exported:
 - `is_incomplete_dr_config` (Boolean) Default: false. Boolean: `true`, `false`.
 - `fqdn_dns_check` - (Boolean) Supported values: `true`, `false`
 - `domain_names` - List of domains and IPs.
-- `segment_group_id` - (string)
-- `segment_group_name` - (string)
+- `segment_group_id` - (string) The unique identifier of the segment group.
+- `segment_group_name` - (string) The name of the segment group
 - `default_idle_timeout` - (String)
 - `default_max_age` - (String)
 - `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.

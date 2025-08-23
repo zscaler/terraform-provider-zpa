@@ -185,6 +185,10 @@ func ZPAProvider() *schema.Provider {
 			"zpa_pra_credential_controller":                resourcePRACredentialController(),
 			"zpa_pra_credential_pool":                      resourcePRACredentialPool(),
 			"zpa_pra_console_controller":                   resourcePRAConsoleController(),
+			"zpa_private_cloud_group":                      resourcePrivateCloudGroup(),
+			"zpa_user_portal_controller":                   resourceUserPortalController(),
+			"zpa_user_portal_link":                         resourceUserPortalLink(),
+			"zpa_c2c_ip_ranges":                            resourceC2CIPRanges(),
 
 			// The day I realized I was naming stuff wrong :'-(
 			"zpa_browser_access": deprecateIncorrectNaming(resourceApplicationSegmentBrowserAccess(), zpaBrowserAccess),
@@ -240,6 +244,11 @@ func ZPAProvider() *schema.Provider {
 			"zpa_pra_credential_controller":                dataSourcePRACredentialController(),
 			"zpa_pra_credential_pool":                      dataSourcePRACredentialPool(),
 			"zpa_pra_console_controller":                   dataSourcePRAConsoleController(),
+			"zpa_private_cloud_group":                      dataSourcePrivateCloudGroup(),
+			"zpa_private_cloud_controller":                 dataSourcePrivateCloudController(),
+			"zpa_user_portal_controller":                   dataSourceUserPortalController(),
+			"zpa_user_portal_link":                         dataSourceUserPortalLink(),
+			"zpa_c2c_ip_ranges":                            dataSourceC2CIPRanges(),
 		},
 	}
 

@@ -203,3 +203,75 @@ const (
 	EmgLastName  = "Test01"
 	EmgUserID    = "usertest02"
 )
+
+// C2C IP Ranges
+const (
+	C2CIPRangesDescription = "testAcc_c2c_ip_ranges"
+	C2CIPRangesEnabled     = true
+)
+
+// C2C IP Ranges Update
+const (
+	C2CIPRangesDescriptionUpdate  = "this is update c2c ip ranges test"
+	C2CIPRangesEnabledUpdate      = true
+	C2CIPRangesIPRangeBeginUpdate = "10.0.1.1"
+	C2CIPRangesIPRangeEndUpdate   = "10.0.1.254"
+)
+
+// Private Cloud Group
+const (
+	PrivateCloudGroupDescription       = "Example private cloud group"
+	PrivateCloudGroupEnabled           = true
+	PrivateCloudGroupCityCountry       = "San Jose, US"
+	PrivateCloudGroupLatitude          = "37.33874"
+	PrivateCloudGroupLongitude         = "-121.8852525"
+	PrivateCloudGroupLocation          = "San Jose, CA, USA"
+	PrivateCloudGroupUpgradeDay        = "SUNDAY"
+	PrivateCloudGroupUpgradeTimeInSecs = "66600"
+	// PrivateCloudGroupSiteID                 = "72058304855088543"
+	PrivateCloudGroupVersionProfileID       = "0"
+	PrivateCloudGroupOverrideVersionProfile = true
+	PrivateCloudGroupIsPublic               = "TRUE"
+)
+
+// Private Cloud Group Update
+const (
+	PrivateCloudGroupDescriptionUpdate       = "Updated example private cloud group"
+	PrivateCloudGroupEnabledUpdate           = true
+	PrivateCloudGroupUpgradeDayUpdate        = "MONDAY"
+	PrivateCloudGroupUpgradeTimeInSecsUpdate = "72000"
+)
+
+// User Portal Controller
+const (
+	UserPortalControllerDescription             = "User_Portal_Terraform_01"
+	UserPortalControllerEnabled                 = true
+	UserPortalControllerUserNotification        = "User_Portal_Terraform_01"
+	UserPortalControllerUserNotificationEnabled = true
+	UserPortalControllerDomain                  = "portal01"
+	BACertificateName                           = "bd-hashicorp.com"
+)
+
+// User Portal Controller Update
+const (
+	UserPortalControllerDescriptionUpdate      = "Updated User Portal Terraform 01"
+	UserPortalControllerEnabledUpdate          = true
+	UserPortalControllerUserNotificationUpdate = "Updated User Portal Terraform 01"
+	UserPortalControllerDomainUpdate           = "portal02"
+)
+
+// User Portal Link
+const (
+	UserPortalLinkDescription = "server1.example.com"
+	UserPortalLinkEnabled     = true
+	UserPortalLinkIconText    = ""
+	UserPortalLinkProtocol    = "https://"
+)
+
+// User Portal Link Update
+const (
+	UserPortalLinkDescriptionUpdate = "updated-server1.example.com"
+	UserPortalLinkEnabledUpdate     = true
+	UserPortalLinkIconTextUpdate    = ""
+	UserPortalLinkProtocolUpdate    = "https://"
+)

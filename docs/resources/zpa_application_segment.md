@@ -152,7 +152,7 @@ The following arguments are supported:
 - `domain_names` - (List) List of domains and IPs.
 - `server_groups` - (Block Set) List of Server Group IDs
   - `id` - (Required)
-- `segment_group_id` - (String) List of Segment Group IDs
+- `segment_group_id` - (string) The unique identifier of the segment group.
 - `tcp_port_ranges` - (List of String) TCP port ranges used to access the app.
 - `udp_port_ranges` - (List of String) UDP port ranges used to access the app.
 
