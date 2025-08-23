@@ -73,7 +73,7 @@ In addition to all arguments above, the following attributes are exported:
 - `ip_anchored` - (bool) Whether Source IP Anchoring for use with ZIA is enabled (true) or disabled (false) for the application.
 - `passive_health_enabled` - (bool) Indicates if passive health checks are enabled on the application.
 - `segment_group_id` - (string) The unique identifier of the segment group.
-- `segment_group_name` - (string) The name of the segment group.
+- `segment_group_name` - (string) The name of the segment group
 - `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
 - `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
 

@@ -59,7 +59,7 @@ The following arguments are supported:
 - `name` (String) Name. The name of the App Connector Group to be exported.
 - `domain_names` - (Required) List of domains and IPs.
 - `server_groups` - (Required) List of Server Group IDs
-- `segment_group_id` - (String) The unique identifier of the Segment Group.
+- `segment_group_id` - (string) The unique identifier of the segment group.
 - `common_apps_dto` (Block Set, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
   - `apps_config:` (Block Set, Min: 1) List of applications to be configured
     - `domain` - (String) Domain name of the Privileged Remote Access

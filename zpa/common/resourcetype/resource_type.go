@@ -43,4 +43,8 @@ const (
 	ZPAInspectionCustomControl         = "zpa_inspection_custom_controls"
 	ZPAInspectionProfile               = "zpa_inspection_profile"
 	ZPAMicrotenant                     = "zpa_microtenant_controller"
+	ZPAC2CIPRanges                     = "zpa_c2c_ip_ranges"
+	ZPAPrivateCloudGroup               = "zpa_private_cloud_group"
+	ZPAUserPortalController            = "zpa_user_portal_controller"
+	ZPAUserPortalLink                  = "zpa_user_portal_link"
 )

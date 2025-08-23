@@ -155,7 +155,7 @@ The following arguments are supported:
 - `server_groups` (Block Set) List of Server Group IDs
   - `id` - (Required)
 
-- `segment_group_id` (String) List of Segment Group IDs
+- `segment_group_id` - (string) The unique identifier of the segment group.
 
 - `clientless_apps` (Block Set)
   - `name` - (String) - Name of BA app.

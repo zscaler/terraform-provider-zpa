@@ -59,7 +59,7 @@ The following arguments are supported:
 - `server_groups` - (Block Set) List of Server Group IDs
   - `id` - (String)
 
-- `segment_group_id` - (String) The unique identifier of the Segment Group.
+- `segment_group_id` - (string) The unique identifier of the segment group.
 - `common_apps_dto` (Block Set, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
   - `apps_config:` (Block Set, Min: 1) List of applications to be configured
     - `name` (String) Name of the Inspection Application Segment.

@@ -47,10 +47,10 @@ In addition to all arguments above, the following attributes are exported:
 * `domain_names` - (string) List of domains and IPs.
 * `server_groups` - (string) List of Server Group IDs
   * `id:` - (string) List of Server Group IDs
-* `segment_group_id` - (String) Segment Group IDs
-* `creation_time` - (String)
-* `modified_time` - (String)
-* `modifiedby` - (String)
+* `segment_group_id` - (String) The unique identifier of the segment group
+* `creation_time` - (String) The time the application resource is created.
+* `modified_time` - (String) The time the application resource is modified
+* `modifiedby` - (String) The unique identifier of the tenant who modified the application resource
 * `tcp_port_ranges` - (string) TCP port ranges used to access the app.
 * `udp_port_ranges` - (string) UDP port ranges used to access the app.
 
