@@ -12,9 +12,19 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.2.0``
+``Last updated: v4.2.1``
 
 ---
+
+## 4.2.1 (September, 5 2025)
+
+### Notes
+
+- Release date: **(September, 5 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+[PR #590](https://github.com/zscaler/terraform-provider-zpa/pull/590) - Fixed `zpa_app_connector_group` resource attribute `lss_app_connector_group` due to API issues.
 
 ## 4.2.0 (August, 22 2025)
 

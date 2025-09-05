@@ -114,7 +114,6 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"lss_app_connector_group": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Computed:    true,
 				Description: "Whether or not the App Connector Group is configured for the Log Streaming Service (LSS)",
 			},
 			"tcp_quick_ack_app": {
@@ -237,14 +236,26 @@ func resourceAppConnectorGroupRead(ctx context.Context, d *schema.ResourceData, 
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := appconnectorgroup.Get(ctx, service, d.Id())
+	// Use GetAll to get the complete list and find the resource by ID
+	// This avoids the individual Get API call which returns incorrect lssAppConnectorGroup values
+	list, _, err := appconnectorgroup.GetAll(ctx, service)
 	if err != nil {
-		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
-			log.Printf("[WARN] Removing app connector group %s from state because it no longer exists in ZPA", d.Id())
-			d.SetId("")
-			return nil
-		}
 		return diag.FromErr(err)
+	}
+
+	// Find the specific resource by ID in the list
+	var resp *appconnectorgroup.AppConnectorGroup
+	for _, item := range list {
+		if item.ID == d.Id() {
+			resp = &item
+			break
+		}
+	}
+
+	if resp == nil {
+		log.Printf("[WARN] Removing app connector group %s from state because it no longer exists in ZPA", d.Id())
+		d.SetId("")
+		return nil
 	}
 
 	log.Printf("[INFO] Getting app connector group:\n%+v\n", resp)
