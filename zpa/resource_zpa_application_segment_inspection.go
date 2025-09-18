@@ -254,11 +254,6 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"enabled": {
-										Type:     schema.TypeBool,
-										Optional: true,
-										Computed: true,
-									},
 									"app_types": {
 										Type:     schema.TypeSet,
 										Optional: true,
@@ -599,7 +594,6 @@ func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationse
 				InspectAppID:        appConfigMap["inspect_app_id"].(string),
 				Name:                appConfigMap["name"].(string),
 				Description:         appConfigMap["description"].(string),
-				Enabled:             appConfigMap["enabled"].(bool),
 				ApplicationPort:     appConfigMap["application_port"].(string),
 				ApplicationProtocol: appConfigMap["application_protocol"].(string),
 				CertificateID:       appConfigMap["certificate_id"].(string),
@@ -630,7 +624,6 @@ func mapInspectAppsToCommonApps(d *schema.ResourceData, inspectionApps []applica
 			"certificate_id":       app.CertificateID,
 			"description":          app.Description,
 			"domain":               app.Domain,
-			"enabled":              app.Enabled,
 			"name":                 app.Name,
 			// "protocols":            app.Protocols,
 			"trust_untrusted_cert": app.TrustUntrustedCert,
