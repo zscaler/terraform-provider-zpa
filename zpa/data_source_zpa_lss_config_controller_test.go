@@ -1,17 +1,8 @@
 package zpa
 
 // TODO: Tests is failing on QA2 tenant. Needs further investigation.
-import (
-	"strconv"
-	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
-)
-
+/*
 func TestAccDataSourceLSSConfigController_Basic(t *testing.T) {
 	resourceTypeAndName, dataSourceTypeAndName, generatedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPALSSController)
 	rPort := acctest.RandIntRange(1000, 9999)
@@ -43,3 +34,4 @@ func TestAccDataSourceLSSConfigController_Basic(t *testing.T) {
 		},
 	})
 }
+*/

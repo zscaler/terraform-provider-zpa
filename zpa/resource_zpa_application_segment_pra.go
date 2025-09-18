@@ -156,7 +156,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"icmp_access_type": {
 				Type:     schema.TypeString,

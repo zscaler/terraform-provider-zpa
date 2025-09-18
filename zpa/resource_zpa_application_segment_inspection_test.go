@@ -172,7 +172,6 @@ resource "%s" "%s" {
 		  application_protocol = "HTTPS"
 		  application_port     = "443"
 		  certificate_id       = data.zpa_ba_certificate.sales.id
-		  enabled = true
 		  app_types = ["INSPECT"]
 		}
 	}

@@ -168,7 +168,6 @@ resource "%s" "%s" {
 		  application_protocol = "RDP"
 		  connection_security  = "ANY"
 		  application_port     = "3389"
-		  enabled = true
 		  app_types = ["SECURE_REMOTE_ACCESS"]
 		}
 	}

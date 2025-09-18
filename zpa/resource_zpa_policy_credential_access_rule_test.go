@@ -165,14 +165,12 @@ resource "zpa_application_segment_pra" "this" {
 			application_protocol = "RDP"
 			connection_security  = "ANY"
 			application_port     = "3392"
-			enabled              = true
 			app_types            = ["SECURE_REMOTE_ACCESS"]
 		}
 		apps_config {
 			domain               = "ssh_pra3223.example.com"
 			application_protocol = "SSH"
 			application_port     = "3223"
-			enabled              = true
 			app_types            = ["SECURE_REMOTE_ACCESS"]
 		}
 	}

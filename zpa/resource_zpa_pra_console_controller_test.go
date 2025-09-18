@@ -160,7 +160,6 @@ resource "zpa_application_segment_pra" "this" {
 		application_protocol = "RDP"
 		connection_security  = "ANY"
 		application_port     = "3392"
-		enabled              = true
 		app_types            = ["SECURE_REMOTE_ACCESS"]
 		}
 	}

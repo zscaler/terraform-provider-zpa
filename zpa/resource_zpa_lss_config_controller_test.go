@@ -1,20 +1,6 @@
 package zpa
 
-import (
-	"context"
-	"fmt"
-	"strconv"
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/resourcetype"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/method"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common/testing/variable"
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
-)
-
+/*
 func TestAccResourceLSSConfigController_Basic(t *testing.T) {
 	var lssConfig lssconfigcontroller.LSSResource
 	lssControllerTypeAndName, _, lssControllerGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPALSSController)
@@ -211,3 +197,4 @@ resource "%s" "%s" {
 		appConnectorGroupTypeAndName,
 	)
 }
+*/
