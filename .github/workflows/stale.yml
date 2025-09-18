@@ -2,6 +2,10 @@ name: "Stale issues and pull requests"
 on:
   schedule:
     - cron: '0 0 * * *'
+  
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   stale:
