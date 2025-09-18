@@ -1,5 +1,27 @@
 # Changelog
 
+## 4.2.2 (September, 18 2025)
+
+### Notes
+
+- Release date: **(September, 18 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+[PR #593](https://github.com/zscaler/terraform-provider-zpa/pull/593) - Removed computed attribute `enabled` from `common_apps_dto.apps_config`. PRA application segments are always enabled. and can only be disabled by removing it entirely.
+
+## 4.2.1 (September, 5 2025)
+
+### Notes
+
+- Release date: **(September, 5 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+[PR #590](https://github.com/zscaler/terraform-provider-zpa/pull/590) - Fixed `zpa_app_connector_group` resource attribute `lss_app_connector_group` due to API issues.
+
+
 ## 4.2.0 (August, 22 2025)
 
 ### Notes
