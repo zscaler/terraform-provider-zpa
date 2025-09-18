@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.2.1``
+``Last updated: v4.2.2``
 
 ---
+
+## 4.2.2 (September, 18 2025)
+
+### Notes
+
+- Release date: **(September, 18 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+[PR #593](https://github.com/zscaler/terraform-provider-zpa/pull/593) - Removed computed attribute `enabled` from `common_apps_dto.apps_config`. PRA application segments are always enabled. and can only be disabled by removing it entirely.
 
 ## 4.2.1 (September, 5 2025)
 

@@ -68,7 +68,6 @@ The following arguments are supported:
     - `app_types` (List of String) Indicates the type of application as Privileged Remote Access. Supported value: `SECURE_REMOTE_ACCESS`
     - `connection_security` - (String) - Parameter required when `application_protocol` is of type `RDP`
       - **NOTE** This attribute is ONLY accepted for RDP protocols. DO NOT set this attribute when `application_protocol` is `SSH`
-    - `enabled` - (Boolean) Whether this application is enabled or not
 - `tcp_port_ranges` - (List of String) TCP port ranges used to access the app.
 - `udp_port_ranges` - (List of String) UDP port ranges used to access the app.
 

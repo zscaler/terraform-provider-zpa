@@ -60,25 +60,23 @@ func resourcePRAConsoleController() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "The name of the privileged console",
 			},
 			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				// Computed:    true,
 				Description: "The description of the privileged console",
 			},
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Computed:    true,
 				Description: "Whether or not the privileged console is enabled",
 			},
 			"icon_text": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				// Computed:    true,
 				Description: "The privileged console icon. The icon image is converted to base64 encoded text format",
 			},
 			"pra_portals": {
@@ -89,7 +87,7 @@ func resourcePRAConsoleController() *schema.Resource {
 						"id": {
 							Type:     schema.TypeSet,
 							Optional: true,
-							Computed: true,
+							// Computed: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -111,9 +109,9 @@ func resourcePRAConsoleController() *schema.Resource {
 				},
 			},
 			"microtenant_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				// Computed:    true,
 				Description: "The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as 0 when making requests to retrieve data from the Default Microtenant.",
 			},
 		},
