@@ -124,12 +124,12 @@ lint:
 
 tools:
 	@which $(GOFMT) || go install mvdan.cc/gofumpt@v0.6.0
-	@which $(TFPROVIDERLINT) || go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.30.0
+	@which $(TFPROVIDERLINT) || go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.31.0
 	@which $(STATICCHECK) || go install honnef.co/go/tools/cmd/staticcheck@v0.4.7
 
 tools-update:
 	@go install mvdan.cc/gofumpt@v0.6.0
-	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.30.0
+	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.31.0
 	@go install honnef.co/go/tools/cmd/staticcheck@v0.4.7
 
 website:
