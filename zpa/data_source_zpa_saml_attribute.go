@@ -93,19 +93,32 @@ func dataSourceSamlAttributeRead(ctx context.Context, d *schema.ResourceData, me
 	id, idExists := d.Get("id").(string)
 	name, nameExists := d.Get("name").(string)
 
-	// Retrieve SAML attribute by ID or name
+	// Retrieve SAML attribute by ID or name within the specified IDP
 	if idExists && id != "" {
-		res, _, err := samlattribute.Get(ctx, service, idpResp.ID)
+		// Use IDP-specific lookup for SAML attribute by ID
+		res, _, err := samlattribute.GetByIdpAndAttributeID(ctx, service, idpResp.ID, id)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		resp = res
 	} else if nameExists && name != "" {
-		res, _, err := samlattribute.GetByName(ctx, service, name)
+		// Get all SAML attributes for the IDP and find by name
+		samlAttrs, _, err := samlattribute.GetAllByIdp(ctx, service, idpResp.ID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		resp = res
+
+		// Find the SAML attribute by name within this IDP
+		for _, attr := range samlAttrs {
+			if attr.Name == name {
+				resp = &attr
+				break
+			}
+		}
+
+		if resp == nil {
+			return diag.FromErr(fmt.Errorf("no SAML attribute named '%s' was found in IDP '%s'", name, idpResp.Name))
+		}
 	}
 
 	// Set the resource data if the response is not nil
@@ -120,7 +133,7 @@ func dataSourceSamlAttributeRead(ctx context.Context, d *schema.ResourceData, me
 		_ = d.Set("saml_name", resp.SamlName)
 		_ = d.Set("user_attribute", resp.UserAttribute)
 	} else {
-		return diag.FromErr(fmt.Errorf("couldn't find any SAML attribute with name '%s' or id '%s'", name, id))
+		return diag.FromErr(fmt.Errorf("couldn't find any SAML attribute with name '%s' or id '%s' in IDP '%s'", name, id, idpResp.Name))
 	}
 
 	return nil

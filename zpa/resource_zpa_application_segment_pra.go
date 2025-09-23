@@ -227,12 +227,8 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 									"name": {
 										Type:     schema.TypeString,
 										Computed: true,
+										Optional: true,
 									},
-									// "enabled": {
-									// 	Type:     schema.TypeBool,
-									// 	Optional: true,
-									// 	// Computed: true,
-									// },
 									"app_types": {
 										Type:     schema.TypeSet,
 										Optional: true,
@@ -724,11 +720,10 @@ func mapPRAAppsToCommonApps(d *schema.ResourceData, praApps []applicationsegment
 				"domain":               app.Domain,
 				"application_protocol": app.ApplicationProtocol,
 				"application_port":     app.ApplicationPort,
-				// "enabled":              app.Enabled,
-				"app_types":           []string{"SECURE_REMOTE_ACCESS"},
-				"app_id":              app.AppID,
-				"connection_security": app.ConnectionSecurity,
-				"pra_app_id":          app.ID,
+				"app_types":            []string{"SECURE_REMOTE_ACCESS"},
+				"app_id":               app.AppID,
+				"connection_security":  app.ConnectionSecurity,
+				"pra_app_id":           app.ID,
 			}
 			commonAppsConfig = append(commonAppsConfig, commonAppMap)
 		}
@@ -741,11 +736,10 @@ func mapPRAAppsToCommonApps(d *schema.ResourceData, praApps []applicationsegment
 				"domain":               app.Domain,
 				"application_protocol": app.ApplicationProtocol,
 				"application_port":     app.ApplicationPort,
-				// "enabled":              app.Enabled,
-				"app_types":           []string{"SECURE_REMOTE_ACCESS"},
-				"app_id":              app.AppID,
-				"connection_security": app.ConnectionSecurity,
-				"pra_app_id":          app.ID,
+				"app_types":            []string{"SECURE_REMOTE_ACCESS"},
+				"app_id":               app.AppID,
+				"connection_security":  app.ConnectionSecurity,
+				"pra_app_id":           app.ID,
 			}
 			commonAppsConfig = append(commonAppsConfig, commonAppMap)
 		}

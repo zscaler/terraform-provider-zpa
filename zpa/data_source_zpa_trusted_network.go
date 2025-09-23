@@ -26,7 +26,7 @@ func dataSourceTrustedNetwork() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -41,6 +41,7 @@ func dataSourceTrustedNetwork() *schema.Resource {
 			"network_id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"zscaler_cloud": {
 				Type:     schema.TypeString,
@@ -83,7 +84,7 @@ func dataSourceTrustedNetworkRead(ctx context.Context, d *schema.ResourceData, m
 		d.SetId(resp.ID)
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("domain", resp.Domain)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("network_id", resp.NetworkID)

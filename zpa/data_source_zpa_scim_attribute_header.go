@@ -38,7 +38,7 @@ func dataSourceScimAttributeHeader() *schema.Resource {
 			},
 			"id": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"idp_id": {
 				Type:     schema.TypeString,

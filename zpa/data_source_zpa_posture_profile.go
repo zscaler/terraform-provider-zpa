@@ -21,6 +21,7 @@ func dataSourcePostureProfile() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"master_customer_id": {
 				Type:     schema.TypeString,
@@ -33,6 +34,7 @@ func dataSourcePostureProfile() *schema.Resource {
 			"posture_udid": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"zscaler_cloud": {
 				Type:     schema.TypeString,
@@ -50,7 +52,7 @@ func dataSourcePostureProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -88,7 +90,7 @@ func dataSourcePostureProfileRead(ctx context.Context, d *schema.ResourceData, m
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("domain", resp.Domain)
 		_ = d.Set("master_customer_id", resp.MasterCustomerID)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("posture_udid", resp.PostureudID)

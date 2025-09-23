@@ -21,6 +21,7 @@ func dataSourceIsolationProfile() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -38,7 +39,7 @@ func dataSourceIsolationProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"modifiedby": {
+			"modified_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -63,12 +64,37 @@ func dataSourceIsolationProfileRead(ctx context.Context, d *schema.ResourceData,
 	service := zClient.Service
 
 	var resp *isolationprofile.IsolationProfile
-	name, ok := d.Get("name").(string)
-	if ok && name != "" {
-		log.Printf("[INFO] Getting data for isolation profile name %s\n", name)
+	var searchCriteria string
+
+	// Check if searching by ID first
+	id, idOk := d.Get("id").(string)
+	if idOk && id != "" {
+		log.Printf("[INFO] Getting isolation profile by id: %s\n", id)
+		searchCriteria = fmt.Sprintf("id=%s", id)
+
+		// Get all isolation profiles and find the one with matching ID
+		allProfiles, _, err := isolationprofile.GetAll(ctx, service)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		for _, profile := range allProfiles {
+			if profile.ID == id {
+				resp = &profile
+				break
+			}
+		}
+	}
+
+	// Check if searching by name (only if ID search didn't find anything)
+	name, nameOk := d.Get("name").(string)
+	if resp == nil && nameOk && name != "" {
+		log.Printf("[INFO] Getting isolation profile by name: %s\n", name)
+		searchCriteria = fmt.Sprintf("name=%s", name)
+
 		res, _, err := isolationprofile.GetByName(ctx, service, name)
 		if err != nil {
-			return diag.FromErr(err) // Wrap error using diag.FromErr
+			return diag.FromErr(err)
 		}
 		resp = res
 	}
@@ -79,13 +105,13 @@ func dataSourceIsolationProfileRead(ctx context.Context, d *schema.ResourceData,
 		_ = d.Set("description", resp.Description)
 		_ = d.Set("enabled", resp.Enabled)
 		_ = d.Set("creation_time", resp.CreationTime)
-		_ = d.Set("modifiedby", resp.ModifiedBy)
+		_ = d.Set("modified_by", resp.ModifiedBy)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("isolation_profile_id", resp.IsolationProfileID)
 		_ = d.Set("isolation_tenant_id", resp.IsolationTenantID)
 		_ = d.Set("isolation_url", resp.IsolationURL)
 	} else {
-		return diag.FromErr(fmt.Errorf("couldn't find any isolation profile with name '%s'", name))
+		return diag.FromErr(fmt.Errorf("couldn't find any isolation profilewith %s", searchCriteria))
 	}
 
 	return nil
