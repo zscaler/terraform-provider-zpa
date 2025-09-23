@@ -3,6 +3,7 @@ package zpa
 import (
 	"context"
 	"log"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,8 +17,33 @@ func resourceC2CIPRanges() *schema.Resource {
 		UpdateContext: resourceC2CIPRangesUpdate,
 		DeleteContext: resourceC2CIPRangesDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				client := meta.(*Client)
+				service := client.Service
+
+				microTenantID := GetString(d.Get("microtenant_id"))
+				if microTenantID != "" {
+					service = service.WithMicroTenant(microTenantID)
+				}
+
+				id := d.Id()
+				_, parseIDErr := strconv.ParseInt(id, 10, 64)
+				if parseIDErr == nil {
+					// assume if the passed value is an int
+					_ = d.Set("id", id)
+				} else {
+					resp, _, err := c2c_ip_ranges.GetByName(ctx, service, id)
+					if err == nil {
+						d.SetId(resp.ID)
+						_ = d.Set("id", resp.ID)
+					} else {
+						return []*schema.ResourceData{d}, err
+					}
+				}
+				return []*schema.ResourceData{d}, nil
+			},
 		},
+
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,

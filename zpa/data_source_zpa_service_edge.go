@@ -66,6 +66,7 @@ func dataSourceServiceEdgeController() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"ip_acl": {
 				Type:     schema.TypeString,

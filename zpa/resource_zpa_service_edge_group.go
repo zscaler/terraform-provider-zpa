@@ -331,13 +331,10 @@ func resourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData, m
 		_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
 	}
 	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
-	// Only set service_edges if they were previously configured or exist in the diff
-	if _, ok := d.GetOk("service_edges"); ok {
-		_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
-	} else {
-		// Explicitly remove from state if not configured
-		_ = d.Set("service_edges", nil)
-	}
+
+	// Always set service_edges in state to match API response
+	// The DiffSuppressFunc will handle suppressing diffs when not explicitly configured
+	_ = d.Set("service_edges", flattenServiceEdgeSimple(resp.ServiceEdges))
 
 	return nil
 }

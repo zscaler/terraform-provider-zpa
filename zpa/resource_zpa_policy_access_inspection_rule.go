@@ -22,7 +22,7 @@ func resourcePolicyInspectionRule() *schema.Resource {
 		},
 
 		Schema: MergeSchema(
-			CommonPolicySchema(),
+			InspectionPolicySchema(),
 			map[string]*schema.Schema{
 				"action": {
 					Type:        schema.TypeString,
@@ -47,6 +47,41 @@ func resourcePolicyInspectionRule() *schema.Resource {
 				}),
 			},
 		),
+	}
+}
+
+func InspectionPolicySchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"description": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "This is the description of the access policy.",
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"name": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "This is the name of the policy.",
+		},
+		"operator": {
+			Type:     schema.TypeString,
+			Optional: true,
+			ValidateFunc: validation.StringInSlice([]string{
+				"AND",
+				"OR",
+			}, false),
+		},
+		"zpn_inspection_profile_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"microtenant_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
 	}
 }
 
@@ -118,14 +153,10 @@ func resourcePolicyInspectionRuleRead(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[INFO] Got Policy Set Inspection Rule:\n%+v\n", resp)
 	d.SetId(resp.ID)
 	_ = d.Set("action", resp.Action)
-	_ = d.Set("action_id", resp.ActionID)
-	_ = d.Set("custom_msg", resp.CustomMsg)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("operator", resp.Operator)
 	_ = d.Set("policy_set_id", resp.PolicySetID)
-	_ = d.Set("policy_type", resp.PolicyType)
-	_ = d.Set("priority", resp.Priority)
 	_ = d.Set("zpn_inspection_profile_id", resp.ZpnInspectionProfileID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
@@ -206,15 +237,11 @@ func expandCreatePolicyInspectionRule(d *schema.ResourceData, policySetID string
 	}
 	return &policysetcontroller.PolicyRule{
 		Action:                 d.Get("action").(string),
-		ActionID:               d.Get("action_id").(string),
-		CustomMsg:              d.Get("custom_msg").(string),
 		Description:            d.Get("description").(string),
 		ID:                     d.Get("id").(string),
 		Name:                   d.Get("name").(string),
 		Operator:               d.Get("operator").(string),
 		PolicySetID:            policySetID,
-		PolicyType:             d.Get("policy_type").(string),
-		Priority:               d.Get("priority").(string),
 		MicroTenantID:          GetString(d.Get("microtenant_id")),
 		ZpnInspectionProfileID: d.Get("zpn_inspection_profile_id").(string),
 		Conditions:             conditions,

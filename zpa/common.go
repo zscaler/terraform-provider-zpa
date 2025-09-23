@@ -475,6 +475,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"bypass_default_rule": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Computed: true,
 		},
 		"custom_msg": {
 			Type:        schema.TypeString,
@@ -485,6 +486,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"default_rule": {
 			Type:        schema.TypeBool,
 			Optional:    true,
+			Computed:    true,
 			Description: "This is for providing a customer message for the user.",
 		},
 		"description": {
@@ -528,6 +530,7 @@ func CommonPolicySchema() map[string]*schema.Schema {
 		"reauth_default_rule": {
 			Type:     schema.TypeBool,
 			Optional: true,
+			Computed: true,
 		},
 		"reauth_idle_timeout": {
 			Type:     schema.TypeString,

@@ -22,7 +22,7 @@ func resourcePolicyIsolationRule() *schema.Resource {
 		},
 
 		Schema: MergeSchema(
-			CommonPolicySchema(),
+			IsolationPolicySchema(),
 			map[string]*schema.Schema{
 				"action": {
 					Type:        schema.TypeString,
@@ -46,6 +46,41 @@ func resourcePolicyIsolationRule() *schema.Resource {
 				}),
 			},
 		),
+	}
+}
+
+func IsolationPolicySchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"description": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "This is the description of the access policy.",
+		},
+		"id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"name": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "This is the name of the policy.",
+		},
+		"operator": {
+			Type:     schema.TypeString,
+			Optional: true,
+			ValidateFunc: validation.StringInSlice([]string{
+				"AND",
+				"OR",
+			}, false),
+		},
+		"zpn_isolation_profile_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
+		"microtenant_id": {
+			Type:     schema.TypeString,
+			Optional: true,
+		},
 	}
 }
 
@@ -121,8 +156,6 @@ func resourcePolicyIsolationRuleRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("action", resp.Action)
 	_ = d.Set("operator", resp.Operator)
 	_ = d.Set("policy_set_id", resp.PolicySetID)
-	_ = d.Set("policy_type", resp.PolicyType)
-	_ = d.Set("zpn_cbi_profile_id", resp.ZpnCbiProfileID)
 	_ = d.Set("zpn_isolation_profile_id", resp.ZpnIsolationProfileID)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 
@@ -207,15 +240,8 @@ func expandCreatePolicyIsolationRule(d *schema.ResourceData, policySetID string)
 		Name:                  d.Get("name").(string),
 		Description:           d.Get("description").(string),
 		Action:                d.Get("action").(string),
-		ActionID:              d.Get("action_id").(string),
-		CustomMsg:             d.Get("custom_msg").(string),
-		BypassDefaultRule:     d.Get("bypass_default_rule").(bool),
-		DefaultRule:           d.Get("default_rule").(bool),
 		Operator:              d.Get("operator").(string),
-		PolicyType:            d.Get("policy_type").(string),
-		ZpnCbiProfileID:       d.Get("zpn_cbi_profile_id").(string),
 		ZpnIsolationProfileID: d.Get("zpn_isolation_profile_id").(string),
-		Priority:              d.Get("priority").(string),
 		MicroTenantID:         GetString(d.Get("microtenant_id")),
 		Conditions:            conditions,
 		PolicySetID:           policySetID,

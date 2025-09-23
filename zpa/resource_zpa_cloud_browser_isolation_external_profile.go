@@ -77,29 +77,29 @@ func resourceCBIExternalProfile() *schema.Resource {
 						"forward_to_zia": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Computed: true,
+							// Computed: true,
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
 										Type:     schema.TypeBool,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 									},
 									"organization_id": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 									},
 									"cloud_name": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 									},
 									"pac_file_url": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 									},
 								},
 							},
@@ -154,7 +154,7 @@ func resourceCBIExternalProfile() *schema.Resource {
 						"copy_paste": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
+							// Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"none",
 								"all",
@@ -163,7 +163,7 @@ func resourceCBIExternalProfile() *schema.Resource {
 						"upload_download": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
+							// Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"none",
 								"all",
@@ -328,11 +328,14 @@ func resourceCBIExternalProfileRead(ctx context.Context, d *schema.ResourceData,
 	if resp.UserExperience != nil {
 		_ = d.Set("user_experience", flattenUserExperience(resp.UserExperience))
 	}
-	log.Printf("[INFO] Setting debug_mode: %+v\n", resp.DebugMode)
-
-	if resp.DebugMode != nil {
-		log.Printf("[INFO] Setting debug_mode: %+v\n", resp.DebugMode)
+	// Only set debug_mode in state if it's actually enabled or has meaningful configuration
+	if resp.DebugMode != nil && (resp.DebugMode.Allowed || resp.DebugMode.FilePassword != "") {
+		log.Printf("[INFO] Setting debug_mode (enabled): %+v\n", resp.DebugMode)
 		_ = d.Set("debug_mode", flattenDebugMode(resp.DebugMode))
+	} else {
+		log.Printf("[INFO] Skipping debug_mode (disabled/empty): %+v\n", resp.DebugMode)
+		// Explicitly remove from state if it exists but is disabled
+		_ = d.Set("debug_mode", nil)
 	}
 
 	return nil
