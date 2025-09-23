@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.2.4 (September, 22 2025)
+
+### Notes
+
+- Release date: **(September, 22 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+[PR #596](https://github.com/zscaler/terraform-provider-zpa/pull/596) - Introduced `GetByIdpAndAttributeID` in the data source `data_source_zpa_saml_attribute` to allow search IDP and Attribute ID. 
+[PR #596](https://github.com/zscaler/terraform-provider-zpa/pull/596) - Made `id` attribute optional in some datasources to allow for search by ID.
+[PR #596](https://github.com/zscaler/terraform-provider-zpa/pull/596) - Enhanced the Terraform schema in the following resources: `zpa_policy_inspection_rule` and `zpa_policy_isolation_rule`
+
 ## 4.2.3 (September, 22 2025)
 
 ### Notes
