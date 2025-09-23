@@ -60,6 +60,10 @@ func IsolationPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
+		"policy_set_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
 		"name": {
 			Type:        schema.TypeString,
 			Required:    true,
