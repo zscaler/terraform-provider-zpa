@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.2.4 (October 8, 2025)
+
+### Notes
+
+- Release date: **(October 8 2025)**
+- Supported Terraform version: **v1.x**
+
+### Documentation
+
+[PR #600](https://github.com/zscaler/terraform-provider-zpa/pull/596) - Updated index documentation for further clarity on ZPA Customer ID configuration
+[PR #596](https://github.com/zscaler/terraform-provider-zpa/pull/596) - Added additional examples within the examples folder for resources and datasources `zpa_c2c_ip_ranges`, `zpa_private_cloud_controller`, `zpa_private_cloud_group`, `zpa_user_portal_controller`, `zpa_user_portal_link`
+
+
 ## 4.2.4 (September, 22 2025)
 
 ### Notes
