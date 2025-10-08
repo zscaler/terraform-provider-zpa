@@ -53,7 +53,7 @@ provider "zpa" {
   client_secret = "[ZSCALER_CLIENT_SECRET]"
   vanity_domain = "[ZSCALER_VANITY_DOMAIN]"
   zscaler_cloud = "[ZSCALER_CLOUD]"
-  zpa_customer_id = "[ZPA_CUSTOMER_ID]"
+  customer_id = "[CUSTOMER_ID]"
 }
 ```
 
@@ -83,7 +83,7 @@ provider "zpa" {
   private_key   = "[ZSCALER_PRIVATE_KEY]"
   vanity_domain = "[ZSCALER_VANITY_DOMAIN]"
   zscaler_cloud = "[ZSCALER_CLOUD]"
-  zpa_customer_id = "[ZPA_CUSTOMER_ID]"
+  customer_id = "[CUSTOMER_ID]"
 }
 ```
 
@@ -183,9 +183,9 @@ provider "zpa" {
 
 You can provide credentials via the `ZPA_CLIENT_ID`, `ZPA_CLIENT_SECRET`, `ZPA_CUSTOMER_ID`, `ZPA_CLOUD` environment variables, representing your ZPA API key credentials and customer ID, of your ZPA account, respectively.
 
-~> **NOTE** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is required to provision resources in the ZPA Beta Cloud, Gov Cloud, Gov US Cloud, or Preview Cloud.
+~> **NOTE 1** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is **ONLY** required when provisioning resources in in the following ZPA Clouds `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `ZPATWO`
 
-~> **NOTE** `ZPA_MICROTENANT_ID` environment variable is an optional parameter when provisioning resources within a ZPA microtenant
+~> **NOTE 2** `ZPA_MICROTENANT_ID` environment variable is an optional parameter when provisioning resources within a ZPA microtenant
 
 ```terraform
 provider "zpa" {}
@@ -225,7 +225,9 @@ The following arguments are supported:
 
 ### Optional
 
-* `zpa_cloud` - (Optional) ZPA Cloud name `PRODUCTION`. Optional when running in the ZPA production cloud.
+* `zpa_cloud` - (Optional) ZPA Cloud name `PRODUCTION`.
+
+~> **NOTE** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is **ONLY** required when provisioning resources in in the following ZPA Clouds `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `ZPATWO`
 
 ### Zscaler Private Access Microtenant
 
@@ -238,7 +240,7 @@ When authenticating to microtenant via API using the ZPA Terraform provider, the
 
 ~> **NOTE 1** The environment variable `ZPA_MICROTENANT_ID` is mandatory when provisioning/managing resources exclusively within a Microtenant.
 
-~> **NOTE 2** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is required to provision resources in the `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `ZPATWO` clouds.
+~> **NOTE 2** `ZPA_CLOUD` environment variable is an optional parameter when running this provider in production; however, this parameter is **ONLY** required when provisioning resources in in the following ZPA Clouds `BETA`, `GOV`, `GOVUS`, `PREVIEW` or `ZPATWO`
 
 ## Argument Reference - OneAPI
 
