@@ -28,6 +28,13 @@ func dataSourceLSSLogTypeFormats() *schema.Resource {
 					"zpn_http_trans_log",
 					"zpn_waf_http_exchanges_log",
 					"zpn_sys_auth_log",
+					"zpn_smb_inspection_log",
+					"zpn_auth_log_1id",
+					"zpn_sitec_auth_log",
+					"zpn_sitec_comprehensive_stats",
+					"zpn_ldap_inspection_log",
+					"zms_flow_log",
+					"zpn_krb_inspection_log",
 				}, false),
 			},
 			"tsv": {
