@@ -1218,17 +1218,47 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 }
 
 func fetchPolicySetIDByType(ctx context.Context, zClient *Client, policyType string, microTenantID string) (string, error) {
-	service := zClient.Service
+	// Create cache key including microtenant ID for multi-tenant scenarios
+	cacheKey := policyType
+	if microTenantID != "" {
+		cacheKey = policyType + ":" + microTenantID
+	}
 
+	// First check: read lock (fast path for cached values)
+	zClient.mu.RLock()
+	if policySetID, found := zClient.policySetIDCache[cacheKey]; found {
+		zClient.mu.RUnlock()
+		return policySetID, nil
+	}
+	zClient.mu.RUnlock()
+
+	// Not in cache, acquire write lock to prevent race condition
+	zClient.mu.Lock()
+
+	// Double-check: another goroutine might have fetched while we waited for the lock
+	if policySetID, found := zClient.policySetIDCache[cacheKey]; found {
+		zClient.mu.Unlock()
+		return policySetID, nil
+	}
+
+	// Still not in cache, we need to fetch from API (hold the lock during fetch)
+	service := zClient.Service
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
 	}
 
 	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, policyType)
 	if err != nil {
+		zClient.mu.Unlock()
 		return "", fmt.Errorf("failed to fetch policy set ID for type '%s': %v", policyType, err)
 	}
-	return globalPolicySet.ID, nil
+
+	// Store in cache before releasing lock
+	zClient.policySetIDCache[cacheKey] = globalPolicySet.ID
+	result := globalPolicySet.ID
+	zClient.mu.Unlock()
+
+	return result, nil
 }
 
 // ConvertV1ResponseToV2Request converts a PolicyRuleResource (API v1 response) to a PolicyRule (API v2 request) with aggregated values.

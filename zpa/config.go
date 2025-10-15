@@ -3,12 +3,12 @@ package zpa
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-hclog"
@@ -52,7 +52,9 @@ type (
 )
 
 type Client struct {
-	Service *zscaler.Service
+	Service          *zscaler.Service
+	policySetIDCache map[string]string // Cache for policySetIDs by type
+	mu               sync.RWMutex      // Mutex for cache access
 }
 
 func (c *Client) GetConfig() *zscaler.Configuration {
@@ -63,12 +65,12 @@ func NewConfig(d *schema.ResourceData) *Config {
 	// defaults
 	config := Config{
 		backoff:        true,
-		minWait:        30,
-		maxWait:        300,
-		retryCount:     10,
+		minWait:        2,
+		maxWait:        10,
+		retryCount:     100,
 		parallelism:    1,
 		logLevel:       int(hclog.Error),
-		requestTimeout: 0,
+		requestTimeout: 240,
 	}
 	logLevel := hclog.Level(config.logLevel)
 	if os.Getenv("TF_LOG") != "" {
@@ -249,9 +251,10 @@ func zscalerSDKV2Client(c *Config) (*zscaler.Service, error) {
 
 	// Start with base configuration setters
 	setters := []zpa.ConfigSetter{
-		zpa.WithCache(false),
-		zpa.WithHttpClientPtr(http.DefaultClient),
+		zpa.WithCache(true), // Enable caching to avoid duplicate API calls
 		zpa.WithRateLimitMaxRetries(int32(c.retryCount)),
+		zpa.WithRateLimitMinWait(time.Duration(c.minWait) * time.Second),
+		zpa.WithRateLimitMaxWait(time.Duration(c.maxWait) * time.Second),
 		zpa.WithRequestTimeout(time.Duration(c.requestTimeout) * time.Second),
 	}
 
@@ -319,9 +322,10 @@ func zscalerSDKV3Client(c *Config) (*zscaler.Client, error) {
 	customUserAgent := generateUserAgent(c.TerraformVersion, c.customerID)
 
 	setters := []zscaler.ConfigSetter{
-		zscaler.WithCache(false),
-		zscaler.WithHttpClientPtr(http.DefaultClient),
+		zscaler.WithCache(true), // Enable caching to avoid duplicate API calls
 		zscaler.WithRateLimitMaxRetries(int32(c.retryCount)),
+		zscaler.WithRateLimitMinWait(time.Duration(c.minWait) * time.Second),
+		zscaler.WithRateLimitMaxWait(time.Duration(c.maxWait) * time.Second),
 		zscaler.WithRequestTimeout(time.Duration(c.requestTimeout) * time.Second),
 		zscaler.WithUserAgentExtra(""), // Set the custom user agent
 	}
@@ -422,7 +426,8 @@ func (c *Config) Client() (*Client, error) {
 		}
 
 		return &Client{
-			Service: zscaler.NewService(wrappedV2Client.Client, nil),
+			Service:          zscaler.NewService(wrappedV2Client.Client, nil),
+			policySetIDCache: make(map[string]string),
 		}, nil
 	}
 
@@ -432,6 +437,7 @@ func (c *Config) Client() (*Client, error) {
 		return nil, fmt.Errorf("failed to initialize v3 client: %w", err)
 	}
 	return &Client{
-		Service: zscaler.NewService(v3Client, nil),
+		Service:          zscaler.NewService(v3Client, nil),
+		policySetIDCache: make(map[string]string),
 	}, nil
 }

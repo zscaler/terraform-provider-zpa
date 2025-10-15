@@ -9,7 +9,7 @@ import (
 
 var lssConfigLogTypeFormatsNames = []string{
 	"zpn_ast_comprehensive_stats", "zpn_auth_log", "zpn_pbroker_comprehensive_stats", "zpn_ast_auth_log", "zpn_audit_log",
-	"zpn_trans_log", "zpn_http_trans_log", "zpn_waf_http_exchanges_log",
+	"zpn_trans_log", "zpn_waf_http_exchanges_log",
 }
 
 func TestAccDataSourceLSSLogTypeFormats_Basic(t *testing.T) {
