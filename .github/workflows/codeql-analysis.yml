@@ -2,13 +2,12 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
   schedule:
-    - cron: '41 1 * * 0'
+    - cron: "41 1 * * 0"
   workflow_dispatch:
-
 
 jobs:
   analyze:
@@ -18,24 +17,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'go' ]
+        language: ["go"]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-    - name: Setup Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: 1.22.x
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.x
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v3
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4

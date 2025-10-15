@@ -12,11 +12,23 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.2.5``
+``Last updated: v4.2.6``
 
 ---
 
-## 4.2.4 (October 8, 2025)
+## 4.2.6 (October 14, 2025)
+
+### Notes
+
+- Release date: **(October 14 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+[PR #602](https://github.com/zscaler/terraform-provider-zpa/pull/602) - Implemented local caching for policy-controller resources for more efficiency on data source utilization.
+[PR #602](https://github.com/zscaler/terraform-provider-zpa/pull/602) - Upgraded to [Zscaler-SDK-GO v3.7.5](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v3.7.5) to leverage better rate limiting and retry logic mechanism.
+
+## 4.2.5 (October 8, 2025)
 
 ### Notes
 
@@ -25,8 +37,8 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Documentation
 
-[PR #600](https://github.com/zscaler/terraform-provider-zpa/pull/596) - Updated index documentation for further clarity on ZPA Customer ID configuration
-[PR #596](https://github.com/zscaler/terraform-provider-zpa/pull/596) - Added additional examples within the examples folder for resources and datasources `zpa_c2c_ip_ranges`, `zpa_private_cloud_controller`, `zpa_private_cloud_group`, `zpa_user_portal_controller`, `zpa_user_portal_link`
+[PR #600](https://github.com/zscaler/terraform-provider-zpa/pull/600) - Updated index documentation for further clarity on ZPA Customer ID configuration
+[PR #600](https://github.com/zscaler/terraform-provider-zpa/pull/600) - Added additional examples within the examples folder for resources and datasources `zpa_c2c_ip_ranges`, `zpa_private_cloud_controller`, `zpa_private_cloud_group`, `zpa_user_portal_controller`, `zpa_user_portal_link`
 
 ## 4.2.4 (September, 22 2025)
 
