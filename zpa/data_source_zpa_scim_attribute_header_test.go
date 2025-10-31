@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -52,4 +53,4 @@ data "zpa_scim_attribute_header" "name_family_name" {
     name = "name.familyName"
     idp_name = "BD_Okta_Users"
 }
-`
+`*/

@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloud_connector_group"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/customerversionprofile"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/idpcontroller"
@@ -106,7 +106,7 @@ func validateOperand(ctx context.Context, operand policysetcontroller.Operands, 
 		}))
 	case "EDGE_CONNECTOR_GROUP":
 		return customValidate(operand, []string{"id"}, "cloud connector group ID", Getter(func(id string) error {
-			_, _, err := cloudconnectorgroup.Get(ctx, zClient.Service, id)
+			_, _, err := cloud_connector_group.Get(ctx, zClient.Service, id)
 			return err
 		}))
 	case "CLIENT_TYPE":
@@ -1204,11 +1204,11 @@ func ValidatePolicyRuleConditions(d *schema.ResourceData) error {
 					lhs, lhsOk := evMap["lhs"].(string)
 					rhs, rhsOk := evMap["rhs"].(string)
 
-					if !lhsOk || lhs == "" {
-						return fmt.Errorf("LHS must be a valid Chrome Enterprise ID and cannot be empty for CHROME_ENTERPRISE object_type")
+					if !lhsOk || lhs != "managed" {
+						return fmt.Errorf("LHS must be 'managed' for CHROME_ENTERPRISE object_type")
 					}
 					if !rhsOk || (rhs != "true" && rhs != "false") {
-						return fmt.Errorf("rhs value must be 'true' for CHROME_ENTERPRISE object_type")
+						return fmt.Errorf("rhs value must be 'true' or 'false' for CHROME_ENTERPRISE object_type")
 					}
 				}
 			}
@@ -1312,7 +1312,7 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 
 		for _, operand := range condition.Operands {
 			switch operand.ObjectType {
-			case "APP", "APP_GROUP", "CONSOLE", "CHROME_POSTURE_PROFILE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE", "USER_PORTAL":
+			case "APP", "APP_GROUP", "CONSOLE", "CHROME_POSTURE_PROFILE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE", "USER_PORTAL", "PRIVILEGE_PORTAL":
 				operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
 			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE", "RISK_FACTOR_TYPE", "CHROME_ENTERPRISE":
 				entryValuesMap[operand.ObjectType] = append(entryValuesMap[operand.ObjectType], policysetcontrollerv2.OperandsResourceLHSRHSValue{
@@ -1665,6 +1665,18 @@ func flattenCommonAppServerGroupSimple(serverGroups []servergroup.ServerGroup) [
 	return []interface{}{
 		map[string]interface{}{
 			"id": schema.NewSet(schema.HashString, ids),
+		},
+	}
+}
+
+func flattenCommonZPNERIDSimple(credential *common.ZPNERID) []interface{} {
+	if credential == nil || credential.ID == "" {
+		return nil
+	}
+
+	return []interface{}{
+		map[string]interface{}{
+			"id": schema.NewSet(schema.HashString, []interface{}{credential.ID}),
 		},
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 )
@@ -68,9 +69,9 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 				Description: "This is for providing a customer message for the user.",
 			},
 			"conditions": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
+				Type:     schema.TypeSet,
+				Optional: true,
+				// Computed:    true,
 				Description: "This is for proviidng the set of conditions for the policy.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -81,32 +82,32 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 						"operator": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
+							// Computed: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"AND",
 								"OR",
 							}, false),
 						},
 						"operands": {
-							Type:        schema.TypeSet,
-							Optional:    true,
-							Computed:    true,
+							Type:     schema.TypeSet,
+							Optional: true,
+							// Computed:    true,
 							Description: "This signifies the various policy criteria.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"values": {
-										Type:        schema.TypeSet,
-										Optional:    true,
-										Computed:    true,
+										Type:     schema.TypeSet,
+										Optional: true,
+										// Computed:    true,
 										Description: "This denotes a list of values for the given object type. The value depend upon the key. If rhs is defined this list will be ignored",
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
 									},
 									"object_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Computed:    true,
+										Type:     schema.TypeString,
+										Optional: true,
+										// Computed:    true,
 										Description: "  This is for specifying the policy critiera.",
 										ValidateFunc: validation.StringInSlice([]string{
 											"APP",
@@ -126,23 +127,24 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 											"PLATFORM",
 											"RISK_FACTOR_TYPE",
 											"CHROME_ENTERPRISE",
+											"CHROME_POSTURE_PROFILE",
 										}, false),
 									},
 									"entry_values": {
 										Type:     schema.TypeSet,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"rhs": {
 													Type:     schema.TypeString,
 													Optional: true,
-													Computed: true,
+													// Computed: true,
 												},
 												"lhs": {
 													Type:     schema.TypeString,
 													Optional: true,
-													Computed: true,
+													// Computed: true,
 												},
 											},
 										},
@@ -176,6 +178,53 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
+			"extranet_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable extranet for this policy rule.",
+			},
+			"extranet_dto": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Extranet configuration for the policy rule.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"zpn_er_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "ZPN Extranet Resource ID.",
+						},
+						"location_dto": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of location DTOs.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Location ID.",
+									},
+								},
+							},
+						},
+						"location_group_dto": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of location group DTOs.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Location Group ID.",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -261,9 +310,11 @@ func resourcePolicyAccessV2Read(ctx context.Context, d *schema.ResourceData, met
 	_ = d.Set("operator", v2PolicyRule.Operator)
 	_ = d.Set("policy_set_id", policySetID)
 	_ = d.Set("custom_msg", v2PolicyRule.CustomMsg)
+	_ = d.Set("extranet_enabled", resp.ExtranetEnabled)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
 	_ = d.Set("app_server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
+	_ = d.Set("extranet_dto", flattenExtranetDTO(&resp.ExtranetDTO))
 
 	return nil
 }
@@ -351,14 +402,15 @@ func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*poli
 		return nil, err
 	}
 	rule := &policysetcontrollerv2.PolicyRule{
-		ID:          d.Get("id").(string),
-		Name:        d.Get("name").(string),
-		Description: d.Get("description").(string),
-		Action:      d.Get("action").(string),
-		CustomMsg:   d.Get("custom_msg").(string),
-		Operator:    d.Get("operator").(string),
-		PolicySetID: policySetID,
-		Conditions:  conditions,
+		ID:              d.Get("id").(string),
+		Name:            d.Get("name").(string),
+		Description:     d.Get("description").(string),
+		Action:          d.Get("action").(string),
+		CustomMsg:       d.Get("custom_msg").(string),
+		Operator:        d.Get("operator").(string),
+		PolicySetID:     policySetID,
+		ExtranetEnabled: d.Get("extranet_enabled").(bool),
+		Conditions:      conditions,
 		AppServerGroups: func() []servergroup.ServerGroup {
 			groups := expandAppServerGroups(d)
 			if groups == nil {
@@ -377,6 +429,13 @@ func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*poli
 		// AppConnectorGroups: expandCommonAppConnectorGroups(d),
 	}
 
+	// Conditionally set extranet DTO if the user actually set it in TF
+	if extranetDTO, ok := d.GetOk("extranet_dto"); ok {
+		if expandedDTO := expandExtranetDTO(extranetDTO); expandedDTO != nil {
+			rule.ExtranetDTO = *expandedDTO
+		}
+	}
+
 	// Conditionally set credential if the user actually set it in TF.
 	// ADDING CONDITION TO EXPLICITLY IGNORE THE CREDENTIAL ATTRIBUTE
 	if val, ok := d.GetOk("credential"); ok {
@@ -388,4 +447,91 @@ func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*poli
 	}
 
 	return rule, nil
+}
+
+// expandExtranetDTO expands the extranet DTO configuration
+func expandExtranetDTO(extranetDTOInterface interface{}) *common.ExtranetDTO {
+	if extranetDTOInterface == nil {
+		return nil
+	}
+
+	extranetDTOList, ok := extranetDTOInterface.([]interface{})
+	if !ok || len(extranetDTOList) == 0 {
+		return nil
+	}
+
+	extranetDTOMap := extranetDTOList[0].(map[string]interface{})
+	extranetDTO := &common.ExtranetDTO{
+		ZpnErID: extranetDTOMap["zpn_er_id"].(string),
+	}
+
+	// Expand location DTO
+	if locationDTOInterface, ok := extranetDTOMap["location_dto"]; ok && locationDTOInterface != nil {
+		locationDTOList := locationDTOInterface.([]interface{})
+		if len(locationDTOList) > 0 {
+			extranetDTO.LocationDTO = make([]common.LocationDTO, len(locationDTOList))
+			for i, locationInterface := range locationDTOList {
+				locationMap := locationInterface.(map[string]interface{})
+				extranetDTO.LocationDTO[i] = common.LocationDTO{
+					ID: locationMap["id"].(string),
+				}
+			}
+		}
+	}
+
+	// Expand location group DTO
+	if locationGroupDTOInterface, ok := extranetDTOMap["location_group_dto"]; ok && locationGroupDTOInterface != nil {
+		locationGroupDTOList := locationGroupDTOInterface.([]interface{})
+		if len(locationGroupDTOList) > 0 {
+			extranetDTO.LocationGroupDTO = make([]common.LocationGroupDTO, len(locationGroupDTOList))
+			for i, locationGroupInterface := range locationGroupDTOList {
+				locationGroupMap := locationGroupInterface.(map[string]interface{})
+				extranetDTO.LocationGroupDTO[i] = common.LocationGroupDTO{
+					ID: locationGroupMap["id"].(string),
+				}
+			}
+		}
+	}
+
+	return extranetDTO
+}
+
+// flattenExtranetDTO flattens the extranet DTO configuration
+func flattenExtranetDTO(extranetDTO *common.ExtranetDTO) []interface{} {
+	if extranetDTO == nil {
+		return nil
+	}
+
+	// Return nil if the DTO is empty (no zpnErID and no locations)
+	if extranetDTO.ZpnErID == "" && len(extranetDTO.LocationDTO) == 0 && len(extranetDTO.LocationGroupDTO) == 0 {
+		return nil
+	}
+
+	result := map[string]interface{}{
+		"zpn_er_id": extranetDTO.ZpnErID,
+	}
+
+	// Flatten location DTO
+	if len(extranetDTO.LocationDTO) > 0 {
+		locationDTOList := make([]interface{}, len(extranetDTO.LocationDTO))
+		for i, location := range extranetDTO.LocationDTO {
+			locationDTOList[i] = map[string]interface{}{
+				"id": location.ID,
+			}
+		}
+		result["location_dto"] = locationDTOList
+	}
+
+	// Flatten location group DTO
+	if len(extranetDTO.LocationGroupDTO) > 0 {
+		locationGroupDTOList := make([]interface{}, len(extranetDTO.LocationGroupDTO))
+		for i, locationGroup := range extranetDTO.LocationGroupDTO {
+			locationGroupDTOList[i] = map[string]interface{}{
+				"id": locationGroup.ID,
+			}
+		}
+		result["location_group_dto"] = locationGroupDTOList
+	}
+
+	return []interface{}{result}
 }

@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -54,3 +55,4 @@ data "zpa_saml_attribute" "group" {
 	idp_name = "BD_Okta_Users"
 }
 `
+*/

@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloud_connector_group"
 )
 
 func dataSourceCloudConnectorGroup() *schema.Resource {
@@ -116,11 +116,11 @@ func dataSourceCloudConnectorGroupRead(ctx context.Context, d *schema.ResourceDa
 	zClient := meta.(*Client)
 	service := zClient.Service
 
-	var resp *cloudconnectorgroup.CloudConnectorGroup
+	var resp *cloud_connector_group.CloudConnectorGroup
 	id, ok := d.Get("id").(string)
 	if ok && id != "" {
 		log.Printf("[INFO] Getting data for cloud connector group  %s\n", id)
-		res, _, err := cloudconnectorgroup.Get(ctx, service, id)
+		res, _, err := cloud_connector_group.Get(ctx, service, id)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -129,7 +129,7 @@ func dataSourceCloudConnectorGroupRead(ctx context.Context, d *schema.ResourceDa
 	name, ok := d.Get("name").(string)
 	if ok && name != "" {
 		log.Printf("[INFO] Getting data for cloud connector group name %s\n", name)
-		res, _, err := cloudconnectorgroup.GetByName(ctx, service, name)
+		res, _, err := cloud_connector_group.GetByName(ctx, service, name)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -156,7 +156,7 @@ func dataSourceCloudConnectorGroupRead(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func flattenCloudConnectors(cloudConnectors *cloudconnectorgroup.CloudConnectorGroup) []interface{} {
+func flattenCloudConnectors(cloudConnectors *cloud_connector_group.CloudConnectorGroup) []interface{} {
 	connectorItems := make([]interface{}, len(cloudConnectors.CloudConnectors))
 	for i, connectorItem := range cloudConnectors.CloudConnectors {
 		connectorItems[i] = map[string]interface{}{

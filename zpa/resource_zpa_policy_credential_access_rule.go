@@ -302,6 +302,7 @@ func resourcePolicyCredentialAccessRuleUpdate(ctx context.Context, d *schema.Res
 
 	return resourcePolicyCredentialAccessRuleRead(ctx, d, meta)
 }
+
 func resourcePolicyCredentialAccessRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	zClient := meta.(*Client)
 	service := zClient.Service

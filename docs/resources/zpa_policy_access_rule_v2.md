@@ -168,6 +168,99 @@ resource "zpa_policy_access_rule_v2" "this" {
 }
 ```
 
+## Example Usage - Configure Extranet Access Rule
+
+```hcl
+data "zpa_location_controller" "this" {
+  name        = "ExtranetLocation01 | zscalerbeta.net"
+  zia_er_name = "NewExtranet 8432"
+}
+
+data "zpa_location_group_controller" "this" {
+  location_name = "ExtranetLocation01"
+  zia_er_name   = "NewExtranet 8432"
+}
+
+data "zpa_extranet_resource_partner" "this" {
+  name = "NewExtranet 8432"
+}
+
+resource "zpa_policy_access_rule_v2" "this" {
+  name             = "Extranet_Rule01"
+  description      = "Extranet_Rule01"
+  action           = "ALLOW"
+  custom_msg       = "Test"
+  operator         = "AND"
+  extranet_enabled = true
+
+  extranet_dto {
+    zpn_er_id = data.zpa_extranet_resource_partner.this.id
+
+    location_dto {
+      id = data.zpa_location_controller.this.id
+    }
+
+    location_group_dto {
+      id = data.zpa_location_group_controller.this.id
+    }
+  }
+}
+```
+
+## Example Usage - Configuration Location Rule
+
+```hcl
+data "zpa_location_controller_summary" "this" {
+  name = "BD_CC01_US | NONE | zscalerbeta.net"
+}
+
+resource "zpa_policy_access_rule_v2" "this" {
+  name        = "ExampleLocationRule"
+  description = "ExampleLocationRule"
+  action      = "ALLOW"
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "LOCATION"
+      values      = [data.zpa_location_controller_summary.this.id]
+    }
+  }
+}
+```
+
+## Example Usage - Chrome Enterprise and Chrome Posture Profile
+
+```hcl
+data "zpa_managed_browser_profile" "this" {
+  name = "Profile01"
+}
+
+
+resource "zpa_policy_access_rule_v2" "this" {
+  name        = "Example_v2_100_test"
+  description = "Example_v2_100_test"
+  action      = "ALLOW"
+  custom_msg  = "Test"
+  operator    = "AND"
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "CHROME_ENTERPRISE"
+      entry_values {
+        lhs = "managed"
+        rhs = "true"
+      }
+    }
+    operands {
+      object_type = "CHROME_POSTURE_PROFILE"
+      values      = [data.zpa_managed_browser_profile.this.id]
+    }
+  }
+}
+```
+
 ## Schema
 
 ### Required
@@ -179,6 +272,7 @@ resource "zpa_policy_access_rule_v2" "this" {
 - `description` (String) This is the description of the access policy rule.
 - `action` (String) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``, and ``REQUIRE_APPROVAL``
 - `custom_msg` (String) This is for providing a customer message for the user.
+- `extranet_enabled` (boolean) Indiciates if the application is designated for Extranet Application Support (true) or not (false). Extranet applications connect to a partner site or offshore development center that is not directly available on your organization’s network.
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
@@ -258,6 +352,25 @@ resource "zpa_policy_access_rule_v2" "this" {
             - `lhs` - (String) -  Must be set to `managed`
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
         - `values` (Block List) The list of ID values for each `CHROME_POSTURE_PROFILE`
+
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_ENTERPRISE`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  `"managed"`
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
+
+    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_POSTURE_PROFILE`
+        - `values` (Block List) The list of values for the specified object type (e.g., managed browser profile ID `zpa_managed_browser_profile`).
+
+- `extranet_dto` (Block Set) - Extranet location and location group configuration
+    - `zpn_er_id` (String) - The unique identifier of the extranet resource that is configured in ZIA. Use the data source `zpa_extranet_resource_partner` to retrieve the Extranet ID
+        - `location_dto` (Block Set)
+            - `id` - (String) -  Unique identifiers for the location
+        - `location_group_dto` (Block Set)
+            - `id` - (String) -  Unique identifiers for the location group
 
 ## Import
 

@@ -53,7 +53,7 @@ provider "zpa" {
   client_secret = "[ZSCALER_CLIENT_SECRET]"
   vanity_domain = "[ZSCALER_VANITY_DOMAIN]"
   zscaler_cloud = "[ZSCALER_CLOUD]"
-  customer_id = "[ZPA_CUSTOMER_ID]"
+  customer_id   = "[ZPA_CUSTOMER_ID]"
 }
 ```
 
@@ -83,7 +83,7 @@ provider "zpa" {
   private_key   = "[ZSCALER_PRIVATE_KEY]"
   vanity_domain = "[ZSCALER_VANITY_DOMAIN]"
   zscaler_cloud = "[ZSCALER_CLOUD]"
-  customer_id = "[ZPA_CUSTOMER_ID]"
+  customer_id   = "[ZPA_CUSTOMER_ID]"
 }
 ```
 
