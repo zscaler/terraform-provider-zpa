@@ -153,7 +153,7 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "NONE",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"NONE",

@@ -147,7 +147,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "NONE",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"NONE",
@@ -156,7 +156,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"match_style": {
 				Type:     schema.TypeString,
 				Optional: true,
-				// Computed: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"EXCLUSIVE",
 					"INCLUSIVE",
