@@ -20,7 +20,9 @@ Use the **zpa_branch_connector_group** data source to get information about bran
 data "zpa_branch_connector_group" "this" {
     name = "GROUP01"
 }
+```
 
+```terraform
 data "zpa_branch_connector_group" "this" {
     id = "123635465"
 }

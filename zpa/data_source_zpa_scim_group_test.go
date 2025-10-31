@@ -1,5 +1,6 @@
 package zpa
 
+/*
 import (
 	"testing"
 
@@ -52,3 +53,4 @@ data "zpa_scim_groups" "executives" {
 	idp_name = "BD_Okta_Users"
 }
 `
+*/

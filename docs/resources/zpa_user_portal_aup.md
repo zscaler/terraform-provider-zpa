@@ -17,7 +17,6 @@ The **zpa_user_portal_aup** resource creates a user portal link in the Zscaler P
 ## Example Usage
 
 ```hcl
-
 resource "zpa_user_portal_aup" "this" {
   name        = "Org_AUP01"
   description = "Org_AUP01"
