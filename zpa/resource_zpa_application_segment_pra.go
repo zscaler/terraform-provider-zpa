@@ -131,7 +131,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "DEFAULT",
+				Default:  "NONE",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"NONE",
@@ -243,7 +243,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 									"application_protocol": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"RDP", "SSH", "VNC",
 										}, false),
@@ -251,7 +251,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 									"connection_security": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"ANY", "NLA", "NLA_EXT", "TLS", "VM_CONNECT", "RDP",
 										}, false),
@@ -259,7 +259,7 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 									"domain": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 									},
 								},
 							},
@@ -269,6 +269,19 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 			},
 
 			"server_groups": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeSet,
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
+			"zpn_er_id": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
@@ -356,12 +369,13 @@ func resourceApplicationSegmentPRARead(ctx context.Context, d *schema.ResourceDa
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("health_reporting", resp.HealthReporting)
+	_ = d.Set("zpn_er_id", flattenCommonZPNERIDSimple(resp.ZPNERID))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
 
 	// Map pra_apps to common_apps_dto.apps_config for state management
-	if err := mapPRAAppsToCommonApps(d, resp.PRAApps); err != nil {
-		return diag.FromErr(fmt.Errorf("failed to map PRA apps to common apps: %v", err))
-	}
+	// if err := mapPRAAppsToCommonApps(d, resp.PRAApps); err != nil {
+	// 	return diag.FromErr(fmt.Errorf("failed to map PRA apps to common apps: %v", err))
+	// }
 
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
@@ -447,6 +461,22 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 		service = service.WithMicroTenant(microTenantID)
 	}
 
+	// Expand zpn_er_id (extranet resource ID)
+	var extranet *common.ZPNERID
+	if v, ok := d.GetOk("zpn_er_id"); ok {
+		if items := v.([]interface{}); len(items) > 0 {
+			m := items[0].(map[string]interface{})
+			if idSet, ok := m["id"].(*schema.Set); ok && idSet.Len() > 0 {
+				ids := idSet.List()
+				if len(ids) > 0 {
+					if id, ok := ids[0].(string); ok && id != "" {
+						extranet = &common.ZPNERID{ID: id}
+					}
+				}
+			}
+		}
+	}
+
 	// Prepare initial base object
 	hclDefinedDto := expandCommonAppsDto(d)
 	details := applicationsegmentpra.AppSegmentPRA{
@@ -470,6 +500,7 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
+		ZPNERID:                   extranet,
 		DomainNames:               SetToStringList(d, "domain_names"),
 		ServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
@@ -495,6 +526,7 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 		}
 	}
 
+	// TCP (original behavior using equality checks)
 	TCPAppPortRange := expandAppSegmentNetwokPorts(d, "tcp_port_range")
 	TCPAppPortRanges := convertToPortRange(d.Get("tcp_port_ranges").([]interface{}))
 	if isSameSlice(TCPAppPortRange, TCPAppPortRanges) || isSameSlice(TCPAppPortRange, remoteTCPAppPortRanges) {
@@ -503,6 +535,7 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 		details.TCPPortRanges = TCPAppPortRange
 	}
 
+	// UDP (original behavior using equality checks)
 	UDPAppPortRange := expandAppSegmentNetwokPorts(d, "udp_port_range")
 	UDPAppPortRanges := convertToPortRange(d.Get("udp_port_ranges").([]interface{}))
 	if isSameSlice(UDPAppPortRange, UDPAppPortRanges) || isSameSlice(UDPAppPortRange, remoteUDPAppPortRanges) {
@@ -537,23 +570,23 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 			currentHCLDomains[app.Domain] = struct{}{}
 		}
 
-		// Rebuild apps from existing state
+		// Rebuild apps from existing state: keep only apps still present in HCL; mark removed ones for deletion
 		for domain, pra := range existingDomains {
-			app := applicationsegmentpra.AppsConfig{
-				AppID:               pra.AppID,
-				PRAAppID:            pra.ID,
-				Name:                pra.Name,
-				Enabled:             pra.Enabled,
-				AppTypes:            []string{"SECURE_REMOTE_ACCESS"},
-				ApplicationPort:     pra.ApplicationPort,
-				ApplicationProtocol: pra.ApplicationProtocol,
-				ConnectionSecurity:  pra.ConnectionSecurity,
-				Domain:              pra.Domain,
-				Description:         pra.Description,
-			}
-			fullAppsConfig = append(fullAppsConfig, app)
-
-			if _, found := currentHCLDomains[domain]; !found {
+			if _, found := currentHCLDomains[domain]; found {
+				app := applicationsegmentpra.AppsConfig{
+					AppID:               pra.AppID,
+					PRAAppID:            pra.ID,
+					Name:                pra.Name,
+					Enabled:             pra.Enabled,
+					AppTypes:            []string{"SECURE_REMOTE_ACCESS"},
+					ApplicationPort:     pra.ApplicationPort,
+					ApplicationProtocol: pra.ApplicationProtocol,
+					ConnectionSecurity:  pra.ConnectionSecurity,
+					Domain:              pra.Domain,
+					Description:         pra.Description,
+				}
+				fullAppsConfig = append(fullAppsConfig, app)
+			} else {
 				details.CommonAppsDto.DeletedPraApps = append(details.CommonAppsDto.DeletedPraApps, pra.ID)
 			}
 		}

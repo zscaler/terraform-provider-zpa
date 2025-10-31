@@ -143,6 +143,53 @@ func resourceServerGroup() *schema.Resource {
 					},
 				},
 			},
+			"extranet_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable extranet for this policy rule.",
+			},
+			"extranet_dto": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Extranet configuration for the policy rule.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"zpn_er_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "ZPN Extranet Resource ID.",
+						},
+						"location_dto": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of location DTOs.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Location ID.",
+									},
+								},
+							},
+						},
+						"location_group_dto": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of location group DTOs.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Location Group ID.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -203,12 +250,13 @@ func resourceServerGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("dynamic_discovery", resp.DynamicDiscovery)
-	_ = d.Set("enabled", resp.Enabled)
+	_ = d.Set("extranet_enabled", resp.ExtranetEnabled)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
 	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
 	_ = d.Set("applications", flattenServerGroupApplicationsSimple(resp.Applications))
 	_ = d.Set("servers", flattenApplicationServer(resp.Servers))
+	_ = d.Set("extranet_dto", flattenExtranetDTO(&resp.ExtranetDTO))
 
 	return nil
 }
@@ -369,6 +417,7 @@ func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 	result := servergroup.ServerGroup{
 		ID:                 d.Id(),
 		Enabled:            d.Get("enabled").(bool),
+		ExtranetEnabled:    d.Get("extranet_enabled").(bool),
 		Description:        d.Get("description").(string),
 		IpAnchored:         d.Get("ip_anchored").(bool),
 		ConfigSpace:        d.Get("config_space").(string),
@@ -380,6 +429,12 @@ func expandServerGroup(d *schema.ResourceData) servergroup.ServerGroup {
 	}
 	if d.HasChange("name") {
 		result.Name = d.Get("name").(string)
+	}
+	// Conditionally set extranet DTO if the user actually set it in TF
+	if extranetDTO, ok := d.GetOk("extranet_dto"); ok {
+		if expandedDTO := expandExtranetDTO(extranetDTO); expandedDTO != nil {
+			result.ExtranetDTO = *expandedDTO
+		}
 	}
 	return result
 }

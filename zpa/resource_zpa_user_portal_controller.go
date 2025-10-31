@@ -157,6 +157,7 @@ func resourceUserPortalControllerRead(ctx context.Context, d *schema.ResourceDat
 	}
 
 	log.Printf("[INFO] Getting user portal controller:\n%+v\n", resp)
+	d.SetId(resp.ID)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("certificate_id", resp.CertificateId)
 	_ = d.Set("description", resp.Description)

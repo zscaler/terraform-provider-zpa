@@ -322,12 +322,21 @@ func zscalerSDKV3Client(c *Config) (*zscaler.Client, error) {
 	customUserAgent := generateUserAgent(c.TerraformVersion, c.customerID)
 
 	setters := []zscaler.ConfigSetter{
-		zscaler.WithCache(true), // Enable caching to avoid duplicate API calls
+		zscaler.WithCache(true),                // Enable caching to reduce API calls
+		zscaler.WithCacheTtl(10 * time.Minute), // Cache entries for 10 minutes
+		zscaler.WithCacheTti(8 * time.Minute),  // Idle timeout of 8 minutes
 		zscaler.WithRateLimitMaxRetries(int32(c.retryCount)),
 		zscaler.WithRateLimitMinWait(time.Duration(c.minWait) * time.Second),
 		zscaler.WithRateLimitMaxWait(time.Duration(c.maxWait) * time.Second),
 		zscaler.WithRequestTimeout(time.Duration(c.requestTimeout) * time.Second),
 		zscaler.WithUserAgentExtra(""), // Set the custom user agent
+	}
+
+	// Enable SDK debug logging when Terraform debug logging is enabled
+	tfLog := os.Getenv("TF_LOG")
+	if tfLog == "DEBUG" || tfLog == "TRACE" {
+		setters = append(setters, zscaler.WithDebug(true))
+		log.Println("[DEBUG] SDK debug logging enabled")
 	}
 
 	// Configure HTTP proxy if provided

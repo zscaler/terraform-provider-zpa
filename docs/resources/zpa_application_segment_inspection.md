@@ -36,12 +36,10 @@ resource "zpa_application_segment_inspection" "this" {
   }
   common_apps_dto {
     apps_config {
-      name                 = "jenkins.example.com"
       domain               = "jenkins.example.com"
       application_protocol = "HTTPS"
       application_port     = "443"
       certificate_id       = data.zpa_ba_certificate.jenkins.id
-      enabled              = true
       app_types            = [ "INSPECT" ]
     }
   }
@@ -62,19 +60,21 @@ The following arguments are supported:
 - `segment_group_id` - (string) The unique identifier of the segment group.
 - `common_apps_dto` (Block Set, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
   - `apps_config:` (Block Set, Min: 1) List of applications to be configured
-    - `name` (String) Name of the Inspection Application Segment.
-    - `domain` (String) Domain name of the Inspection Application Segment.
+    - `domain` - (String) Domain name of the Privileged Remote Access
+      - **NOTE** The domain name configured in this attribute **MUST** also be present in `domain_names` list.
+
     - `application_protocol` (String) Protocol for the Inspection Application Segment.. Supported values: `HTTP` and `HTTPS`
-    - `application_port` (String) Port for the Inspection Application Segment.
+
+    - `application_port` - (String) Port for the Privileged Remote Access.
+      - **NOTE** The ports configured in this attribute **MUST** also be present in the port list.
+
     - `app_types` (List of String) Indicates the type of application as inspection. Supported value: `INSPECT`
     - `certificate_id` (string) - ID of the signing certificate. This field is required if the ``application_protocol`` is set to `HTTPS`. The ``certificate_id`` is **NOT** supported if the application_protocol is set to `HTTP`.
     - `enabled` (Boolean) Whether this application is enabled or not
 - `tcp_port_ranges` - (List of String) TCP port ranges used to access the app.
 - `udp_port_ranges` - (List of String) UDP port ranges used to access the app.
 
-!> **WARNING:** Removing PRA applications from the `common_apps_dto.apps_config` block will cause the provider to force a replacement of the application segment.
-
--> **NOTE:**  TCP and UDP ports can also be defined using the following model:
+-> **NOTE:**  TCP and UDP ports can also be defined using the following model below. We recommend this model as opposed of the legacy model via `tcp_port_ranges` and or `udp_port_ranges`.
 
 - `tcp_port_range` - (Block Set) TCP port ranges used to access the app.
   - `from:` (String) The starting port for a port range.

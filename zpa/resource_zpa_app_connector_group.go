@@ -62,12 +62,12 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"city_country": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"country_code": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
+				Type:     schema.TypeString,
+				Optional: true,
+				// Computed:     true,
 				ValidateFunc: validateCountryCode,
 			},
 			"description": {
@@ -89,7 +89,7 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Computed:    true,
+				Default:     true,
 				Description: "Whether this App Connector Group is enabled or not",
 			},
 			"latitude": {

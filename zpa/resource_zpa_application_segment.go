@@ -147,7 +147,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "DEFAULT",
+				Default:  "NONE",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"NONE",
@@ -156,7 +156,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"match_style": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"EXCLUSIVE",
 					"INCLUSIVE",
@@ -239,6 +239,19 @@ func resourceApplicationSegment() *schema.Resource {
 				Description: "If set to true, designates the application segment for API traffic inspection",
 			},
 			"server_groups": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeSet,
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
+			"zpn_er_id": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
@@ -351,6 +364,7 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
+	_ = d.Set("zpn_er_id", flattenCommonZPNERIDSimple(resp.ZPNERID))
 
 	shareTo := []string{}
 	if len(resp.SharedMicrotenantDetails.SharedToMicrotenants) > 0 {
@@ -452,6 +466,22 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		service = service.WithMicroTenant(microTenantID)
 	}
 
+	// Expand zpn_er_id (extranet resource ID)
+	var extranet *common.ZPNERID
+	if v, ok := d.GetOk("zpn_er_id"); ok {
+		if items := v.([]interface{}); len(items) > 0 {
+			m := items[0].(map[string]interface{})
+			if idSet, ok := m["id"].(*schema.Set); ok && idSet.Len() > 0 {
+				ids := idSet.List()
+				if len(ids) > 0 {
+					if id, ok := ids[0].(string); ok && id != "" {
+						extranet = &common.ZPNERID{ID: id}
+					}
+				}
+			}
+		}
+	}
+
 	details := applicationsegment.ApplicationSegmentResource{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
@@ -480,6 +510,7 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
 		APIProtectionEnabled:      d.Get("api_protection_enabled").(bool),
+		ZPNERID:                   extranet,
 		ServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
 			if groups == nil {

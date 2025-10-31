@@ -2,6 +2,7 @@ package zpa
 
 import (
 	"context"
+	"crypto/md5"
 	"errors"
 	"fmt"
 	"log"
@@ -53,6 +54,38 @@ func SetToStringList(d *schema.ResourceData, key string) []string {
 		return []string{}
 	}
 	return SetToStringSlice(set)
+}
+
+func SetToIntList(d *schema.ResourceData, key string) []int {
+	setObj, ok := d.GetOk(key)
+	if !ok {
+		return []int{}
+	}
+	set, ok := setObj.(*schema.Set)
+	if !ok {
+		return []int{}
+	}
+	return SetToIntSlice(set)
+}
+
+func SetToIntSlice(d *schema.Set) []int {
+	if d == nil || d.Len() == 0 {
+		return []int{}
+	}
+	list := d.List()
+	ans := make([]int, 0, len(list))
+	for _, v := range list {
+		switch x := v.(type) {
+		case string:
+			// Parse string to int
+			if intVal, err := strconv.Atoi(x); err == nil {
+				ans = append(ans, intVal)
+			}
+		case int:
+			ans = append(ans, x)
+		}
+	}
+	return ans
 }
 
 func ListToStringSlice(v []interface{}) []string {
@@ -307,4 +340,10 @@ func isSensitiveField(fieldName string) bool {
 		}
 	}
 	return false
+}
+
+// generateShortID creates a short, unique ID from a string using MD5 hash
+func generateShortID(input string) string {
+	hash := md5.Sum([]byte(input))
+	return fmt.Sprintf("%x", hash)[:8] // Use first 8 characters of MD5 hash
 }

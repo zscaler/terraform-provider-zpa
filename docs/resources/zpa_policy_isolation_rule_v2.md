@@ -97,6 +97,37 @@ resource "zpa_policy_isolation_rule_v2" "this" {
 }
 ```
 
+## Example Usage - Chrome Enterprise and Chrome Posture Profile
+
+```hcl
+data "zpa_managed_browser_profile" "this" {
+  name = "Profile01"
+}
+
+
+resource "zpa_policy_isolation_rule_v2" "this" {
+  name                      = "Example"
+  description               = "Example"
+  action                    = "ISOLATE"
+  zpn_isolation_profile_id  = data.zpa_isolation_profile.this.id
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "CHROME_ENTERPRISE"
+      entry_values {
+        lhs = "managed"
+        rhs = "true"
+      }
+    }
+    operands {
+      object_type = "CHROME_POSTURE_PROFILE"
+      values      = [data.zpa_managed_browser_profile.this.id]
+    }
+  }
+}
+```
+
 ## Schema
 
 ### Required
@@ -165,6 +196,18 @@ resource "zpa_policy_isolation_rule_v2" "this" {
         - `entry_values` (Block Set)
             - `lhs` - (String) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
             - `rhs` - (String) - The SAML attribute string i.e Group name, Department Name, Email address etc.
+
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_ENTERPRISE`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  `"managed"`
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
+
+    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_POSTURE_PROFILE`
+        - `values` (Block List) The list of values for the specified object type (e.g., managed browser profile ID `zpa_managed_browser_profile`).
 
 ## Import
 

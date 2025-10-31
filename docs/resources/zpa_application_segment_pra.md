@@ -62,16 +62,21 @@ The following arguments are supported:
 - `segment_group_id` - (string) The unique identifier of the segment group.
 - `common_apps_dto` (Block Set, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
   - `apps_config:` (Block Set, Min: 1) List of applications to be configured
+
     - `domain` - (String) Domain name of the Privileged Remote Access
+      - **NOTE** The domain name configured in this attribute **MUST** also be present in `domain_names` list.
+
     - `application_protocol` - (String) Protocol for the Privileged Remote Access. Supported values: `RDP` and `SSH`
-    - `application_port` - (String) Port for the Privileged Remote Access
+    - `application_port` - (String) Port for the Privileged Remote Access.
+      - **NOTE** The ports configured in this attribute **MUST** also be present in the port list.
+
     - `app_types` (List of String) Indicates the type of application as Privileged Remote Access. Supported value: `SECURE_REMOTE_ACCESS`
     - `connection_security` - (String) - Parameter required when `application_protocol` is of type `RDP`
       - **NOTE** This attribute is ONLY accepted for RDP protocols. DO NOT set this attribute when `application_protocol` is `SSH`
 - `tcp_port_ranges` - (List of String) TCP port ranges used to access the app.
 - `udp_port_ranges` - (List of String) UDP port ranges used to access the app.
 
--> **NOTE:**  TCP and UDP ports can also be defined using the following model:
+-> **NOTE:**  TCP and UDP ports can also be defined using the following model below. We recommend this model as opposed of the legacy model via `tcp_port_ranges` and or `udp_port_ranges`.
 
 - `tcp_port_range` - (Block Set) TCP port ranges used to access the app.
   - `from:` (String) The starting port for a port range.

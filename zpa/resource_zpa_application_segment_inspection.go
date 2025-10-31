@@ -139,9 +139,8 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Description: "Description of the application.",
 			},
 			"domain_names": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
+				Type:        schema.TypeSet,
+				Required:    true,
 				Description: "List of domains and IPs.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
@@ -154,7 +153,7 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "DEFAULT",
+				Default:  "NONE",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"NONE",
@@ -381,10 +380,10 @@ func resourceApplicationSegmentInspectionRead(ctx context.Context, d *schema.Res
 	_ = d.Set("udp_protocols", resp.UDPProtocols)
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 
-	// Map inspect to common_apps_dto.apps_config for state management
-	if err := mapInspectAppsToCommonApps(d, resp.InspectionAppDto); err != nil {
-		return diag.FromErr(err)
-	}
+	// Do not map API apps into state to avoid drift; keep HCL as the source of truth
+	// if err := mapInspectAppsToCommonApps(d, resp.InspectionAppDto); err != nil {
+	//     return diag.FromErr(err)
+	// }
 
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
@@ -421,10 +420,7 @@ func resourceApplicationSegmentInspectionUpdate(ctx context.Context, d *schema.R
 		return diag.FromErr(fmt.Errorf("error retrieving application segment: %v", err))
 	}
 
-	// Extract app_id and inspect_app_id from praApps and set in common_apps_dto in state
-	if err := setInspectionAppIDsInCommonAppsDto(d, resp.InspectionAppDto); err != nil {
-		return diag.FromErr(fmt.Errorf("error setting app_id and inspect_app_id in common_apps_dto: %v", err))
-	}
+	_ = resp // avoid unused if we don't use resp afterward
 
 	req := expandInspectionApplicationSegment(ctx, d, zClient, "")
 
@@ -493,7 +489,7 @@ func expandInspectionApplicationSegment(ctx context.Context, d *schema.ResourceD
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
-		DomainNames:               expandStringInSlice(d, "domain_names"),
+		DomainNames:               SetToStringList(d, "domain_names"),
 		TCPProtocols:              expandStringInSlice(d, "tcp_protocols"),
 		UDPProtocols:              expandStringInSlice(d, "udp_protocols"),
 		// AppServerGroups:           expandCommonServerGroups(d),

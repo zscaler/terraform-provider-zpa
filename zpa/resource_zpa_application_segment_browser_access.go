@@ -160,7 +160,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 			"health_check_type": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "DEFAULT",
+				Default:  "NONE",
 				ValidateFunc: validation.StringInSlice([]string{
 					"DEFAULT",
 					"NONE",
@@ -331,6 +331,19 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 					},
 				},
 			},
+			"zpn_er_id": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeSet,
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -411,6 +424,7 @@ func resourceApplicationSegmentBrowserAccessRead(ctx context.Context, d *schema.
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
+	_ = d.Set("zpn_er_id", flattenCommonZPNERIDSimple(resp.ZPNERID))
 
 	if err := d.Set("clientless_apps", flattenBaClientlessApps(resp)); err != nil {
 		return diag.FromErr(fmt.Errorf("failed to read clientless apps %s", err))
@@ -516,6 +530,21 @@ func expandBrowserAccess(ctx context.Context, d *schema.ResourceData, zClient *C
 		service = service.WithMicroTenant(microTenantID)
 	}
 
+	// Expand zpn_er_id (extranet resource ID)
+	var extranet *common.ZPNERID
+	if v, ok := d.GetOk("zpn_er_id"); ok {
+		if items := v.([]interface{}); len(items) > 0 {
+			m := items[0].(map[string]interface{})
+			if idSet, ok := m["id"].(*schema.Set); ok && idSet.Len() > 0 {
+				ids := idSet.List()
+				if len(ids) > 0 {
+					if id, ok := ids[0].(string); ok && id != "" {
+						extranet = &common.ZPNERID{ID: id}
+					}
+				}
+			}
+		}
+	}
 	details := applicationsegmentbrowseraccess.BrowserAccess{
 		ID:                        d.Id(),
 		Name:                      d.Get("name").(string),
@@ -539,6 +568,7 @@ func expandBrowserAccess(ctx context.Context, d *schema.ResourceData, zClient *C
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
+		ZPNERID:                   extranet,
 		AppServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
 			if groups == nil {
