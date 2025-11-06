@@ -447,8 +447,8 @@ github.com/zclconf/go-cty-debug v0.0.0-20191215020915-b22d67c1ba0b/go.mod h1:ZRK
 github.com/zclconf/go-cty-debug v0.0.0-20240509010212-0d6042c53940 h1:4r45xpDWB6ZMSMNJFMOjqrGHynW3DIBuR2H9j0ug+Mo=
 github.com/zclconf/go-cty-debug v0.0.0-20240509010212-0d6042c53940/go.mod h1:CmBdvvj3nqzfzJ6nTCIwDTPZ56aVGvDrmztiO5g3qrM=
 github.com/zclconf/go-cty-yaml v1.0.2/go.mod h1:IP3Ylp0wQpYm50IHK8OZWKMu6sPJIUgKa8XhiVHura0=
-github.com/zscaler/zscaler-sdk-go/v3 v3.8.0 h1:q2ato1/bnH7f74xct6MpUwZCdrC+2or075mbJ46PhOI=
-github.com/zscaler/zscaler-sdk-go/v3 v3.8.0/go.mod h1:ehk0b4itrcmqG3n0fa0DySP5VIqBtalpcSycBKt66no=
+github.com/zscaler/zscaler-sdk-go/v3 v3.8.2 h1:MkDhuvuNGkW0g8hvFJXXOknjBcB1P/mli3Q+Lfa6Oms=
+github.com/zscaler/zscaler-sdk-go/v3 v3.8.2/go.mod h1:ehk0b4itrcmqG3n0fa0DySP5VIqBtalpcSycBKt66no=
 go.abhg.dev/goldmark/frontmatter v0.2.0 h1:P8kPG0YkL12+aYk2yU3xHv4tcXzeVnN+gU0tJ5JnxRw=
 go.abhg.dev/goldmark/frontmatter v0.2.0/go.mod h1:XqrEkZuM57djk7zrlRUB02x8I5J0px76YjkOzhB4YlU=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
