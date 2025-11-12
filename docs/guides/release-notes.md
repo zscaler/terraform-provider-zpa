@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.3.2``
+``Last updated: v4.3.3``
 
 ---
+
+## 4.3.3 (November, 11 2025)
+
+### Notes
+
+- Release date: **(November, 11 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #612](https://github.com/zscaler/terraform-provider-zpa/pull/612) - Added `zpa_application_segment_weightedlb_config` resource and data source to manage weighted load balancer configuration for application segments, including automatic lookup by application and server group name.
 
 ## 4.3.2 (November, 6 2025)
 

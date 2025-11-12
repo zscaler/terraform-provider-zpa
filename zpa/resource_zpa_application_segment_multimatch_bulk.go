@@ -21,7 +21,7 @@ func resourceApplicationSegmentMultimatchBulk() *schema.Resource {
 		CreateContext: resourceApplicationSegmentMultimatchBulkCreate,
 		ReadContext:   resourceApplicationSegmentMultimatchBulkRead,
 		UpdateContext: resourceApplicationSegmentMultimatchBulkUpdate,
-		DeleteContext: resourceApplicationSegmentMultimatchBulkDelete,
+		DeleteContext: resourceFuncNoOp,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -218,14 +218,6 @@ func resourceApplicationSegmentMultimatchBulkUpdate(ctx context.Context, d *sche
 	log.Printf("[INFO] Successfully updated bulk multimatch. ID: %s\n", newID)
 
 	return resourceApplicationSegmentMultimatchBulkRead(ctx, d, meta)
-}
-
-func resourceApplicationSegmentMultimatchBulkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// No delete operation for bulk multimatch - just remove from state
-	// The individual application segments retain their match_style settings
-	log.Printf("[INFO] Deleting bulk multimatch resource from state (match_style settings remain on application segments)")
-	d.SetId("")
-	return nil
 }
 
 // verifyMatchStyleViaIndividualGETs fetches each segment individually to verify match_style

@@ -233,6 +233,11 @@ func resourceApplicationSegment() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"weighted_load_balancing": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "If set to true, designates the application segment for weighted load balancing",
+			},
 			"api_protection_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -361,6 +366,7 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("passive_health_enabled", resp.PassiveHealthEnabled)
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("api_protection_enabled", resp.APIProtectionEnabled)
+	_ = d.Set("weighted_load_balancing", resp.WeightedLoadBalancing)
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
@@ -510,6 +516,7 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
 		APIProtectionEnabled:      d.Get("api_protection_enabled").(bool),
+		WeightedLoadBalancing:     d.Get("weighted_load_balancing").(bool),
 		ZPNERID:                   extranet,
 		ServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
