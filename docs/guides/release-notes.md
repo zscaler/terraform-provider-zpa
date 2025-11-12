@@ -27,6 +27,8 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 - [PR #612](https://github.com/zscaler/terraform-provider-zpa/pull/612) - Added `zpa_application_segment_weightedlb_config` resource and data source to manage weighted load balancer configuration for application segments, including automatic lookup by application and server group name.
 
+- [PR #612](https://github.com/zscaler/terraform-provider-zpa/pull/612) - Added new attributes to `zpa_service_edge_group` attributes `exclusive_for_business_continuity`, and `city`
+
 ## 4.3.2 (November, 6 2025)
 
 ### Notes

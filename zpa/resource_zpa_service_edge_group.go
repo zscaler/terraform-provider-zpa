@@ -63,7 +63,11 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			"city_country": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
+			},
+			"city": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "City for the Service Edge Group.",
 			},
 			"country_code": {
 				Type:         schema.TypeString,
@@ -118,22 +122,6 @@ func resourceServiceEdgeGroup() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			// "service_edges": {
-			// 	Type:     schema.TypeList,
-			// 	Optional: true,
-			// 	MaxItems: 1,
-			// Description: "WARNING: Service edge membership is managed externally. " +
-			// 	"Specifying this field will enforce exact membership matching.",
-			// 	Elem: &schema.Resource{
-			// 		Schema: map[string]*schema.Schema{
-			// 			"id": {
-			// 				Type:     schema.TypeSet,
-			// 				Required: true,
-			// 				Elem:     &schema.Schema{Type: schema.TypeString},
-			// 			},
-			// 		},
-			// 	},
-			// },
 			"service_edges": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -175,6 +163,11 @@ func resourceServiceEdgeGroup() *schema.Resource {
 						},
 					},
 				},
+			},
+			"exclusive_for_business_continuity": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Indicates whether the Service Edge Group is exclusive for business continuity.",
 			},
 			"upgrade_day": {
 				Type:        schema.TypeString,
@@ -309,6 +302,7 @@ func resourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData, m
 	isPublic, _ := strconv.ParseBool(resp.IsPublic)
 	_ = d.Set("name", resp.Name)
 	_ = d.Set("city_country", resp.CityCountry)
+	_ = d.Set("city", resp.City)
 	_ = d.Set("country_code", resp.CountryCode)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
@@ -330,6 +324,7 @@ func resourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData, m
 		_ = d.Set("grace_distance_value", resp.GraceDistanceValue)
 		_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
 	}
+	_ = d.Set("exclusive_for_business_continuity", resp.ExclusiveForBusinessContinuity)
 	_ = d.Set("trusted_networks", flattenAppTrustedNetworksSimple(resp.TrustedNetworks))
 
 	// Always set service_edges in state to match API response
@@ -391,70 +386,35 @@ func resourceServiceEdgeGroupDelete(ctx context.Context, d *schema.ResourceData,
 
 func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdgeGroup {
 	serviceEdgeGroup := serviceedgegroup.ServiceEdgeGroup{
-		ID:                            d.Get("id").(string),
-		Name:                          d.Get("name").(string),
-		CityCountry:                   d.Get("city_country").(string),
-		CountryCode:                   d.Get("country_code").(string),
-		Description:                   d.Get("description").(string),
-		Enabled:                       d.Get("enabled").(bool),
-		IsPublic:                      strings.ToUpper(strconv.FormatBool(d.Get("is_public").(bool))),
-		Latitude:                      d.Get("latitude").(string),
-		Location:                      d.Get("location").(string),
-		Longitude:                     d.Get("longitude").(string),
-		UpgradeDay:                    d.Get("upgrade_day").(string),
-		UseInDrMode:                   d.Get("use_in_dr_mode").(bool),
-		UpgradeTimeInSecs:             d.Get("upgrade_time_in_secs").(string),
-		VersionProfileID:              d.Get("version_profile_id").(string),
-		VersionProfileName:            d.Get("version_profile_name").(string),
-		VersionProfileVisibilityScope: d.Get("version_profile_visibility_scope").(string),
-		OverrideVersionProfile:        d.Get("override_version_profile").(bool),
-		MicroTenantID:                 d.Get("microtenant_id").(string),
-		GraceDistanceEnabled:          d.Get("grace_distance_enabled").(bool),
-		GraceDistanceValue:            d.Get("grace_distance_value").(string),
-		GraceDistanceValueUnit:        d.Get("grace_distance_value_unit").(string),
-		ServiceEdges:                  expandServiceEdges(d),
-		TrustedNetworks:               expandTrustedNetworks(d),
+		ID:                             d.Get("id").(string),
+		Name:                           d.Get("name").(string),
+		CityCountry:                    d.Get("city_country").(string),
+		City:                           d.Get("city").(string),
+		CountryCode:                    d.Get("country_code").(string),
+		Description:                    d.Get("description").(string),
+		Enabled:                        d.Get("enabled").(bool),
+		IsPublic:                       strings.ToUpper(strconv.FormatBool(d.Get("is_public").(bool))),
+		Latitude:                       d.Get("latitude").(string),
+		Location:                       d.Get("location").(string),
+		Longitude:                      d.Get("longitude").(string),
+		UpgradeDay:                     d.Get("upgrade_day").(string),
+		UseInDrMode:                    d.Get("use_in_dr_mode").(bool),
+		UpgradeTimeInSecs:              d.Get("upgrade_time_in_secs").(string),
+		VersionProfileID:               d.Get("version_profile_id").(string),
+		VersionProfileName:             d.Get("version_profile_name").(string),
+		VersionProfileVisibilityScope:  d.Get("version_profile_visibility_scope").(string),
+		OverrideVersionProfile:         d.Get("override_version_profile").(bool),
+		MicroTenantID:                  d.Get("microtenant_id").(string),
+		GraceDistanceEnabled:           d.Get("grace_distance_enabled").(bool),
+		GraceDistanceValue:             d.Get("grace_distance_value").(string),
+		GraceDistanceValueUnit:         d.Get("grace_distance_value_unit").(string),
+		ExclusiveForBusinessContinuity: d.Get("exclusive_for_business_continuity").(bool),
+		ServiceEdges:                   expandServiceEdges(d),
+		TrustedNetworks:                expandTrustedNetworks(d),
 	}
 
 	return serviceEdgeGroup
 }
-
-/*
-func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceEdgeController {
-	raw, ok := d.GetOk("service_edges")
-	if !ok || raw == nil {
-		return nil
-	}
-
-	blocks := raw.([]interface{})
-	if len(blocks) == 0 {
-		return nil
-	}
-
-	block, ok := blocks[0].(map[string]interface{})
-	if !ok {
-		return nil
-	}
-
-	idRaw, ok := block["id"]
-	if !ok || idRaw == nil {
-		return nil
-	}
-
-	idSet, ok := idRaw.(*schema.Set)
-	if !ok {
-		return nil
-	}
-
-	var edges []serviceedgecontroller.ServiceEdgeController
-	for _, id := range idSet.List() {
-		edges = append(edges, serviceedgecontroller.ServiceEdgeController{
-			ID: id.(string),
-		})
-	}
-	return edges
-}
-*/
 
 func expandServiceEdges(d *schema.ResourceData) []serviceedgecontroller.ServiceEdgeController {
 	// Return nil if service_edges isn't in config
@@ -531,36 +491,6 @@ func expandTrustedNetworks(d *schema.ResourceData) []trustednetwork.TrustedNetwo
 	return networks
 }
 
-// func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeController) []interface{} {
-// 	ids := make([]interface{}, len(serviceEdges))
-// 	for i, edge := range serviceEdges {
-// 		ids[i] = edge.ID
-// 	}
-
-// 	return []interface{}{
-// 		map[string]interface{}{
-// 			"id": schema.NewSet(schema.HashString, ids),
-// 		},
-// 	}
-// }
-
-// func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeController) []interface{} {
-// 	if len(serviceEdges) == 0 {
-// 		return nil
-// 	}
-
-// 	ids := make([]interface{}, len(serviceEdges))
-// 	for i, edge := range serviceEdges {
-// 		ids[i] = edge.ID
-// 	}
-
-// 	return []interface{}{
-// 		map[string]interface{}{
-// 			"id": schema.NewSet(schema.HashString, ids),
-// 		},
-// 	}
-// }
-
 func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeController) []interface{} {
 	if len(serviceEdges) == 0 {
 		return nil
@@ -577,19 +507,6 @@ func flattenServiceEdgeSimple(serviceEdges []serviceedgecontroller.ServiceEdgeCo
 		},
 	}
 }
-
-// func flattenAppTrustedNetworksSimple(trustedNetworks []trustednetwork.TrustedNetwork) []interface{} {
-// 	ids := make([]interface{}, len(trustedNetworks))
-// 	for i, network := range trustedNetworks {
-// 		ids[i] = network.ID
-// 	}
-
-// 	return []interface{}{
-// 		map[string]interface{}{
-// 			"id": schema.NewSet(schema.HashString, ids),
-// 		},
-// 	}
-// }
 
 func flattenAppTrustedNetworksSimple(trustedNetworks []trustednetwork.TrustedNetwork) []interface{} {
 	if len(trustedNetworks) == 0 {
