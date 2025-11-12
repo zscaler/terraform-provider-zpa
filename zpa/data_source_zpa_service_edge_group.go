@@ -32,8 +32,14 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Computed: true,
 			},
 			"city_country": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "City and Country for the Service Edge Group.",
+			},
+			"city": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "City for the Service Edge Group.",
 			},
 			"country_code": {
 				Type:     schema.TypeString,
@@ -140,6 +146,21 @@ func dataSourceServiceEdgeGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Indicates the grace distance unit of measure in miles or kilometers. This value is only required if grace_distance_value is set to true",
+			},
+			"restricted_entity": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Indicates whether the entity is restricted.",
+			},
+			"exclusive_for_business_continuity": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Indicates whether the Service Edge Group is exclusive for business continuity.",
+			},
+			"name_without_trim": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The name of the Service Edge Group without any trimming.",
 			},
 			"service_edges": {
 				Type:     schema.TypeList,
@@ -571,6 +592,7 @@ func dataSourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData,
 	if resp != nil {
 		d.SetId(resp.ID)
 		_ = d.Set("city_country", resp.CityCountry)
+		_ = d.Set("city", resp.City)
 		_ = d.Set("country_code", resp.CountryCode)
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("description", resp.Description)
@@ -596,6 +618,9 @@ func dataSourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData,
 		_ = d.Set("grace_distance_enabled", resp.GraceDistanceEnabled)
 		_ = d.Set("grace_distance_value", resp.GraceDistanceValue)
 		_ = d.Set("grace_distance_value_unit", resp.GraceDistanceValueUnit)
+		_ = d.Set("restricted_entity", resp.RestrictedEntity)
+		_ = d.Set("exclusive_for_business_continuity", resp.ExclusiveForBusinessContinuity)
+		_ = d.Set("name_without_trim", resp.NameWithoutTrim)
 		_ = d.Set("trusted_networks", flattenTrustedNetworks(resp))
 		_ = d.Set("service_edges", flattenServiceEdges(resp))
 
