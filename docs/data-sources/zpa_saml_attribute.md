@@ -14,8 +14,6 @@ description: |-
 
 Use the **zpa_saml_attribute** data source to get information about a SAML Attributes from an Identity Provider (IdP). This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 
-**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
-
 ## Example Usage
 
 ```terraform

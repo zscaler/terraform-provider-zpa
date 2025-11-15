@@ -12,8 +12,6 @@ description: |-
 
 Use the **zpa_cloud_browser_isolation_external_profile** data source to get information about Cloud Browser Isolation external profile. This data source information can then be used in as part of `zpa_policy_isolation_rule` when the `action` attribute is set to `ISOLATE`.
 
-**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
-
 ## Example Usage
 
 ```terraform

@@ -14,8 +14,6 @@ description: |-
 
 Use the **zpa_ba_certificate** data source to get information about a browser access certificate created in the Zscaler Private Access cloud. This data source is required when creating a browser access application segment resource.
 
-**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
-
 ## Example Usage
 
 ```terraform

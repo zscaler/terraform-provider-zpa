@@ -1,35 +1,35 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"flag"
 	"log"
-	"os"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa"
-	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common"
+	framework "github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework"
+	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/version"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )
 
 func main() {
-	log.SetFlags(0)
-	if len(os.Args) > 1 && os.Args[1] == "version" {
-		fmt.Println(common.Version())
-		return
-	}
 	var debug bool
-	if len(os.Args) > 1 && os.Args[1] == "debug" {
-		debug = true
+
+	flag.BoolVar(&debug, "debug", false, "Start provider in debug mode.")
+	flag.Parse()
+
+	logFlags := log.Flags()
+	logFlags = logFlags &^ (log.Ldate | log.Ltime)
+	log.SetFlags(logFlags)
+
+	opts := providerserver.ServeOpts{
+		Address: "registry.terraform.io/zscaler/zpa",
+		Debug:   debug,
 	}
-	log.Printf(`ZPA Terraform Provider
 
-Version %s
-
-https://registry.terraform.io/providers/zscaler/zpa/latest/docs
-
-`, common.Version())
-	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: zpa.ZPAProvider,
-		ProviderAddr: "registry.terraform.io/zscaler/zpa",
-		Debug:        debug,
-	})
+	err := providerserver.Serve(context.Background(), func() provider.Provider {
+		return framework.New(version.ProviderVersion)
+	}, opts)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }

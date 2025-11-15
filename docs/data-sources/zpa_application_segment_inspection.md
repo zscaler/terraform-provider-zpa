@@ -11,8 +11,6 @@ description: |-
 
 Use the **zpa_application_segment_inspection** data source to get information about an inspection application segment in the Zscaler Private Access cloud. This resource can then be referenced in a ZPA access inspection policy. This resource supports ZPA Inspection for both `HTTP` and `HTTPS`.
 
-**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
-
 ## Example Usage
 
 ```terraform
@@ -45,10 +43,10 @@ In addition to all arguments above, the following attributes are exported:
 * `domain_names` - (string) List of domains and IPs.
 * `server_groups` - (string) List of Server Group IDs
   * `id:` - (string) List of Server Group IDs
-* `segment_group_id` - (String) The unique identifier of the segment group
-* `creation_time` - (String) The time the application resource is created.
-* `modified_time` - (String) The time the application resource is modified
-* `modifiedby` - (String) The unique identifier of the tenant who modified the application resource
+* `segment_group_id` - (String) Segment Group IDs
+* `creation_time` - (String)
+* `modified_time` - (String)
+* `modifiedby` - (String)
 * `tcp_port_ranges` - (string) TCP port ranges used to access the app.
 * `udp_port_ranges` - (string) UDP port ranges used to access the app.
 

@@ -131,7 +131,7 @@ resource "zpa_policy_forwarding_rule_v2" "this" {
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy. Separate condition blocks for each object type is required.
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
         - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `BRANCH_CONNECTOR_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`, `LOCATION`.
@@ -155,10 +155,10 @@ resource "zpa_policy_forwarding_rule_v2" "this" {
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
         - `object_type` (String) This is for specifying the policy criteria. Supported values: `POSTURE`
         - `entry_values` (Block Set)
-            - `lhs` - (String) -  The Posture Profile `posture_udid` value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile)
+            - `lhs` - (String) -  The Posture Profile `posture_udid` value.
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
@@ -166,33 +166,21 @@ resource "zpa_policy_forwarding_rule_v2" "this" {
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
         - `object_type` (String) This is for specifying the policy criteria. Supported values: `TRUSTED_NETWORK`
         - `entry_values` (Block Set)
-            - `lhs` (String) -  The Trusted Network `network_id` value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network)
-            - `rhs` (String) - Supported values: `"true"` or `"false"`
+            - `lhs` - (String) -  The Trusted Network `network_id` value.
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
-- `conditions` - (Block Set) - This is for providing the set of conditions for the policy
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SCIM_GROUP`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`, `SCIM`, `SCIM_GROUP`
         - `entry_values` (Block Set)
-            - `lhs` - (String) -  ID of the Identity Provider
-            - `rhs` - (String) - ID of the SCIM Group. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups)
-
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SCIM`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
-            - `rhs` - (String) - 	The SCIM Attribute value to match
-
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
-            - `rhs` - (String) - The SAML attribute string i.e Group name, Department Name, Email address etc.
+            - `lhs` - (String) -  2 Letter Country in ``ISO 3166 Alpha2 Code`` [Lear More](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Policy access timeout rule can be imported by using `<RULE ID>` as the import ID.
 

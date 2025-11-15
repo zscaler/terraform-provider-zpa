@@ -1,8 +1,8 @@
-[![Release](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/zscaler/terraform-provider-zpa/actions/workflows/release.yml)
-[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/zscaler/terraform-provider-zpa)](https://github.com/zscaler/terraform-provider-zpa/v2/blob/master/.go-version)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zscaler/terraform-provider-zpa)](https://goreportcard.com/report/github.com/zscaler/terraform-provider-zpa)
+[![Release](https://github.com/SecurityGeekIO/terraform-provider-zpa/actions/workflows/release.yml/badge.svg)](https://github.com/SecurityGeekIO/terraform-provider-zpa/actions/workflows/release.yml)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/zscaler/terraform-provider-zpa)](https://github.com/SecurityGeekIO/terraform-provider-zpa/v2/blob/master/.go-version)
+[![Go Report Card](https://goreportcard.com/badge/github.com/SecurityGeekIO/terraform-provider-zpa)](https://goreportcard.com/report/github.com/SecurityGeekIO/terraform-provider-zpa)
 [![codecov](https://codecov.io/gh/zscaler/terraform-provider-zpa/graph/badge.svg?token=7YX2V2LV8H)](https://codecov.io/gh/zscaler/terraform-provider-zpa)
-[![License](https://img.shields.io/github/license/zscaler/terraform-provider-zpa?color=blue)](https://github.com/zscaler/terraform-provider-zpa/v2/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/zscaler/terraform-provider-zpa?color=blue)](https://github.com/SecurityGeekIO/terraform-provider-zpa/v2/blob/master/LICENSE)
 [![Zscaler Community](https://img.shields.io/badge/zscaler-community-blue)](https://community.zscaler.com/)
 [![Slack](https://img.shields.io/badge/Join%20Our%20Community-Slack-blue)](https://forms.gle/3iMJvVmJDvmUy36q9)
 
@@ -48,7 +48,7 @@ To clone on windows
 ```sh
 mkdir %GOPATH%\src\github.com\terraform-providers
 cd %GOPATH%\src\github.com\terraform-providers
-git clone https://github.com/zscaler/terraform-provider-zpa.git
+git clone https://github.com/SecurityGeekIO/terraform-provider-zpa.git
 ```
 
 Enter the provider directory and build the provider
@@ -145,14 +145,14 @@ terraform {
 Examples
 --------
 
-Visit [here](https://github.com/zscaler/terraform-provider-zpa/tree/master/docs) for the complete documentation for all resources on github.
+Visit [here](https://github.com/SecurityGeekIO/terraform-provider-zpa/tree/master/docs) for the complete documentation for all resources on github.
 
-Examples [here] (<https://github.com/zscaler/terraform-provider-zpa/tree/master/examples>) for the complete list of examples on github.
+Examples [here] (<https://github.com/SecurityGeekIO/terraform-provider-zpa/tree/master/examples>) for the complete list of examples on github.
 
 Issues
 =========
 
-Please feel free to open an issue using [Github Issues](https://github.com/zscaler/terraform-provider-zpa/issues) if you run into any problems using this ZPA Terraform provider.
+Please feel free to open an issue using [Github Issues](https://github.com/SecurityGeekIO/terraform-provider-zpa/issues) if you run into any problems using this ZPA Terraform provider.
 
 Developing the Provider
 ---------------------------
@@ -189,7 +189,7 @@ MIT License
 
 =======
 
-Copyright (c) 2022 [Zscaler](https://github.com/zscaler)
+Copyright (c) 2022 [Zscaler](https://github.com/SecurityGeekIO)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

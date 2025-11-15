@@ -12,8 +12,6 @@ description: |-
 
 Use the **zpa_cloud_browser_isolation_banner** data source to get information about Cloud Browser Isolation banner. This data source information is required as part of the attribute `banner_id` when creating an Cloud Browser Isolation External Profile ``zpa_cloud_browser_isolation_external_profile``
 
-**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
-
 ## Example Usage
 
 ```terraform

@@ -14,8 +14,6 @@ description: |-
 
 Use the **zpa_idp_controller** data source to get information about an Identity Provider created in the Zscaler Private Access cloud. This data source is required when creating:
 
-**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
-
 * Access policy Rules
 * Access policy timeout rules
 * Access policy forwarding rules

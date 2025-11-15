@@ -45,7 +45,7 @@ We welcome issues of all kinds including feature requests, bug reports, and
 general questions. Below you'll find checklists with guidelines for well-formed
 issues of each type.
 
-#### [Bug Reports](https://github.com/zscaler/terraform-provider-zpa/issues/new?template=Bug_Report.md)
+#### [Bug Reports](https://github.com/SecurityGeekIO/terraform-provider-zpa/issues/new?template=Bug_Report.md)
 
 - [ ] **Test against the latest release**: Make sure you test against the latest
       released version. It is possible we already fixed the bug you're experiencing.
@@ -53,7 +53,7 @@ issues of each type.
 - [ ] **Search for possible duplicate reports**: It's helpful to keep bug
       reports consolidated to one thread, so do a quick search on existing bug
       reports to check if anybody else has reported the same thing. You can [scope
-      searches by the label "bug"](https://github.com/zscaler/terraform-provider-zpa/issues?q=is%3Aopen+is%3Aissue+label%3Abug) to help narrow things down.
+      searches by the label "bug"](https://github.com/SecurityGeekIO/terraform-provider-zpa/issues?q=is%3Aopen+is%3Aissue+label%3Abug) to help narrow things down.
 
 - [ ] **Include steps to reproduce**: Provide steps to reproduce the issue,
       along with your `.tf` files, with secrets removed, so we can try to
@@ -63,19 +63,19 @@ issues of each type.
       create a [gist](https://gist.github.com) of the _entire_ generated crash log
       for us to look at. Double check no sensitive items were in the log.
 
-#### [Feature Requests](https://github.com/zscaler/terraform-provider-zpa/issues/new?labels=enhancement&template=Feature_Request.md)
+#### [Feature Requests](https://github.com/SecurityGeekIO/terraform-provider-zpa/issues/new?labels=enhancement&template=Feature_Request.md)
 
 - [ ] **Search for possible duplicate requests**: It's helpful to keep requests
       consolidated to one thread, so do a quick search on existing requests to
       check if anybody else has reported the same thing. You can [scope searches by
-      the label "enhancement"](https://github.com/zscaler/terraform-provider-zpa/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) to help narrow things down.
+      the label "enhancement"](https://github.com/SecurityGeekIO/terraform-provider-zpa/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement) to help narrow things down.
 
 - [ ] **Include a use case description**: In addition to describing the
       behavior of the feature you'd like to see added, it's helpful to also lay
       out the reason why the feature would be important and how it would benefit
       Terraform users.
 
-#### [Questions](https://github.com/zscaler/terraform-provider-zpa/issues/new?labels=question&template=Question.md)
+#### [Questions](https://github.com/SecurityGeekIO/terraform-provider-zpa/issues/new?labels=question&template=Question.md)
 
 - [ ] **Search for answers in Terraform documentation**: We're happy to answer
       questions in GitHub Issues, but it helps reduce issue churn and maintainer
@@ -373,7 +373,7 @@ TF_ACC=1 go test ./zpa -v -run=TestAccResourceAppConnectorGroupBasic -timeout 12
 === RUN   TestAccResourceAppConnectorGroupBasic
 --- PASS: TestAccResourceAppConnectorGroupBasic (26.56s)
 PASS
-ok  	github.com/zscaler/terraform-provider-zpa/v4/zpa	26.607s
+ok  	github.com/SecurityGeekIO/terraform-provider-zpa/v2/zpa	26.607s
 ```
 
 #### Writing an Acceptance Test
@@ -440,7 +440,7 @@ When executing the test, the following steps are taken for each `TestStep`:
    responsible for configuring the resource under test, and any dependencies it
    may have. For example, to test the `zpa_app_connector_group` resource, a valid configuration with the requisite fields is required. This results in configuration which looks like this:
 
-   ```terraform
+   ```hcl
    resource "zpa_app_connector_group" "test" {
        name        = "testAcc_app_connector_group"
        description = "testing"
@@ -489,6 +489,6 @@ When executing the test, the following steps are taken for each `TestStep`:
    CheckDestroy: testAccCheckAppConnectorGroupDestroy,
    ```
 
-[website]: https://github.com/zscaler/terraform-provider-zpa/blob/master/.github/CONTRIBUTING.md
+[website]: https://github.com/SecurityGeekIO/terraform-provider-zpa/blob/master/.github/CONTRIBUTING.md
 [acctests]: https://github.com/hashicorp/terraform#acceptance-tests
 [ml]: https://groups.google.com/group/terraform-tool

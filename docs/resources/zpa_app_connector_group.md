@@ -18,7 +18,7 @@ The **zpa_app_connector_group** resource creates a and manages app connector gro
 
 [![ZPA Terraform provider Video Series Ep2 - Connector Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_app_connector_group.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEoCAI/video-zpa-terraform-provider-video-series-ep2-connector-groups)
 
-## Example Usage - Using Version Profile Name
+## Example Usage
 
 ```terraform
 # Create a App Connector Group
@@ -40,32 +40,6 @@ resource "zpa_app_connector_group" "example" {
 }
 ```
 
-## Example Usage - Using Version Profile ID
-
-data "zpa_customer_version_profile" "this" {
-  name = "New Release"
-}
-
-```terraform
-# Create a App Connector Group
-resource "zpa_app_connector_group" "example" {
-  name                          = "Example"
-  description                   = "Example"
-  enabled                       = true
-  city_country                  = "San Jose, CA"
-  country_code                  = "US"
-  latitude                      = "37.338"
-  longitude                     = "-121.8863"
-  location                      = "San Jose, CA, US"
-  upgrade_day                   = "SUNDAY"
-  upgrade_time_in_secs          = "66600"
-  override_version_profile      = true
-  version_profile_id            = data.zpa_customer_version_profile.this.id 
-  dns_query_type                = "IPV4_IPV6"
-  use_in_dr_mode                = true
-}
-```
-
 ## Schema
 
 ### Required
@@ -77,7 +51,7 @@ The following arguments are supported:
 - `latitude` - (String) Latitude of the App Connector Group. Integer or decimal. With values in the range of `-90` to `90`
 - `longitude` - (String) Longitude of the App Connector Group. Integer or decimal. With values in the range of `-180` to `180`
 - `location` - (String) Location of the App Connector Group. i.e ``"San Jose, CA, USA"``
-- `city_country` - (String) The city and country of the App Connector. i.e ``"San Jose, US"``
+- `city_country` - (String) Whether Double Encryption is enabled or disabled for the app. i.e ``"San Jose, US"``
 - `country_code` - (String) Provide a 2 letter [ISO3166 Alpha2 Country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). i.e ``"US"``, ``"CA"``
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
@@ -88,17 +62,10 @@ The following arguments are supported:
 - `upgrade_day` - (String) App Connectors in this group will attempt to update to a newer version of the software during this specified day i.e ``SUNDAY``
 - `upgrade_time_in_secs` - (String) App Connectors in this group will attempt to update to a newer version of the software during this specified time. Default value: `66600`. Integer in seconds (i.e., `-66600`). The integer should be greater than or equal to `0` and less than `86400`, in `15` minute intervals
 - `override_version_profile` - (Boolean) Whether the default version profile of the App Connector Group is applied or overridden. Default: `false` Supported values: `true`, `false`
-
 - `version_profile_id` - (String) The unique identifier of the version profile. Supported values are:
   - ``0`` = ``Default``
   - ``1`` = ``Previous Default``
   - ``2`` = ``New Release``
-
-  **NOTE:** In order to retrieve other version profile IDs, you can leverage the data source `zpa_customer_version_profile`
-
-- `version_profile_name` - (String) The unique identifier of the version profile. Supported values are:
-  - ``Default``, ``Previous Default``, ``New Release``, ``Default - el8``, ``New Release - el8``, ``Previous Default - el8``
-
 - `dns_query_type` - (String) Whether IPv4, IPv6, or both, are enabled for DNS resolution of all applications in the App Connector Group. Supported values are: ``IPV4``, ``IPV6``, or ``IPV4_IPV6``
 - `tcp_quick_ack_app` - (Boolean) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
 - `tcp_quick_ack_assistant` - (Boolean) Whether TCP Quick Acknowledgement is enabled or disabled for the application. The tcpQuickAckApp, tcpQuickAckAssistant, and tcpQuickAckReadAssistant fields must all share the same value. Supported values: `true`, `false`
@@ -112,7 +79,7 @@ The following arguments are supported:
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 App Connector Group can be imported by using `<APP CONNECTOR GROUP ID>` or `<APP CONNECTOR GROUP NAME>`as the import ID.
 

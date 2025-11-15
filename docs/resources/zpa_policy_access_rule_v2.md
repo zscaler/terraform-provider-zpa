@@ -168,99 +168,6 @@ resource "zpa_policy_access_rule_v2" "this" {
 }
 ```
 
-## Example Usage - Configure Extranet Access Rule
-
-```hcl
-data "zpa_location_controller" "this" {
-  name        = "ExtranetLocation01 | zscalerbeta.net"
-  zia_er_name = "NewExtranet 8432"
-}
-
-data "zpa_location_group_controller" "this" {
-  location_name = "ExtranetLocation01"
-  zia_er_name   = "NewExtranet 8432"
-}
-
-data "zpa_extranet_resource_partner" "this" {
-  name = "NewExtranet 8432"
-}
-
-resource "zpa_policy_access_rule_v2" "this" {
-  name             = "Extranet_Rule01"
-  description      = "Extranet_Rule01"
-  action           = "ALLOW"
-  custom_msg       = "Test"
-  operator         = "AND"
-  extranet_enabled = true
-
-  extranet_dto {
-    zpn_er_id = data.zpa_extranet_resource_partner.this.id
-
-    location_dto {
-      id = data.zpa_location_controller.this.id
-    }
-
-    location_group_dto {
-      id = data.zpa_location_group_controller.this.id
-    }
-  }
-}
-```
-
-## Example Usage - Configuration Location Rule
-
-```hcl
-data "zpa_location_controller_summary" "this" {
-  name = "BD_CC01_US | NONE | zscalerbeta.net"
-}
-
-resource "zpa_policy_access_rule_v2" "this" {
-  name        = "ExampleLocationRule"
-  description = "ExampleLocationRule"
-  action      = "ALLOW"
-
-  conditions {
-    operator = "OR"
-    operands {
-      object_type = "LOCATION"
-      values      = [data.zpa_location_controller_summary.this.id]
-    }
-  }
-}
-```
-
-## Example Usage - Chrome Enterprise and Chrome Posture Profile
-
-```hcl
-data "zpa_managed_browser_profile" "this" {
-  name = "Profile01"
-}
-
-
-resource "zpa_policy_access_rule_v2" "this" {
-  name        = "Example_v2_100_test"
-  description = "Example_v2_100_test"
-  action      = "ALLOW"
-  custom_msg  = "Test"
-  operator    = "AND"
-
-  conditions {
-    operator = "OR"
-    operands {
-      object_type = "CHROME_ENTERPRISE"
-      entry_values {
-        lhs = "managed"
-        rhs = "true"
-      }
-    }
-    operands {
-      object_type = "CHROME_POSTURE_PROFILE"
-      values      = [data.zpa_managed_browser_profile.this.id]
-    }
-  }
-}
-```
-
 ## Schema
 
 ### Required
@@ -272,7 +179,6 @@ resource "zpa_policy_access_rule_v2" "this" {
 - `description` (String) This is the description of the access policy rule.
 - `action` (String) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``, and ``REQUIRE_APPROVAL``
 - `custom_msg` (String) This is for providing a customer message for the user.
-- `extranet_enabled` (boolean) Indiciates if the application is designated for Extranet Application Support (true) or not (false). Extranet applications connect to a partner site or offshore development center that is not directly available on your organization’s network.
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
@@ -286,7 +192,7 @@ resource "zpa_policy_access_rule_v2" "this" {
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-- `conditions` (Block Set)  - This is for providing the set of conditions for the policy. Separate condition blocks for each object type is required.
+- `conditions` (Block Set)  - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
         - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `BRANCH_CONNECTOR_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`, `LOCATION`.
@@ -310,10 +216,10 @@ resource "zpa_policy_access_rule_v2" "this" {
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
         - `object_type` (String) This is for specifying the policy criteria. Supported values: `POSTURE`
         - `entry_values` (Block Set)
-            - `lhs` - (String) -  The Posture Profile `posture_udid` value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile)
+            - `lhs` - (String) -  The Posture Profile `posture_udid` value.
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
@@ -321,61 +227,28 @@ resource "zpa_policy_access_rule_v2" "this" {
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
         - `object_type` (String) This is for specifying the policy criteria. Supported values: `TRUSTED_NETWORK`
         - `entry_values` (Block Set)
-            - `lhs` (String) -  The Trusted Network `network_id` value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network)
-            - `rhs` (String) - Supported values: `"true"` or `"false"`
+            - `lhs` - (String) -  The Trusted Network `network_id` value.
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
 - `conditions` - (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SCIM_GROUP`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`, `SCIM`, `SCIM_GROUP`
         - `entry_values` (Block Set)
-            - `lhs` - (String) -  ID of the Identity Provider
-            - `rhs` - (String) - ID of the SCIM Group. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups)
-
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SCIM`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
-            - `rhs` - (String) - 	The SCIM Attribute value to match
-
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
-            - `rhs` - (String) - The SAML attribute string i.e Group name, Department Name, Email address etc.
+            - `lhs` - (String) -  2 Letter Country in ``ISO 3166 Alpha2 Code`` [Lear More](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)
+            - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_ENTERPRISE`, `CHROME_POSTURE_PROFILE`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_ENTERPRISE`
         - `entry_values` (Block Set)
             - `lhs` - (String) -  Must be set to `managed`
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
-        - `values` (Block List) The list of ID values for each `CHROME_POSTURE_PROFILE`
-
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
-    - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_ENTERPRISE`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  `"managed"`
-            - `rhs` - (String) - Supported values: `"true"` or `"false"`
-
-    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_POSTURE_PROFILE`
-        - `values` (Block List) The list of values for the specified object type (e.g., managed browser profile ID `zpa_managed_browser_profile`).
-
-- `extranet_dto` (Block Set) - Extranet location and location group configuration
-    - `zpn_er_id` (String) - The unique identifier of the extranet resource that is configured in ZIA. Use the data source `zpa_extranet_resource_partner` to retrieve the Extranet ID
-        - `location_dto` (Block Set)
-            - `id` - (String) -  Unique identifiers for the location
-        - `location_group_dto` (Block Set)
-            - `id` - (String) -  Unique identifiers for the location group
-
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Policy access rule can be imported by using `<RULE ID>` as the import ID.
 
@@ -389,19 +262,19 @@ terraform import zpa_policy_access_rule_v2.example <rule_id>
 
 | Object Type | LHS| RHS| VALUES
 |----------|-----------|----------|----------
-| [APP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment)  | `NA` | `NA` | ``application_segment_id`` |
-| [APP_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_segment_group)  | `NA`  | `NA` | ``segment_group_id``|
-| [CLIENT_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_client_types)  | `NA`  | `NA` |  ``zpn_client_type_exporter``, ``zpn_client_type_exporter_noauth``, ``zpn_client_type_machine_tunnel``, ``zpn_client_type_edge_connector``, ``zpn_client_type_zia_inspection``, ``zpn_client_type_vdi``, ``zpn_client_type_zapp``, ``zpn_client_type_slogger``, ``zpn_client_type_zapp_partner``, ``zpn_client_type_browser_isolation``, ``zpn_client_type_ip_anchoring``, ``zpn_client_type_branch_connector`` |
-| [EDGE_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group)  | `NA`  | `NA` |  ``<edge_connector_id>`` |
-| [BRANCH_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group)  | `NA` | `NA` |  ``<branch_connector_id>`` |
-| [LOCATION](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group)   | `NA` | `NA` | ``location_id`` |
-| [MACHINE_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group)   | `NA` | `NA` | ``machine_group_id`` |
+| [APP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment)  |   |  | ``application_segment_id`` |
+| [APP_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_segment_group)  |   |  | ``segment_group_id``|
+| [CLIENT_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_client_types)  |   |  |  ``zpn_client_type_zappl``, ``zpn_client_type_exporter``, ``zpn_client_type_browser_isolation``, ``zpn_client_type_ip_anchoring``, ``zpn_client_type_edge_connector``, ``zpn_client_type_branch_connector``,  ``zpn_client_type_zapp_partner``, ``zpn_client_type_zapp``  |
+| [EDGE_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group)  |   |  |  ``<edge_connector_id>`` |
+| [BRANCH_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group)  |   |  |  ``<branch_connector_id>`` |
+| [LOCATION](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group)   |   |  | ``location_id`` |
+| [MACHINE_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group)   |   |  | ``machine_group_id`` |
 | [SAML](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) | ``saml_attribute_id``  | ``attribute_value_to_match`` |
 | [SCIM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header) | ``scim_attribute_id``  | ``attribute_value_to_match``  |
 | [SCIM_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) | ``scim_group_attribute_id``  | ``attribute_value_to_match``  |
-| [PLATFORM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``mac``, ``ios``, ``windows``, ``android``, ``linux`` | ``"true"`` |
+| [PLATFORM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``mac``, ``ios``, ``windows``, ``android``, ``linux`` | ``"true"`` / ``"false"`` |
 | [POSTURE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile) | ``posture_udid``  | ``"true"`` / ``"false"`` |
 | [TRUSTED_NETWORK](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network) | ``network_id``  | ``"true"`` |
-| [COUNTRY_CODE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_platforms) | [2 Letter ISO3166 Alpha2](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)  | ``"true"`` |
+| [COUNTRY_CODE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_platforms) | [2 Letter ISO3166 Alpha2](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)  | ``"true"`` / ``"false"`` |
 | [RISK_FACTOR_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``ZIA``  | ``"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"`` |
 | [CHROME_ENTERPRISE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``managed``  | ``"true" / "false"`` |

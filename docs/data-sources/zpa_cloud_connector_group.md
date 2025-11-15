@@ -16,8 +16,6 @@ Use the **zpa_cloud_connector_group** data source to get information about a clo
 
 ~> **NOTE:** A Cloud Connector Group resource is created in the Zscaler Cloud Connector cloud and replicated to the ZPA cloud. This resource can then be referenced in a Access Policy Rule where the Object Type = `EDGE_CONNECTOR_GROUP` is being used.
 
-**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
-
 ## Example Usage
 
 ```terraform
