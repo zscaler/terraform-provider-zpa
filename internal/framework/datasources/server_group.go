@@ -14,7 +14,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
 )
 
 var (
@@ -79,6 +79,7 @@ func (d *ServerGroupDataSource) Schema(ctx context.Context, req datasource.Schem
 			"microtenant_name":  schema.StringAttribute{Computed: true},
 		},
 		Blocks: map[string]schema.Block{
+			"applications":         nestedIDNameBlock,
 			"app_connector_groups": nestedIDNameBlock,
 			"servers":              nestedIDNameBlock,
 		},

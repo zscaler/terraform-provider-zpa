@@ -11,8 +11,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/acctest"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/acctest"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
 )
 
 func TestAccServiceEdgeGroup_basic(t *testing.T) {

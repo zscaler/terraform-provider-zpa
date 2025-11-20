@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -15,6 +13,8 @@ import (
 	fwrschema "github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	fwvalidator "github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
@@ -190,7 +190,7 @@ func (r *PolicyAccessRuleResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	state, readDiags := r.readPolicyAccessRule(ctx, service, policySetID, created.ID, plan.MicrotenantID)
+	state, readDiags := r.readPolicyAccessRule(ctx, service, policySetID, created.ID, plan.MicrotenantID, &plan)
 	resp.Diagnostics.Append(readDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -225,7 +225,7 @@ func (r *PolicyAccessRuleResource) Read(ctx context.Context, req resource.ReadRe
 		}
 	}
 
-	newState, diags := r.readPolicyAccessRule(ctx, service, policySetID, state.ID.ValueString(), state.MicrotenantID)
+	newState, diags := r.readPolicyAccessRule(ctx, service, policySetID, state.ID.ValueString(), state.MicrotenantID, &state)
 	if diags.HasError() {
 		for _, d := range diags {
 			if d.Severity() == diag.SeverityError && strings.Contains(strings.ToLower(d.Detail()), "not found") {
@@ -272,6 +272,16 @@ func (r *PolicyAccessRuleResource) Update(ctx context.Context, req resource.Upda
 		}
 	}
 
+	// Check if resource still exists before updating
+	rule, _, err := policysetcontroller.GetPolicyRule(ctx, service, policySetID, plan.ID.ValueString())
+	if err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
+	_ = rule // Use the retrieved rule if needed
+
 	request, diags := expandPolicyAccessRule(ctx, &plan, policySetID)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -288,7 +298,7 @@ func (r *PolicyAccessRuleResource) Update(ctx context.Context, req resource.Upda
 		return
 	}
 
-	newState, readDiags := r.readPolicyAccessRule(ctx, service, policySetID, plan.ID.ValueString(), plan.MicrotenantID)
+	newState, readDiags := r.readPolicyAccessRule(ctx, service, policySetID, plan.ID.ValueString(), plan.MicrotenantID, &plan)
 	resp.Diagnostics.Append(readDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -353,7 +363,7 @@ func (r *PolicyAccessRuleResource) ImportState(ctx context.Context, req resource
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), types.StringValue(id))...)
 }
 
-func (r *PolicyAccessRuleResource) readPolicyAccessRule(ctx context.Context, service *zscaler.Service, policySetID, ruleID string, microTenantID types.String) (PolicyAccessRuleModel, diag.Diagnostics) {
+func (r *PolicyAccessRuleResource) readPolicyAccessRule(ctx context.Context, service *zscaler.Service, policySetID, ruleID string, microTenantID types.String, existingState *PolicyAccessRuleModel) (PolicyAccessRuleModel, diag.Diagnostics) {
 	rule, _, err := policysetcontroller.GetPolicyRule(ctx, service, policySetID, ruleID)
 	if err != nil {
 		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
@@ -362,7 +372,7 @@ func (r *PolicyAccessRuleResource) readPolicyAccessRule(ctx context.Context, ser
 		return PolicyAccessRuleModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Client Error", fmt.Sprintf("Failed to read policy access rule: %v", err))}
 	}
 
-	return flattenPolicyAccessRule(ctx, rule, policySetID, microTenantID)
+	return flattenPolicyAccessRule(ctx, rule, policySetID, microTenantID, existingState)
 }
 
 func expandPolicyAccessRule(ctx context.Context, model *PolicyAccessRuleModel, policySetID string) (*policysetcontroller.PolicyRule, diag.Diagnostics) {
@@ -407,7 +417,7 @@ func expandPolicyAccessRule(ctx context.Context, model *PolicyAccessRuleModel, p
 	return rule, diags
 }
 
-func flattenPolicyAccessRule(ctx context.Context, rule *policysetcontroller.PolicyRule, policySetID string, microTenantID types.String) (PolicyAccessRuleModel, diag.Diagnostics) {
+func flattenPolicyAccessRule(ctx context.Context, rule *policysetcontroller.PolicyRule, policySetID string, microTenantID types.String, existingState *PolicyAccessRuleModel) (PolicyAccessRuleModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	serverGroups, sgDiags := helpers.FlattenServerGroups(ctx, rule.AppServerGroups)
@@ -418,6 +428,19 @@ func flattenPolicyAccessRule(ctx context.Context, rule *policysetcontroller.Poli
 
 	conditions, condDiags := helpers.PolicyConditionsToModels(ctx, rule.Conditions)
 	diags.Append(condDiags...)
+
+	// Preserve null values for LSSDefaultRule if it wasn't set in the plan/state
+	var lssDefaultRule types.Bool
+	if existingState != nil && (existingState.LSSDefaultRule.IsNull() || existingState.LSSDefaultRule.IsUnknown()) {
+		// If it was null in the plan/state, keep it null unless the API returned true
+		if rule.LSSDefaultRule {
+			lssDefaultRule = types.BoolValue(true)
+		} else {
+			lssDefaultRule = types.BoolNull()
+		}
+	} else {
+		lssDefaultRule = types.BoolValue(rule.LSSDefaultRule)
+	}
 
 	state := PolicyAccessRuleModel{
 		ID:                     helpers.StringValueOrNull(rule.ID),
@@ -440,7 +463,7 @@ func flattenPolicyAccessRule(ctx context.Context, rule *policysetcontroller.Poli
 		ZPNInspectionProfileID: helpers.StringValueOrNull(rule.ZpnInspectionProfileID),
 		RuleOrder:              helpers.StringValueOrNull(rule.RuleOrder),
 		MicrotenantID:          helpers.StringValueOrNull(rule.MicroTenantID),
-		LSSDefaultRule:         types.BoolValue(rule.LSSDefaultRule),
+		LSSDefaultRule:         lssDefaultRule,
 		AppServerGroups:        serverGroups,
 		AppConnectorGroups:     connectorGroups,
 		Conditions:             conditions,

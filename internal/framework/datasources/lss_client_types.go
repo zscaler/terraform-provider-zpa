@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/lssconfigcontroller"
 )
 
@@ -36,7 +36,7 @@ type LSSClientTypesModel struct {
 }
 
 func (d *LSSClientTypesDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_lss_client_types"
+	resp.TypeName = req.ProviderTypeName + "_lss_config_client_types"
 }
 
 func (d *LSSClientTypesDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
@@ -103,7 +103,7 @@ func (d *LSSClientTypesDataSource) Read(ctx context.Context, req datasource.Read
 		return
 	}
 
-	data.ID = types.StringValue("lss_client_types")
+	data.ID = types.StringValue("_lss_config_client_types")
 	data.ZPNClientTypeExporter = types.StringValue(typesResp.ZPNClientTypeExporter)
 	data.ZPNClientTypeMachineTunnel = types.StringValue(typesResp.ZPNClientTypeMachineTunnel)
 	data.ZPNClientTypeIPAnchoring = types.StringValue(typesResp.ZPNClientTypeIPAnchoring)

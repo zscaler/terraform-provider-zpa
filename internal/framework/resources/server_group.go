@@ -27,8 +27,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 )
 
 var (
@@ -284,6 +284,14 @@ func (r *ServerGroupResource) Update(ctx context.Context, req resource.UpdateReq
 		service = service.WithMicroTenant(plan.MicroTenantID.ValueString())
 	}
 
+	// Check if resource still exists before updating
+	if _, _, err := servergroup.Get(ctx, service, plan.ID.ValueString()); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
+
 	// Check if servers or dynamic_discovery changed (SDKv2 behavior)
 	serversChanged := !plan.Servers.Equal(state.Servers)
 	dynamicDiscoveryChanged := !plan.DynamicDiscovery.Equal(state.DynamicDiscovery)
@@ -333,7 +341,7 @@ func (r *ServerGroupResource) Delete(ctx context.Context, req resource.DeleteReq
 		service = service.WithMicroTenant(state.MicroTenantID.ValueString())
 	}
 
-	if err := detachServerGroupFromAppConnectorGroups(ctx, state.ID.ValueString(), service); err != nil {
+	if err := detachServerGroupFromAppConnectorGroups(ctx, state.ID.ValueString(), service, service); err != nil {
 		tflog.Warn(ctx, "Failed to detach server group from app connector groups", map[string]any{"error": err.Error()})
 	}
 
@@ -341,6 +349,10 @@ func (r *ServerGroupResource) Delete(ctx context.Context, req resource.DeleteReq
 	detachServerGroupFromAppSegments(ctx, state.ID.ValueString(), service)
 
 	if _, err := servergroup.Delete(ctx, service, state.ID.ValueString()); err != nil {
+		// If resource is already deleted (not found), that's fine
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete server group: %v", err))
 		return
 	}
@@ -761,33 +773,34 @@ func detachServerGroupFromAppSegments(ctx context.Context, id string, service *z
 	}
 }
 
-func detachServerGroupFromAppConnectorGroups(ctx context.Context, id string, service *zscaler.Service) error {
+func detachServerGroupFromAppConnectorGroups(ctx context.Context, serverGroupID string, service *zscaler.Service, appConnectorGroupService *zscaler.Service) error {
+	tflog.Info(ctx, "Detaching Server Group from App Connector Groups", map[string]any{"serverGroupID": serverGroupID})
+
+	serverGroup, _, err := servergroup.Get(ctx, service, serverGroupID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch server group %s: %w", serverGroupID, err)
+	}
+
 	serverGroupDetachLock.Lock()
 	defer serverGroupDetachLock.Unlock()
 
-	group, _, err := servergroup.Get(ctx, service, id)
-	if err != nil {
-		return fmt.Errorf("failed to fetch server group: %w", err)
-	}
-
-	for _, connector := range group.AppConnectorGroups {
-		appConnector, _, err := appconnectorgroup.Get(ctx, service, connector.ID)
+	for _, appConnectorGroup := range serverGroup.AppConnectorGroups {
+		app, _, err := appconnectorgroup.Get(ctx, appConnectorGroupService, appConnectorGroup.ID)
 		if err != nil {
-			tflog.Warn(ctx, "Failed to fetch app connector group", map[string]any{"id": connector.ID, "error": err.Error()})
+			tflog.Warn(ctx, "Failed to fetch app connector group", map[string]any{"id": appConnectorGroup.ID, "error": err.Error()})
 			continue
 		}
-		updated := make([]appconnectorgroup.AppServerGroup, 0, len(appConnector.AppServerGroup))
-		for _, sg := range appConnector.AppServerGroup {
-			if sg.ID == id {
+		appServerGroups := []appconnectorgroup.AppServerGroup{}
+		for _, s := range app.AppServerGroup {
+			if s.ID == serverGroupID {
 				continue
 			}
-			updated = append(updated, sg)
+			appServerGroups = append(appServerGroups, s)
 		}
-		appConnector.AppServerGroup = updated
-		if _, err := appconnectorgroup.Update(ctx, service, appConnector.ID, appConnector); err != nil {
-			tflog.Warn(ctx, "Failed to update app connector group", map[string]any{"id": appConnector.ID, "error": err.Error()})
+		app.AppServerGroup = appServerGroups
+		if _, err := appconnectorgroup.Update(ctx, appConnectorGroupService, app.ID, app); err != nil {
+			tflog.Warn(ctx, "Failed to update app connector group", map[string]any{"id": app.ID, "error": err.Error()})
 		}
 	}
-
 	return nil
 }

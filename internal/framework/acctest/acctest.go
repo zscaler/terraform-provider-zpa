@@ -12,8 +12,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
 )
 
 // testAccProtoV5ProviderFactories is the provider factory for ProtoV5 testing

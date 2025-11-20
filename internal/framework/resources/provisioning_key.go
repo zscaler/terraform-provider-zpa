@@ -18,8 +18,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/provisioningkey"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 )
 
 var (
@@ -223,6 +223,15 @@ func (r *ProvisioningKeyResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	associationType := plan.AssociationType.ValueString()
+
+	// Check if resource still exists before updating
+	if _, _, err := provisioningkey.Get(ctx, service, associationType, plan.ID.ValueString()); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
+
 	payload, diags := expandProvisioningKey(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -262,6 +271,10 @@ func (r *ProvisioningKeyResource) Delete(ctx context.Context, req resource.Delet
 	}
 
 	if _, err := provisioningkey.Delete(ctx, service, associationType, state.ID.ValueString()); err != nil {
+		// If resource is already deleted (not found), that's fine
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			return
+		}
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete provisioning key: %v", err))
 		return
 	}

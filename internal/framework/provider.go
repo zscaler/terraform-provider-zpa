@@ -6,15 +6,15 @@ package framework
 import (
 	"context"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/datasources"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/ephemeralresources"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/resources"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/datasources"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/ephemeralresources"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/resources"
 )
 
 // Ensure ZPAProvider satisfies various provider interfaces.

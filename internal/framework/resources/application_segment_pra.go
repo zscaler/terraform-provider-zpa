@@ -20,8 +20,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegmentpra"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 )
 
 var (
@@ -638,6 +638,54 @@ func (r *ApplicationSegmentPRAResource) readIntoState(ctx context.Context, servi
 		return ApplicationSegmentPRAModel{}, diags
 	}
 
+	// Only populate tcp_port_range/udp_port_range if they were in the plan/state
+	// If only tcp_port_ranges/udp_port_ranges were used, keep the block empty to avoid plan/state mismatch
+	var finalTCPPortRange types.List
+	if !existingState.TCPPortRange.IsNull() && !existingState.TCPPortRange.IsUnknown() {
+		// Check if the list has any elements
+		elements := existingState.TCPPortRange.Elements()
+		if len(elements) > 0 {
+			finalTCPPortRange = tcpPorts
+		} else {
+			// Empty list in plan, return empty list
+			emptyList, _ := types.ListValue(types.ObjectType{AttrTypes: map[string]attr.Type{
+				"from": types.StringType,
+				"to":   types.StringType,
+			}}, []attr.Value{})
+			finalTCPPortRange = emptyList
+		}
+	} else {
+		// Block wasn't in plan, return empty list
+		emptyList, _ := types.ListValue(types.ObjectType{AttrTypes: map[string]attr.Type{
+			"from": types.StringType,
+			"to":   types.StringType,
+		}}, []attr.Value{})
+		finalTCPPortRange = emptyList
+	}
+
+	var finalUDPPortRange types.List
+	if !existingState.UDPPortRange.IsNull() && !existingState.UDPPortRange.IsUnknown() {
+		// Check if the list has any elements
+		elements := existingState.UDPPortRange.Elements()
+		if len(elements) > 0 {
+			finalUDPPortRange = udpPorts
+		} else {
+			// Empty list in plan, return empty list
+			emptyList, _ := types.ListValue(types.ObjectType{AttrTypes: map[string]attr.Type{
+				"from": types.StringType,
+				"to":   types.StringType,
+			}}, []attr.Value{})
+			finalUDPPortRange = emptyList
+		}
+	} else {
+		// Block wasn't in plan, return empty list
+		emptyList, _ := types.ListValue(types.ObjectType{AttrTypes: map[string]attr.Type{
+			"from": types.StringType,
+			"to":   types.StringType,
+		}}, []attr.Value{})
+		finalUDPPortRange = emptyList
+	}
+
 	state := ApplicationSegmentPRAModel{
 		ID:                        helpers.StringValueOrNull(segment.ID),
 		Name:                      helpers.StringValueOrNull(segment.Name),
@@ -665,8 +713,8 @@ func (r *ApplicationSegmentPRAResource) readIntoState(ctx context.Context, servi
 		MicroTenantName:           helpers.StringValueOrNull(segment.MicroTenantName),
 		TCPPortRanges:             tcpRanges,
 		UDPPortRanges:             udpRanges,
-		TCPPortRange:              tcpPorts,
-		UDPPortRange:              udpPorts,
+		TCPPortRange:              finalTCPPortRange,
+		UDPPortRange:              finalUDPPortRange,
 		ServerGroups:              serverGroups,
 		ZpnERID:                   zpnER,
 		CommonAppsDto:             commonApps,

@@ -15,7 +15,7 @@ If you have problems with code that uses ZPA Terraform provider, follow these st
 TF_LOG=DEBUG ZSCALER_SDK_VERBOSE=true ZSCALER_SDK_LOG=true terraform apply -no-color 2>&1 |tee tf-debug.log
 ```
 
-* Open a [new GitHub issue](https://github.com/SecurityGeekIO/terraform-provider-zpa/issues/new/choose) providing all information described in the issue template - debug logs, your Terraform code, Terraform & plugin versions, etc.
+* Open a [new GitHub issue](https://github.com/zscaler/terraform-provider-zpa/issues/new/choose) providing all information described in the issue template - debug logs, your Terraform code, Terraform & plugin versions, etc.
 
 ## Typical problems
 
@@ -95,12 +95,12 @@ Running the `terraform init` command, you may see `Failed to install provider` e
 ```sh
 Error: Failed to install provider
 
-Error while installing zscaler/zpa: v2.82.0: checksum list has no SHA-256 hash for "https://github.com/SecurityGeekIO/terraform-provider-zpa/releases/download/v2.82.0/terraform-provider-zpa_2.82.0_darwin_amd64.zip"
+Error while installing zscaler/zpa: v2.82.0: checksum list has no SHA-256 hash for "https://github.com/zscaler/terraform-provider-zpa/releases/download/v2.82.0/terraform-provider-zpa_2.82.0_darwin_amd64.zip"
 ```
 
 You can fix it by following three simple steps:
 
-* Replace `zscaler.com/zpa/zpa` with `zscaler/zpa` in all your `.tf` files with the `python3 -c "$(curl -Ls https://github.com/SecurityGeekIO/terraform-provider-zpa/scripts/upgrade-namespace.py)"` command.
+* Replace `zscaler.com/zpa/zpa` with `zscaler/zpa` in all your `.tf` files with the `python3 -c "$(curl -Ls https://github.com/zscaler/terraform-provider-zpa/scripts/upgrade-namespace.py)"` command.
 * Run the `terraform state replace-provider zscaler.com/zpa/zpa zscaler/zpa` command and approve the changes. See [Terraform CLI](https://www.terraform.io/cli/commands/state/replace-provider) docs for more information.
 * Run `terraform init` to verify everything working.
 

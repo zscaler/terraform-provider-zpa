@@ -21,7 +21,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/segmentgroup"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
 )
 
 var (
@@ -178,6 +178,15 @@ func (r *SegmentGroupsResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	service := r.serviceForMicrotenant(plan.MicroTenantID)
+
+	// Check if resource still exists before updating
+	if _, _, err := segmentgroup.Get(ctx, service, plan.ID.ValueString()); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
+
 	segmentGroupReq, diags := expandSegmentGroup(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

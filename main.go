@@ -5,10 +5,10 @@ import (
 	"flag"
 	"log"
 
-	framework "github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/version"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	framework "github.com/zscaler/terraform-provider-zpa/v4/internal/framework"
+	"github.com/zscaler/terraform-provider-zpa/v4/version"
 )
 
 func main() {

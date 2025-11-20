@@ -79,7 +79,7 @@ The following arguments are supported:
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 App Connector Group can be imported by using `<APP CONNECTOR GROUP ID>` or `<APP CONNECTOR GROUP NAME>`as the import ID.
 

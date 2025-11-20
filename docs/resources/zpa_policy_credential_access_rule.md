@@ -231,7 +231,7 @@ resource "zpa_policy_credential_rule" "this" {
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Policy access credential can be imported by using `<POLICY CREDENTIAL ID>` as the import ID.
 

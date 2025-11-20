@@ -3,7 +3,7 @@
 This example will show you how to use Terraform to implement a ZPA application segment resource.
 This example codifies [this API](https://help.zscaler.com/zpa/inspection-control-controller#/mgmtconfig/v1/admin/customers/{customerId}/inspectionControls/custom-post).
 
-To run, configure your ZPA provider as described [Here](https://github.com/SecurityGeekIO/terraform-provider-zpa/blob/master/docs/index.md)
+To run, configure your ZPA provider as described [Here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md)
 
 ## Run the example
 

@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
-	clientpkg "github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	clientpkg "github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"

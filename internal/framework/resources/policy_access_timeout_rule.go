@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -15,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
@@ -156,7 +156,7 @@ func (r *PolicyAccessTimeoutRuleResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	state, readDiags := r.readPolicyAccessTimeoutRule(ctx, service, policySetID, created.ID, plan.MicrotenantID)
+	state, readDiags := r.readPolicyAccessTimeoutRule(ctx, service, policySetID, created.ID, plan.MicrotenantID, &plan)
 	resp.Diagnostics.Append(readDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -191,7 +191,7 @@ func (r *PolicyAccessTimeoutRuleResource) Read(ctx context.Context, req resource
 		}
 	}
 
-	newState, diags := r.readPolicyAccessTimeoutRule(ctx, service, policySetID, helpers.StringValue(state.ID), state.MicrotenantID)
+	newState, diags := r.readPolicyAccessTimeoutRule(ctx, service, policySetID, helpers.StringValue(state.ID), state.MicrotenantID, &state)
 	if diags.HasError() {
 		for _, d := range diags {
 			if d.Severity() == diag.SeverityError && strings.Contains(strings.ToLower(d.Detail()), "not found") {
@@ -254,7 +254,7 @@ func (r *PolicyAccessTimeoutRuleResource) Update(ctx context.Context, req resour
 		return
 	}
 
-	newState, readDiags := r.readPolicyAccessTimeoutRule(ctx, service, policySetID, plan.ID.ValueString(), plan.MicrotenantID)
+	newState, readDiags := r.readPolicyAccessTimeoutRule(ctx, service, policySetID, plan.ID.ValueString(), plan.MicrotenantID, &plan)
 	resp.Diagnostics.Append(readDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -321,7 +321,7 @@ func (r *PolicyAccessTimeoutRuleResource) ImportState(ctx context.Context, req r
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), types.StringValue(rule.ID))...)
 }
 
-func (r *PolicyAccessTimeoutRuleResource) readPolicyAccessTimeoutRule(ctx context.Context, service *zscaler.Service, policySetID, ruleID string, microtenantID types.String) (PolicyAccessTimeoutRuleModel, diag.Diagnostics) {
+func (r *PolicyAccessTimeoutRuleResource) readPolicyAccessTimeoutRule(ctx context.Context, service *zscaler.Service, policySetID, ruleID string, microtenantID types.String, existingState *PolicyAccessTimeoutRuleModel) (PolicyAccessTimeoutRuleModel, diag.Diagnostics) {
 	rule, _, err := policysetcontroller.GetPolicyRule(ctx, service, policySetID, ruleID)
 	if err != nil {
 		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
@@ -330,7 +330,7 @@ func (r *PolicyAccessTimeoutRuleResource) readPolicyAccessTimeoutRule(ctx contex
 		return PolicyAccessTimeoutRuleModel{}, diag.Diagnostics{diag.NewErrorDiagnostic("Client Error", fmt.Sprintf("Failed to read timeout policy rule: %v", err))}
 	}
 
-	return flattenPolicyAccessTimeoutRule(ctx, rule, policySetID, microtenantID)
+	return flattenPolicyAccessTimeoutRule(ctx, rule, policySetID, microtenantID, existingState)
 }
 
 func (r *PolicyAccessTimeoutRuleResource) serviceForMicrotenant(microtenantID types.String) *zscaler.Service {
@@ -375,11 +375,24 @@ func expandPolicyAccessTimeoutRule(ctx context.Context, model *PolicyAccessTimeo
 	return payload, diags
 }
 
-func flattenPolicyAccessTimeoutRule(ctx context.Context, rule *policysetcontroller.PolicyRule, policySetID string, microtenantID types.String) (PolicyAccessTimeoutRuleModel, diag.Diagnostics) {
+func flattenPolicyAccessTimeoutRule(ctx context.Context, rule *policysetcontroller.PolicyRule, policySetID string, microtenantID types.String, existingState *PolicyAccessTimeoutRuleModel) (PolicyAccessTimeoutRuleModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	conditions, condDiags := helpers.PolicyConditionsToModels(ctx, rule.Conditions)
 	diags.Append(condDiags...)
+
+	// Preserve null values for LSSDefaultRule if it wasn't set in the plan/state
+	var lssDefaultRule types.Bool
+	if existingState != nil && (existingState.LSSDefaultRule.IsNull() || existingState.LSSDefaultRule.IsUnknown()) {
+		// If it was null in the plan/state, keep it null unless the API returned true
+		if rule.LSSDefaultRule {
+			lssDefaultRule = types.BoolValue(true)
+		} else {
+			lssDefaultRule = types.BoolNull()
+		}
+	} else {
+		lssDefaultRule = types.BoolValue(rule.LSSDefaultRule)
+	}
 
 	state := PolicyAccessTimeoutRuleModel{
 		ID:                     helpers.StringValueOrNull(rule.ID),
@@ -402,7 +415,7 @@ func flattenPolicyAccessTimeoutRule(ctx context.Context, rule *policysetcontroll
 		ZPNCBIProfileID:        helpers.StringValueOrNull(rule.ZpnCbiProfileID),
 		RuleOrder:              helpers.StringValueOrNull(rule.RuleOrder),
 		MicrotenantID:          helpers.StringValueOrNull(rule.MicroTenantID),
-		LSSDefaultRule:         types.BoolValue(rule.LSSDefaultRule),
+		LSSDefaultRule:         lssDefaultRule,
 		Conditions:             conditions,
 	}
 

@@ -13,10 +13,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/c2c_ip_ranges"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 )
 
 var (
@@ -213,6 +214,14 @@ func (r *C2CIPRangesResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	service := r.client.Service
+
+	// Check if resource still exists before updating
+	if _, _, err := c2c_ip_ranges.Get(ctx, service, plan.ID.ValueString()); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
 
 	payload := expandC2CIPRanges(plan)
 

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
 	cbiprofilecontroller "github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/cloudbrowserisolation/cbiprofilecontroller"
 )
 

@@ -24,8 +24,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/customerversionprofile"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 )
 
 var (
@@ -241,6 +241,14 @@ func (r *AppConnectorGroupResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	service := r.serviceForMicrotenant(plan.MicroTenantID)
+
+	// Check if resource still exists before updating
+	if _, _, err := appconnectorgroup.Get(ctx, service, plan.ID.ValueString()); err != nil {
+		if helpers.IsObjectNotFoundError(err) {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
 
 	if diags := r.resolveVersionProfile(ctx, service, &plan); diags.HasError() {
 		resp.Diagnostics.Append(diags...)

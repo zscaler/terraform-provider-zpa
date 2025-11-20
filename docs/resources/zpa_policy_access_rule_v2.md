@@ -248,7 +248,7 @@ resource "zpa_policy_access_rule_v2" "this" {
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Policy access rule can be imported by using `<RULE ID>` as the import ID.
 

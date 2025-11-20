@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	clientpkg "github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
 	fwstringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -20,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	clientpkg "github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
@@ -595,119 +595,6 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-	}
-}
-
-func resourceNetworkPortsSchema(desc string) *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeSet,
-		Optional:    true,
-		Computed:    true,
-		Description: desc,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"from": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-				"to": {
-					Type:     schema.TypeString,
-					Optional: true,
-				},
-			},
-		},
-	}
-}
-
-func flattenNetworkPorts(ports []common.NetworkPorts) []interface{} {
-	portsObj := make([]interface{}, len(ports))
-	for i, val := range ports {
-		portsObj[i] = map[string]interface{}{
-			"from": val.From,
-			"to":   val.To,
-		}
-	}
-	return portsObj
-}
-
-func resourceAppSegmentPortRange(desc string) *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		Computed: true,
-		// Activate the "Attributes as Blocks" processing mode to permit dynamic declaration of no ports
-		ConfigMode:  schema.SchemaConfigModeAttr,
-		Description: desc,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"from": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ValidateFunc: validation.NoZeroValues,
-				},
-				"to": {
-					Type:         schema.TypeString,
-					Optional:     true,
-					ValidateFunc: validation.NoZeroValues,
-				},
-			},
-		},
-	}
-}
-
-func importPolicyStateContextFunc(types []string) schema.StateContextFunc {
-	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-		zClient := meta.(*Client)
-		service := zClient.Service
-
-		microTenantID := GetString(d.Get("microtenant_id"))
-		if microTenantID != "" {
-			service = service.WithMicroTenant(microTenantID)
-		}
-
-		id := d.Id()
-		_, parseIDErr := strconv.ParseInt(id, 10, 64)
-		if parseIDErr == nil {
-			// assume if the passed value is an int
-			_ = d.Set("id", id)
-		} else {
-			resp, _, err := policysetcontroller.GetByNameAndTypes(ctx, service, types, id)
-			if err == nil {
-				d.SetId(resp.ID)
-				_ = d.Set("id", resp.ID)
-			} else {
-				return []*schema.ResourceData{d}, err
-			}
-		}
-		return []*schema.ResourceData{d}, nil
-	}
-}
-
-func importPolicyStateContextFuncV2(types []string) schema.StateContextFunc {
-	return func(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-		zClient := meta.(*Client)
-		service := zClient.Service
-
-		microTenantID := GetString(d.Get("microtenant_id"))
-		if microTenantID != "" {
-			service = service.WithMicroTenant(microTenantID)
-		}
-
-		id := d.Id()
-		_, parseIDErr := strconv.ParseInt(id, 10, 64)
-		if parseIDErr == nil {
-			// assume if the passed value is an int
-			_ = d.Set("id", id)
-		} else {
-			resp, _, err := policysetcontrollerv2.GetByNameAndTypes(ctx, service, types, id)
-			if err == nil {
-				d.SetId(resp.ID)
-				_ = d.Set("id", resp.ID)
-			} else {
-				return []*schema.ResourceData{d}, err
-			}
-		}
-		return []*schema.ResourceData{d}, nil
 	}
 }
 

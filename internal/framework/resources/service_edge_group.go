@@ -25,8 +25,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/trustednetwork"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 )
 
 var (
@@ -305,6 +305,14 @@ func (r *ServiceEdgeGroupResource) Update(ctx context.Context, req resource.Upda
 	service := r.client.Service
 	if !plan.MicroTenantID.IsNull() && plan.MicroTenantID.ValueString() != "" {
 		service = service.WithMicroTenant(plan.MicroTenantID.ValueString())
+	}
+
+	// Check if resource still exists before updating
+	if _, _, err := serviceedgegroup.Get(ctx, service, plan.ID.ValueString()); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 	}
 
 	if diags := r.ensureVersionProfileID(ctx, service, &plan); diags.HasError() {

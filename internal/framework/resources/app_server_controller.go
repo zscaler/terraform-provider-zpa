@@ -19,8 +19,8 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 )
 
 var (
@@ -201,6 +201,14 @@ func (r *AppServerControllerResource) Update(ctx context.Context, req resource.U
 	service := r.client.Service
 	if !plan.MicroTenantID.IsNull() && plan.MicroTenantID.ValueString() != "" {
 		service = service.WithMicroTenant(plan.MicroTenantID.ValueString())
+	}
+
+	// Check if resource still exists before updating
+	if _, _, err := appservercontroller.Get(ctx, service, plan.ID.ValueString()); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 	}
 
 	payload, diags := expandApplicationServer(ctx, plan)

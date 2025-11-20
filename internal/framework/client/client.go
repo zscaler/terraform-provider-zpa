@@ -12,7 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/version"
+	"github.com/zscaler/terraform-provider-zpa/v4/version"
 )
 
 // Config contains our provider configuration values and Zscaler clients.
@@ -62,11 +62,15 @@ func newLegacyClient(config *Config) (*Client, error) {
 	customUserAgent := generateUserAgent(config.TerraformVersion, config.CustomerID)
 
 	setters := []zpa.ConfigSetter{
-		zpa.WithCache(true),
 		zpa.WithRateLimitMaxRetries(int32(config.RetryCount)),
 		zpa.WithRateLimitMinWait(time.Duration(config.MinWait) * time.Second),
 		zpa.WithRateLimitMaxWait(time.Duration(config.MaxWait) * time.Second),
 		zpa.WithRequestTimeout(time.Duration(config.RequestTimeout) * time.Second),
+	}
+
+	// Disable cache when running TF acceptance tests
+	if os.Getenv("TF_ACC") != "1" {
+		setters = append(setters, zpa.WithCache(true))
 	}
 
 	setters = append(setters,
@@ -125,14 +129,20 @@ func newV3Client(config *Config) (*Client, error) {
 	customUserAgent := generateUserAgent(config.TerraformVersion, config.CustomerID)
 
 	setters := []zscaler.ConfigSetter{
-		zscaler.WithCache(true),
-		zscaler.WithCacheTtl(10 * time.Minute),
-		zscaler.WithCacheTti(8 * time.Minute),
 		zscaler.WithRateLimitMaxRetries(int32(config.RetryCount)),
 		zscaler.WithRateLimitMinWait(time.Duration(config.MinWait) * time.Second),
 		zscaler.WithRateLimitMaxWait(time.Duration(config.MaxWait) * time.Second),
 		zscaler.WithRequestTimeout(time.Duration(config.RequestTimeout) * time.Second),
 		zscaler.WithUserAgentExtra(""),
+	}
+
+	// Disable cache when running TF acceptance tests
+	if os.Getenv("TF_ACC") != "1" {
+		setters = append(setters,
+			zscaler.WithCache(true),
+			zscaler.WithCacheTtl(10*time.Minute),
+			zscaler.WithCacheTti(8*time.Minute),
+		)
 	}
 
 	tfLog := os.Getenv("TF_LOG")

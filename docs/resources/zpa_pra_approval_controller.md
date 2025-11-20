@@ -129,7 +129,7 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 **zpa_pra_approval_controller** can be imported by using `<APPROVAL ID>` or `<APPROVAL NAME>` as the import ID.
 

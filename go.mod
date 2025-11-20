@@ -1,4 +1,4 @@
-module github.com/SecurityGeekIO/terraform-provider-zpa/v4
+module github.com/zscaler/terraform-provider-zpa/v4
 
 go 1.24.0
 

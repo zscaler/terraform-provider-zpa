@@ -105,7 +105,7 @@ The following arguments are supported:
   - `name` - (String) - Name of BA app.
   - `application_port` - (String) - Port for the BA app.
   - `application_protocol` - (String) - Protocol for the BA app. Supported values: `HTTP` and `HTTPS`
-  - `certificate_id` - (String) - ID of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/SecurityGeekIO/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
+  - `certificate_id` - (String) - ID of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
   - `domain` - (String) - Domain name or IP address of the BA app.
   - `allow_options` - (Boolean) - If you want ZPA to forward unauthenticated HTTP preflight OPTIONS requests from the browser to the app.. Supported values: `true` and `false`
   - `microtenant_id` (Boolean) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenant_id as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenant_id as null to retrieve data from all customers associated with the tenant.
@@ -126,7 +126,7 @@ In addition to all arguments above, the following attributes are exported:
 - `icmp_access_type` - (String) The ICMP access type. Supported values: `PING_TRACEROUTING`, `PING`, `NONE`
 - `ip_anchored` (Boolean) - If Source IP Anchoring for use with ZIA, is enabled or disabled for the app. Supported values are `true` and `false`
 -  `is_cname_enabled` (Boolean) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors.
-- `certificate_name` - (String) - Name of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/SecurityGeekIO/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
+- `certificate_name` - (String) - Name of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
 - `tcp_keep_alive` (String) Supported values: ``1`` for Enabled and ``0`` for Disabled
 
 - `select_connector_close_to_app` - (Boolean) Whether the App Connector is closest to the application (true) or closest to the user (false). Supported values: `true`, `false`
@@ -140,7 +140,7 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 **zpa_application_segment_browser_access** Application Segment Browser Access can be imported by using <`BROWSER ACCESS ID`> or `<<BROWSER ACCESS NAME>` as the import ID.
 

@@ -7,7 +7,7 @@ import (
 	sdkacctest "github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/acctest"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/acctest"
 )
 
 func TestAccServiceEdgeGroupDataSource_basic(t *testing.T) {

@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -17,6 +15,8 @@ import (
 	fwstringplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
@@ -226,7 +226,7 @@ func (r *PolicyAccessTimeoutRuleV2Resource) Create(ctx context.Context, req reso
 		return
 	}
 
-	state, readDiags := r.readPolicyAccessTimeoutRuleV2(ctx, service, policySetID, created.ID, plan.MicrotenantID)
+	state, readDiags := r.readPolicyAccessTimeoutRuleV2(ctx, service, policySetID, created.ID, plan.MicrotenantID, &plan)
 	resp.Diagnostics.Append(readDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -261,7 +261,7 @@ func (r *PolicyAccessTimeoutRuleV2Resource) Read(ctx context.Context, req resour
 		}
 	}
 
-	newState, diags := r.readPolicyAccessTimeoutRuleV2(ctx, service, policySetID, state.ID.ValueString(), state.MicrotenantID)
+	newState, diags := r.readPolicyAccessTimeoutRuleV2(ctx, service, policySetID, state.ID.ValueString(), state.MicrotenantID, &state)
 	if diags.HasError() {
 		for _, d := range diags {
 			if d.Severity() == diag.SeverityError && strings.Contains(strings.ToLower(d.Detail()), "not found") {
@@ -327,6 +327,16 @@ func (r *PolicyAccessTimeoutRuleV2Resource) Update(ctx context.Context, req reso
 		}
 	}
 
+	// Check if resource still exists before updating
+	ruleResource, _, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, plan.ID.ValueString())
+	if err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
+	_ = ruleResource // Use the retrieved rule if needed
+
 	reqPayload, diags := expandPolicyAccessTimeoutRuleV2(ctx, &plan, policySetID)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -338,7 +348,7 @@ func (r *PolicyAccessTimeoutRuleV2Resource) Update(ctx context.Context, req reso
 		return
 	}
 
-	newState, readDiags := r.readPolicyAccessTimeoutRuleV2(ctx, service, policySetID, plan.ID.ValueString(), plan.MicrotenantID)
+	newState, readDiags := r.readPolicyAccessTimeoutRuleV2(ctx, service, policySetID, plan.ID.ValueString(), plan.MicrotenantID, &plan)
 	resp.Diagnostics.Append(readDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -410,7 +420,7 @@ func (r *PolicyAccessTimeoutRuleV2Resource) serviceForMicrotenant(microtenantID 
 	return service
 }
 
-func (r *PolicyAccessTimeoutRuleV2Resource) readPolicyAccessTimeoutRuleV2(ctx context.Context, service *zscaler.Service, policySetID, ruleID string, microTenantID types.String) (PolicyAccessTimeoutRuleV2Model, diag.Diagnostics) {
+func (r *PolicyAccessTimeoutRuleV2Resource) readPolicyAccessTimeoutRuleV2(ctx context.Context, service *zscaler.Service, policySetID, ruleID string, microTenantID types.String, existingState *PolicyAccessTimeoutRuleV2Model) (PolicyAccessTimeoutRuleV2Model, diag.Diagnostics) {
 	ruleResource, _, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, ruleID)
 	if err != nil {
 		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
@@ -440,17 +450,38 @@ func (r *PolicyAccessTimeoutRuleV2Resource) readPolicyAccessTimeoutRuleV2(ctx co
 		timeout = helpers.SecondsToHumanReadable(timeout)
 	}
 
+	// Ensure microtenant_id is always known (not unknown)
+	var microtenantID types.String
+	if microTenantID.IsUnknown() {
+		microtenantID = types.StringNull()
+	} else {
+		microtenantID = microTenantID
+	}
+
+	// Preserve null values for CustomMsg if it wasn't set in the plan/state
+	var customMsg types.String
+	if existingState != nil && (existingState.CustomMsg.IsNull() || existingState.CustomMsg.IsUnknown()) {
+		// If it was null in the plan/state, keep it null unless the API returned a non-empty value
+		if rule.CustomMsg != "" {
+			customMsg = types.StringValue(rule.CustomMsg)
+		} else {
+			customMsg = types.StringNull()
+		}
+	} else {
+		customMsg = types.StringValue(rule.CustomMsg)
+	}
+
 	model := PolicyAccessTimeoutRuleV2Model{
 		ID:                types.StringValue(rule.ID),
 		Name:              types.StringValue(rule.Name),
 		Description:       types.StringValue(rule.Description),
 		Action:            types.StringValue(rule.Action),
-		CustomMsg:         types.StringValue(rule.CustomMsg),
+		CustomMsg:         customMsg,
 		PolicySetID:       types.StringValue(policySetID),
 		ReauthIdleTimeout: types.StringValue(idleTimeout),
 		ReauthTimeout:     types.StringValue(timeout),
 		Conditions:        conditions,
-		MicrotenantID:     microTenantID,
+		MicrotenantID:     microtenantID,
 	}
 
 	return model, condDiags

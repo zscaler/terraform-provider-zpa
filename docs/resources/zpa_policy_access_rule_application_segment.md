@@ -82,7 +82,7 @@ resource "zpa_server_group" "this" {
 ### Optional
 
 * `policy_set_id` - (String) Use [zpa_policy_type](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_policy_type) data source to retrieve the necessary policy Set ID ``policy_set_id``
-    ~> **NOTE** As of v3.2.0 the ``policy_set_id`` attribute is now optional, and will be automatically determined based on the policy type being configured. The attribute is being kept for backwards compatibility, but can be safely removed from existing configurations.`zpa_policy_type` [PR #432](https://github.com/SecurityGeekIO/terraform-provider-zpa/pull/432) 
+    ~> **NOTE** As of v3.2.0 the ``policy_set_id`` attribute is now optional, and will be automatically determined based on the policy type being configured. The attribute is being kept for backwards compatibility, but can be safely removed from existing configurations.`zpa_policy_type` [PR #432](https://github.com/zscaler/terraform-provider-zpa/pull/432) 
 - `action` (String) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``
 - `custom_msg` (String) This is for providing a customer message for the user.
 - `description` (String) This is the description of the access policy rule.
@@ -119,7 +119,7 @@ resource "zpa_server_group" "this" {
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
+[Visit](https://github.com/zscaler/zscaler-terraformer)
 
 Policy Access Rule for Browser Access can be imported by using`<POLICY ACCESS RULE ID>` as the import ID.
 

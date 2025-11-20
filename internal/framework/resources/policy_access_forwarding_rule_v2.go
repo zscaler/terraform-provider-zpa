@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/client"
-	"github.com/SecurityGeekIO/terraform-provider-zpa/v4/internal/framework/helpers"
 	stringvalidator "github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -16,6 +14,8 @@ import (
 	fwstringplanmodifier "github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/client"
+	"github.com/zscaler/terraform-provider-zpa/v4/internal/framework/helpers"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
@@ -255,6 +255,16 @@ func (r *PolicyAccessForwardingRuleV2Resource) Update(ctx context.Context, req r
 		}
 	}
 
+	// Check if resource still exists before updating
+	ruleResource, _, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, plan.ID.ValueString())
+	if err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
+	_ = ruleResource // Use the retrieved rule if needed
+
 	reqPayload, diags := expandPolicyAccessForwardingRuleV2(ctx, &plan, policySetID)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -354,6 +364,14 @@ func (r *PolicyAccessForwardingRuleV2Resource) readPolicyAccessForwardingRuleV2(
 		return PolicyAccessForwardingRuleV2Model{}, condDiags
 	}
 
+	// Ensure microtenant_id is always known (not unknown)
+	var microtenantID types.String
+	if microTenantID.IsUnknown() {
+		microtenantID = types.StringNull()
+	} else {
+		microtenantID = microTenantID
+	}
+
 	model := PolicyAccessForwardingRuleV2Model{
 		ID:            types.StringValue(rule.ID),
 		Name:          types.StringValue(rule.Name),
@@ -361,7 +379,7 @@ func (r *PolicyAccessForwardingRuleV2Resource) readPolicyAccessForwardingRuleV2(
 		Action:        types.StringValue(rule.Action),
 		PolicySetID:   types.StringValue(policySetID),
 		Conditions:    conditions,
-		MicrotenantID: microTenantID,
+		MicrotenantID: microtenantID,
 	}
 
 	return model, condDiags
