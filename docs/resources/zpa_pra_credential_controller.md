@@ -17,6 +17,7 @@ The **zpa_pra_credential_controller** resource creates a privileged remote acces
 ## Example Usage
 
 ```terraform
+#### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ####
 # Creates Credential of Type "USERNAME_PASSWORD"
 resource "zpa_pra_credential_controller" "this" {
     name = "John Doe"
@@ -28,9 +29,9 @@ resource "zpa_pra_credential_controller" "this" {
 }
 ```
 
-######### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE #########  
-######### ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ##########
+
 ```terraform
+#### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ####
 # Creates Credential of Type "SSH_KEY"
 resource "zpa_pra_credential_controller" "this" {
     name = "John Doe"

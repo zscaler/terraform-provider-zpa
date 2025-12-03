@@ -23,10 +23,9 @@ data "zpa_ba_certificate" "foo" {
 }
 ```
 
-######### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE #########  
-######### ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ##########
+
 ```terraform
-# ZPA Browser Access resource
+#### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ####
 resource "zpa_ba_certificate" "this" {
     name = "server.example.com"
     description = "server.example.com"

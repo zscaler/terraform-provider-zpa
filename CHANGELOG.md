@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.3.4 (December, 3 2025)
+
+### Notes
+
+- Release date: **(December, 3 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #617](https://github.com/zscaler/terraform-provider-zpa/pull/617) - Fixed `zpa_application_segment_pra` and `zpa_application_segment_inspection` resources not storing `pra_app_id`/`inspect_app_id` in state, which prevented proper updates and deletes of app configurations.
+
 ## 4.3.3 (November, 11 2025)
 
 ### Notes
@@ -145,6 +156,7 @@ The following new data sources have been introduced:
 - Supported Terraform version: **v1.x**
 
 ### Bug Fixes
+
 [PR #590](https://github.com/zscaler/terraform-provider-zpa/pull/590) - Fixed `zpa_app_connector_group` resource attribute `lss_app_connector_group` due to API issues.
 
 

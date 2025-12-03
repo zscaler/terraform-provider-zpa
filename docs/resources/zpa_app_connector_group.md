@@ -16,7 +16,7 @@ The **zpa_app_connector_group** resource creates a and manages app connector gro
 
 ## Zenith Community - ZPA App Connector Group
 
-[![ZPA Terraform provider Video Series Ep2 - Connector Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_app_connector_group.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEoCAI/video-zpa-terraform-provider-video-series-ep2-connector-groups)
+[![ZPA Terraform provider Video Series Ep2 - Connector Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/refs/heads/master/images/zpa_app_connector_group.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEoCAI/video-zpa-terraform-provider-video-series-ep2-connector-groups)
 
 ## Example Usage - Using Version Profile Name
 
@@ -42,11 +42,11 @@ resource "zpa_app_connector_group" "example" {
 
 ## Example Usage - Using Version Profile ID
 
+```terraform
 data "zpa_customer_version_profile" "this" {
   name = "New Release"
 }
 
-```terraform
 # Create a App Connector Group
 resource "zpa_app_connector_group" "example" {
   name                          = "Example"
