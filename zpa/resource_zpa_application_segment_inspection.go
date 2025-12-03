@@ -380,10 +380,10 @@ func resourceApplicationSegmentInspectionRead(ctx context.Context, d *schema.Res
 	_ = d.Set("udp_protocols", resp.UDPProtocols)
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 
-	// Do not map API apps into state to avoid drift; keep HCL as the source of truth
-	// if err := mapInspectAppsToCommonApps(d, resp.InspectionAppDto); err != nil {
-	//     return diag.FromErr(err)
-	// }
+	// Map inspection apps to common_apps_dto.apps_config for state management
+	if err := mapInspectAppsToCommonApps(d, resp.InspectionAppDto); err != nil {
+		return diag.FromErr(err)
+	}
 
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))

@@ -373,9 +373,9 @@ func resourceApplicationSegmentPRARead(ctx context.Context, d *schema.ResourceDa
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
 
 	// Map pra_apps to common_apps_dto.apps_config for state management
-	// if err := mapPRAAppsToCommonApps(d, resp.PRAApps); err != nil {
-	// 	return diag.FromErr(fmt.Errorf("failed to map PRA apps to common apps: %v", err))
-	// }
+	if err := mapPRAAppsToCommonApps(d, resp.PRAApps); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to map PRA apps to common apps: %v", err))
+	}
 
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
