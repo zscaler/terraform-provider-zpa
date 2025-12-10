@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.3.4``
+``Last updated: v4.3.5``
 
 ---
+
+## 4.3.5 (December, 10 2025)
+
+### Notes
+
+- Release date: **(December, 10 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #618](https://github.com/zscaler/terraform-provider-zpa/pull/618) - Added new attribute `approval_reviewers` to ZPA `zpa_pra_portal_controller` package.
 
 ## 4.3.4 (December, 3 2025)
 

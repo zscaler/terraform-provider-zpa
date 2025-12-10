@@ -48,6 +48,7 @@ In addition to all arguments above, the following attributes are exported:
     - `end_time` - (string) The end time that the user no longer has access to the privileged approval.
     - `end_time_cron` - (string) The cron expression provided to configure the privileged approval end time working hours. The standard cron expression format is [Seconds][Minutes][Hours][Day of the Month][Month][Day of the Week][Year]. For example, 0 15 10 ? * MON-FRI represents the end time working hours for 10:15 AM every Monday, Tuesday, Wednesday, Thursday and Friday.
     - `timezone` - (String) The time zone for the time window of a privileged approval in IANA format `"America/Vancouver"`.[Learn More](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+* `approval_reviewers` - (List of String) List of approval reviewers email
 
 ## Attribute Reference
 

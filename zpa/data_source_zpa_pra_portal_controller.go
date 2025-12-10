@@ -124,6 +124,11 @@ func dataSourcePRAPortalController() *schema.Resource {
 				Computed:    true,
 				Description: "The unique identifier of the user portal.",
 			},
+			"approval_reviewers": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -178,6 +183,7 @@ func dataSourcePRAPortalControllerRead(ctx context.Context, d *schema.ResourceDa
 		_ = d.Set("ext_domain_translation", resp.ExtDomainTranslation)
 		_ = d.Set("user_portal_gid", resp.UserPortalGid)
 		_ = d.Set("getc_name", resp.GetcName)
+		_ = d.Set("approval_reviewers", resp.ApprovalReviewers)
 	} else {
 		return diag.FromErr(fmt.Errorf("couldn't find any pra portal controller with name '%s' or id '%s'", name, id))
 	}

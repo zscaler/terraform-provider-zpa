@@ -67,6 +67,24 @@ resource "zpa_pra_portal_controller" "this" {
 }
 ```
 
+# Configuring PRA Portal with Approval Reviewer
+```hcl
+resource "zpa_pra_portal_controller" "this" {
+  name                      = "Server1 PRA01"
+  description               = "Server1 PRA01 Description"
+  enabled                   = true
+  domain                    = "server1-acme.com.pra.d.zscalerportal.net"
+  user_notification         = "Created with Terraform"
+  user_notification_enabled = true
+  ext_label                 = "server1"
+  ext_domain                = "acme.com"
+  ext_domain_name           = "acme.com.pra.d.zscalerportal.net"
+  ext_domain_translation    = "acme.com"
+  user_portal_gid           = "145262059234265326"
+  approval_reviewers        = ["jdoe@acme.com"]
+}
+```
+
 ## Schema
 
 ### Required
@@ -91,6 +109,7 @@ In addition to all arguments above, the following attributes are exported:
 - `ext_domain_translation` (String) The translation of the external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal.
 - `user_portal_gid` (String) The unique identifier **ID** for the user portal.
 - `microtenant_id` (String) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as 0 when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
+* `approval_reviewers` - (List of String) List of approval reviewers email
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
