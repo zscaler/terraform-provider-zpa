@@ -147,6 +147,11 @@ func resourcePRAPortalController() *schema.Resource {
 				Optional:    true,
 				Description: "The unique identifier of the user portal.",
 			},
+			"approval_reviewers": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -208,6 +213,7 @@ func resourcePRAPortalControllerRead(ctx context.Context, d *schema.ResourceData
 	_ = d.Set("ext_domain_name", resp.ExtDomainName)
 	_ = d.Set("ext_domain_translation", resp.ExtDomainTranslation)
 	_ = d.Set("user_portal_gid", resp.UserPortalGid)
+	_ = d.Set("approval_reviewers", resp.ApprovalReviewers)
 	return nil
 }
 
@@ -278,6 +284,7 @@ func expandPRAPortalController(d *schema.ResourceData) praportal.PRAPortal {
 		ExtDomainName:           d.Get("ext_domain_name").(string),
 		ExtDomainTranslation:    d.Get("ext_domain_translation").(string),
 		UserPortalGid:           d.Get("user_portal_gid").(string),
+		ApprovalReviewers:       SetToStringList(d, "approval_reviewers"),
 	}
 	return praPortal
 }

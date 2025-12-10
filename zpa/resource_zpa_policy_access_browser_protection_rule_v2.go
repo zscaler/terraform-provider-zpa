@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
 )
 
@@ -184,9 +184,9 @@ func resourcePolicyBrowserProtectionRuleRead(ctx context.Context, d *schema.Reso
 	}
 
 	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", policySetID, d.Id())
-	resp, respErr, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, d.Id())
+	resp, _, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, d.Id())
 	if err != nil {
-		if respErr != nil && (respErr.StatusCode == 404 || respErr.StatusCode == http.StatusNotFound) {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil
@@ -238,9 +238,9 @@ func resourcePolicyBrowserProtectionRuleUpdate(ctx context.Context, d *schema.Re
 	}
 
 	// Checking the current state of the rule to handle cases where it might have been deleted outside Terraform
-	_, respErr, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, ruleID)
+	_, _, err = policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, ruleID)
 	if err != nil {
-		if respErr != nil && (respErr.StatusCode == http.StatusNotFound) {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			d.SetId("")
 			return nil
 		}
