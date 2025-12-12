@@ -221,7 +221,7 @@ resource "zpa_policy_credential_rule" "this" {
         - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`
         - `entry_values` (Block Set) 
             - `lhs` - (String) -  The Identity Provider (IdP) ID
-            - `rhs` - (String) - The SCIM Group unique identified (ID)
+            - `rhs` - (String) - The SCIM Group unique identified (ID) [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups)
     - `operands` (Block Set)  - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
         - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM`
         - `entry_values` (Block Set)
@@ -231,7 +231,7 @@ resource "zpa_policy_credential_rule" "this" {
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Policy access credential can be imported by using `<POLICY CREDENTIAL ID>` as the import ID.
 

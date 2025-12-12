@@ -142,6 +142,69 @@ resource "zpa_app_connector_group" "this" {
 }
 ```
 
+## Example 3 Usage - Application Segment Extranet Configuration
+
+```terraform
+data "zpa_location_controller" "this" {
+  name        = "ExtranetLocation01 | zscalerbeta.net"
+  zia_er_name = "NewExtranet 8432"
+}
+
+data "zpa_location_group_controller" "this" {
+  location_name = "ExtranetLocation01"
+  zia_er_name   = "NewExtranet 8432"
+}
+
+data "zpa_extranet_resource_partner" "this" {
+  name = "NewExtranet 8432"
+}
+
+resource "zpa_segment_group" "this" {
+  name                   = "Example"
+  description            = "Example"
+  enabled                = true
+}
+
+resource "zpa_server_group" "this" {
+  name              = "Example"
+  description       = "Example"
+  enabled           = true
+  dynamic_discovery = true
+  extranet_enabled  = true
+
+  extranet_dto {
+    zpn_er_id = data.zpa_extranet_resource_partner.this.id
+
+    location_dto {
+      id = data.zpa_location_controller.this.id
+    }
+
+    location_group_dto {
+      id = data.zpa_location_group_controller.this.id
+    }
+  }
+}
+
+resource "zpa_application_segment" "this" {
+  name              = "app01.acme.com"
+  description       = "app01.acme.com"
+  enabled           = true
+  health_reporting  = "NONE"
+  health_check_type = "NONE"
+  bypass_type       = "NEVER"
+  is_cname_enabled  = true
+  tcp_port_ranges   = ["8080", "8080"]
+  domain_names      = ["app01.acme.com"]
+  segment_group_id  = zpa_segment_group.this.id
+  server_groups {
+    id = [zpa_server_group.this.id]
+  }
+  zpn_er_id {
+    id = [data.zpa_extranet_resource_partner.this.id]
+  }
+}
+```
+
 ## Schema
 
 ### Required
@@ -149,15 +212,14 @@ resource "zpa_app_connector_group" "this" {
 The following arguments are supported:
 
 - `name` - (String) Name. The name of the App Connector Group to be exported.
-- `domain_names` - (Required) List of domains and IPs.
+- `domain_names` - (List) List of domains and IPs.
 - `server_groups` - (Block Set) List of Server Group IDs
   - `id` - (Required)
-- `segment_group_id` - (String) List of Segment Group IDs
+- `segment_group_id` - (string) The unique identifier of the segment group.
 - `tcp_port_ranges` - (List of String) TCP port ranges used to access the app.
 - `udp_port_ranges` - (List of String) UDP port ranges used to access the app.
 
--> **NOTE:**  TCP and UDP ports can also be defined using the following model:
--> **NOTE:** When removing TCP and/or UDP ports, parameter must be defined but set as empty due to current API behavior.
+-> **NOTE:**  TCP and UDP ports can also be defined using the following model below. We recommend this model as opposed of the legacy model via `tcp_port_ranges` and or `udp_port_ranges`.
 
 - `tcp_port_range` - (Block Set) TCP port ranges used to access the app.
   - `from:` (String) The starting port for a port range.
@@ -192,13 +254,17 @@ Supported values: `EXCLUSIVE`, `INCLUSIVE`. [Learn More](https://help.zscaler.co
 - `use_in_dr_mode` - (Boolean) Supported values: `true`, `false`
 - `is_incomplete_dr_config` - (Boolean) Supported values: `true`, `false`
 - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
+- `fqdn_dns_check` - (Boolean) When set to Enabled, Zscaler Client Connector receives CNAME DNS records from the App Connector for FQDN applications. Supported values: `true`, `false`
+- `share_to_microtenants` (List) List of destination Microtenants to which the application segment is to be shared with.
+- `zpn_er_id` (Block Set) - ZPN Extranet Resource
+    - `id` - (String) The unique identifier of the zpn extranet resource
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Application Segment can be imported by using `<APPLICATION SEGMENT ID>` or `<APPLICATION SEGMENT NAME>` as the import ID.
 

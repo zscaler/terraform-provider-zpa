@@ -32,7 +32,6 @@ resource "zpa_application_segment_pra" "this" {
   }
   common_apps_dto {
     apps_config {
-      name                 = "ssh_pra"
       domain               = "ssh_pra.example.com"
       application_protocol = "SSH"
       application_port     = "22"
@@ -40,7 +39,6 @@ resource "zpa_application_segment_pra" "this" {
       app_types = [ "SECURE_REMOTE_ACCESS" ]
     }
     apps_config {
-    name                 = "rdp_pra"
     domain               = "rdp_pra.example.com"
     application_protocol = "RDP"
     connection_security  = "ANY"
@@ -61,19 +59,24 @@ The following arguments are supported:
 - `name` (String) Name. The name of the App Connector Group to be exported.
 - `domain_names` - (Required) List of domains and IPs.
 - `server_groups` - (Required) List of Server Group IDs
-- `segment_group_id` - (String) The unique identifier of the Segment Group.
+- `segment_group_id` - (string) The unique identifier of the segment group.
 - `common_apps_dto` (Block Set, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
   - `apps_config:` (Block Set, Min: 1) List of applications to be configured
+
     - `domain` - (String) Domain name of the Privileged Remote Access
+      - **NOTE** The domain name configured in this attribute **MUST** also be present in `domain_names` list.
+
     - `application_protocol` - (String) Protocol for the Privileged Remote Access. Supported values: `RDP` and `SSH`
-    - `application_port` - (String) Port for the Privileged Remote Access
+    - `application_port` - (String) Port for the Privileged Remote Access.
+      - **NOTE** The ports configured in this attribute **MUST** also be present in the port list.
+
     - `app_types` (List of String) Indicates the type of application as Privileged Remote Access. Supported value: `SECURE_REMOTE_ACCESS`
     - `connection_security` - (String) - Parameter required when `application_protocol` is of type `RDP`
-    - `enabled` - (Boolean) Whether this application is enabled or not
+      - **NOTE** This attribute is ONLY accepted for RDP protocols. DO NOT set this attribute when `application_protocol` is `SSH`
 - `tcp_port_ranges` - (List of String) TCP port ranges used to access the app.
 - `udp_port_ranges` - (List of String) UDP port ranges used to access the app.
 
--> **NOTE:**  TCP and UDP ports can also be defined using the following model:
+-> **NOTE:**  TCP and UDP ports can also be defined using the following model below. We recommend this model as opposed of the legacy model via `tcp_port_ranges` and or `udp_port_ranges`.
 
 - `tcp_port_range` - (Block Set) TCP port ranges used to access the app.
   - `from:` (String) The starting port for a port range.
@@ -97,6 +100,7 @@ The following arguments are supported:
 - `health_check_type` (String) Default: `DEFAULT`. Supported values: `DEFAULT`, `NONE`
 - `icmp_access_type` - (String) The ICMP access type. Supported values: `PING_TRACEROUTING`, `PING`, `NONE`
 - `ip_anchored` - (Boolean) Whether Source IP Anchoring for use with ZIA is enabled or disabled for the application.
+- `fqdn_dns_check` - (Boolean) When set to Enabled, Zscaler Client Connector receives CNAME DNS records from the App Connector for FQDN applications. Supported values: `true`, `false`
 - `is_cname_enabled` (Boolean) Indicates if the Zscaler Client Connector (formerly Zscaler App or Z App) receives CNAME DNS records from the connectors. Supported values: `true`, `false`
 - `tcp_keep_alive` (String) Whether the application is using TCP communication sockets or not. Supported values: ``1`` for Enabled and ``0`` for Disabled
 - `passive_health_enabled` - Indicates if passive health checks are enabled on the application. (Boolean) Supported values: `true`, `false`
@@ -112,7 +116,7 @@ The following arguments are supported:
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Application Segment can be imported by using `<APPLICATION SEGMENT ID>` or `<APPLICATION SEGMENT NAME>` as the import ID.
 

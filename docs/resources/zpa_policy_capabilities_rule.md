@@ -110,34 +110,37 @@ resource "zpa_policy_capabilities_rule" "this" {
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy. Separate condition blocks for each object type is required.
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
         - `object_type` (String) The object type of the operand. Supported values: `APP` for application segments and `APP_GROUP` for segment groups
         - `values` (List of Strings) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
 
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+- `conditions` - (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SCIM_GROUP`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  ID of the Identity Provider
+            - `rhs` - (String) - ID of the SCIM Group. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups)
+
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SCIM`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
+            - `rhs` - (String) - 	The SCIM Attribute value to match
+
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
         - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`
         - `entry_values` (Block Set)
             - `lhs` - (String) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
             - `rhs` - (String) - The SAML attribute string i.e Group name, Department Name, Email address etc.
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM_GROUP`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  The Identity Provider (IdP) ID
-            - `rhs` - (String) - The SCIM Group unique identified (ID)
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy critiera. Supported values: `SCIM`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
             - `rhs` - (String) - 	The SCIM Attribute value to match
 
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Policy access capability can be imported by using `<RULE ID>` as the import ID.
 

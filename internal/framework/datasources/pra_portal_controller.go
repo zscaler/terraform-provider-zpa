@@ -49,6 +49,7 @@ type PRAPortalControllerModel struct {
 	UserPortalGID           types.String `tfsdk:"user_portal_gid"`
 	UserPortalName          types.String `tfsdk:"user_portal_name"`
 	GetcName                types.String `tfsdk:"getc_name"`
+	ApprovalReviewers       types.Set    `tfsdk:"approval_reviewers"`
 }
 
 func (d *PRAPortalControllerDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -115,6 +116,10 @@ func (d *PRAPortalControllerDataSource) Schema(ctx context.Context, req datasour
 			},
 			"getc_name": schema.StringAttribute{
 				Computed: true,
+			},
+			"approval_reviewers": schema.SetAttribute{
+				ElementType: types.StringType,
+				Computed:    true,
 			},
 		},
 	}

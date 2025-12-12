@@ -198,7 +198,7 @@ brew install --cask zscaler/tap/zscaler-terraformer
 ```
 
 If you use another OS, you will need to download the release directly from
-[GitHub Releases](https://github.com/zscaler/zscaler-terraformer/releases).
+[GitHub Releases](https://github.com/SecurityGeekIO/zscaler-terraformer/releases).
 
 In the future we plan on releasing versions for installation via MacPorts and Chocolatey for Windows systems.
 
@@ -287,7 +287,7 @@ MIT License
 
 =======
 
-Copyright (c) 2022 [Zscaler](https://github.com/zscaler)
+Copyright (c) 2022 [Zscaler](https://github.com/SecurityGeekIO)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

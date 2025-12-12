@@ -14,6 +14,8 @@ description: |-
 
 Use the **zpa_lss_config_controller** data source to get information about a Log Streaming (LSS) configuration resource created in the Zscaler Private Access.
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 ## Example Usage
 
 ```terraform

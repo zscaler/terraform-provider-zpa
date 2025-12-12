@@ -18,10 +18,9 @@ The **zpa_server_group** resource creates a server group in the Zscaler Private 
 
 [![ZPA Terraform provider Video Series Ep4 - Server Groups](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_server_groups.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEmCAI/video-zpa-terraform-provider-video-series-ep4-server-groups)
 
-## Example Usage
+## Example Usage - Dynamic Discovery Enabled
 
 ```terraform
-# Create a Server Group resource with Dynamic Discovery Enabled
 resource "zpa_server_group" "example" {
   name              = "Example"
   description       = "Example"
@@ -51,8 +50,9 @@ resource "zpa_app_connector_group" "example" {
 }
 ```
 
+## Example Usage - Dynamic Discovery Disabled
+
 ```terraform
-# ZPA Server Group resource with Dynamic Discovery Disabled
 resource "zpa_server_group" "example" {
   name = "Example"
   description = "Example"
@@ -92,6 +92,43 @@ resource "zpa_app_connector_group" "example" {
   dns_query_type                = "IPV4"
 }
 ```
+## Example Usage - Extranet Configuration
+
+```terraform
+data "zpa_location_controller" "this" {
+  name        = "ExtranetLocation01 | zscalerbeta.net"
+  zia_er_name = "NewExtranet 8432"
+}
+
+data "zpa_location_group_controller" "this" {
+  location_name = "ExtranetLocation01"
+  zia_er_name   = "NewExtranet 8432"
+}
+
+data "zpa_extranet_resource_partner" "this" {
+  name = "NewExtranet 8432"
+}
+
+resource "zpa_server_group" "example" {
+  name              = "Example"
+  description       = "Example"
+  enabled           = true
+  dynamic_discovery = true
+  extranet_enabled  = true
+
+  extranet_dto {
+    zpn_er_id = data.zpa_extranet_resource_partner.this.id
+
+    location_dto {
+      id = data.zpa_location_controller.this.id
+    }
+
+    location_group_dto {
+      id = data.zpa_location_group_controller.this.id
+    }
+  }
+}
+```
 
 ## Schema
 
@@ -115,10 +152,17 @@ In addition to all arguments above, the following attributes are exported:
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
+- `extranet_dto` (Block Set) - Extranet location and location group configuration
+    - `zpn_er_id` (String) - The unique identifier of the extranet resource that is configured in ZIA. Use the data source `zpa_extranet_resource_partner` to retrieve the Extranet ID
+        - `location_dto` (Block Set)
+            - `id` - (String) -  Unique identifiers for the location
+        - `location_group_dto` (Block Set)
+            - `id` - (String) -  Unique identifiers for the location group
+
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Server Groups can be imported; use `<SERVER GROUP ID>` or `<SERVER GROUP NAME>` as the import ID.
 

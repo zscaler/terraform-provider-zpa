@@ -17,6 +17,7 @@ The **zpa_pra_credential_controller** resource creates a privileged remote acces
 ## Example Usage
 
 ```terraform
+#### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ####
 # Creates Credential of Type "USERNAME_PASSWORD"
 resource "zpa_pra_credential_controller" "this" {
     name = "John Doe"
@@ -28,9 +29,9 @@ resource "zpa_pra_credential_controller" "this" {
 }
 ```
 
-######### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE #########  
-######### ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ##########
+
 ```terraform
+#### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ####
 # Creates Credential of Type "SSH_KEY"
 resource "zpa_pra_credential_controller" "this" {
     name = "John Doe"
@@ -75,7 +76,7 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 **pra_credential_controller** can be imported by using `<CREDENTIAL ID>` or `<CREDENTIAL NAME>` as the import ID.
 

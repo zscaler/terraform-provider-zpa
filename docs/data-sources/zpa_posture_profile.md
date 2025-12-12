@@ -14,6 +14,8 @@ description: |-
 
 Use the **zpa_posture_profile** data source to get information about a posture profile created in the Zscaler Private Access Mobile Portal. This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 ## Example Usage
 
 ```terraform

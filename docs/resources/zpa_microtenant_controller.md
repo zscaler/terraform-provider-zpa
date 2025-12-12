@@ -59,7 +59,7 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 **microtenant_controller** can be imported by using `<MICROTENANT ID>` or `<MICROTENANT NAME>` as the import ID.
 

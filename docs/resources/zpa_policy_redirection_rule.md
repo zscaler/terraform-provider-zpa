@@ -90,8 +90,7 @@ resource "zpa_policy_redirection_rule" "this" {
 
 - `name` (String) This is the name of the forwarding policy rule.
 - `action` (String) This is for providing the rule action.
-  * The supported actions for a policy isolation rule are: ``BYPASS_ISOLATE``, or ``ISOLATE``
-- `zpn_isolation_profile_id` (String) Use [zpa_isolation_profile](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_isolation_profile) data source to retrieve the necessary Isolation profile ID ``zpn_isolation_profile_id``
+  * The supported actions for a policy isolation rule are: ``REDIRECT_DEFAULT``, ``REDIRECT_ALWAYS`` or ``REDIRECT_PREFERRED``
 
 ### Optional
 
@@ -101,7 +100,7 @@ resource "zpa_policy_redirection_rule" "this" {
 - `operator` (String) Supported values: ``AND``, ``OR``
 - `rule_order` (String, Deprecated)
 
-    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
+    ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``zpa_policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
 - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
@@ -134,7 +133,7 @@ Specifies the set of conditions for the policy rule.
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Policy Access Isolation Rule can be imported by using `<POLICY REDIRECTION RULE ID>` as the import ID.
 

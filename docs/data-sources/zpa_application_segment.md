@@ -13,6 +13,8 @@ description: |-
 
 Use the **zpa_application_segment** data source to get information about a application segment created in the Zscaler Private Access cloud. This data source can then be referenced in an Access Policy, Timeout policy, Forwarding Policy, Inspection Policy or Isolation Policy.
 
+**NOTE:** To ensure consistent search results across data sources, please avoid using multiple spaces or special characters in your search queries.
+
 ## Zenith Community - ZPA Application Segment
 
 [![ZPA Terraform provider Video Series Ep7 - Application Segment](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_application_segments.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEXCAY/video-zpa-terraform-provider-video-series-ep7-zpa-application-segment)
@@ -61,9 +63,10 @@ In addition to all arguments above, the following attributes are exported:
 - `select_connector_close_to_app` - (Boolean) Default: false. Boolean: `true`, `false`.
 - `use_in_dr_mode` (Boolean) Default: false. Boolean: `true`, `false`.
 - `is_incomplete_dr_config` (Boolean) Default: false. Boolean: `true`, `false`.
+- `fqdn_dns_check` - (Boolean) Supported values: `true`, `false`
 - `domain_names` - List of domains and IPs.
-- `segment_group_id` - (string)
-- `segment_group_name` - (string)
+- `segment_group_id` - (string) The unique identifier of the segment group.
+- `segment_group_name` - (string) The name of the segment group
 - `default_idle_timeout` - (String)
 - `default_max_age` - (String)
 - `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.

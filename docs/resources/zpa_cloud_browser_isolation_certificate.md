@@ -21,6 +21,8 @@ resource "zpa_cloud_browser_isolation_certificate" "this" {
     pem = file("cert.pem")
 }
 
+#### PASSWORDS OR RELATED CREDENTIALS ATTRIBUTES IN THIS FILE ARE FOR EXAMPLE ONLY AND NOT USED IN PRODUCTION SYSTEMS ####
+
 resource "zpa_cloud_browser_isolation_certificate" "this" {
     name = "CBI_Certificate"
     pem = <<CERT

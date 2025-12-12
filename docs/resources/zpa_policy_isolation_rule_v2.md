@@ -97,6 +97,37 @@ resource "zpa_policy_isolation_rule_v2" "this" {
 }
 ```
 
+## Example Usage - Chrome Enterprise and Chrome Posture Profile
+
+```hcl
+data "zpa_managed_browser_profile" "this" {
+  name = "Profile01"
+}
+
+
+resource "zpa_policy_isolation_rule_v2" "this" {
+  name                      = "Example"
+  description               = "Example"
+  action                    = "ISOLATE"
+  zpn_isolation_profile_id  = data.zpa_isolation_profile.this.id
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "CHROME_ENTERPRISE"
+      entry_values {
+        lhs = "managed"
+        rhs = "true"
+      }
+    }
+    operands {
+      object_type = "CHROME_POSTURE_PROFILE"
+      values      = [data.zpa_managed_browser_profile.this.id]
+    }
+  }
+}
+```
+
 ## Schema
 
 ### Required
@@ -116,7 +147,7 @@ resource "zpa_policy_isolation_rule_v2" "this" {
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-- `conditions` (Block Set) Specifies the set of conditions for the policy rule.
+- `conditions` (Block Set) Specifies the set of conditions for the policy rule. Separate condition blocks for each object type is required.
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
         - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`
@@ -132,32 +163,56 @@ resource "zpa_policy_isolation_rule_v2" "this" {
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
         - `object_type` (String) This is for specifying the policy criteria. Supported values: `POSTURE`
         - `entry_values` (Block Set)
-            - `lhs` - (String) -  The Posture Profile `posture_udid` value.
+            - `lhs` - (String) -  The Posture Profile `posture_udid` value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile)
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
+
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `TRUSTED_NETWORK`
+        - `entry_values` (Block Set)
+            - `lhs` (String) -  The Trusted Network `network_id` value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network)
+            - `rhs` (String) - Supported values: `"true"` or `"false"`
+
+- `conditions` - (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SCIM_GROUP`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  ID of the Identity Provider
+            - `rhs` - (String) - ID of the SCIM Group. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups)
+
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SCIM`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The SCIM Attribute Header ID. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header)
+            - `rhs` - (String) - 	The SCIM Attribute value to match
+
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  The ID of the SAML Attribute value. [See Documentation](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute)
+            - `rhs` - (String) - The SAML attribute string i.e Group name, Department Name, Email address etc.
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `TRUSTED_NETWORK`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_ENTERPRISE`
         - `entry_values` (Block Set)
-            - `lhs` - (String) -  The Trusted Network `network_id` value.
+            - `lhs` - (String) -  `"managed"`
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
-    - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `SAML`, `SCIM`, `SCIM_GROUP`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  2 Letter Country in ``ISO 3166 Alpha2 Code`` [Lear More](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)
-            - `rhs` - (String) - Supported values: `"true"` or `"false"`
+    - `operands` (String) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `CHROME_POSTURE_PROFILE`
+        - `values` (Block List) The list of values for the specified object type (e.g., managed browser profile ID `zpa_managed_browser_profile`).
 
 ## Import
 
 Zscaler offers a dedicated tool called Zscaler-Terraformer to allow the automated import of ZPA configurations into Terraform-compliant HashiCorp Configuration Language.
-[Visit](https://github.com/zscaler/zscaler-terraformer)
+[Visit](https://github.com/SecurityGeekIO/zscaler-terraformer)
 
 Policy access isolation rule can be imported by using `<RULE ID>` as the import ID.
 

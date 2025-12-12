@@ -3,7 +3,7 @@
 This example will show you how to create a standard access policy rule.
 This example codifies [this API](https://help.zscaler.com/zpa/configuring-access-policies-using-api#postV2).
 
-To run, configure your ZPA provider as described [Here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md)
+To run, configure your ZPA provider as described [Here](https://github.com/SecurityGeekIO/terraform-provider-zpa/blob/master/docs/index.md)
 
 ## Run the example
 
