@@ -50,6 +50,7 @@ type PRAPortalControllerModel struct {
 	ExtDomainTranslation    types.String `tfsdk:"ext_domain_translation"`
 	MicrotenantID           types.String `tfsdk:"microtenant_id"`
 	UserPortalGid           types.String `tfsdk:"user_portal_gid"`
+	ApprovalReviewers       types.Set    `tfsdk:"approval_reviewers"`
 }
 
 func (r *PRAPortalControllerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -116,6 +117,11 @@ func (r *PRAPortalControllerResource) Schema(ctx context.Context, req resource.S
 			"user_portal_gid": schema.StringAttribute{
 				Optional:    true,
 				Description: "The unique identifier of the user portal.",
+			},
+			"approval_reviewers": schema.SetAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
+				Description: "List of approval reviewers for the privileged portal.",
 			},
 		},
 	}
@@ -369,6 +375,7 @@ func (r *PRAPortalControllerResource) expandPRAPortalController(plan *PRAPortalC
 		ExtDomainName:           helpers.StringValue(plan.ExtDomainName),
 		ExtDomainTranslation:    helpers.StringValue(plan.ExtDomainTranslation),
 		UserPortalGid:           helpers.StringValue(plan.UserPortalGid),
+		ApprovalReviewers:       helpers.SetValueToStringSliceSimple(plan.ApprovalReviewers),
 	}
 }
 
@@ -387,6 +394,10 @@ func (r *PRAPortalControllerResource) readPRAPortalController(ctx context.Contex
 		}
 	}
 
+	// Convert approval_reviewers from []string to types.Set
+	approvalReviewers, setDiags := types.SetValueFrom(ctx, types.StringType, portal.ApprovalReviewers)
+	diags.Append(setDiags...)
+
 	return PRAPortalControllerModel{
 		ID:                      types.StringValue(portal.ID),
 		Name:                    helpers.StringValueOrNull(portal.Name),
@@ -402,6 +413,7 @@ func (r *PRAPortalControllerResource) readPRAPortalController(ctx context.Contex
 		ExtDomainName:           helpers.StringValueOrNull(portal.ExtDomainName),
 		ExtDomainTranslation:    helpers.StringValueOrNull(portal.ExtDomainTranslation),
 		UserPortalGid:           helpers.StringValueOrNull(portal.UserPortalGid),
+		ApprovalReviewers:       approvalReviewers,
 	}, diags
 }
 

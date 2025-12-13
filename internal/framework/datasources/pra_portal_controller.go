@@ -194,6 +194,13 @@ func (d *PRAPortalControllerDataSource) Read(ctx context.Context, req datasource
 		return
 	}
 
+	// Convert approval_reviewers from []string to types.Set
+	approvalReviewers, setDiags := types.SetValueFrom(ctx, types.StringType, portal.ApprovalReviewers)
+	resp.Diagnostics.Append(setDiags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	state := PRAPortalControllerModel{
 		ID:                      types.StringValue(portal.ID),
 		Name:                    types.StringValue(portal.Name),
@@ -216,6 +223,7 @@ func (d *PRAPortalControllerDataSource) Read(ctx context.Context, req datasource
 		UserPortalGID:           types.StringValue(portal.UserPortalGid),
 		UserPortalName:          types.StringValue(portal.UserPortalName),
 		GetcName:                types.StringValue(portal.GetcName),
+		ApprovalReviewers:       approvalReviewers,
 	}
 
 	if !data.MicroTenantID.IsNull() && strings.TrimSpace(data.MicroTenantID.ValueString()) != "" {

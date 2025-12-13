@@ -2280,3 +2280,20 @@ func FlattenPRAApps(ctx context.Context, apps []applicationsegmentpra.PRAApps) (
 	diags.Append(listDiags...)
 	return list, diags
 }
+
+// SetValueToStringSliceSimple converts a types.Set to []string without context/diagnostics
+// Use this for simple cases where the set is known to contain strings
+func SetValueToStringSliceSimple(set types.Set) []string {
+	if set.IsNull() || set.IsUnknown() {
+		return nil
+	}
+	
+	elements := set.Elements()
+	result := make([]string, 0, len(elements))
+	for _, elem := range elements {
+		if strVal, ok := elem.(types.String); ok {
+			result = append(result, strVal.ValueString())
+		}
+	}
+	return result
+}

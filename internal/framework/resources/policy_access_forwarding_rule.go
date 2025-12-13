@@ -242,6 +242,14 @@ func (r *PolicyAccessForwardingRuleResource) Update(ctx context.Context, req res
 		}
 	}
 
+	// Check if resource still exists before updating
+	_, _, getErr := policysetcontroller.GetPolicyRule(ctx, service, policySetID, plan.ID.ValueString())
+	if getErr != nil {
+		if respErr, ok := getErr.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
 	payload, diags := expandPolicyAccessForwardingRule(ctx, &plan, policySetID)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

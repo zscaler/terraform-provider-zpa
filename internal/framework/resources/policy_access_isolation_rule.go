@@ -249,6 +249,13 @@ func (r *PolicyAccessIsolationRuleResource) Update(ctx context.Context, req reso
 		return
 	}
 
+	// Check if resource still exists before updating
+	if _, _, err := policysetcontroller.GetPolicyRule(ctx, service, policySetID, plan.ID.ValueString()); err != nil {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
+			resp.State.RemoveResource(ctx)
+			return
+		}
+	}
 	if _, err := policysetcontroller.UpdateRule(ctx, service, policySetID, plan.ID.ValueString(), payload); err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Failed to update isolation policy rule: %v", err))
 		return
