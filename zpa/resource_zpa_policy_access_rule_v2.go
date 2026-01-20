@@ -128,6 +128,7 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 											"RISK_FACTOR_TYPE",
 											"CHROME_ENTERPRISE",
 											"CHROME_POSTURE_PROFILE",
+											"WORKLOAD_TAG_GROUP",
 										}, false),
 									},
 									"entry_values": {

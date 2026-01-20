@@ -2,9 +2,7 @@
 page_title: "zpa_zia_cloud_config Resource - terraform-provider-zpa"
 subcategory: "Customer Config Controller"
 description: |-
-  Official documentation https://help.zscaler.com/zpa/about-user-portals
-  API documentation https://help.zscaler.com/zpa/about-user-portals
-  Creates and manages ZPA User Portal details.
+  Configure Zscaler Cloud Sandbox Settings
 ---
 
 # zpa_zia_cloud_config (Resource)
