@@ -297,7 +297,7 @@ func dataSourcePrivateCloudControllerRead(ctx context.Context, d *schema.Resourc
 		resp = res
 	}
 	if resp != nil {
-		d.SetId(resp.Id)
+		d.SetId(resp.ID)
 		_ = d.Set("name", resp.Name)
 		_ = d.Set("application_start_time", resp.ApplicationStartTime)
 		_ = d.Set("control_channel_status", resp.ControlChannelStatus)
