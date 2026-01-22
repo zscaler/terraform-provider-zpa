@@ -13,6 +13,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
 )
 
 func resourceAppConnectorGroup() *schema.Resource {
@@ -332,9 +333,9 @@ func resourceAppConnectorGroupDelete(ctx context.Context, d *schema.ResourceData
 
 	log.Printf("[INFO] Deleting app connector group ID: %v\n", d.Id())
 
-	// Detach app connector group from all access policy rules
-	if err := detachAppConnectorGroupFromAllAccessPolicyRules(ctx, d, service); err != nil {
-		return diag.FromErr(err)
+	// Detach app connector group from all access policy rules (v1 and v2)
+	if err := detachAppConnectorGroupFromAllAccessPolicyRules(ctx, d.Id(), service); err != nil {
+		return diag.FromErr(fmt.Errorf("error detaching App Connector Group with ID %s from PolicySetControllers: %s", d.Id(), err))
 	}
 
 	// Call Delete with context and necessary parameters
@@ -376,29 +377,60 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 	return appConnectorGroup
 }
 
-func detachAppConnectorGroupFromAllAccessPolicyRules(ctx context.Context, d *schema.ResourceData, service *zscaler.Service) error {
+func detachAppConnectorGroupFromAllAccessPolicyRules(ctx context.Context, id string, service *zscaler.Service) error {
 	policyRulesDetchLock.Lock()
 	defer policyRulesDetchLock.Unlock()
 
+	// Process V1 policies
+	if err := detachAppConnectorGroupFromV1Policies(ctx, id, service); err != nil {
+		return fmt.Errorf("failed to detach from v1 policies: %w", err)
+	}
+
+	// Process V2 policies
+	if err := detachAppConnectorGroupFromV2Policies(ctx, id, service); err != nil {
+		return fmt.Errorf("failed to detach from v2 policies: %w", err)
+	}
+
+	return nil
+}
+
+// detachAppConnectorGroupFromV1Policies handles detaching app connector groups from v1 policy rules
+func detachAppConnectorGroupFromV1Policies(ctx context.Context, id string, service *zscaler.Service) error {
 	// Retrieve access policy set
 	accessPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, "ACCESS_POLICY")
 	if err != nil {
-		return fmt.Errorf("failed to get access policy set: %w", err)
+		log.Printf("[WARN] Failed to get v1 access policy set: %v", err)
+		return nil // Don't fail if v1 API is not available
 	}
 
 	// Retrieve all access policy rules
 	rules, _, err := policysetcontroller.GetAllByType(ctx, service, "ACCESS_POLICY")
 	if err != nil {
-		return fmt.Errorf("failed to get access policy rules: %w", err)
+		log.Printf("[WARN] Failed to get v1 access policy rules: %v", err)
+		return nil // Don't fail if v1 API is not available
 	}
+
+	log.Printf("[INFO] Detaching App Connector Group from V1 Policy Rules, count: %d", len(rules))
 
 	// Iterate over rules and detach the app connector group
 	for _, rule := range rules {
+		// Verify this rule actually exists in v1 API before processing
+		// This prevents trying to update v2 rules via v1 API
+		_, _, err := policysetcontroller.GetPolicyRule(ctx, service, accessPolicySet.ID, rule.ID)
+		if err != nil {
+			if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
+				log.Printf("[DEBUG] Rule %s not found in v1 API, skipping (likely a v2 rule)", rule.ID)
+				continue
+			}
+			log.Printf("[WARN] Failed to verify v1 policy rule %s: %v", rule.ID, err)
+			continue
+		}
+
 		var updatedGroups []appconnectorgroup.AppConnectorGroup
 		changed := false
 
 		for _, group := range rule.AppConnectorGroups {
-			if group.ID == d.Id() {
+			if group.ID == id {
 				changed = true
 				continue
 			}
@@ -409,8 +441,53 @@ func detachAppConnectorGroupFromAllAccessPolicyRules(ctx context.Context, d *sch
 		if changed {
 			rule.AppConnectorGroups = updatedGroups
 			if _, err := policysetcontroller.UpdateRule(ctx, service, accessPolicySet.ID, rule.ID, &rule); err != nil {
-				log.Printf("[WARN] Failed to update policy rule %s: %v", rule.ID, err)
-				// Continue processing other rules despite errors
+				log.Printf("[WARN] Failed to update v1 policy rule %s: %v", rule.ID, err)
+				return fmt.Errorf("failed to update v1 policy rule %s: %w", rule.ID, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+// detachAppConnectorGroupFromV2Policies handles detaching app connector groups from v2 policy rules
+func detachAppConnectorGroupFromV2Policies(ctx context.Context, id string, service *zscaler.Service) error {
+	// Retrieve access policy set
+	accessPolicySet, _, err := policysetcontrollerv2.GetByPolicyType(ctx, service, "ACCESS_POLICY")
+	if err != nil {
+		log.Printf("[WARN] Failed to get v2 access policy set: %v", err)
+		return nil // Don't fail if v2 API is not available
+	}
+
+	// Retrieve all access policy rules
+	rules, _, err := policysetcontrollerv2.GetAllByType(ctx, service, "ACCESS_POLICY")
+	if err != nil {
+		log.Printf("[WARN] Failed to get v2 access policy rules: %v", err)
+		return nil // Don't fail if v2 API is not available
+	}
+
+	log.Printf("[INFO] Detaching App Connector Group from V2 Policy Rules, count: %d", len(rules))
+
+	// Iterate over rules and detach the app connector group
+	for _, rule := range rules {
+		var updatedGroups []appconnectorgroup.AppConnectorGroup
+		changed := false
+
+		for _, group := range rule.AppConnectorGroups {
+			if group.ID == id {
+				changed = true
+				continue
+			}
+			updatedGroups = append(updatedGroups, appconnectorgroup.AppConnectorGroup{ID: group.ID})
+		}
+
+		// If the rule was modified, update it
+		if changed {
+			rule.AppConnectorGroups = updatedGroups
+			convertedRule := ConvertV1ResponseToV2Request(rule)
+			if _, err := policysetcontrollerv2.UpdateRule(ctx, service, accessPolicySet.ID, rule.ID, &convertedRule); err != nil {
+				log.Printf("[WARN] Failed to update v2 policy rule %s: %v", rule.ID, err)
+				return fmt.Errorf("failed to update v2 policy rule %s: %w", rule.ID, err)
 			}
 		}
 	}

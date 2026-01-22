@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.3.6``
+``Last updated: v4.3.7``
 
 ---
+
+## 4.3.7 (January, 21 2025)
+
+### Notes
+
+- Release date: **(January, 21 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #624](https://github.com/zscaler/terraform-provider-zpa/pull/624) - Fixed `zpa_segment_group` detachment function to ensure it removes the resource correctly from all supported access policies during destruction process.
 
 ## 4.3.6 (January, 19 2025)
 
