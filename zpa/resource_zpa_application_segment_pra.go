@@ -443,7 +443,7 @@ func resourceApplicationSegmentPRADelete(ctx context.Context, d *schema.Resource
 	}
 
 	log.Printf("[INFO] Deleting application segment pra with id %v\n", d.Id())
-	detachAppConnectorGroupFromAllAccessPolicyRules(ctx, d, service)
+	// detachAppConnectorGroupFromAllAccessPolicyRules(ctx, d, service)
 
 	if _, err := applicationsegmentpra.Delete(ctx, service, d.Id()); err != nil {
 		return diag.FromErr(err)
