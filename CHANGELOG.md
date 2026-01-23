@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.3.8 (January, 23 2025)
+
+### Notes
+
+- Release date: **(January, 23 2025)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #625](https://github.com/zscaler/terraform-provider-zpa/pull/625) - Fixed `zpa_segment_group` and `zpa_app_connector_group` detachment function to ensure it removes the resource correctly from all supported access policies during apply and destruction process.
+
 ## 4.3.7 (January, 21 2025)
 
 ### Notes
