@@ -341,6 +341,11 @@ func detachSegmentGroupFromV1Policies(ctx context.Context, id string, service *z
 		if changed {
 			rule.Conditions = newConditions
 			if _, err := policysetcontroller.UpdateRule(ctx, service, rule.PolicySetID, rule.ID, &rule); err != nil {
+				// Check if the rule was already deleted (e.g., by Terraform in parallel)
+				if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
+					log.Printf("[DEBUG] Rule %s no longer exists, skipping update (likely already deleted)", rule.ID)
+					continue
+				}
 				log.Printf("[WARN] Failed to update v1 policy rule %s: %v", rule.ID, err)
 				return fmt.Errorf("failed to update v1 policy rule %s: %w", rule.ID, err)
 			}
@@ -431,6 +436,11 @@ func detachSegmentGroupFromV2Policies(ctx context.Context, id string, service *z
 			rule.Conditions = newConditions
 			convertedRule := ConvertV1ResponseToV2Request(rule)
 			if _, err := policysetcontrollerv2.UpdateRule(ctx, service, rule.PolicySetID, rule.ID, &convertedRule); err != nil {
+				// Check if the rule was already deleted (e.g., by Terraform in parallel)
+				if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
+					log.Printf("[DEBUG] Rule %s no longer exists, skipping update (likely already deleted)", rule.ID)
+					continue
+				}
 				log.Printf("[WARN] Failed to update v2 policy rule %s: %v", rule.ID, err)
 				return fmt.Errorf("failed to update v2 policy rule %s: %w", rule.ID, err)
 			}
