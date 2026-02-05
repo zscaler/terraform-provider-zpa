@@ -62,8 +62,10 @@ func dataSourceProvisioningKey() *schema.Resource {
 				Optional: true,
 			},
 			"provisioning_key": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "The provisioning key value. This is required to onboard App Connector or Service Edge devices. Marked as sensitive to prevent exposure in logs.",
 			},
 			"enrollment_cert_id": {
 				Type:        schema.TypeString,

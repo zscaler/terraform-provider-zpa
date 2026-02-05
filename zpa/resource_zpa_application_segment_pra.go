@@ -158,6 +158,11 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Optional: true,
 				// Computed: true,
 			},
+			// "policy_style": {
+			// 	Type:        schema.TypeBool,
+			// 	Optional:    true,
+			// 	Description: "Enable dual policy evaluation (resolve FQDN to Server IP and enforce policies based on Server IP and FQDN). false = NONE (disabled), true = DUAL_POLICY_EVAL (enabled).",
+			// },
 			"icmp_access_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -369,6 +374,7 @@ func resourceApplicationSegmentPRARead(ctx context.Context, d *schema.ResourceDa
 	_ = d.Set("ip_anchored", resp.IpAnchored)
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("health_reporting", resp.HealthReporting)
+	// _ = d.Set("policy_style", PolicyStyleAPIToBool(resp.PolicyStyle))
 	_ = d.Set("zpn_er_id", flattenCommonZPNERIDSimple(resp.ZPNERID))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
 
@@ -500,8 +506,9 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		TCPKeepAlive:              d.Get("tcp_keep_alive").(string),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
-		ZPNERID:                   extranet,
-		DomainNames:               SetToStringList(d, "domain_names"),
+		// PolicyStyle:               PolicyStyleBoolToAPIString(GetBool(d.Get("policy_style"))),
+		ZPNERID:     extranet,
+		DomainNames: SetToStringList(d, "domain_names"),
 		ServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
 			if groups == nil {

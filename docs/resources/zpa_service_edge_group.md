@@ -92,6 +92,36 @@ resource "zpa_service_edge_group" "service_edge_group_nyc" {
 }
 ```
 
+## Example Usage - OAuth2 enrollment with user codes
+
+When enrolling Service Edges via OAuth2, set the enrollment certificate and provide the user codes displayed on the Service Edge VMs after deployment. The provider will create the group and then call the user code verification API to complete enrollment.
+
+```terraform
+data "zpa_enrollment_cert" "service_edge" {
+  name = "Service Edge"
+}
+
+resource "zpa_service_edge_group" "service_edge_group_sjc" {
+  name                 = "Service Edge Group San Jose"
+  description          = "Service Edge Group in San Jose"
+  enabled              = true
+  is_public            = true
+  upgrade_day          = "SUNDAY"
+  upgrade_time_in_secs = "66600"
+  latitude             = "37.3382082"
+  longitude            = "-121.8863286"
+  location             = "San Jose, CA, USA"
+  version_profile_name = "New Release"
+
+  enrollment_cert_id   = data.zpa_enrollment_cert.service_edge.id
+  user_codes           = ["CODE_FROM_VM_1", "CODE_FROM_VM_2"]
+
+  trusted_networks {
+    id = [data.zpa_trusted_network.example.id]
+  }
+}
+```
+
 ## Schema
 
 ### Required
@@ -135,6 +165,11 @@ In addition to all arguments above, the following attributes are exported:
 - `microtenant_id` (Strings) The ID of the microtenant the resource is to be associated with.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
+
+### OAuth2 enrollment (optional)
+
+- `enrollment_cert_id` - (String) ID of the enrollment certificate used for OAuth2 enrollment. When set along with `user_codes`, the provider will enroll Service Edges via the OAuth2 user code verification API. Use the data source `zpa_enrollment_cert` to look up the certificate (e.g. name = "Service Edge").
+- `user_codes` - (Set of String) User codes from deployed Service Edge VMs for OAuth2 enrollment. When provided together with `enrollment_cert_id`, the provider calls the user code verification API to enroll the service edges. Obtain these codes from the Service Edge VM after deployment (they are displayed during the OAuth2 enrollment flow).
 
 - `trusted_networks` - (Block Set) Trusted networks for this Service Edge Group. List of trusted network objects Maximum 1 block allowed.
     - `id` - (List of Strings) The unique identifier of the trusted network.

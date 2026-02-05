@@ -181,22 +181,41 @@ func validateOperand(ctx context.Context, operand policysetcontroller.Operands, 
 		}
 		return nil
 	case "SCIM":
+		// Validate that IDP ID is provided
 		if operand.IdpID == "" {
 			return fmt.Errorf("[WARN] when operand object type is %v Idp ID must be set", operand.ObjectType)
 		}
+		// Validate that LHS (SCIM Attribute ID) is provided
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, nil)
 		}
+		// Fetch the SCIM attribute header to verify it exists
 		scim, _, err := scimattributeheader.Get(ctx, zClient.Service, operand.IdpID, operand.LHS)
 		if err != nil {
 			return lhsWarn(operand.ObjectType, "valid SCIM Attribute ID", operand.LHS, err)
 		}
+		// Validate that RHS (SCIM Attribute Value) is provided
 		if operand.RHS == "" {
 			return rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, nil)
 		}
-		values, _ := scimattributeheader.SearchValues(ctx, zClient.Service, scim.IdpID, scim.ID, operand.RHS)
-		if len(values) == 0 {
-			return rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value (%s)", values), operand.RHS, nil)
+		// Get all available values for the SCIM attribute to validate against
+		// This retrieves the complete list of values that users can reference by name
+		values, err := scimattributeheader.GetValues(ctx, zClient.Service, scim.IdpID, scim.ID)
+		if err != nil {
+			return rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, err)
+		}
+		// Check if the provided RHS value exists in the values list
+		// This allows users to reference SCIM attribute values by their display name
+		// without needing to know the position in the list
+		valueFound := false
+		for _, v := range values {
+			if v == operand.RHS {
+				valueFound = true
+				break
+			}
+		}
+		if !valueFound {
+			return rhsWarn(operand.ObjectType, fmt.Sprintf("valid SCIM Attribute Value from the list: %v", values), operand.RHS, nil)
 		}
 		return nil
 	case "SCIM_GROUP":

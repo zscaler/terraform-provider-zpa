@@ -10,7 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/oauth2_user"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgecontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/trustednetwork"
@@ -246,6 +248,17 @@ func resourceServiceEdgeGroup() *schema.Resource {
 					"MILES", "KMS",
 				}, false),
 			},
+			"enrollment_cert_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "ID of the enrollment certificate that can be used for this provisioning key.",
+			},
+			"user_codes": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "User codes from deployed Service Edge VMs for OAuth2 enrollment. When provided, the provider will call the user code verification API to enroll the service edges. These codes are obtained from the Service Edge VM after deployment.",
+			},
 		},
 	}
 }
@@ -273,6 +286,20 @@ func resourceServiceEdgeGroupCreate(ctx context.Context, d *schema.ResourceData,
 	}
 	log.Printf("[INFO] Created service edge group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
+
+	// Verify user codes if provided
+	if v, ok := d.GetOk("user_codes"); ok {
+		userCodes := SetToStringList(d, "user_codes")
+		if len(userCodes) > 0 {
+			if err := verifyServiceEdgeUserCodes(ctx, service, resp.ID, userCodes); err != nil {
+				// Group was created but verification failed
+				// We still want to keep the group in state, but report the error
+				return diag.Errorf("service edge group created successfully (ID: %s), but user code verification failed: %s. You can retry by running terraform apply again.", resp.ID, err)
+			}
+			log.Printf("[INFO] User codes verified successfully for Service Edge Group ID: %v", resp.ID)
+		}
+		_ = v // suppress unused variable warning
+	}
 
 	return resourceServiceEdgeGroupRead(ctx, d, meta)
 }
@@ -317,6 +344,7 @@ func resourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData, m
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("microtenant_id", resp.MicroTenantID)
+	_ = d.Set("enrollment_cert_id", resp.EnrollmentCertID)
 	_ = d.Set("version_profile_visibility_scope", resp.VersionProfileVisibilityScope)
 	log.Printf("[DEBUG] Set grace_distance_enabled to: %v", resp.GraceDistanceEnabled)
 	_ = d.Set("grace_distance_enabled", resp.GraceDistanceEnabled)
@@ -361,6 +389,20 @@ func resourceServiceEdgeGroupUpdate(ctx context.Context, d *schema.ResourceData,
 
 	if _, err := serviceedgegroup.Update(ctx, service, id, &req); err != nil {
 		return diag.FromErr(err)
+	}
+
+	// Verify user codes if they changed
+	if d.HasChange("user_codes") {
+		if v, ok := d.GetOk("user_codes"); ok {
+			userCodes := SetToStringList(d, "user_codes")
+			if len(userCodes) > 0 {
+				if err := verifyServiceEdgeUserCodes(ctx, service, id, userCodes); err != nil {
+					return diag.Errorf("service edge group updated successfully (ID: %s), but user code verification failed: %s", id, err)
+				}
+				log.Printf("[INFO] User codes verified successfully for Service Edge Group ID: %v", id)
+			}
+			_ = v // suppress unused variable warning
+		}
 	}
 
 	return resourceServiceEdgeGroupRead(ctx, d, meta)
@@ -409,6 +451,7 @@ func expandServiceEdgeGroup(d *schema.ResourceData) serviceedgegroup.ServiceEdge
 		GraceDistanceValue:             d.Get("grace_distance_value").(string),
 		GraceDistanceValueUnit:         d.Get("grace_distance_value_unit").(string),
 		ExclusiveForBusinessContinuity: d.Get("exclusive_for_business_continuity").(bool),
+		EnrollmentCertID:               d.Get("enrollment_cert_id").(string),
 		ServiceEdges:                   expandServiceEdges(d),
 		TrustedNetworks:                expandTrustedNetworks(d),
 	}
@@ -523,4 +566,27 @@ func flattenAppTrustedNetworksSimple(trustedNetworks []trustednetwork.TrustedNet
 			"id": schema.NewSet(schema.HashString, ids),
 		},
 	}
+}
+
+// verifyServiceEdgeUserCodes calls the OAuth2 user code verification API
+// to enroll Service Edges using the user codes obtained from the deployed VMs.
+func verifyServiceEdgeUserCodes(ctx context.Context, service *zscaler.Service, componentGroupID string, userCodes []string) error {
+	if len(userCodes) == 0 {
+		return nil
+	}
+
+	log.Printf("[INFO] Verifying %d user code(s) for Service Edge Group ID: %s", len(userCodes), componentGroupID)
+
+	request := &oauth2_user.UserCodeRequest{
+		ComponentGroupID: componentGroupID,
+		UserCodes:        userCodes,
+	}
+
+	resp, _, err := oauth2_user.VerifyUserCodes(ctx, service, "SERVICE_EDGE_GRP", request)
+	if err != nil {
+		return fmt.Errorf("failed to verify user codes for Service Edge Group %s: %w", componentGroupID, err)
+	}
+
+	log.Printf("[INFO] Successfully verified user codes for Service Edge Group ID: %s, Response: %+v", componentGroupID, resp)
+	return nil
 }

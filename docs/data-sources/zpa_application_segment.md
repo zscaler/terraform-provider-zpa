@@ -71,3 +71,4 @@ In addition to all arguments above, the following attributes are exported:
 - `default_max_age` - (String)
 - `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
 - `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
+- `policy_style` - (Boolean) Enable dual policy evaluation (resolve FQDN to Server IP and enforce policies based on Server IP and FQDN). Supported values: `true`, `false` 

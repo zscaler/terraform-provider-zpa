@@ -176,6 +176,11 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			// "policy_style": {
+			// 	Type:        schema.TypeBool,
+			// 	Optional:    true,
+			// 	Description: "Enable dual policy evaluation (resolve FQDN to Server IP and enforce policies based on Server IP and FQDN). false = NONE (disabled), true = DUAL_POLICY_EVAL (enabled).",
+			// },
 			"health_reporting": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -424,6 +429,7 @@ func resourceApplicationSegmentBrowserAccessRead(ctx context.Context, d *schema.
 	_ = d.Set("is_cname_enabled", resp.IsCnameEnabled)
 	_ = d.Set("icmp_access_type", resp.ICMPAccessType)
 	_ = d.Set("health_reporting", resp.HealthReporting)
+	// _ = d.Set("policy_style", PolicyStyleAPIToBool(resp.PolicyStyle))
 	_ = d.Set("zpn_er_id", flattenCommonZPNERIDSimple(resp.ZPNERID))
 
 	if err := d.Set("clientless_apps", flattenBaClientlessApps(resp)); err != nil {
@@ -568,7 +574,8 @@ func expandBrowserAccess(ctx context.Context, d *schema.ResourceData, zClient *C
 		UseInDrMode:               d.Get("use_in_dr_mode").(bool),
 		IsIncompleteDRConfig:      d.Get("is_incomplete_dr_config").(bool),
 		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
-		ZPNERID:                   extranet,
+		// PolicyStyle:               PolicyStyleBoolToAPIString(GetBool(d.Get("policy_style"))),
+		ZPNERID: extranet,
 		AppServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
 			if groups == nil {

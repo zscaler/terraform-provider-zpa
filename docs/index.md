@@ -15,6 +15,16 @@ Use the navigation on the left to read about the available resources.
 
 -> **Disclaimer:** Please refer to our [General Support Statement](guides/support.md) before proceeding with the use of this provider. You can also refer to our [troubleshooting guide](guides/troubleshooting.md) for guidance on typical problems.
 
+## Feature Availability and API Parity
+
+-> **Important:** The ZPA Terraform provider maintain parity with publicly available API endpoints. In some instances, certain features or attributes available via the Zscaler UI may not be immediately available through the API, and therefore cannot be included in the Terraform provider. This does not indicate that the provider is lagging behind; rather, it reflects that we implement only the features that are currently exposed by the public API.
+
+If there is a feature or attribute you would like to see included in the provider, you are welcome to:
+- Submit a feature request via [GitHub Issues](https://github.com/zscaler/terraform-provider-zpa/issues)
+- Contact Zscaler Global Support by opening a support ticket
+
+Our team continuously works with product teams to expand API coverage and will incorporate new features into the provider as they become publicly available through the API.
+
 ## Zscaler OneAPI New Framework
 
 The ZPA Terraform Provider now offers support for [OneAPI](https://help.zscaler.com/oneapi/understanding-oneapi) Oauth2 authentication through [Zidentity](https://help.zscaler.com/zidentity/what-zidentity).

@@ -66,6 +66,33 @@ resource "zpa_app_connector_group" "example" {
 }
 ```
 
+## Example Usage - OAuth2 enrollment with user codes
+
+When enrolling App Connectors via OAuth2, set the enrollment certificate and provide the user codes displayed on the App Connector VMs after deployment. The provider will create the group and then call the user code verification API to complete enrollment.
+
+```terraform
+data "zpa_enrollment_cert" "connector" {
+  name = "Connector"
+}
+
+resource "zpa_app_connector_group" "example" {
+  name                  = "Example"
+  description           = "Example"
+  enabled               = true
+  city_country          = "San Jose, CA"
+  country_code          = "US"
+  latitude              = "37.338"
+  longitude             = "-121.8863"
+  location              = "San Jose, CA, US"
+  upgrade_day           = "SUNDAY"
+  upgrade_time_in_secs  = "66600"
+  dns_query_type        = "IPV4_IPV6"
+
+  enrollment_cert_id    = data.zpa_enrollment_cert.connector.id
+  user_codes            = ["CODE_FROM_VM_1", "CODE_FROM_VM_2"]
+}
+```
+
 ## Schema
 
 ### Required
@@ -108,6 +135,11 @@ The following arguments are supported:
 - `waf_disabled` - (Boolean) Whether or not AppProtection is disabled for the App Connector Group. Supported values: `true`, `false`
 - `microtenant_id` (String) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenantId as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenantId as null to retrieve data from all customers associated with the tenant.
 - `lss_app_connector_group` (boolean) Whether or not the App Connector Group is configured for the Log Streaming Service (LSS).
+
+### OAuth2 enrollment (optional)
+
+- `enrollment_cert_id` - (String) ID of the enrollment certificate used for OAuth2 enrollment. When set along with `user_codes`, the provider will enroll App Connectors via the OAuth2 user code verification API. Use the data source `zpa_enrollment_cert` to look up the certificate (e.g. name = "Connector").
+- `user_codes` - (Set of String) User codes from deployed App Connector VMs for OAuth2 enrollment. When provided together with `enrollment_cert_id`, the provider calls the user code verification API to enroll the connectors. Obtain these codes from the App Connector VM after deployment (they are displayed during the OAuth2 enrollment flow).
 
 ## Import
 

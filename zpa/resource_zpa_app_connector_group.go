@@ -12,6 +12,7 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/oauth2_user"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
 )
@@ -193,6 +194,26 @@ func resourceAppConnectorGroup() *schema.Resource {
 				// 	"0", "1", "2",
 				// }, false),
 			},
+			"dc_hosting_info": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Indicates the host data center information using a maximum of 64 characters. The Data Center Hosting information is used for the Quarterly Business Review Insights.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Equinix", "Data Center", "Private Cloud", "Rackspace",
+				}, false),
+			},
+			"enrollment_cert_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "ID of the enrollment certificate that can be used for OAuth2 enrollment.",
+			},
+			"user_codes": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "User codes from deployed App Connector VMs for OAuth2 enrollment. When provided, the provider will call the user code verification API to enroll the connectors. These codes are obtained from the App Connector VM after deployment.",
+			},
 		},
 	}
 }
@@ -224,6 +245,20 @@ func resourceAppConnectorGroupCreate(ctx context.Context, d *schema.ResourceData
 	}
 	log.Printf("[INFO] Created app connector group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
+
+	// Verify user codes if provided
+	if v, ok := d.GetOk("user_codes"); ok {
+		userCodes := SetToStringList(d, "user_codes")
+		if len(userCodes) > 0 {
+			if err := verifyAppConnectorUserCodes(ctx, service, resp.ID, userCodes); err != nil {
+				// Group was created but verification failed
+				// We still want to keep the group in state, but report the error
+				return diag.Errorf("app connector group created successfully (ID: %s), but user code verification failed: %s. You can retry by running terraform apply again.", resp.ID, err)
+			}
+			log.Printf("[INFO] User codes verified successfully for App Connector Group ID: %v", resp.ID)
+		}
+		_ = v // suppress unused variable warning
+	}
 
 	return resourceAppConnectorGroupRead(ctx, d, meta)
 }
@@ -282,6 +317,8 @@ func resourceAppConnectorGroupRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("version_profile_name", resp.VersionProfileName)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
 	_ = d.Set("waf_disabled", resp.WAFDisabled)
+	_ = d.Set("enrollment_cert_id", resp.EnrollmentCertID)
+	_ = d.Set("dc_hosting_info", resp.DCHostingInfo)
 	return nil
 }
 
@@ -316,6 +353,20 @@ func resourceAppConnectorGroupUpdate(ctx context.Context, d *schema.ResourceData
 
 	if _, err := appconnectorgroup.Update(ctx, service, id, &req); err != nil {
 		return diag.FromErr(err)
+	}
+
+	// Verify user codes if they changed
+	if d.HasChange("user_codes") {
+		if v, ok := d.GetOk("user_codes"); ok {
+			userCodes := SetToStringList(d, "user_codes")
+			if len(userCodes) > 0 {
+				if err := verifyAppConnectorUserCodes(ctx, service, id, userCodes); err != nil {
+					return diag.Errorf("app connector group updated successfully (ID: %s), but user code verification failed: %s", id, err)
+				}
+				log.Printf("[INFO] User codes verified successfully for App Connector Group ID: %v", id)
+			}
+			_ = v // suppress unused variable warning
+		}
 	}
 
 	return resourceAppConnectorGroupRead(ctx, d, meta)
@@ -373,6 +424,8 @@ func expandAppConnectorGroup(d *schema.ResourceData) appconnectorgroup.AppConnec
 		MicroTenantID:            d.Get("microtenant_id").(string),
 		VersionProfileID:         d.Get("version_profile_id").(string),
 		VersionProfileName:       d.Get("version_profile_name").(string),
+		EnrollmentCertID:         d.Get("enrollment_cert_id").(string),
+		DCHostingInfo:            d.Get("dc_hosting_info").(string),
 	}
 	return appConnectorGroup
 }
@@ -515,5 +568,28 @@ func validateTCPQuickAck(tcp appconnectorgroup.AppConnectorGroup) error {
 	if tcp.TCPQuickAckAssistant != tcp.TCPQuickAckReadAssistant {
 		return fmt.Errorf("the values of tcpQuickAck related flags need to be consistent")
 	}
+	return nil
+}
+
+// verifyAppConnectorUserCodes calls the OAuth2 user code verification API
+// to enroll App Connectors using the user codes obtained from the deployed VMs.
+func verifyAppConnectorUserCodes(ctx context.Context, service *zscaler.Service, componentGroupID string, userCodes []string) error {
+	if len(userCodes) == 0 {
+		return nil
+	}
+
+	log.Printf("[INFO] Verifying %d user code(s) for App Connector Group ID: %s", len(userCodes), componentGroupID)
+
+	request := &oauth2_user.UserCodeRequest{
+		ComponentGroupID: componentGroupID,
+		UserCodes:        userCodes,
+	}
+
+	resp, _, err := oauth2_user.VerifyUserCodes(ctx, service, "CONNECTOR_GRP", request)
+	if err != nil {
+		return fmt.Errorf("failed to verify user codes for App Connector Group %s: %w", componentGroupID, err)
+	}
+
+	log.Printf("[INFO] Successfully verified user codes for App Connector Group ID: %s, Response: %+v", componentGroupID, resp)
 	return nil
 }
