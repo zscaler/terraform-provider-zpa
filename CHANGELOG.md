@@ -1,6 +1,17 @@
 # Changelog
 
-## 4.3.81 (February, 4 2025)
+## 4.3.82(February, 5 2025)
+
+### Notes
+
+- Release date: **(February, 4 2025)**
+- Supported Terraform version: **v1.x**
+
+## 4.3.81 (February, 5 2025)
+
+### Bug Fixes
+
+- [PR #630](https://github.com/zscaler/terraform-provider-zpa/pull/630) - Fixed attribute `dc_hosting_info` in the resource `zpa_app_connector_group` by setting it to both `Optional` and `Computed`. Also removed enforced validation of supported values to allow custom user names.
 
 ### Notes
 
