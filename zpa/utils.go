@@ -222,6 +222,29 @@ func GetBool(input interface{}) bool {
 	return input.(bool)
 }
 
+// PolicyStyle API string constants
+const (
+	PolicyStyleAPINone           = "NONE"             // disabled
+	PolicyStyleAPIDualPolicyEval = "DUAL_POLICY_EVAL" // enabled
+)
+
+// PolicyStyleBoolToAPIString converts a Terraform boolean to the ZPA API policy_style string.
+// false -> "NONE" (disabled), true -> "DUAL_POLICY_EVAL" (enabled).
+// Use this when building API request payloads from resource schema (e.g. in expand/Create/Update).
+func PolicyStyleBoolToAPIString(enabled bool) string {
+	if enabled {
+		return PolicyStyleAPIDualPolicyEval
+	}
+	return PolicyStyleAPINone
+}
+
+// PolicyStyleAPIToBool converts the ZPA API policy_style string to a Terraform boolean.
+// "DUAL_POLICY_EVAL" -> true (enabled), "NONE" or any other value -> false (disabled).
+// Use this when reading API responses into resource state (e.g. in Read).
+func PolicyStyleAPIToBool(apiValue string) bool {
+	return apiValue == PolicyStyleAPIDualPolicyEval
+}
+
 // Converts an epoch time (in seconds, represented as a string) to a human-readable format.
 func epochToRFC1123(epochStr string, useRFC1123Z bool) (string, error) {
 	epoch, err := strconv.ParseInt(epochStr, 10, 64)

@@ -238,6 +238,11 @@ func resourceApplicationSegment() *schema.Resource {
 				Optional:    true,
 				Description: "If set to true, designates the application segment for weighted load balancing",
 			},
+			"policy_style": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable dual policy evaluation (resolve FQDN to Server IP and enforce policies based on Server IP and FQDN). false = NONE (disabled), true = DUAL_POLICY_EVAL (enabled). Default: disabled.",
+			},
 			"api_protection_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -367,6 +372,7 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("api_protection_enabled", resp.APIProtectionEnabled)
 	_ = d.Set("weighted_load_balancing", resp.WeightedLoadBalancing)
+	_ = d.Set("policy_style", PolicyStyleAPIToBool(resp.PolicyStyle))
 	_ = d.Set("tcp_port_ranges", convertPortsToListString(resp.TCPAppPortRange))
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
@@ -517,6 +523,7 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		FQDNDnsCheck:              d.Get("fqdn_dns_check").(bool),
 		APIProtectionEnabled:      d.Get("api_protection_enabled").(bool),
 		WeightedLoadBalancing:     d.Get("weighted_load_balancing").(bool),
+		PolicyStyle:               PolicyStyleBoolToAPIString(GetBool(d.Get("policy_style"))),
 		ZPNERID:                   extranet,
 		ServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)

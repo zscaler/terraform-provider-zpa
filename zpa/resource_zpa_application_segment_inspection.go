@@ -180,6 +180,11 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"policy_style": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Enable dual policy evaluation (resolve FQDN to Server IP and enforce policies based on Server IP and FQDN). false = NONE (disabled), true = DUAL_POLICY_EVAL (enabled).",
+			},
 			"icmp_access_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -378,6 +383,7 @@ func resourceApplicationSegmentInspectionRead(ctx context.Context, d *schema.Res
 	_ = d.Set("fqdn_dns_check", resp.FQDNDnsCheck)
 	_ = d.Set("tcp_protocols", resp.TCPProtocols)
 	_ = d.Set("udp_protocols", resp.UDPProtocols)
+	// _ = d.Set("policy_style", PolicyStyleAPIToBool(resp.PolicyStyle))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 
 	// Map inspection apps to common_apps_dto.apps_config for state management
@@ -492,6 +498,7 @@ func expandInspectionApplicationSegment(ctx context.Context, d *schema.ResourceD
 		DomainNames:               SetToStringList(d, "domain_names"),
 		TCPProtocols:              expandStringInSlice(d, "tcp_protocols"),
 		UDPProtocols:              expandStringInSlice(d, "udp_protocols"),
+		// PolicyStyle:               PolicyStyleBoolToAPIString(GetBool(d.Get("policy_style"))),
 		// AppServerGroups:           expandCommonServerGroups(d),
 		AppServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)

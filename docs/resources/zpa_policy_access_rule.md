@@ -18,6 +18,8 @@ The **zpa_policy_access_rule** resource creates and manages policy access rule i
 
 ## Example Usage
 
+### Basic Example with SCIM Group
+
 ```terraform
 # Get IdP ID
 data "zpa_idp_controller" "idp_name" {
@@ -69,6 +71,43 @@ resource "zpa_policy_access_rule" "this" {
   }
 }
 ```
+
+### Example with SCIM Attribute Values
+
+```terraform
+# Get SCIM attribute header for a specific attribute
+data "zpa_scim_attribute_header" "display_name" {
+  name     = "DisplayName"
+  idp_name = "IdP_Name"
+}
+
+# Optional: Output to see available values for the attribute
+output "available_values" {
+  value = data.zpa_scim_attribute_header.display_name.values
+}
+
+# Create Policy Access Rule using SCIM attribute value
+resource "zpa_policy_access_rule" "scim_example" {
+  name        = "SCIM Attribute Example"
+  description = "Policy rule filtering by SCIM attribute value"
+  action      = "ALLOW"
+  operator    = "AND"
+
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "SCIM"
+      idp_id      = data.zpa_scim_attribute_header.display_name.idp_id
+      lhs         = data.zpa_scim_attribute_header.display_name.id
+      # Reference SCIM attribute values by name - the value must exist in the 
+      # values list returned by the data source
+      rhs         = "John Smith"
+    }
+  }
+}
+```
+
+**Note**: When using SCIM attributes, the `rhs` value must match one of the values available in the SCIM attribute's values list. You can reference the `values` attribute from the `zpa_scim_attribute_header` data source to see available options.
 
 ## Schema
 

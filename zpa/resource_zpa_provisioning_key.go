@@ -117,10 +117,11 @@ func resourceProvisioningKey() *schema.Resource {
 				Description: "Read only property. Applicable only for GET calls, ignored in PUT/POST calls.",
 			},
 			"provisioning_key": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Optional:    true,
-				Description: "read only field. Ignored in PUT/POST calls.",
+				Type:     schema.TypeString,
+				Computed: true,
+				// Optional:    true,
+				Sensitive:   true,
+				Description: "The provisioning key returned by the API. This value is required to onboard App Connector or Service Edge devices. Although marked as sensitive to prevent exposure in logs and console output, the value is stored in the Terraform state file and can be retrieved using 'terraform output' or by referencing the attribute in other resources.",
 			},
 			"association_type": {
 				Type:         schema.TypeString,

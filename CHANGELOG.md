@@ -1,5 +1,23 @@
 # Changelog
 
+## 4.3.81 (February, 4 2025)
+
+### Notes
+
+- Release date: **(February, 4 2025)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #626](https://github.com/zscaler/terraform-provider-zpa/pull/626) - Added `enrollment_cert_id` and `user_codes` attributes to `zpa_app_connector_group` to support OAuth2 enrollment via user code verification API.
+- [PR #626](https://github.com/zscaler/terraform-provider-zpa/pull/626) - Added `enrollment_cert_id` and `user_codes` attributes to `zpa_service_edge_group` to support OAuth2 enrollment via user code verification API.
+- [PR #627](https://github.com/zscaler/terraform-provider-zpa/pull/627) - Marked `provisioning_key` attribute as sensitive in `zpa_provisioning_key` resource and data source to prevent exposure in logs and console output; value remains accessible via `terraform output` and resource references.
+- [PR #628](https://github.com/zscaler/terraform-provider-zpa/pull/628) - Added boolean `policy_style` attribute to `zpa_application_segment` to enable `FQDN-to-IP Policy Evaluation`
+
+### Bug Fixes
+
+- [PR #629](https://github.com/zscaler/terraform-provider-zpa/pull/629) - Fixed policy access rule SCIM condition validation: validation now uses `GetValues` (aligned with `zpa_scim_attribute_header` data source) so RHS values from the attribute's `values` list (e.g. display names) are accepted instead of incorrectly failing.
+
 ## 4.3.8 (January, 23 2025)
 
 ### Notes
@@ -1843,7 +1861,7 @@ Fixed authentication issue when specifying zpa_cloud="PRODUCTION"
 
 ### Enhancements
 
-- Added support to `scim_attribute_header` to support policy access SCIM criteria based on SCIM attribute values.  Issue [#146](https://github.com/zscaler/terraform-provider-zpa/issues/146) / PR [#147]((https://github.com/zscaler/terraform-provider-zpa/pull/147))
+- Added support to `scim_attribute_header` to support policy access SCIM criteria based on SCIM attribute values. Issue [#146](https://github.com/zscaler/terraform-provider-zpa/issues/146) / [PR #147](https://github.com/zscaler/terraform-provider-zpa/pull/147)
 
 - ZPA Beta Cloud: The provider now supports authentication via environment variables or static credentials to ZPA Beta Cloud. For authentication instructions please refer to the documentation page [here](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/index.md) PR [#136](https://github.com/zscaler/terraform-provider-zpa/pull/136)
 

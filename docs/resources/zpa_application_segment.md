@@ -255,6 +255,8 @@ Supported values: `EXCLUSIVE`, `INCLUSIVE`. [Learn More](https://help.zscaler.co
 - `is_incomplete_dr_config` - (Boolean) Supported values: `true`, `false`
 - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 - `fqdn_dns_check` - (Boolean) When set to Enabled, Zscaler Client Connector receives CNAME DNS records from the App Connector for FQDN applications. Supported values: `true`, `false`
+- `policy_style` - (Boolean) Enable dual policy evaluation (resolve FQDN to Server IP and enforce policies based on Server IP and FQDN). Supported values: `true`, `false`
+
 - `share_to_microtenants` (List) List of destination Microtenants to which the application segment is to be shared with.
 - `zpn_er_id` (Block Set) - ZPN Extranet Resource
     - `id` - (String) The unique identifier of the zpn extranet resource
