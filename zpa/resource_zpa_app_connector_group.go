@@ -197,10 +197,8 @@ func resourceAppConnectorGroup() *schema.Resource {
 			"dc_hosting_info": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Indicates the host data center information using a maximum of 64 characters. The Data Center Hosting information is used for the Quarterly Business Review Insights.",
-				ValidateFunc: validation.StringInSlice([]string{
-					"Equinix", "Data Center", "Private Cloud", "Rackspace",
-				}, false),
 			},
 			"enrollment_cert_id": {
 				Type:        schema.TypeString,
