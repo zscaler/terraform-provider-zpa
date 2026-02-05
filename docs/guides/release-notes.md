@@ -25,10 +25,10 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Enhancements
 
-- [PR #626](https://github.com/zscaler/terraform-provider-zpa/pull/626) - Added `enrollment_cert_id` and `user_codes` attributes to `zpa_app_connector_group` to support OAuth2 enrollment via user code verification API.
-- [PR #626](https://github.com/zscaler/terraform-provider-zpa/pull/626) - Added `enrollment_cert_id` and `user_codes` attributes to `zpa_service_edge_group` to support OAuth2 enrollment via user code verification API.
-- [PR #627](https://github.com/zscaler/terraform-provider-zpa/pull/627) - Marked `provisioning_key` attribute as sensitive in `zpa_provisioning_key` resource and data source to prevent exposure in logs and console output; value remains accessible via `terraform output` and resource references.
-- [PR #628](https://github.com/zscaler/terraform-provider-zpa/pull/628) - Added boolean `policy_style` attribute to `zpa_application_segment` to enable `FQDN-to-IP Policy Evaluation`
+- [PR #629](https://github.com/zscaler/terraform-provider-zpa/pull/629) - Added `enrollment_cert_id` and `user_codes` attributes to `zpa_app_connector_group` to support OAuth2 enrollment via user code verification API.
+- [PR #629](https://github.com/zscaler/terraform-provider-zpa/pull/629) - Added `enrollment_cert_id` and `user_codes` attributes to `zpa_service_edge_group` to support OAuth2 enrollment via user code verification API.
+- [PR #629](https://github.com/zscaler/terraform-provider-zpa/pull/629) - Marked `provisioning_key` attribute as sensitive in `zpa_provisioning_key` resource and data source to prevent exposure in logs and console output; value remains accessible via `terraform output` and resource references.
+- [PR #629](https://github.com/zscaler/terraform-provider-zpa/pull/629) - Added boolean `policy_style` attribute to `zpa_application_segment` to enable `FQDN-to-IP Policy Evaluation`
 
 ### Bug Fixes
 
