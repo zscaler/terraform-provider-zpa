@@ -34,6 +34,9 @@ import (
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/segmentgroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/serviceedgegroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/tag_controller/tag_group"
+	tag_key_controller "github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/tag_controller/tag_key"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/tag_controller/tag_namespace"
 )
 
 var (
@@ -115,6 +118,9 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestPRAConsoleController(testClient)
 	sweepTestPRAPortalController(testClient)
 	sweepTestPRAPrivilegedApprovalController(testClient)
+	sweepTestTagGroup(testClient)
+	sweepTestTagKey(testClient)
+	sweepTestTagNamespace(testClient)
 }
 
 // Sets up sweeper to clean up dangling resources
@@ -929,6 +935,110 @@ func sweepTestPRAPrivilegedApprovalController(client *testClient) error {
 	}
 
 	// Log errors encountered during the deletion process
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestTagGroup(client *testClient) error {
+	var errorList []error
+
+	service := &zscaler.Service{
+		Client: client.sdkV3Client,
+	}
+
+	groups, _, err := tag_group.GetAll(context.Background(), service)
+	if err != nil {
+		return err
+	}
+
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(groups)))
+
+	for _, b := range groups {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
+			if _, err := tag_group.Delete(context.Background(), service, b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPATagGroup, b.ID, b.Name)
+		}
+	}
+
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestTagKey(client *testClient) error {
+	var errorList []error
+
+	service := &zscaler.Service{
+		Client: client.sdkV3Client,
+	}
+
+	namespaces, _, err := tag_namespace.GetAll(context.Background(), service)
+	if err != nil {
+		return err
+	}
+
+	for _, ns := range namespaces {
+		keys, _, err := tag_key_controller.GetAll(context.Background(), service, ns.ID)
+		if err != nil {
+			errorList = append(errorList, err)
+			continue
+		}
+
+		sweeperLogger.Warn(fmt.Sprintf("Found %d tag keys in namespace %s to sweep", len(keys), ns.Name))
+
+		for _, k := range keys {
+			if strings.HasPrefix(k.Name, testResourcePrefix) || strings.HasPrefix(k.Name, updateResourcePrefix) {
+				if _, err := tag_key_controller.Delete(context.Background(), service, ns.ID, k.ID); err != nil {
+					errorList = append(errorList, err)
+					continue
+				}
+				logSweptResource(resourcetype.ZPATagKey, k.ID, k.Name)
+			}
+		}
+	}
+
+	if len(errorList) > 0 {
+		for _, err := range errorList {
+			sweeperLogger.Error(err.Error())
+		}
+	}
+	return condenseError(errorList)
+}
+
+func sweepTestTagNamespace(client *testClient) error {
+	var errorList []error
+
+	service := &zscaler.Service{
+		Client: client.sdkV3Client,
+	}
+
+	namespaces, _, err := tag_namespace.GetAll(context.Background(), service)
+	if err != nil {
+		return err
+	}
+
+	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(namespaces)))
+
+	for _, b := range namespaces {
+		if strings.HasPrefix(b.Name, testResourcePrefix) || strings.HasPrefix(b.Name, updateResourcePrefix) {
+			if _, err := tag_namespace.Delete(context.Background(), service, b.ID); err != nil {
+				errorList = append(errorList, err)
+				continue
+			}
+			logSweptResource(resourcetype.ZPATagNamespace, b.ID, b.Name)
+		}
+	}
+
 	if len(errorList) > 0 {
 		for _, err := range errorList {
 			sweeperLogger.Error(err.Error())

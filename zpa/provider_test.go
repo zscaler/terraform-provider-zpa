@@ -61,6 +61,9 @@ func TestMain(m *testing.M) {
 		setupSweeper(resourcetype.ZPAPRACredentialController, sweepTestPRACredentialController)
 		setupSweeper(resourcetype.ZPAPRAPortalController, sweepTestPRAPortalController)
 		setupSweeper(resourcetype.ZPAPRAApprovalController, sweepTestPRAPrivilegedApprovalController)
+		setupSweeper(resourcetype.ZPATagGroup, sweepTestTagGroup)
+		setupSweeper(resourcetype.ZPATagKey, sweepTestTagKey)
+		setupSweeper(resourcetype.ZPATagNamespace, sweepTestTagNamespace)
 	}
 
 	resource.TestMain(m)
