@@ -275,3 +275,25 @@ const (
 	UserPortalLinkIconTextUpdate    = ""
 	UserPortalLinkProtocolUpdate    = "https://"
 )
+
+// Tag Namespace
+const (
+	TagNamespaceDescription       = "Tag Namespace Test"
+	TagNamespaceDescriptionUpdate = "Tag Namespace Test Updated"
+	TagNamespaceEnabled           = true
+	TagNamespaceEnabledUpdate     = true
+)
+
+// Tag Key
+const (
+	TagKeyDescription       = "Tag Key Test"
+	TagKeyDescriptionUpdate = "Tag Key Test Updated"
+	TagKeyEnabled           = true
+	TagKeyEnabledUpdate     = true
+)
+
+// Tag Group
+const (
+	TagGroupDescription       = "Tag Group Test"
+	TagGroupDescriptionUpdate = "Tag Group Test Updated"
+)

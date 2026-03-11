@@ -194,6 +194,9 @@ func ZPAProvider() *schema.Provider {
 			"zpa_user_portal_aup":                          resourceUserPortalAUP(),
 			"zpa_c2c_ip_ranges":                            resourceC2CIPRanges(),
 			//"zpa_browser_protection":                       resourceBrowserProtection(),
+			"zpa_tag_namespace":    resourceTagNamespace(),
+			"zpa_tag_key":          resourceTagKey(),
+			"zpa_tag_group":        resourceTagGroup(),
 			"zpa_zia_cloud_config": resourceZiaCloudConfig(),
 
 			// The day I realized I was naming stuff wrong :'-(
@@ -266,6 +269,9 @@ func ZPAProvider() *schema.Provider {
 			"zpa_extranet_resource_partner":                dataSourceExtranetResourcePartner(),
 			"zpa_managed_browser_profile":                  dataSourceManagedBrowserProfile(),
 			"zpa_browser_protection":                       dataSourceBrowserProtection(),
+			"zpa_tag_namespace":                            dataSourceTagNamespace(),
+			"zpa_tag_key":                                  dataSourceTagKey(),
+			"zpa_tag_group":                                dataSourceTagGroup(),
 			"zpa_workload_tag_group":                       dataSourceWorkloadTagGroup(),
 			"zpa_zia_cloud_config":                         dataSourceZiaCloudConfig(),
 		},

@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.3.82``
+``Last updated: v4.4.0``
 
 ---
+
+## 4.4.0 (March, 11 2026)
+
+### Notes
+
+- Release date: **(March, 11 2026)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #639](https://github.com/zscaler/terraform-provider-zpa/pull/639) - Added new `zpa_tag_namespace`, `zpa_tag_key`, and `zpa_tag_group` resources and data sources for managing tag controller objects.
 
 ## 4.3.82(February, 5 2025)
 

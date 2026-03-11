@@ -47,4 +47,7 @@ const (
 	ZPAPrivateCloudGroup               = "zpa_private_cloud_group"
 	ZPAUserPortalController            = "zpa_user_portal_controller"
 	ZPAUserPortalLink                  = "zpa_user_portal_link"
+	ZPATagNamespace                    = "zpa_tag_namespace"
+	ZPATagKey                          = "zpa_tag_key"
+	ZPATagGroup                        = "zpa_tag_group"
 )
