@@ -1,10 +1,21 @@
 # Changelog
 
+## 4.4.1 (March, 12 2026)
+
+### Notes
+
+- Release date: **(March, 12 2026)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #640](https://github.com/zscaler/terraform-provider-zpa/pull/640) - Fixed SCIM operand RHS validation in v1 access policy rules to use case-insensitive comparison (`strings.EqualFold`) so that values like email addresses are matched regardless of casing, consistent with RFC 7643 SCIM attribute semantics.
+
 ## 4.4.0 (March, 11 2026)
 
 ### Notes
 
-- Release date: **(March, 11 2026)**
+- Release date: **(March, 12 2026)**
 - Supported Terraform version: **v1.x**
 
 ### Enhancements
