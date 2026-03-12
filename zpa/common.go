@@ -204,12 +204,12 @@ func validateOperand(ctx context.Context, operand policysetcontroller.Operands, 
 		if err != nil {
 			return rhsWarn(operand.ObjectType, "SCIM Attribute Value", operand.RHS, err)
 		}
-		// Check if the provided RHS value exists in the values list
-		// This allows users to reference SCIM attribute values by their display name
-		// without needing to know the position in the list
+		// Case-insensitive match: SCIM attribute values (emails, names, etc.)
+		// are case-insensitive per RFC 7643, so "adam@example.com" should
+		// match "Adam@example.com" from the upstream IdP.
 		valueFound := false
 		for _, v := range values {
-			if v == operand.RHS {
+			if strings.EqualFold(v, operand.RHS) {
 				valueFound = true
 				break
 			}
