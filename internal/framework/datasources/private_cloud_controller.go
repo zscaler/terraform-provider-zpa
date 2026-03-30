@@ -309,7 +309,7 @@ func flattenPrivateCloudController(ctx context.Context, controller *private_clou
 	diags.Append(versionDiags...)
 
 	state := PrivateCloudControllerModel{
-		ID:                               types.StringValue(controller.Id),
+		ID:                               types.StringValue(controller.ID),
 		Name:                             types.StringValue(controller.Name),
 		ApplicationStartTime:             types.StringValue(controller.ApplicationStartTime),
 		ControlChannelStatus:             types.StringValue(controller.ControlChannelStatus),
