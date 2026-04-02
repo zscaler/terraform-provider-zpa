@@ -124,10 +124,12 @@ func resourceProvisioningKey() *schema.Resource {
 				Description: "The provisioning key returned by the API. This value is required to onboard App Connector or Service Edge devices. Although marked as sensitive to prevent exposure in logs and console output, the value is stored in the Terraform state file and can be retrieved using 'terraform output' or by referencing the attribute in other resources.",
 			},
 			"association_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Description:  "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
-				ValidateFunc: validation.StringInSlice(provisioningkey.ProvisioningKeyAssociationTypes, false),
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are CONNECTOR_GRP and SERVICE_EDGE_GRP.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"CONNECTOR_GRP", "SERVICE_EDGE_GRP", "SITE_CONTROLLER_GRP", "EXPORTER_GRP", "NP_ASSISTANT_GRP",
+				}, false),
 			},
 			"ip_acl": {
 				Type:     schema.TypeSet,
