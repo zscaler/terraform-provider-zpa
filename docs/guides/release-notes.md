@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.4.1``
+``Last updated: v4.4.2``
 
 ---
+
+## 4.4.2 (April 2 2026)
+
+### Notes
+
+- Release date: **(April 2 2026)**
+- Supported Terraform version: **v1.x**
+
+### Documentation
+
+- [PR #647](https://github.com/zscaler/terraform-provider-zpa/pull/647) - Updated `zpa_provisioning_key` documentation with newly supported `association_type` attribute values: `SITE_CONTROLLER_GRP`, `EXPORTER_GRP`, `NP_ASSISTANT_GRP`
 
 ## 4.4.1 (March, 12 2026)
 

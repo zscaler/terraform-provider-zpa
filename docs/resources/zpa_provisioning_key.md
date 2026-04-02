@@ -180,7 +180,7 @@ The following arguments are supported:
 * `max_usage` - (String) The maximum number of instances where this provisioning key can be used for enrolling an App Connector or Service Edge.
 * `enrollment_cert_id` - (String) ID of the enrollment certificate that can be used for this provisioning key. `ID` of the existing enrollment certificate that has the private key
 * `zcomponent_id` - (String) ID of the existing App Connector or Service Edge Group.
-* `association_type` (String) Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are `CONNECTOR_GRP` and `SERVICE_EDGE_GRP`
+* `association_type` (String) Specifies the provisioning key type for App Connectors or ZPA Private Service Edges. The supported values are `CONNECTOR_GRP`, `SERVICE_EDGE_GRP`, `SITE_CONTROLLER_GRP`, `EXPORTER_GRP`, `NP_ASSISTANT_GRP`
 
 ### Optional
 
