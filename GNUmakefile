@@ -55,14 +55,14 @@ test\:integration\:zpa:
 build13: GOOS=$(shell go env GOOS)
 build13: GOARCH=$(shell go env GOARCH)
 ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
-build13: DESTINATION=$(APPDATA)/terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/4.4.2/$(GOOS)_$(GOARCH)
+build13: DESTINATION=$(APPDATA)/terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/4.4.3/$(GOOS)_$(GOARCH)
 else
-build13: DESTINATION=$(HOME)/.terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/4.4.2/$(GOOS)_$(GOARCH)
+build13: DESTINATION=$(HOME)/.terraform.d/plugins/$(ZPA_PROVIDER_NAMESPACE)/4.4.3/$(GOOS)_$(GOARCH)
 endif
 build13: fmtcheck
 	@echo "==> Installing plugin to $(DESTINATION)"
 	@mkdir -p $(DESTINATION)
-	go build -o $(DESTINATION)/terraform-provider-zpa_v4.4.2
+	go build -o $(DESTINATION)/terraform-provider-zpa_v4.4.3
 
 vet:
 	@echo "==> Checking source code against go vet and staticcheck"
@@ -123,14 +123,14 @@ lint:
 		./$(PKG_NAME)
 
 tools:
-	@which $(GOFMT) || go install mvdan.cc/gofumpt@v0.6.0
-	@which $(TFPROVIDERLINT) || go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.31.0
-	@which $(STATICCHECK) || go install honnef.co/go/tools/cmd/staticcheck@v0.4.7
+	@which $(GOFMT) || go install mvdan.cc/gofumpt@v0.9.2
+	@which $(TFPROVIDERLINT) || go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@latest
+	@which $(STATICCHECK) || go install honnef.co/go/tools/cmd/staticcheck@latest
 
 tools-update:
-	@go install mvdan.cc/gofumpt@v0.6.0
-	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@v0.31.0
-	@go install honnef.co/go/tools/cmd/staticcheck@v0.4.7
+	@go install mvdan.cc/gofumpt@v0.9.2
+	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@latest
+	@go install honnef.co/go/tools/cmd/staticcheck@latest
 
 website:
 ifeq (,$(wildcard $(GOPATH)/src/$(WEBSITE_REPO)))

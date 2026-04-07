@@ -12,9 +12,21 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.4.2``
+``Last updated: v4.4.3``
 
 ---
+
+## 4.4.3 (April 7 2026)
+
+### Notes
+
+- Release date: **(April 7 2026)**
+- Supported Terraform version: **v1.x**
+
+### Documentation
+
+- [PR #649](https://github.com/zscaler/terraform-provider-zpa/pull/649) - Upgraded SDK to GO v1.25.x
+- [PR #649](https://github.com/zscaler/terraform-provider-zpa/pull/649) - Upgraded go-jose library from v3 to v4
 
 ## 4.4.2 (April 2 2026)
 
