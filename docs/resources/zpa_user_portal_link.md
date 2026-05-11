@@ -42,6 +42,7 @@ resource "zpa_user_portal_link" "this" {
 - `id` (String) - The ID of the User Portal Link
 - `description` (String) - Description of the User Portal Link
 - `enabled` (Boolean) - Whether this User Portal Link is enabled or not
+- `application_id` (String) - The unique identifier of the application segment associated with the user portal link. Required by the ZPA API when the link URL resolves through an application segment or when updating an existing link.
 - `icon_text` (String) - Icon text for the User Portal Link
 - `link` (String) - Link URL for the User Portal Link
 - `link_path` (String) - Link path for the User Portal Link

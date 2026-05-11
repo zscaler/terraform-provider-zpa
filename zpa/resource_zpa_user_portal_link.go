@@ -56,6 +56,12 @@ func resourceUserPortalLink() *schema.Resource {
 				Required:    true,
 				Description: "Name of the User Portal Link",
 			},
+			"application_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The unique identifier of the application segment associated with the user portal link",
+			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -155,6 +161,7 @@ func resourceUserPortalLinkRead(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("[INFO] Getting user portal link:\n%+v\n", resp)
 	_ = d.Set("name", resp.Name)
+	_ = d.Set("application_id", resp.ApplicationID)
 	_ = d.Set("description", resp.Description)
 	_ = d.Set("enabled", resp.Enabled)
 	_ = d.Set("icon_text", resp.IconText)
@@ -220,6 +227,7 @@ func expandUserPortalLink(d *schema.ResourceData) portal_link.UserPortalLink {
 	return portal_link.UserPortalLink{
 		ID:            d.Get("id").(string),
 		Name:          d.Get("name").(string),
+		ApplicationID: d.Get("application_id").(string),
 		Description:   d.Get("description").(string),
 		Enabled:       d.Get("enabled").(bool),
 		IconText:      d.Get("icon_text").(string),
