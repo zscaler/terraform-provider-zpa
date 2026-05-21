@@ -49,6 +49,7 @@ The following arguments are supported:
 * `modified_time` - (String) Modified time of the User Portal Link
 * `protocol` - (String) Protocol for the User Portal Link
 * `user_portal_id` - (String) User Portal ID for the User Portal Link
+- `application_id` (String) - Application Segment ID
 * `user_portals` - (List) List of User Portals associated with this link
   * `id` - (String) ID of the user portal
   * `name` - (String) Name of the user portal

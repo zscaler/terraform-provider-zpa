@@ -3,16 +3,140 @@ page_title: "zpa_service_edge_group Resource - terraform-provider-zpa"
 subcategory: "Service Edge Group"
 description: |-
   Official documentation https://help.zscaler.com/zpa/about-zpa-private-service-edge-groups
-  API documentation https://help.zscaler.com/zpa/configuring-zpa-private-service-edge-groups-using-api
+  API documentation https://automate.zscaler.com/docs/docs/api-reference-and-guides/api-reference/zpa/private-service-edge-group-management
   Creates and manages ZPA Service Edge Group details.
 ---
 
 # zpa_service_edge_group (Resource)
 
 * [Official documentation](https://help.zscaler.com/zpa/about-zpa-private-service-edge-groups)
-* [API documentation](https://help.zscaler.com/zpa/configuring-zpa-private-service-edge-groups-using-api)
+* [API documentation](https://automate.zscaler.com/docs/docs/api-reference-and-guides/api-reference/zpa/private-service-edge-group-management)
 
 The **zpa_service_edge_group** resource creates a service edge group in the Zscaler Private Access cloud. This resource can then be referenced in a service edge connector.
+
+## Service Edge Onboarding Methods
+
+ZPA Private Service Edges can be onboarded into ZPA in two ways. This resource supports both:
+
+1. **OAuth2 user codes** *(recommended for new deployments)* - Set `user_codes` with the codes generated on each Service Edge VM. The provider creates the group and then calls the OAuth2 user code verification API to enroll the Service Edges.
+2. **Provisioning key** *(legacy / still supported)* - Create the group with this resource, then create a `zpa_provisioning_key` referencing it. The key is then injected into the Service Edge VM at deployment time.
+
+In **both** methods, the Service Edge enrollment requires an `enrollment_cert_id`. You can either:
+- Set `enrollment_cert_id` explicitly using the `zpa_enrollment_cert` data source, or
+- Omit it entirely - the provider will automatically look up the **"Service Edge"** enrollment certificate by name and populate the ID for you.
+
+---
+
+## Example Usage - OAuth2 enrollment with user codes (Explicit Enrollment Certificate)
+
+Set the enrollment certificate explicitly and provide the user codes displayed on the Service Edge VMs after deployment. The provider will create the group and then call the user code verification API to complete enrollment.
+
+```terraform
+data "zpa_enrollment_cert" "service_edge" {
+  name = "Service Edge"
+}
+
+resource "zpa_service_edge_group" "example" {
+  name                 = "Service Edge Group San Jose"
+  description          = "Service Edge Group in San Jose"
+  enabled              = true
+  is_public            = true
+  upgrade_day          = "SUNDAY"
+  upgrade_time_in_secs = "66600"
+  latitude             = "37.3382082"
+  longitude            = "-121.8863286"
+  location             = "San Jose, CA, USA"
+  version_profile_name = "New Release"
+
+  enrollment_cert_id = data.zpa_enrollment_cert.service_edge.id
+  user_codes         = ["CODE_FROM_VM_1", "CODE_FROM_VM_2"]
+}
+```
+
+## Example Usage - OAuth2 enrollment with user codes (Auto-resolved Enrollment Certificate)
+
+Omit `enrollment_cert_id` entirely and the provider will automatically resolve the **"Service Edge"** enrollment certificate for you. This is the simplest configuration and is functionally equivalent to the explicit example above.
+
+```terraform
+resource "zpa_service_edge_group" "example" {
+  name                 = "Service Edge Group San Jose"
+  description          = "Service Edge Group in San Jose"
+  enabled              = true
+  is_public            = true
+  upgrade_day          = "SUNDAY"
+  upgrade_time_in_secs = "66600"
+  latitude             = "37.3382082"
+  longitude            = "-121.8863286"
+  location             = "San Jose, CA, USA"
+  version_profile_name = "New Release"
+
+  user_codes = ["CODE_FROM_VM_1", "CODE_FROM_VM_2"]
+}
+```
+
+## Example Usage - Enrolling Service Edges Via Provisioning Key (Explicit Enrollment Certificate)
+
+Create the Service Edge Group, then create a `zpa_provisioning_key` that references the group's ID. The provisioning key is then injected into the Service Edge VM at deployment time.
+
+```terraform
+data "zpa_enrollment_cert" "service_edge" {
+  name = "Service Edge"
+}
+
+resource "zpa_service_edge_group" "example" {
+  name                 = "Service Edge Group San Jose"
+  description          = "Service Edge Group in San Jose"
+  enabled              = true
+  is_public            = true
+  upgrade_day          = "SUNDAY"
+  upgrade_time_in_secs = "66600"
+  latitude             = "37.3382082"
+  longitude            = "-121.8863286"
+  location             = "San Jose, CA, USA"
+  version_profile_name = "New Release"
+
+  enrollment_cert_id = data.zpa_enrollment_cert.service_edge.id
+}
+
+resource "zpa_provisioning_key" "example" {
+  name               = "ProvisioningKey01"
+  association_type   = "SERVICE_EDGE_GRP"
+  max_usage          = "10"
+  enrollment_cert_id = data.zpa_enrollment_cert.service_edge.id
+  zcomponent_id      = zpa_service_edge_group.example.id
+}
+```
+
+## Example Usage - Enrolling Service Edges Via Provisioning Key (Auto-resolved Enrollment Certificate)
+
+For the Service Edge Group, you can omit `enrollment_cert_id` and let the provider auto-resolve it. The `zpa_provisioning_key` resource still requires `enrollment_cert_id` to be set explicitly.
+
+```terraform
+data "zpa_enrollment_cert" "service_edge" {
+  name = "Service Edge"
+}
+
+resource "zpa_service_edge_group" "example" {
+  name                 = "Service Edge Group San Jose"
+  description          = "Service Edge Group in San Jose"
+  enabled              = true
+  is_public            = true
+  upgrade_day          = "SUNDAY"
+  upgrade_time_in_secs = "66600"
+  latitude             = "37.3382082"
+  longitude            = "-121.8863286"
+  location             = "San Jose, CA, USA"
+  version_profile_name = "New Release"
+}
+
+resource "zpa_provisioning_key" "example" {
+  name               = "ProvisioningKey01"
+  association_type   = "SERVICE_EDGE_GRP"
+  max_usage          = "10"
+  enrollment_cert_id = data.zpa_enrollment_cert.service_edge.id
+  zcomponent_id      = zpa_service_edge_group.example.id
+}
+```
 
 ## Example Usage - Using Version Profile Name
 
@@ -30,53 +154,18 @@ resource "zpa_service_edge_group" "service_edge_group_sjc" {
   location             = "San Jose, CA, USA"
   version_profile_name = "New Release"
   trusted_networks {
-    id = [ data.zpa_trusted_network.example.id ]
+    id = [data.zpa_trusted_network.example.id]
   }
-}
-```
-
-```terraform
-# ZPA Service Edge Group resource - No Trusted Network
-resource "zpa_service_edge_group" "service_edge_group_nyc" {
-  name                 = "Service Edge Group New York"
-  description          = "Service Edge Group in New York"
-  enabled              = true
-  is_public            = true
-  upgrade_day          = "SUNDAY"
-  upgrade_time_in_secs = "66600"
-  latitude             = "40.7128"
-  longitude            = "-73.935242"
-  location             = "New York, NY, USA"
-  version_profile_id   = data.zpa_customer_version_profile.this.id 
 }
 ```
 
 ## Example Usage - Using Version Profile ID
 
+```terraform
 data "zpa_customer_version_profile" "this" {
   name = "New Release"
 }
 
-```terraform
-# ZPA Service Edge Group resource - Trusted Network
-resource "zpa_service_edge_group" "service_edge_group_sjc" {
-  name                 = "Service Edge Group San Jose"
-  description          = "Service Edge Group in San Jose"
-  enabled              = true
-  is_public            = true
-  upgrade_day          = "SUNDAY"
-  upgrade_time_in_secs = "66600"
-  latitude             = "37.3382082"
-  longitude            = "-121.8863286"
-  location             = "San Jose, CA, USA"
-  version_profile_name = "New Release"
-  trusted_networks {
-    id = [ data.zpa_trusted_network.example.id ]
-  }
-}
-```
-
-```terraform
 # ZPA Service Edge Group resource - No Trusted Network
 resource "zpa_service_edge_group" "service_edge_group_nyc" {
   name                 = "Service Edge Group New York"
@@ -88,37 +177,7 @@ resource "zpa_service_edge_group" "service_edge_group_nyc" {
   latitude             = "40.7128"
   longitude            = "-73.935242"
   location             = "New York, NY, USA"
-  version_profile_name = "New Release"
-}
-```
-
-## Example Usage - OAuth2 enrollment with user codes
-
-When enrolling Service Edges via OAuth2, set the enrollment certificate and provide the user codes displayed on the Service Edge VMs after deployment. The provider will create the group and then call the user code verification API to complete enrollment.
-
-```terraform
-data "zpa_enrollment_cert" "service_edge" {
-  name = "Service Edge"
-}
-
-resource "zpa_service_edge_group" "service_edge_group_sjc" {
-  name                 = "Service Edge Group San Jose"
-  description          = "Service Edge Group in San Jose"
-  enabled              = true
-  is_public            = true
-  upgrade_day          = "SUNDAY"
-  upgrade_time_in_secs = "66600"
-  latitude             = "37.3382082"
-  longitude            = "-121.8863286"
-  location             = "San Jose, CA, USA"
-  version_profile_name = "New Release"
-
-  enrollment_cert_id   = data.zpa_enrollment_cert.service_edge.id
-  user_codes           = ["CODE_FROM_VM_1", "CODE_FROM_VM_2"]
-
-  trusted_networks {
-    id = [data.zpa_trusted_network.example.id]
-  }
+  version_profile_id   = data.zpa_customer_version_profile.this.id
 }
 ```
 
@@ -168,8 +227,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ### OAuth2 enrollment (optional)
 
-- `enrollment_cert_id` - (String) ID of the enrollment certificate used for OAuth2 enrollment. When set along with `user_codes`, the provider will enroll Service Edges via the OAuth2 user code verification API. Use the data source `zpa_enrollment_cert` to look up the certificate (e.g. name = "Service Edge").
-- `user_codes` - (Set of String) User codes from deployed Service Edge VMs for OAuth2 enrollment. When provided together with `enrollment_cert_id`, the provider calls the user code verification API to enroll the service edges. Obtain these codes from the Service Edge VM after deployment (they are displayed during the OAuth2 enrollment flow).
+- `enrollment_cert_id` - (String) ID of the enrollment certificate used for OAuth2 enrollment. If not set, the provider will automatically look up the **"Service Edge"** enrollment certificate by name and populate this attribute for you. You can override the auto-resolution by setting this attribute explicitly using the `zpa_enrollment_cert` data source.
+- `user_codes` - (Set of String) User codes from deployed Service Edge VMs for OAuth2 enrollment. When provided, the provider calls the user code verification API to enroll the service edges. Obtain these codes from the Service Edge VM after deployment (they are displayed during the OAuth2 enrollment flow).
 
 - `trusted_networks` - (Block Set) Trusted networks for this Service Edge Group. List of trusted network objects Maximum 1 block allowed.
     - `id` - (List of Strings) The unique identifier of the trusted network.
