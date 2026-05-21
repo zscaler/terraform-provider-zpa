@@ -12,9 +12,24 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.4.3``
+``Last updated: v4.4.4``
 
 ---
+
+## 4.4.4 (May 21, 2026)
+
+### Notes
+
+- Release date: **(May 21, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #659](https://github.com/zscaler/terraform-provider-zpa/pull/659) - Added support for OAuth2 user code enrollment to `zpa_app_connector_group` and `zpa_service_edge_group` resources via the new `user_codes` attribute. The `enrollment_cert_id` attribute is now optional and auto-resolved by name (`Connector` / `Service Edge`) when omitted, while remaining backwards compatible when set explicitly.
+
+### Bug Fixes
+
+- [PR #659](https://github.com/zscaler/terraform-provider-zpa/pull/659) - Added attribute `application_id` to resource `zpa_user_portal_link` to make reference to application segment resources.
 
 ## 4.4.3 (April 7 2026)
 

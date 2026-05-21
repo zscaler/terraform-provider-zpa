@@ -251,7 +251,8 @@ func resourceServiceEdgeGroup() *schema.Resource {
 			"enrollment_cert_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "ID of the enrollment certificate that can be used for this provisioning key.",
+				Computed:    true,
+				Description: "ID of the enrollment certificate that can be used for OAuth2 enrollment. If not set, the provider will automatically look up the 'Service Edge' enrollment certificate by name.",
 			},
 			"user_codes": {
 				Type:        schema.TypeSet,
@@ -274,6 +275,11 @@ func resourceServiceEdgeGroupCreate(ctx context.Context, d *schema.ResourceData,
 
 	// Ensure version_profile_id is set if version_profile_name is provided
 	if err := validateAndSetProfileNameID(ctx, d, service); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Auto-resolve enrollment_cert_id by looking up "Service Edge" enrollment cert when not provided
+	if err := resolveEnrollmentCertID(ctx, d, service, "Service Edge"); err != nil {
 		return diag.FromErr(err)
 	}
 

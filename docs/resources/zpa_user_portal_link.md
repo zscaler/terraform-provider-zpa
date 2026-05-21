@@ -18,6 +18,10 @@ The **zpa_user_portal_link** resource creates a user portal link in the Zscaler 
 
 ```hcl
 
+data "zpa_application_segment" "this" {
+  name = "AppPortal01"
+}
+
 resource "zpa_user_portal_link" "this" {
   name        = "server1.example.com"
   description = "server1.example.com"
@@ -25,6 +29,7 @@ resource "zpa_user_portal_link" "this" {
   link        = "server1.example.com"
   icon_text   = ""
   protocol    = "https://"
+  application_id = data.zpa_application_segment.this.id
   user_portals {
     id = [zpa_user_portal_controller.this.id]
   }
@@ -47,6 +52,7 @@ resource "zpa_user_portal_link" "this" {
 - `link_path` (String) - Link path for the User Portal Link
 - `protocol` (String) - Protocol for the User Portal Link
 - `microtenant_id` (String) - Microtenant ID for the User Portal Link
+- `application_id` (String) - Application Segment ID
 - `user_portals` (List) - List of User Portals
   * `id` (Set of String) - List of User Portal IDs
 

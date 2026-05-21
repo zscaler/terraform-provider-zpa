@@ -91,6 +91,11 @@ func resourceUserPortalLink() *schema.Resource {
 				Optional:    true,
 				Description: "Microtenant ID for the User Portal Link",
 			},
+			"application_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Application ID for the User Portal Link",
+			},
 			"user_portals": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -162,6 +167,7 @@ func resourceUserPortalLinkRead(ctx context.Context, d *schema.ResourceData, met
 	_ = d.Set("link_path", resp.LinkPath)
 	_ = d.Set("protocol", resp.Protocol)
 	_ = d.Set("microtenant_id", resp.MicrotenantID)
+	_ = d.Set("application_id", resp.ApplicationID)
 	_ = d.Set("user_portals", flattenUserPortalsSimple(resp.UserPortals))
 	return nil
 }
@@ -227,6 +233,7 @@ func expandUserPortalLink(d *schema.ResourceData) portal_link.UserPortalLink {
 		LinkPath:      d.Get("link_path").(string),
 		Protocol:      d.Get("protocol").(string),
 		MicrotenantID: d.Get("microtenant_id").(string),
+		ApplicationID: d.Get("application_id").(string),
 		UserPortals:   expandUserPortals(d),
 	}
 }
