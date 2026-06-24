@@ -13,7 +13,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/enrollmentcert"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/segmentgroup"
 )
 
@@ -369,4 +371,27 @@ func isSensitiveField(fieldName string) bool {
 func generateShortID(input string) string {
 	hash := md5.Sum([]byte(input))
 	return fmt.Sprintf("%x", hash)[:8] // Use first 8 characters of MD5 hash
+}
+
+// resolveEnrollmentCertID auto-resolves the enrollment_cert_id attribute by looking up
+// the enrollment certificate by name when the user hasn't explicitly set it.
+// This allows users to omit enrollment_cert_id from their configuration and have the
+// provider automatically populate it using the well-known certificate name (e.g.
+// "Connector" for App Connector Groups, "Service Edge" for Service Edge Groups).
+func resolveEnrollmentCertID(ctx context.Context, d *schema.ResourceData, service *zscaler.Service, certName string) error {
+	if v, ok := d.GetOk("enrollment_cert_id"); ok && v.(string) != "" {
+		return nil
+	}
+
+	log.Printf("[INFO] enrollment_cert_id not set, auto-resolving by name: %s", certName)
+	cert, _, err := enrollmentcert.GetByName(ctx, service, certName)
+	if err != nil {
+		return fmt.Errorf("failed to auto-resolve enrollment certificate by name %q: %w", certName, err)
+	}
+	if cert == nil || cert.ID == "" {
+		return fmt.Errorf("auto-resolved enrollment certificate %q returned an empty ID", certName)
+	}
+	log.Printf("[INFO] Auto-resolved enrollment_cert_id=%s for cert name %q", cert.ID, certName)
+	_ = d.Set("enrollment_cert_id", cert.ID)
+	return nil
 }
