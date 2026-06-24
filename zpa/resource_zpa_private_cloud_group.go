@@ -2,13 +2,16 @@ package zpa
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/oauth2_user"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/private_cloud_group"
 )
 
@@ -113,11 +116,11 @@ func resourcePrivateCloudGroup() *schema.Resource {
 				Optional:    true,
 				Description: "Microtenant ID for the Private Cloud Group",
 			},
-			"site_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Site ID for the Private Cloud Group",
-			},
+			// "site_id": {
+			// 	Type:        schema.TypeString,
+			// 	Optional:    true,
+			// 	Description: "Site ID for the Private Cloud Group",
+			// },
 			"upgrade_day": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -134,7 +137,31 @@ func resourcePrivateCloudGroup() *schema.Resource {
 			"version_profile_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "ID of the version profile for the Private Cloud Group",
+			},
+			"version_profile_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Name of the version profile. To learn more, see Version Profile Use Cases. This value is required, if the value for overrideVersionProfile is set to true",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Default", "Previous Default",
+					"New Release", "Default - el8",
+					"New Release - el8", "Previous Default - el8",
+				}, false),
+			},
+			"enrollment_cert_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "ID of the enrollment certificate that can be used for OAuth2 enrollment. If not set, the provider will automatically look up the 'Connector' enrollment certificate by name.",
+			},
+			"user_codes": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "User codes from deployed Private Cloud Controllers for OAuth2 enrollment. When provided, the provider will call the user code verification API to enroll the Private Cloud Controllers. These codes are obtained from the Private Cloud Controller VM after deployment.",
 			},
 		},
 	}
@@ -149,6 +176,16 @@ func resourcePrivateCloudGroupCreate(ctx context.Context, d *schema.ResourceData
 		service = service.WithMicroTenant(microTenantID)
 	}
 
+	// Ensure version_profile_id is set if version_profile_name is provided
+	if err := validateAndSetProfileNameID(ctx, d, service); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Auto-resolve enrollment_cert_id by looking up "Connector" enrollment cert when not provided
+	if err := resolveEnrollmentCertID(ctx, d, service, "Connector"); err != nil {
+		return diag.FromErr(err)
+	}
+
 	req := expandPrivateCloudGroup(d)
 	log.Printf("[INFO] Creating zpa private cloud group with request\n%+v\n", req)
 
@@ -158,6 +195,20 @@ func resourcePrivateCloudGroupCreate(ctx context.Context, d *schema.ResourceData
 	}
 	log.Printf("[INFO] Created private cloud group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
+
+	// Verify user codes if provided
+	if v, ok := d.GetOk("user_codes"); ok {
+		userCodes := SetToStringList(d, "user_codes")
+		if len(userCodes) > 0 {
+			if err := verifyPrivateCloudUserCodes(ctx, service, resp.ID, userCodes); err != nil {
+				// Group was created but verification failed
+				// We still want to keep the group in state, but report the error
+				return diag.Errorf("private cloud group created successfully (ID: %s), but user code verification failed: %s. You can retry by running terraform apply again.", resp.ID, err)
+			}
+			log.Printf("[INFO] User codes verified successfully for Private Cloud Group ID: %v", resp.ID)
+		}
+		_ = v // suppress unused variable warning
+	}
 
 	return resourcePrivateCloudGroupRead(ctx, d, meta)
 }
@@ -193,10 +244,12 @@ func resourcePrivateCloudGroupRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("longitude", resp.Longitude)
 	_ = d.Set("override_version_profile", resp.OverrideVersionProfile)
 	_ = d.Set("microtenant_id", resp.MicrotenantID)
-	_ = d.Set("site_id", resp.SiteID)
+	//_ = d.Set("site_id", resp.SiteID)
 	_ = d.Set("upgrade_day", resp.UpgradeDay)
 	_ = d.Set("upgrade_time_in_secs", resp.UpgradeTimeInSecs)
 	_ = d.Set("version_profile_id", resp.VersionProfileID)
+	_ = d.Set("version_profile_name", resp.VersionProfileName)
+	_ = d.Set("enrollment_cert_id", resp.EnrollmentCertID)
 	return nil
 }
 
@@ -207,6 +260,11 @@ func resourcePrivateCloudGroupUpdate(ctx context.Context, d *schema.ResourceData
 	microTenantID := GetString(d.Get("microtenant_id"))
 	if microTenantID != "" {
 		service = service.WithMicroTenant(microTenantID)
+	}
+
+	// Ensure version_profile_id is set if version_profile_name is provided
+	if err := validateAndSetProfileNameID(ctx, d, service); err != nil {
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -225,6 +283,19 @@ func resourcePrivateCloudGroupUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
+	// Verify user codes if they changed
+	if d.HasChange("user_codes") {
+		if v, ok := d.GetOk("user_codes"); ok {
+			userCodes := SetToStringList(d, "user_codes")
+			if len(userCodes) > 0 {
+				if err := verifyPrivateCloudUserCodes(ctx, service, id, userCodes); err != nil {
+					return diag.Errorf("private cloud group updated successfully (ID: %s), but user code verification failed: %s", id, err)
+				}
+				log.Printf("[INFO] User codes verified successfully for Private Cloud Group ID: %v", id)
+			}
+			_ = v // suppress unused variable warning
+		}
+	}
 	return resourcePrivateCloudGroupRead(ctx, d, meta)
 }
 
@@ -260,9 +331,34 @@ func expandPrivateCloudGroup(d *schema.ResourceData) private_cloud_group.Private
 		Longitude:              d.Get("longitude").(string),
 		OverrideVersionProfile: d.Get("override_version_profile").(bool),
 		MicrotenantID:          d.Get("microtenant_id").(string),
-		SiteID:                 d.Get("site_id").(string),
-		UpgradeDay:             d.Get("upgrade_day").(string),
-		UpgradeTimeInSecs:      d.Get("upgrade_time_in_secs").(string),
-		VersionProfileID:       d.Get("version_profile_id").(string),
+		//SiteID:                 d.Get("site_id").(string),
+		UpgradeDay:         d.Get("upgrade_day").(string),
+		UpgradeTimeInSecs:  d.Get("upgrade_time_in_secs").(string),
+		VersionProfileID:   d.Get("version_profile_id").(string),
+		VersionProfileName: d.Get("version_profile_name").(string),
+		EnrollmentCertID:   d.Get("enrollment_cert_id").(string),
 	}
+}
+
+// verifyPrivateCloudUserCodes calls the OAuth2 user code verification API
+// to enroll Private Cloud Controllers using the user codes obtained from the deployed VMs.
+func verifyPrivateCloudUserCodes(ctx context.Context, service *zscaler.Service, componentGroupID string, userCodes []string) error {
+	if len(userCodes) == 0 {
+		return nil
+	}
+
+	log.Printf("[INFO] Verifying %d user code(s) for Private Cloud Group ID: %s", len(userCodes), componentGroupID)
+
+	request := &oauth2_user.UserCodeRequest{
+		ComponentGroupID: componentGroupID,
+		UserCodes:        userCodes,
+	}
+
+	resp, _, err := oauth2_user.VerifyUserCodes(ctx, service, "SITE_CONTROLLER_GRP", request)
+	if err != nil {
+		return fmt.Errorf("failed to verify user codes for Private Cloud Group %s: %w", componentGroupID, err)
+	}
+
+	log.Printf("[INFO] Successfully verified user codes for Private Cloud Group ID: %s, Response: %+v", componentGroupID, resp)
+	return nil
 }

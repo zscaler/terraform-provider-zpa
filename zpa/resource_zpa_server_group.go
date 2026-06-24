@@ -368,11 +368,19 @@ func detachServerGroupFromAllAppSegments(ctx context.Context, id string, service
 
 	for _, app := range apps {
 		ids := []servergroup.ServerGroup{}
+		changed := false
 		for _, appServerGroup := range app.ServerGroups {
 			if appServerGroup.ID == id {
+				changed = true
 				continue
 			}
 			ids = append(ids, servergroup.ServerGroup{ID: appServerGroup.ID})
+		}
+		// Only update application segments that actually referenced the server
+		// group being deleted. Updating unrelated segments causes unnecessary
+		// config churn and noisy audit history.
+		if !changed {
+			continue
 		}
 		app.ServerGroups = ids
 		if _, err := applicationsegment.Update(ctx, service, app.ID, app); err != nil {
@@ -399,11 +407,18 @@ func detachServerGroupFromAppConnectorGroups(ctx context.Context, serverGroupID 
 			continue
 		}
 		appServerGroups := []appconnectorgroup.AppServerGroup{}
+		changed := false
 		for _, s := range app.AppServerGroup {
 			if s.ID == serverGroupID {
+				changed = true
 				continue
 			}
 			appServerGroups = append(appServerGroups, s)
+		}
+		// Only update app connector groups that actually referenced the server
+		// group being deleted.
+		if !changed {
+			continue
 		}
 		app.AppServerGroup = appServerGroups
 		if _, err := appconnectorgroup.Update(ctx, appConnectorGroupService, app.ID, app); err != nil {
