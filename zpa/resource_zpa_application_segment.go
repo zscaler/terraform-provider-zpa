@@ -194,7 +194,6 @@ func resourceApplicationSegment() *schema.Resource {
 			"select_connector_close_to_app": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 			},
 			"use_in_dr_mode": {
 				Type:     schema.TypeBool,

@@ -12,9 +12,20 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.4.5``
+``Last updated: v4.4.6``
 
 ---
+
+## 4.4.6 (June 30, 2026)
+
+### Notes
+
+- Release date: **(June 30, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #663](https://github.com/zscaler/terraform-provider-zpa/pull/663) Remove `forceNew` from attribute `select_connector_close_to_app` in resource `zpa_application_segment`
 
 ## 4.4.5 (June 23, 2026)
 
