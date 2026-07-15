@@ -321,7 +321,7 @@ func resourceServiceEdgeGroupRead(ctx context.Context, d *schema.ResourceData, m
 
 	resp, _, err := serviceedgegroup.Get(ctx, service, d.Id())
 	if err != nil {
-		if err.(*errorx.ErrorResponse).IsObjectNotFound() {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing service edge group %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil

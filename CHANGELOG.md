@@ -1,5 +1,20 @@
 # Changelog
 
+## 4.4.7 (July 15, 2026)
+
+### Notes
+
+- Release date: **(July 15, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #671](https://github.com/zscaler/terraform-provider-zpa/pull/671) Added new `privileged_portal_capabilities` options `UPLOAD_INSPECTED_SANDBOX`, and `UPLOAD_INSPECTED_SCAN` to resource `zpa_policy_portal_access_rule`
+
+### Bug Fixes
+
+- [PR #671](https://github.com/zscaler/terraform-provider-zpa/pull/671) - Fixed a provider panic ([Issue #670](https://github.com/zscaler/terraform-provider-zpa/issues/670)) caused by an unguarded error type assertion in the read functions of `zpa_application_segment`, `zpa_server_group`, `zpa_service_edge_group`, and `zpa_lss_config_controller`. Transient API errors (e.g. cancelled/timed-out requests) are now surfaced as recoverable Terraform errors instead of crashing the provider.
+
 ## 4.4.6 (June 30, 2026)
 
 ### Notes
