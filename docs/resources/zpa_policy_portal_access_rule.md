@@ -107,6 +107,9 @@ resource "zpa_policy_portal_access_rule" "example" {
     - `access_uninspected_file` - (Boolean) Allows a User like an Admin to see all files marked Uninspected from other users in the tenant. Supported values: `true` or `false`
     - `request_approvals` - (Boolean) Indicates the request approvals is enabled or disabled. Supported values: `true` or `false`
     - `review_approvals` - (Boolean) Indicates the review approvals is enabled or disabled. Supported values: `true` or `false`
+    - `upload_inspected_sandbox` - (Boolean) Sandbox to inspect the file via ZIA sandbox and Scan to inspect the file via ZIA Deep Inspection
+    - `upload_inspected_scan` - (Boolean) Sandbox to inspect the file via ZIA sandbox and Scan to inspect the file via ZIA Deep Inspection
+    - `access_uninspected_file_sandbox` - (Boolean) Allows a User like an Admin to see all files marked Uninspected from other users in the tenant.
 
 ### Optional
 

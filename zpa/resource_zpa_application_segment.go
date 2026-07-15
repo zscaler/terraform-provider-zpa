@@ -334,7 +334,7 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 
 	resp, _, err := applicationsegment.Get(ctx, service, d.Id())
 	if err != nil {
-		if err.(*errorx.ErrorResponse).IsObjectNotFound() {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing application segment %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil

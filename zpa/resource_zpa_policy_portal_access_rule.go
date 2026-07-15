@@ -119,7 +119,6 @@ func resourcePolicyPortalAccessRule() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"delete_file": {
@@ -128,6 +127,11 @@ func resourcePolicyPortalAccessRule() *schema.Resource {
 							Description: "Allows a User to delete files to reclaim space. Allowing deletion will prevent auditing of the file.",
 						},
 						"access_uninspected_file": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Allows a User like an Admin to see all files marked Uninspected from other users in the tenant.",
+						},
+						"access_uninspected_file_sandbox": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Allows a User like an Admin to see all files marked Uninspected from other users in the tenant.",
@@ -141,6 +145,16 @@ func resourcePolicyPortalAccessRule() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Allows a User to review approvals",
+						},
+						"upload_inspected_sandbox": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Sandbox to inspect the file via ZIA sandbox and Scan to inspect the file via ZIA Deep Inspection",
+						},
+						"upload_inspected_scan": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Sandbox to inspect the file via ZIA sandbox and Scan to inspect the file via ZIA Deep Inspection",
 						},
 					},
 				},
@@ -316,15 +330,24 @@ func flattenPrivilegedPortalCapabilities(capabilities policysetcontrollerv2.Priv
 			capMap["request_approvals"] = true
 		case "REVIEW_APPROVALS":
 			capMap["review_approvals"] = true
+		case "UPLOAD_INSPECTED_SANDBOX":
+			capMap["upload_inspected_sandbox"] = true
+		case "UPLOAD_INSPECTED_SCAN":
+			capMap["upload_inspected_scan"] = true
+		case "ACCESS_UNINSPECTED_FILE_SANDBOX":
+			capMap["access_uninspected_file_sandbox"] = true
 		}
 	}
 
 	return []interface{}{
 		map[string]interface{}{
-			"delete_file":             capMap["delete_file"],
-			"access_uninspected_file": capMap["access_uninspected_file"],
-			"request_approvals":       capMap["request_approvals"],
-			"review_approvals":        capMap["review_approvals"],
+			"delete_file":                     capMap["delete_file"],
+			"access_uninspected_file":         capMap["access_uninspected_file"],
+			"access_uninspected_file_sandbox": capMap["access_uninspected_file_sandbox"],
+			"request_approvals":               capMap["request_approvals"],
+			"review_approvals":                capMap["review_approvals"],
+			"upload_inspected_sandbox":        capMap["upload_inspected_sandbox"],
+			"upload_inspected_scan":           capMap["upload_inspected_scan"],
 		},
 	}
 }
@@ -357,6 +380,15 @@ func expandPrivilegedPortalCapabilitiesRule(d *schema.ResourceData, policySetID 
 			}
 			if privCapsMap["review_approvals"].(bool) {
 				capabilities = append(capabilities, "REVIEW_APPROVALS")
+			}
+			if privCapsMap["upload_inspected_sandbox"].(bool) {
+				capabilities = append(capabilities, "UPLOAD_INSPECTED_SANDBOX")
+			}
+			if privCapsMap["upload_inspected_scan"].(bool) {
+				capabilities = append(capabilities, "UPLOAD_INSPECTED_SCAN")
+			}
+			if privCapsMap["access_uninspected_file_sandbox"].(bool) {
+				capabilities = append(capabilities, "ACCESS_UNINSPECTED_FILE_SANDBOX")
 			}
 		}
 	}

@@ -321,7 +321,7 @@ func resourceLSSConfigControllerRead(ctx context.Context, d *schema.ResourceData
 
 	resp, _, err := lssconfigcontroller.Get(ctx, service, d.Id())
 	if err != nil {
-		if err.(*errorx.ErrorResponse).IsObjectNotFound() {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing lss config controller %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil

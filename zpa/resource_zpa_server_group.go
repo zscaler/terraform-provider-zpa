@@ -234,7 +234,7 @@ func resourceServerGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	resp, _, err := servergroup.Get(ctx, service, d.Id())
 	if err != nil {
-		if err.(*errorx.ErrorResponse).IsObjectNotFound() {
+		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing server group %s from state because it no longer exists in ZPA", d.Id())
 			d.SetId("")
 			return nil

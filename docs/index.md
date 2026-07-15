@@ -31,7 +31,7 @@ The ZPA Terraform Provider now offers support for [OneAPI](https://help.zscaler.
 
 **NOTE** As of version v4.0.0, this Terraform provider offers backwards compatibility to the Zscaler legacy API framework. This is the recommended authentication method for organizations whose tenants are still not migrated to [Zidentity](https://help.zscaler.com/zidentity/what-zidentity). 
 
-**NOTE** Notice that OneAPI and Zidentity is not currently supported for the following clouds: `GOV` and `GOVUS`. Refer to the [Legacy API Framework](#legacy-api-framework) for more information on how authenticate to these environments
+**NOTE**: Attention Government customers. OneAPI and Zidentity now support the government (FedRAMP) clouds via the unified `cloud=gov` and `cloud=govus` values. See the [OneAPI Government (FedRAMP) Cloud Environments](#oneapi-government-fedramp-cloud-environments) section below for details.
 
 ## Zenith Community - ZPA Terraform Provider Introduction
 
@@ -97,7 +97,11 @@ provider "zpa" {
 }
 ```
 
-**NOTE**: The `zscaler_cloud` is optional and only required when authenticating to other environments i.e `beta`
+**NOTE**: The `zscaler_cloud` is optional for production comercial Clouds and ONLY required when authenticating to other environments. Currently the only supported value are:
+
+- Production Commericial Clouds: The cloud parameter `IS NOT` required.
+- Test (Beta) Commercial Clouds: `beta`
+- FedRAMP Clouds: `gov` or `govus`
 
 ⚠️ **WARNING:** Hard-coding credentials into any Terraform configuration is not recommended, and risks secret leakage should this file be committed to public version control
 
@@ -110,6 +114,24 @@ As of version v4.0.0, this provider supports authentication via the new Zscaler 
 Zscaler OneAPI uses the OAuth 2.0 authorization framework to provide secure access to Zscaler Private Access (ZPA) APIs. OAuth 2.0 allows third-party applications to obtain controlled access to protected resources using access tokens. OneAPI uses the Client Credentials OAuth flow, in which client applications can exchange their credentials with the authorization server for an access token and obtain access to the API resources, without any user authentication involved in the process.
 
 * [ZPA API](https://help.zscaler.com/oneapi/understanding-oneapi#:~:text=Workload%20Groups-,ZPA%20API,-Zscaler%20Private%20Access)
+
+## OneAPI Government (FedRAMP) Cloud Environments
+
+OneAPI supports the Zscaler government (FedRAMP) clouds. These are FedRAMP-isolated environments served by a dedicated Zidentity identity provider and API gateway. To authenticate, set the `cloud` attribute (or `ZSCALER_CLOUD` environment variable) to one of the supported government values:
+
+| Argument        | Description                                                         | Environment Variable     |
+|-----------------|---------------------------------------------------------------------|--------------------------|
+| `vanity_domain` | _(String)_ Refers to the domain name used by your organization     | `ZSCALER_VANITY_DOMAIN`  |
+| `zscaler_cloud` | _(String)_ Supported Zidentity Gov Cloud `gov` or `govus`                | `ZSCALER_CLOUD`          |
+
+**NOTE** FedRAMP cloud is only supported when upgrading to the provider version `>=v4.4.6`. Earlier versions are NOT supported.
+
+For example, authenticating to the GOV environment:
+
+```sh
+export ZSCALER_VANITY_DOMAIN="acme"
+export ZSCALER_CLOUD="gov"
+```
 
 ### OneAPI (API Client Scope)
 
