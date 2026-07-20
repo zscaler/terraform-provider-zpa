@@ -174,12 +174,12 @@ func resourcePolicyCapabilitiesAccessRule() *schema.Resource {
 						"join_session": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "Indicates the PRA Session Control and Monitoring capabilities to enable PRA Session Monitoring",
+							Description: "Join Sessions is set to Disabled. Select Enable to allow users to join and view sessions that have been shared with them",
 						},
 						"control_session": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "Indicates the PRA Session Control and Monitoring capabilities to enable PRA Session Monitoring",
+							Description: "Select Control to allow sharing and user control of live privileged sessions",
 						},
 					},
 				},

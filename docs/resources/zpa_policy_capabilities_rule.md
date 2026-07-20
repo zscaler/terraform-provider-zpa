@@ -101,6 +101,8 @@ resource "zpa_policy_capabilities_rule" "this" {
     - `monitor_session` - (Boolean) Indicates the PRA Monitoring Capabilities to enable the PRA Session Monitoring function. Supported values: `true` or `false`
     - `record_session` - (Boolean) Indicates the PRA Session Recording capabilities to enable PRA Session Recording. Supported values: `true` or `false`
     - `share_session` - (Boolean) Indicates the PRA Session Control and Monitoring capabilities to enable PRA Session Monitoring. Supported values: `true` or `false`
+    - `join_session` - (Boolean) Join Sessions is set to Disabled. Select Enable to allow users to join and view sessions that have been shared with them. Supported values: `true` or `false`
+    - `control_session` - (Boolean) Select Control to allow sharing and user control of live privileged sessions. Supported values: `true` or `false`
 
 ### Optional
 
