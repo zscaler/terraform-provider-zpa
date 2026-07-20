@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.4.8 (July 20, 2026)
+
+### Notes
+
+- Release date: **(July 20, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #673](https://github.com/zscaler/terraform-provider-zpa/pull/673) Added new `privileged_portal_capabilities` options `JOIN_SESSION`, and `CONTROL_SESSION` to resource `zpa_policy_capabilities_rule`
+
 ## 4.4.7 (July 15, 2026)
 
 ### Notes
