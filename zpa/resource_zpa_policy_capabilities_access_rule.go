@@ -171,6 +171,16 @@ func resourcePolicyCapabilitiesAccessRule() *schema.Resource {
 							Optional:    true,
 							Description: "Indicates the PRA Session Control and Monitoring capabilities to enable PRA Session Monitoring",
 						},
+						"join_session": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Indicates the PRA Session Control and Monitoring capabilities to enable PRA Session Monitoring",
+						},
+						"control_session": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Indicates the PRA Session Control and Monitoring capabilities to enable PRA Session Monitoring",
+						},
 					},
 				},
 			},
@@ -352,6 +362,10 @@ func flattenPrivilegedCapabilities(capabilities policysetcontrollerv2.Privileged
 			capMap["record_session"] = true
 		case "SHARE_SESSION":
 			capMap["share_session"] = true
+		case "JOIN_SESSION":
+			capMap["join_session"] = true
+		case "CONTROL_SESSION":
+			capMap["control_session"] = true
 		}
 	}
 
@@ -365,6 +379,8 @@ func flattenPrivilegedCapabilities(capabilities policysetcontrollerv2.Privileged
 		"monitor_session":       capMap["monitor_session"],
 		"record_session":        capMap["record_session"],
 		"share_session":         capMap["share_session"],
+		"join_session":          capMap["join_session"],
+		"control_session":       capMap["control_session"],
 	}}
 }
 
@@ -411,6 +427,12 @@ func expandPrivilegedCapabilitiesRule(d *schema.ResourceData, policySetID string
 			}
 			if privCapsMap["share_session"].(bool) {
 				capabilities = append(capabilities, "SHARE_SESSION")
+			}
+			if privCapsMap["join_session"].(bool) {
+				capabilities = append(capabilities, "JOIN_SESSION")
+			}
+			if privCapsMap["control_session"].(bool) {
+				capabilities = append(capabilities, "CONTROL_SESSION")
 			}
 		}
 	}
