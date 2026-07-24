@@ -591,6 +591,11 @@ func CommonPolicySchema() map[string]*schema.Schema {
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
+		"device_posture_failure_notification_enabled": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: "This is for enabling device posture failure notification.",
+		},
 	}
 }
 

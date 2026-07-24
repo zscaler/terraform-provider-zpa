@@ -234,12 +234,22 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
+				// Singleton wrapper block. A stable constant hash keeps the single
+				// element matched consistently within the set so computed nested
+				// values never cause the wrapper to churn.
+				Set: resourceInspectionCommonAppsDtoHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Computed: true,
+							// Inspection apps are an unordered collection. The hash
+							// keys on "domain" (the stable identity) and excludes
+							// computed fields (app_id, inspect_app_id, name,
+							// description, etc.) so ordering and server-populated
+							// values never produce a spurious diff.
+							Set: resourceInspectionAppsConfigHash,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"app_id": {
@@ -428,7 +438,9 @@ func resourceApplicationSegmentInspectionUpdate(ctx context.Context, d *schema.R
 
 	_ = resp // avoid unused if we don't use resp afterward
 
-	req := expandInspectionApplicationSegment(ctx, d, zClient, "")
+	// Pass the id so the expand resolves the tcp_port_range/tcp_port_ranges
+	// ambiguity against the remote resource instead of a stale computed block.
+	req := expandInspectionApplicationSegment(ctx, d, zClient, id)
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
 		return diag.FromErr(err)
@@ -712,4 +724,27 @@ func customizeDiffApplicationSegmentInspection(ctx context.Context, d *schema.Re
 	}
 
 	return nil
+}
+
+// resourceInspectionAppsConfigHash hashes an apps_config element by its stable
+// identity ("domain") only. Computed/server-populated fields (app_id,
+// inspect_app_id, name, description, certificate_id, ...) are intentionally
+// excluded so that reordering by the API or ID injection during apply does not
+// produce a spurious plan diff.
+func resourceInspectionAppsConfigHash(v interface{}) int {
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+	domain, _ := m["domain"].(string)
+	return schema.HashString(domain)
+}
+
+// resourceInspectionCommonAppsDtoHash returns a stable constant hash for the
+// common_apps_dto wrapper. The block is a singleton, so a constant keeps the one
+// element matched consistently within the set and lets Terraform diff its nested
+// apps_config contents normally instead of churning the whole wrapper whenever a
+// computed value changes.
+func resourceInspectionCommonAppsDtoHash(_ interface{}) int {
+	return 1
 }

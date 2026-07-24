@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.4.9 (July 24, 2026)
+
+### Notes
+
+- Release date: **(July 24, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #675](https://github.com/zscaler/terraform-provider-zpa/pull/675) Removed `omitempty` tag from attribute boolean value `bypass_on_reauth` on ZPA `applicationsegment` and `applicationsegmentbrowseraccess`
+- [PR #675](https://github.com/zscaler/terraform-provider-zpa/pull/675) Added support to attribute `devicePosture_failure_notification_enabled` on resources `zpa_policy_access_rule_v2` and `zpa_policy_access_rule`.
+
+
 ## 4.4.8 (July 20, 2026)
 
 ### Notes

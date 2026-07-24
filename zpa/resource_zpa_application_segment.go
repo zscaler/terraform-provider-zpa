@@ -73,7 +73,7 @@ func resourceApplicationSegment() *schema.Resource {
 			"bypass_on_reauth": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				// Computed: true,
 			},
 			"bypass_type": {
 				Type:        schema.TypeString,

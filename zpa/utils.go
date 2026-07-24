@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
@@ -393,5 +395,53 @@ func resolveEnrollmentCertID(ctx context.Context, d *schema.ResourceData, servic
 	}
 	log.Printf("[INFO] Auto-resolved enrollment_cert_id=%s for cert name %q", cert.ID, certName)
 	_ = d.Set("enrollment_cert_id", cert.ID)
+	return nil
+}
+
+// Ensures consistent formatting for multi-line text (aligns properly)
+func normalizeMultiLineString(val interface{}) string {
+	str, ok := val.(string)
+	if !ok || str == "" {
+		return ""
+	}
+
+	// Trim leading/trailing whitespace for consistency
+	str = strings.TrimSpace(str)
+
+	// Ensure uniform indentation by trimming each line
+	lines := strings.Split(str, "\n")
+	for i := range lines {
+		lines[i] = strings.TrimSpace(lines[i])
+	}
+
+	// Escape Terraform variable interpolation (`$` → `$$`)
+	escapedStr := strings.Join(lines, "\n")
+	escapedStr = strings.ReplaceAll(escapedStr, "$", "$$")
+
+	// Ensure the final newline to match Terraform formatting
+	return escapedStr + "\n"
+}
+
+// Suppresses differences in multi-line text by ignoring whitespace discrepancies
+func noChangeInMultiLineText(k, oldText, newText string, d *schema.ResourceData) bool {
+	if newText == "" {
+		return true
+	}
+
+	// Normalize both values and compare
+	oldTextNormalized := normalizeMultiLineString(oldText)
+	newTextNormalized := normalizeMultiLineString(newText)
+
+	return oldTextNormalized == newTextNormalized
+}
+
+func stringIsMultiLine(i interface{}, k cty.Path) diag.Diagnostics {
+	v, ok := i.(string)
+	if !ok {
+		return diag.Errorf("expected type of %s to be string", k)
+	}
+	if v == "" {
+		return diag.Errorf("expected %q text to not be empty, got %v", k, i)
+	}
 	return nil
 }

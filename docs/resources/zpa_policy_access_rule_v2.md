@@ -261,6 +261,96 @@ resource "zpa_policy_access_rule_v2" "this" {
 }
 ```
 
+## Example Usage - Multiple POSTURE Groups (Separate Condition Blocks)
+
+The API does **not** allow the same `object_type` to appear more than once within a
+single `conditions` block (it returns `duplicate.operand.found`). To evaluate more
+than one group of the same criteria type — for example two independent groups of
+posture profiles, each with its own operator — declare a **separate `conditions`
+block per group**. Every block is joined to the others with `AND` (see
+[Operator and Condition Behavior](#operator-and-condition-behavior)), while the
+operator *inside* each block (`AND`/`OR`) controls how that group's profiles combine.
+
+```hcl
+resource "zpa_policy_access_rule_v2" "this" {
+  name        = "Example_Posture_Groups"
+  description = "Example_Posture_Groups"
+  action      = "ALLOW"
+
+  # Group 1: both posture profiles must be VERIFIED (operator = AND)
+  conditions {
+    operator = "AND"
+    operands {
+      object_type = "POSTURE"
+      entry_values {
+        lhs = "cfab2ee9-9bf4-4482-9dcc-dadf7311c49b" # posture_udid
+        rhs = "true"
+      }
+      entry_values {
+        lhs = "c6e095ef-9fba-49b9-98b3-f6a7add2faff" # posture_udid
+        rhs = "true"
+      }
+    }
+  }
+
+  # Group 2: either posture profile may be VERIFIED (operator = OR)
+  conditions {
+    operator = "OR"
+    operands {
+      object_type = "POSTURE"
+      entry_values {
+        lhs = "661f8a33-2b4d-440f-be66-be4fad12e285" # posture_udid
+        rhs = "true"
+      }
+      entry_values {
+        lhs = "3c3aae3c-cd1d-452d-a58c-7e8ccc429e8e" # posture_udid
+        rhs = "true"
+      }
+    }
+  }
+}
+```
+
+## Operator and Condition Behavior
+
+A policy rule evaluates its criteria at three levels. Understanding these levels
+explains which operators are allowed where, and why some structures that Terraform
+and the API accept cannot be edited in the ZPA Admin GUI.
+
+1. **Rule level — the top-level `operator` argument.** This joins the separate
+   `conditions` blocks to each other. **Only `AND` is supported at this level**;
+   sending `OR` returns the API error `operator.or.not.supported.policy.rule`
+   (`"Operator:OR is not supported at policy rule level."`). The argument is
+   optional and computed — if you omit it, ZPA sets it to `AND` automatically, so
+   there is no need to set it explicitly. This is why the GUI shows a fixed `AND`
+   between criteria groups with no toggle.
+
+2. **Block level — the `operator` inside each `conditions` block.** This joins the
+   `operands` *within that one block* and may be `AND` or `OR`. It is managed per
+   block, so different blocks can use different operators.
+
+3. **Operand level — multiple `entry_values` (or `values`) inside one operand.**
+   Entries within a single operand are **always OR'd** together (any matching value
+   satisfies the operand), regardless of the block-level operator.
+
+### Rules and constraints
+
+- **No duplicate `object_type` inside one block.** The same `object_type` may not
+  appear in more than one `operands` block within a single `conditions` block; the
+  API rejects it with `duplicate.operand.found`. Aggregate all `entry_values`/`values`
+  under one operand, or, when you need two independent groups of the same type with
+  different operators, split them into separate `conditions` blocks (see
+  [Multiple POSTURE Groups](#example-usage---multiple-posture-groups-separate-condition-blocks)).
+- **Different `object_type` values may share a block.** A single `conditions` block
+  can contain operands of different object types (e.g. `SAML` + `SCIM_GROUP`, or
+  `CHROME_ENTERPRISE` + `CHROME_POSTURE_PROFILE`) combined by the block-level operator.
+- **GUI compatibility.** Rules that combine *different* object types within one block
+  using the `OR` operator are valid via Terraform and the API, but the ZPA Admin GUI's
+  criteria builder cannot always represent them. If such a rule is opened and re-saved
+  in the GUI, the GUI may silently drop the operands it cannot render. When you manage
+  a rule with Terraform, continue managing it with Terraform and avoid re-saving it in
+  the GUI.
+
 ## Schema
 
 ### Required
@@ -272,6 +362,8 @@ resource "zpa_policy_access_rule_v2" "this" {
 - `description` (String) This is the description of the access policy rule.
 - `action` (String) This is for providing the rule action. Supported values: ``ALLOW``, ``DENY``, and ``REQUIRE_APPROVAL``
 - `custom_msg` (String) This is for providing a customer message for the user.
+- `device_posture_failure_notification_enabled` (boolean) Enable Device Posture notification on failure.
+- `operator` (String) The rule-level operator that joins the separate `conditions` blocks. **Only `AND` is supported**; `OR` is rejected by the API (`operator.or.not.supported.policy.rule`). This argument is optional and computed — if omitted, it defaults to `AND`. See [Operator and Condition Behavior](#operator-and-condition-behavior).
 - `extranet_enabled` (boolean) Indiciates if the application is designated for Extranet Application Support (true) or not (false). Extranet applications connect to a partner site or offshore development center that is not directly available on your organization’s network.
 
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
@@ -286,8 +378,8 @@ resource "zpa_policy_access_rule_v2" "this" {
 
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
-- `conditions` (Block Set)  - This is for providing the set of conditions for the policy. Separate condition blocks for each object type is required.
-    - `operator` (String) - Supported values are: `AND` or `OR`
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy. Each block is joined to the others with the rule-level `AND` operator, and the same `object_type` cannot be repeated within a single block. See [Operator and Condition Behavior](#operator-and-condition-behavior) for the full operator semantics and constraints.
+    - `operator` (String) - The block-level operator that joins the `operands` within this block. Supported values are: `AND` or `OR`.
     - `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
         - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `BRANCH_CONNECTOR_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`, `LOCATION`.
         - `values` (Block List) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
