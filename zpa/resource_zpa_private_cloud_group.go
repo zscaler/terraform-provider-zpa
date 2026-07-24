@@ -331,7 +331,7 @@ func expandPrivateCloudGroup(d *schema.ResourceData) private_cloud_group.Private
 		Longitude:              d.Get("longitude").(string),
 		OverrideVersionProfile: d.Get("override_version_profile").(bool),
 		MicrotenantID:          d.Get("microtenant_id").(string),
-		//SiteID:                 d.Get("site_id").(string),
+		// SiteID:                 d.Get("site_id").(string),
 		UpgradeDay:         d.Get("upgrade_day").(string),
 		UpgradeTimeInSecs:  d.Get("upgrade_time_in_secs").(string),
 		VersionProfileID:   d.Get("version_profile_id").(string),

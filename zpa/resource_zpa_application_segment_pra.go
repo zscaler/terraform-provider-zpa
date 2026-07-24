@@ -216,9 +216,16 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Computed: true,
+							// PRA apps are an unordered collection from the API's
+							// perspective. A Set makes ordering irrelevant so a
+							// different order returned by the API never produces a
+							// spurious plan diff. The hash keys on "domain" (the
+							// stable identity the provider already uses to match
+							// PRA apps) and excludes computed fields.
+							Set: resourcePraAppsConfigHash,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"app_id": {
@@ -635,13 +642,44 @@ func containsStringSlice(slice []string, val string) bool {
 	return false
 }
 
+// resourcePraAppsConfigHash computes the Set hash for an apps_config element.
+// It keys on "domain" only — the stable identity the provider already uses to
+// match PRA apps (see praAppsMap/setAppIDsInCommonAppsDto) — and excludes
+// computed / server-populated fields (app_id, pra_app_id, name, app_types) so a
+// config element and the refreshed-state element hash identically regardless of
+// ordering.
+func resourcePraAppsConfigHash(v interface{}) int {
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+	domain := ""
+	if s, ok := m["domain"].(string); ok {
+		domain = s
+	}
+	return schema.HashString(domain)
+}
+
+// appsConfigToSlice normalizes the apps_config value (now a TypeSet) to a slice.
+// It also tolerates a []interface{} for backward compatibility.
+func appsConfigToSlice(v interface{}) []interface{} {
+	switch t := v.(type) {
+	case *schema.Set:
+		return t.List()
+	case []interface{}:
+		return t
+	default:
+		return nil
+	}
+}
+
 func expandCommonAppsDto(d *schema.ResourceData) applicationsegmentpra.CommonAppsDto {
 	result := applicationsegmentpra.CommonAppsDto{}
 	if commonAppsInterface, ok := d.GetOk("common_apps_dto"); ok {
 		commonAppsList := commonAppsInterface.([]interface{})
 		if len(commonAppsList) > 0 {
 			commonAppMap := commonAppsList[0].(map[string]interface{})
-			appsConfig := commonAppMap["apps_config"].([]interface{})
+			appsConfig := appsConfigToSlice(commonAppMap["apps_config"])
 			var appConfigs []applicationsegmentpra.AppsConfig
 
 			for _, appConfig := range appsConfig {
@@ -690,7 +728,7 @@ func customizeDiffApplicationSegmentPRA(ctx context.Context, d *schema.ResourceD
 
 	for _, dto := range commonAppsDto {
 		dtoMap := dto.(map[string]interface{})
-		appsConfig := dtoMap["apps_config"].([]interface{})
+		appsConfig := appsConfigToSlice(dtoMap["apps_config"])
 
 		for _, appConfig := range appsConfig {
 			appConfigMap := appConfig.(map[string]interface{})
@@ -718,7 +756,7 @@ func customizeDiffApplicationSegmentPRA(ctx context.Context, d *schema.ResourceD
 
 	for _, dto := range commonAppsDto {
 		dtoMap := dto.(map[string]interface{})
-		appsConfig := dtoMap["apps_config"].([]interface{})
+		appsConfig := appsConfigToSlice(dtoMap["apps_config"])
 
 		for _, app := range appsConfig {
 			appMap := app.(map[string]interface{})
@@ -741,7 +779,7 @@ func mapPRAAppsToCommonApps(d *schema.ResourceData, praApps []applicationsegment
 	currentCommonApps := d.Get("common_apps_dto").([]interface{})
 	var currentDomains []string
 	if len(currentCommonApps) > 0 {
-		appsConfig := currentCommonApps[0].(map[string]interface{})["apps_config"].([]interface{})
+		appsConfig := appsConfigToSlice(currentCommonApps[0].(map[string]interface{})["apps_config"])
 		for _, app := range appsConfig {
 			currentDomains = append(currentDomains, app.(map[string]interface{})["domain"].(string))
 		}
@@ -811,7 +849,7 @@ func setAppIDsInCommonAppsDto(d *schema.ResourceData, praApps []applicationsegme
 	}
 
 	dto := commonAppsDto[0].(map[string]interface{})
-	appsConfig := dto["apps_config"].([]interface{})
+	appsConfig := appsConfigToSlice(dto["apps_config"])
 
 	for _, appIface := range appsConfig {
 		appMap := appIface.(map[string]interface{})

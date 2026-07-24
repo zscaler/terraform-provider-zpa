@@ -125,7 +125,7 @@ resource "zpa_policy_access_rule" "scim_example" {
 - `description` (String) This is the description of the access policy rule.
 - `operator` (String) Supported values: ``AND``, ``OR``
 - `rule_order` (String, Deprecated)
-
+- `device_posture_failure_notification_enabled` (boolean) Enable Device Posture notification on failure.
   ⚠️ **WARNING:**: The attribute ``rule_order`` is now deprecated in favor of the new resource  [``policy_access_rule_reorder``](zpa_policy_access_rule_reorder.md)
 
 - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.

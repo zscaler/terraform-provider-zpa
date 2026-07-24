@@ -51,6 +51,12 @@ func resourceCBICertificates() *schema.Resource {
 			"pem": {
 				Type:     schema.TypeString,
 				Optional: true,
+				// The API can return the certificate with CRLF line endings and/or
+				// trailing whitespace. Normalize on write and ignore whitespace/
+				// line-ending-only differences so identical certificates do not
+				// produce a perpetual plan diff (e.g. after import).
+				StateFunc:        normalizeMultiLineString,
+				DiffSuppressFunc: noChangeInMultiLineText,
 			},
 		},
 	}

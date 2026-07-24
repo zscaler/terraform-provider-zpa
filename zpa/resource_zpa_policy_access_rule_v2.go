@@ -68,6 +68,11 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 				Computed:    true,
 				Description: "This is for providing a customer message for the user.",
 			},
+			"device_posture_failure_notification_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "This is for enabling device posture failure notification.",
+			},
 			"conditions": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -312,6 +317,7 @@ func resourcePolicyAccessV2Read(ctx context.Context, d *schema.ResourceData, met
 	_ = d.Set("policy_set_id", policySetID)
 	_ = d.Set("custom_msg", v2PolicyRule.CustomMsg)
 	_ = d.Set("extranet_enabled", resp.ExtranetEnabled)
+	_ = d.Set("device_posture_failure_notification_enabled", resp.DevicePostureFailureNotificationEnabled)
 	_ = d.Set("conditions", flattenConditionsV2(v2PolicyRule.Conditions))
 	_ = d.Set("app_server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
@@ -403,15 +409,16 @@ func expandCreatePolicyRuleV2(d *schema.ResourceData, policySetID string) (*poli
 		return nil, err
 	}
 	rule := &policysetcontrollerv2.PolicyRule{
-		ID:              d.Get("id").(string),
-		Name:            d.Get("name").(string),
-		Description:     d.Get("description").(string),
-		Action:          d.Get("action").(string),
-		CustomMsg:       d.Get("custom_msg").(string),
-		Operator:        d.Get("operator").(string),
-		PolicySetID:     policySetID,
-		ExtranetEnabled: d.Get("extranet_enabled").(bool),
-		Conditions:      conditions,
+		ID:                                      d.Get("id").(string),
+		Name:                                    d.Get("name").(string),
+		Description:                             d.Get("description").(string),
+		Action:                                  d.Get("action").(string),
+		CustomMsg:                               d.Get("custom_msg").(string),
+		Operator:                                d.Get("operator").(string),
+		PolicySetID:                             policySetID,
+		ExtranetEnabled:                         d.Get("extranet_enabled").(bool),
+		DevicePostureFailureNotificationEnabled: d.Get("device_posture_failure_notification_enabled").(bool),
+		Conditions:                              conditions,
 		AppServerGroups: func() []servergroup.ServerGroup {
 			groups := expandAppServerGroups(d)
 			if groups == nil {

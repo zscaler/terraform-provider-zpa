@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -27,12 +28,18 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				return nil
 			}
 
-			clientlessApps, ok := clientlessAppsRaw.([]interface{})
-			if !ok {
+			// clientless_apps is a TypeSet; normalize to a slice for validation.
+			var clientlessApps []interface{}
+			switch v := clientlessAppsRaw.(type) {
+			case *schema.Set:
+				clientlessApps = v.List()
+			case []interface{}:
+				clientlessApps = v
+			default:
 				return nil
 			}
 
-			for i, appRaw := range clientlessApps {
+			for _, appRaw := range clientlessApps {
 				app, ok := appRaw.(map[string]interface{})
 				if !ok {
 					continue
@@ -47,8 +54,8 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 
 				if extFieldsSet && certSet {
 					return fmt.Errorf(
-						"clientless_apps[%d]: 'certificate_id' cannot be set when either 'ext_label' or 'ext_domain' is configured",
-						i,
+						"clientless_apps app %q: 'certificate_id' cannot be set when either 'ext_label' or 'ext_domain' is configured",
+						app["name"],
 					)
 				}
 			}
@@ -241,8 +248,15 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				Description: "Name of the application.",
 			},
 			"clientless_apps": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
+				// Clientless apps are an unordered collection from the API's
+				// perspective. Using a Set (instead of a List) makes ordering
+				// irrelevant so a different order returned by the API never
+				// produces a spurious plan diff. The custom Set hash below only
+				// considers user-configurable fields and deliberately excludes
+				// computed fields so config and refreshed state hash identically.
+				Set: resourceBaClientlessAppsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"app_id": {
@@ -476,16 +490,26 @@ func resourceApplicationSegmentBrowserAccessUpdate(ctx context.Context, d *schem
 		return diag.FromErr(err)
 	}
 
-	// Step 2: Build the update payload
-	req := expandBrowserAccess(ctx, d, zClient, "")
+	// Step 2: Build the update payload. The id must be passed so the expand can
+	// compare the state-echoed tcp_port_range/udp_port_range blocks against the
+	// remote resource; with an empty id the comparison is skipped and a stale
+	// computed tcp_port_range wins over a user-updated tcp_port_ranges list,
+	// silently dropping newly added ports from the PUT payload.
+	req := expandBrowserAccess(ctx, d, zClient, id)
 
-	// Step 3: Inject app_id and clientless_apps.id from the existing configuration
+	// Step 3: Inject app_id and clientless_apps.id from the existing configuration.
+	// Match existing clientless apps by name (their stable identity) rather than
+	// by list index: clientless_apps is now a Set, so the order returned by the
+	// API/expand is not guaranteed to line up positionally with the request.
 	req.ID = existingSegment.ID // Assign app_id to the parent application
-	for i, clientlessApp := range req.ClientlessApps {
-		if i < len(existingSegment.ClientlessApps) {
-			clientlessApp.ID = existingSegment.ClientlessApps[i].ID // Existing clientless_app id
-			clientlessApp.AppID = existingSegment.ID                // Assign parent app_id to clientless_app
-			req.ClientlessApps[i] = clientlessApp
+	existingClientlessByName := make(map[string]applicationsegmentbrowseraccess.ClientlessApps, len(existingSegment.ClientlessApps))
+	for _, existing := range existingSegment.ClientlessApps {
+		existingClientlessByName[existing.Name] = existing
+	}
+	for i := range req.ClientlessApps {
+		if existing, ok := existingClientlessByName[req.ClientlessApps[i].Name]; ok {
+			req.ClientlessApps[i].ID = existing.ID           // Preserve existing clientless_app id
+			req.ClientlessApps[i].AppID = existingSegment.ID // Assign parent app_id to clientless_app
 		}
 	}
 
@@ -500,12 +524,31 @@ func resourceApplicationSegmentBrowserAccessUpdate(ctx context.Context, d *schem
 		return diag.FromErr(fmt.Errorf("please provide a valid segment group for the browser access application segment"))
 	}
 
-	// Step 5: Perform the update
+	// Step 5: The API validates each clientless app's port against the port
+	// ranges already persisted on the application. When a new port is introduced
+	// in the same apply that adds/updates a clientless app using it, a single PUT
+	// fails with "invalid.clientless.port" because the new range is not yet
+	// committed. To handle this transparently, first commit the port ranges
+	// (keeping the currently-persisted clientless apps), then apply the full
+	// desired state in Step 6.
+	if browserAccessClientlessPortsNeedPrewrite(existingSegment, &req) {
+		portPrewrite := req
+		portPrewrite.ClientlessApps = existingSegment.ClientlessApps
+		portPrewrite.TCPPortRanges = unionPortRanges(existingSegment.TCPPortRanges, convertPortsToListString(existingSegment.TCPAppPortRange), req.TCPPortRanges)
+		portPrewrite.UDPPortRanges = unionPortRanges(existingSegment.UDPPortRanges, convertPortsToListString(existingSegment.UDPAppPortRange), req.UDPPortRanges)
+
+		log.Printf("[INFO] Pre-writing port ranges for browser access %s before attaching clientless apps that use newly added ports", id)
+		if _, err := applicationsegmentbrowseraccess.Update(ctx, service, id, &portPrewrite); err != nil {
+			return diag.FromErr(fmt.Errorf("failed to pre-write port ranges before updating clientless apps: %w", err))
+		}
+	}
+
+	// Step 6: Perform the update with the full desired state
 	if _, err := applicationsegmentbrowseraccess.Update(ctx, service, id, &req); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Step 6: Refresh the state after updating
+	// Step 7: Refresh the state after updating
 	return resourceApplicationSegmentBrowserAccessRead(ctx, d, meta)
 }
 
@@ -631,10 +674,48 @@ func expandBrowserAccess(ctx context.Context, d *schema.ResourceData, zClient *C
 	return details
 }
 
+// resourceBaClientlessAppsHash computes the Set hash for a clientless_apps
+// element. It hashes only user-configurable fields and deliberately excludes
+// computed / server-populated fields (id, app_id, cname, enabled,
+// trust_untrusted_cert) so that a config element (which lacks those values) and
+// the refreshed-state element (which has them) hash to the same value. This
+// keeps the set order-independent without introducing add/remove churn.
+func resourceBaClientlessAppsHash(v interface{}) int {
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+	getStr := func(k string) string {
+		if s, ok := m[k].(string); ok {
+			return s
+		}
+		return ""
+	}
+	getBool := func(k string) bool {
+		if b, ok := m[k].(bool); ok {
+			return b
+		}
+		return false
+	}
+	key := fmt.Sprintf("%s|%s|%s|%s|%s|%s|%t|%s|%s|%s",
+		getStr("name"),
+		getStr("domain"),
+		getStr("application_port"),
+		getStr("application_protocol"),
+		getStr("certificate_id"),
+		getStr("description"),
+		getBool("allow_options"),
+		getStr("ext_label"),
+		getStr("ext_domain"),
+		getStr("microtenant_id"),
+	)
+	return schema.HashString(key)
+}
+
 func expandClientlessApps(d *schema.ResourceData) []applicationsegmentbrowseraccess.ClientlessApps {
 	clientlessInterface, ok := d.GetOk("clientless_apps")
 	if ok {
-		clientless := clientlessInterface.([]interface{})
+		clientless := clientlessInterface.(*schema.Set).List()
 		log.Printf("[INFO] clientless apps data: %+v\n", clientless)
 		var clientlessApps []applicationsegmentbrowseraccess.ClientlessApps
 		for _, clientlessApp := range clientless {
@@ -662,6 +743,112 @@ func expandClientlessApps(d *schema.ResourceData) []applicationsegmentbrowseracc
 	}
 
 	return []applicationsegmentbrowseraccess.ClientlessApps{}
+}
+
+// portInterval represents an inclusive [from, to] TCP/UDP port range.
+type portInterval struct {
+	from int
+	to   int
+}
+
+// parsePortPairsToIntervals converts a flat [from, to, from, to, ...] slice
+// (the shape of TCPPortRanges/UDPPortRanges) into a list of intervals.
+func parsePortPairsToIntervals(pairs []string) []portInterval {
+	intervals := make([]portInterval, 0, len(pairs)/2)
+	for i := 0; i+1 < len(pairs); i += 2 {
+		from, errFrom := strconv.Atoi(strings.TrimSpace(pairs[i]))
+		to, errTo := strconv.Atoi(strings.TrimSpace(pairs[i+1]))
+		if errFrom != nil || errTo != nil {
+			continue
+		}
+		if from > to {
+			from, to = to, from
+		}
+		intervals = append(intervals, portInterval{from: from, to: to})
+	}
+	return intervals
+}
+
+// networkPortsToIntervals converts a list of common.NetworkPorts (from/to) into
+// a list of intervals.
+func networkPortsToIntervals(ports []common.NetworkPorts) []portInterval {
+	intervals := make([]portInterval, 0, len(ports))
+	for _, p := range ports {
+		from, errFrom := strconv.Atoi(strings.TrimSpace(p.From))
+		to, errTo := strconv.Atoi(strings.TrimSpace(p.To))
+		if errFrom != nil || errTo != nil {
+			continue
+		}
+		if from > to {
+			from, to = to, from
+		}
+		intervals = append(intervals, portInterval{from: from, to: to})
+	}
+	return intervals
+}
+
+func portWithinIntervals(port int, intervals []portInterval) bool {
+	for _, iv := range intervals {
+		if port >= iv.from && port <= iv.to {
+			return true
+		}
+	}
+	return false
+}
+
+// browserAccessRequestPortIntervals gathers every port interval declared on a
+// request/response, from both the flat *PortRanges slices and the structured
+// *AppPortRange blocks.
+func browserAccessRequestPortIntervals(ba *applicationsegmentbrowseraccess.BrowserAccess) []portInterval {
+	intervals := parsePortPairsToIntervals(ba.TCPPortRanges)
+	intervals = append(intervals, parsePortPairsToIntervals(ba.UDPPortRanges)...)
+	intervals = append(intervals, networkPortsToIntervals(ba.TCPAppPortRange)...)
+	intervals = append(intervals, networkPortsToIntervals(ba.UDPAppPortRange)...)
+	return intervals
+}
+
+// browserAccessClientlessPortsNeedPrewrite reports whether any clientless app in
+// the desired request uses a port that is not yet part of the port ranges
+// currently persisted on the application. When true, the update must first
+// commit the port ranges before the clientless apps can be attached (see the
+// two-phase logic in the Update function).
+func browserAccessClientlessPortsNeedPrewrite(existing, req *applicationsegmentbrowseraccess.BrowserAccess) bool {
+	intervals := browserAccessRequestPortIntervals(existing)
+
+	for _, app := range req.ClientlessApps {
+		portStr := strings.TrimSpace(app.ApplicationPort)
+		if portStr == "" {
+			continue
+		}
+		port, err := strconv.Atoi(portStr)
+		if err != nil {
+			continue
+		}
+		if !portWithinIntervals(port, intervals) {
+			return true
+		}
+	}
+	return false
+}
+
+// unionPortRanges merges one or more flat [from, to, ...] port-range slices into
+// a single deduplicated slice, preserving the order in which pairs are first
+// seen. Used to build the port ranges for the pre-write phase so no existing
+// clientless app loses a port it currently depends on.
+func unionPortRanges(rangeSets ...[]string) []string {
+	var union []string
+	seen := make(map[string]struct{})
+	for _, set := range rangeSets {
+		for i := 0; i+1 < len(set); i += 2 {
+			key := set[i] + "-" + set[i+1]
+			if _, ok := seen[key]; ok {
+				continue
+			}
+			seen[key] = struct{}{}
+			union = append(union, set[i], set[i+1])
+		}
+	}
+	return union
 }
 
 func flattenBaClientlessApps(clientlessApp *applicationsegmentbrowseraccess.BrowserAccess) []interface{} {

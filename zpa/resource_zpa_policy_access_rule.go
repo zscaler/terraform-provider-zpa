@@ -166,6 +166,7 @@ func resourcePolicyAccessRead(ctx context.Context, d *schema.ResourceData, meta 
 	_ = d.Set("priority", resp.Priority)
 	_ = d.Set("lss_default_rule", resp.LSSDefaultRule)
 	_ = d.Set("microtenant_id", microTenantID)
+	_ = d.Set("device_posture_failure_notification_enabled", resp.DevicePostureFailureNotificationEnabled)
 	_ = d.Set("conditions", flattenPolicyConditions(resp.Conditions))
 	_ = d.Set("app_server_groups", flattenCommonAppServerGroupSimple(resp.AppServerGroups))
 	_ = d.Set("app_connector_groups", flattenCommonAppConnectorGroups(resp.AppConnectorGroups))
@@ -245,21 +246,22 @@ func expandCreatePolicyRule(d *schema.ResourceData, policySetID string) (*policy
 		return nil, err
 	}
 	return &policysetcontroller.PolicyRule{
-		ID:                d.Get("id").(string),
-		Name:              d.Get("name").(string),
-		Description:       d.Get("description").(string),
-		Action:            d.Get("action").(string),
-		ActionID:          d.Get("action_id").(string),
-		BypassDefaultRule: d.Get("bypass_default_rule").(bool),
-		CustomMsg:         d.Get("custom_msg").(string),
-		DefaultRule:       d.Get("default_rule").(bool),
-		Operator:          d.Get("operator").(string),
-		PolicySetID:       policySetID,
-		PolicyType:        d.Get("policy_type").(string),
-		Priority:          d.Get("priority").(string),
-		MicroTenantID:     d.Get("microtenant_id").(string),
-		LSSDefaultRule:    d.Get("lss_default_rule").(bool),
-		Conditions:        conditions,
+		ID:                                      d.Get("id").(string),
+		Name:                                    d.Get("name").(string),
+		Description:                             d.Get("description").(string),
+		Action:                                  d.Get("action").(string),
+		ActionID:                                d.Get("action_id").(string),
+		BypassDefaultRule:                       d.Get("bypass_default_rule").(bool),
+		CustomMsg:                               d.Get("custom_msg").(string),
+		DefaultRule:                             d.Get("default_rule").(bool),
+		Operator:                                d.Get("operator").(string),
+		PolicySetID:                             policySetID,
+		PolicyType:                              d.Get("policy_type").(string),
+		Priority:                                d.Get("priority").(string),
+		MicroTenantID:                           d.Get("microtenant_id").(string),
+		LSSDefaultRule:                          d.Get("lss_default_rule").(bool),
+		DevicePostureFailureNotificationEnabled: d.Get("device_posture_failure_notification_enabled").(bool),
+		Conditions:                              conditions,
 		AppServerGroups: func() []servergroup.ServerGroup {
 			groups := expandAppServerGroups(d)
 			if groups == nil {
