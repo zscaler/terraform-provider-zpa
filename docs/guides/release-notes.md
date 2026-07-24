@@ -28,7 +28,7 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 ### Enhancements
 
 - [PR #675](https://github.com/zscaler/terraform-provider-zpa/pull/675) Removed `omitempty` tag from attribute boolean value `bypass_on_reauth` on ZPA `applicationsegment` and `applicationsegmentbrowseraccess`
-- [PR #675](https://github.com/zscaler/terraform-provider-zpa/pull/675) Added support to attribute `devicePosture_failure_notification_enabled` on resources `zpa_policy_access_rule_v2` and `zpa_policy_access_rule`.
+- [PR #675](https://github.com/zscaler/terraform-provider-zpa/pull/675) Added support to attribute `device_posture_failure_notification_enabled` on resources `zpa_policy_access_rule_v2` and `zpa_policy_access_rule`.
 
 ### Notes
 
