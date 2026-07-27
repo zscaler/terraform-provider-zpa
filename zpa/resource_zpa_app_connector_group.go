@@ -339,6 +339,13 @@ func resourceAppConnectorGroupUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
+	// Auto-resolve enrollment_cert_id by looking up "Connector" enrollment cert when not provided.
+	// The API requires enrollmentCertId on update as well, so this must run on every
+	// update to cover groups whose state has no enrollment_cert_id value.
+	if err := resolveEnrollmentCertID(ctx, d, service, "Connector"); err != nil {
+		return diag.FromErr(err)
+	}
+
 	id := d.Id()
 	log.Printf("[INFO] Updating app connector group ID: %v\n", id)
 	req := expandAppConnectorGroup(d)

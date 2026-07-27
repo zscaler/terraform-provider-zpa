@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.4.10 (July 27, 2026)
+
+### Notes
+
+- Release date: **(July 27, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #678](https://github.com/zscaler/terraform-provider-zpa/pull/678) - Fixed ([Issue #677](https://github.com/zscaler/terraform-provider-zpa/issues/677)) where the `enrollment_cert_id` auto-resolution only ran on create. The resolution now also runs on update for the resources `zpa_app_connector_group`, `zpa_service_edge_group`, and `zpa_private_cloud_group`, preventing a `missing.mandatory.params` API error when the attribute is empty in the state.
+
 ## 4.4.9 (July 24, 2026)
 
 ### Notes
