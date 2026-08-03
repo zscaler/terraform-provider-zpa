@@ -1,11 +1,11 @@
 module github.com/zscaler/terraform-provider-zpa/v4
 
-go 1.25.8
+go 1.26
 
 require (
 	github.com/bflad/tfproviderlint v0.31.0
 	github.com/client9/misspell v0.3.4
-	github.com/fabiotavarespr/iso3166 v0.0.3
+	github.com/fabiotavarespr/iso3166 v0.0.5
 	github.com/hashicorp/go-cty v1.5.0
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/terraform-plugin-docs v0.25.0
