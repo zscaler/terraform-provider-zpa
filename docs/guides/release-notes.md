@@ -12,9 +12,35 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.4.10``
+``Last updated: v4.4.11``
 
 ---
+
+## 4.4.12 (Unreleased)
+
+### Notes
+
+- Supported Terraform version: **v1.x**
+
+### Features
+
+- Added ([Issue #684](https://github.com/zscaler/terraform-provider-zpa/issues/684)) the provider attribute `skip_credentials_validation` (env var `ZSCALER_SKIP_CREDENTIALS_VALIDATION`). When enabled, the provider skips credential validation and API client initialization so that configurations where every `zpa_*` resource and data source is conditionally disabled (e.g., `count = 0`) can plan and apply without credentials — e.g., multi-environment deployments where Zscaler is not present in every environment. A warning is emitted at configure time, and any resource or data source that does attempt an API call fails with an explanatory error instead of a panic.
+
+## 4.4.11 (July 30, 2026)
+
+### Notes
+
+- Release date: **(July 30, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Deprecations
+
+- [PR #679](https://github.com/zscaler/terraform-provider-zpa/pull/679) - Deprecated the `parallelism` provider attribute. The attribute has no effect and will be removed in a future major release; remove it from the provider block. Rate limiting requires no configuration: when a limit is exceeded, the API returns the interval to wait and the provider retries the request automatically.
+
+### Documentation
+
+- [PR #679](https://github.com/zscaler/terraform-provider-zpa/pull/679) - Removed the `parallelism` attribute from the provider argument reference.
+- [PR #679](https://github.com/zscaler/terraform-provider-zpa/pull/679) - Removed the legacy guidance recommending that the number of concurrent API calls be limited to one when provisioning the resources `zpa_policy_access_rule`, `zpa_policy_inspection_rule`, `zpa_policy_timeout_rule`, `zpa_policy_forwarding_rule`, and `zpa_policy_isolation_rule`. Lowering Terraform's `-parallelism` flag applies to an entire run, cannot be scoped to individual resource types, and significantly slows large deployments.
 
 ## 4.4.10 (July 27, 2026)
 
@@ -1576,20 +1602,6 @@ Upgraded to Zscaler SDK GO v2.5.31 to address new ZPA error handling to retry on
   - Internal References:
     - [ET-53585](https://jira.corp.zscaler.com/browse/ET-53585)
     - [ET-48860](https://confluence.corp.zscaler.com/display/ET/ET-48860+incorrect+rules+order)
-
-Terraform uses goroutines to speed up deployment, but the number of parallel
-operations it launches may exceed [what is recommended](https://help.zscaler.com/zpa/about-rate-limiting).
-When configuring ZPA Policies we recommend to limit the number of concurrent API calls to **ONE**. This limit ensures that there is no performance impact during the provisioning of large Terraform configurations involving access policy creation.
-
-This recommendation applies to the following resources:
-
-- ``zpa_policy_access_rule``
-- ``zpa_policy_inspection_rule``
-- ``zpa_policy_timeout_rule``
-- ``zpa_policy_forwarding_rule``
-- ``zpa_policy_isolation_rule``
-
-In order to accomplish this, we recommend setting the [parallelism](https://www.terraform.io/cli/commands/apply#parallelism-n) value at this limit to prevent performance impacts.
 
 ## 2.7.6 (May, 20 2023)
 

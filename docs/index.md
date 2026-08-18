@@ -294,11 +294,11 @@ Before starting with this Terraform provider you must create an API Client in th
 
 * `http_proxy` - (Optional) This is a custom URL endpoint that can be used for unit testing or local caching proxies. Can also be sourced from the `ZSCALER_HTTP_PROXY` environment variable.
 
-* `parallelism` - (Optional) Number of concurrent requests to make within a resource where bulk operations are not possible. [Learn More](https://help.zscaler.com/oneapi/understanding-rate-limiting)
-
 * `max_retries` - (Optional) Maximum number of retries to attempt before returning an error, the default is `5`.
 
 * `request_timeout` - (Optional) Timeout for single request (in seconds) which is made to Zscaler, the default is `0` (means no limit is set). The maximum value can be `300`.
+
+* `skip_credentials_validation` - (Optional) When set to `true`, the provider skips credential validation and does not initialize the API client. Can also be sourced from the `ZSCALER_SKIP_CREDENTIALS_VALIDATION` environment variable. This is intended for configurations where the ZPA provider is declared but every `zpa_*` resource and data source is conditionally disabled (e.g., `count = 0`) — such as multi-environment deployments where Zscaler is not present in every environment. With this flag enabled, `terraform plan`/`apply` succeeds with a warning even when no credentials are supplied; any resource or data source that does attempt an API call fails with an explanatory error. Default: `false`.
 
 * `zpa_client_id` - (Required) A string that contains the legacy ZPA client ID.  Can also be sourced from the `ZPA_CLIENT_ID` environment variable.. Required when setting the attribute `use_legacy_client`
 
