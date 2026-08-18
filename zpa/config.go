@@ -22,26 +22,32 @@ import (
 type (
 	// Config contains our provider schema values and Zscaler clients.
 	Config struct {
-		clientID           string
-		clientSecret       string
-		customerID         string
-		microtenantID      string
-		vanityDomain       string
-		cloud              string
-		privateKey         string
-		httpProxy          string
-		retryCount         int
-		parallelism        int
-		backoff            bool
-		minWait            int
-		maxWait            int
-		logLevel           int
-		requestTimeout     int
-		useLegacyClient    bool
-		zscalerSDKClientV3 *zscaler.Client
-		logger             hclog.Logger
-		TerraformVersion   string // New field for Terraform version
-		ProviderVersion    string // New field for Provider version
+		clientID        string
+		clientSecret    string
+		customerID      string
+		microtenantID   string
+		vanityDomain    string
+		cloud           string
+		privateKey      string
+		httpProxy       string
+		retryCount      int
+		backoff         bool
+		minWait         int
+		maxWait         int
+		logLevel        int
+		requestTimeout  int
+		useLegacyClient bool
+		// skipCredentialsValidation disables SDK client construction entirely.
+		// Unlike the AWS provider's flag of the same name (which only skips a
+		// validation API call), the OneAPI SDK performs an OAuth handshake
+		// inside its constructor, so "skipping validation" here means never
+		// building the client. Resources receive an inert *Client and fail
+		// with a descriptive error if they attempt an API call.
+		skipCredentialsValidation bool
+		zscalerSDKClientV3        *zscaler.Client
+		logger                    hclog.Logger
+		TerraformVersion          string // New field for Terraform version
+		ProviderVersion           string // New field for Provider version
 
 		// Options for Legacy V2 SDK
 		zpaClientID     string
@@ -55,6 +61,11 @@ type Client struct {
 	Service          *zscaler.Service
 	policySetIDCache map[string]string // Cache for policySetIDs by type
 	mu               sync.RWMutex      // Mutex for cache access
+	// skipCredentialsValidation marks this client as inert: the provider was
+	// configured with skip_credentials_validation and Service is nil. Every
+	// resource/data source CRUD function is wrapped (see ZPAProvider) to
+	// return a descriptive error instead of dereferencing the nil Service.
+	skipCredentialsValidation bool
 }
 
 func (c *Client) GetConfig() *zscaler.Configuration {
@@ -68,7 +79,6 @@ func NewConfig(d *schema.ResourceData) *Config {
 		minWait:        2,
 		maxWait:        10,
 		retryCount:     100,
-		parallelism:    1,
 		logLevel:       int(hclog.Error),
 		requestTimeout: 240,
 	}
@@ -85,6 +95,12 @@ func NewConfig(d *schema.ResourceData) *Config {
 		config.useLegacyClient = val.(bool)
 	} else if os.Getenv("ZSCALER_USE_LEGACY_CLIENT") != "" {
 		config.useLegacyClient = strings.ToLower(os.Getenv("ZSCALER_USE_LEGACY_CLIENT")) == "true"
+	}
+
+	if val, ok := d.GetOk("skip_credentials_validation"); ok {
+		config.skipCredentialsValidation = val.(bool)
+	} else if os.Getenv("ZSCALER_SKIP_CREDENTIALS_VALIDATION") != "" {
+		config.skipCredentialsValidation = strings.ToLower(os.Getenv("ZSCALER_SKIP_CREDENTIALS_VALIDATION")) == "true"
 	}
 
 	if val, ok := d.GetOk("client_id"); ok {
@@ -166,10 +182,6 @@ func NewConfig(d *schema.ResourceData) *Config {
 
 	if val, ok := d.GetOk("max_retries"); ok {
 		config.retryCount = val.(int)
-	}
-
-	if val, ok := d.GetOk("parallelism"); ok {
-		config.parallelism = val.(int)
 	}
 
 	if val, ok := d.GetOk("backoff"); ok {
