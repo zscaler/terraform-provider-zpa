@@ -75,7 +75,7 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Computed:    true,
-				Description: "If autoAppProtectEnabled is set to true, this field indicates if the application segment’s traffic is inspected by AppProtection.",
+				Description: "Enables Auto App Protection, so the application segment's traffic is inspected by AppProtection. When true, the API manages the protocol of every common_apps_dto.apps_config entry itself and reports it as DYNAMIC; application_protocol must still be set (the API requires it) and the provider keeps the configured value in state.",
 			},
 			"bypass_on_reauth": {
 				Type:     schema.TypeBool,
@@ -231,13 +231,15 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				}, false),
 			},
 			"common_apps_dto": {
-				Type:     schema.TypeSet,
+				// Singleton wrapper block, kept as a TypeList exactly like
+				// zpa_application_segment_pra. It must NOT be a TypeSet with a
+				// constant hash: the SDK's set diff short-circuits when old and
+				// new element hash codes are equal and never recurses into the
+				// nested apps_config, so additions and removals of apps_config
+				// blocks would produce no plan diff and no PUT.
+				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
-				// Singleton wrapper block. A stable constant hash keeps the single
-				// element matched consistently within the set so computed nested
-				// values never cause the wrapper to churn.
-				Set: resourceInspectionCommonAppsDtoHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
@@ -277,31 +279,33 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 									"application_port": {
 										Type:     schema.TypeString,
 										Optional: true,
-										Computed: true,
+										// Computed: true,
 									},
 									"application_protocol": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Protocol for the inspection application. Supported values: HTTP, HTTPS. Required by the API on every write. When auto_app_protect_enabled is true the API manages the protocol itself and reports DYNAMIC; the provider keeps the configured value in state so the configuration does not drift.",
+										// Computed: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"HTTP",
 											"HTTPS",
 										}, false),
 									},
 									"certificate_id": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type: schema.TypeString,
+										// Computed: true,
 										Optional: true,
 									},
 									"domain": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type: schema.TypeString,
+										// Computed: true,
 										Optional: true,
 									},
 									"trust_untrusted_cert": {
-										Type:     schema.TypeBool,
-										Computed: true,
-										Optional: true,
+										Type: schema.TypeBool,
+										// Computed:    true,
+										Optional:    true,
+										Description: "Enables Use Untrusted Certificates for the inspection application, allowing inspection of applications that present self-signed or otherwise untrusted certificates. Equivalent to the Admin Portal's \"Use Untrusted Certificates\" option.",
 									},
 								},
 							},
@@ -436,7 +440,10 @@ func resourceApplicationSegmentInspectionUpdate(ctx context.Context, d *schema.R
 		return diag.FromErr(fmt.Errorf("error retrieving application segment: %v", err))
 	}
 
-	_ = resp // avoid unused if we don't use resp afterward
+	// Extract app_id and inspect_app_id from inspectionApps and set in common_apps_dto in state
+	if err := setInspectionAppIDsInCommonAppsDto(d, resp.InspectionAppDto); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting app_id and inspect_app_id in common_apps_dto: %v", err))
+	}
 
 	// Pass the id so the expand resolves the tcp_port_range/tcp_port_ranges
 	// ambiguity against the remote resource instead of a stale computed block.
@@ -569,7 +576,7 @@ func expandInspectionApplicationSegment(ctx context.Context, d *schema.ResourceD
 func expandInspectionCommonAppsDto(d *schema.ResourceData) applicationsegmentinspection.CommonAppsDto {
 	result := applicationsegmentinspection.CommonAppsDto{}
 	if commonAppsInterface, ok := d.GetOk("common_apps_dto"); ok {
-		commonAppsList := commonAppsInterface.(*schema.Set).List()
+		commonAppsList := commonAppsInterface.([]interface{})
 		if len(commonAppsList) > 0 {
 			commonAppMap := commonAppsList[0].(map[string]interface{})
 			result.AppsConfig = expandInspectionAppsConfig(commonAppMap["apps_config"])
@@ -579,13 +586,10 @@ func expandInspectionCommonAppsDto(d *schema.ResourceData) applicationsegmentins
 }
 
 func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationsegmentinspection.AppsConfig {
-	appsConfig, ok := appsConfigInterface.(*schema.Set)
-	if !ok {
-		return []applicationsegmentinspection.AppsConfig{}
-	}
+	appsConfig := appsConfigToSlice(appsConfigInterface)
 	log.Printf("[INFO] apps config data: %+v\n", appsConfig)
 	var commonAppConfigDto []applicationsegmentinspection.AppsConfig
-	for _, commonAppConfig := range appsConfig.List() {
+	for _, commonAppConfig := range appsConfig {
 		appConfigMap, ok := commonAppConfig.(map[string]interface{})
 		if ok {
 			// Automatically set `name` to match `domain` to prevent drift
@@ -622,79 +626,130 @@ func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationse
 	return commonAppConfigDto
 }
 
+// mapInspectAppsToCommonApps mirrors mapPRAAppsToCommonApps in
+// zpa_application_segment_pra: the apps currently in state are emitted first (in
+// their existing order), followed by any apps the API returned that are not yet
+// in state, all wrapped in the single common_apps_dto block.
 func mapInspectAppsToCommonApps(d *schema.ResourceData, inspectionApps []applicationsegmentinspection.InspectionAppDto) error {
-	// If the API returned any Inspection Apps, map them to common_apps_dto.apps_config
 	if len(inspectionApps) == 0 {
 		return nil
 	}
 
-	// Create a single common_apps_dto with multiple apps_config blocks
-	commonAppsConfig := make([]interface{}, len(inspectionApps))
-	for i, app := range inspectionApps {
-		commonAppMap := map[string]interface{}{
-			"app_id":               app.AppID, // Populate app_id from InspectionAppDto
-			"app_types":            []interface{}{"INSPECT"},
-			"application_protocol": app.ApplicationProtocol,
-			"application_port":     app.ApplicationPort,
-			"certificate_id":       app.CertificateID,
-			"description":          app.Description,
-			"domain":               app.Domain,
-			"name":                 app.Name,
-			// "protocols":            app.Protocols,
-			"trust_untrusted_cert": app.TrustUntrustedCert,
+	currentCommonApps := d.Get("common_apps_dto").([]interface{})
+	var currentDomains []string
+	currentByDomain := make(map[string]map[string]interface{})
+	if len(currentCommonApps) > 0 {
+		appsConfig := appsConfigToSlice(currentCommonApps[0].(map[string]interface{})["apps_config"])
+		for _, app := range appsConfig {
+			appMap := app.(map[string]interface{})
+			domain := appMap["domain"].(string)
+			currentDomains = append(currentDomains, domain)
+			currentByDomain[domain] = appMap
 		}
-		// Only set inspect_app_id if it's present in the response
-		if app.ID != "" {
-			commonAppMap["inspect_app_id"] = app.ID // Populate inspect_app_id from InspectAppID
-		}
-		commonAppsConfig[i] = commonAppMap
 	}
 
-	// Wrap commonAppsConfig in the common_apps_dto block
+	inspectionAppsMap := make(map[string]applicationsegmentinspection.InspectionAppDto)
+	for _, app := range inspectionApps {
+		inspectionAppsMap[app.Domain] = app
+	}
+
+	toMap := func(app applicationsegmentinspection.InspectionAppDto) map[string]interface{} {
+		// applicationProtocol is mandatory on every write, but with Auto App
+		// Protection enabled the API manages the protocol itself and reports
+		// "DYNAMIC" (and no port) on read regardless of what was sent. Keep the
+		// configured values in state in that case so the config never drifts.
+		protocol := app.ApplicationProtocol
+		port := app.ApplicationPort
+		if current, ok := currentByDomain[app.Domain]; ok {
+			if protocol == "DYNAMIC" {
+				if v, ok := current["application_protocol"].(string); ok && v != "" {
+					protocol = v
+				}
+			}
+			if port == "" {
+				if v, ok := current["application_port"].(string); ok && v != "" {
+					port = v
+				}
+			}
+		}
+		return map[string]interface{}{
+			"name":                 app.Name,
+			"domain":               app.Domain,
+			"application_protocol": protocol,
+			"application_port":     port,
+			"app_types":            []interface{}{"INSPECT"},
+			"app_id":               app.AppID,
+			"inspect_app_id":       app.ID,
+			"certificate_id":       app.CertificateID,
+			"description":          app.Description,
+			"trust_untrusted_cert": app.TrustUntrustedCert,
+		}
+	}
+
+	var commonAppsConfig []interface{}
+	for _, domain := range currentDomains {
+		if app, exists := inspectionAppsMap[domain]; exists {
+			commonAppsConfig = append(commonAppsConfig, toMap(app))
+		}
+	}
+
+	for _, app := range inspectionApps {
+		if !contains(currentDomains, app.Domain) {
+			commonAppsConfig = append(commonAppsConfig, toMap(app))
+		}
+	}
+
 	commonAppsDto := []interface{}{
 		map[string]interface{}{
 			"apps_config": commonAppsConfig,
 		},
 	}
 
-	// Set common_apps_dto in the resource data
-	if err := d.Set("common_apps_dto", commonAppsDto); err != nil {
-		return fmt.Errorf("failed to set common_apps_dto: %s", err)
-	}
-	return nil
+	return d.Set("common_apps_dto", commonAppsDto)
 }
 
+// setInspectionAppIDsInCommonAppsDto mirrors setAppIDsInCommonAppsDto in
+// zpa_application_segment_pra: before an update, inject the server-side
+// app_id/inspect_app_id into each apps_config entry that matches an existing
+// inspection app by domain and name, and clear stale IDs on entries that don't.
 func setInspectionAppIDsInCommonAppsDto(d *schema.ResourceData, inspectionApps []applicationsegmentinspection.InspectionAppDto) error {
 	if len(inspectionApps) == 0 {
 		return nil
 	}
 
-	// Extract app_id and inspect_app_id from the first Inspect app in the list
-	appID := inspectionApps[0].AppID
-	inspectAppID := inspectionApps[0].ID
+	// Build a map of existing apps by domain
+	existingMap := make(map[string]applicationsegmentinspection.InspectionAppDto)
+	for _, app := range inspectionApps {
+		existingMap[app.Domain] = app
+	}
 
-	// Update the common_apps_dto with extracted app_id and inspect_app_id values
-	commonAppsDto := d.Get("common_apps_dto").(*schema.Set).List()
+	commonAppsDto := d.Get("common_apps_dto").([]interface{})
 	if len(commonAppsDto) == 0 {
 		return fmt.Errorf("common_apps_dto block is missing")
 	}
 
-	// Update the first entry in commonAppsDto.appsConfig with app_id and inspect_app_id
-	commonAppConfig := commonAppsDto[0].(map[string]interface{})
-	appsConfig := commonAppConfig["apps_config"].(*schema.Set).List()
+	dto := commonAppsDto[0].(map[string]interface{})
+	appsConfig := appsConfigToSlice(dto["apps_config"])
 
-	if len(appsConfig) > 0 {
-		appConfig := appsConfig[0].(map[string]interface{})
-		appConfig["app_id"] = appID
-		appConfig["inspect_app_id"] = inspectAppID
+	for _, appIface := range appsConfig {
+		appMap := appIface.(map[string]interface{})
+		domain := appMap["domain"].(string)
+		name := appMap["name"].(string)
+
+		// Only set IDs if domain matches existing inspection app
+		if existingApp, ok := existingMap[domain]; ok && existingApp.Name == name {
+			appMap["inspect_app_id"] = existingApp.ID
+			appMap["app_id"] = existingApp.AppID
+		} else {
+			// Clear stale IDs (this is crucial!)
+			appMap["inspect_app_id"] = ""
+			appMap["app_id"] = ""
+		}
 	}
 
-	// Write the updated config back to the resource data
-	if err := d.Set("common_apps_dto", commonAppsDto); err != nil {
-		return fmt.Errorf("failed to set common_apps_dto: %v", err)
-	}
-
-	return nil
+	// Write it back
+	dto["apps_config"] = appsConfig
+	return d.Set("common_apps_dto", []interface{}{dto})
 }
 
 func customizeDiffApplicationSegmentInspection(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
@@ -707,11 +762,11 @@ func customizeDiffApplicationSegmentInspection(ctx context.Context, d *schema.Re
 
 	// Validation for common_apps_dto.apps_config fields
 	commonAppsDto, ok := d.GetOk("common_apps_dto")
-	if !ok || len(commonAppsDto.(*schema.Set).List()) == 0 {
+	if !ok || len(commonAppsDto.([]interface{})) == 0 {
 		return nil // If there's no common_apps_dto, skip further validation
 	}
 
-	appsConfig := commonAppsDto.(*schema.Set).List()[0].(map[string]interface{})["apps_config"].(*schema.Set).List()
+	appsConfig := appsConfigToSlice(commonAppsDto.([]interface{})[0].(map[string]interface{})["apps_config"])
 	for _, config := range appsConfig {
 		appConfig := config.(map[string]interface{})
 		protocol := appConfig["application_protocol"].(string)
@@ -720,6 +775,13 @@ func customizeDiffApplicationSegmentInspection(ctx context.Context, d *schema.Re
 		// Check if protocol is HTTP and certificate ID is set
 		if protocol == "HTTP" && hasCertID && certID.(string) != "" {
 			return fmt.Errorf("certificate ID should not be set when 'application_protocol' is HTTP")
+		}
+
+		// HTTPS requires a certificate unless Auto App Protection is enabled,
+		// in which case the API manages the certificate itself.
+		if protocol == "HTTPS" && !autoAppProtectEnabled && (!hasCertID || certID.(string) == "") {
+			return fmt.Errorf("common_apps_dto.apps_config for domain %q: 'certificate_id' is required when 'application_protocol' is HTTPS and 'auto_app_protect_enabled' is not true",
+				appConfig["domain"])
 		}
 	}
 
@@ -738,13 +800,4 @@ func resourceInspectionAppsConfigHash(v interface{}) int {
 	}
 	domain, _ := m["domain"].(string)
 	return schema.HashString(domain)
-}
-
-// resourceInspectionCommonAppsDtoHash returns a stable constant hash for the
-// common_apps_dto wrapper. The block is a singleton, so a constant keeps the one
-// element matched consistently within the set and lets Terraform diff its nested
-// apps_config contents normally instead of churning the whole wrapper whenever a
-// computed value changes.
-func resourceInspectionCommonAppsDtoHash(_ interface{}) int {
-	return 1
 }

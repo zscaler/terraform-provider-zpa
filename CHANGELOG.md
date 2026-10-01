@@ -1,5 +1,28 @@
 # Changelog
 
+## 4.4.12 (October 1, 2026)
+
+### Notes
+
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- Fixed `zpa_application_segment_inspection` not removing `common_apps_dto.apps_config` blocks that were deleted from the configuration. The `common_apps_dto` wrapper was a set with a constant hash, which caused Terraform to consider it unchanged and never diff its nested `apps_config` contents, so removing (or adding) a block produced no plan diff and no API call. The wrapper is now a list, matching `zpa_application_segment_pra`, and the update flow now mirrors the PRA resource: existing `app_id`/`inspect_app_id` values are injected before the update and removed inspection apps are sent to the API in `deletedInspectApps` so they are actually deleted. Requires `zscaler-sdk-go` with the corresponding `applicationsegmentinspection.Update` change.
+- Fixed permanent plan drift on `zpa_application_segment_inspection` when `auto_app_protect_enabled` is `true`. The API requires `application_protocol` on every `common_apps_dto.apps_config` entry but, with Auto App Protection enabled, manages the protocol itself and reports it back as `DYNAMIC` with no port. The provider now keeps the configured `application_protocol` and `application_port` in state when the API reports `DYNAMIC`, so the configuration no longer drifts.
+- Added plan-time validation to `zpa_application_segment_inspection` requiring `certificate_id` in a `common_apps_dto.apps_config` entry whose `application_protocol` is `HTTPS` when `auto_app_protect_enabled` is unset or `false`. The certificate is not required when `auto_app_protect_enabled` is `true`, because the API manages it itself.
+
+### Deprecations
+
+- Deprecated the provider attributes `backoff`, `min_wait_seconds`, and `max_wait_seconds`. They are now ignored and will be removed in a future major release; remove them from the provider block. Retry back-off requires no configuration: the provider honours the `Retry-After` interval returned by the API and grows the wait between retries automatically, so exposing these knobs only invited retry stampedes. `backoff` had never had any effect.
+
+### Documentation
+
+- Corrected the provider argument reference for `max_retries` (the default is `100`, not `5`) and `request_timeout` (the default is `240` seconds; `0` selects the SDK's built-in 60-second timeout rather than disabling the timeout), and added a note explaining that rate limiting requires no configuration, that these are the only supported tuning attributes, that neither affects request throughput, and that Zscaler Go SDK environment variables such as `ZSCALER_CLIENT_RATE_LIMIT_MAX_RETRIES` are not part of the provider's configuration and are ignored.
+
+- Clarified ([Issue #687](https://github.com/zscaler/terraform-provider-zpa/issues/687)) on `zpa_application_segment` that AppProtection (Auto App Protection) and Active Directory Inspection are not supported by that resource. Enabling either setting on a segment outside Terraform (e.g., via the Admin Portal) converts it into an inspection application segment, which is only supported by `zpa_application_segment_inspection`; the converted segment must be imported into `zpa_application_segment_inspection` and removed from `zpa_application_segment`. Continuing to update a converted segment with `zpa_application_segment` is not supported and disables the inspection settings.
+- Documented the previously undocumented `zpa_application_segment_inspection` attributes `auto_app_protect_enabled`, `adp_enabled`, and `common_apps_dto.apps_config.trust_untrusted_cert` (the Terraform equivalent of the Admin Portal's "Use Untrusted Certificates" option), and clarified that these are supported exclusively by that resource.
+
 ## 4.4.11 (August 18, 2026)
 
 ### Notes
@@ -10,7 +33,6 @@
 ### Features
 
 - [PR #686](https://github.com/zscaler/terraform-provider-zpa/pull/686) - Added ([Issue #684](https://github.com/zscaler/terraform-provider-zpa/issues/684)) the provider attribute `skip_credentials_validation` (env var `ZSCALER_SKIP_CREDENTIALS_VALIDATION`). When enabled, the provider skips credential validation and API client initialization so that configurations where every `zpa_*` resource and data source is conditionally disabled (e.g., `count = 0`) can plan and apply without credentials — e.g., multi-environment deployments where Zscaler is not present in every environment. A warning is emitted at configure time, and any resource or data source that does attempt an API call fails with an explanatory error instead of a panic.
-
 
 ### Deprecations
 

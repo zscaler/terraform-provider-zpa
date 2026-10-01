@@ -14,6 +14,8 @@ description: |-
 
 The **zpa_application_segment_inspection** resource creates an inspection application segment in the Zscaler Private Access cloud. This resource can then be referenced in an access policy inspection rule. This resource supports Inspection for both `HTTP` and `HTTPS`.
 
+~> **NOTE: This is the only resource that supports AppProtection and Active Directory Inspection.** The segment-level **Auto App Protection** (`auto_app_protect_enabled`) and **Active Directory Inspection** (`adp_enabled`) settings, and the per-application **Use Untrusted Certificates** option (`trust_untrusted_cert`), are supported exclusively here. Enabling Auto App Protection or Active Directory Inspection on a segment in the ZPA Admin Portal converts it into an inspection application segment: if that segment is currently managed by [`zpa_application_segment`](zpa_application_segment.md), import it into this resource and remove it from `zpa_application_segment`. Continuing to manage a converted segment with `zpa_application_segment` is not supported — that resource has no inspection attributes, so any update it applies disables these settings.
+
 ## Example Usage
 
 ```terraform
@@ -60,16 +62,17 @@ The following arguments are supported:
 - `segment_group_id` - (string) The unique identifier of the segment group.
 - `common_apps_dto` (Block Set, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
   - `apps_config:` (Block Set, Min: 1) List of applications to be configured
-    - `domain` - (String) Domain name of the Privileged Remote Access
+    - `domain` - (String) Domain name of the inspection application.
       - **NOTE** The domain name configured in this attribute **MUST** also be present in `domain_names` list.
 
-    - `application_protocol` (String) Protocol for the Inspection Application Segment.. Supported values: `HTTP` and `HTTPS`
+    - `application_protocol` (String) Protocol for the Inspection Application Segment. Supported values: `HTTP` and `HTTPS`. Required by the API on every write. When `auto_app_protect_enabled` is `true` the API manages the protocol itself and reports `DYNAMIC`; the provider keeps the configured value in state so the configuration does not drift.
 
-    - `application_port` - (String) Port for the Privileged Remote Access.
+    - `application_port` - (String) Port for the inspection application.
       - **NOTE** The ports configured in this attribute **MUST** also be present in the port list.
 
     - `app_types` (List of String) Indicates the type of application as inspection. Supported value: `INSPECT`
-    - `certificate_id` (string) - ID of the signing certificate. This field is required if the ``application_protocol`` is set to `HTTPS`. The ``certificate_id`` is **NOT** supported if the application_protocol is set to `HTTP`.
+    - `certificate_id` (string) - ID of the signing certificate. This field is **required** if the ``application_protocol`` is set to `HTTPS` and `auto_app_protect_enabled` is unset or `false`; the provider rejects the configuration at plan time otherwise. It is not required when `auto_app_protect_enabled` is `true`, because the API manages the certificate itself. The ``certificate_id`` is **NOT** supported if the application_protocol is set to `HTTP`.
+    - `trust_untrusted_cert` (Boolean) Enables **Use Untrusted Certificates** for the inspection application, allowing inspection of applications that present self-signed or otherwise untrusted certificates. This is the Terraform equivalent of the Admin Portal's "Use Untrusted Certificates" checkbox and is only supported on this resource.
     - `enabled` (Boolean) Whether this application is enabled or not
 - `tcp_port_ranges` - (List of String) TCP port ranges used to access the app.
 - `udp_port_ranges` - (List of String) UDP port ranges used to access the app.
@@ -88,6 +91,10 @@ The following arguments are supported:
 
 ### Optional
 
+- `auto_app_protect_enabled` (Boolean) Enables **Auto App Protection** for the application segment, so that its traffic is inspected by AppProtection. This is the segment-level toggle shown in the Admin Portal and is only supported on this resource. Supported values: `true`, `false`
+
+  ~> **NOTE:** When `auto_app_protect_enabled` is `true`, the ZPA API manages the protocol of every `common_apps_dto.apps_config` entry itself and reports it as `DYNAMIC` (with no port), regardless of the value sent. `application_protocol` must still be set in every `apps_config` block — the API rejects the request without it — and the provider keeps the configured `application_protocol` and `application_port` in state so the configuration does not drift. With `auto_app_protect_enabled` unset or `false`, the configured `HTTP`/`HTTPS` protocol is applied as-is.
+- `adp_enabled` (Boolean) Enables **Active Directory Inspection** (Active Directory Protection) for the application segment, so that its Kerberos/LDAP/SMB traffic is inspected. Only supported on this resource, and mutually exclusive with `auto_app_protect_enabled`. Supported values: `true`, `false`
 - `description` - (String) Description of the application.
 - `bypass_on_reauth` (Boolean) Supported values: `true`, `false`
 - `bypass_type` (String) Indicates whether users can bypass ZPA to access applications. Default value is: `NEVER` and supported values are: `ALWAYS`, `NEVER` and `ON_NET`. The value `NEVER` indicates the use of the client forwarding policy.

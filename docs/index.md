@@ -294,9 +294,11 @@ Before starting with this Terraform provider you must create an API Client in th
 
 * `http_proxy` - (Optional) This is a custom URL endpoint that can be used for unit testing or local caching proxies. Can also be sourced from the `ZSCALER_HTTP_PROXY` environment variable.
 
-* `max_retries` - (Optional) Maximum number of retries to attempt before returning an error, the default is `5`.
+~> **Rate limiting requires no configuration.** The provider enforces the documented ZPA API rate limits on the client side and, when a limit is reached, waits out the `Retry-After` interval returned by the API before retrying automatically. `max_retries` and `request_timeout` are the only tuning attributes the provider supports: they bound how long a failing request is retried and how long a single request may take. Neither changes request throughput, so lowering them cannot make `plan` or `apply` faster. Environment variables belonging to the Zscaler Go SDK (for example `ZSCALER_CLIENT_RATE_LIMIT_MAX_RETRIES` or `ZSCALER_CLIENT_REQUEST_TIMEOUT`) are **not** part of the provider's configuration and are ignored.
 
-* `request_timeout` - (Optional) Timeout for single request (in seconds) which is made to Zscaler, the default is `0` (means no limit is set). The maximum value can be `300`.
+* `max_retries` - (Optional) Maximum number of times a rate-limited or transiently failing request is retried before the operation fails. Default and maximum: `100`. Each retry waits out the interval reported by the API, so the default costs nothing when rate limits are not being reached and lets large configurations complete without manual intervention; lowering it only makes runs fail sooner under sustained rate limiting.
+
+* `request_timeout` - (Optional) Timeout in seconds for a single HTTP request to the ZPA API. Default: `240`. Accepted values: `0`-`300`, where `0` selects the SDK's built-in 60-second timeout. Raise it only if individual requests (for example very large list operations) are timing out.
 
 * `skip_credentials_validation` - (Optional) When set to `true`, the provider skips credential validation and does not initialize the API client. Can also be sourced from the `ZSCALER_SKIP_CREDENTIALS_VALIDATION` environment variable. This is intended for configurations where the ZPA provider is declared but every `zpa_*` resource and data source is conditionally disabled (e.g., `count = 0`) — such as multi-environment deployments where Zscaler is not present in every environment. With this flag enabled, `terraform plan`/`apply` succeeds with a warning even when no credentials are supplied; any resource or data source that does attempt an API call fails with an explanatory error. Default: `false`.
 
