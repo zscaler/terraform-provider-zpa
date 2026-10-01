@@ -265,10 +265,7 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 									"name": {
 										Type:     schema.TypeString,
 										Computed: true,
-									},
-									"description": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Optional: true,
 									},
 									"app_types": {
 										Type:     schema.TypeSet,
@@ -279,13 +276,11 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 									"application_port": {
 										Type:     schema.TypeString,
 										Optional: true,
-										// Computed: true,
 									},
 									"application_protocol": {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Description: "Protocol for the inspection application. Supported values: HTTP, HTTPS. Required by the API on every write. When auto_app_protect_enabled is true the API manages the protocol itself and reports DYNAMIC; the provider keeps the configured value in state so the configuration does not drift.",
-										// Computed: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"HTTP",
 											"HTTPS",
@@ -612,7 +607,6 @@ func expandInspectionAppsConfig(appsConfigInterface interface{}) []applicationse
 				AppID:               appConfigMap["app_id"].(string),
 				InspectAppID:        appConfigMap["inspect_app_id"].(string),
 				Name:                appConfigMap["name"].(string),
-				Description:         appConfigMap["description"].(string),
 				ApplicationPort:     appConfigMap["application_port"].(string),
 				ApplicationProtocol: appConfigMap["application_protocol"].(string),
 				CertificateID:       appConfigMap["certificate_id"].(string),
@@ -681,7 +675,6 @@ func mapInspectAppsToCommonApps(d *schema.ResourceData, inspectionApps []applica
 			"app_id":               app.AppID,
 			"inspect_app_id":       app.ID,
 			"certificate_id":       app.CertificateID,
-			"description":          app.Description,
 			"trust_untrusted_cert": app.TrustUntrustedCert,
 		}
 	}
