@@ -17,6 +17,8 @@ The **zpa_application_segment** resource creates an application segment in the Z
 
 [![ZPA Terraform provider Video Series Ep7 - Application Segment](https://raw.githubusercontent.com/zscaler/terraform-provider-zpa/master/images/zpa_application_segments.svg)](https://community.zscaler.com/zenith/s/question/0D54u00009evlEXCAY/video-zpa-terraform-provider-video-series-ep7-zpa-application-segment)
 
+~> **NOTE: AppProtection and Active Directory Inspection are not supported by this resource.** Enabling **Auto App Protection** or **Active Directory Inspection** on an application segment — for example in the ZPA Admin Portal — converts it into an *inspection* application segment, which is only supported by the [`zpa_application_segment_inspection`](zpa_application_segment_inspection.md) resource. A segment that has been converted must be imported into `zpa_application_segment_inspection` and removed from `zpa_application_segment`. Continuing to manage a converted segment with this resource is not supported: because this resource has no inspection attributes, any update it applies disables AppProtection or Active Directory Inspection and leaves the segment's per-domain inspection configuration in an invalid state.
+
 ## Example 1 Usage
 
 ```terraform

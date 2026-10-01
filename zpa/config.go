@@ -31,7 +31,6 @@ type (
 		privateKey      string
 		httpProxy       string
 		retryCount      int
-		backoff         bool
 		minWait         int
 		maxWait         int
 		logLevel        int
@@ -74,8 +73,12 @@ func (c *Client) GetConfig() *zscaler.Configuration {
 
 func NewConfig(d *schema.ResourceData) *Config {
 	// defaults
+	// minWait/maxWait match the SDK's own retry back-off defaults and are
+	// deliberately not user-configurable (the min_wait_seconds/max_wait_seconds
+	// attributes are deprecated no-ops): the SDK honours the API's Retry-After
+	// interval and grows the wait on its own, so tuning them only invites
+	// retry stampedes.
 	config := Config{
-		backoff:        true,
 		minWait:        2,
 		maxWait:        10,
 		retryCount:     100,
@@ -182,22 +185,6 @@ func NewConfig(d *schema.ResourceData) *Config {
 
 	if val, ok := d.GetOk("max_retries"); ok {
 		config.retryCount = val.(int)
-	}
-
-	if val, ok := d.GetOk("backoff"); ok {
-		config.backoff = val.(bool)
-	}
-
-	if val, ok := d.GetOk("min_wait_seconds"); ok {
-		config.minWait = val.(int)
-	}
-
-	if val, ok := d.GetOk("max_wait_seconds"); ok {
-		config.maxWait = val.(int)
-	}
-
-	if val, ok := d.GetOk("log_level"); ok {
-		config.logLevel = val.(int)
 	}
 
 	if val, ok := d.GetOk("request_timeout"); ok {

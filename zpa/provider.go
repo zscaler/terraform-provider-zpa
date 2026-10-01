@@ -119,23 +119,26 @@ func ZPAProvider() *schema.Provider {
 			"backoff": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Use exponential back off strategy for rate limits.",
+				Deprecated:  "This attribute has never had any effect and will be removed in a future major release. Remove it from the provider block. Retry back-off is handled automatically by the provider.",
+				Description: "Deprecated and ignored. Retry back-off is handled automatically and this attribute has no effect.",
 			},
 			"min_wait_seconds": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "minimum seconds to wait when rate limit is hit. We use exponential backoffs when backoff is enabled.",
+				Deprecated:  "This attribute no longer has any effect and will be removed in a future major release. Remove it from the provider block. Retry back-off is handled automatically: the provider honours the Retry-After interval returned by the API and grows the wait between retries on its own.",
+				Description: "Deprecated and ignored. Previously set the minimum wait between retries of a rate-limited request. Retry back-off is now handled automatically and this attribute has no effect.",
 			},
 			"max_wait_seconds": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "maximum seconds to wait when rate limit is hit. We use exponential backoffs when backoff is enabled.",
+				Deprecated:  "This attribute no longer has any effect and will be removed in a future major release. Remove it from the provider block. Retry back-off is handled automatically: the provider honours the Retry-After interval returned by the API and grows the wait between retries on its own.",
+				Description: "Deprecated and ignored. Previously set the maximum wait between retries of a rate-limited request. Retry back-off is now handled automatically and this attribute has no effect.",
 			},
 			"max_retries": {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				ValidateDiagFunc: intAtMost(100),
-				Description:      "maximum number of retries to attempt before erroring out.",
+				Description:      "Maximum number of times a rate-limited or transiently failing request is retried before the operation fails. Default and maximum: 100. Does not affect request throughput; lowering it only makes runs fail sooner under sustained rate limiting.",
 			},
 			"parallelism": {
 				Type:       schema.TypeInt,
@@ -148,7 +151,7 @@ func ZPAProvider() *schema.Provider {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				ValidateDiagFunc: intBetween(0, 300),
-				Description:      "Timeout for single request (in seconds) which is made to Zscaler, the default is `0` (means no limit is set). The maximum value can be `300`.",
+				Description:      "Timeout in seconds for a single HTTP request to the Zscaler API. Default: 240. Accepted values: 0-300, where 0 selects the SDK's built-in 60-second timeout. Does not affect request throughput.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
