@@ -120,7 +120,8 @@ func resourceApplicationServerCreate(ctx context.Context, d *schema.ResourceData
 	log.Printf("[INFO] Created application server request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceApplicationServerRead(ctx, d, meta)
+	zClient.appServers.invalidate()
+	return resourceApplicationServerRead(skipListIndex(ctx), d, meta)
 }
 
 func resourceApplicationServerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -132,7 +133,16 @@ func resourceApplicationServerRead(ctx context.Context, d *schema.ResourceData, 
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := appservercontroller.Get(ctx, service, d.Id())
+	resp, err := readFromListIndex(ctx, &zClient.appServers, microTenantID, d.Id(),
+		func(ctx context.Context) ([]appservercontroller.ApplicationServer, error) {
+			list, _, err := appservercontroller.GetAll(ctx, service)
+			return list, err
+		},
+		func(item *appservercontroller.ApplicationServer) string { return item.ID },
+		func() (*appservercontroller.ApplicationServer, error) {
+			item, _, err := appservercontroller.Get(ctx, service, d.Id())
+			return item, err
+		})
 	if err != nil {
 		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing application server %s from state because it no longer exists in ZPA", d.Id())
@@ -178,7 +188,8 @@ func resourceApplicationServerUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	return resourceApplicationServerRead(ctx, d, meta)
+	zClient.appServers.invalidate()
+	return resourceApplicationServerRead(skipListIndex(ctx), d, meta)
 }
 
 func resourceApplicationServerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -194,6 +205,7 @@ func resourceApplicationServerDelete(ctx context.Context, d *schema.ResourceData
 	if _, err := appservercontroller.Delete(ctx, service, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
+	zClient.appServers.invalidate()
 
 	d.SetId("")
 	log.Printf("[INFO] application server deleted successfully")

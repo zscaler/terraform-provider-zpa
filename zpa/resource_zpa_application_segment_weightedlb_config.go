@@ -102,6 +102,7 @@ func resourceApplicationSegmentWeightedLBConfigCreate(ctx context.Context, d *sc
 	if diags := updateWeightedLBConfig(ctx, service, applicationID, d); diags.HasError() {
 		return diags
 	}
+	zClient.appSegments.invalidate()
 
 	d.SetId(applicationID)
 	if applicationName != "" {
@@ -179,6 +180,7 @@ func resourceApplicationSegmentWeightedLBConfigUpdate(ctx context.Context, d *sc
 	if diags := updateWeightedLBConfig(ctx, service, applicationID, d); diags.HasError() {
 		return diags
 	}
+	zClient.appSegments.invalidate()
 
 	return resourceApplicationSegmentWeightedLBConfigRead(ctx, d, meta)
 }
@@ -209,6 +211,7 @@ func resourceApplicationSegmentWeightedLBConfigDelete(ctx context.Context, d *sc
 	if _, _, err := applicationsegment.UpdateWeightedLoadBalancerConfig(ctx, service, applicationID, payload); err != nil {
 		return diag.FromErr(fmt.Errorf("failed to disable weighted load balancer config for application %s: %w", applicationID, err))
 	}
+	zClient.appSegments.invalidate()
 
 	d.SetId("")
 	return nil

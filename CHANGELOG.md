@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.4.13 (October 5, 2026)
+
+### Notes
+
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #692](https://github.com/zscaler/terraform-provider-zpa/pull/692) - Added the optional arguments `iam_idp_id` and `iam_idp_name` to the `zpa_scim_groups` data source. With ZIdentity, several IAM IdPs can map to the same ZPA IdP, so a group name is no longer unique within a ZPA IdP and the lookup could return the wrong group. Setting either argument restricts the match to the group from that IAM IdP, and the lookup fails with the list of candidate groups if the result is still ambiguous or empty. The two arguments are mutually exclusive and require `name`. Configurations that do not set them behave exactly as before.
+
+- [PR #692](https://github.com/zscaler/terraform-provider-zpa/pull/692) - Improved `terraform plan` and refresh performance for large configurations. The following resources now refresh from their paginated list endpoint (500 objects per page), fetched once per run and per microtenant, instead of making one API request per resource: `zpa_application_segment`, `zpa_application_server`, `zpa_segment_group`, `zpa_server_group`, `zpa_app_connector_group`, `zpa_policy_access_rule`, `zpa_policy_access_rule_v2`, `zpa_policy_timeout_rule`, `zpa_policy_timeout_rule_v2`, `zpa_policy_forwarding_rule` and `zpa_policy_forwarding_rule_v2`. For example, refreshing 4,000 application segments now takes 8 API requests instead of 4,000. Requests remain paced to the documented ZPA API rate limits. A resource that is not in the list is read individually before it is removed from state, except `zpa_app_connector_group`, which reads only from the list as before. Create and update still read the resource back individually.
+
 ## 4.4.12 (October 1, 2026)
 
 ### Notes

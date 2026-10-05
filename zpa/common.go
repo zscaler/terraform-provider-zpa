@@ -1285,6 +1285,42 @@ func fetchPolicySetIDByType(ctx context.Context, zClient *Client, policyType str
 	return result, nil
 }
 
+// readPolicyRule reads a v1 policy rule of policyType, serving refreshes from
+// the per-run index built from one paginated list of all rules of that type.
+func readPolicyRule(ctx context.Context, zClient *Client, service *zscaler.Service, policyType, microTenantID, policySetID, id string) (*policysetcontroller.PolicyRule, error) {
+	return readFromListIndex(ctx, &zClient.policyRules, policyType+"/"+microTenantID, id,
+		func(ctx context.Context) ([]policysetcontroller.PolicyRule, error) {
+			list, _, err := policysetcontroller.GetAllByType(ctx, service, policyType)
+			return list, err
+		},
+		func(r *policysetcontroller.PolicyRule) string { return r.ID },
+		func() (*policysetcontroller.PolicyRule, error) {
+			rule, _, err := policysetcontroller.GetPolicyRule(ctx, service, policySetID, id)
+			return rule, err
+		})
+}
+
+// readPolicyRuleV2 is readPolicyRule for the v2 policy rule resources.
+func readPolicyRuleV2(ctx context.Context, zClient *Client, service *zscaler.Service, policyType, microTenantID, policySetID, id string) (*policysetcontrollerv2.PolicyRuleResource, error) {
+	return readFromListIndex(ctx, &zClient.policyRulesV2, policyType+"/"+microTenantID, id,
+		func(ctx context.Context) ([]policysetcontrollerv2.PolicyRuleResource, error) {
+			list, _, err := policysetcontrollerv2.GetAllByType(ctx, service, policyType)
+			return list, err
+		},
+		func(r *policysetcontrollerv2.PolicyRuleResource) string { return r.ID },
+		func() (*policysetcontrollerv2.PolicyRuleResource, error) {
+			rule, _, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, id)
+			return rule, err
+		})
+}
+
+// invalidatePolicyRules clears the v1 and v2 policy rule indexes, which list
+// the same rules decoded into different types.
+func (c *Client) invalidatePolicyRules() {
+	c.policyRules.invalidate()
+	c.policyRulesV2.invalidate()
+}
+
 // ConvertV1ResponseToV2Request converts a PolicyRuleResource (API v1 response) to a PolicyRule (API v2 request) with aggregated values.
 func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleResource) policysetcontrollerv2.PolicyRule {
 	v2Request := policysetcontrollerv2.PolicyRule{

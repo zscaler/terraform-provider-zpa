@@ -320,7 +320,8 @@ func resourceApplicationSegmentCreate(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
-	return resourceApplicationSegmentRead(ctx, d, meta)
+	zClient.appSegments.invalidate()
+	return resourceApplicationSegmentRead(skipListIndex(ctx), d, meta)
 }
 
 func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -332,7 +333,16 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := applicationsegment.Get(ctx, service, d.Id())
+	resp, err := readFromListIndex(ctx, &zClient.appSegments, microTenantID, d.Id(),
+		func(ctx context.Context) ([]applicationsegment.ApplicationSegmentResource, error) {
+			list, _, err := applicationsegment.GetAll(ctx, service)
+			return list, err
+		},
+		func(s *applicationsegment.ApplicationSegmentResource) string { return s.ID },
+		func() (*applicationsegment.ApplicationSegmentResource, error) {
+			seg, _, err := applicationsegment.Get(ctx, service, d.Id())
+			return seg, err
+		})
 	if err != nil {
 		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing application segment %s from state because it no longer exists in ZPA", d.Id())
@@ -443,7 +453,8 @@ func resourceApplicationSegmentUpdate(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
-	return resourceApplicationSegmentRead(ctx, d, meta)
+	zClient.appSegments.invalidate()
+	return resourceApplicationSegmentRead(skipListIndex(ctx), d, meta)
 }
 
 func resourceApplicationSegmentDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -460,10 +471,12 @@ func resourceApplicationSegmentDelete(ctx context.Context, d *schema.ResourceDat
 
 	// Pass d.Id() as a string to the detachAppsFromAllPolicyRules function
 	detachAppsFromAllPolicyRules(ctx, d.Id(), service)
+	zClient.invalidatePolicyRules()
 
 	if _, err := applicationsegment.Delete(ctx, service, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
+	zClient.appSegments.invalidate()
 
 	d.SetId("")
 	log.Printf("[INFO] Application segment deleted successfully")

@@ -158,6 +158,18 @@ resource "zpa_application_segment" "this" {
 }
 ```
 
+### Slow `terraform plan` with large configurations
+
+The provider paces its API requests to the documented [ZPA API rate limits](https://automate.zscaler.com/docs/api-reference-and-guides/guides/rate-limiting/zpa) (20 GET and 10 POST/PUT/DELETE requests per 10 seconds). Before `v4.4.13`, refreshing each resource took one GET, so refreshing 3,600 application segments took 3,600 GETs and at least 30 minutes.
+
+From `v4.4.13`, the following resources refresh from their paginated list endpoint (500 objects per page) instead: `zpa_application_segment`, `zpa_application_server`, `zpa_segment_group`, `zpa_server_group`, `zpa_app_connector_group`, and the v1 and v2 access, timeout and forwarding policy rules. The same 3,600 segments now take 8 GETs. Applies are unchanged: each create, update or delete is still one request.
+
+If plans or applies are still slow:
+
+1. Do not change Terraform's `-parallelism`, and do not set Zscaler Go SDK environment variables such as `ZSCALER_CLIENT_RATE_LIMIT_MAX_RETRIES` or `ZSCALER_CLIENT_REQUEST_TIMEOUT`. They are not part of the provider's configuration and cannot speed up a run.
+2. For routine changes, plan without a refresh (`terraform plan -refresh=false`; in Terraform Enterprise or HCP Terraform, set the workspace variable `TF_CLI_ARGS_plan="-refresh=false"`), and run a full refresh periodically.
+3. If the configuration is expected to keep growing, split it into smaller workspaces, for example by segment group or application domain.
+
 ### Access Policy Operand Validation Error `zpa_policy_access_rule` Error: [WARN] when operand object type is COUNTRY_CODE LHS
 
 This type of error happens when the administrator fails to provide a valid attribute value within the conditions.operands block of an access policy.

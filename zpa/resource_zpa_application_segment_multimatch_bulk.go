@@ -78,6 +78,7 @@ func resourceApplicationSegmentMultimatchBulkCreate(ctx context.Context, d *sche
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("failed to bulk update multimatch: %w", err))
 	}
+	zClient.appSegments.invalidate()
 
 	// Generate a synthetic ID based on application_ids (as strings) and match_style
 	id := generateBulkMultimatchID(applicationIDsStr, matchStyle)
@@ -208,6 +209,7 @@ func resourceApplicationSegmentMultimatchBulkUpdate(ctx context.Context, d *sche
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("failed to bulk update multimatch: %w", err))
 	}
+	zClient.appSegments.invalidate()
 
 	// Update ID if application_ids or match_style changed
 	newID := generateBulkMultimatchID(applicationIDsStr, matchStyle)
