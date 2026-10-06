@@ -28,6 +28,10 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 - [PR #692](https://github.com/zscaler/terraform-provider-zpa/pull/692) - Improved `terraform plan` and refresh performance for large configurations. The following resources now refresh from their paginated list endpoint (500 objects per page), fetched once per run and per microtenant, instead of making one API request per resource: `zpa_application_segment`, `zpa_application_server`, `zpa_segment_group`, `zpa_server_group`, `zpa_app_connector_group`, `zpa_policy_access_rule`, `zpa_policy_access_rule_v2`, `zpa_policy_timeout_rule`, `zpa_policy_timeout_rule_v2`, `zpa_policy_forwarding_rule` and `zpa_policy_forwarding_rule_v2`. For example, refreshing 4,000 application segments now takes 8 API requests instead of 4,000. Requests remain paced to the documented ZPA API rate limits. A resource that is not in the list is read individually before it is removed from state, except `zpa_app_connector_group`, which reads only from the list as before. Create and update still read the resource back individually.
 
+### Documentation
+
+- [PR #692](https://github.com/zscaler/terraform-provider-zpa/pull/692) - Corrected the `zpa_enrollment_cert` data source documentation ([Issue #693](https://github.com/zscaler/terraform-provider-zpa/issues/693)) to match its schema: `id`, `name`, and `microtenant_id` are optional (one of `id` or `name` is required; `id` takes precedence), the non-existent `cert_chain` attribute was removed, `valid_to_in_epoch_sec` is now spelled correctly, the remaining computed attributes are documented, and the private key warning was replaced with an accurate note.
+
 ## 4.4.12 (October 1, 2026)
 
 ### Notes
