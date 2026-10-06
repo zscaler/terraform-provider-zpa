@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-cty/cty"
@@ -444,4 +445,90 @@ func stringIsMultiLine(i interface{}, k cty.Path) diag.Diagnostics {
 		return diag.Errorf("expected %q text to not be empty, got %v", k, i)
 	}
 	return nil
+}
+
+// listIndex holds every item returned by one paginated list call (500 per
+// page), per snapshot key, so that refreshing N resources costs a handful of
+// list requests instead of N individual GETs, and the list is decoded once per
+// run instead of once per resource. Writes call invalidate.
+type listIndex[T any] struct {
+	mu        sync.Mutex
+	snapshots map[string]*listSnapshot[T]
+}
+
+type listSnapshot[T any] struct {
+	once  sync.Once
+	items map[string]*T
+	err   error
+}
+
+// lookup returns the item with the given ID from the snapshot for key, loading
+// the snapshot on first use. found is false when the item is not in the list.
+func (idx *listIndex[T]) lookup(ctx context.Context, key, id string, list func(context.Context) ([]T, error), idOf func(*T) string) (*T, bool, error) {
+	idx.mu.Lock()
+	if idx.snapshots == nil {
+		idx.snapshots = make(map[string]*listSnapshot[T])
+	}
+	snap, ok := idx.snapshots[key]
+	if !ok {
+		snap = &listSnapshot[T]{}
+		idx.snapshots[key] = snap
+	}
+	idx.mu.Unlock()
+
+	snap.once.Do(func() {
+		items, err := list(ctx)
+		if err != nil {
+			snap.err = err
+			return
+		}
+		snap.items = make(map[string]*T, len(items))
+		for i := range items {
+			snap.items[idOf(&items[i])] = &items[i]
+		}
+	})
+	if snap.err != nil {
+		return nil, false, snap.err
+	}
+
+	item, found := snap.items[id]
+	if !found {
+		return nil, false, nil
+	}
+	itemCopy := *item
+	return &itemCopy, true, nil
+}
+
+// invalidate drops every snapshot so the next lookup reloads the list.
+func (idx *listIndex[T]) invalidate() {
+	idx.mu.Lock()
+	idx.snapshots = nil
+	idx.mu.Unlock()
+}
+
+type skipListIndexKey struct{}
+
+// skipListIndex marks ctx so readFromListIndex reads by ID. Create and Update
+// pass it to their read-back: a write invalidates the index, and reloading the
+// whole list for every written resource would cost more than one GET.
+func skipListIndex(ctx context.Context) context.Context {
+	return context.WithValue(ctx, skipListIndexKey{}, true)
+}
+
+// readFromListIndex serves a refresh Read from idx, falling back to get when ctx
+// skips the index, the list request fails, or the item is not listed (which
+// also covers items created or deleted while the pages were fetched).
+func readFromListIndex[T any](ctx context.Context, idx *listIndex[T], key, id string, list func(context.Context) ([]T, error), idOf func(*T) string, get func() (*T, error)) (*T, error) {
+	if skip, _ := ctx.Value(skipListIndexKey{}).(bool); !skip {
+		item, found, err := idx.lookup(ctx, key, id, list, idOf)
+		switch {
+		case err != nil:
+			log.Printf("[WARN] Listing failed, falling back to reading %s by ID: %v", id, err)
+		case !found:
+			log.Printf("[DEBUG] %s not in the listed items, falling back to reading it by ID", id)
+		default:
+			return item, nil
+		}
+	}
+	return get()
 }

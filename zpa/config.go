@@ -17,6 +17,13 @@ import (
 	"github.com/zscaler/terraform-provider-zpa/v4/zpa/common"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appconnectorgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/appservercontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontroller"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/policysetcontrollerv2"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/segmentgroup"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 )
 
 type (
@@ -65,6 +72,13 @@ type Client struct {
 	// resource/data source CRUD function is wrapped (see ZPAProvider) to
 	// return a descriptive error instead of dereferencing the nil Service.
 	skipCredentialsValidation bool
+	appSegments               listIndex[applicationsegment.ApplicationSegmentResource]
+	appServers                listIndex[appservercontroller.ApplicationServer]
+	segmentGroups             listIndex[segmentgroup.SegmentGroup]
+	serverGroups              listIndex[servergroup.ServerGroup]
+	appConnectorGroups        listIndex[appconnectorgroup.AppConnectorGroup]
+	policyRules               listIndex[policysetcontroller.PolicyRule]
+	policyRulesV2             listIndex[policysetcontrollerv2.PolicyRuleResource]
 }
 
 func (c *Client) GetConfig() *zscaler.Configuration {

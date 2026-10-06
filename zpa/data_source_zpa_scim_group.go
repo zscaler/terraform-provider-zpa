@@ -40,6 +40,22 @@ func dataSourceScimGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"iam_idp_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"iam_idp_name"},
+				RequiredWith:  []string{"name"},
+				Description:   "ID of the ZIdentity (IAM) IdP the group belongs to. Disambiguates groups with the same name under the same ZPA IdP. Conflicts with iam_idp_name.",
+			},
+			"iam_idp_name": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"iam_idp_id"},
+				RequiredWith:  []string{"name"},
+				Description:   "Name of the ZIdentity (IAM) IdP the group belongs to. Disambiguates groups with the same name under the same ZPA IdP. Conflicts with iam_idp_id.",
+			},
 			"modified_time": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -97,7 +113,17 @@ func dataSourceScimGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 		resp = res
 	} else if nameExists && name != "" && idpResp != nil {
 		// Check idpResp is non-nil before accessing its fields
-		res, _, err := scimgroup.GetByName(ctx, service, name, idpResp.ID)
+		criteria := scimgroup.IamIdpCriteria{
+			IamIdpID:   d.Get("iam_idp_id").(string),
+			IamIdpName: d.Get("iam_idp_name").(string),
+		}
+		var res *scimgroup.ScimGroup
+		var err error
+		if criteria.IamIdpID != "" || criteria.IamIdpName != "" {
+			res, _, err = scimgroup.GetByNameAndIamIdp(ctx, service, name, idpResp.ID, criteria)
+		} else {
+			res, _, err = scimgroup.GetByName(ctx, service, name, idpResp.ID)
+		}
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -113,6 +139,14 @@ func dataSourceScimGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 		_ = d.Set("idp_name", resp.IdpName)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
+		// API versions that predate the iamIdpId/iamIdpName fields return them
+		// empty; keep the configured value instead of overwriting it.
+		if resp.IamIdpID != "" {
+			_ = d.Set("iam_idp_id", resp.IamIdpID)
+		}
+		if resp.IamIdpName != "" {
+			_ = d.Set("iam_idp_name", resp.IamIdpName)
+		}
 	} else {
 		return diag.FromErr(fmt.Errorf("no SCIM group with name '%s' and IDP name '%s', or ID '%s' was found", name, idpName, id))
 	}

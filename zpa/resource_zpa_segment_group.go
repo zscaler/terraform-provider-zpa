@@ -111,7 +111,8 @@ func resourceSegmentGroupCreate(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("[INFO] Created segment group request. ID: %v\n", segmentgroup)
 
 	d.SetId(segmentgroup.ID)
-	return resourceSegmentGroupRead(ctx, d, meta)
+	zClient.segmentGroups.invalidate()
+	return resourceSegmentGroupRead(skipListIndex(ctx), d, meta)
 }
 
 func resourceSegmentGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -131,7 +132,16 @@ func resourceSegmentGroupRead(ctx context.Context, d *schema.ResourceData, meta 
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := segmentgroup.Get(ctx, service, d.Id())
+	resp, err := readFromListIndex(ctx, &zClient.segmentGroups, microTenantID, d.Id(),
+		func(ctx context.Context) ([]segmentgroup.SegmentGroup, error) {
+			list, _, err := segmentgroup.GetAll(ctx, service)
+			return list, err
+		},
+		func(item *segmentgroup.SegmentGroup) string { return item.ID },
+		func() (*segmentgroup.SegmentGroup, error) {
+			item, _, err := segmentgroup.Get(ctx, service, d.Id())
+			return item, err
+		})
 	if err != nil {
 		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing segment group %s from state because it no longer exists in ZPA", d.Id())
@@ -186,7 +196,8 @@ func resourceSegmentGroupUpdate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	return resourceSegmentGroupRead(ctx, d, meta)
+	zClient.segmentGroups.invalidate()
+	return resourceSegmentGroupRead(skipListIndex(ctx), d, meta)
 }
 
 func resourceSegmentGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -212,10 +223,12 @@ func resourceSegmentGroupDelete(ctx context.Context, d *schema.ResourceData, met
 	if err := detachSegmentGroupFromAllPolicyRules(ctx, d.Id(), service); err != nil {
 		return diag.FromErr(fmt.Errorf("error detaching SegmentGroup with ID %s from PolicySetControllers: %s", d.Id(), err))
 	}
+	zClient.invalidatePolicyRules()
 
 	if _, err := segmentgroup.Delete(ctx, service, d.Id()); err != nil {
 		return diag.FromErr(fmt.Errorf("error deleting SegmentGroup with ID %s: %s", d.Id(), err))
 	}
+	zClient.segmentGroups.invalidate()
 
 	log.Printf("[INFO] Segment group with ID %s deleted", d.Id())
 	d.SetId("")

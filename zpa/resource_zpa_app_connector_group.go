@@ -263,6 +263,7 @@ func resourceAppConnectorGroupCreate(ctx context.Context, d *schema.ResourceData
 		_ = v // suppress unused variable warning
 	}
 
+	zClient.appConnectorGroups.invalidate()
 	return resourceAppConnectorGroupRead(ctx, d, meta)
 }
 
@@ -275,23 +276,19 @@ func resourceAppConnectorGroupRead(ctx context.Context, d *schema.ResourceData, 
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	// Use GetAll to get the complete list and find the resource by ID
-	// This avoids the individual Get API call which returns incorrect lssAppConnectorGroup values
-	list, _, err := appconnectorgroup.GetAll(ctx, service)
+	// Read from the GetAll list, never the individual Get, which returns
+	// incorrect lssAppConnectorGroup values; a group missing from the list is gone.
+	resp, found, err := zClient.appConnectorGroups.lookup(ctx, microTenantID, d.Id(),
+		func(ctx context.Context) ([]appconnectorgroup.AppConnectorGroup, error) {
+			list, _, err := appconnectorgroup.GetAll(ctx, service)
+			return list, err
+		},
+		func(g *appconnectorgroup.AppConnectorGroup) string { return g.ID })
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Find the specific resource by ID in the list
-	var resp *appconnectorgroup.AppConnectorGroup
-	for _, item := range list {
-		if item.ID == d.Id() {
-			resp = &item
-			break
-		}
-	}
-
-	if resp == nil {
+	if !found {
 		log.Printf("[WARN] Removing app connector group %s from state because it no longer exists in ZPA", d.Id())
 		d.SetId("")
 		return nil
@@ -379,6 +376,7 @@ func resourceAppConnectorGroupUpdate(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
+	zClient.appConnectorGroups.invalidate()
 	return resourceAppConnectorGroupRead(ctx, d, meta)
 }
 
@@ -398,11 +396,13 @@ func resourceAppConnectorGroupDelete(ctx context.Context, d *schema.ResourceData
 	if err := detachAppConnectorGroupFromAllAccessPolicyRules(ctx, d.Id(), service); err != nil {
 		return diag.FromErr(fmt.Errorf("error detaching App Connector Group with ID %s from PolicySetControllers: %s", d.Id(), err))
 	}
+	zClient.invalidatePolicyRules()
 
 	// Call Delete with context and necessary parameters
 	if _, err := appconnectorgroup.Delete(ctx, service, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
+	zClient.appConnectorGroups.invalidate()
 
 	d.SetId("")
 	log.Printf("[INFO] App connector group deleted successfully")

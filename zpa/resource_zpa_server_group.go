@@ -220,7 +220,8 @@ func resourceServerGroupCreate(ctx context.Context, d *schema.ResourceData, meta
 	log.Printf("[INFO] Created server group request. ID: %v\n", resp)
 	d.SetId(resp.ID)
 
-	return resourceServerGroupRead(ctx, d, meta)
+	zClient.serverGroups.invalidate()
+	return resourceServerGroupRead(skipListIndex(ctx), d, meta)
 }
 
 func resourceServerGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -232,7 +233,16 @@ func resourceServerGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 		service = service.WithMicroTenant(microTenantID)
 	}
 
-	resp, _, err := servergroup.Get(ctx, service, d.Id())
+	resp, err := readFromListIndex(ctx, &zClient.serverGroups, microTenantID, d.Id(),
+		func(ctx context.Context) ([]servergroup.ServerGroup, error) {
+			list, _, err := servergroup.GetAll(ctx, service)
+			return list, err
+		},
+		func(item *servergroup.ServerGroup) string { return item.ID },
+		func() (*servergroup.ServerGroup, error) {
+			item, _, err := servergroup.Get(ctx, service, d.Id())
+			return item, err
+		})
 	if err != nil {
 		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
 			log.Printf("[WARN] Removing server group %s from state because it no longer exists in ZPA", d.Id())
@@ -295,7 +305,8 @@ func resourceServerGroupUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if _, err := servergroup.Update(ctx, service, id, &req); err != nil {
 		return diag.FromErr(err)
 	}
-	return resourceServerGroupRead(ctx, d, meta)
+	zClient.serverGroups.invalidate()
+	return resourceServerGroupRead(skipListIndex(ctx), d, meta)
 }
 
 func resourceServerGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -314,11 +325,14 @@ func resourceServerGroupDelete(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	detachServerGroupFromAllAccessPolicyRules(ctx, d.Id(), service)
+	zClient.invalidatePolicyRules()
 	detachServerGroupFromAllAppSegments(ctx, d.Id(), service)
+	zClient.appSegments.invalidate()
 
 	if _, err := servergroup.Delete(ctx, service, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
+	zClient.serverGroups.invalidate()
 	d.SetId("")
 	log.Printf("[INFO] Server group deleted")
 	return nil

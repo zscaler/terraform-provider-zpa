@@ -38,19 +38,28 @@ data "zpa_enrollment_cert" "isolation_client" {
 }
 ```
 
+### Lookup by ID
+
+```terraform
+data "zpa_enrollment_cert" "connector" {
+    id = "6573"
+}
+```
+
 ## Schema
 
-### Required
+### Optional
 
-The following arguments are supported:
+The following arguments are supported. One of `id` or `name` must be set; when both are set, `id` takes precedence and `name` is ignored.
 
+* `id` - (String) The ID of the enrollment certificate to be exported.
 * `name` - (String) The name of the enrollment certificate to be exported.
+* `microtenant_id` - (String) The ID of the microtenant the enrollment certificate belongs to.
 
 ### Read-Only
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - (String) The id of the enrollment certificate to be exported.
 * `allow_signing` - (bool)
 * `cname` - (string)
 * `certificate` - (string) The certificate text is in PEM format.
@@ -68,9 +77,12 @@ In addition to all arguments above, the following attributes are exported:
 * `modified_by` - (string)
 * `parent_cert_id` - (string)
 * `parent_cert_name` - (string)
-* `cert_chain` - (string)
 * `serial_no` - (string)
 * `valid_from_in_epoch_sec` - (string)
-* `valid_to_in_epochsec` - (string)
+* `valid_to_in_epoch_sec` - (string)
+* `private_key_present` - (bool) Indicates whether a private key exists for the certificate.
+* `private_key` - (string) Always empty; the API does not return private key material.
+* `zrsa_encrypted_private_key` - (string) Always empty; the API does not return private key material.
+* `zrsa_encrypted_session_key` - (string) Always empty; the API does not return private key material.
 
-~> **Warning**: Notice that certificate, public and private key information are omitted from the output.
+~> **Note**: The certificate (`certificate`) and certificate signing request (`csr`) are public material and are included in the output. Private key material is never returned by the API, so `private_key`, `zrsa_encrypted_private_key`, and `zrsa_encrypted_session_key` are always empty; use `private_key_present` to check whether a private key exists.

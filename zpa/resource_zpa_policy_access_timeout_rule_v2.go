@@ -196,7 +196,8 @@ func resourcePolicyTimeoutRuleV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 	d.SetId(policysetcontrollerv2.ID)
 
-	return resourcePolicyTimeoutRuleV2Read(ctx, d, meta)
+	zClient.invalidatePolicyRules()
+	return resourcePolicyTimeoutRuleV2Read(skipListIndex(ctx), d, meta)
 }
 
 func resourcePolicyTimeoutRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -214,7 +215,7 @@ func resourcePolicyTimeoutRuleV2Read(ctx context.Context, d *schema.ResourceData
 	}
 
 	log.Printf("[INFO] Getting Policy Set Rule: globalPolicySet:%s id: %s\n", policySetID, d.Id())
-	resp, _, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, d.Id())
+	resp, err := readPolicyRuleV2(ctx, zClient, service, "TIMEOUT_POLICY", microTenantID, policySetID, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
@@ -306,7 +307,8 @@ func resourcePolicyTimeoutRuleV2Update(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	return resourcePolicyTimeoutRuleV2Read(ctx, d, meta)
+	zClient.invalidatePolicyRules()
+	return resourcePolicyTimeoutRuleV2Read(skipListIndex(ctx), d, meta)
 }
 
 func resourcePolicyTimeoutRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -329,6 +331,7 @@ func resourcePolicyTimeoutRuleV2Delete(ctx context.Context, d *schema.ResourceDa
 	if _, err := policysetcontrollerv2.Delete(ctx, service, policySetID, d.Id()); err != nil {
 		return diag.FromErr(fmt.Errorf("failed to delete policy timeout rule: %w", err))
 	}
+	zClient.invalidatePolicyRules()
 
 	return nil
 }

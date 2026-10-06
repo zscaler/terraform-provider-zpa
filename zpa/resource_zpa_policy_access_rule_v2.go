@@ -276,8 +276,9 @@ func resourcePolicyAccessV2Create(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 	d.SetId(policysetcontrollerv2.ID)
+	zClient.invalidatePolicyRules()
 
-	return resourcePolicyAccessV2Read(ctx, d, meta)
+	return resourcePolicyAccessV2Read(skipListIndex(ctx), d, meta)
 }
 
 func resourcePolicyAccessV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -294,8 +295,7 @@ func resourcePolicyAccessV2Read(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[INFO] Getting Policy Set Rule: policySetID:%s id: %s\n", policySetID, d.Id())
-	resp, _, err := policysetcontrollerv2.GetPolicyRule(ctx, service, policySetID, d.Id())
+	resp, err := readPolicyRuleV2(ctx, zClient, service, "ACCESS_POLICY", microTenantID, policySetID, d.Id())
 	if err != nil {
 		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
 			log.Printf("[WARN] Removing policy rule %s from state because it no longer exists in ZPA", d.Id())
@@ -372,7 +372,8 @@ func resourcePolicyAccessV2Update(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	return resourcePolicyAccessV2Read(ctx, d, meta)
+	zClient.invalidatePolicyRules()
+	return resourcePolicyAccessV2Read(skipListIndex(ctx), d, meta)
 }
 
 func resourcePolicyAccessV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -399,6 +400,7 @@ func resourcePolicyAccessV2Delete(ctx context.Context, d *schema.ResourceData, m
 	if _, err := policysetcontrollerv2.Delete(ctx, service, policySetID, d.Id()); err != nil {
 		return diag.FromErr(err)
 	}
+	zClient.invalidatePolicyRules()
 
 	return nil
 }
