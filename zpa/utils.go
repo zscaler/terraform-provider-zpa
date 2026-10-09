@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -323,6 +324,38 @@ func pluralize(count int, singular, plural string) string {
 		return singular
 	}
 	return plural
+}
+
+// segmentGroupApplicationChanges compares the segment group's applications
+// before and after a change (the zpa_segment_group "applications" list) and
+// returns the application IDs added to and removed from the group. Order is
+// ignored: listing the same applications in a different order is no change.
+func segmentGroupApplicationChanges(oldApps, newApps []interface{}) (added, deleted []string) {
+	ids := func(apps []interface{}) map[string]bool {
+		set := make(map[string]bool, len(apps))
+		for _, a := range apps {
+			if m, ok := a.(map[string]interface{}); ok {
+				if id, _ := m["id"].(string); id != "" {
+					set[id] = true
+				}
+			}
+		}
+		return set
+	}
+	oldIDs, newIDs := ids(oldApps), ids(newApps)
+	for id := range newIDs {
+		if !oldIDs[id] {
+			added = append(added, id)
+		}
+	}
+	for id := range oldIDs {
+		if !newIDs[id] {
+			deleted = append(deleted, id)
+		}
+	}
+	sort.Strings(added)
+	sort.Strings(deleted)
+	return added, deleted
 }
 
 func detachSegmentGroup(ctx context.Context, zClient *Client, segmentID, segmentGroupID string) error {
