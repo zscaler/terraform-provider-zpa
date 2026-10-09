@@ -50,11 +50,33 @@ func resourceSegmentGroup() *schema.Resource {
 			},
 		},
 
+		// An application segment always belongs to exactly one segment group and the
+		// API changes that only through the application segment's segment_group_id.
+		// Membership is therefore never changed from the segment group: reject a
+		// configuration that adds or removes applications on an existing group,
+		// instead of planning a change that would never be applied.
+		CustomizeDiff: func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+			if d.Id() == "" || !d.HasChange("applications") {
+				return nil
+			}
+			oldApps, newApps := d.GetChange("applications")
+			oldList, _ := oldApps.([]interface{})
+			newList, _ := newApps.([]interface{})
+			added, deleted := segmentGroupApplicationChanges(oldList, newList)
+			if len(added) > 0 || len(deleted) > 0 {
+				return fmt.Errorf("application segment membership cannot be changed from zpa_segment_group (%d added, %d removed): set segment_group_id on zpa_application_segment instead, and remove the deprecated applications block", len(added), len(deleted))
+			}
+			return nil
+		},
+
 		Schema: map[string]*schema.Schema{
 			"applications": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
+				Deprecated: "Application segment membership is managed through the segment_group_id attribute of zpa_application_segment. " +
+					"This attribute cannot change membership and will be removed in a future major release; remove it from the configuration.",
+				Description: "Deprecated. The application segments in this segment group. Membership is managed through segment_group_id on zpa_application_segment.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -183,7 +205,18 @@ func resourceSegmentGroupUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	id := d.Id()
 	log.Printf("[INFO] Updating segment group ID: %v\n", id)
-	req := expandSegmentGroup(d)
+
+	// Only the segment group's own settings are sent. The application list is
+	// never sent: membership is managed through segment_group_id on
+	// zpa_application_segment, and sending the full list grows with the size of
+	// the group until the API rejects it (payload.size.exceeded). The v2 update
+	// leaves the group's applications unchanged.
+	req := segmentgroup.SegmentGroupV2Update{
+		Name:          d.Get("name").(string),
+		Description:   d.Get("description").(string),
+		Enabled:       d.Get("enabled").(bool),
+		MicroTenantID: d.Get("microtenant_id").(string),
+	}
 
 	if _, _, err := segmentgroup.Get(ctx, service, id); err != nil {
 		if respErr, ok := err.(*errorx.ErrorResponse); ok && respErr.IsObjectNotFound() {
@@ -192,7 +225,7 @@ func resourceSegmentGroupUpdate(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	if _, err := segmentgroup.UpdateV2(ctx, service, id, &req); err != nil {
+	if _, err := segmentgroup.UpdateV2Changes(ctx, service, id, &req); err != nil {
 		return diag.FromErr(err)
 	}
 

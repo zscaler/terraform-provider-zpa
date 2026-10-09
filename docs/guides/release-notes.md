@@ -12,9 +12,29 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ---
 
-``Last updated: v4.4.13``
+``Last updated: v4.4.14``
 
 ---
+
+## 4.4.14 (October 8, 2026)
+
+### Notes
+
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #695](https://github.com/zscaler/terraform-provider-zpa/pull/695) - Fixed `zpa_segment_group` updates failing with `payload.size.exceeded` for segment groups with a large number of applications. Updates previously sent every application associated with the segment group, even when the configuration did not manage them. Updates now send only the segment group's own settings (name, description, enabled), so the request size no longer depends on the size of the group; the group's applications are unchanged.
+
+### Deprecations
+
+- [PR #695](https://github.com/zscaler/terraform-provider-zpa/pull/695) - `zpa_segment_group`: the `applications` attribute is **deprecated** and will be removed in a future major release.
+  - **Why:** An application segment always belongs to exactly one segment group, and that association can only be changed through the application segment itself. Application segment membership therefore cannot be managed from the segment group.
+  - **What changes in this release:**
+    - Updating a segment group (for example its name or description) no longer sends its list of applications. The segment group's applications are left unchanged.
+    - Adding or removing applications in the `applications` block of an existing segment group is rejected at plan time, with an error explaining how to manage membership instead.
+    - Setting `applications` shows a deprecation warning. Configurations that list the segment group's current applications, in any order, keep working without changes.
+  - **What to do:** Remove the `applications` block from `zpa_segment_group`, and associate each application segment with its segment group using the `segment_group_id` attribute of `zpa_application_segment`. To move an application segment to another segment group, change its `segment_group_id`; the application segment is updated in place. See the `zpa_segment_group` documentation for an example.
 
 ## 4.4.13 (October 6, 2026)
 
