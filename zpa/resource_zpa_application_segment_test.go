@@ -72,6 +72,107 @@ func TestAccResourceApplicationSegment_Basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceApplicationSegment_Tags(t *testing.T) {
+	var appSegment applicationsegment.ApplicationSegmentResource
+	appSegmentTypeAndName, _, appSegmentGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPAApplicationSegment)
+	rPort := acctest.RandIntRange(1000, 9999)
+
+	segmentGroupTypeAndName, _, segmentGroupGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPASegmentGroup)
+	segmentGroupHCL := testAccCheckSegmentGroupConfigure(segmentGroupTypeAndName, "tf-acc-test-"+segmentGroupGeneratedName, variable.SegmentGroupDescription, variable.SegmentGroupEnabled)
+
+	_, _, tagGeneratedName := method.GenerateRandomSourcesTypeAndName(resourcetype.ZPATagKey)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckApplicationSegmentDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckApplicationSegmentTagsConfigure(appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, tagGeneratedName, rPort, 1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckApplicationSegmentExists(appSegmentTypeAndName, &appSegment),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tags.#", "1"),
+				),
+			},
+			// Update test: add a second tag value of the same tag key
+			{
+				Config: testAccCheckApplicationSegmentTagsConfigure(appSegmentGeneratedName, segmentGroupHCL, segmentGroupTypeAndName, tagGeneratedName, rPort, 2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckApplicationSegmentExists(appSegmentTypeAndName, &appSegment),
+					resource.TestCheckResourceAttr(appSegmentTypeAndName, "tags.#", "2"),
+				),
+			},
+			// Import test
+			{
+				ResourceName:      appSegmentTypeAndName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccCheckApplicationSegmentTagsConfigure(generatedName, segmentGroupHCL, segmentGroupTypeAndName, tagGeneratedName string, rPort, tagCount int) string {
+	tags := ""
+	for i := 0; i < tagCount; i++ {
+		tags += fmt.Sprintf(`
+	tags {
+		tag_key_id   = %[1]s.%[2]s.id
+		tag_value_id = %[1]s.%[2]s.tag_values[%[3]d].id
+	}
+`, resourcetype.ZPATagKey, tagGeneratedName, i)
+	}
+
+	return fmt.Sprintf(`
+// segment group resource
+%[1]s
+
+resource "%[2]s" "%[3]s" {
+	name        = "tf-acc-test-%[3]s"
+	description = "Namespace for application segment tags test"
+	enabled     = true
+}
+
+resource "%[4]s" "%[3]s" {
+	name         = "tf-acc-test-%[3]s"
+	description  = "Tag key for application segment tags test"
+	enabled      = true
+	namespace_id = %[2]s.%[3]s.id
+
+	tag_values {
+		name = "Production"
+	}
+
+	tag_values {
+		name = "Staging"
+	}
+}
+
+resource "%[5]s" "%[6]s" {
+	name             = "tf-acc-test-%[6]s"
+	description      = "tf-acc-test-%[6]s"
+	enabled          = true
+	health_reporting = "ON_ACCESS"
+	bypass_type      = "NEVER"
+	is_cname_enabled = true
+	tcp_port_ranges  = ["%[7]d", "%[7]d"]
+	domain_names     = ["tags.example.com"]
+	segment_group_id = %[8]s.id
+%[9]s
+}
+`,
+		segmentGroupHCL,
+		resourcetype.ZPATagNamespace,
+		tagGeneratedName,
+		resourcetype.ZPATagKey,
+		resourcetype.ZPAApplicationSegment,
+		generatedName,
+		rPort,
+		segmentGroupTypeAndName,
+		tags,
+	)
+}
+
 func testAccCheckApplicationSegmentDestroy(s *terraform.State) error {
 	apiClient := testAccProvider.Meta().(*Client)
 

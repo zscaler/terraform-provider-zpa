@@ -134,6 +134,8 @@ func resourcePolicyAccessRuleV2() *schema.Resource {
 											"CHROME_ENTERPRISE",
 											"CHROME_POSTURE_PROFILE",
 											"WORKLOAD_TAG_GROUP",
+											"ENTITY_TAG_GRP",
+											"ENTITY_TAG_VAL",
 										}, false),
 									},
 									"entry_values": {

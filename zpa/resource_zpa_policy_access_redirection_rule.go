@@ -38,6 +38,11 @@ func resourcePolicyRedictionRule() *schema.Resource {
 				},
 				"conditions": GetPolicyConditionsSchema([]string{
 					"CLIENT_TYPE",
+					"IDP",
+					"SAML",
+					"SCIM",
+					"SCIM_GROUP",
+					"COUNTRY_CODE",
 				}),
 				"service_edge_groups": {
 					Type:        schema.TypeList,

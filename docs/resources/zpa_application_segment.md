@@ -207,6 +207,56 @@ resource "zpa_application_segment" "this" {
 }
 ```
 
+## Example 4 Usage - Application Segment with Tags
+
+```terraform
+resource "zpa_tag_namespace" "this" {
+  name        = "Example Namespace"
+  description = "Example Namespace"
+  enabled     = true
+}
+
+resource "zpa_tag_key" "this" {
+  name         = "Environment"
+  description  = "Environment"
+  enabled      = true
+  namespace_id = zpa_tag_namespace.this.id
+
+  tag_values {
+    name = "Production"
+  }
+
+  tag_values {
+    name = "Staging"
+  }
+}
+
+resource "zpa_application_segment" "this" {
+  name             = "app01.acme.com"
+  description      = "app01.acme.com"
+  enabled          = true
+  health_reporting = "ON_ACCESS"
+  bypass_type      = "NEVER"
+  is_cname_enabled = true
+  tcp_port_ranges  = ["443", "443"]
+  domain_names     = ["app01.acme.com"]
+  segment_group_id = zpa_segment_group.this.id
+  server_groups {
+    id = [zpa_server_group.this.id]
+  }
+
+  tags {
+    tag_key_id   = zpa_tag_key.this.id
+    tag_value_id = zpa_tag_key.this.tag_values[0].id
+  }
+
+  tags {
+    tag_key_id   = zpa_tag_key.this.id
+    tag_value_id = zpa_tag_key.this.tag_values[1].id
+  }
+}
+```
+
 ## Schema
 
 ### Required
@@ -262,6 +312,9 @@ Supported values: `EXCLUSIVE`, `INCLUSIVE`. [Learn More](https://help.zscaler.co
 - `share_to_microtenants` (List) List of destination Microtenants to which the application segment is to be shared with.
 - `zpn_er_id` (Block Set) - ZPN Extranet Resource
     - `id` - (String) The unique identifier of the zpn extranet resource
+- `tags` (Block Set) - Tags associated with the application segment. Each block is one tag value of a tag key (see `zpa_tag_key`).
+    - `tag_key_id` - (Required, String) The ID of the tag key.
+    - `tag_value_id` - (Required, String) The ID of the tag value.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 

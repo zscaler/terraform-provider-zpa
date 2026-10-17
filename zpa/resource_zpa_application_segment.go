@@ -273,6 +273,25 @@ func resourceApplicationSegment() *schema.Resource {
 					},
 				},
 			},
+			"tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Tags associated with the application segment. Each tag is a tag value of a tag key.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"tag_key_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "ID of the tag key",
+						},
+						"tag_value_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "ID of the tag value",
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -386,6 +405,7 @@ func resourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("udp_port_ranges", convertPortsToListString(resp.UDPAppPortRange))
 	_ = d.Set("server_groups", flattenCommonAppServerGroupSimple(resp.ServerGroups))
 	_ = d.Set("zpn_er_id", flattenCommonZPNERIDSimple(resp.ZPNERID))
+	_ = d.Set("tags", flattenApplicationSegmentTags(resp.Tags))
 
 	shareTo := []string{}
 	if len(resp.SharedMicrotenantDetails.SharedToMicrotenants) > 0 {
@@ -537,6 +557,7 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		WeightedLoadBalancing:     d.Get("weighted_load_balancing").(bool),
 		PolicyStyle:               PolicyStyleBoolToAPIString(GetBool(d.Get("policy_style"))),
 		ZPNERID:                   extranet,
+		Tags:                      expandApplicationSegmentTags(d),
 		ServerGroups: func() []servergroup.ServerGroup {
 			groups := expandCommonServerGroups(d)
 			if groups == nil {
@@ -580,6 +601,40 @@ func expandApplicationSegmentRequest(ctx context.Context, d *schema.ResourceData
 		details.UDPPortRanges = []string{}
 	}
 	return details
+}
+
+func expandApplicationSegmentTags(d *schema.ResourceData) []applicationsegment.Tag {
+	v, ok := d.GetOk("tags")
+	if !ok {
+		return nil
+	}
+	items := v.(*schema.Set).List()
+	tags := make([]applicationsegment.Tag, 0, len(items))
+	for _, item := range items {
+		m, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		tags = append(tags, applicationsegment.Tag{
+			TagKey:   common.CommonSummary{ID: GetString(m["tag_key_id"])},
+			TagValue: common.CommonIDName{ID: GetString(m["tag_value_id"])},
+		})
+	}
+	return tags
+}
+
+func flattenApplicationSegmentTags(tags []applicationsegment.Tag) []interface{} {
+	if len(tags) == 0 {
+		return nil
+	}
+	result := make([]interface{}, 0, len(tags))
+	for _, t := range tags {
+		result = append(result, map[string]interface{}{
+			"tag_key_id":   t.TagKey.ID,
+			"tag_value_id": t.TagValue.ID,
+		})
+	}
+	return result
 }
 
 func detachAppsFromAllPolicyRules(ctx context.Context, id string, policySetControllerService *zscaler.Service) {

@@ -148,8 +148,65 @@ func dataSourceApplicationSegment() *schema.Resource {
 			},
 			"tcp_port_range": resourceNetworkPortsSchema("tcp port range"),
 			"udp_port_range": resourceNetworkPortsSchema("udp port range"),
+			"tags": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "Tags associated with the application segment.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"namespace": dataSourceApplicationSegmentTagRefSchema(),
+						"tag_key":   dataSourceApplicationSegmentTagRefSchema(),
+						"tag_value": dataSourceApplicationSegmentTagRefSchema(),
+						"origin": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
+}
+
+func dataSourceApplicationSegmentTagRefSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Computed: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"id": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+				"name": {
+					Type:     schema.TypeString,
+					Computed: true,
+				},
+			},
+		},
+	}
+}
+
+func flattenApplicationSegmentTagsDetails(tags []applicationsegment.Tag) []interface{} {
+	if len(tags) == 0 {
+		return nil
+	}
+	ref := func(id, name string) []interface{} {
+		if id == "" && name == "" {
+			return nil
+		}
+		return []interface{}{map[string]interface{}{"id": id, "name": name}}
+	}
+	result := make([]interface{}, 0, len(tags))
+	for _, t := range tags {
+		result = append(result, map[string]interface{}{
+			"namespace": ref(t.Namespace.ID, t.Namespace.Name),
+			"tag_key":   ref(t.TagKey.ID, t.TagKey.Name),
+			"tag_value": ref(t.TagValue.ID, t.TagValue.Name),
+			"origin":    t.Origin,
+		})
+	}
+	return result
 }
 
 func dataSourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -222,6 +279,10 @@ func dataSourceApplicationSegmentRead(ctx context.Context, d *schema.ResourceDat
 		}
 
 		if err := d.Set("udp_port_range", flattenNetworkPorts(resp.UDPAppPortRange)); err != nil {
+			return diag.FromErr(err)
+		}
+
+		if err := d.Set("tags", flattenApplicationSegmentTagsDetails(resp.Tags)); err != nil {
 			return diag.FromErr(err)
 		}
 

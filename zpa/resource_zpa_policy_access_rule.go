@@ -81,6 +81,8 @@ func resourcePolicyAccessRule() *schema.Resource {
 					"RISK_FACTOR_TYPE",
 					"CHROME_ENTERPRISE",
 					"WORKLOAD_TAG_GROUP",
+					"ENTITY_TAG_GRP",
+					"ENTITY_TAG_VAL",
 				}),
 			},
 		),

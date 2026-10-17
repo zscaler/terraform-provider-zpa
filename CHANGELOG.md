@@ -1,5 +1,25 @@
 # Changelog
 
+## 4.4.15 (October 16, 2026)
+
+### Notes
+
+- Release date: **(October 16, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added the `tags` attribute to the resource and data source `zpa_application_segment`. Each `tags` block associates a tag value (`tag_value_id`) of a tag key (`tag_key_id`) with the application segment; the data source also returns the tag namespace, names and origin.
+
+- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added new `conditions` options `IDP`, `SAML`, `SCIM_GROUP`, `SCIM`, `COUNTRY_CODE`, within the resource `zpa_policy_redirection_rule`
+
+- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added the `conditions` object types `ENTITY_TAG_GRP` and `ENTITY_TAG_VAL` to the resources `zpa_policy_access_rule` and `zpa_policy_access_rule_v2`.
+
+### Documentation
+
+- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added the [Best Practices](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/guides/best-practices) guide, covering general Terraform practices for this provider and ZPA-specific practices (composition chain, application segments and segment group membership, policy rules and operands, rule ordering, microtenant scoping), and linked it from the provider documentation index.
+- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Corrected the `SCIM_GROUP` row of the operand reference table in the policy rule resource documentation: `lhs` is the IdP ID and `rhs` is the SCIM group ID.
+
 ## 4.4.14 (October 8, 2026)
 
 ### Notes

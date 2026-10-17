@@ -15,6 +15,10 @@ Use the navigation on the left to read about the available resources.
 
 -> **Disclaimer:** Please refer to our [General Support Statement](guides/support.md) before proceeding with the use of this provider. You can also refer to our [troubleshooting guide](guides/troubleshooting.md) for guidance on typical problems.
 
+## Best Practices
+
+~> **Recommended reading:** Before building or scaling a ZPA configuration, read the [Best Practices](guides/best-practices.md) guide. It covers authentication and credential handling, state and module layout, CI/CD, and the practices specific to ZPA: the resource composition chain, application segments and segment group membership, policy rules and operands, rule ordering, and microtenant scoping.
+
 ## Feature Availability and API Parity
 
 -> **Important:** The ZPA Terraform provider maintain parity with publicly available API endpoints. In some instances, certain features or attributes available via the Zscaler UI may not be immediately available through the API, and therefore cannot be included in the Terraform provider. This does not indicate that the provider is lagging behind; rather, it reflects that we implement only the features that are currently exposed by the public API.
