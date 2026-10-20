@@ -127,43 +127,23 @@ func resourceApplicationSegmentMultimatchBulkRead(ctx context.Context, d *schema
 	if v, ok := d.GetOk("match_style"); ok {
 		matchStyleFromState = v.(string)
 	}
-	actualMatchStyle := matchStyleFromState
+	actualMatchStyle := ""
 
 	if len(allDomainNames) > 0 {
 		domainPayload := applicationsegment.MultiMatchUnsupportedReferencesPayload(allDomainNames)
 		unsupportedRefs, _, err := applicationsegment.GetMultiMatchUnsupportedReferences(ctx, service, domainPayload)
-		if err != nil {
-			log.Printf("[WARN] Failed to get unsupported references via POST: %v", err)
-			// Fallback to individual GET calls
-			actualMatchStyle = verifyMatchStyleViaIndividualGETs(ctx, service, applicationIDs, matchStyleFromState)
-		} else {
-			// Build a map of segment ID to match_style from the POST response
+		if err == nil {
 			segmentMatchStyleMap := make(map[string]string)
 			for _, ref := range unsupportedRefs {
 				if ref.ID != "" && ref.MatchStyle != "" {
 					segmentMatchStyleMap[ref.ID] = ref.MatchStyle
 				}
 			}
-
-			// Determine the actual match_style from the POST response
-			// Check if all segments in our list have the same match_style
-			for _, appID := range applicationIDs {
-				if refMatchStyle, exists := segmentMatchStyleMap[appID]; exists {
-					if actualMatchStyle == "" {
-						actualMatchStyle = refMatchStyle
-					} else if actualMatchStyle != refMatchStyle {
-						log.Printf("[WARN] Application segments have different match_style values. Segment %s has '%s', but others have '%s'", appID, refMatchStyle, actualMatchStyle)
-					}
-				}
-			}
-
-			// If we didn't find match_style in POST response, fallback to individual GETs
-			if actualMatchStyle == "" {
-				actualMatchStyle = verifyMatchStyleViaIndividualGETs(ctx, service, applicationIDs, matchStyleFromState)
-			}
+			actualMatchStyle = reconcileMatchStyle(applicationIDs, segmentMatchStyleMap, matchStyleFromState)
 		}
-	} else {
-		// No domain names available, use individual GET calls
+	}
+	// Fall back to reading each segment when the references call gives no answer.
+	if actualMatchStyle == "" {
 		actualMatchStyle = verifyMatchStyleViaIndividualGETs(ctx, service, applicationIDs, matchStyleFromState)
 	}
 
@@ -224,21 +204,34 @@ func resourceApplicationSegmentMultimatchBulkUpdate(ctx context.Context, d *sche
 
 // verifyMatchStyleViaIndividualGETs fetches each segment individually to verify match_style
 func verifyMatchStyleViaIndividualGETs(ctx context.Context, service *zscaler.Service, applicationIDs []string, expectedMatchStyle string) string {
-	actualMatchStyle := ""
+	styles := make(map[string]string)
 	for _, appID := range applicationIDs {
 		segment, _, err := applicationsegment.Get(ctx, service, appID)
 		if err != nil {
-			log.Printf("[WARN] Failed to fetch application segment %s for match_style verification: %v", appID, err)
 			continue
 		}
-		if actualMatchStyle == "" {
-			actualMatchStyle = segment.MatchStyle
-		}
-		if segment.MatchStyle != expectedMatchStyle && expectedMatchStyle != "" {
-			log.Printf("[WARN] Application segment %s has match_style '%s' (expected '%s')", appID, segment.MatchStyle, expectedMatchStyle)
-		}
+		styles[appID] = segment.MatchStyle
 	}
-	return actualMatchStyle
+	return reconcileMatchStyle(applicationIDs, styles, expectedMatchStyle)
+}
+
+// reconcileMatchStyle returns the match style the segments actually have: the
+// expected style when every segment found has it, otherwise the first differing
+// style, so a segment changed outside Terraform shows up as a plan change.
+// It returns "" when none of the segments was found.
+func reconcileMatchStyle(applicationIDs []string, styles map[string]string, expected string) string {
+	actual := ""
+	for _, appID := range applicationIDs {
+		style, ok := styles[appID]
+		if !ok || style == "" {
+			continue
+		}
+		if style != expected {
+			return style
+		}
+		actual = style
+	}
+	return actual
 }
 
 // convertStringIDsToInts converts a slice of string IDs to integers

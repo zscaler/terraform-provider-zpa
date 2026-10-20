@@ -148,11 +148,27 @@ func dataSourcePolicyType() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"microtenant_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"microtenant_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"zpn_cbi_profile_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"zpn_inspection_profile_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"zpn_inspection_profile_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"zpn_isolation_profile_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -174,6 +190,10 @@ func dataSourcePolicyType() *schema.Resource {
 										Computed: true,
 									},
 									"modified_time": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"microtenant_id": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -223,6 +243,10 @@ func dataSourcePolicyType() *schema.Resource {
 													Computed: true,
 												},
 												"operator": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"microtenant_id": {
 													Type:     schema.TypeString,
 													Computed: true,
 												},

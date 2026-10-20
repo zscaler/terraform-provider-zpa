@@ -114,6 +114,8 @@ func TestRunForcedSweeper(t *testing.T) {
 	sweepTestServiceEdgeGroup(testClient)
 	sweepTestCBIBanner(testClient)
 	sweepTestCBIExternalProfile(testClient)
+	sweepTestCBICertificate(testClient)
+	sweepTestBaCertificate(testClient)
 	sweepTestPRACredentialController(testClient)
 	sweepTestPRAConsoleController(testClient)
 	sweepTestPRAPortalController(testClient)
@@ -431,6 +433,9 @@ func sweepTestLSSConfigController(client *testClient) error {
 	sweeperLogger.Warn(fmt.Sprintf("Found %d resources to sweep", len(lssConfig)))
 
 	for _, b := range lssConfig {
+		if b.LSSConfig == nil {
+			continue
+		}
 		// Check if the resource name has the required prefix before deleting it
 		if strings.HasPrefix(b.LSSConfig.Name, testResourcePrefix) || strings.HasPrefix(b.LSSConfig.Name, updateResourcePrefix) {
 			// Attempt to delete the resource

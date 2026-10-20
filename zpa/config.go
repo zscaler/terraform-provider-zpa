@@ -81,10 +81,6 @@ type Client struct {
 	policyRulesV2             listIndex[policysetcontrollerv2.PolicyRuleResource]
 }
 
-func (c *Client) GetConfig() *zscaler.Configuration {
-	return &zscaler.Configuration{}
-}
-
 func NewConfig(d *schema.ResourceData) *Config {
 	// defaults
 	// minWait/maxWait match the SDK's own retry back-off defaults and are
@@ -235,14 +231,6 @@ func (c *Config) loadClients() diag.Diagnostics {
 	c.zscalerSDKClientV3 = v3Client
 
 	return nil
-}
-
-// SelectClient returns the appropriate client based on authentication type or other factors.
-func (c *Config) SelectClient() (*zscaler.Client, *zpa.Client, error) {
-	if c.zscalerSDKClientV3 != nil {
-		return c.zscalerSDKClientV3, nil, nil
-	}
-	return nil, nil, fmt.Errorf("no valid client configuration provided")
 }
 
 // generateUserAgent constructs the user agent string with all required details
@@ -441,6 +429,15 @@ func zscalerSDKV3Client(c *Config) (*zscaler.Client, error) {
 
 // Client instantiates the provider client with necessary configurations.
 func (c *Config) Client() (*Client, error) {
+	// Reuse the client loadClients already built and authenticated: building
+	// another one would log in to the API a second time.
+	if c.zscalerSDKClientV3 != nil {
+		return &Client{
+			Service:          zscaler.NewService(c.zscalerSDKClientV3, nil),
+			policySetIDCache: make(map[string]string),
+		}, nil
+	}
+
 	if c.useLegacyClient {
 		wrappedV2Client, err := zscalerSDKV2Client(c)
 		if err != nil {

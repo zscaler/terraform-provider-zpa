@@ -39,9 +39,27 @@ sweep:
 	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
 	go test $(TEST) -sweep=$(SWEEP) $(SWEEPARGS)
 
+# Unit tests: offline, run against an in-memory mock of the ZPA API (see
+# zpa/unit_fixture_test.go). No credentials, no tenant changes. Tests that need
+# a tenant (TestAcc*, the forced sweeper) are not run. TF_ACC is cleared here so
+# an exported TF_ACC never turns a unit run into API calls.
+
 test:
-	echo $(TEST) | \
-		xargs -t -n4 go test $(TESTARGS) $(TEST_FILTER) -timeout=30s -parallel=10
+	@$(MAKE) test\:unit
+
+test\:unit:
+	@echo "$(COLOR_ZSCALER)Running zpa unit tests (no API calls)...$(COLOR_NONE)"
+	TF_ACC= go test ./zpa -count=1 -race $(TESTARGS) -skip '^TestAcc|^TestRunForcedSweeper$$' \
+		-cover -coverprofile=unit-coverage.out -covermode=atomic -timeout 10m
+	go tool cover -func unit-coverage.out | grep total:
+
+# Acceptance tests: real API calls against the ZPA tenant configured in the
+# environment (ZSCALER_CLIENT_ID, ZSCALER_CLIENT_SECRET, ZSCALER_VANITY_DOMAIN,
+# ZPA_CUSTOMER_ID, ...). Each test creates and deletes tf-acc-test-* resources.
+test\:acceptance:
+	@echo "$(COLOR_ZSCALER)Running zpa acceptance tests (real API calls; creates and deletes resources in the tenant)...$(COLOR_NONE)"
+	TF_ACC=1 go test -v -race -cover -coverprofile=zpacoverage.out -covermode=atomic ./zpa -parallel 1 -timeout 120m $(TESTARGS)
+	go tool cover -func zpacoverage.out | grep total:
 
 testacc:
 	TF_ACC=1 go test $(TEST) $(TESTARGS) $(TEST_FILTER) -timeout 120m

@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/c2c_ip_ranges"
 )
 
@@ -139,6 +140,11 @@ func resourceC2CIPRangesRead(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[INFO] Getting C2C IP Ranges with id: %v\n", id)
 	resp, _, err := c2c_ip_ranges.Get(ctx, service, id)
 	if err != nil {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
+			log.Printf("[WARN] Removing C2C IP Ranges %s from state because it no longer exists in ZPA", id)
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(err)
 	}
 	log.Printf("[INFO] Got C2C IP Ranges:\n%+v\n", resp)

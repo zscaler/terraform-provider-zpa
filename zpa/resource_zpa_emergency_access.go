@@ -92,6 +92,7 @@ func resourceEmergencyAccessRead(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[INFO] Getting emergency access user:\n%+v\n", resp)
 	d.SetId(resp.UserID)
+	_ = d.Set("user_id", resp.UserID)
 	_ = d.Set("first_name", resp.FirstName)
 	_ = d.Set("last_name", resp.LastName)
 	_ = d.Set("email_id", resp.EmailID)

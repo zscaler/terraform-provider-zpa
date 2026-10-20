@@ -660,7 +660,10 @@ func detachAppsFromAllPolicyRules(ctx context.Context, id string, policySetContr
 	for _, rr := range rules {
 		rule := rr
 		changed := false
-		for i, condition := range rr.Conditions {
+		// Drop the segment from every condition, and drop conditions left
+		// without operands: the API rejects a condition with no operands.
+		conditions := []policysetcontroller.Conditions{}
+		for _, condition := range rr.Conditions {
 			operands := []policysetcontroller.Operands{}
 			for _, op := range condition.Operands {
 				if op.ObjectType == "APP" && op.LHS == "id" && op.RHS == id {
@@ -669,11 +672,13 @@ func detachAppsFromAllPolicyRules(ctx context.Context, id string, policySetContr
 				}
 				operands = append(operands, op)
 			}
-			rule.Conditions[i].Operands = operands
+			if len(operands) == 0 && len(condition.Operands) > 0 {
+				continue
+			}
+			condition.Operands = operands
+			conditions = append(conditions, condition)
 		}
-		if len(rule.Conditions) == 0 {
-			rule.Conditions = []policysetcontroller.Conditions{}
-		}
+		rule.Conditions = conditions
 		if changed {
 			if _, err := policysetcontroller.UpdateRule(ctx, policySetControllerService, rule.PolicySetID, rule.ID, &rule); err != nil {
 				continue

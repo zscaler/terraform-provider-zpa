@@ -1,13 +1,19 @@
 name: ZPA Test
 on:
+  # Unit tests run on every pull request, whatever branch it targets (stacked
+  # PRs target feature branches), and on every push to master, including merges.
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master ]
 
   schedule:
     - cron: '0 12 * * 1-5' # UTC
   workflow_dispatch:
+    inputs:
+      run_acceptance:
+        description: "Also run the acceptance tests (real API calls; creates and deletes resources in the ZPA tenants)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -20,6 +26,31 @@ permissions:
 
 
 jobs:
+  # Unit tests run on every pull request, push to master and scheduled run. They use an
+  # in-memory mock of the ZPA API: no credentials, no tenant changes.
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: "1.26"
+
+      - name: Run unit tests
+        run: make test:unit
+
+      - name: Upload unit test coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unit-test-coverage
+          path: unit-coverage.out
+          if-no-files-found: warn
+          retention-days: 30
+
   # zpa-qa1-tenants:
   #   runs-on: ubuntu-latest
   #   strategy:
@@ -163,8 +194,11 @@ jobs:
   #         TF_ACC: ${{ secrets.TF_ACC }}
   #         ZPA_ACC_TEST_FORCE_SWEEPERS: ${{ secrets.ZPA_ACC_TEST_FORCE_SWEEPERS }}
 
+  # Acceptance tests (real API calls) run only when requested: start the workflow
+  # manually (Actions > ZPA Test > Run workflow) with run_acceptance checked.
   zpa-beta-tenants:
-    # needs: [zpa-qa2-tenants]
+    needs: [unit-tests]
+    if: github.event_name == 'workflow_dispatch' && inputs.run_acceptance
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

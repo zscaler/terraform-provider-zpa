@@ -170,15 +170,15 @@ func dataSourceMicrotenantController() *schema.Resource {
 							Computed: true,
 						},
 						"phone_number": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"pin_session": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"role_id": {
+						"pin_session": {
 							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						"role_id": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"sync_version": {
@@ -225,8 +225,12 @@ func dataSourceMicrotenantController() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"modified_by": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"modified_time": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
@@ -320,7 +324,7 @@ func flattenMicroTenantUserResource(userResource *microtenants.UserResource) []m
 	result[0]["language_code"] = userResource.LanguageCode
 	result[0]["local_login_disabled"] = userResource.LocalLoginDisabled
 	result[0]["one_identity_user"] = userResource.OneIdentityUser
-	result[0]["operation_type	"] = userResource.OperationType
+	result[0]["operation_type"] = userResource.OperationType
 	result[0]["password"] = userResource.Password
 	result[0]["phone_number"] = userResource.PhoneNumber
 	result[0]["pin_session"] = userResource.PinSession
