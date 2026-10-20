@@ -25,11 +25,11 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Enhancements
 
-- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added the `tags` attribute to the resource and data source `zpa_application_segment`. Each `tags` block associates a tag value (`tag_value_id`) of a tag key (`tag_key_id`) with the application segment; the data source also returns the tag namespace, names and origin.
+- [PR #697](https://github.com/zscaler/terraform-provider-zpa/pull/697) - Added the `tags` attribute to the resource and data source `zpa_application_segment`. Each `tags` block associates a tag value (`tag_value_id`) of a tag key (`tag_key_id`) with the application segment; the data source also returns the tag namespace, names and origin.
 
-- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added new `conditions` options `IDP`, `SAML`, `SCIM_GROUP`, `SCIM`, `COUNTRY_CODE`, within the resource `zpa_policy_redirection_rule`
+- [PR #697](https://github.com/zscaler/terraform-provider-zpa/pull/697) - Added new `conditions` options `IDP`, `SAML`, `SCIM_GROUP`, `SCIM`, `COUNTRY_CODE`, within the resource `zpa_policy_redirection_rule`
 
-- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added the `conditions` object types `ENTITY_TAG_GRP` and `ENTITY_TAG_VAL` to the resources `zpa_policy_access_rule` and `zpa_policy_access_rule_v2`.
+- [PR #697](https://github.com/zscaler/terraform-provider-zpa/pull/697) - Added the `conditions` object types `ENTITY_TAG_GRP` and `ENTITY_TAG_VAL` to the resources `zpa_policy_access_rule` and `zpa_policy_access_rule_v2`.
 
 ### Bug Fixes
 
@@ -54,8 +54,8 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 ### Documentation
 
-- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added the [Best Practices](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/guides/best-practices) guide, covering general Terraform practices for this provider and ZPA-specific practices (composition chain, application segments and segment group membership, policy rules and operands, rule ordering, microtenant scoping), and linked it from the provider documentation index.
-- [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Corrected the `SCIM_GROUP` row of the operand reference table in the policy rule resource documentation: `lhs` is the IdP ID and `rhs` is the SCIM group ID.
+- [PR #697](https://github.com/zscaler/terraform-provider-zpa/pull/697) - Added the [Best Practices](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/guides/best-practices) guide, covering general Terraform practices for this provider and ZPA-specific practices (composition chain, application segments and segment group membership, policy rules and operands, rule ordering, microtenant scoping), and linked it from the provider documentation index.
+- [PR #697](https://github.com/zscaler/terraform-provider-zpa/pull/697) - Corrected the `SCIM_GROUP` row of the operand reference table in the policy rule resource documentation: `lhs` is the IdP ID and `rhs` is the SCIM group ID.
 - [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - Fixed the `zpa_pra_approval_controller` data source example: `email_ids` is a list.
 - [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - Updated the `zpa_policy_redirection_rule` documentation to match the resource: examples now use `lhs`/`rhs` operands, and it documents the `IDP`, `SAML`, `SCIM`, `SCIM_GROUP` and `COUNTRY_CODE` conditions, `service_edge_groups`, and the correct import command.
 - [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - Updated the `zpa_policy_access_rule` documentation to match the resource: fixed the `CHROME_ENTERPRISE` example, the supported `object_type` and `CLIENT_TYPE` values, the `PLATFORM` value, and documented `rhs_list`.
