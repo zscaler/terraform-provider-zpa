@@ -31,10 +31,38 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 
 - [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added the `conditions` object types `ENTITY_TAG_GRP` and `ENTITY_TAG_VAL` to the resources `zpa_policy_access_rule` and `zpa_policy_access_rule_v2`.
 
+### Bug Fixes
+
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_policy_redirection_rule`: when `policy_set_id` is not set, create now resolves the redirection policy set instead of posting the rule without one.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_c2c_ip_ranges`: an IP range deleted outside Terraform is now removed from state instead of failing every plan.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_app_connector_assistant_schedule` and `zpa_service_edge_assistant_schedule`: create now stores the ID of the new schedule.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_policy_timeout_rule_v2`: equivalent timeouts (such as `Never` and `never`, or `60 Minutes` and `1 Hour`) no longer show as a change in every plan.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_inspection_profile`: reading a profile that has controls no longer fails; removed unused import attributes.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_policy_type` data source: no longer fails when the policy set has rules.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_pra_approval_controller` data source: the lookup by `email_ids` now works.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_lss_config_controller` data source: added the `name` argument used by the documented lookup by name.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_lss_config_status_codes` data source: `zpn_auth_log` now returns the user authentication status codes.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_scim_groups` data source: the lookup by `idp_id` now works.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_microtenant_controller` data source: the `user` block is now exported.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_application_segment_by_type` data source: returns the segment with the exact name instead of the first search result.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_application_segment`: deleting a segment no longer fails when removing it from a policy rule leaves a condition with no operands; that condition is now removed.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_application_segment_multimatch_bulk`: a `match_style` changed outside Terraform now shows as a plan change.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_application_segment_weightedlb_config`: removed from state when its application segment was deleted outside Terraform, and destroy no longer fails in that case.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_cloud_config`: read errors are now reported instead of ignored, and a config deleted outside Terraform is removed from state.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - `zpa_emergency_access`: `user_id` is now set when the user is read, including after import.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - v2 policy rule resources, and resources that remove objects from policy rules: operands returned with a list of values no longer lose those values when the rule is updated.
+
 ### Documentation
 
 - [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Added the [Best Practices](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/guides/best-practices) guide, covering general Terraform practices for this provider and ZPA-specific practices (composition chain, application segments and segment group membership, policy rules and operands, rule ordering, microtenant scoping), and linked it from the provider documentation index.
 - [PR #696](https://github.com/zscaler/terraform-provider-zpa/pull/696) - Corrected the `SCIM_GROUP` row of the operand reference table in the policy rule resource documentation: `lhs` is the IdP ID and `rhs` is the SCIM group ID.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - Fixed the `zpa_pra_approval_controller` data source example: `email_ids` is a list.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - Updated the `zpa_policy_redirection_rule` documentation to match the resource: examples now use `lhs`/`rhs` operands, and it documents the `IDP`, `SAML`, `SCIM`, `SCIM_GROUP` and `COUNTRY_CODE` conditions, `service_edge_groups`, and the correct import command.
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - Updated the `zpa_policy_access_rule` documentation to match the resource: fixed the `CHROME_ENTERPRISE` example, the supported `object_type` and `CLIENT_TYPE` values, the `PLATFORM` value, and documented `rhs_list`.
+
+### Internal Changes
+
+- [PR #698](https://github.com/zscaler/terraform-provider-zpa/pull/698) - Added unit tests that run resource and data source logic against an in-memory mock of the ZPA API (no credentials or API calls), covering every resource and data source that has acceptance tests. `make test` / `make test:unit` run only the unit tests and `make test:acceptance` runs the acceptance tests against a live tenant. The `TestProviderValidate` cases that authenticate with real credentials moved to `TestAccProviderValidate`. The test sweepers are unit tested to delete only `tf-acc-test-` / `tf-updated-` objects; the LSS sweeper no longer stops on an entry without a config, and the forced sweep now includes the CBI and BA certificate sweepers. The CI workflow now runs unit tests on every push and pull request, and the acceptance tests only when requested. The provider now reuses its authenticated API client instead of logging in a second time at start-up, and unused client and policy set helpers were removed.
 
 ## 4.4.14 (October 8, 2026)
 

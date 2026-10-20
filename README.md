@@ -168,19 +168,19 @@ $ $GOPATH/bin/terraform-provider-zpa
 ...
 ```
 
-In order to test the provider, you can simply run `make test`.
+The provider has two kinds of tests:
+
+- **Unit tests** run the resource and data source logic against an in-memory mock of the ZPA API. They need no credentials, make no API calls and finish in seconds. They run on every push and pull request.
+- **Acceptance tests** (`TestAcc*`) make real API calls against a ZPA tenant and create and delete `tf-acc-test-*` resources. They run in CI only when requested (Actions > ZPA Test > Run workflow, with `run_acceptance` checked).
 
 ```sh
-make test
+make test              # unit tests (same as make test:unit)
+make test:acceptance   # acceptance tests against the tenant configured in the environment
 ```
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+*Note:* Acceptance tests create real resources, and often cost money to run. They read the tenant credentials from the environment (`ZSCALER_CLIENT_ID`, `ZSCALER_CLIENT_SECRET`, `ZSCALER_VANITY_DOMAIN`, `ZPA_CUSTOMER_ID`).
 
-*Note:* Acceptance tests create real resources, and often cost money to run.
-
-```sh
-make testacc
-```
+New unit tests use the fixture in `zpa/unit_fixture_test.go`; see `zpa/resource_zpa_segment_group_unit_test.go` for examples.
 
 License
 =========

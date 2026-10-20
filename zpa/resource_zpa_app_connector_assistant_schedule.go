@@ -74,8 +74,7 @@ func resourceAppConnectorAssistantScheduleCreate(ctx context.Context, d *schema.
 		return diag.FromErr(err)
 	}
 
-	// Use = instead of := because err is already declared
-	_, _, err = appconnectorschedule.CreateSchedule(ctx, service, req)
+	created, _, err := appconnectorschedule.CreateSchedule(ctx, service, req)
 	if err != nil {
 		// Assuming err.Error() returns a string representation of the error
 		errStr := err.Error()
@@ -98,8 +97,8 @@ func resourceAppConnectorAssistantScheduleCreate(ctx context.Context, d *schema.
 		}
 		return diag.FromErr(err)
 	}
-	log.Printf("[INFO] Created app connector assistant schedule request. ID: %v\n", req.ID)
-	d.SetId(req.ID)
+	log.Printf("[INFO] Created app connector assistant schedule request. ID: %v\n", created.ID)
+	d.SetId(created.ID)
 
 	return resourceAppConnectorAssistantScheduleRead(ctx, d, meta)
 }

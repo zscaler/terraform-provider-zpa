@@ -140,8 +140,10 @@ func dataSourcePRAPrivilegedApprovalControllerRead(ctx context.Context, d *schem
 		}
 		resp = res
 	}
-	emailID, ok := d.Get("email_ids").(string)
-	if id == "" && ok && emailID != "" {
+	// email_ids is a set: look the approval up by the first email address given.
+	emailIDs := SetToStringList(d, "email_ids")
+	if id == "" && len(emailIDs) > 0 && emailIDs[0] != "" {
+		emailID := emailIDs[0]
 		log.Printf("[INFO] Getting data for pra approval email ID %s\n", emailID)
 		res, _, err := praapproval.GetByEmailID(ctx, service, emailID)
 		if err != nil {

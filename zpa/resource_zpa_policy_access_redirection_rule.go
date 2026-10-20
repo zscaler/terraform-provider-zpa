@@ -111,6 +111,13 @@ func resourcePolicyRedictionRuleCreate(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	// policy_set_id is optional: resolve it from the policy type when not set.
+	if req.PolicySetID == "" {
+		req.PolicySetID, err = fetchPolicySetIDByType(ctx, zClient, "REDIRECTION_POLICY", microTenantID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
 	log.Printf("[INFO] Creating zpa policy redirection rule with request\n%+v\n", req)
 	if err := ValidateConditions(ctx, req.Conditions, zClient, req.MicroTenantID); err == nil {
 		policysetcontroller, _, err := policysetcontroller.CreateRule(ctx, service, req)

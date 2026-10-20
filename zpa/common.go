@@ -792,28 +792,6 @@ var AllowedPolicyTypes = map[string]struct{}{
 	"REDIRECTION_POLICY":                   {},
 }
 
-func GetGlobalPolicySetByPolicyType(ctx context.Context, zClient *Client, policyType string) (*policysetcontroller.PolicySet, error) {
-	// Check if the provided policy type is allowed
-	if _, ok := AllowedPolicyTypes[policyType]; !ok {
-		return nil, fmt.Errorf("invalid policy type: %s", policyType)
-	}
-
-	policySetsMutex.Lock()
-	defer policySetsMutex.Unlock()
-
-	if p, ok := policySets[policyType]; ok {
-		return &p, nil
-	}
-
-	service := zClient.Service
-	globalPolicySet, _, err := policysetcontroller.GetByPolicyType(ctx, service, policyType)
-	if err != nil {
-		return nil, err
-	}
-	policySets[policyType] = *globalPolicySet
-	return globalPolicySet, nil
-}
-
 // ######################################################################################################################
 // ################################ ZPA ACCESS POLICY V2 COMMON CONDITIONS FUNCTIONS ####################################
 // ######################################################################################################################
@@ -1373,7 +1351,13 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 		for _, operand := range condition.Operands {
 			switch operand.ObjectType {
 			case "APP", "APP_GROUP", "CONSOLE", "CHROME_POSTURE_PROFILE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE", "USER_PORTAL", "PRIVILEGE_PORTAL":
-				operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
+				// v1 operands carry one ID in RHS; an operand that already holds a
+				// values list (v2 shape) keeps all of its values.
+				if len(operand.Values) > 0 {
+					operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.Values...)
+				} else if operand.RHS != "" {
+					operandMap[operand.ObjectType] = append(operandMap[operand.ObjectType], operand.RHS)
+				}
 			case "PLATFORM", "POSTURE", "TRUSTED_NETWORK", "SAML", "SCIM", "SCIM_GROUP", "COUNTRY_CODE", "RISK_FACTOR_TYPE", "CHROME_ENTERPRISE":
 				entryValuesMap[operand.ObjectType] = append(entryValuesMap[operand.ObjectType], policysetcontrollerv2.OperandsResourceLHSRHSValue{
 					LHS: operand.LHS,

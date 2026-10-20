@@ -27,14 +27,11 @@ func resourceInspectionProfile() *schema.Resource {
 
 				id := d.Id()
 				_, parseIDErr := strconv.ParseInt(id, 10, 64)
-				if parseIDErr == nil {
-					// assume if the passed value is an int
-					d.Set("profile_id", id)
-				} else {
+				if parseIDErr != nil {
+					// not a numeric ID: import by name
 					resp, _, err := inspection_profile.GetByName(ctx, service, id)
 					if err == nil {
 						d.SetId(resp.ID)
-						d.Set("profile_id", resp.ID)
 					} else {
 						return []*schema.ResourceData{d}, err
 					}
@@ -322,7 +319,7 @@ func resourceInspectionProfileRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if len(resp.ControlInfoResource) > 0 {
-		if err := d.Set("controls_info", flattenControlInfoResource(resp.ControlInfoResource)); err != nil {
+		if err := d.Set("controls_info", flattenControlInfoTypes(resp.ControlInfoResource)); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -424,6 +421,16 @@ func expandInspectionProfile(d *schema.ResourceData) inspection_profile.Inspecti
 	}
 
 	return inspection_profile
+}
+
+// flattenControlInfoTypes keeps the control types of controlsInfo; the per-type
+// count the API also returns is not part of the resource schema.
+func flattenControlInfoTypes(controlInfo []inspection_profile.ControlInfoResource) []interface{} {
+	result := make([]interface{}, len(controlInfo))
+	for i, val := range controlInfo {
+		result[i] = map[string]interface{}{"control_type": val.ControlType}
+	}
+	return result
 }
 
 func expandControlsInfo(d *schema.ResourceData) []inspection_profile.ControlInfoResource {

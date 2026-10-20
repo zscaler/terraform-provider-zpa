@@ -57,12 +57,14 @@ func resourcePolicyTimeoutRuleV2() *schema.Resource {
 				Computed: true,
 			},
 			"reauth_idle_timeout": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: suppressEquivalentTimeout,
 			},
 			"reauth_timeout": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: suppressEquivalentTimeout,
 			},
 			"conditions": {
 				Type:        schema.TypeSet,

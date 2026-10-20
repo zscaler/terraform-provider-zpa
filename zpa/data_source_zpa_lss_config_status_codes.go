@@ -73,7 +73,7 @@ func dataSourceLSSStatusCodesRead(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[INFO] Getting LSS Status Codes:\n%+v\n", resp)
 	d.SetId("lss_status_codes")
-	_ = d.Set("zpn_auth_log", toMapString(resp.ZPNAstAuthLog))
+	_ = d.Set("zpn_auth_log", toMapString(resp.ZPNAuthLog))
 	_ = d.Set("zpn_ast_auth_log", toMapString(resp.ZPNAstAuthLog))
 	_ = d.Set("zpn_trans_log", toMapString(resp.ZPNTransLog))
 	_ = d.Set("zpn_sys_auth_log", toMapString(resp.ZPNSysAuthLog))

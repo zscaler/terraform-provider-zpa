@@ -74,11 +74,15 @@ func dataSourceScimGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	var resp *scimgroup.ScimGroup
-	idpId, okidpId := d.Get("idp_id").(string)
+	// idp_id is numeric in the schema; the SDK takes it as a string.
+	idpId := ""
+	if v, ok := d.Get("idp_id").(int); ok && v != 0 {
+		idpId = strconv.Itoa(v)
+	}
 	idpName, okIdpName := d.Get("idp_name").(string)
 
 	// Ensure either IDP name or ID is provided
-	if (!okIdpName && !okidpId) || (idpId == "" && idpName == "") {
+	if (!okIdpName && idpId == "") || (idpId == "" && idpName == "") {
 		log.Printf("[INFO] IDP name or ID is required\n")
 		return diag.FromErr(fmt.Errorf("IDP name or ID is required"))
 	}

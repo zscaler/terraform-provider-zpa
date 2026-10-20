@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -111,7 +112,22 @@ func accPreCheck() error {
 	return nil
 }
 
+// TestProviderValidate checks the provider rejects incomplete credentials (offline).
 func TestProviderValidate(t *testing.T) {
+	testProviderValidate(t, false)
+}
+
+// TestAccProviderValidate authenticates with the real credentials from the environment.
+func TestAccProviderValidate(t *testing.T) {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+	}
+	testProviderValidate(t, true)
+}
+
+// testProviderValidate runs the cases that use real credentials (withCredentials)
+// or the ones that do not.
+func testProviderValidate(t *testing.T, withCredentials bool) {
 	// Save current env vars and clear them to simulate controlled test inputs
 	envKeys := []string{
 		"ZSCALER_CLIENT_ID",
@@ -135,6 +151,9 @@ func TestProviderValidate(t *testing.T) {
 		cloud        string
 		expectError  bool
 		skipIfCloud  bool
+		// needsCredentials marks cases that authenticate with the real
+		// credentials from the environment (run by TestAccProviderValidate).
+		needsCredentials bool
 	}{
 		{
 			name:         "valid client_id + client_secret",
@@ -144,6 +163,8 @@ func TestProviderValidate(t *testing.T) {
 			customerID:   envVals["ZPA_CUSTOMER_ID"],
 			cloud:        envVals["ZSCALER_CLOUD"],
 			expectError:  false,
+
+			needsCredentials: true,
 		},
 		{
 			name:         "missing client_id",
@@ -181,11 +202,23 @@ func TestProviderValidate(t *testing.T) {
 			cloud:        "", // simulate unset cloud
 			expectError:  false,
 			skipIfCloud:  true, // only run if cloud is NOT needed
+
+			needsCredentials: true,
 		},
 	}
 
 	for _, test := range tests {
+		if test.needsCredentials != withCredentials {
+			continue
+		}
 		t.Run(test.name, func(t *testing.T) {
+			if test.needsCredentials {
+				for _, key := range []string{"ZSCALER_CLIENT_ID", "ZSCALER_CLIENT_SECRET", "ZSCALER_VANITY_DOMAIN", "ZPA_CUSTOMER_ID"} {
+					if envVals[key] == "" {
+						t.Skipf("Skipping '%s': %s is not set (needs real credentials)", test.name, key)
+					}
+				}
+			}
 			// Skip if this test depends on cloud being unset and cloud is required
 			if test.skipIfCloud && envVals["ZSCALER_CLOUD"] != "" {
 				t.Skipf("Skipping '%s': cloud-specific credentials cannot authenticate without ZSCALER_CLOUD", test.name)
@@ -243,4 +276,9 @@ func sdkV3ClientForTest() (*zscaler.Client, error) {
 
 	testSdkV3Client = client
 	return testSdkV3Client, nil
+}
+
+// createValidResourceName converts the given name to a valid Terraform resource name
+func createValidResourceName(name string) string {
+	return strings.ReplaceAll(name, " ", "_")
 }

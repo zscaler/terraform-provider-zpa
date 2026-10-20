@@ -19,6 +19,12 @@ func dataSourceLSSConfigController() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The name of the LSS configuration (config.0.name).",
+			},
 			"config": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -295,6 +301,9 @@ func dataSourceLSSConfigControllerRead(ctx context.Context, d *schema.ResourceDa
 	}
 	if resp != nil {
 		d.SetId(resp.ID)
+		if resp.LSSConfig != nil {
+			_ = d.Set("name", resp.LSSConfig.Name)
+		}
 		if err := d.Set("config", flattenLSSConfig(resp.LSSConfig)); err != nil {
 			return diag.FromErr(err)
 		}

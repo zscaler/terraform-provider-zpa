@@ -3,11 +3,13 @@ package zpa
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/custom_config_controller"
 )
 
@@ -111,7 +113,12 @@ func resourceZiaCloudConfigRead(ctx context.Context, d *schema.ResourceData, met
 
 	resp, _, err := custom_config_controller.GetZIACloudConfig(ctx, service)
 	if err != nil {
-		return nil
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
+			log.Printf("[WARN] Removing ZIA cloud config from state because it no longer exists in ZPA")
+			d.SetId("")
+			return nil
+		}
+		return diag.FromErr(err)
 	}
 
 	if resp != nil {

@@ -18,17 +18,17 @@ Use the **zpa_pra_approval_controller** data source to get information about a p
 ```terraform
 # ZPA PRA Portal Data Source
 data "zpa_pra_approval_controller" "this" {
- email_ids = "jdoe@example.com"
+ email_ids = ["jdoe@example.com"]
 }
 ```
 
 ## Schema
 
-### Required
+### Optional
 
 The following arguments are supported:
 
-* `email_ids` - (Required) The name of the privileged remote access portal to be exported.
+* `email_ids` - (Optional) The email address of the user the privileged approval is assigned to. The approval is looked up by the first address in the list.
 
 ### Read-Only
 

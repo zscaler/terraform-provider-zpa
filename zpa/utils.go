@@ -14,8 +14,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
@@ -24,16 +22,16 @@ import (
 )
 
 func ValidateLatitude(val interface{}, _ string) (warns []string, errs []error) {
-	v, _ := strconv.ParseFloat(val.(string), 64)
-	if v < -90 || v > 90 {
+	v, err := strconv.ParseFloat(val.(string), 64)
+	if err != nil || v < -90 || v > 90 {
 		errs = append(errs, fmt.Errorf("latitude must be between -90 and 90"))
 	}
 	return
 }
 
 func ValidateLongitude(val interface{}, _ string) (warns []string, errs []error) {
-	v, _ := strconv.ParseFloat(val.(string), 64)
-	if v < -180 || v > 180 {
+	v, err := strconv.ParseFloat(val.(string), 64)
+	if err != nil || v < -180 || v > 180 {
 		errs = append(errs, fmt.Errorf("longitude must be between -180 and 180"))
 	}
 	return
@@ -60,38 +58,6 @@ func SetToStringList(d *schema.ResourceData, key string) []string {
 		return []string{}
 	}
 	return SetToStringSlice(set)
-}
-
-func SetToIntList(d *schema.ResourceData, key string) []int {
-	setObj, ok := d.GetOk(key)
-	if !ok {
-		return []int{}
-	}
-	set, ok := setObj.(*schema.Set)
-	if !ok {
-		return []int{}
-	}
-	return SetToIntSlice(set)
-}
-
-func SetToIntSlice(d *schema.Set) []int {
-	if d == nil || d.Len() == 0 {
-		return []int{}
-	}
-	list := d.List()
-	ans := make([]int, 0, len(list))
-	for _, v := range list {
-		switch x := v.(type) {
-		case string:
-			// Parse string to int
-			if intVal, err := strconv.Atoi(x); err == nil {
-				ans = append(ans, intVal)
-			}
-		case int:
-			ans = append(ans, x)
-		}
-	}
-	return ans
 }
 
 func ListToStringSlice(v []interface{}) []string {
@@ -197,11 +163,6 @@ func validateAppPorts(selectConnectorCloseToApp bool, udpAppPortRange []common.N
 	return nil
 }
 
-// createValidResourceName converts the given name to a valid Terraform resource name
-func createValidResourceName(name string) string {
-	return strings.ReplaceAll(name, " ", "_")
-}
-
 func GetString(v interface{}) string {
 	if v == nil {
 		return ""
@@ -295,6 +256,14 @@ func parseHumanReadableTimeout(input string) (int, error) {
 	}
 
 	return value * multiplier, nil
+}
+
+// suppressEquivalentTimeout ignores differences between timeouts of the same
+// duration, e.g. "Never" and "never", or "60 Minutes" and the "1 Hour" read back.
+func suppressEquivalentTimeout(_, old, new string, _ *schema.ResourceData) bool {
+	oldSeconds, oldErr := parseHumanReadableTimeout(old)
+	newSeconds, newErr := parseHumanReadableTimeout(new)
+	return oldErr == nil && newErr == nil && oldSeconds == newSeconds
 }
 
 // Convert seconds into a human-readable format. This function assumes `seconds` is a string that can be parsed into an int.
@@ -467,17 +436,6 @@ func noChangeInMultiLineText(k, oldText, newText string, d *schema.ResourceData)
 	newTextNormalized := normalizeMultiLineString(newText)
 
 	return oldTextNormalized == newTextNormalized
-}
-
-func stringIsMultiLine(i interface{}, k cty.Path) diag.Diagnostics {
-	v, ok := i.(string)
-	if !ok {
-		return diag.Errorf("expected type of %s to be string", k)
-	}
-	if v == "" {
-		return diag.Errorf("expected %q text to not be empty, got %v", k, i)
-	}
-	return nil
 }
 
 // listIndex holds every item returned by one paginated list call (500 per

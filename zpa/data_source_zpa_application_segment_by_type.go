@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -108,8 +109,15 @@ func dataSourceApplicationSegmentByTypeRead(ctx context.Context, d *schema.Resou
 		return diag.FromErr(fmt.Errorf("no application segment found for name '%s' and type '%s'", name, applicationType))
 	}
 
-	// Assuming we are only interested in the first result for simplicity
+	// The search is not an exact match: prefer the segment with exactly this
+	// name (case-insensitive) and fall back to the first result.
 	appSegment := resp[0]
+	for _, candidate := range resp {
+		if name != "" && strings.EqualFold(candidate.Name, name) {
+			appSegment = candidate
+			break
+		}
+	}
 
 	d.SetId(appSegment.ID)
 	_ = d.Set("app_id", appSegment.AppID)

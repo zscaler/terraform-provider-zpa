@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
+	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/errorx"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/applicationsegment"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/servergroup"
 )
@@ -131,6 +132,11 @@ func resourceApplicationSegmentWeightedLBConfigRead(ctx context.Context, d *sche
 
 	config, _, err := applicationsegment.GetWeightedLoadBalancerConfig(ctx, service, applicationID)
 	if err != nil {
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
+			log.Printf("[WARN] Removing weighted load balancer config %s from state because the application segment no longer exists in ZPA", applicationID)
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(fmt.Errorf("failed to retrieve weighted load balancer config for application %s: %w", applicationID, err))
 	}
 	if config == nil {
@@ -209,6 +215,11 @@ func resourceApplicationSegmentWeightedLBConfigDelete(ctx context.Context, d *sc
 
 	log.Printf("[INFO] Disabling weighted load balancer config for application %s", applicationID)
 	if _, _, err := applicationsegment.UpdateWeightedLoadBalancerConfig(ctx, service, applicationID, payload); err != nil {
+		// the application segment is already gone: nothing left to disable
+		if errResp, ok := err.(*errorx.ErrorResponse); ok && errResp.IsObjectNotFound() {
+			d.SetId("")
+			return nil
+		}
 		return diag.FromErr(fmt.Errorf("failed to disable weighted load balancer config for application %s: %w", applicationID, err))
 	}
 	zClient.appSegments.invalidate()
