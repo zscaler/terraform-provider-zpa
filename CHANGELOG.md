@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.4.15 (October 16, 2026)
+## 4.4.15 (October 19, 2026)
 
 ### Notes
 
