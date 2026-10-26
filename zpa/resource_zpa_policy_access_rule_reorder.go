@@ -79,6 +79,22 @@ type RulesOrders struct {
 	Orders     map[string]int
 }
 
+// deceptionRuleAtOrderOne returns the ID of the "Zscaler Deception" rule when
+// it is at order 1 and is not one of the configured rules. The API requires
+// such a rule to stay first, so the provider keeps it at order 1 and shifts
+// the configured orders by one: Update adds the offset when it writes, Read
+// removes it when it stores the live orders, and the configured orders start
+// from 1 in both cases.
+func deceptionRuleAtOrderOne(rules []policysetcontroller.PolicyRule, configured *RulesOrders) (string, bool) {
+	for _, rule := range rules {
+		if rule.Name == "Zscaler Deception" && rule.RuleOrder == "1" {
+			_, managedByTerraform := configured.Orders[rule.ID]
+			return rule.ID, !managedByTerraform
+		}
+	}
+	return "", false
+}
+
 // Validate that no two rules have the same order.
 func validateRuleOrders(orders *RulesOrders) error {
 	// Check for orders <= 0
@@ -218,9 +234,14 @@ func resourcePolicyAccessReorderRead(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
+	offset := 0
+	if _, shifted := deceptionRuleAtOrderOne(currentRules, configuredRules); shifted {
+		offset = 1
+	}
+
 	for id := range configuredRules.Orders {
-		if currentOrder, exists := currentOrderMap[id]; exists {
-			configuredRules.Orders[id] = currentOrder
+		if currentOrder, exists := currentOrderMap[id]; exists && currentOrder > offset {
+			configuredRules.Orders[id] = currentOrder - offset
 		}
 	}
 
@@ -255,16 +276,6 @@ func resourcePolicyAccessReorderUpdate(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	deceptionAtOne := false
-	deceptionID := ""
-	for _, rule := range existingRules {
-		if rule.Name == "Zscaler Deception" && rule.RuleOrder == "1" {
-			deceptionAtOne = true
-			deceptionID = rule.ID
-			break
-		}
-	}
-
 	userDefinedRules, err := getRules(d)
 	if err != nil {
 		return diag.FromErr(err)
@@ -277,18 +288,12 @@ func resourcePolicyAccessReorderUpdate(ctx context.Context, d *schema.ResourceDa
 
 	ruleIdToOrder := make(map[string]int)
 
+	deceptionID, deceptionAtOne := deceptionRuleAtOrderOne(existingRules, userDefinedRules)
 	if deceptionAtOne {
-		_, managedByTerraform := userDefinedRules.Orders[deceptionID]
-		if !managedByTerraform {
-			ruleIdToOrder[deceptionID] = 1
-		}
+		ruleIdToOrder[deceptionID] = 1
 	}
 
 	for id, order := range userDefinedRules.Orders {
-		if id == deceptionID {
-			continue
-		}
-
 		if deceptionAtOne {
 			ruleIdToOrder[id] = order + 1
 		} else {

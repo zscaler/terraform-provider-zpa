@@ -106,7 +106,7 @@ Specifies the set of conditions for the policy rule.
     - `lhs` (String) LHS must always carry the string value ``id`` or the attribute ID of the resource being associated with the rule.
     - `rhs` (String) RHS is either the ID attribute of a resource or fixed string value. Refer to the chart below for further details.
     - `idp_id` (String)
-    - `object_type` (String) This is for specifying the policy critiera. Supported values: `APP`, `APP_GROUP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
+    - `object_type` (String) This is for specifying the policy criteria. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`, `BRANCH_CONNECTOR_GROUP`, `EDGE_CONNECTOR_GROUP`, `POSTURE`, `MACHINE_GRP`, `TRUSTED_NETWORK`, `PLATFORM`, `IDP`, `SAML`, `SCIM`, `SCIM_GROUP`. The same object types are supported by `zpa_policy_forwarding_rule_v2`.
     - `CLIENT_TYPE` (String) - The below options are the only ones supported in a timeout policy rule.
       - `zpn_client_type_exporter`
       - `zpn_client_type_browser_isolation`
@@ -141,7 +141,9 @@ LHS and RHS values differ based on object types. Refer to the following table:
 | [APP_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_segment_group) | ``"id"`` | ``segment_group_id``|
 | [CLIENT_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_client_types) | ``"id"`` | ``zpn_client_type_exporter``, ``zpn_client_type_browser_isolation``, ``zpn_client_type_ip_anchoring``, ``zpn_client_type_edge_connector``, ``zpn_client_type_branch_connector``, ``zpn_client_type_zapp_partner``,  ``zpn_client_type_machine_tunnel``, ``zpn_client_type_zapp``  |
 | [EDGE_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group) | ``"id"`` | ``edge_connector_id`` |
+| [BRANCH_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_branch_connector_group) | ``"id"`` | ``branch_connector_group_id`` |
 | [MACHINE_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group) | ``"id"`` | ``machine_group_id`` |
+| [PLATFORM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_platforms) | ``mac``, ``ios``, ``windows``, ``android``, ``linux`` | ``"true"`` |
 | [POSTURE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile) | ``posture_udid``  | ``"true"`` / ``"false"`` |
 | [TRUSTED_NETWORK](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network) | ``network_id``  | ``"true"`` |
 | [IDP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_idp_controller) | ``"id"`` | ``identity_provider_id`` |

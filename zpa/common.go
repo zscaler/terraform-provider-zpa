@@ -132,6 +132,20 @@ func validateOperand(ctx context.Context, operand policysetcontroller.Operands, 
 			_, _, err := machinegroup.Get(ctx, zClient.Service.WithMicroTenant(microtenantID), id)
 			return err
 		}))
+	// ID-based object types without a lookup by ID in the API: the same
+	// presence check the v2 resources apply to their values.
+	case "LOCATION":
+		return customValidate(operand, []string{"id"}, "location ID", acceptAnyID)
+	case "BRANCH_CONNECTOR_GROUP":
+		return customValidate(operand, []string{"id"}, "branch connector group ID", acceptAnyID)
+	case "WORKLOAD_TAG_GROUP":
+		return customValidate(operand, []string{"id"}, "workload tag group ID", acceptAnyID)
+	case "ENTITY_TAG_GRP":
+		return customValidate(operand, []string{"id"}, "tag group ID", acceptAnyID)
+	case "ENTITY_TAG_VAL":
+		return customValidate(operand, []string{"id"}, "tag value ID", acceptAnyID)
+	case "CHROME_POSTURE_PROFILE":
+		return customValidate(operand, []string{"id"}, "managed browser profile ID", acceptAnyID)
 	case "POSTURE":
 		if operand.LHS == "" {
 			return lhsWarn(operand.ObjectType, "valid posture network ID", operand.LHS, nil)
@@ -276,6 +290,9 @@ type Getter func(id string) error
 func (g Getter) Get(id string) error {
 	return g(id)
 }
+
+// acceptAnyID is the Getter of object types whose RHS cannot be looked up by ID.
+var acceptAnyID = Getter(func(string) error { return nil })
 
 func customValidate(operand policysetcontroller.Operands, expectedLHS []string, expectedRHS string, clientRHS Getter) error {
 	if operand.LHS == "" || !contains(expectedLHS, operand.LHS) {
@@ -1350,7 +1367,8 @@ func ConvertV1ResponseToV2Request(v1Response policysetcontrollerv2.PolicyRuleRes
 
 		for _, operand := range condition.Operands {
 			switch operand.ObjectType {
-			case "APP", "APP_GROUP", "CONSOLE", "CHROME_POSTURE_PROFILE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE", "USER_PORTAL", "PRIVILEGE_PORTAL":
+			case "APP", "APP_GROUP", "CONSOLE", "CHROME_POSTURE_PROFILE", "MACHINE_GRP", "LOCATION", "BRANCH_CONNECTOR_GROUP", "EDGE_CONNECTOR_GROUP", "CLIENT_TYPE", "USER_PORTAL", "PRIVILEGE_PORTAL",
+				"IDP", "WORKLOAD_TAG_GROUP", "ENTITY_TAG_GRP", "ENTITY_TAG_VAL":
 				// v1 operands carry one ID in RHS; an operand that already holds a
 				// values list (v2 shape) keeps all of its values.
 				if len(operand.Values) > 0 {

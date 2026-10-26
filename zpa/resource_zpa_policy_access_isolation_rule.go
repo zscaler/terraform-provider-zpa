@@ -43,6 +43,8 @@ func resourcePolicyIsolationRule() *schema.Resource {
 					"SAML",
 					"SCIM",
 					"SCIM_GROUP",
+					"CHROME_ENTERPRISE",
+					"CHROME_POSTURE_PROFILE",
 				}),
 			},
 		),

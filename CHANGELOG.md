@@ -1,5 +1,23 @@
 # Changelog
 
+## 4.4.16 (October 26, 2026)
+
+### Notes
+
+- Release date: **(October 26, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #699](https://github.com/zscaler/terraform-provider-zpa/pull/699) - `zpa_policy_access_rule_reorder`: on a tenant with a `Zscaler Deception` rule at order 1, the configured orders are written one position after it; reading them back now removes that offset again, so a configuration declaring orders `1..N` no longer shows a change in every plan. Example 3 in the documentation now declares orders starting from 1 in both cases.
+- [PR #700](https://github.com/zscaler/terraform-provider-zpa/pull/700) - `zpa_policy_isolation_rule`: added the `conditions` object types `CHROME_ENTERPRISE` and `CHROME_POSTURE_PROFILE`, already supported by `zpa_policy_isolation_rule_v2`.
+- [PR #700](https://github.com/zscaler/terraform-provider-zpa/pull/700) - `zpa_policy_access_rule`: the object types `LOCATION`, `BRANCH_CONNECTOR_GROUP`, `CHROME_POSTURE_PROFILE`, `WORKLOAD_TAG_GROUP`, `ENTITY_TAG_GRP` and `ENTITY_TAG_VAL` no longer fail on apply with `invalid operand object type`.
+- [PR #700](https://github.com/zscaler/terraform-provider-zpa/pull/700) - v2 policy rule resources: operands of type `IDP`, `WORKLOAD_TAG_GROUP`, `ENTITY_TAG_GRP` and `ENTITY_TAG_VAL` are no longer dropped when the rule is read, which showed as a change in every plan.
+
+### Documentation
+
+- [PR #700](https://github.com/zscaler/terraform-provider-zpa/pull/700) - Policy rule resources: the supported `object_type` values and the LHS/RHS tables now match the resource schemas, and each v1 page lists the same object types as its v2 counterpart.
+
 ## 4.4.15 (October 19, 2026)
 
 ### Notes
