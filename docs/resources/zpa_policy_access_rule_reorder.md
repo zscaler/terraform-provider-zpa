@@ -101,10 +101,12 @@ resource "zpa_policy_access_rule_reorder" "access_policy_reorder" {
 ## Example Usage 3 - Used when Zscaler Deception Rule Exists
 
 ```terraform
-# IF NO ZSCALER DECEPTION RULE EXIST, DECREASE THE INDEX TO +1 TO PREVENT DRIFTS
+# Orders start from 1 whether or not a Zscaler Deception rule exists: the
+# provider keeps the Deception rule at order 1 and places the configured rules
+# after it. Do not include the Deception rule in the configuration.
 locals {
   policy_config = yamldecode(file("${path.module}/policies.yaml"))
-  policies = { for policy in local.policy_config.policies : policy.name => merge(policy, { rule_number = index(local.policy_config.policies, policy) + 2 }) }
+  policies = { for policy in local.policy_config.policies : policy.name => merge(policy, { rule_number = index(local.policy_config.policies, policy) + 1 }) }
 }
 
 resource "zpa_policy_access_rule" "rules" {

@@ -381,7 +381,7 @@ and the API accept cannot be edited in the ZPA Admin GUI.
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy. Each block is joined to the others with the rule-level `AND` operator, and the same `object_type` cannot be repeated within a single block. See [Operator and Condition Behavior](#operator-and-condition-behavior) for the full operator semantics and constraints.
     - `operator` (String) - The block-level operator that joins the `operands` within this block. Supported values are: `AND` or `OR`.
     - `operands` (Optional) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
-        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `BRANCH_CONNECTOR_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`, `LOCATION`.
+        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `BRANCH_CONNECTOR_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `IDP`, `MACHINE_GRP`, `LOCATION`, `WORKLOAD_TAG_GROUP`, `ENTITY_TAG_GRP`, `ENTITY_TAG_VAL`. The same object types are supported by `zpa_policy_access_rule`.
         - `values` (Block List) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
 
 - `conditions` (Block Set)  - This is for providing the set of conditions for the policy
@@ -399,6 +399,14 @@ and the API accept cannot be edited in the ZPA Admin GUI.
         - `entry_values` (Block Set)
             - `lhs` - (String) -  2 Letter Country in ``ISO 3166 Alpha2 Code`` [Lear More](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
+
+- `conditions` (Block Set) - This is for providing the set of conditions for the policy
+    - `operator` (String) - Supported values are: `AND` or `OR`
+    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
+        - `object_type` (String) This is for specifying the policy criteria. Supported values: `RISK_FACTOR_TYPE`
+        - `entry_values` (Block Set)
+            - `lhs` - (String) -  Must be set to `ZIA`
+            - `rhs` - (String) - Supported values: `UNKNOWN`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
     - `operator` (String) - Supported values are: `AND` or `OR`
@@ -488,6 +496,11 @@ terraform import zpa_policy_access_rule_v2.example <rule_id>
 | [BRANCH_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group)  | `NA` | `NA` |  ``<branch_connector_id>`` |
 | [LOCATION](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group)   | `NA` | `NA` | ``location_id`` |
 | [MACHINE_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group)   | `NA` | `NA` | ``machine_group_id`` |
+| [IDP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_idp_controller)   | `NA` | `NA` | ``identity_provider_id`` |
+| [CHROME_POSTURE_PROFILE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_managed_browser_profile)   | `NA` | `NA` | ``managed_browser_profile_id`` |
+| [WORKLOAD_TAG_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_workload_tag_group)   | `NA` | `NA` | ``workload_tag_group_id`` |
+| [ENTITY_TAG_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_tag_group)   | `NA` | `NA` | ``tag_group_id`` |
+| [ENTITY_TAG_VAL](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_tag_key)   | `NA` | `NA` | ``tag_value_id`` |
 | [SAML](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) | ``saml_attribute_id``  | ``attribute_value_to_match`` |
 | [SCIM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header) | ``scim_attribute_id``  | ``attribute_value_to_match``  |
 | [SCIM_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) | ``idp_id``  | ``scim_group_id``  |

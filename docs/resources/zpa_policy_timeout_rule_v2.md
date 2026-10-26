@@ -148,7 +148,7 @@ resource "zpa_policy_timeout_rule_v2" "this" {
 - `conditions` (Block Set) Specifies the set of conditions for the policy rule. Separate condition blocks for each object type is required.
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
-        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`
+        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`, `IDP`. The same object types are supported by `zpa_policy_timeout_rule`.
         - `values` (List of Strings) The list of values for the specified object type (e.g., application segment ID and/or segment group ID)
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
@@ -207,6 +207,7 @@ terraform import zpa_policy_timeout_rule_v2.example <rule_id>
 | [APP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment)  |   |  | ``application_segment_id`` |
 | [APP_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_segment_group)  |   |  | ``segment_group_id``|
 | [CLIENT_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_client_types)  |   |  |  ``zpn_client_type_zappl``, ``zpn_client_type_exporter``, ``zpn_client_type_browser_isolation``, ``zpn_client_type_ip_anchoring``, ``zpn_client_type_edge_connector``, ``zpn_client_type_branch_connector``,  ``zpn_client_type_zapp_partner``, ``zpn_client_type_zapp``  |
+| [IDP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_idp_controller)  |   |  | ``identity_provider_id`` |
 | [SAML](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) | ``saml_attribute_id``  | ``attribute_value_to_match`` |
 | [SCIM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header) | ``scim_attribute_id``  | ``attribute_value_to_match``  |
 | [SCIM_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) | ``idp_id``  | ``scim_group_id``  |

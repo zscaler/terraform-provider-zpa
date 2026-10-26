@@ -99,8 +99,8 @@ Specifies the set of conditions for the policy rule.
     - `lhs` (String) LHS must always carry the string value ``id`` or the attribute ID of the resource being associated with the rule.
     - `rhs` (String) RHS is either the ID attribute of a resource or fixed string value. Refer to the chart below for further details.
     - `idp_id` (String)
-    - `object_type` (String) This is for specifying the policy critiera. Supported values: `APP`, `APP_GROUP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
-    - `CLIENT_TYPE` (String) - The below options are the only ones supported in a timeout policy rule.
+    - `object_type` (String) This is for specifying the policy criteria. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `IDP`, `POSTURE`, `SAML`, `SCIM`, `SCIM_GROUP`, `TRUSTED_NETWORK`. The same object types are supported by `zpa_policy_inspection_rule_v2`.
+    - `CLIENT_TYPE` (String) - The below options are the only ones supported in an inspection policy rule.
       - `zpn_client_type_exporter`
       - `zpn_client_type_browser_isolation`
       - `zpn_client_type_machine_tunnel`
@@ -136,7 +136,5 @@ terraform import zpa_policy_inspection_rule.example <policy_inspection_rule_id>
 | [SAML](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) | ``saml_attribute_id``  | ``attribute_value_to_match`` |
 | [SCIM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header) | ``scim_attribute_id``  | ``attribute_value_to_match``  |
 | [SCIM_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) | ``idp_id``  | ``scim_group_id``  |
-| [PLATFORM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``mac``, ``ios``, ``windows``, ``android``, ``linux`` | ``"true"`` / ``"false"`` |
-| [MACHINE_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group) | ``"id"`` | ``machine_group_id`` |
 | [POSTURE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile) | ``posture_udid``  | ``"true"`` / ``"false"`` |
 | [TRUSTED_NETWORK](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network) | ``network_id``  | ``"true"`` |

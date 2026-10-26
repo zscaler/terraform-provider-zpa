@@ -135,7 +135,7 @@ resource "zpa_policy_access_rule" "scim_example" {
   ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.
 
   - `operands` (Block List) - Operands block must be repeated if multiple per `object_type` conditions are to be added to the rule.
-    - `object_type` (String, Required) This is for specifying the policy criteria. Supported values: `APP`, `APP_GROUP`, `IDP`, `SAML`, `SCIM`, `SCIM_GROUP`, `CLIENT_TYPE`, `POSTURE`, `TRUSTED_NETWORK`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`, `COUNTRY_CODE`, `PLATFORM`, `RISK_FACTOR_TYPE`, `CHROME_ENTERPRISE`. See [LHS and RHS Values](#lhs-and-rhs-values) for what each one expects.
+    - `object_type` (String, Required) This is for specifying the policy criteria. Supported values: `APP`, `APP_GROUP`, `LOCATION`, `IDP`, `SAML`, `SCIM`, `SCIM_GROUP`, `CLIENT_TYPE`, `POSTURE`, `TRUSTED_NETWORK`, `BRANCH_CONNECTOR_GROUP`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`, `COUNTRY_CODE`, `PLATFORM`, `RISK_FACTOR_TYPE`, `CHROME_ENTERPRISE`, `CHROME_POSTURE_PROFILE`, `WORKLOAD_TAG_GROUP`, `ENTITY_TAG_GRP`, `ENTITY_TAG_VAL`. The same object types are supported by `zpa_policy_access_rule_v2`. See [LHS and RHS Values](#lhs-and-rhs-values) for what each one expects.
     - `lhs` (String, Required) The key of the criterion: the string ``id`` or the attribute ID of the resource being associated with the rule. Refer to the chart below for further details.
     - `rhs` (String) The value of the criterion: the ID of a resource or a fixed string value. Refer to the chart below for further details.
     - `rhs_list` (Set of String) A list of values for the same `lhs`; each value is sent as its own operand. Ignored when `rhs` is set.
@@ -182,6 +182,8 @@ terraform import zpa_policy_access_rule.example <policy_access_rule_id>
 | [APP_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_segment_group) | ``"id"`` | ``segment_group_id``|
 | [CLIENT_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_client_types) | ``"id"`` | ``zpn_client_type_zapp``, ``zpn_client_type_exporter``, ``zpn_client_type_exporter_noauth``, ``zpn_client_type_ip_anchoring``, ``zpn_client_type_browser_isolation``, ``zpn_client_type_machine_tunnel``, ``zpn_client_type_edge_connector``, ``zpn_client_type_slogger``, ``zpn_client_type_branch_connector``, ``zpn_client_type_zapp_partner``, ``zpn_client_type_vdi`` |
 | [EDGE_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group) | ``"id"`` | ``<edge_connector_id>`` |
+| [BRANCH_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_branch_connector_group) | ``"id"`` | ``branch_connector_group_id`` |
+| [LOCATION](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_location_controller) | ``"id"`` | ``location_id`` |
 | [IDP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_idp_controller) | ``"id"`` | ``identity_provider_id`` |
 | [SAML](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) | ``saml_attribute_id``  | ``attribute_value_to_match`` |
 | [SCIM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header) | ``scim_attribute_id`` (also set `idp_id`) | ``attribute_value_to_match``  |
@@ -193,3 +195,7 @@ terraform import zpa_policy_access_rule.example <policy_access_rule_id>
 | [COUNTRY_CODE](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes) | [2 Letter ISO3166 Alpha2](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)  | ``"true"`` / ``"false"`` |
 | [RISK_FACTOR_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``ZIA``  | ``"UNKNOWN", "LOW", "MEDIUM", "HIGH", "CRITICAL"`` |
 | [CHROME_ENTERPRISE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``managed``  | ``"true" / "false"`` |
+| [CHROME_POSTURE_PROFILE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_managed_browser_profile) | ``"id"`` | ``managed_browser_profile_id`` |
+| [WORKLOAD_TAG_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_workload_tag_group) | ``"id"`` | ``workload_tag_group_id`` |
+| [ENTITY_TAG_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_tag_group) | ``"id"`` | ``tag_group_id`` |
+| [ENTITY_TAG_VAL](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_tag_key) | ``"id"`` | ``tag_value_id`` |

@@ -89,7 +89,7 @@ The following arguments are supported:
     - `lhs` (String) LHS must always carry the string value ``id`` or the attribute ID of the resource being associated with the rule.
     - `rhs` (String) RHS is either the ID attribute of a resource or fixed string value. Refer to the chart below for further details.
     - `idp_id` (String)
-    - `object_type` (String) This is for specifying the policy critiera. Supported values: `APP`, `SAML`, `SCIM`, `SCIM_GROUP`, `IDP`, `CLIENT_TYPE`,  `POSTURE`
+    - `object_type` (String) This is for specifying the policy criteria. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`, `IDP`, `POSTURE`, `PLATFORM`, `SAML`, `SCIM`, `SCIM_GROUP`. The same object types are supported by `zpa_policy_timeout_rule_v2`.
     - `CLIENT_TYPE` (String) - The below options are the only ones supported in a timeout policy rule.
       - `zpn_client_type_zapp`
       - `zpn_client_type_browser_isolation`

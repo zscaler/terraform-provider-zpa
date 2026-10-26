@@ -77,8 +77,8 @@ Specifies the set of conditions for the policy rule.
     - `lhs` (String) LHS must always carry the string value ``id`` or the attribute ID of the resource being associated with the rule.
     - `rhs` (String) RHS is either the ID attribute of a resource or fixed string value. Refer to the chart below for further details.
     - `idp_id` (String)
-    - `object_type` (String) This is for specifying the policy critiera. Supported values: `APP`, `SAML`, `IDP`, `CLIENT_TYPE`, `TRUSTED_NETWORK`, `POSTURE`, `SCIM`, `SCIM_GROUP`, and `CLOUD_CONNECTOR_GROUP`. `TRUSTED_NETWORK`, and `CLIENT_TYPE`.
-    - `CLIENT_TYPE` (String) - The below options are the only ones supported in a timeout policy rule.
+    - `object_type` (String) This is for specifying the policy criteria. Supported values: `APP`, `APP_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `PLATFORM`, `IDP`, `SAML`, `SCIM`, `SCIM_GROUP`, `CHROME_ENTERPRISE`, `CHROME_POSTURE_PROFILE`. The same object types are supported by `zpa_policy_isolation_rule_v2`.
+    - `CLIENT_TYPE` (String) - The below options are the only ones supported in an isolation policy rule.
       - ``zpn_client_type_exporter`` "Web Browser"
     - `microtenant_id` (String) The ID of the microtenant the resource is to be associated with.
 
@@ -112,6 +112,5 @@ LHS and RHS values differ based on object types. Refer to the following table:
 | [SAML](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) | ``saml_attribute_id``  | <Attribute_value_to_match> |
 | [SCIM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header) | ``scim_attribute_id``  | <Attribute_value_to_match>  |
 | [SCIM_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) | ``idp_id``  | ``scim_group_id``  |
-| [MACHINE_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group) | ``"id"`` | ``machine_group_id`` |
-| [POSTURE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_posture_profile) | ``posture_udid``  | ``"true"`` / ``"false"`` |
-| [TRUSTED_NETWORK](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network) | ``network_id``  | ``"true"`` |
+| [CHROME_ENTERPRISE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_policy_access_rule) | ``managed``  | ``"true" / "false"`` |
+| [CHROME_POSTURE_PROFILE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_managed_browser_profile) | ``"id"`` | ``managed_browser_profile_id`` |

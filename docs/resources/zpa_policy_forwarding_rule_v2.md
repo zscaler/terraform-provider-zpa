@@ -134,7 +134,7 @@ resource "zpa_policy_forwarding_rule_v2" "this" {
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy. Separate condition blocks for each object type is required.
     - `operator` (String) - Supported values are: `AND` or `OR`
     - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `values`
-        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `BRANCH_CONNECTOR_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `MACHINE_GRP`, `LOCATION`.
+        - `object_type` (String) The object type of the operand. Supported values: `APP`, `APP_GROUP`, `BRANCH_CONNECTOR_GROUP`, `CLIENT_TYPE`, `EDGE_CONNECTOR_GROUP`, `IDP`, `MACHINE_GRP`. The same object types are supported by `zpa_policy_forwarding_rule`.
         - `values` (List of Strings) The list of values for the specified object type (e.g., application segment ID and/or segment group ID.).
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
@@ -143,14 +143,6 @@ resource "zpa_policy_forwarding_rule_v2" "this" {
         - `object_type` (String) This is for specifying the policy criteria. Supported values: `PLATFORM`
         - `entry_values` (Block Set)
             - `lhs` - (String) -  Supported values: `android`, `ios`, `linux`, `mac`, `windows`
-            - `rhs` - (String) - Supported values: `"true"` or `"false"`
-
-- `conditions` (Block Set) - This is for providing the set of conditions for the policy
-    - `operator` (String) - Supported values are: `AND` or `OR`
-    - `operands` (Block Set) - This signifies the various policy criteria. Supported Values: `object_type`, `entry_values`
-        - `object_type` (String) This is for specifying the policy criteria. Supported values: `COUNTRY_CODE`
-        - `entry_values` (Block Set)
-            - `lhs` - (String) -  2 Letter Country in ``ISO 3166 Alpha2 Code`` [Lear More](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes)
             - `rhs` - (String) - Supported values: `"true"` or `"false"`
 
 - `conditions` (Block Set) - This is for providing the set of conditions for the policy
@@ -209,6 +201,11 @@ terraform import zpa_policy_timeout_rule_v2.example <rule_id>
 | [APP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_application_segment)  |   |  | ``application_segment_id`` |
 | [APP_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/resources/zpa_segment_group)  |   |  | ``segment_group_id``|
 | [CLIENT_TYPE](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_access_policy_client_types)  |   |  |  ``zpn_client_type_zappl``, ``zpn_client_type_exporter``, ``zpn_client_type_browser_isolation``, ``zpn_client_type_ip_anchoring``, ``zpn_client_type_edge_connector``, ``zpn_client_type_branch_connector``,  ``zpn_client_type_zapp_partner``, ``zpn_client_type_zapp``  |
+| [BRANCH_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_branch_connector_group)  |   |  | ``branch_connector_group_id`` |
+| [EDGE_CONNECTOR_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_cloud_connector_group)  |   |  | ``edge_connector_group_id`` |
+| [IDP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_idp_controller)  |   |  | ``identity_provider_id`` |
+| [MACHINE_GRP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_machine_group)  |   |  | ``machine_group_id`` |
+| [TRUSTED_NETWORK](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_trusted_network) | ``network_id``  | ``"true"`` |
 | [SAML](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_saml_attribute) | ``saml_attribute_id``  | ``attribute_value_to_match`` |
 | [SCIM](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_attribute_header) | ``scim_attribute_id``  | ``attribute_value_to_match``  |
 | [SCIM_GROUP](https://registry.terraform.io/providers/zscaler/zpa/latest/docs/data-sources/zpa_scim_groups) | ``idp_id``  | ``scim_group_id``  |
