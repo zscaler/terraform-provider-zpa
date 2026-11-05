@@ -1,5 +1,24 @@
 # Changelog
 
+## 4.4.17 (November 5, 2026)
+
+### Notes
+
+- Release date: **(November 5, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Enhancements
+
+- [PR #703](https://github.com/zscaler/terraform-provider-zpa/pull/703) - `zpa_application_segment_browser_access` resource and data source: added the computed `clientless_apps` attributes `ext_id` and `ext_domain_name`, which ZPA generates for the external URL of an app that uses a Zscaler-managed certificate.
+- [PR #703](https://github.com/zscaler/terraform-provider-zpa/pull/703) - `zpa_application_segment_browser_access` resource: added the `clientless_apps` attribute `local_domain`, the local domain of the Browser Access app.
+- [PR #703](https://github.com/zscaler/terraform-provider-zpa/pull/703) - Upgraded to [Zscaler SDK GO v3.8.58](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v3.8.58).
+
+### Bug Fixes
+
+- [PR #703](https://github.com/zscaler/terraform-provider-zpa/pull/703) - `zpa_application_segment_browser_access`: changing `enabled` or `trust_untrusted_cert` in a `clientless_apps` block now updates the application. Before, the change was not detected and no update was sent. Both now default to `false`, the value already sent when they were not set.
+- [PR #703](https://github.com/zscaler/terraform-provider-zpa/pull/703) - `zpa_application_segment_pra`: `common_apps_dto.apps_config` is a list again, so `common_apps_dto[0].apps_config[0].pra_app_id` can be referenced as in 4.4.8 and earlier. Changing `application_port`, `application_protocol` or `connection_security` of an existing app now updates it; before, the change was not detected or the previous values were sent.
+- [PR #703](https://github.com/zscaler/terraform-provider-zpa/pull/703) - `zpa_application_segment_inspection`: `common_apps_dto.apps_config` is now a list, so `common_apps_dto[0].apps_config[0].inspect_app_id` can be referenced. Changing `application_port`, `application_protocol`, `certificate_id` or `trust_untrusted_cert` of an existing app now updates it; before, the change was not detected.
+
 ## 4.4.16 (October 26, 2026)
 
 ### Notes

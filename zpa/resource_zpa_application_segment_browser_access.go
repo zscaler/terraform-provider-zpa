@@ -253,9 +253,10 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 				// Clientless apps are an unordered collection from the API's
 				// perspective. Using a Set (instead of a List) makes ordering
 				// irrelevant so a different order returned by the API never
-				// produces a spurious plan diff. The custom Set hash below only
-				// considers user-configurable fields and deliberately excludes
-				// computed fields so config and refreshed state hash identically.
+				// produces a spurious plan diff. The custom Set hash below covers
+				// every user-configurable field and excludes computed ones, so
+				// config and refreshed state hash identically. A field left out
+				// of the hash is never diffed: changing it plans no update.
 				Set: resourceBaClientlessAppsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -302,7 +303,7 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 						"cname": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "ID of the BA certificate.",
+							Description: "The CNAME ZPA generates for the BA app.",
 						},
 						"description": {
 							Type:     schema.TypeString,
@@ -316,12 +317,12 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 						"enabled": {
 							Type:     schema.TypeBool,
 							Optional: true,
-							Computed: true,
+							Default:  false,
 						},
 						"trust_untrusted_cert": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Computed:    true,
+							Default:     false,
 							Description: "Indicates whether Use Untrusted Certificates is enabled or disabled for a BA app.",
 						},
 						"ext_label": {
@@ -333,6 +334,21 @@ func resourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal.",
+						},
+						"ext_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The random part ZPA generates for the external URL of a Browser Access application that uses a Zscaler-managed certificate.",
+						},
+						"ext_domain_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The Zscaler domain ZPA generates for the external URL of a Browser Access application that uses a Zscaler-managed certificate.",
+						},
+						"local_domain": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The local domain of the Browser Access application.",
 						},
 					},
 				},
@@ -675,11 +691,12 @@ func expandBrowserAccess(ctx context.Context, d *schema.ResourceData, zClient *C
 }
 
 // resourceBaClientlessAppsHash computes the Set hash for a clientless_apps
-// element. It hashes only user-configurable fields and deliberately excludes
-// computed / server-populated fields (id, app_id, cname, enabled,
-// trust_untrusted_cert) so that a config element (which lacks those values) and
-// the refreshed-state element (which has them) hash to the same value. This
-// keeps the set order-independent without introducing add/remove churn.
+// element. It hashes every user-configurable field and excludes the computed /
+// server-populated ones (id, app_id, cname, ext_id, ext_domain_name), so that a
+// config element (which lacks those values) and the refreshed-state element
+// (which has them) hash to the same value. Every configurable field must be in
+// the hash: Terraform only diffs set elements by hash, so a change to a field
+// left out of it never reaches the plan and no update is sent.
 func resourceBaClientlessAppsHash(v interface{}) int {
 	m, ok := v.(map[string]interface{})
 	if !ok {
@@ -697,7 +714,7 @@ func resourceBaClientlessAppsHash(v interface{}) int {
 		}
 		return false
 	}
-	key := fmt.Sprintf("%s|%s|%s|%s|%s|%s|%t|%s|%s|%s",
+	key := fmt.Sprintf("%s|%s|%s|%s|%s|%s|%t|%s|%s|%s|%s|%t|%t",
 		getStr("name"),
 		getStr("domain"),
 		getStr("application_port"),
@@ -708,6 +725,9 @@ func resourceBaClientlessAppsHash(v interface{}) int {
 		getStr("ext_label"),
 		getStr("ext_domain"),
 		getStr("microtenant_id"),
+		getStr("local_domain"),
+		getBool("enabled"),
+		getBool("trust_untrusted_cert"),
 	)
 	return schema.HashString(key)
 }
@@ -736,6 +756,9 @@ func expandClientlessApps(d *schema.ResourceData) []applicationsegmentbrowseracc
 					TrustUntrustedCert:  clientlessApp["trust_untrusted_cert"].(bool),
 					ExtLabel:            clientlessApp["ext_label"].(string),
 					ExtDomain:           clientlessApp["ext_domain"].(string),
+					ExtID:               clientlessApp["ext_id"].(string),
+					ExtDomainName:       clientlessApp["ext_domain_name"].(string),
+					LocalDomain:         clientlessApp["local_domain"].(string),
 				})
 			}
 		}
@@ -870,6 +893,9 @@ func flattenBaClientlessApps(clientlessApp *applicationsegmentbrowseraccess.Brow
 			"trust_untrusted_cert": clientlessApp.TrustUntrustedCert,
 			"ext_label":            clientlessApp.ExtLabel,
 			"ext_domain":           clientlessApp.ExtDomain,
+			"ext_id":               clientlessApp.ExtID,
+			"ext_domain_name":      clientlessApp.ExtDomainName,
+			"local_domain":         clientlessApp.LocalDomain,
 		}
 	}
 

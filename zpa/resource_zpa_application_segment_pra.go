@@ -216,16 +216,13 @@ func resourceApplicationSegmentPRA() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
-							Type:     schema.TypeSet,
+							// A list, so apps_config[N] can be referenced (for example
+							// apps_config[0].pra_app_id). Read keeps the apps in the
+							// configured order, matched by domain, so the order the API
+							// returns them in never shows as a change.
+							Type:     schema.TypeList,
 							Optional: true,
 							Computed: true,
-							// PRA apps are an unordered collection from the API's
-							// perspective. A Set makes ordering irrelevant so a
-							// different order returned by the API never produces a
-							// spurious plan diff. The hash keys on "domain" (the
-							// stable identity the provider already uses to match
-							// PRA apps) and excludes computed fields.
-							Set: resourcePraAppsConfigHash,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"app_id": {
@@ -426,12 +423,8 @@ func resourceApplicationSegmentPRAUpdate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(fmt.Errorf("error retrieving application segment: %v", err))
 	}
 
-	// Extract app_id and pra_app_id from praApps and set in common_apps_dto in state
-	if err := setAppIDsInCommonAppsDto(d, resp.PRAApps); err != nil {
-		return diag.FromErr(fmt.Errorf("error setting app_id and pra_app_id in common_apps_dto: %v", err))
-	}
-
-	// Prepare the request payload for the update
+	// Prepare the request payload for the update. Apps that already exist keep
+	// their app_id and pra_app_id, matched by domain.
 	req := expandSRAApplicationSegment(ctx, d, zClient, id, resp)
 
 	if err := validateAppPorts(req.SelectConnectorCloseToApp, req.UDPAppPortRange, req.UDPPortRanges); err != nil {
@@ -571,44 +564,43 @@ func expandSRAApplicationSegment(ctx context.Context, d *schema.ResourceData, zC
 		details.ServerGroups = expandCommonServerGroups(d)
 	}
 
-	// ✅ Handle merging of existing + new PRA apps
+	// Merge the configured apps with the ones that already exist, matched by
+	// domain: an existing app keeps its IDs and is sent with the configured
+	// values; an app no longer configured is sent in deletedPraApps.
 	if existing != nil {
-		fullAppsConfig := []applicationsegmentpra.AppsConfig{}
 		existingDomains := map[string]applicationsegmentpra.PRAApps{}
 		for _, pra := range existing.PRAApps {
 			existingDomains[pra.Domain] = pra
 		}
+		configuredNames := commonAppsConfiguredNames(d.GetRawConfig())
 
+		fullAppsConfig := []applicationsegmentpra.AppsConfig{}
 		currentHCLDomains := map[string]struct{}{}
 		for _, app := range hclDefinedDto.AppsConfig {
 			currentHCLDomains[app.Domain] = struct{}{}
-		}
-
-		// Rebuild apps from existing state: keep only apps still present in HCL; mark removed ones for deletion
-		for domain, pra := range existingDomains {
-			if _, found := currentHCLDomains[domain]; found {
-				app := applicationsegmentpra.AppsConfig{
-					AppID:               pra.AppID,
-					PRAAppID:            pra.ID,
-					Name:                pra.Name,
-					Enabled:             pra.Enabled,
-					AppTypes:            []string{"SECURE_REMOTE_ACCESS"},
-					ApplicationPort:     pra.ApplicationPort,
-					ApplicationProtocol: pra.ApplicationProtocol,
-					ConnectionSecurity:  pra.ConnectionSecurity,
-					Domain:              pra.Domain,
-					Description:         pra.Description,
+			// The planned name can belong to another app when the list shifted;
+			// use the configured name, else the existing app's name.
+			app.Name = configuredNames[app.Domain]
+			if pra, found := existingDomains[app.Domain]; found {
+				app.AppID = pra.AppID
+				app.PRAAppID = pra.ID
+				app.Enabled = pra.Enabled
+				app.Description = pra.Description
+				if app.Name == "" {
+					app.Name = pra.Name
 				}
-				fullAppsConfig = append(fullAppsConfig, app)
 			} else {
-				details.CommonAppsDto.DeletedPraApps = append(details.CommonAppsDto.DeletedPraApps, pra.ID)
+				app.AppID = ""
+				app.PRAAppID = ""
 			}
+			if len(app.AppTypes) == 0 {
+				app.AppTypes = []string{"SECURE_REMOTE_ACCESS"}
+			}
+			fullAppsConfig = append(fullAppsConfig, app)
 		}
-
-		// ✅ Append newly defined apps in HCL that are not in existing
-		for _, app := range hclDefinedDto.AppsConfig {
-			if _, exists := existingDomains[app.Domain]; !exists {
-				fullAppsConfig = append(fullAppsConfig, app)
+		for _, pra := range existing.PRAApps {
+			if _, found := currentHCLDomains[pra.Domain]; !found {
+				details.CommonAppsDto.DeletedPraApps = append(details.CommonAppsDto.DeletedPraApps, pra.ID)
 			}
 		}
 
@@ -642,26 +634,7 @@ func containsStringSlice(slice []string, val string) bool {
 	return false
 }
 
-// resourcePraAppsConfigHash computes the Set hash for an apps_config element.
-// It keys on "domain" only — the stable identity the provider already uses to
-// match PRA apps (see praAppsMap/setAppIDsInCommonAppsDto) — and excludes
-// computed / server-populated fields (app_id, pra_app_id, name, app_types) so a
-// config element and the refreshed-state element hash identically regardless of
-// ordering.
-func resourcePraAppsConfigHash(v interface{}) int {
-	m, ok := v.(map[string]interface{})
-	if !ok {
-		return 0
-	}
-	domain := ""
-	if s, ok := m["domain"].(string); ok {
-		domain = s
-	}
-	return schema.HashString(domain)
-}
-
-// appsConfigToSlice normalizes the apps_config value (now a TypeSet) to a slice.
-// It also tolerates a []interface{} for backward compatibility.
+// appsConfigToSlice normalizes the apps_config value to a slice.
 func appsConfigToSlice(v interface{}) []interface{} {
 	switch t := v.(type) {
 	case *schema.Set:
@@ -747,6 +720,10 @@ func customizeDiffApplicationSegmentPRA(ctx context.Context, d *schema.ResourceD
 		}
 	}
 
+	if err := planCommonAppsDtoIDs(d, "pra_app_id"); err != nil {
+		return err
+	}
+
 	// ✅ Append validation: ensure every apps_config domain is also in domain_names
 	domainNamesRaw := d.Get("domain_names").(*schema.Set).List()
 	domainNames := make(map[string]struct{}, len(domainNamesRaw))
@@ -830,44 +807,4 @@ func mapPRAAppsToCommonApps(d *schema.ResourceData, praApps []applicationsegment
 	}
 
 	return d.Set("common_apps_dto", commonAppsDto)
-}
-
-func setAppIDsInCommonAppsDto(d *schema.ResourceData, praApps []applicationsegmentpra.PRAApps) error {
-	if len(praApps) == 0 {
-		return nil
-	}
-
-	// Build a map of existing apps by domain
-	existingMap := make(map[string]applicationsegmentpra.PRAApps)
-	for _, app := range praApps {
-		existingMap[app.Domain] = app
-	}
-
-	commonAppsDto := d.Get("common_apps_dto").([]interface{})
-	if len(commonAppsDto) == 0 {
-		return fmt.Errorf("common_apps_dto block is missing")
-	}
-
-	dto := commonAppsDto[0].(map[string]interface{})
-	appsConfig := appsConfigToSlice(dto["apps_config"])
-
-	for _, appIface := range appsConfig {
-		appMap := appIface.(map[string]interface{})
-		domain := appMap["domain"].(string)
-		name := appMap["name"].(string)
-
-		// Only set IDs if domain matches existing PRA app
-		if existingApp, ok := existingMap[domain]; ok && existingApp.Name == name {
-			appMap["pra_app_id"] = existingApp.ID
-			appMap["app_id"] = existingApp.AppID
-		} else {
-			// Clear stale IDs (this is crucial!)
-			appMap["pra_app_id"] = ""
-			appMap["app_id"] = ""
-		}
-	}
-
-	// Write it back
-	dto["apps_config"] = appsConfig
-	return d.Set("common_apps_dto", []interface{}{dto})
 }

@@ -188,6 +188,16 @@ func dataSourceApplicationSegmentBrowserAccess() *schema.Resource {
 							Optional:    true,
 							Description: "The external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal.",
 						},
+						"ext_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The random part ZPA generates for the external URL of a Browser Access application that uses a Zscaler-managed certificate.",
+						},
+						"ext_domain_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The Zscaler domain ZPA generates for the external URL of a Browser Access application that uses a Zscaler-managed certificate.",
+						},
 					},
 				},
 			},

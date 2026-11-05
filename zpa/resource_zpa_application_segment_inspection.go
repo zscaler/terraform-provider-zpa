@@ -243,15 +243,14 @@ func resourceApplicationSegmentInspection() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"apps_config": {
-							Type:     schema.TypeSet,
+							// A list, so apps_config[N] can be referenced (for example
+							// apps_config[0].inspect_app_id) and a change to any field
+							// of an app is planned. Read keeps the apps in the
+							// configured order, matched by domain, so the order the API
+							// returns them in never shows as a change.
+							Type:     schema.TypeList,
 							Optional: true,
 							Computed: true,
-							// Inspection apps are an unordered collection. The hash
-							// keys on "domain" (the stable identity) and excludes
-							// computed fields (app_id, inspect_app_id, name,
-							// description, etc.) so ordering and server-populated
-							// values never produce a spurious diff.
-							Set: resourceInspectionAppsConfigHash,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"app_id": {
@@ -701,10 +700,9 @@ func mapInspectAppsToCommonApps(d *schema.ResourceData, inspectionApps []applica
 	return d.Set("common_apps_dto", commonAppsDto)
 }
 
-// setInspectionAppIDsInCommonAppsDto mirrors setAppIDsInCommonAppsDto in
-// zpa_application_segment_pra: before an update, inject the server-side
+// setInspectionAppIDsInCommonAppsDto: before an update, inject the server-side
 // app_id/inspect_app_id into each apps_config entry that matches an existing
-// inspection app by domain and name, and clear stale IDs on entries that don't.
+// inspection app by domain, and clear stale IDs on entries that don't.
 func setInspectionAppIDsInCommonAppsDto(d *schema.ResourceData, inspectionApps []applicationsegmentinspection.InspectionAppDto) error {
 	if len(inspectionApps) == 0 {
 		return nil
@@ -727,10 +725,9 @@ func setInspectionAppIDsInCommonAppsDto(d *schema.ResourceData, inspectionApps [
 	for _, appIface := range appsConfig {
 		appMap := appIface.(map[string]interface{})
 		domain := appMap["domain"].(string)
-		name := appMap["name"].(string)
 
 		// Only set IDs if domain matches existing inspection app
-		if existingApp, ok := existingMap[domain]; ok && existingApp.Name == name {
+		if existingApp, ok := existingMap[domain]; ok {
 			appMap["inspect_app_id"] = existingApp.ID
 			appMap["app_id"] = existingApp.AppID
 		} else {
@@ -751,6 +748,10 @@ func customizeDiffApplicationSegmentInspection(ctx context.Context, d *schema.Re
 	autoAppProtectEnabled := d.Get("auto_app_protect_enabled").(bool)
 	if adpEnabled && autoAppProtectEnabled {
 		return fmt.Errorf("if 'adp_enabled' is set to true, 'auto_app_protect_enabled' cannot be true")
+	}
+
+	if err := planCommonAppsDtoIDs(d, "inspect_app_id"); err != nil {
+		return err
 	}
 
 	// Validation for common_apps_dto.apps_config fields
@@ -779,18 +780,4 @@ func customizeDiffApplicationSegmentInspection(ctx context.Context, d *schema.Re
 	}
 
 	return nil
-}
-
-// resourceInspectionAppsConfigHash hashes an apps_config element by its stable
-// identity ("domain") only. Computed/server-populated fields (app_id,
-// inspect_app_id, name, description, certificate_id, ...) are intentionally
-// excluded so that reordering by the API or ID injection during apply does not
-// produce a spurious plan diff.
-func resourceInspectionAppsConfigHash(v interface{}) int {
-	m, ok := v.(map[string]interface{})
-	if !ok {
-		return 0
-	}
-	domain, _ := m["domain"].(string)
-	return schema.HashString(domain)
 }
