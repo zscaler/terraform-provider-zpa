@@ -35,6 +35,10 @@ Track all ZPA Terraform provider's releases. New resources, features, and bug fi
 - [PR #703](https://github.com/zscaler/terraform-provider-zpa/pull/703) - `zpa_application_segment_pra`: `common_apps_dto.apps_config` is a list again, so `common_apps_dto[0].apps_config[0].pra_app_id` can be referenced as in 4.4.8 and earlier. Changing `application_port`, `application_protocol` or `connection_security` of an existing app now updates it; before, the change was not detected or the previous values were sent.
 - [PR #703](https://github.com/zscaler/terraform-provider-zpa/pull/703) - `zpa_application_segment_inspection`: `common_apps_dto.apps_config` is now a list, so `common_apps_dto[0].apps_config[0].inspect_app_id` can be referenced. Changing `application_port`, `application_protocol`, `certificate_id` or `trust_untrusted_cert` of an existing app now updates it; before, the change was not detected.
 
+### Internal Changes
+
+- [PR #701](https://github.com/zscaler/terraform-provider-zpa/pull/701) - Removed the CodeQL workflow: code scanning runs through the repository's CodeQL default setup, which rejected the workflow's results.
+
 ## 4.4.16 (October 26, 2026)
 
 ### Notes
