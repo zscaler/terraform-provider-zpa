@@ -1,6 +1,7 @@
 package zpa
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -112,5 +113,115 @@ func TestResourceApplicationSegmentPRA_RDPRequiresConnectionSecurity(t *testing.
 	err := fx.diff(resourceApplicationSegmentPRA(), "", map[string]any{}, praSegmentConfig(app))
 	if err == nil || !strings.Contains(err.Error(), "connection_security is required when application_protocol is RDP") {
 		t.Fatalf("expected an RDP app without connection_security to be rejected at plan time, got %v", err)
+	}
+}
+
+// apps_config is a list, so configurations can reference
+// common_apps_dto[0].apps_config[0].pra_app_id (a set has no index).
+func TestResourceApplicationSegmentPRA_PRAAppIDIsIndexable(t *testing.T) {
+	fx := newUnitFixture(t)
+	fx.on("GET", fx.path("application", "pra1"), common.SuccessResponse(praSegmentResponse(sshApp, rdpApp)))
+
+	d := fx.resourceData(resourceApplicationSegmentPRA(), "pra1",
+		praSegmentConfig(praApp("rdp.acme.com", "3389", "RDP"), praApp("ssh.acme.com", "22", "SSH")))
+	fx.run(resourceApplicationSegmentPRARead, d)
+
+	// the API returns ssh first; state keeps the configured order
+	for i, want := range []string{"pa1", "pa2"} {
+		if got := d.Get(fmt.Sprintf("common_apps_dto.0.apps_config.%d.pra_app_id", i)); got != want {
+			t.Errorf("apps_config[%d].pra_app_id = %v, want %s", i, got, want)
+		}
+	}
+}
+
+// Changing an existing app's settings plans an update and sends the configured
+// values, with the app's IDs.
+func TestResourceApplicationSegmentPRA_UpdateSendsChangedAppSettings(t *testing.T) {
+	fx := newUnitFixture(t)
+	fx.on("GET", fx.path("application", "pra1"), common.SuccessResponse(praSegmentResponse(rdpApp)))
+	fx.on("PUT", fx.path("application", "pra1"), common.NoContentResponse())
+
+	changed := praApp("rdp.acme.com", "3390", "RDP")
+	changed["connection_security"] = "NLA"
+	d := fx.updateData(resourceApplicationSegmentPRA(), "pra1",
+		praSegmentConfig(praApp("rdp.acme.com", "3389", "RDP")), praSegmentConfig(changed))
+	if !d.HasChange("common_apps_dto") {
+		t.Fatal("changing application_port and connection_security planned no update")
+	}
+	fx.run(resourceApplicationSegmentPRAUpdate, d)
+
+	assertSubset(t, "update request", fx.body("PUT", fx.path("application", "pra1")), map[string]any{
+		"commonAppsDto": map[string]any{"appsConfig": []any{map[string]any{
+			"domain": "rdp.acme.com", "appId": "pra1", "praAppId": "pa1",
+			"applicationPort": "3390", "connectionSecurity": "NLA",
+		}}},
+	})
+}
+
+// An app added before an existing one is sent as new: it does not inherit the
+// IDs or the name of the app that used to be at its position.
+func TestResourceApplicationSegmentPRA_UpdateAddsAppBeforeExistingOne(t *testing.T) {
+	fx := newUnitFixture(t)
+	fx.on("GET", fx.path("application", "pra1"), common.SuccessResponse(praSegmentResponse(rdpApp)))
+	fx.on("PUT", fx.path("application", "pra1"), common.NoContentResponse())
+
+	state := praSegmentConfig(praApp("rdp.acme.com", "3389", "RDP"))
+	app := state["common_apps_dto"].([]any)[0].(map[string]any)["apps_config"].([]any)[0].(map[string]any)
+	app["app_id"], app["pra_app_id"] = "pra1", "pa1"
+	ssh := praApp("ssh.acme.com", "22", "SSH")
+	delete(ssh, "name")
+	rdp := praApp("rdp.acme.com", "3389", "RDP")
+	delete(rdp, "name")
+	d := fx.updateData(resourceApplicationSegmentPRA(), "pra1", state, praSegmentConfig(ssh, rdp))
+	fx.run(resourceApplicationSegmentPRAUpdate, d)
+
+	apps := fx.body("PUT", fx.path("application", "pra1"))["commonAppsDto"].(map[string]any)["appsConfig"].([]any)
+	if len(apps) != 2 {
+		t.Fatalf("expected 2 apps in the update, got %v", apps)
+	}
+	added, kept := apps[0].(map[string]any), apps[1].(map[string]any)
+	empty := func(v any) bool { return v == nil || v == "" }
+	if added["domain"] != "ssh.acme.com" || !empty(added["praAppId"]) || !empty(added["appId"]) || !empty(added["name"]) {
+		t.Errorf("new app must be sent without IDs or another app's name, got %v", added)
+	}
+	if kept["domain"] != "rdp.acme.com" || kept["praAppId"] != "pa1" || kept["name"] != "rdp.acme.com" {
+		t.Errorf("existing app must keep its IDs and name, got %v", kept)
+	}
+}
+
+// An app added to an existing segment plans its IDs as unknown (known after
+// apply), so other resources and outputs that use them get the real IDs; an
+// app that moves to another position keeps its own IDs.
+func TestResourceApplicationSegmentPRA_PlanAddedAppIDsUnknown(t *testing.T) {
+	rdp := praApp("rdp.acme.com", "3389", "RDP")
+	delete(rdp, "name")
+	ssh := praApp("ssh.acme.com", "22", "SSH")
+	delete(ssh, "name")
+
+	state := praSegmentConfig(praApp("rdp.acme.com", "3389", "RDP"))
+	app := state["common_apps_dto"].([]any)[0].(map[string]any)["apps_config"].([]any)[0].(map[string]any)
+	app["app_id"], app["pra_app_id"] = "pra1", "pa1"
+
+	for name, order := range map[string][]map[string]any{
+		"added after":  {rdp, ssh},
+		"added before": {ssh, rdp},
+	} {
+		t.Run(name, func(t *testing.T) {
+			apps := plannedCommonApps(t, resourceApplicationSegmentPRA(), state, praSegmentConfig(order...))
+			for _, a := range apps {
+				domain := a.GetAttr("domain").AsString()
+				id := a.GetAttr("pra_app_id")
+				switch domain {
+				case "rdp.acme.com":
+					if !id.IsKnown() || id.AsString() != "pa1" {
+						t.Errorf("existing app: planned pra_app_id = %#v, want pa1", id)
+					}
+				case "ssh.acme.com":
+					if id.IsKnown() {
+						t.Errorf("added app: planned pra_app_id = %#v, want unknown", id)
+					}
+				}
+			}
+		})
 	}
 }

@@ -14,6 +14,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler"
 	"github.com/zscaler/zscaler-sdk-go/v3/zscaler/zpa/services/common"
@@ -522,4 +523,100 @@ func readFromListIndex[T any](ctx context.Context, idx *listIndex[T], key, id st
 		}
 	}
 	return get()
+}
+
+// unknownPlanValue is how the plugin SDK marks a value as unknown ("known after
+// apply") in a planned value (hcl2shim.UnknownVariableValue, internal to the SDK).
+const unknownPlanValue = "74D93920-ED26-11E3-AC10-0800200C9A66"
+
+// commonAppsConfiguredNames returns the common_apps_dto.apps_config names set in
+// the configuration, by domain. It reads the raw configuration because a name
+// left out of it is computed, and in a list the planned value can come from the
+// app that used to be at the same position.
+func commonAppsConfiguredNames(raw cty.Value) map[string]string {
+	names := map[string]string{}
+	if !raw.IsKnown() || raw.IsNull() || !raw.Type().IsObjectType() || !raw.Type().HasAttribute("common_apps_dto") {
+		return names
+	}
+	dtos := raw.GetAttr("common_apps_dto")
+	if !dtos.IsKnown() || dtos.IsNull() || !dtos.CanIterateElements() {
+		return names
+	}
+	for it := dtos.ElementIterator(); it.Next(); {
+		_, dto := it.Element()
+		if !dto.IsKnown() || dto.IsNull() {
+			continue
+		}
+		apps := dto.GetAttr("apps_config")
+		if !apps.IsKnown() || apps.IsNull() || !apps.CanIterateElements() {
+			continue
+		}
+		for appIt := apps.ElementIterator(); appIt.Next(); {
+			_, app := appIt.Element()
+			if !app.IsKnown() || app.IsNull() {
+				continue
+			}
+			domain, name := app.GetAttr("domain"), app.GetAttr("name")
+			if domain.IsKnown() && !domain.IsNull() && name.IsKnown() && !name.IsNull() && name.AsString() != "" {
+				names[domain.AsString()] = name.AsString()
+			}
+		}
+	}
+	return names
+}
+
+// planCommonAppsDtoIDs sets the planned app_id, <idAttr> (pra_app_id or
+// inspect_app_id) and name of each common_apps_dto.apps_config entry by domain.
+// In a list, the plan keeps the computed values of whatever app was at the same
+// position before, so an added app would be planned with no IDs (null) or with
+// the IDs of another app. An existing app keeps its own values; an added app's
+// values are known after apply.
+func planCommonAppsDtoIDs(d *schema.ResourceDiff, idAttr string) error {
+	if d.Id() == "" || !d.HasChange("common_apps_dto") {
+		return nil // on create every computed value is already unknown
+	}
+	oldRaw, newRaw := d.GetChange("common_apps_dto")
+	newDtos, _ := newRaw.([]interface{})
+	if len(newDtos) == 0 || newDtos[0] == nil {
+		return nil
+	}
+
+	existing := map[string]map[string]interface{}{}
+	if oldDtos, _ := oldRaw.([]interface{}); len(oldDtos) > 0 && oldDtos[0] != nil {
+		for _, a := range appsConfigToSlice(oldDtos[0].(map[string]interface{})["apps_config"]) {
+			if m, ok := a.(map[string]interface{}); ok {
+				existing[GetString(m["domain"])] = m
+			}
+		}
+	}
+	configuredNames := commonAppsConfiguredNames(d.GetRawConfig())
+
+	var apps []interface{}
+	for _, a := range appsConfigToSlice(newDtos[0].(map[string]interface{})["apps_config"]) {
+		m, ok := a.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		app := make(map[string]interface{}, len(m))
+		for k, v := range m {
+			app[k] = v
+		}
+		domain := GetString(app["domain"])
+		_, nameSet := configuredNames[domain]
+		if prior, found := existing[domain]; found && GetString(prior[idAttr]) != "" {
+			app["app_id"] = prior["app_id"]
+			app[idAttr] = prior[idAttr]
+			if !nameSet {
+				app["name"] = prior["name"]
+			}
+		} else {
+			app["app_id"] = unknownPlanValue
+			app[idAttr] = unknownPlanValue
+			if !nameSet {
+				app["name"] = unknownPlanValue
+			}
+		}
+		apps = append(apps, app)
+	}
+	return d.SetNew("common_apps_dto", []interface{}{map[string]interface{}{"apps_config": apps}})
 }

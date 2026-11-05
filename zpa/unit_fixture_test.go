@@ -17,6 +17,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -834,4 +835,27 @@ func toAnySlice(items any) []any {
 		out[i] = v.Index(i).Interface()
 	}
 	return out
+}
+
+// plannedCommonApps plans an update the way the plugin SDK does for Terraform
+// (SimpleDiff, then the diff applied to the prior state) and returns the
+// planned common_apps_dto.apps_config.
+func plannedCommonApps(t *testing.T, r *schema.Resource, state, config map[string]any) []cty.Value {
+	t.Helper()
+	fx := newUnitFixture(t)
+	prior := fx.resourceData(r, "id1", state).State()
+	diff, err := r.SimpleDiff(context.Background(), prior, terraform.NewResourceConfigRaw(config), fx.client)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	block := r.CoreConfigSchema()
+	priorVal, err := prior.AttrsAsObjectValue(block.ImpliedType())
+	if err != nil {
+		t.Fatal(err)
+	}
+	planned, err := diff.ApplyToValue(priorVal, block)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return planned.GetAttr("common_apps_dto").Index(cty.NumberIntVal(0)).GetAttr("apps_config").AsValueSlice()
 }

@@ -60,8 +60,8 @@ The following arguments are supported:
   - `id` - (String)
 
 - `segment_group_id` - (string) The unique identifier of the segment group.
-- `common_apps_dto` (Block Set, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
-  - `apps_config:` (Block Set, Min: 1) List of applications to be configured
+- `common_apps_dto` (Block List, Min: 1) List of applications (e.g., Inspection, Browser Access or Privileged Remote Access)
+  - `apps_config:` (Block List, Min: 1) List of applications to be configured. The computed `inspect_app_id` of an app can be referenced by position, e.g. `common_apps_dto[0].apps_config[0].inspect_app_id`.
     - `domain` - (String) Domain name of the inspection application.
       - **NOTE** The domain name configured in this attribute **MUST** also be present in `domain_names` list.
 

@@ -163,9 +163,14 @@ The following arguments are supported:
   - `application_protocol` - (String) - Protocol for the BA app. Supported values: `HTTP` and `HTTPS`
   - `certificate_id` - (String) - ID of the BA certificate. Refer to the data source documentation for [`zpa_ba_certificate`](https://github.com/zscaler/terraform-provider-zpa/blob/master/docs/data-sources/zpa_ba_certificate.md)
   - `domain` - (String) - Domain name or IP address of the BA app.
+  - `local_domain` - (String) - Domain for Browser Isolation
+  - `enabled` - (Boolean) - Whether the BA app is enabled. Default: `false`
+  - `trust_untrusted_cert` - (Boolean) - Whether the BA app accepts untrusted certificates. Default: `false`
   - `allow_options` - (Boolean) - If you want ZPA to forward unauthenticated HTTP preflight OPTIONS requests from the browser to the app.. Supported values: `true` and `false`
   - `ext_label` (String) The domain prefix for the privileged portal URL. The supported string can include numbers, lower case characters, and only supports a hyphen (-).
   - `ext_domain` (String) The external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal. This field is returned when making GET requests to get privileged portal details or when retreiving application segment details. The supported value must be a string, but doesn't support special characters (e.g., periods) as the FQDN wouldn't match the CNAME entry.
+  - `ext_id` (String) Computed. The random part ZPA generates for the external URL when the app uses a Zscaler-managed certificate (`ext_label` and `ext_domain` set, no `certificate_id`).
+  - `ext_domain_name` (String) Computed. The Zscaler domain ZPA generates for the external URL when the app uses a Zscaler-managed certificate, e.g. `acme-com.p.zsproxy.net`.
   - `microtenant_id` (Boolean) The unique identifier of the Microtenant for the ZPA tenant. If you are within the Default Microtenant, pass microtenant_id as `0` when making requests to retrieve data from the Default Microtenant. Pass microtenant_id as null to retrieve data from all customers associated with the tenant.
 
 ⚠️ **WARNING:**: The attribute ``microtenant_id`` is optional and requires the microtenant license and feature flag enabled for the respective tenant. The provider also supports the microtenant ID configuration via the environment variable `ZPA_MICROTENANT_ID` which is the recommended method.

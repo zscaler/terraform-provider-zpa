@@ -89,7 +89,7 @@ In addition to all arguments above, the following attributes are exported:
   - `description` (string) The description of the Browser Access application segment.
   - `enabled` (bool) Indicates whether the Browser Access application segment is enabled (true) or not (false).
   - `hidden` (bool)
-  - `local_domain` (string) The local domain of the Browser Access application.
+  -  `local_domain` - (String) - Domain for Browser Isolation
   - `path` (string) The path of the Browser Access application.
   - `trust_untrusted_cert` (String) Whether the use of untrusted certificates is enabled or disabled for the Browser Access application. Supported values are `true` and `false`
   - `use_in_dr_mode` - (Boolean) Whether or not the application resource is designated for disaster recovery. Supported values: `true`, `false`
@@ -97,5 +97,7 @@ In addition to all arguments above, the following attributes are exported:
   - `select_connector_close_to_app` - (Boolean) Whether the App Connector is closest to the application (true) or closest to the user (false). Supported values: `true`, `false`
   - `ext_label` (String) The domain prefix for the privileged portal URL. The supported string can include numbers, lower case characters, and only supports a hyphen (-).
   - `ext_domain` (String) The external domain name prefix of the Browser Access application that is used for Zscaler-managed certificates when creating a privileged portal. This field is returned when making GET requests to get privileged portal details or when retreiving application segment details. The supported value must be a string, but doesn't support special characters (e.g., periods) as the FQDN wouldn't match the CNAME entry.
+  - `ext_id` (String) The random part ZPA generates for the external URL when the app uses a Zscaler-managed certificate.
+  - `ext_domain_name` (String) The Zscaler domain ZPA generates for the external URL when the app uses a Zscaler-managed certificate, e.g. `acme-com.p.zsproxy.net`.
   - `microtenant_id` (string) The ID of the microtenant the resource is to be associated with.
   - `microtenant_name` (string) The name of the microtenant the resource is to be associated with.
