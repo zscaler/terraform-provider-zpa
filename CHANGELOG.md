@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.4.18 (November 16, 2026)
+
+### Notes
+
+- Release date: **(November 16, 2026)**
+- Supported Terraform version: **v1.x**
+
+### Bug Fixes
+
+- [PR #706](https://github.com/zscaler/terraform-provider-zpa/pull/706) - `zpa_scim_groups`: lookups no longer fail with `json: cannot unmarshal string into Go struct field ScimGroup.list.id of type int64` on ZPA clouds that return the SCIM group `id` as a string ([issue #705](https://github.com/zscaler/terraform-provider-zpa/issues/705)). `idp_id` now keeps every digit; large IdP IDs were stored rounded. The same fix applies to the SCIM group validation in policy rules.
+- [PR #706](https://github.com/zscaler/terraform-provider-zpa/pull/706) - Upgraded to [Zscaler SDK GO v3.8.60](https://github.com/zscaler/zscaler-sdk-go/releases/tag/v3.8.60).
+
 ## 4.4.17 (November 5, 2026)
 
 ### Notes

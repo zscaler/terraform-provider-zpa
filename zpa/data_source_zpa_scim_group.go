@@ -17,7 +17,7 @@ func dataSourceScimGroup() *schema.Resource {
 		ReadContext: dataSourceScimGroupRead,
 		Schema: map[string]*schema.Schema{
 			"creation_time": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"id": {
@@ -33,7 +33,7 @@ func dataSourceScimGroup() *schema.Resource {
 				Computed: true,
 			},
 			"idp_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"idp_name": {
@@ -57,7 +57,7 @@ func dataSourceScimGroup() *schema.Resource {
 				Description:   "Name of the ZIdentity (IAM) IdP the group belongs to. Disambiguates groups with the same name under the same ZPA IdP. Conflicts with iam_idp_id.",
 			},
 			"modified_time": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},

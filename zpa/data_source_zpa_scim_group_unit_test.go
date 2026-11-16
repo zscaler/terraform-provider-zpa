@@ -51,3 +51,22 @@ func TestDataSourceScimGroup_ByIdpID(t *testing.T) {
 		t.Errorf("id = %q, want 101", d.Id())
 	}
 }
+
+// Some ZPA clouds return the SCIM group id as a string (issue #705); the
+// lookup works either way, and large numbers such as idpId keep every digit.
+func TestDataSourceScimGroup_StringID(t *testing.T) {
+	fx := newUnitFixture(t)
+	mockIdp(fx)
+	fx.on("GET", common.ZPAUserConfigPath(common.TestCustomerID, "scimgroup", "idpId", "idp1"), common.SuccessResponse(`{"totalPages":1,"totalCount":1,"list":[
+		{"id":"799580","name":"A000","idpGroupId":"428lik90rms4ih","idpId":72060623063613444,"creationTime":1794849806,"modifiedTime":1794849806}
+	]}`))
+
+	d := fx.resourceData(dataSourceScimGroup(), "", map[string]any{"idp_name": "Okta_Users", "name": "A000"})
+	fx.run(dataSourceScimGroupRead, d)
+	if d.Id() != "799580" {
+		t.Errorf("id = %q, want 799580", d.Id())
+	}
+	assertState(t, d, map[string]any{
+		"idp_group_id": "428lik90rms4ih", "idp_id": 72060623063613444, "creation_time": 1794849806,
+	})
+}
