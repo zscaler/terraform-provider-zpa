@@ -140,7 +140,12 @@ func dataSourceScimGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("idp_group_id", resp.IdpGroupID)
 		_ = d.Set("idp_id", resp.IdpID)
-		_ = d.Set("idp_name", resp.IdpName)
+		// Some ZPA clouds leave idpName empty; use the IdP looked up above.
+		idpNameValue := resp.IdpName
+		if idpNameValue == "" && idpResp != nil {
+			idpNameValue = idpResp.Name
+		}
+		_ = d.Set("idp_name", idpNameValue)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		// API versions that predate the iamIdpId/iamIdpName fields return them
