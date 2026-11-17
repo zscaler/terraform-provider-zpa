@@ -17,7 +17,7 @@ func dataSourceScimGroup() *schema.Resource {
 		ReadContext: dataSourceScimGroupRead,
 		Schema: map[string]*schema.Schema{
 			"creation_time": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"id": {
@@ -33,7 +33,7 @@ func dataSourceScimGroup() *schema.Resource {
 				Computed: true,
 			},
 			"idp_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 			},
 			"idp_name": {
@@ -57,7 +57,7 @@ func dataSourceScimGroup() *schema.Resource {
 				Description:   "Name of the ZIdentity (IAM) IdP the group belongs to. Disambiguates groups with the same name under the same ZPA IdP. Conflicts with iam_idp_id.",
 			},
 			"modified_time": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 		},
@@ -140,7 +140,12 @@ func dataSourceScimGroupRead(ctx context.Context, d *schema.ResourceData, meta i
 		_ = d.Set("creation_time", resp.CreationTime)
 		_ = d.Set("idp_group_id", resp.IdpGroupID)
 		_ = d.Set("idp_id", resp.IdpID)
-		_ = d.Set("idp_name", resp.IdpName)
+		// Some ZPA clouds leave idpName empty; use the IdP looked up above.
+		idpNameValue := resp.IdpName
+		if idpNameValue == "" && idpResp != nil {
+			idpNameValue = idpResp.Name
+		}
+		_ = d.Set("idp_name", idpNameValue)
 		_ = d.Set("modified_time", resp.ModifiedTime)
 		_ = d.Set("name", resp.Name)
 		// API versions that predate the iamIdpId/iamIdpName fields return them
